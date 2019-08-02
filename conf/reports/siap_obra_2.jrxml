@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_expansion_2" pageWidth="612" pageHeight="792" whenNoDataType="AllSectionsNoDetail" columnWidth="612" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" uuid="888c5c82-0359-4836-814e-8f60c493d7a1">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<queryString language="SQL">
+		<![CDATA[]]>
+	</queryString>
+	<pageHeader>
+		<band height="528" splitType="Stretch">
+			<line>
+				<reportElement x="1" y="394" width="586" height="1" uuid="b3a49cda-e192-47aa-bf1f-d5d2a44ee947"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="415" width="586" height="1" uuid="013c7274-66c3-40e2-8305-d5b483db33f9"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="294" width="586" height="1" uuid="73b5cc00-c914-40d5-a8b3-b4e1d95656e4"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="252" width="586" height="1" uuid="7a54e63f-de78-46f8-9669-c414b5630671"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="273" width="586" height="1" uuid="9276e2ed-b389-471b-ac79-a4336b6d2518"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="171" width="586" height="1" uuid="66f83ad1-5ef8-4ec5-b742-a1fdf8d79863"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="151" width="586" height="1" uuid="2bd0de45-6b86-4fc3-96f0-d1db79d81935"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="190" width="586" height="1" uuid="e8a96ae6-7578-4e77-8599-4706f3bf297a"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="373" width="586" height="1" uuid="8d58a120-b560-4eed-b7d9-d976382f8f5b"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="587" y="0" width="1" height="515" uuid="eb8aaf5a-69ad-4ca3-b026-340d469329d7"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="354" width="586" height="1" uuid="aa6fca5a-be8c-41c4-8ca4-1808a8ccf211"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="232" width="586" height="1" uuid="45218476-a99e-4e66-9d32-efc376dd842d"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="200" height="27" backcolor="#FFFFFF" uuid="25c2d478-4135-4922-a676-4b229706604d"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<leftPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[MATERIAL UTILIZADO]]></text>
+			</staticText>
+			<line>
+				<reportElement x="1" y="211" width="586" height="1" uuid="24a471b7-998f-4762-99b2-3de952130341"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="435" width="588" height="1" uuid="20a272ed-01fa-4f80-8398-ca2347f4403a"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="131" width="586" height="1" uuid="32d973e5-875e-455a-a068-a729e5dfff1a"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="314" width="586" height="1" uuid="2e95df93-6010-4b65-b6ea-f2e0b8bbd14a"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="334" width="586" height="1" uuid="3e250e7e-f514-4d48-9edf-cb45c07e2d87"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="0" width="1" height="515" uuid="9da86c09-b51e-49b5-af78-b6a42d5afeaf"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="259" y="27" width="1" height="488" uuid="11e15801-22dc-4747-bcfc-c0a6ac8b1824"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Transparent" x="199" y="14" width="60" height="13" backcolor="#FFFFFF" uuid="01e7a5ff-8101-4f97-8b2b-374a5e5c223d"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[CODIGO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="259" y="14" width="36" height="13" backcolor="#FFFFFF" uuid="c3572f4d-3dd3-423c-811d-b9ebdd102a1c"/>
+				<box>
+					<pen lineWidth="0.0" lineStyle="Dotted"/>
+					<topPen lineWidth="0.0" lineStyle="Dotted" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Dotted" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[CANTIDAD]]></text>
+			</staticText>
+			<line>
+				<reportElement x="296" y="27" width="1" height="488" uuid="1c63a854-73c6-4c71-8dfd-dec96e1e159f">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="200" y="27" width="1" height="488" uuid="6fb5e2d7-ee78-4f97-9efb-4c3341cf2c97"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="200" y="0" width="96" height="13" backcolor="#FFFFFF" uuid="d85f2db1-3c2a-46e1-99a6-e3ef6be1c34c"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[INSTALADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="487" y="14" width="61" height="13" backcolor="#FFFFFF" uuid="5abaf008-c8e5-4d89-97f5-ed997b44c9cf"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[CODIGO]]></text>
+			</staticText>
+			<line>
+				<reportElement x="548" y="27" width="1" height="488" uuid="bc76e959-9475-47cf-b3cd-cc5484e39ae8"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="488" y="27" width="1" height="488" uuid="ea11f64f-6cb4-4573-96f9-d0ddd3a8fec5"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement mode="Transparent" x="548" y="14" width="38" height="13" backcolor="#FFFFFF" uuid="94fd3a45-41ac-4b8e-a0a3-ea6723a6c5a7"/>
+				<box>
+					<pen lineWidth="0.0" lineStyle="Dotted"/>
+					<topPen lineWidth="0.0" lineStyle="Dotted" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Dotted" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[CANTIDAD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="296" y="0" width="191" height="27" backcolor="#FFFFFF" uuid="5842e343-cf77-4ebe-8a6a-43fb85481a0d"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[MATERIAL UTILIZADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="488" y="0" width="97" height="13" backcolor="#FFFFFF" uuid="231fa424-14cf-4036-8b07-905ab0fb9b6d"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<leftPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[INSTALADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1" y="516" width="587" height="12" backcolor="#FFFFFF" uuid="39cd694b-6555-4a4f-8838-9d513721e0fa"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[REPORTE TÉCNICO]]></text>
+			</staticText>
+			<line>
+				<reportElement x="1" y="110" width="586" height="1" uuid="0ec94eaa-4d05-4751-a517-e77573de1cdd"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="70" width="586" height="1" uuid="793e1c43-f155-46d3-be1d-669906131fdb"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="90" width="586" height="1" uuid="e982ee31-4d1e-4d7f-80bf-a62a8b1c3526"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="50" width="586" height="1" uuid="c684c801-e4b5-4df4-a5eb-aaa52ea3fb7b"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="515" width="586" height="1" uuid="7f57cf86-9dae-414b-8eb2-5e998beb97f7"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="494" width="586" height="1" uuid="bec5c00b-ffac-49cb-b05b-82dcc4a46a34"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="475" width="586" height="1" uuid="faaf48cc-61f5-4b38-8e1a-6c9c263a20a7"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="455" width="586" height="1" uuid="49376312-cd2c-461d-9e65-c07ce42b47c3"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+		</band>
+	</pageHeader>
+	<summary>
+		<band height="221">
+			<staticText>
+				<reportElement mode="Opaque" x="483" y="160" width="106" height="50" uuid="b77a2e7c-9b3b-41a8-9be8-f9d1a336565f"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[ALMACENISTA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="384" y="160" width="99" height="50" uuid="6404c4c1-4576-4ddd-aea6-82ca3e64d8d2"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[INTERVENTOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1" y="78" width="587" height="13" backcolor="#FFFFFF" uuid="92145496-e647-43cd-b019-d9b25497dd19"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[MANEJO AMBIENTAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="4" y="160" width="99" height="50" uuid="f8232744-fe87-40f5-b244-ced58c28a5c3"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[RECEPCION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="587" height="78" uuid="5f997ce4-c399-454d-93a7-91d73006aea3"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="103" y="160" width="90" height="50" uuid="f18c5d48-2d40-4c40-81cf-de5ca8d54dca"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[RESIDENTE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="283" y="160" width="100" height="50" uuid="e077daa4-a9ea-4845-9319-d050b17bf897"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[JEFE CUADRILLA]]></text>
+			</staticText>
+			<subreport>
+				<reportElement mode="Opaque" x="1" y="92" width="587" height="66" uuid="9432e5c2-2d61-4573-a1da-5180561da133"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["medioambiente.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement mode="Opaque" x="193" y="160" width="90" height="50" uuid="b0337f2b-f2f3-445b-9f0b-99ff3c01c58b"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[SUPERVISOR]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_carta_respuesta_solicitud" language="javascript" pageWidth="612" pageHeight="792" columnWidth="414" leftMargin="113" rightMargin="85" topMargin="85" bottomMargin="56" uuid="b4a1e1a2-f3b6-40e9-b4f3-9cca74286e29">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Siap_Adapter"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="cm"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="CIUDAD_LARGA" class="java.lang.String">
+		<parameterDescription><![CDATA[Ciudad Origen de la Carta]]></parameterDescription>
+	</parameter>
+	<parameter name="FECHA_LARGA" class="java.lang.String"/>
+	<parameter name="CODIGO_RESPUESTA" class="java.lang.String"/>
+	<parameter name="SOLI_ID" class="java.lang.Long"/>
+	<parameter name="CIUDAD_CORTA" class="java.lang.String"/>
+	<parameter name="FECHA_RADICADO_LARGA" class="java.lang.String"/>
+	<parameter name="LUMINARIAS_LETRAS" class="java.lang.String"/>
+	<parameter name="GERENTE" class="java.lang.String"/>
+	<parameter name="EMPR_SIGLA" class="java.lang.String"/>
+	<parameter name="FIRMA" class="java.io.InputStream" isForPrompting="false"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT 
+	s.soli_nombre, 
+	s.soli_direccion, 
+	b.barr_descripcion,
+ 	s.soli_fecha,
+ 	s.soli_solicitud,
+ 	s.soli_luminarias,
+ 	s.soli_tipoexpansion,
+ 	s.soli_puntos,
+ 	s.soli_consecutivo,
+ 	s.soli_numerorte
+FROM 
+	siap.solicitud s
+LEFT JOIN siap.barrio b ON b.barr_id = s.barr_id
+WHERE 
+    s.soli_id = $P{SOLI_ID}]]>
+	</queryString>
+	<field name="soli_nombre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="soli_nombre"/>
+	</field>
+	<field name="soli_direccion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="soli_direccion"/>
+	</field>
+	<field name="barr_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="barr_descripcion"/>
+	</field>
+	<field name="soli_fecha" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="soli_fecha"/>
+	</field>
+	<field name="soli_solicitud" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="soli_solicitud"/>
+	</field>
+	<field name="soli_luminarias" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="soli_luminarias"/>
+	</field>
+	<field name="soli_tipoexpansion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="soli_tipoexpansion"/>
+	</field>
+	<field name="soli_puntos" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="soli_puntos"/>
+	</field>
+	<field name="soli_consecutivo" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="soli_consecutivo"/>
+	</field>
+	<field name="soli_numerorte" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="soli_numerorte"/>
+	</field>
+	<pageHeader>
+		<band height="577" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="280" height="16" uuid="c0811c5d-5486-44ec-851d-d9d36f69d534"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[CONCATENATE($P{CIUDAD_LARGA} ,", ", $P{FECHA_LARGA})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="220" y="14" width="190" height="16" uuid="cb42342a-1211-4360-af4b-2066f1fcff19"/>
+				<textElement textAlignment="Right">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CODIGO_RESPUESTA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="44" width="100" height="16" uuid="2fd42197-3015-402a-a04c-59bfbe23c38d"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Señor(a)]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="60" width="440" height="16" uuid="aaa81ad9-7780-4f91-bdf4-a5decae53294"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{soli_nombre}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="74" width="440" height="16" uuid="39fef302-8409-434b-bee9-44e254a5a31f"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{soli_direccion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="88" width="440" height="16" uuid="1868f5dd-a387-4c6e-84e3-2d911645b55e"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{barr_descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="102" width="436" height="16" uuid="76fd471a-35c0-473c-b93e-46dcc86ee7a6"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CIUDAD_CORTA}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="160" width="151" height="16" uuid="37f0670c-f9ac-4326-8941-270805d47ebc"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Respetado Señor(a)]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="190" width="410" height="170" uuid="68ce69a5-de8b-471a-b81d-22562120f330"/>
+				<textElement textAlignment="Justified" markup="html">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[CONCATENATE(CONCATENATE("Para dar respuesta a su solicitud radicada con fecha ",$P{FECHA_RADICADO_LARGA},", mediante la cuál solicita  ","'",$F{soli_solicitud},"'",", me permito informarle que mediante visita técnica realizada por funcionarios de nuestra empresa (ingeniero residente y supervisor), se ha verificado la necesidad de instalar ",$P{LUMINARIAS_LETRAS}," (",TEXT($F{soli_luminarias},"##0"), ") luminarias en expansion tipo ", $F{soli_tipoexpansion}, " en el sitio señalado."),
+"<br/>",
+"<br/>",
+CONCATENATE("Esta obra ha obtenido ",TEXT($F{soli_puntos},"##0")," puntos según criterios de calificación y está ubicado en el puesto No. ",TEXT($F{soli_numerorte},"##0")," con Reporte Técnico No. ",TEXT($F{soli_consecutivo},"00000")," dentro del plan de expansión, la cual se realizará según orden de trabajo impartida por el Municipio de Girón y disponibilidad de recursos."))]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="381" width="100" height="16" uuid="767dfcde-769b-4096-8d98-63bcee32a7c6"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Cordialmente,]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="485" width="410" height="16" uuid="2812d92b-ecf9-4c79-ae6a-6a83cdbdbf87"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{GERENTE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="499" width="410" height="16" uuid="1b80724f-df91-4c3d-957f-89b6311b518f"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Gerente]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="555" width="100" height="22" uuid="2f3e8847-1439-457c-8aed-b14d0eff8d02"/>
+				<text><![CDATA[C.c. Archivo]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="515" width="410" height="16" uuid="56ce7f88-f9d3-4231-867e-abd17ebbde94"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{EMPR_SIGLA}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="-20" y="408" width="210" height="91" uuid="5801850a-9474-4c85-b757-8b28e1ebf0bd"/>
+				<imageExpression><![CDATA[$P{FIRMA}]]></imageExpression>
+			</image>
+		</band>
+	</pageHeader>
+</jasperReport>

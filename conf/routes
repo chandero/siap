@@ -1,0 +1,373 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                               controllers.FrontController.index()
+
+# Usuarios
+# GET     /api/u/t                      controllers.UsuarioController.todos()
++ nocsrf
+GET     /api/u/a/:u/:c                  controllers.UsuarioController.autenticar(u: String, c: String)
++ nocsrf
+GET     /api/usua/recovery/:e           controllers.UsuarioController.recuperarClave(e: String)
++ nocsrf
+GET     /api/usua/link/:e               controllers.UsuarioController.linkValidator(e: String)
++ nocsrf
+POST    /api/usua/change                controllers.UsuarioController.cambiarClave()
+GET     /api/u/bpe/:u                   controllers.UsuarioController.buscarporemail(u: String)      
+GET     /api/usua/bpi/:id               controllers.UsuarioController.buscarporid(id: Long) 
+GET     /api/u/ui                       controllers.UsuarioController.userinfo()
+GET     /api/usua/get/:p/:c             controllers.UsuarioController.todos(p: Long, c: Long)
+GET     /api/usua/get/cuad              controllers.UsuarioController.paraCuadrilla()
+GET     /api/usua/del/:id               controllers.UsuarioController.borrarUsuario(id: Long)
+POST    /api/usua/save                  controllers.UsuarioController.guardarUsuario
+# Empresa
+GET     /api/empr/get/:p/:c             controllers.EmpresaController.todos(p:Long, c:Long)
+GET     /api/empr/:id                   controllers.EmpresaController.buscarPorId(id: Long)
+GET     /api/e/ei                       controllers.EmpresaController.empresainfo()
+GET     /api/empr/get/u                 controllers.EmpresaController.buscarPorUsuario()
+GET     /api/empr/set/:id               controllers.EmpresaController.seleccionarEmpresa(id: Long)
+GET     /api/empr/del/:id               controllers.EmpresaController.borrarEmpresa(id: Long)
+POST    /api/empr/save                  controllers.EmpresaController.guardarEmpresa
+POST    /api/empr/upd                   controllers.EmpresaController.actualizarEmpresa
+
+
+GET     /api/muni/get/:id               controllers.MunicipioController.buscarpordepartamento(id: Long)
+
+GET     /api/barr/get/:id/:p/:c         controllers.BarrioController.buscarpormunicipio(id: Long, p:Long, c:Long)
+GET     /api/barr/get/empr              controllers.BarrioController.buscarporempresa
+GET     /api/barr/byid/:id              controllers.BarrioController.buscarporid(id: Long)
+GET     /api/barr/del/:id               controllers.BarrioController.borrarBarrio(id: Long)
+POST    /api/barr/save                  controllers.BarrioController.guardarBarrio
+POST    /api/barr/upd                   controllers.BarrioController.actualizarBarrio
+
+GET     /api/tipobarr/get               controllers.BarrioController.obtenertipobarrio
+
+
+GET     /api/depa/get                   controllers.DepartamentoController.todos()
+
+GET     /api/perf/get/:p/:c             controllers.PerfilController.todos(p:Long, c:Long)
+
+# Unidad
+GET     /api/unid/get/:p/:c             controllers.UnidadController.todos(p:Long, c:Long)
+GET     /api/unid/all                   controllers.UnidadController.unidades
+GET     /api/unid/:id                   controllers.UnidadController.buscarPorId(id: Long)
+GET     /api/unid/del/:id               controllers.UnidadController.borrarUnidad(id: Long)
+POST    /api/unid/save                  controllers.UnidadController.guardarUnidad
+POST    /api/unid/upd                   controllers.UnidadController.actualizarUnidad
+
+# Ucap
+GET     /api/ucap/get/:p/:c             controllers.UcapController.todos(p:Long, c:Long)
+GET     /api/ucap/all                   controllers.UcapController.ucaps
+GET     /api/ucap/:id                   controllers.UcapController.buscarPorId(id: Long)
+GET     /api/ucap/del/:id               controllers.UcapController.borrarUcap(id: Long)
+POST    /api/ucap/save                  controllers.UcapController.guardarUcap
+POST    /api/ucap/upd                   controllers.UcapController.actualizarUcap
+
+# Urbanizadora
+GET     /api/urba/get/:p/:c             controllers.UrbanizadoraController.todos(p:Long, c:Long)
+GET     /api/urba/all                   controllers.UrbanizadoraController.urbanizadoras
+GET     /api/urba/:id                   controllers.UrbanizadoraController.buscarPorId(id: Long)
+GET     /api/urba/del/:id               controllers.UrbanizadoraController.borrar(id: Long)
+POST    /api/urba/save                  controllers.UrbanizadoraController.guardar
+POST    /api/urba/upd                   controllers.UrbanizadoraController.actualizar
+
+# Solicitudes
+GET     /api/soli/get/:p/:c             controllers.SolicitudController.todos(p:Long, c:Long)
+GET     /api/soli/all                   controllers.SolicitudController.solis
+GET     /api/soli/bpv                   controllers.SolicitudController.buscarPorVencer
+GET     /api/soli/:id                   controllers.SolicitudController.buscarPorId(id: Long)
+GET     /api/soli/del/:id               controllers.SolicitudController.borrar(id: Long)
+GET     /api/soli/gbr/:r                controllers.SolicitudController.buscarPorRadicado(r:String)
+GET     /api/soli/rang/:a/:m            controllers.SolicitudController.buscarPorRango(a:Int, m:Int)
+POST    /api/soli/save                  controllers.SolicitudController.guardar
+POST    /api/soli/upd                   controllers.SolicitudController.actualizar
+GET     /api/soli/ensu/:id              controllers.SolicitudController.entregarSupervisor(id: Long)
+GET     /api/soli/enfo/:id              controllers.SolicitudController.entregarFormatoRTE(id: Long)
+GET     /api/soli/arte/:id/:f/:n        controllers.SolicitudController.asignarRte(id: Long, f: Long, n: Int)
+POST    /api/soli/inin                  controllers.SolicitudController.ingresarInforme
+POST    /api/soli/inre                  controllers.SolicitudController.ingresarRespuesta
+GET     /api/soli/frte/:id/:e/:t        controllers.SolicitudController.formatoRTE(id: Long, e: Long, t: String)
+
+# Tipo Solicitud
+GET     /api/soti/get/:p/:c             controllers.SolicitudTipoController.todos(p:Long, c:Long)
+GET     /api/soti/all                   controllers.SolicitudTipoController.solicitudtipos
+GET     /api/soti/:id                   controllers.SolicitudTipoController.buscarPorId(id: Long)
+GET     /api/soti/del/:id               controllers.SolicitudTipoController.borrar(id: Long)
+POST    /api/soti/save                  controllers.SolicitudTipoController.guardar
+POST    /api/soti/upd                   controllers.SolicitudTipoController.actualizar
+
+# Caracteristicas
+GET     /api/cara/get/:p/:c             controllers.CaracteristicaController.todos(p:Long, c:Long)
+GET     /api/cara/:id                   controllers.CaracteristicaController.buscarPorId(id:Long)
+GET     /api/cara/del/:id               controllers.CaracteristicaController.borrarCaracteristica(id:Long)
+GET     /api/cara/get/all               controllers.CaracteristicaController.caracteristicas
+POST    /api/cara/save                  controllers.CaracteristicaController.guardarCaracteristica
+POST    /api/cara/upd                   controllers.CaracteristicaController.actualizarCaracteristica
+
+# Tipo Elemento
+GET     /api/tiel/get/:p/:c             controllers.TipoElementoController.todos(p:Long, c:Long)
+GET     /api/tiel/all                   controllers.TipoElementoController.tiposelemento
+GET     /api/tiel/:id                   controllers.TipoElementoController.buscarPorId(id: Long)
+GET     /api/tiel/del/:id               controllers.TipoElementoController.borrarTipoElemento(id: Long)
+POST    /api/tiel/save                  controllers.TipoElementoController.guardarTipoElemento
+POST    /api/tiel/upd                   controllers.TipoElementoController.actualizarTipoElemento
+
+# Tipo Barrio
+GET     /api/tiba/get/:p/:c             controllers.TipoBarrioController.todos(p:Long, c:Long)
+GET     /api/tiba/all                   controllers.TipoBarrioController.tiposbarrio
+GET     /api/tiba/:id                   controllers.TipoBarrioController.buscarPorId(id: Long)
+GET     /api/tiba/del/:id               controllers.TipoBarrioController.borrarTipoBarrio(id: Long)
+POST    /api/tiba/save                  controllers.TipoBarrioController.guardarTipoBarrio
+POST    /api/tiba/upd                   controllers.TipoBarrioController.actualizarTipoBarrio
+
+# Actividad
+GET     /api/acti/get/:p/:c             controllers.ActividadController.todos(p:Long, c:Long)
+GET     /api/acti/all                   controllers.ActividadController.actividades
+GET     /api/acti/:id                   controllers.ActividadController.buscarPorId(id: Long)
+GET     /api/acti/del/:id               controllers.ActividadController.borrarActividad(id: Long)
+POST    /api/acti/save                  controllers.ActividadController.guardarActividad
+POST    /api/acti/upd                   controllers.ActividadController.actualizarActividad
+# Origen
+GET     /api/orig/get/:p/:c             controllers.OrigenController.todos(p:Long, c:Long)
+GET     /api/orig/all                   controllers.OrigenController.origenes
+GET     /api/orig/:id                   controllers.OrigenController.buscarPorId(id: Long)
+GET     /api/orig/del/:id               controllers.OrigenController.borrarOrigen(id: Long)
+POST    /api/orig/save                  controllers.OrigenController.guardarOrigen
+POST    /api/orig/upd                   controllers.OrigenController.actualizarOrigen
+# TipoRetiro
+GET     /api/tire/get/:p/:c             controllers.TipoRetiroController.todos(p:Long, c:Long)
+GET     /api/tire/all                   controllers.TipoRetiroController.tiposretiro
+GET     /api/tire/:id                   controllers.TipoRetiroController.buscarPorId(id: Long)
+GET     /api/tire/del/:id               controllers.TipoRetiroController.borrar(id: Long)
+POST    /api/tire/save                  controllers.TipoRetiroController.guardar
+POST    /api/tire/upd                   controllers.TipoRetiroController.actualizar
+# Accion
+GET     /api/acci/get/:p/:c             controllers.AccionController.todos(p:Long, c:Long)
+GET     /api/acci/all                   controllers.AccionController.acciones
+GET     /api/acci/:id                   controllers.AccionController.buscarPorId(id: Long)
+GET     /api/acci/del/:id               controllers.AccionController.borrarAccion(id: Long)
+POST    /api/acci/save                  controllers.AccionController.guardarAccion
+POST    /api/acci/upd                   controllers.AccionController.actualizarAccion
+
+# Tipo Medidor
+GET     /api/time/get/:p/:c             controllers.TipoMedidorController.todos(p:Long, c:Long)
+GET     /api/time/all                   controllers.TipoMedidorController.tiposmedidor
+GET     /api/time/:id                   controllers.TipoMedidorController.buscarPorId(id: Long)
+GET     /api/time/del/:id               controllers.TipoMedidorController.borrarTipoMedidor(id: Long)
+POST    /api/time/save                  controllers.TipoMedidorController.guardarTipoMedidor
+POST    /api/time/upd                   controllers.TipoMedidorController.actualizarTipoMedidor
+
+# Elemento
+GET     /api/elem/get/:f/:p/:c          controllers.ElementoController.todos(f: String, p:Long, c:Long)
+GET     /api/elem/all                   controllers.ElementoController.elementos
+GET     /api/elem/:id                   controllers.ElementoController.buscarPorId(id: Long)
+GET     /api/elem/del/:id               controllers.ElementoController.borrarElemento(id: Long)
+POST    /api/elem/save                  controllers.ElementoController.guardarElemento
+POST    /api/elem/upd                   controllers.ElementoController.actualizarElemento
+GET     /api/elem/bdesc/:q                controllers.ElementoController.buscarPorDescripcion(q: String)
+# Cuadrilla
+GET     /api/cuad/get/:p/:c             controllers.CuadrillaController.todos(p:Long, c:Long)
+GET     /api/cuad/:id                   controllers.CuadrillaController.buscarPorId(id:Long)
+GET     /api/cuad/del/:id               controllers.CuadrillaController.borrarCuadrilla(id:Long)
+GET     /api/cuad/get/all               controllers.CuadrillaController.cuadrillas
+POST    /api/cuad/save                  controllers.CuadrillaController.guardarCuadrilla
+POST    /api/cuad/upd                   controllers.CuadrillaController.actualizarCuadrilla
+# Aap
+POST    /api/aap/get                   controllers.AapController.todos
+POST    /api/aap/all                   controllers.AapController.aaps
+GET     /api/aap/next                  controllers.AapController.buscarSiguienteACrear()
+GET     /api/aap/:id                   controllers.AapController.buscarPorId(id: Long)
+GET     /api/aap/vali/:id              controllers.AapController.buscarParaVerificar(id: Long)
+GET     /api/aap/apoyo/:id             controllers.AapController.buscarPorApoyo(id: String)
+GET     /api/aap/bpm/:c/:t             controllers.AapController.buscarPorMaterial(c: String, t: scala.Long)
+GET     /api/aap/del/:id               controllers.AapController.borrarAap(id: Long)
+POST    /api/aap/save                  controllers.AapController.guardarAap
+POST    /api/aap/upd                   controllers.AapController.actualizarAap
+# Aap Tipo Carcasa
+GET     /api/aatc/get/:p/:c             controllers.AapTipoCarcasaController.todos(p:Long, c:Long)
+GET     /api/aatc/all                   controllers.AapTipoCarcasaController.aaptiposcarcasa
+GET     /api/aatc/:id                   controllers.AapTipoCarcasaController.buscarPorId(id: Long)
+GET     /api/aatc/del/:id               controllers.AapTipoCarcasaController.borrarAapTipoCarcasa(id: Long)
+POST    /api/aatc/save                  controllers.AapTipoCarcasaController.guardarAapTipoCarcasa
+POST    /api/aatc/upd                   controllers.AapTipoCarcasaController.actualizarAapTipoCarcasa
+# Aap Conexion
+GET     /api/aaco/get/:p/:c             controllers.AapConexionController.todos(p:Long, c:Long)
+GET     /api/aaco/all                   controllers.AapConexionController.aapconexiones
+GET     /api/aaco/:id                   controllers.AapConexionController.buscarPorId(id: Long)
+GET     /api/aaco/del/:id               controllers.AapConexionController.borrarAapConexion(id: Long)
+POST    /api/aaco/save                  controllers.AapConexionController.guardarAapConexion
+POST    /api/aaco/upd                   controllers.AapConexionController.actualizarAapConexion
+# Aap Uso
+GET     /api/aaus/get/:p/:c             controllers.AapUsoController.todos(p:Long, c:Long)
+GET     /api/aaus/all                   controllers.AapUsoController.aapusos
+GET     /api/aaus/:id                   controllers.AapUsoController.buscarPorId(id: Long)
+GET     /api/aaus/del/:id               controllers.AapUsoController.borrarAapUso(id: Long)
+POST    /api/aaus/save                  controllers.AapUsoController.guardarAapUso
+POST    /api/aaus/upd                   controllers.AapUsoController.actualizarAapUso
+# Aap Marca
+GET     /api/aama/get/:p/:c             controllers.AapMarcaController.todos(p:Long, c:Long)
+GET     /api/aama/all                   controllers.AapMarcaController.aapmarcas
+GET     /api/aama/:id                   controllers.AapMarcaController.buscarPorId(id: Long)
+GET     /api/aama/del/:id               controllers.AapMarcaController.borrarAapMarca(id: Long)
+POST    /api/aama/save                  controllers.AapMarcaController.guardarAapMarca
+POST    /api/aama/upd                   controllers.AapMarcaController.actualizarAapMarca
+
+# Medidor
+GET     /api/medi/get/:p/:c             controllers.MedidorController.todos(p:Long, c:Long)
+GET     /api/medi/all                   controllers.MedidorController.medidores
+GET     /api/medi/:id                   controllers.MedidorController.buscarPorId(id: Long)
+GET     /api/medi/del/:id               controllers.MedidorController.borrar(id: Long)
+POST    /api/medi/save                  controllers.MedidorController.guardar
+POST    /api/medi/upd                   controllers.MedidorController.actualizar
+GET     /api/medi/ism/:e                controllers.MedidorController.informe_siap_medidor(e: Long)
+
+# Transformador
+GET     /api/tran/get/:p/:c             controllers.TransformadorController.todos(p:Long, c:Long)
+GET     /api/tran/all                   controllers.TransformadorController.transformadores
+GET     /api/tran/:id                   controllers.TransformadorController.buscarPorId(id: Long)
+GET     /api/tran/del/:id               controllers.TransformadorController.borrar(id: Long)
+POST    /api/tran/save                  controllers.TransformadorController.guardar
+POST    /api/tran/upd                   controllers.TransformadorController.actualizar
+GET     /api/tran/ism/:e                controllers.TransformadorController.informe_siap_transformador(e: Long)
+
+# Aap Medidor Marca
+GET     /api/amem/get/:p/:c             controllers.AapMedidorMarcaController.todos(p:Long, c:Long)
+GET     /api/amem/all                   controllers.AapMedidorMarcaController.aapmedidormarcas
+GET     /api/amem/:id                   controllers.AapMedidorMarcaController.buscarPorId(id: Long)
+GET     /api/amem/del/:id               controllers.AapMedidorMarcaController.borrarAapMedidorMarca(id: Long)
+POST    /api/amem/save                  controllers.AapMedidorMarcaController.guardarAapMedidorMarca
+POST    /api/amem/upd                   controllers.AapMedidorMarcaController.actualizarAapMedidorMarca
+# Aap Medidor Tipo
+GET     /api/amet/get/:p/:c             controllers.AapMedidorTipoController.todos(p:Long, c:Long)
+GET     /api/amet/all                   controllers.AapMedidorTipoController.aapmedidortipos
+GET     /api/amet/:id                   controllers.AapMedidorTipoController.buscarPorId(id: Long)
+GET     /api/amet/del/:id               controllers.AapMedidorTipoController.borrarAapMedidorTipo(id: Long)
+POST    /api/amet/save                  controllers.AapMedidorTipoController.guardarAapMedidorTipo
+POST    /api/amet/upd                   controllers.AapMedidorTipoController.actualizarAapMedidorTipo
+# Aap Modelo
+GET     /api/aamo/get/:p/:c             controllers.AapModeloController.todos(p:Long, c:Long)
+GET     /api/aamo/all                   controllers.AapModeloController.aapmodelos
+GET     /api/aamo/:id                   controllers.AapModeloController.buscarPorId(id: Long)
+GET     /api/aamo/del/:id               controllers.AapModeloController.borrarAapModelo(id: Long)
+POST    /api/aamo/save                  controllers.AapModeloController.guardarAapModelo
+POST    /api/aamo/upd                   controllers.AapModeloController.actualizarAapModelo
+
+# Aap Cuenta Ap
+GET     /api/aacu/get/:p/:c             controllers.AapCuentaApController.todos(p:Long, c:Long)
+GET     /api/aacu/all                   controllers.AapCuentaApController.aapcuentasap
+GET     /api/aacu/:id                   controllers.AapCuentaApController.buscarPorId(id: Long)
+GET     /api/aacu/del/:id               controllers.AapCuentaApController.borrarAapCuentaAp(id: Long)
+POST    /api/aacu/save                  controllers.AapCuentaApController.guardarAapCuentaAp
+POST    /api/aacu/upd                   controllers.AapCuentaApController.actualizarAapCuentaAp
+GET     /api/aap/edit/:id              controllers.AapController.buscarParaEditar(id: Long)
+# Reporte
+POST    /api/repo/get                    controllers.ReporteController.todos
+GET     /api/repo/updh                   controllers.ReporteController.actualizarHistoria()
+GET     /api/repo/all                    controllers.ReporteController.reportes
+GET     /api/repo/:id                    controllers.ReporteController.buscarPorId(id: Long)
+GET     /api/repo/del/:id                controllers.ReporteController.borrarReporte(id: Long)
+POST    /api/repo/save                   controllers.ReporteController.guardarReporte
+POST    /api/repo/upd                    controllers.ReporteController.actualizarReporte
+GET     /api/repo/st/get                 controllers.ReporteController.estados
+GET     /api/repo/tp/get                 controllers.ReporteController.tipos
+GET     /api/repo/prn/repo/:id/:em           controllers.ReporteController.imprimirReporte(id: Long, em: Long)
+GET     /api/repo/prn/rela/:fi/:ff/:e/:u/:t  controllers.ReporteController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long, t:String)
+GET     /api/repo/prn/form/:i/:e             controllers.ReporteController.imprimirFormato(i:Long, e:Long)
+GET     /api/repo/rang/:y/:m             controllers.ReporteController.buscarPorRango(y: Int, m: Int)
+GET     /api/repo/gbtc/:t/:n             controllers.ReporteController.buscarPorConsecutivo(t: Long, n:Int)
+GET     /api/repo/vali/:e/:c             controllers.ReporteController.validarCodigo(e: Long, c: String)
+GET     /api/repo/venc/get               controllers.ReporteController.siap_reporte_vencido
+GET     /api/repo/vadi/:t/:n             controllers.ReporteController.validarReporteDiligenciado(t: Long, n: Int)
+
+# Obra
+POST    /api/obra/get                    controllers.ObraController.todos
+GET     /api/obra/updh                   controllers.ObraController.actualizarHistoria()
+GET     /api/obra/all                    controllers.ObraController.obras
+GET     /api/obra/:id                    controllers.ObraController.buscarPorId(id: Long)
+GET     /api/obra/del/:id                controllers.ObraController.borrarObra(id: Long)
+POST    /api/obra/save                   controllers.ObraController.guardarObra
+POST    /api/obra/upd                    controllers.ObraController.actualizarObra
+GET     /api/obra/st/get                 controllers.ObraController.estados
+GET     /api/obra/prn/obra/:id/:em       controllers.ObraController.imprimirObra(id: Long, em: Long)
+GET     /api/obra/prn/rela/:fi/:ff/:e/:u controllers.ObraController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long)
+GET     /api/obra/prn/form/:i/:e         controllers.ObraController.imprimirFormato(i:Long, e:Long)
+GET     /api/obra/rang/:y/:m             controllers.ObraController.buscarPorRango(y: Int, m: Int)
+GET     /api/obra/gbtc/:t             controllers.ObraController.buscarPorConsecutivo(t: Long)
+GET     /api/obra/vali/:e/:c             controllers.ObraController.validarCodigo(e: Long, c: String)
+# Orden Trabajo
+POST    /api/ortr/get                   controllers.OrdenTrabajoController.todos
+GET     /api/ortr/all                   controllers.OrdenTrabajoController.ordenes
+GET     /api/ortr/:id                   controllers.OrdenTrabajoController.buscarPorId(id: Long)
+GET     /api/ortr/del/:id               controllers.OrdenTrabajoController.borrarOrden(id: Long)
+POST    /api/ortr/save                  controllers.OrdenTrabajoController.guardarOrden
+POST    /api/ortr/upd                   controllers.OrdenTrabajoController.actualizarOrden
+GET     /api/ortr/st/get                controllers.OrdenTrabajoController.getEstados
+GET     /api/ortr/prn/ortr/:id/:em      controllers.OrdenTrabajoController.imprimirOrden(id: Long, em: Long)
+# Medioambiente
+GET     /api/meam/get                   controllers.MedioAmbienteController.todos
+# Informe
+GET     /api/info/sdm/:fi/:ff/:uid/:eid         controllers.InformeController.siap_detallado_material(fi: Long, ff: Long, uid: Long, eid: Long)
+GET     /api/info/srm/:fi/:ff/:uid/:eid         controllers.InformeController.siap_resumen_material(fi: Long, ff: Long, uid: Long, eid: Long)
+GET     /api/info/srmr/:fi/:ff/:uid/:eid        controllers.InformeController.siap_resumen_material_reporte(fi: Long, ff: Long, uid: Long, eid: Long)
+GET     /api/info/sdmx/:fi/:ff                  controllers.InformeController.siap_detallado_material_xls(fi: Long, ff: Long)
+GET     /api/info/srmx/:fi/:ff                  controllers.InformeController.siap_resumen_material_xls(fi: Long, ff: Long)
+GET     /api/info/srpu/:ft/:uid/:eid            controllers.InformeController.siap_reporte_por_uso_xls(ft: Long, uid: Long, eid: Long)
+GET     /api/info/smrx/:fi/:ff/:te              controllers.InformeController.siap_material_repetido_xls(fi: Long, ff: Long, te: Long)
+GET     /api/info/srmrx/:fi/:ff                 controllers.InformeController.siap_resumen_material_reporte_xls(fi: Long, ff: Long)
+GET     /api/info/srcx/:fi/:ff                  controllers.InformeController.siap_reporte_consolidado_xls(fi: Long, ff: Long)
+GET     /api/info/sdex/:fi/:ff                  controllers.InformeController.siap_detallado_expansion_xls(fi: Long, ff: Long)
+GET     /api/info/sdrx/:fi/:ff                  controllers.InformeController.siap_detallado_reubicacion_xls(fi: Long, ff: Long)
+GET     /api/info/sdzx/:fi/:ff                  controllers.InformeController.siap_detallado_modernizacion_xls(fi: Long, ff: Long)
+GET     /api/info/sdax/:fi/:ff                  controllers.InformeController.siap_detallado_actualizacion_xls(fi: Long, ff: Long)
+GET     /api/info/sdpx/:fi/:ff                  controllers.InformeController.siap_detallado_reposicion_xls(fi: Long, ff: Long)
+GET     /api/info/sdwx/:fi/:ff                  controllers.InformeController.siap_detallado_repotenciacion_xls(fi: Long, ff: Long)
+GET     /api/info/sdtx/:fi/:ff                  controllers.InformeController.siap_detallado_retiro_xls(fi: Long, ff: Long)
+GET     /api/info/sig/:fc/:ps/:cp               controllers.InformeController.siap_inventario(fc: Long, ps: Long, cp: Long)
+GET     /api/info/sigx/:fc/:e                   controllers.InformeController.siap_inventario_xls(fc: Long, e: Long)
+GET     /api/info/sdx/:fi/:ff/:wt/:e            controllers.InformeController.siap_disponibilidad_xls(fi: Long, ff: Long, wt:Double, e: Long)
+GET     /api/info/sde/:fi/:ff/:e                controllers.InformeController.siap_eficiencia_xls(fi: Long, ff: Long, e: Long)
+GET     /api/info/sgr/:fi/:ff/:uid/:eid/:num    controllers.InformeController.siap_graficos_reporte(fi: Long, ff: Long, uid: Long, eid: Long, num: Int)
+GET     /api/info/svpb/:fi/:ff                  controllers.InformeController.siap_visita_por_barrio_xls(fi: Long, ff: Long)
+GET     /api/info/scc/:p/:a/:e                  controllers.InformeController.siap_calculo_carga_xls(p: Long, a: Long, e: Long)
+GET     /api/info/sdrr/:fi/:ff                  controllers.InformeController.siap_detallado_retiro_reubicacion_xls(fi:Long, ff:Long)
+GET     /api/info/sifx/:fc/:o/:f/:e             controllers.InformeController.siap_inventario_filtro_xls(fc: Long, o: String, f:String, e: Long)
+GET     /api/info/smx/:e/:t                     controllers.InformeController.siap_medidor_xls(e: Long, t:String)
+GET     /api/info/stx/:e/:t                     controllers.InformeController.siap_transformador_xls(e: Long, t:String)
+GET     /api/info/sucx/:fi/:ff/:e               controllers.InformeController.siap_ucap_xls(fi: Long, ff: Long, e: Long)
+
+# Graficas
+GET     /api/graf/sgrp                           controllers.GraficaController.siap_grafica_reporte_pendiente()
+GET     /api/graf/sgrv                           controllers.GraficaController.siap_grafica_reporte_vencido()
+GET     /api/graf/sgrpo                          controllers.GraficaController.siap_grafica_reporte_potencia()
+GET     /api/graf/slrp/:p                        controllers.GraficaController.siap_lista_reporte_potencia(p: Long)
+GET     /api/graf/slp                            controllers.GraficaController.siap_lista_potencias()
+GET     /api/graf/slt                            controllers.GraficaController.siap_lista_tecnologias()
+GET     /api/graf/slm                            controllers.GraficaController.siap_lista_medidas()
+GET     /api/graf/sls                            controllers.GraficaController.siap_lista_sectores()
+GET     /api/graf/slu                            controllers.GraficaController.siap_lista_usos()
+GET     /api/graf/slb                            controllers.GraficaController.siap_lista_barrios()
+GET     /api/graf/slv                            controllers.GraficaController.siap_lista_veredas()
+GET     /api/graf/sgrpotec                       controllers.GraficaController.siap_grafica_reporte_potencia_tecnologia()
+GET     /api/graf/slrpt/:t/:p                    controllers.GraficaController.siap_lista_reporte_potencia_tecnologia(t:String, p: Long)
+GET     /api/graf/sgrpomed                       controllers.GraficaController.siap_grafica_reporte_potencia_medida()
+GET     /api/graf/slrpm/:m/:p                    controllers.GraficaController.siap_lista_reporte_potencia_medida(m: String, p: Long)
+GET     /api/graf/sgrsec                         controllers.GraficaController.siap_grafica_reporte_sector()
+GET     /api/graf/slrs/:s                        controllers.GraficaController.siap_lista_reporte_sector(s: String)
+GET     /api/graf/sgruso                         controllers.GraficaController.siap_grafica_reporte_uso()
+GET     /api/graf/slru/:u                        controllers.GraficaController.siap_lista_reporte_uso(u: String)
+GET     /api/graf/sgrtec                         controllers.GraficaController.siap_grafica_reporte_tecnologia()
+GET     /api/graf/slrt/:t                        controllers.GraficaController.siap_lista_reporte_tecnologia(t: String)
+GET     /api/graf/sgrmed                         controllers.GraficaController.siap_grafica_reporte_medida()
+GET     /api/graf/slrm/:m                        controllers.GraficaController.siap_lista_reporte_medida(m: String)
+GET     /api/graf/sgrbarr                        controllers.GraficaController.siap_grafica_reporte_barrio()
+GET     /api/graf/slrb/:b                        controllers.GraficaController.siap_lista_reporte_barrio(b: String)
+GET     /api/graf/sgrvere                        controllers.GraficaController.siap_grafica_reporte_vereda()
+
+# Código Autorización
+GET     /api/coau/code/:t                        controllers.CodigoautorizacionController.codigo(t: Int)
+GET     /api/coau/vaco/:t/:c                     controllers.CodigoautorizacionController.validar(t:Int, c: String)
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
