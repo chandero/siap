@@ -119,6 +119,8 @@ class SolicitudController @Inject()(
                              soli.b.soli_puntos,
                              soli.b.soli_tipoexpansion,
                              soli.b.soli_aprobada,
+                             soli.b.soli_codigorespuesta,
+                             soli.b.soli_luminarias,                       
                              soli.b.soli_estado,
                              empr_id,
                              usua_id)
@@ -162,7 +164,9 @@ class SolicitudController @Inject()(
                              soli.b.soli_numerorte,
                              soli.b.soli_puntos,
                              soli.b.soli_tipoexpansion,
-                             soli.b.soli_aprobada,                             
+                             soli.b.soli_aprobada,      
+                             soli.b.soli_codigorespuesta,
+                             soli.b.soli_luminarias,                       
                              soli.b.soli_estado,
                              empr_id,
                              usua_id)

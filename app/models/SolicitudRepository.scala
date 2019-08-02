@@ -39,6 +39,8 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter
 import net.sf.jasperreports.export.SimpleXlsxReportConfiguration
 //
 
+import utilities.N2T
+
 case class Soli(soli_id: Option[Long],
                 soti_id: Option[Long],
                 soli_fecha: Option[DateTime],
@@ -64,6 +66,8 @@ case class Soli(soli_id: Option[Long],
                 soli_puntos: Option[Int],
                 soli_tipoexpansion: Option[String],
                 soli_aprobada: Option[Boolean],
+                soli_codigorespuesta: Option[String],
+                soli_luminarias: Option[Int],
                 soli_estado: Option[Int],
                 empr_id: Option[Long],
                 usua_id: Option[Long]
@@ -96,6 +100,8 @@ case class SolicitudB(
                      soli_puntos: Option[Int],
                      soli_tipoexpansion: Option[String],
                      soli_aprobada: Option[Boolean],
+                     soli_codigorespuesta: Option[String],
+                     soli_luminarias: Option[Int],
                      soli_estado: Option[Int],
                      empr_id: Option[Long],
                      usua_id: Option[Long])
@@ -160,6 +166,8 @@ object SolicitudB {
             "soli_puntos" -> soli.soli_puntos,
             "soli_tipoexpansion" -> soli.soli_tipoexpansion,
             "soli_aprobada" -> soli.soli_aprobada,
+            "soli_codigorespuesta" -> soli.soli_codigorespuesta,
+            "soli_luminarias" -> soli.soli_luminarias,
             "soli_estado" -> soli.soli_estado,            
             "empr_id" -> soli.empr_id,
             "usua_id" -> soli.usua_id
@@ -179,6 +187,8 @@ object SolicitudB {
         (__ \ "soli_puntos").readNullable[Int] and
         (__ \ "soli_tipoexpansion").readNullable[String] and
         (__ \ "soli_aprobada").readNullable[Boolean] and
+        (__ \ "soli_codigorespuesta").readNullable[String] and
+        (__ \ "soli_luminarias").readNullable[Int] and
         (__ \ "soli_estado").readNullable[Int] and
         (__ \ "empr_id").readNullable[Long] and
         (__ \ "usua_id").readNullable[Long]
@@ -229,6 +239,8 @@ object Soli {
         get[Option[Int]]("soli_puntos") ~
         get[Option[String]]("soli_tipoexpansion") ~
         get[Option[Boolean]]("soli_aprobada") ~
+        get[Option[String]]("soli_codigorespuesta") ~
+        get[Option[Int]]("soli_luminarias") ~
         get[Option[Int]]("soli_estado") ~
         get[Option[Long]]("empr_id") ~ 
         get[Option[Long]]("usua_id") map {
@@ -257,6 +269,8 @@ object Soli {
                  soli_puntos ~
                  soli_tipoexpansion ~
                  soli_aprobada ~
+                 soli_codigorespuesta ~
+                 soli_luminarias ~
                  soli_estado ~ 
                  empr_id ~ 
                  usua_id => Soli(soli_id,
@@ -284,6 +298,8 @@ object Soli {
                       soli_puntos,
                       soli_tipoexpansion,
                       soli_aprobada,
+                      soli_codigorespuesta,
+                      soli_luminarias,
                       soli_estado, 
                       empr_id, 
                       usua_id)
@@ -291,7 +307,7 @@ object Soli {
     }    
 }
 
-class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaRepository)(implicit ec: DatabaseExecutionContext){
+class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaRepository, generalService: GeneralRepository)(implicit ec: DatabaseExecutionContext){
     private val db = dbapi.database("default")
     private val REPORT_DEFINITION_PATH = System.getProperty("user.dir") + "/conf/reports/"
 
@@ -331,6 +347,8 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                                         s.soli_puntos,
                                                         s.soli_tipoexpansion,
                                                         s.soli_aprobada,
+                                                        s.soli_codigorespuesta,
+                                                        s.soli_luminarias,
                                                         s.soli_estado,
                                                         s.empr_id,
                                                         s.usua_id)
@@ -350,6 +368,8 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                                        None,
                                                        None)
                                 val b = new SolicitudB(None,
+                                                       None,
+                                                       None,
                                                        None,
                                                        None,
                                                        None,
@@ -408,6 +428,8 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                                         s.soli_puntos,
                                                         s.soli_tipoexpansion,
                                                         s.soli_aprobada,
+                                                        s.soli_codigorespuesta,
+                                                        s.soli_luminarias,
                                                         s.soli_estado,
                                                         s.empr_id,
                                                         s.usua_id)
@@ -427,6 +449,8 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                                        None,
                                                        None)
                                 val b = new SolicitudB(None,
+                                                       None,
+                                                       None,
                                                        None,
                                                        None,
                                                        None,
@@ -485,6 +509,8 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                                             s.soli_puntos,
                                                             s.soli_tipoexpansion,
                                                             s.soli_aprobada,
+                                                            s.soli_codigorespuesta,
+                                                            s.soli_luminarias,
                                                             s.soli_estado,
                                                             s.empr_id,
                                                             s.usua_id)
@@ -546,6 +572,8 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                                             s.soli_puntos,
                                                             s.soli_tipoexpansion,
                                                             s.soli_aprobada,
+                                                            s.soli_codigorespuesta,
+                                                            s.soli_luminarias,
                                                             s.soli_estado,
                                                             s.empr_id,
                                                             s.usua_id)
@@ -590,6 +618,8 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                            s.soli_puntos,
                                            s.soli_tipoexpansion,
                                            s.soli_aprobada,
+                                           s.soli_codigorespuesta,
+                                           s.soli_luminarias,
                                            s.soli_estado,
                                            s.empr_id,
                                            s.usua_id)
@@ -652,6 +682,8 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                            s.soli_puntos,
                                            s.soli_tipoexpansion,
                                            s.soli_aprobada,
+                                           s.soli_codigorespuesta,
+                                           s.soli_luminarias,
                                            s.soli_estado,
                                            s.empr_id,
                                            s.usua_id)
@@ -705,7 +737,9 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                                         s.soli_numerorte,
                                                         s.soli_puntos,
                                                         s.soli_tipoexpansion,
-                                                        s.soli_aprobada,                                                        
+                                                        s.soli_aprobada, 
+                                                        s.soli_codigorespuesta,
+                                                        s.soli_luminarias,
                                                         s.soli_estado,
                                                         s.empr_id,
                                                         s.usua_id)
@@ -1139,36 +1173,35 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
     */
     def cartaRTE(soli_id: scala.Long, con_firma: Boolean, empr_id: scala.Long): Array[Byte] = {
         var os = Array[Byte]()
+        var firma: InputStream = null
 
         db.withConnection { implicit connection => 
           empresaService.buscarPorId(empr_id).map { empresa =>
-            try {
-              val solicitud:Option[Solicitud] = buscarPorId(soli_id)
-              var compiledFile = ""
-              solicitud.soli_aprobada match {  
-                case true => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_aprobada.jasper"
-                case true => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_aprobada.jasper"
-                             firma = this.getClass.getResourceAsStream(REPORT_DEFINITION_PATH + "firma.png")
-                case false => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_negada.jasper"
-              }
-              var reportParams = new HashMap[String, java.lang.Object]()
-              reportParams.put("SOLI_ID", new java.lang.Long(soli_id.longValue()))
-              reportParams.put("EMPR_SIGLA", empresa.empr_sigla)
-              reportParams.put("CIUDAD_LARGA", empresa.empr_sigla)
-              reportParams.put("FECHA_LARGA", empresa.empr_sigla)
-              reportParams.put("CODIGO_RESPUESTA", empresa.empr_sigla)
-              reportParams.put("CIUDAD_CORTA", empresa.empr_sigla)
-              reportParams.put("FECHA_RADICADO_LARGA", empresa.empr_sigla)
-              reportParams.put("LUMINARIAS_LETRAS", empresa.empr_sigla)
-              reportParams.put("GERENTE", empresa.empr_sigla)
-              reportParams.put("FIRMA", empresa.empr_sigla)
-              os = JasperRunManager.runReportToPdf(compiledFile, reportParams, connection)
-            } catch {
-              case e: Exception => e.printStackTrace();
-            }
-          }
+              buscarPorId(soli_id) match {
+                case Some(s) =>
+                                    var compiledFile = ""
+                                    s.b.soli_aprobada match {  
+                                        case Some(true) => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_aprobada.jasper"
+                                                           firma = this.getClass.getResourceAsStream(REPORT_DEFINITION_PATH + "firma.png")
+                                        case Some(false) => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_negada.jasper"
+                                        case None => None
+                                    }
+                                    var reportParams = new HashMap[String, java.lang.Object]()
+                                    reportParams.put("SOLI_ID", new java.lang.Long(soli_id.longValue()))
+                                    reportParams.put("EMPR_SIGLA", empresa.empr_sigla)
+                                    reportParams.put("CIUDAD_LARGA", empresa.muni_descripcion)
+                                    reportParams.put("FECHA_LARGA", empresa.empr_sigla)
+                                    reportParams.put("CODIGO_RESPUESTA", s.b.soli_codigorespuesta)
+                                    reportParams.put("CIUDAD_CORTA", empresa.muni_descripcion)
+                                    reportParams.put("FECHA_RADICADO_LARGA", empresa.empr_sigla)
+                                    reportParams.put("LUMINARIAS_LETRAS", N2T.convertirLetras(s.b.soli_luminarias.get))
+                                    reportParams.put("GERENTE", generalService.buscarPorId(4, empr_id))
+                                    reportParams.put("FIRMA", firma)
+                                    os = JasperRunManager.runReportToPdf(compiledFile, reportParams, connection)
+                 case None => os = new Array[Byte](0)
+             }
+           }
         }
         os
     }
-
 }
