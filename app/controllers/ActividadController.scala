@@ -5,6 +5,7 @@ import javax.inject.Inject
 import models._
 
 import play.api.mvc._
+import play.api.Configuration
 import play.api.libs.json._
 
 import com.google.inject.Singleton
@@ -16,7 +17,7 @@ import pdi.jwt.JwtSession
 import utilities._
 
 @Singleton
-class ActividadController @Inject()(actividadService: ActividadRepository, cc: ControllerComponents, authenticatedUserAction: AuthenticatedUserAction)(implicit ec: ExecutionContext) extends AbstractController(cc) {
+class ActividadController @Inject()(actividadService: ActividadRepository, cc: ControllerComponents, config: Configuration, authenticatedUserAction: AuthenticatedUserAction)(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
     def buscarPorId(acti_id: Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val actividad = actividadService.buscarPorId(acti_id)
@@ -40,6 +41,17 @@ class ActividadController @Inject()(actividadService: ActividadRepository, cc: C
         actividadService.actividades().map { result =>
            Ok(Json.toJson(result))
         }
+    }
+
+    def listarActividades(token: String) = Action.async { implicit request: Request[AnyContent] =>
+      val secret = config.get[String]("play.http.secret.key")
+      if (secret == token) {
+        actividadService.actividades().map { result =>
+           Ok(Json.toJson(result))
+        }
+      } else {
+        Future.successful(NotFound)
+      }
     }
 
     def guardarActividad() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>

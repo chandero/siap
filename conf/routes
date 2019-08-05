@@ -37,6 +37,7 @@ GET     /api/muni/get/:id               controllers.MunicipioController.buscarpo
 
 GET     /api/barr/get/:id/:p/:c         controllers.BarrioController.buscarpormunicipio(id: Long, p:Long, c:Long)
 GET     /api/barr/get/empr              controllers.BarrioController.buscarporempresa
+GET     /api/barr/gbi/:e/:t             controllers.BarrioController.listarBarrios(e: Long, t: String)
 GET     /api/barr/byid/:id              controllers.BarrioController.buscarporid(id: Long)
 GET     /api/barr/del/:id               controllers.BarrioController.borrarBarrio(id: Long)
 POST    /api/barr/save                  controllers.BarrioController.guardarBarrio
@@ -125,6 +126,7 @@ POST    /api/tiba/upd                   controllers.TipoBarrioController.actuali
 # Actividad
 GET     /api/acti/get/:p/:c             controllers.ActividadController.todos(p:Long, c:Long)
 GET     /api/acti/all                   controllers.ActividadController.actividades
+GET     /api/acti/gbi/:t                controllers.ActividadController.listarActividades(t: String)
 GET     /api/acti/:id                   controllers.ActividadController.buscarPorId(id: Long)
 GET     /api/acti/del/:id               controllers.ActividadController.borrarActividad(id: Long)
 POST    /api/acti/save                  controllers.ActividadController.guardarActividad
@@ -269,6 +271,8 @@ GET     /api/repo/all                    controllers.ReporteController.reportes
 GET     /api/repo/:id                    controllers.ReporteController.buscarPorId(id: Long)
 GET     /api/repo/del/:id                controllers.ReporteController.borrarReporte(id: Long)
 POST    /api/repo/save                   controllers.ReporteController.guardarReporte
+POST    /api/repo/grw                    controllers.ReporteController.guardarReporteWeb
+GET     /api/repo/brw/:c/:e/:t           controllers.ReporteController.buscarPorConsecutivoWeb(c: Int, e: Long, t:String)
 POST    /api/repo/upd                    controllers.ReporteController.actualizarReporte
 GET     /api/repo/st/get                 controllers.ReporteController.estados
 GET     /api/repo/tp/get                 controllers.ReporteController.tipos

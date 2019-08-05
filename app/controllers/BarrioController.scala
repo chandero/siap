@@ -5,6 +5,7 @@ import javax.inject.Inject
 import models._
 
 import play.api.mvc._
+import play.api.Configuration
 import play.api.libs.json._
 
 import com.google.inject.Singleton
@@ -16,7 +17,7 @@ import pdi.jwt.JwtSession
 import utilities._
 
 @Singleton
-class BarrioController @Inject()(barrioService: BarrioRepository, tipobarrioService: TipoBarrioRepository, empresaService: EmpresaRepository, cc: ControllerComponents, authenticatedUserAction: AuthenticatedUserAction)(implicit ec: ExecutionContext) extends AbstractController(cc) {
+class BarrioController @Inject()(barrioService: BarrioRepository, tipobarrioService: TipoBarrioRepository, empresaService: EmpresaRepository, cc: ControllerComponents, config: Configuration, authenticatedUserAction: AuthenticatedUserAction)(implicit ec: ExecutionContext) extends AbstractController(cc) {
     def buscarpormunicipio(muni_id: Long, page_size: Long, current_page: Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
         val total = barrioService.cuenta(muni_id)
         barrioService.todos(muni_id, page_size, current_page).map { barrios => 
@@ -37,7 +38,26 @@ class BarrioController @Inject()(barrioService: BarrioRepository, tipobarrioServ
               }
           }
         }
-    }    
+    }
+
+    def listarBarrios(empr_id: Long, token: String) = Action.async { implicit request: Request[AnyContent] => 
+      val secret = config.get[String]("play.http.secret.key")
+      if (secret == token) {
+        val empresa = empresaService.buscarPorId(empr_id)
+        empresa match {
+          case None => {
+            Future.successful(NotFound(Json.toJson("false")))
+          }
+          case Some(empresa) => {
+              barrioService.buscarPorMunicipio(empresa.muni_id).map { barrios => 
+                  Ok(Json.toJson(barrios))
+              }
+          }
+        }
+      } else {
+        Future.successful(NotFound)
+      }
+    }
 
     def buscarporid(barr_id: Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val barrio = barrioService.buscarPorId(barr_id)

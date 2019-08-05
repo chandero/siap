@@ -1,13 +1,19 @@
 package controllers
 
 import javax.inject.Inject
+import java.io.{OutputStream, ByteArrayOutputStream}
+
 import models._
+
 import play.api.mvc._
 import play.api.libs.json._
+import play.api.Configuration
+
 import com.google.inject.Singleton
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Failure}
-import java.io.{OutputStream, ByteArrayOutputStream}
+
 import org.joda.time.LocalDate
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -22,6 +28,7 @@ import dto._
 class ReporteController @Inject()(
     reporteService: ReporteRepository,
     cc: ControllerComponents,
+    config: Configuration,
     authenticatedUserAction: AuthenticatedUserAction)(
     implicit ec: ExecutionContext)
     extends AbstractController(cc) {
@@ -137,6 +144,92 @@ class ReporteController @Inject()(
           NotAcceptable(Json.toJson("true"))
         }
       }
+  }
+
+  def guardarReporteWeb() = Action.async {
+    implicit request: Request[AnyContent] =>
+      implicit val dateTimeJsReader = JodaReads.jodaDateReads("yyyy-MM-dd HH:mm:ss")
+      val json = request.body.asJson.get
+      println("Json: " + json)
+      val secret = config.get[String]("play.http.secret.key")
+      val token = (json \ "token").as[String]
+      if (secret == token) {
+        val repo_direccion = (json \ "repo_direccion").as[String]
+        val barr_id = (json \ "barr_id").as[Long]
+        val repo_nombre = (json \ "repo_nombre").as[String]
+        val repo_telefono = (json \ "repo_telefono").as[String]
+        val repo_email = (json \ "repo_email").as[String]
+        val repo_descripcion = (json \ "repo_descripcion").as[String]
+        val repo_fecharecepcion = (json \ "repo_fecharecepcion").as[DateTime]
+        var repo_fechadigitacion = new DateTime()
+        val acti_id = (json \ "acti_id").as[Long]
+        val empr_id = (json \ "empr_id").as[Long]
+        var ra = new ReporteAdicional(None,
+                                      None,
+                                      None,                             
+                                      None,
+                                      None,
+                                      None,
+                                      None,
+                                      None,
+                                      None,
+                                      Some(repo_email),
+                                      Some(acti_id),
+                                      None,
+                                      None,
+                                      None)
+        val usua_id = 1
+        val reportenuevo = new Reporte(null,
+                              Some(1),
+                              None,
+                              Some(repo_fecharecepcion),
+                              Some(repo_direccion),
+                              Some(repo_nombre),
+                              Some(repo_telefono),
+                              None,
+                              None,
+                              None,
+                              None,
+                              Some(repo_descripcion),
+                              Some(1),
+                              Some(9),
+                              Some(barr_id),
+                              Some(empr_id),
+                              None,
+                              Some(usua_id),
+                              Some(ra),
+                              None,
+                              None,
+                              None
+                  )
+        reporteService.crear(reportenuevo).map { case (id, consec) =>
+          if (id > 0) {
+            Created(Json.obj("id" ->id, "consec" -> consec))
+          } else {
+            NotAcceptable(Json.toJson("error"))
+          }
+        }
+      } else {
+        Future.successful(NotFound)
+      }
+  }
+
+  def buscarPorConsecutivoWeb(repo_consecutivo: Int, empr_id: Long, token: String) = Action.async {
+    implicit request: Request[AnyContent] =>
+     val secret = config.get[String]("play.http.secret.key")
+     if (secret == token) {
+      val reporte = reporteService.buscarPorConsecutivoWeb(repo_consecutivo, empr_id)
+      reporte match {
+        case None => {
+          Future.successful(NotFound(Json.toJson("false")))
+        }
+        case Some(reporte) => {
+          Future.successful(Ok(Json.toJson(reporte)))
+        }
+      }
+     } else {
+       Future.successful(NotFound)
+     }
   }
 
   def actualizarReporte() = authenticatedUserAction.async {

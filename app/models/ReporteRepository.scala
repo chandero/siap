@@ -154,7 +154,23 @@ case class Vencido(repo_id: Option[scala.Long],
                    rees_id: Option[scala.Long], 
                    orig_descripcion: Option[String],
                    barr_descripcion: Option[String],
-                   cuad_descripcion: Option[String])                   
+                   cuad_descripcion: Option[String])
+
+case class ReporteWeb(repo_consecutivo: Option[scala.Long],
+                      repo_fecharecepcion: Option[DateTime],
+                      repo_fechadigitacion: Option[DateTime],
+                      repo_direccion: Option[String], 
+                      barr_id: Option[scala.Long],
+                      barr_descripcion: Option[String],
+                      repo_nombre: Option[String], 
+                      repo_telefono: Option[String], 
+                      repo_email: Option[String],
+                      repo_descripcion: Option[String],
+                      rees_id: Option[scala.Long], 
+                      rees_descripcion: Option[String],
+                      repo_reportetecnico: Option[String]
+                     )
+                   
 
 case class ReporteConsulta(repo_id: Option[scala.Long],
                    reti_id: Option[scala.Long],
@@ -771,6 +787,91 @@ object Vencido {
     }
 }
 
+/// AQUI
+object ReporteWeb {
+    implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
+
+    implicit val reporteWrites = new Writes[ReporteWeb] {
+        def writes(reporte: ReporteWeb) = Json.obj(
+            "repo_consecutivo" -> reporte.repo_consecutivo,
+            "repo_fecharecepcion" -> reporte.repo_fecharecepcion,
+            "repo_fechadigitacion" -> reporte.repo_fechadigitacion,
+            "repo_direccion" -> reporte.repo_direccion,
+            "barr_id" -> reporte.barr_id,
+            "barr_descripcion" -> reporte.barr_descripcion,            
+            "repo_nombre" -> reporte.repo_nombre,
+            "repo_telefono" -> reporte.repo_telefono,
+            "repo_email" -> reporte.repo_email,            
+            "repo_descripcion" -> reporte.repo_descripcion,
+            "rees_id" -> reporte.rees_id,
+            "rees_descripcion" -> reporte.rees_descripcion,
+            "repo_reportetecnico" -> reporte.repo_reportetecnico
+        )
+    }
+
+    implicit val reporteReads: Reads[ReporteWeb] = (
+        (__ \ "repo_consecutivo").readNullable[scala.Long] and
+        (__ \ "repo_fecharecepcion").readNullable[DateTime] and
+        (__ \ "repo_fechadigitacion").readNullable[DateTime] and
+        (__ \ "repo_direccion").readNullable[String] and
+        (__ \ "barr_id").readNullable[scala.Long] and
+        (__ \ "barr_descripcion").readNullable[String] and
+        (__ \ "repo_nombre").readNullable[String] and
+        (__ \ "repo_telefono").readNullable[String] and
+        (__ \ "repo_email").readNullable[String] and
+        (__ \ "repo_descripcion").readNullable[String] and
+        (__ \ "rees_id").readNullable[scala.Long] and
+        (__ \ "rees_descripcion").readNullable[String] and
+        (__ \ "repo_reportetecnico").readNullable[String]
+    )(ReporteWeb.apply _)
+
+    val _set = {
+        get[Option[scala.Long]]("repo_consecutivo") ~
+        get[Option[DateTime]]("repo_fecharecepcion") ~
+        get[Option[DateTime]]("repo_fechadigitacion") ~
+        get[Option[String]]("repo_direccion") ~
+        get[Option[scala.Long]]("barr_id") ~
+        get[Option[String]]("barr_descripcion") ~
+        get[Option[String]]("repo_nombre") ~
+        get[Option[String]]("repo_telefono") ~
+        get[Option[String]]("repo_email") ~
+        get[Option[String]]("repo_descripcion") ~
+        get[Option[scala.Long]]("reporte.rees_id") ~
+        get[Option[String]]("rees_descripcion") ~
+        get[Option[String]]("repo_reportetecnico") map {
+            case repo_consecutivo ~
+                 repo_fecharecepcion ~
+                 repo_fechadigitacion ~
+                 repo_direccion ~
+                 barr_id ~
+                 barr_descripcion ~
+                 repo_nombre ~
+                 repo_telefono ~
+                 repo_email ~
+                 repo_descripcion ~
+                 rees_id ~
+                 rees_descripcion ~
+                 repo_reportetecnico => ReporteWeb(
+                 repo_consecutivo,
+                 repo_fecharecepcion,
+                 repo_fechadigitacion,
+                 repo_direccion,
+                 barr_id,
+                 barr_descripcion,
+                 repo_nombre,
+                 repo_telefono,
+                 repo_email,
+                 repo_descripcion,
+                 rees_id,
+                 rees_descripcion,
+                 repo_reportetecnico
+                 )    
+        }
+    }
+}
+
+/// AQUI
 
 object ReporteConsulta {
     implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -1298,6 +1399,28 @@ class ReporteRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository,
         order by o.reti_id, o.repo_consecutivo""").on('empr_id -> empr_id).as(Vencido._set *)
     }
   }    
+
+    /**
+    * Recuperar un Reporte dado su repo_id
+    * @param repo_consecutivo: Int
+    * @param empr_id: scala.Long
+    */
+    def buscarPorConsecutivoWeb(repo_consecutivo: Int, empr_id: scala.Long) : Option[ReporteWeb] = {
+        db.withConnection { implicit connection => 
+            val r = SQL("""SELECT * FROM siap.reporte r
+                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.reporte_adicional ra on r.repo_id = ra.repo_id
+                            LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
+                            LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                    WHERE r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id}""").
+            on(
+                'repo_consecutivo -> repo_consecutivo,
+                'empr_id -> empr_id
+            ).as(ReporteWeb._set.singleOpt)
+            r
+        }
+    }
 
     /**
     * Recuperar un Reporte dado su repo_id
