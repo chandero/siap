@@ -162,6 +162,15 @@ class InformeController @Inject()(
       }
   }
 
+  def siap_inventario_web(fecha_corte: scala.Long, empr_id: Long, token: String) = Action.async { implicit request: Request[AnyContent] =>
+      val secret = config.get[String]("play.http.secret.key")
+      if (secret == token) {
+         informeService.siap_inventario_web(fecha_corte, empr_id).map { data =>
+            Ok(Json.toJson(data))
+         }
+      } else Future.successful(NotFound)
+  }
+
   def siap_inventario_xls(fecha_corte: scala.Long, empr_id: Long) = Action { 
       val os = informeService.siap_inventario_xls(fecha_corte, empr_id)
       val dt = new DateTime(fecha_corte)

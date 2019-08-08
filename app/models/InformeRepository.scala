@@ -246,6 +246,27 @@ object Siap_inventario_b {
     }
 }
 
+object Inventario {
+
+    implicit val iWrites = new Writes[Inventario] {
+        def writes(i: Inventario) = Json.obj(
+            "codigo" -> i.aap_id, 
+            "apoyo" -> i.aap_apoyo,
+            "direccion" -> i.aap_direccion,
+            "barrio" -> i.barr_descripcion,
+            "sector" -> i.tiba_descripcion,
+            "uso" -> i.aaus_descripcion,
+            "tipo" -> i.aatc_descripcion,
+            "medidor" -> i.aap_medidor,
+            "medida" -> i.aaco_descripcion,
+            "marca" -> i.aama_descripcion,
+            "modelo" -> i.aamo_descripcion,
+            "potencia" -> i.aap_potencia,
+            "tecnologia" -> i.aap_tecnologia
+        )
+    }    
+}
+
 object Siap_inventario {
     implicit val siWrites = new Writes[Siap_inventario] {
         def writes(si: Siap_inventario) = Json.obj(
@@ -2056,6 +2077,52 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
             Workbook(sheet).writeToOutputStream(os) 
             println("Stream Listo")
             os.toByteArray
+        }
+    }    
+
+    def siap_inventario_web(fecha_corte: Long, empr_id: Long): Future[Iterable[Inventario]] = Future[Iterable[Inventario]] { 
+        db.withConnection { implicit connection =>
+            val dt = new DateTime(fecha_corte)
+            val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+            val resultSet = SQL("""SELECT
+	                        a.aap_id as Codigo,
+	                        a.aap_apoyo as Apoyo,
+	                        a.aap_direccion as Direccion,
+	                        b.barr_descripcion as Barrio,
+	                        tb.tiba_descripcion as Sector,
+	                        us.aaus_descripcion as Uso,
+	                        a.aap_modernizada as Modernizada,
+	                        d.aap_modernizada_anho as Anho_Modernizada,
+	                        tc.aatc_descripcion as Tipo_Luminaria,
+	                        a.aap_medidor as Medidor,
+	                        co.aaco_descripcion as Tipo_Medida,
+	                        ma.aama_descripcion as Marca,
+	                        mo.aamo_descripcion as Modelo,
+	                        cu.aacu_descripcion as Cuenta,
+	                        tp.tipo_descripcion as Tipo_Poste,
+                            d.aap_poste_altura as Poste_Altura,
+                            d.aap_poste_propietario as Poste_Propietario,
+	                        d.aap_potencia as Potencia,
+	                        d.aap_tecnologia as Tecnologia,
+                    FROM siap.aap a
+                    LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id
+                    LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id
+                    LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
+                    LEFT JOIN siap.tipobarrio tb on tb.tiba_id = b.tiba_id
+                    LEFT JOIN siap.aap_uso us on us.aaus_id = a.aaus_id	
+                    LEFT JOIN siap.aap_tipo_carcasa tc on tc.aatc_id = a.aatc_id
+                    LEFT JOIN siap.aap_conexion co on co.aaco_id = a.aaco_id
+                    LEFT JOIN siap.aap_marca ma on ma.aama_id = a.aama_id
+                    LEFT JOIN siap.aap_modelo mo on mo.aamo_id = a.aamo_id
+                    LEFT JOIN siap.aap_cuentaap cu on cu.aacu_id = a.aacu_id
+                    LEFT JOIN siap.tipo_poste tp on tp.tipo_id = d.tipo_id
+                    WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and esta_id <> 9 and a.aap_id <> 9999999
+                    ORDER BY a.aap_id ASC
+                    """).on(
+                        'fecha_corte -> new DateTime(fecha_corte),
+                        'empr_id -> empr_id
+            ).as(Siap_inventario.Siap_inventario_set *)
+            resultSet
         }
     }    
 
