@@ -71,7 +71,8 @@ export default {
     solicitud: 'Derecho de Petición',
     solicitudlista: 'Solicitudes',
     solicitudcreate: 'Nuevo Derecho de Petición',
-    solicitudedit: 'Asignar Puesto Reporte Técnico',
+    solicitudedit: 'Actualizar Información de La Solicitud',
+    solicitudalmacen: 'Asignar Puesto a Solicitud',
     solicitudporvencer: 'Solicitudes por Vencer',
     solicitudver: 'Ver Solicitud',
     informe: 'Informes',
@@ -500,7 +501,14 @@ export default {
     notcreated: 'No se pudo crear la solicitud, error =>',
     updated: 'Solicitud actualizada con exito!',
     notupdated: 'Solicitud no fue actualizada, error =>',
-    confirmationmsg: 'Se procederá a borrar la solicitud seleccionada, continuar?'
+    confirmationmsg: 'Se procederá a borrar la solicitud seleccionada, continuar?',
+    aprobado: 'Aprobado',
+    tipo_expansion: {
+      title: 'Tipo de Expansión',
+      select: 'Seleccione el Tipo de Expansión'
+    },
+    numero_luminarias: 'Cantidad de Luminarias',
+    puntos: 'Total Puntos'
   },
   reporte: {
     tipo: {

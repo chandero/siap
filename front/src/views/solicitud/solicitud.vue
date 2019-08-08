@@ -151,7 +151,7 @@
               <i class="el-icon-s-order"></i>
             </el-button>            
             <el-button
-              :disabled="scope.row.b.soli_estado != 4"
+              :disabled="scope.row.b.soli_estado != 3 && scope.row.b.soli_estado != 4"
               size="mini"
               circle
               type="warning"
@@ -178,7 +178,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import { getSolicitudesRango, deleteSolicitud, entregarSupervisor, ingresarInforme, ingresarRespuesta, entregarFormatoRTE, imprimirFormatoRTE } from '@/api/solicitud'
+import { getSolicitudesRango, deleteSolicitud, entregarSupervisor, entregarFormatoRTE, imprimirFormatoRTE } from '@/api/solicitud'
 import { getBarriosEmpresa } from '@/api/barrio'
 
 export default {
@@ -333,14 +333,13 @@ export default {
       })
     },
     handleEdit(index, row) {
-      console.log('ingresar informe')
-      this.$prompt('Informe Técnico Solicitud Radicado No.' + row.a.soli_radicado, 'Informe', {
-        confirmButtonText: 'Guardar',
+      this.$confirm('Continuar con el Informe Técnico Radicado No.' + row.a.soli_radicado, 'Informe', {
+        confirmButtonText: 'Continuar',
         cancelButtonText: 'Cancelar',
-        inputType: 'textarea',
         customClass: 'infoclass'
-      }).then((info) => {
-        ingresarInforme(row.soli_id, info.value).then(response => {
+      }).then(() => {
+        this.$router.push({ path: '/solicitud/edit/' + row.a.soli_id })
+        /* ingresarInforme(row.soli_id, info.value).then(response => {
           if (response.status === 200) {
             row.soli_estado = 3
             this.$message({
@@ -353,7 +352,7 @@ export default {
               message: 'No se pudo Guardar el Informe'
             })
           }
-        })
+        }) */
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -363,13 +362,13 @@ export default {
     },
     handleRespuesta(index, row) {
       console.log('ingresar respuesta')
-      this.$prompt('Respuesta Solicitud Radicado No.' + row.soli_radicado, 'Respuesta', {
-        confirmButtonText: 'Guardar',
+      this.$confirm('Continuar con la Respuesta Solicitud Radicado No.' + row.soli_radicado, 'Respuesta', {
+        confirmButtonText: 'Continuar',
         cancelButtonText: 'Cancelar',
-        inputType: 'textarea',
         customClass: 'infoclass'
-      }).then((info) => {
-        ingresarRespuesta(row.soli_id, info.value).then(response => {
+      }).then(() => {
+        this.$router.push({ path: '/solicitud/edit' + row.a.soli_id })
+        /* ingresarRespuesta(row.soli_id, info.value).then(response => {
           if (response.status === 200) {
             row.soli_estado = 4
             this.$message({
@@ -382,7 +381,7 @@ export default {
               message: 'No se pudo Guardar la Respuesta'
             })
           }
-        })
+        }) */
       }).catch(() => {
         this.$message({
           type: 'info',

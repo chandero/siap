@@ -4,11 +4,11 @@
       <span>{{ $t('route.solicitudcreate') }}</span>
     </el-header>
     <el-main>
-     <el-form ref="formSolicitud" :model="solicitud" :rules="rules">
+     <el-form ref="formSolicitud" :model="solicitud" :rules="rules" label-position="top">
        <el-row :gutter="4">
           <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
             <el-form-item prop="a.soli_radicado" :label="$t('solicitud.radicado')">
-              <el-input name="radicado" v-model="solicitud.a.soli_radicado"></el-input>
+              <el-input readonly name="radicado" v-model="solicitud.a.soli_radicado"></el-input>
             </el-form-item>
          </el-col>
             <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
@@ -107,7 +107,7 @@
           </el-row>
         </el-collapse-item>         
        </el-collapse>
-       <el-button :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="confirmacionGuardar = true"></el-button>
+       <el-button :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="confirmacionGuardar = true">Guardar</el-button>
       </el-form>
       <el-dialog title="Confirmación" :visible.sync="confirmacionGuardar">
         <span style="font-size:20px;">Seguro de Guardar la Nueva Solicitud?</span>
@@ -130,6 +130,7 @@ export default {
       activeNames: [],
       state: 0,
       confirmacionGuardar: false,
+      puedeGuardar: true,
       solicitud: {
         a: {
           soli_id: null,
@@ -205,7 +206,7 @@ export default {
       this.$refs['formSolicitud'].validate((valid) => {
         saveSolicitud(this.solicitud).then(response => {
           if (response.status === 201) {
-            this.solicitud.soli_radicado = response.data
+            this.solicitud.a.soli_radicado = response.data
             this.success()
           }
         }).catch(error => {
@@ -220,7 +221,8 @@ export default {
           this.solicitud.a.soli_direccion &&
           this.solicitud.a.barr_id &&
           this.solicitud.a.soli_telefono &&
-          this.solicitud.a.soli_solicitud) {
+          this.solicitud.a.soli_solicitud &&
+          this.puedeGuardar) {
         return true
       } else {
         return false
@@ -274,10 +276,10 @@ export default {
     success() {
       this.$notify({
         title: this.$i18n.t('solicitud.success'),
-        message: this.$i18n.t('solicitud.created') + ' ' + this.solicitud.soli_radicado,
-        type: 'success',
-        onClose: this.limpiar()
+        message: this.$i18n.t('solicitud.created') + ' ' + this.solicitud.a.soli_radicado,
+        type: 'success'
       })
+      this.puedeGuardar = false
     },
     error(e) {
       this.$notify.error({

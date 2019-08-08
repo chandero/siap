@@ -8,7 +8,7 @@
        <el-row :gutter="4">
           <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
             <el-form-item :label="$t('solicitud.radicado')">
-              <el-input readonly ref="radicado" style="font-size: 32px;" name="radicado" v-model="solicitud.a.soli_radicado" @blur="getData()"></el-input>
+              <el-input ref="radicado" style="font-size: 32px;" name="radicado" v-model="solicitud.a.soli_radicado" @blur="getData()"></el-input>
             </el-form-item>
           </el-col>
           <el-col el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
@@ -86,53 +86,33 @@
           <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
               <el-form-item :label="$t('solicitud.fechaalmacen')">
-                <el-date-picker readonly type="datetime" name="fechaalmacen" v-model="solicitud.b.soli_fechaalmacen"></el-date-picker>
+                <el-date-picker type="datetime" name="fechaalmacen" v-model="solicitud.b.soli_fechaalmacen"></el-date-picker>
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
               <el-form-item prop="b.puntos" :label="$t('solicitud.puntos')">
-                <el-input readonly type="number" v-model="solicitud.b.soli_puntos" />
+                <el-input type="number" v-model="solicitud.b.soli_puntos" />
               </el-form-item>
-            </el-col>
+            </el-col>            
             <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
               <el-form-item prop="b.numerorte" :label="$t('solicitud.numerorte')">
-                <el-input readonly ref="numerorte" name="numerorte" v-model="solicitud.b.soli_numerorte" @input="solicitud.b.numerorte = parseInt($event)"></el-input>
+                <el-input ref="numerorte" name="numerorte" v-model="solicitud.b.soli_numerorte" @input="solicitud.b.numerorte = parseInt($event)"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
          </el-collapse-item>                 
-         <el-collapse-item v-if="solicitud.b.soli_estado >= 3" name="2" title="Informe">
+         <el-collapse-item v-if="solicitud.b.soli_estado >= 4" name="2" title="Informe">
           <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
               <el-form-item :label="$t('solicitud.fechainforme')">
-                <el-date-picker type="datetime" name="fechainforme" v-model="solicitud.b.soli_fechainforme"></el-date-picker>
+                <el-date-picker readonly type="datetime" name="fechainforme" v-model="solicitud.b.soli_fechainforme"></el-date-picker>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
               <el-form-item :label="$t('solicitud.informe')">
-                <el-input type="textarea" :rows="5" name="informe" v-model="solicitud.a.soli_informe"></el-input>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-              <el-form-item :label="$t('solicitud.aprobado')">
-                <el-checkbox v-model="solicitud.b.soli_aprobada" />
-              </el-form-item>
-            </el-col>            
-            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-              <el-form-item v-if="solicitud.b.soli_aprobada" :label="$t('solicitud.tipo_expansion.title')">
-                <el-select clearable :title="$t('solicitud.tipo_expansion.select')" style="width: 80%" ref="tipo" v-model="solicitud.b.soli_tipoexpansion" name="tipo_expansion" :placeholder="$t('solicitud.tipo_expansion.select')">
-                  <el-option v-for="te in tipos_expansion" :key="te.tiex_id" :label="te.tiex_descripcion" :value="te.tiex_id" >
-                  </el-option>   
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-              <el-form-item v-if="solicitud.b.soli_aprobada" :label="$t('solicitud.numero_luminarias')">
-                <el-input type="number" v-model="solicitud.b.soli_luminarias" @input="solicitud.b.soli_luminarias = parseInt($event)" />
+                <el-input readonly type="textarea" :rows="5" name="informe" v-model="solicitud.a.soli_informe"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -141,14 +121,14 @@
           <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
               <el-form-item :label="$t('solicitud.fecharespuesta')">
-                <el-date-picker type="datetime" name="fecharespuesta" v-model="solicitud.b.soli_fecharespuesta"></el-date-picker>
+                <el-date-picker readonly type="datetime" name="fecharespuesta" v-model="solicitud.b.soli_fecharespuesta"></el-date-picker>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
               <el-form-item :label="$t('solicitud.respuesta')">
-                <el-input type="textarea" :rows="5" name="respuesta" v-model="solicitud.a.soli_respuesta"></el-input>
+                <el-input readonly type="textarea" :rows="5" name="respuesta" v-model="solicitud.a.soli_respuesta"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -167,7 +147,7 @@
   </el-container>
 </template>
 <script>
-import { asignarRteSolicitud, getSolicitud, getSolicitudPorRadicado } from '@/api/solicitud'
+import { asignarRteSolicitud, getSolicitudPorRadicado } from '@/api/solicitud'
 import { getBarriosEmpresa } from '@/api/barrio'
 
 export default {
@@ -188,8 +168,7 @@ export default {
           soli_email: null,
           soli_solicitud: null,
           soli_respuesta: null,
-          soli_informe: null,
-          soli_consecutivo: null
+          soli_informe: null
         },
         b: {
           soli_fecharespuesta: null,
@@ -201,54 +180,12 @@ export default {
           soli_fecharte: null,
           soli_fechaalmacen: null,
           soli_numerorte: null,
-          soli_puntos: null,
-          soli_tipoexpansion: null,
-          soli_aprobada: null,
-          soli_codigorespuesta: null,
-          soli_luminarias: null,
           soli_estado: null,
           empr_id: null,
           usua_id: null
         }
       },
-      barrios: [],
-      tipos_expansion: [
-        {
-          tiex_id: 1,
-          tiex_descripcion: 'TIPO I',
-          tiex_luminaria: true,
-          tiex_redes: false,
-          tiex_poste: false
-        },
-        {
-          tiex_id: 2,
-          tiex_descripcion: 'TIPO II',
-          tiex_luminaria: true,
-          tiex_redes: false,
-          tiex_poste: false
-        },
-        {
-          tiex_id: 3,
-          tiex_descripcion: 'TIPO III',
-          tiex_luminaria: true,
-          tiex_redes: false,
-          tiex_poste: false
-        },
-        {
-          tiex_id: 4,
-          tiex_descripcion: 'TIPO IV',
-          tiex_luminaria: true,
-          tiex_redes: false,
-          tiex_poste: false
-        },
-        {
-          tiex_id: 5,
-          tiex_descripcion: 'URBANIZADORA',
-          tiex_luminaria: true,
-          tiex_redes: false,
-          tiex_poste: false
-        }
-      ]
+      barrios: []
     }
   },
   mounted() {
@@ -358,6 +295,38 @@ export default {
           soli_email: null,
           soli_solicitud: null,
           soli_respuesta: null,
+          soli_informe: null
+        },
+        b: {
+          soli_fecharespuesta: null,
+          soli_fechadigitado: null,
+          soli_fechalimite: null,
+          soli_fechasupervisor: null,
+          soli_fechainforme: null,
+          soli_fechavisita: null,
+          soli_fecharte: null,
+          soli_fechaalmacen: null,
+          soli_numerorte: null,
+          soli_estado: null,
+          empr_id: null,
+          usua_id: null
+        }
+      }
+    },
+    limpiar() {
+      this.solicitud = {
+        a: {
+          soli_id: null,
+          soti_id: null,
+          soli_fecha: null,
+          soli_nombre: null,
+          soli_radicado: null,
+          soli_direccion: null,
+          barr_id: null,
+          soli_telefono: null,
+          soli_email: null,
+          soli_solicitud: null,
+          soli_respuesta: null,
           soli_informe: null,
           soli_consecutivo: null
         },
@@ -379,57 +348,6 @@ export default {
           soli_estado: null,
           empr_id: null,
           usua_id: null
-        }
-      }
-    },
-    limpiar() {
-      if (this.$route.params.id) {
-        getSolicitud(this.$route.params.id).then(response => {
-          this.solicitud = response.data
-        }).catch(error => {
-          this.$alert('No se encontró la Solicitud, Error: ' + error, 'Derecho de Petición', {
-            confirmationButton: 'Continuar',
-            callback: action => {
-              this.limpiarAndBack()
-            }
-          })
-        })
-      } else {
-        this.solicitud = {
-          a: {
-            soli_id: null,
-            soti_id: null,
-            soli_fecha: null,
-            soli_nombre: null,
-            soli_radicado: null,
-            soli_direccion: null,
-            barr_id: null,
-            soli_telefono: null,
-            soli_email: null,
-            soli_solicitud: null,
-            soli_respuesta: null,
-            soli_informe: null,
-            soli_consecutivo: null
-          },
-          b: {
-            soli_fecharespuesta: null,
-            soli_fechadigitado: null,
-            soli_fechalimite: null,
-            soli_fechasupervisor: null,
-            soli_fechainforme: null,
-            soli_fechavisita: null,
-            soli_fecharte: null,
-            soli_fechaalmacen: null,
-            soli_numerorte: null,
-            soli_puntos: null,
-            soli_tipoexpansion: null,
-            soli_aprobada: null,
-            soli_codigorespuesta: null,
-            soli_luminarias: null,
-            soli_estado: null,
-            empr_id: null,
-            usua_id: null
-          }
         }
       }
     },

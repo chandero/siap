@@ -156,7 +156,8 @@ export const asyncRouterMap = [
     children: [
       { path: 'solicitud', component: _import('solicitud/solicitud'), name: 'solicitudlista', meta: { title: 'solicitudlista', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }},
       { path: 'create', component: _import('solicitud/create'), name: 'solicitudcreate', hidden: true, meta: { title: 'solicitudcreate', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }},
-      { path: 'edit', component: _import('solicitud/edit'), name: 'solicitudedit', meta: { title: 'solicitudedit', roles: ['super', 'admin', 'auxiliar', 'almacen', 'supervisor'] }},
+      { path: 'edit/:id?', component: _import('solicitud/edit'), name: 'solicitudedit', hidden: true, meta: { title: 'solicitudedit', roles: ['super', 'admin', 'auxiliar', 'almacen', 'supervisor'] }},
+      { path: 'almacen', component: _import('solicitud/almacen'), name: 'solicitudalmacen', meta: { title: 'solicitudalmacen', roles: ['super', 'admin', 'auxiliar', 'almacen', 'supervisor'] }},
       { path: 'porvencer', component: _import('solicitud/porvencer'), name: 'solicitudporvencer', hidden: true, meta: { title: 'solicitudporvencer', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }},
       { path: 'ver/:id', component: _import('solicitud/ver'), name: 'solicitudver', hidden: true, meta: { title: 'solicitudver', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }}
     ]
