@@ -394,7 +394,7 @@ class MedidorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
             LEFT JOIN siap.aap a ON a.aap_id = am.aap_id and a.empr_id = am.empr_id
             WHERE m.empr_id = {empr_id}
             GROUP BY m.medi_id, m.medi_numero, m.medi_direccion, ac.aacu_descripcion
-            ORDER BY m.medi_numero""").as(Informe._set *)
+            ORDER BY m.medi_numero""").on('empr_id -> empr_id).as(Informe._set *)
         }
     }
 }

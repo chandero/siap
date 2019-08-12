@@ -258,5 +258,15 @@ class SolicitudController @Inject()(
     } else {
        Forbidden("Dude, you’re not logged in.")
     }
-   }
+  }
+
+  def imprimirRespuesta(soli_id: Long, empr_id: Long, firma: Int, token: String) = Action {
+    if (config.get[String]("play.http.secret.key") == token) {
+       val os = soliService.imprimirRespuesta(soli_id, empr_id, firma)
+       Ok(os).as("application/pdf")
+    } else {
+       Forbidden("Dude, you’re not logged in.")
+    }
+  }
+
 }

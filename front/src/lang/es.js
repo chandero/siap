@@ -493,7 +493,7 @@ export default {
     asupervisor: 'Entregar a Supervisor',
     aformatorte: 'Entregar Formato Reporte Técnico',
     dinforme: 'Ingresar Informe Técnico',
-    drespuesta: 'Ingresar Respuesta',
+    drespuesta: 'Imprimir Respuesta',
     porvencer: 'Solicitud Cercanas a su Fecha de Vencimiento',
     success: 'Éxito',
     created: 'Nueva Solicitud Creada',

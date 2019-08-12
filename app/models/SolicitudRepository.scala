@@ -40,6 +40,7 @@ import net.sf.jasperreports.export.SimpleXlsxReportConfiguration
 //
 
 import utilities.N2T
+import utilities.Utility
 
 case class Soli(soli_id: Option[Long],
                 soti_id: Option[Long],
@@ -852,27 +853,42 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
         db.withConnection { implicit connection => 
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())
-             val result: Boolean = SQL("UPDATE siap.soli SET soli_fecha = {soli_fecha}, soli_estado = {soli_estado}, usua_id = {usua_id} WHERE soli_id = {soli_id}").
+            var estado = 0
+            soli.b.soli_fecharespuesta match {
+                case Some(f) => estado = 6
+                case _ => estado = 5
+            }
+            val result: Boolean = SQL("""UPDATE siap.solicitud SET 
+                                          soli_fechainforme = {soli_fechainforme},
+                                          soli_informe = {soli_informe},
+                                          soli_fecharespuesta = {soli_fecharespuesta},
+                                          soli_respuesta = {soli_respuesta},
+                                          soli_estado = {soli_estado},
+                                          usua_id = {usua_id} WHERE soli_id = {soli_id}""").
             on(
                'soli_id -> soli.a.soli_id,
-               'soli_fecha -> soli.a.soli_fecha,
-               'soli_estado -> soli.b.soli_estado,
+               'soli_fechainforme -> soli.b.soli_fechainforme,
+               'soli_informe -> soli.a.soli_informe,
+               'soli_fecharespuesta -> soli.b.soli_fecharespuesta,
+               'soli_respuesta -> soli.a.soli_respuesta,
+               'soli_estado -> estado,
                'usua_id -> soli.b.usua_id 
             ).executeUpdate() > 0
 
             if (soli_ant != None){
-                if (soli_ant.get.a.soli_fecha != soli.a.soli_fecha){
+                if (soli_ant.get.b.soli_fechainforme != soli.b.soli_fechainforme){
                 SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
-                on(
-                    'audi_fecha -> fecha,
-                    'audi_hora -> hora,
-                    'usua_id -> soli.b.usua_id,
-                    'audi_tabla -> "soli", 
-                    'audi_uid -> soli.a.soli_id,
-                    'audi_campo -> "soli_fecha", 
-                    'audi_valorantiguo -> soli_ant.get.a.soli_fecha,
-                    'audi_valornuevo -> soli.a.soli_fecha,
-                    'audi_evento -> "A").
+                    on(
+                        'audi_fecha -> fecha,
+                        'audi_hora -> hora,
+                        'usua_id -> soli.b.usua_id,
+                        'audi_tabla -> "solicitud", 
+                        'audi_uid -> soli.a.soli_id,
+                        'audi_campo -> "soli_fechainforme", 
+                        'audi_valorantiguo -> soli_ant.get.b.soli_fechainforme,
+                        'audi_valornuevo -> soli.b.soli_fechainforme,
+                        'audi_evento -> "A"
+                    ).
                     executeInsert()                    
                 }
 
@@ -1171,7 +1187,7 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
     * @param soli_id: scala.Long
     * @return OutputStream
     */
-    def cartaRTE(soli_id: scala.Long, con_firma: Boolean, empr_id: scala.Long): Array[Byte] = {
+    def imprimirRespuesta(soli_id: scala.Long, empr_id: scala.Long, con_firma: Int): Array[Byte] = {
         var os = Array[Byte]()
         var firma: InputStream = null
 
@@ -1180,24 +1196,35 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
               buscarPorId(soli_id) match {
                 case Some(s) =>
                                     var compiledFile = ""
+                                    var gerente = ""
+                                    var ciudad = empresa.muni_descripcion.get
+                                    ciudad = ciudad.toLowerCase.capitalize
                                     s.b.soli_aprobada match {  
                                         case Some(true) => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_aprobada.jasper"
+                                                           println("Obteniendo la Firma...")
                                                            firma = this.getClass.getResourceAsStream(REPORT_DEFINITION_PATH + "firma.png")
                                         case Some(false) => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_negada.jasper"
                                         case None => None
                                     }
+                                    generalService.buscarPorId(4, empr_id).map { g =>
+                                        gerente = g.gene_valor.get
+                                    }
                                     var reportParams = new HashMap[String, java.lang.Object]()
                                     reportParams.put("SOLI_ID", new java.lang.Long(soli_id.longValue()))
                                     reportParams.put("EMPR_SIGLA", empresa.empr_sigla)
-                                    reportParams.put("CIUDAD_LARGA", empresa.muni_descripcion)
-                                    reportParams.put("FECHA_LARGA", empresa.empr_sigla)
-                                    reportParams.put("CODIGO_RESPUESTA", s.b.soli_codigorespuesta)
-                                    reportParams.put("CIUDAD_CORTA", empresa.muni_descripcion)
-                                    reportParams.put("FECHA_RADICADO_LARGA", empresa.empr_sigla)
+                                    reportParams.put("CIUDAD_LARGA", ciudad)
+                                    reportParams.put("FECHA_LARGA", Utility.fechaatexto(s.b.soli_fecharespuesta))
+                                    reportParams.put("CODIGO_RESPUESTA", s.b.soli_codigorespuesta.get)
+                                    reportParams.put("CIUDAD_CORTA", ciudad)
+                                    reportParams.put("FECHA_RADICADO_LARGA", Utility.fechaatexto(s.a.soli_fecha))
                                     reportParams.put("LUMINARIAS_LETRAS", N2T.convertirLetras(s.b.soli_luminarias.get))
-                                    reportParams.put("GERENTE", generalService.buscarPorId(4, empr_id))
-                                    reportParams.put("FIRMA", firma)
-                                    os = JasperRunManager.runReportToPdf(compiledFile, reportParams, connection)
+                                    reportParams.put("GERENTE", gerente)
+                                    if (con_firma == 1) {
+                                        reportParams.put("FIRMA", firma)
+                                    } else {
+                                        reportParams.put("FIRMA", null)
+                                    }
+                                    os = JasperRunManager.runReportToPdfStream(compiledFile, os, reportParams, connection)
                  case None => os = new Array[Byte](0)
              }
            }

@@ -156,3 +156,15 @@ export function imprimirFormatoRTE(soli_id, empr_id) {
   const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + ':9091/api' + '/soli/frte/' + data.soli_id + '/' + data.empr_id + '/' + token
   window.open(url, '_blank', 'location=no, menubar=no')
 }
+
+export function imprimirRespuestaSolicitud(soli_id, empr_id, firma) {
+  const data = {
+    soli_id,
+    empr_id,
+    firma
+  }
+  const token = '43f44388-5cd1-4657-9f7e-ea4e014e9333'
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + ':9091/api' + '/soli/frs/' + data.soli_id + '/' + data.empr_id + '/' + data.firma + '/' + token
+  window.open(url, '_blank', 'location=no, menubar=no')
+}
+

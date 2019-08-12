@@ -4097,7 +4097,7 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
                         _listMerged += CellRange((2,2), (0,3))
                         _listMerged.toList
                     }
-                    val _mParser = int("medi_id") ~ str("medi_numero") ~ str("medi_direccion") ~ str("aacu_descripcion") ~ int("cantidad") map { case a ~ b ~ c ~ d ~ e => (a,b,c,d,e) }
+                    val _mParser = get[Option[Int]]("medi_id") ~ get[Option[String]]("medi_numero") ~ get[Option[String]]("medi_direccion") ~ get[Option[String]]("aacu_descripcion") ~ get[Option[Int]]("cantidad") map { case a ~ b ~ c ~ d ~ e => (a,b,c,d,e) }
                     val resultSet = SQL("""SELECT m.medi_id, m.medi_numero, m.medi_direccion, ac.aacu_descripcion, COUNT(a.*) AS cantidad FROM siap.medidor m
                                  LEFT JOIN siap.aap_medidor am ON am.medi_id = m.medi_id AND am.empr_id = m.empr_id
                                  LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = m.aacu_id
@@ -4117,15 +4117,15 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
                             var j = 2
                             val rows = resultSet.map { med => 
                                 j+=1
-                                val link = new HyperLinkUrl(med._2, "#M" +med._2)
+                                val link = new HyperLinkUrl(med._2 match { case Some(m) => m case None => "" }, "#M" + (med._2 match { case Some(m) => m case None => "" }))
                                 com.norbitltd.spoiwo.model.Row(
                                     HyperLinkUrlCell(link ,Some(0), style = Some(CellStyle( dataFormat = CellDataFormat("@"))), CellStyleInheritance.CellThenRowThenColumnThenSheet
                                     ),
-                                    StringCell(med._3 ,Some(1), style = Some(CellStyle( dataFormat = CellDataFormat("@"))), CellStyleInheritance.CellThenRowThenColumnThenSheet
+                                    StringCell(med._3 match { case Some(m) => m case None => "" } ,Some(1), style = Some(CellStyle( dataFormat = CellDataFormat("@"))), CellStyleInheritance.CellThenRowThenColumnThenSheet
                                     ),
-                                    StringCell(med._4 ,Some(2), style = Some(CellStyle( dataFormat = CellDataFormat("@"))), CellStyleInheritance.CellThenRowThenColumnThenSheet
+                                    StringCell(med._4 match { case Some(m) => m case None => "" } ,Some(2), style = Some(CellStyle( dataFormat = CellDataFormat("@"))), CellStyleInheritance.CellThenRowThenColumnThenSheet
                                     ),
-                                    NumericCell(med._5 ,Some(3), style = Some(CellStyle( dataFormat = CellDataFormat("#0"))), CellStyleInheritance.CellThenRowThenColumnThenSheet
+                                    NumericCell(med._5.get ,Some(3), style = Some(CellStyle( dataFormat = CellDataFormat("#0"))), CellStyleInheritance.CellThenRowThenColumnThenSheet
                                     ),
                                 )
                             }
@@ -4137,7 +4137,7 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
                     _listSheet += sheet1
                     resultSet.map { m =>
                         val fmt = DateTimeFormat.forPattern("yyyyMMdd")
-                        val sheet = Sheet(name="M" + m._2,
+                        val sheet = Sheet(name="M" + (m._2 match { case Some(m) => m case None => ""}),
                             rows = { 
                                 val headerRow = com.norbitltd.spoiwo.model.Row().withCellValues("Código",
                                                                      "Apoyo", 

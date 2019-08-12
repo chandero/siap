@@ -100,6 +100,26 @@
               </el-form-item>
             </el-col>
           </el-row>
+          <el-row>
+            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+              <el-form-item :label="$t('solicitud.aprobado')">
+                <el-checkbox v-model="solicitud.b.soli_aprobada" />
+              </el-form-item>
+            </el-col>            
+            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+              <el-form-item v-if="solicitud.b.soli_aprobada" :label="$t('solicitud.tipo_expansion.title')">
+                <el-select clearable :title="$t('solicitud.tipo_expansion.select')" style="width: 80%" ref="tipo" v-model="solicitud.b.soli_tipoexpansion" name="tipo_expansion" :placeholder="$t('solicitud.tipo_expansion.select')">
+                  <el-option v-for="te in tipos_expansion" :key="te.tiex_id" :label="te.tiex_descripcion" :value="te.tiex_id" >
+                  </el-option>   
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+              <el-form-item v-if="solicitud.b.soli_aprobada" :label="$t('solicitud.numero_luminarias')">
+                <el-input type="number" v-model="solicitud.b.soli_luminarias" @input="solicitud.b.soli_luminarias = parseInt($event)" />
+              </el-form-item>
+            </el-col>
+          </el-row>
          </el-collapse-item>                 
          <el-collapse-item v-if="solicitud.b.soli_estado >= 4" name="2" title="Informe">
           <el-row :gutter="4">
@@ -307,6 +327,11 @@ export default {
           soli_fecharte: null,
           soli_fechaalmacen: null,
           soli_numerorte: null,
+          soli_puntos: null,
+          soli_tipoexpansion: null,
+          soli_aprobada: true,
+          soli_codigorespuesta: null,
+          soli_luminarias: null,
           soli_estado: null,
           empr_id: null,
           usua_id: null
@@ -342,7 +367,7 @@ export default {
           soli_numerorte: null,
           soli_puntos: null,
           soli_tipoexpansion: null,
-          soli_aprobada: null,
+          soli_aprobada: true,
           soli_codigorespuesta: null,
           soli_luminarias: null,
           soli_estado: null,

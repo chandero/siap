@@ -178,7 +178,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import { getSolicitudesRango, deleteSolicitud, entregarSupervisor, entregarFormatoRTE, imprimirFormatoRTE } from '@/api/solicitud'
+import { getSolicitudesRango, deleteSolicitud, entregarSupervisor, entregarFormatoRTE, imprimirFormatoRTE, imprimirRespuestaSolicitud } from '@/api/solicitud'
 import { getBarriosEmpresa } from '@/api/barrio'
 
 export default {
@@ -362,31 +362,14 @@ export default {
     },
     handleRespuesta(index, row) {
       console.log('ingresar respuesta')
-      this.$confirm('Continuar con la Respuesta Solicitud Radicado No.' + row.soli_radicado, 'Respuesta', {
-        confirmButtonText: 'Continuar',
-        cancelButtonText: 'Cancelar',
+      this.$confirm('Desea Incluir la Firma de Gerencia?', 'Respuesta', {
+        confirmButtonText: 'No',
+        cancelButtonText: 'Sí',
         customClass: 'infoclass'
       }).then(() => {
-        this.$router.push({ path: '/solicitud/edit' + row.a.soli_id })
-        /* ingresarRespuesta(row.soli_id, info.value).then(response => {
-          if (response.status === 200) {
-            row.soli_estado = 4
-            this.$message({
-              type: 'info',
-              message: 'Respuesta Guardada'
-            })
-          } else {
-            this.$message({
-              type: 'warning',
-              message: 'No se pudo Guardar la Respuesta'
-            })
-          }
-        }) */
+        imprimirRespuestaSolicitud(row.a.soli_id, row.b.empr_id, 0)
       }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: 'Respuesta Cancelada'
-        })
+        imprimirRespuestaSolicitud(row.a.soli_id, row.b.empr_id, 1)
       })
     },
     handleDelete(index, row) {

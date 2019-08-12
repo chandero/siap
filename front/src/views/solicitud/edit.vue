@@ -100,6 +100,26 @@
               </el-form-item>
             </el-col>
           </el-row>
+                    <el-row>
+            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+              <el-form-item :label="$t('solicitud.aprobado')">
+                <el-checkbox disabled v-model="solicitud.b.soli_aprobada" />
+              </el-form-item>
+            </el-col>            
+            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+              <el-form-item v-if="solicitud.b.soli_aprobada" :label="$t('solicitud.tipo_expansion.title')">
+                <el-select disabled clearable :title="$t('solicitud.tipo_expansion.select')" style="width: 80%" ref="tipo" v-model="solicitud.b.soli_tipoexpansion" name="tipo_expansion" :placeholder="$t('solicitud.tipo_expansion.select')">
+                  <el-option v-for="te in tipos_expansion" :key="te.tiex_id" :label="te.tiex_descripcion" :value="te.tiex_id" >
+                  </el-option>   
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+              <el-form-item v-if="solicitud.b.soli_aprobada" :label="$t('solicitud.numero_luminarias')">
+                <el-input readonly type="number" v-model="solicitud.b.soli_luminarias" @input="solicitud.b.soli_luminarias = parseInt($event)" />
+              </el-form-item>
+            </el-col>
+          </el-row>
          </el-collapse-item>                 
          <el-collapse-item v-if="solicitud.b.soli_estado >= 3" name="2" title="Informe">
           <el-row :gutter="4">
@@ -113,26 +133,6 @@
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
               <el-form-item :label="$t('solicitud.informe')">
                 <el-input type="textarea" :rows="5" name="informe" v-model="solicitud.a.soli_informe"></el-input>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-              <el-form-item :label="$t('solicitud.aprobado')">
-                <el-checkbox v-model="solicitud.b.soli_aprobada" />
-              </el-form-item>
-            </el-col>            
-            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-              <el-form-item v-if="solicitud.b.soli_aprobada" :label="$t('solicitud.tipo_expansion.title')">
-                <el-select clearable :title="$t('solicitud.tipo_expansion.select')" style="width: 80%" ref="tipo" v-model="solicitud.b.soli_tipoexpansion" name="tipo_expansion" :placeholder="$t('solicitud.tipo_expansion.select')">
-                  <el-option v-for="te in tipos_expansion" :key="te.tiex_id" :label="te.tiex_descripcion" :value="te.tiex_id" >
-                  </el-option>   
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-              <el-form-item v-if="solicitud.b.soli_aprobada" :label="$t('solicitud.numero_luminarias')">
-                <el-input type="number" v-model="solicitud.b.soli_luminarias" @input="solicitud.b.soli_luminarias = parseInt($event)" />
               </el-form-item>
             </el-col>
           </el-row>
@@ -167,7 +167,7 @@
   </el-container>
 </template>
 <script>
-import { asignarRteSolicitud, getSolicitud, getSolicitudPorRadicado } from '@/api/solicitud'
+import { updateSolicitud, getSolicitud, getSolicitudPorRadicado } from '@/api/solicitud'
 import { getBarriosEmpresa } from '@/api/barrio'
 
 export default {
@@ -328,7 +328,7 @@ export default {
     },
     aplicar() {
       this.confirmacionGuardar = false
-      asignarRteSolicitud(this.solicitud.a.soli_id, this.solicitud.b.soli_fechaalmacen.getTime(), this.solicitud.b.soli_numerorte).then(response => {
+      updateSolicitud(this.solicitud).then(response => {
         if (response.status === 200) {
           this.success()
         }
@@ -337,8 +337,8 @@ export default {
       })
     },
     validate() {
-      if (this.solicitud.b.soli_fechaalmacen &&
-          this.solicitud.b.soli_numerorte) {
+      if (this.solicitud.b.soli_fechainforme &&
+          this.solicitud.a.soli_informe) {
         return true
       } else {
         return false

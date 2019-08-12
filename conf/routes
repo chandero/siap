@@ -90,6 +90,7 @@ GET     /api/soli/arte/:id/:f/:n        controllers.SolicitudController.asignarR
 POST    /api/soli/inin                  controllers.SolicitudController.ingresarInforme
 POST    /api/soli/inre                  controllers.SolicitudController.ingresarRespuesta
 GET     /api/soli/frte/:id/:e/:t        controllers.SolicitudController.formatoRTE(id: Long, e: Long, t: String)
+GET     /api/soli/frs/:id/:e/:f/:t      controllers.SolicitudController.imprimirRespuesta(id: Long, e: Long, f:Int, t: String)
 
 # Tipo Solicitud
 GET     /api/soti/get/:p/:c             controllers.SolicitudTipoController.todos(p:Long, c:Long)
