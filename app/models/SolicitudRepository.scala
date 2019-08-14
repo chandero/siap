@@ -5,6 +5,7 @@ import java.util.Calendar
 import java.util.{ Map, HashMap }
 import java.io.InputStream
 import java.io.FileInputStream
+import java.net.URL
 
 import play.api.libs.json._
 import play.api.libs.json.JodaReads
@@ -1189,7 +1190,6 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
     */
     def imprimirRespuesta(soli_id: scala.Long, empr_id: scala.Long, con_firma: Int): Array[Byte] = {
         var os = Array[Byte]()
-        var firma: InputStream = null
 
         db.withConnection { implicit connection => 
           empresaService.buscarPorId(empr_id).map { empresa =>
@@ -1198,18 +1198,24 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                     var compiledFile = ""
                                     var gerente = ""
                                     var ciudad = empresa.muni_descripcion.get
+                                    var reportParams = new HashMap[String, java.lang.Object]()
                                     ciudad = ciudad.toLowerCase.capitalize
                                     s.b.soli_aprobada match {  
                                         case Some(true) => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_aprobada.jasper"
-                                                           println("Obteniendo la Firma...")
-                                                           firma = this.getClass.getResourceAsStream(REPORT_DEFINITION_PATH + "firma.png")
+                                                           if (con_firma == 1) {
+                                                             val firma:URL = new URL("file", "localhost", REPORT_DEFINITION_PATH + "firma.png")
+                                                             println("URL Firma : " + firma)
+                                                             reportParams.put("FIRMA", firma)
+                                                           } else {
+                                                             reportParams.put("FIRMA", "")
+                                                           }
                                         case Some(false) => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_negada.jasper"
                                         case None => None
                                     }
                                     generalService.buscarPorId(4, empr_id).map { g =>
                                         gerente = g.gene_valor.get
                                     }
-                                    var reportParams = new HashMap[String, java.lang.Object]()
+                                    
                                     reportParams.put("SOLI_ID", new java.lang.Long(soli_id.longValue()))
                                     reportParams.put("EMPR_SIGLA", empresa.empr_sigla)
                                     reportParams.put("CIUDAD_LARGA", ciudad)
@@ -1219,12 +1225,7 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                     reportParams.put("FECHA_RADICADO_LARGA", Utility.fechaatexto(s.a.soli_fecha))
                                     reportParams.put("LUMINARIAS_LETRAS", N2T.convertirLetras(s.b.soli_luminarias.get))
                                     reportParams.put("GERENTE", gerente)
-                                    if (con_firma == 1) {
-                                        reportParams.put("FIRMA", firma)
-                                    } else {
-                                        reportParams.put("FIRMA", null)
-                                    }
-                                    os = JasperRunManager.runReportToPdfStream(compiledFile, os, reportParams, connection)
+                                    os = JasperRunManager.runReportToPdf(compiledFile, reportParams, connection)
                  case None => os = new Array[Byte](0)
              }
            }
