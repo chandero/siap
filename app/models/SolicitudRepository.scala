@@ -1200,6 +1200,14 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                     var ciudad = empresa.muni_descripcion.get
                                     var reportParams = new HashMap[String, java.lang.Object]()
                                     ciudad = ciudad.toLowerCase.capitalize
+                                    val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+                                    val count:Long = SQL("UPDATE siap.solicitud SET soli_fecharespuesta = {soli_fecharespuesta}, soli_estado = {soli_estado} WHERE soli_id = {soli_id} and empr_id = {empr_id}").
+                                    on(
+                                        'soli_id -> soli_id,
+                                        'empr_id -> empr_id,
+                                        'soli_fecharespuesta -> hora,
+                                        'soli_estado -> 4
+                                    ).executeUpdate()
                                     s.b.soli_aprobada match {  
                                         case Some(true) => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_aprobada.jasper"
                                                            if (con_firma == 1) {
@@ -1207,7 +1215,9 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                                              println("URL Firma : " + firma)
                                                              reportParams.put("FIRMA", firma)
                                                            } else {
-                                                             reportParams.put("FIRMA", "")
+                                                            val firma:URL = new URL("file", "localhost", REPORT_DEFINITION_PATH + "blanco.png")
+                                                            println("URL Firma : " + firma)
+                                                            reportParams.put("FIRMA", firma)
                                                            }
                                         case Some(false) => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_negada.jasper"
                                         case None => None
