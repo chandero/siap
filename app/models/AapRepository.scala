@@ -933,7 +933,7 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
         LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
         LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
         LEFT JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
-        WHERE a.esta_id <> 9 and a.empr_id = {empr_id} 
+        WHERE a.empr_id = {empr_id} 
       """
       if (!filter.isEmpty){
           query = query + " and " + filter
@@ -977,12 +977,13 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                                 a.aacu_id, 
                                 a.aaco_id,
                                 b.barr_descripcion,
-                                t.tiba_descripcion  
+                                t.tiba_descripcion,
+                                a.esta_id
                         FROM siap.aap a
                         LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
                         LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
                         LEFT JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
-                        WHERE a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999"""
+                        WHERE a.empr_id = {empr_id} and a.aap_id <> 9999999"""
                     if (!filter.isEmpty) {
                         query = query + " and " + filter
                     }
@@ -1047,14 +1048,15 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                                 aacu_id, 
                                 aaco_id,
                                 barr_descripcion,
-                                tiba_descripcion
+                                tiba_descripcion,
+                                a.esta_id
                         FROM siap.aap a
                         LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
                         LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
                         LEFT JOIN siap.empresa e ON a.empr_id = e.empr_id
                         LEFT JOIN siap.municipio m on e.muni_id = m.muni_id
                         LEFT JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
-                        WHERE a.empr_id = {empr_id} and esta_id <> 9 """
+                        WHERE a.empr_id = {empr_id} and a.aap_id <> 9999999 """
 
                     if (!filter.isEmpty) {
                         query = query + " and " + filter

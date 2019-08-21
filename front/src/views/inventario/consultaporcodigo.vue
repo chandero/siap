@@ -508,8 +508,62 @@ export default {
         })
     },
     validate() {
-      if (this.activo.aap.aap_direccion && this.activo.aap.barr_id) {
-        return true
+      if (
+        this.activo.aap.aap_id &&
+        this.activo.aap.aap_direccion &&
+        this.activo.aap.barr_id &&
+        this.activo.aap.aap_fechatoma &&
+        this.activo.aap.aama_id &&
+        this.activo.aap.aamo_id &&
+        this.activo.aap.aatc_id &&
+        this.activo.aap.aaus_id &&
+        this.activo.aap.aaco_id &&
+        this.activo.aap.aacu_id &&
+        this.activo.aap_adicional.aap_tecnologia &&
+        this.activo.aap_adicional.aap_potencia &&
+        this.activo.aap_adicional.tipo_id &&
+        this.activo.aap_adicional.aap_poste_altura &&
+        this.activo.aap_adicional.aap_poste_propietario &&
+        this.activo.aap_adicional.aap_brazo !== null &&
+        this.activo.aap_adicional.aap_collarin !== null
+      ) {
+        if (
+          this.activo.aap_adicional.aap_tecnologia === 'SODIO' ||
+          this.activo.aap_adicional.aap_tecnologia === 'METAL HALIDE'
+        ) {
+          if (
+            this.activo.aap_elemento.aap_bombillo !== null &&
+            this.activo.aap_elemento.aap_balasto !== null &&
+            this.activo.aap_elemento.aap_arrancador !== null &&
+            this.activo.aap_elemento.aap_condensador !== null &&
+            this.activo.aap_elemento.aap_fotocelda !== null &&
+            this.activo.aap_elemento.aap_bombillo !== '' &&
+            this.activo.aap_elemento.aap_balasto !== '' &&
+            this.activo.aap_elemento.aap_arrancador !== '' &&
+            this.activo.aap_elemento.aap_condensador !== '' &&
+            this.activo.aap_elemento.aap_fotocelda !== ''
+          ) {
+            if (
+              this.activo.aap.aaco_id === 2 &&
+              this.activo.aame.medi_id == null
+            ) {
+              return false
+            } else {
+              return true
+            }
+          } else {
+            return false
+          }
+        } else {
+          if (
+            this.activo.aap_elemento.aap_fotocelda !== null &&
+            this.activo.aap_elemento.aap_fotocelda !== ''
+          ) {
+            return true
+          } else {
+            return false
+          }
+        }
       } else {
         return false
       }

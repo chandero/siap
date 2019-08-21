@@ -4,16 +4,16 @@
           <span>{{ $t('route.gestionedit') }}</span>
       </el-header>
       <el-main>
-        <el-form :label-position="labelPosition">
+        <el-form ref="form" :label-position="labelPosition" v-model="activo">
           <el-collapse v-model="activePages" @change="handleActivePagesChange">
           <el-collapse-item name="1" :title="$t('gestion.codes')">
            <el-row :gutter="4">
              <el-col :span="12">
-               <el-form-item :label="$t('gestion.code')">
-                <el-input type="number" v-model="activo.aap.aap_id" @input="activo.aap.aap_id = parseInt($event)" ref="code" @keyup.enter.native="changeFocus('support')"></el-input>
+               <el-form-item prop="aap.aap_id" :label="$t('gestion.code')">
+                <el-input readonly type="number" v-model="activo.aap.aap_id" @input="activo.aap.aap_id = parseInt($event)" ref="code" @keyup.enter.native="changeFocus('support')"></el-input>
                </el-form-item>
              </el-col>
-             <el-col :span="12"><el-form-item :label="$t('gestion.support')">
+             <el-col :span="12"><el-form-item prop="aap.aap_apoyo" :label="$t('gestion.support')">
                       <el-input v-model="activo.aap.aap_apoyo" autofocus ref="support" @keyup.enter.native="changeFocus('description')"></el-input>
                      </el-form-item> 
              </el-col>
@@ -27,31 +27,31 @@
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="24" :md="14" :lg="14" :xl="14">
-                <el-form-item :label="$t('gestion.address')">
+                <el-form-item prop="aap.aap_direccion" :label="$t('gestion.address')"  >
                  <el-input ref="address" v-model="activo.aap.aap_direccion"  @keyup.enter.native="changeFocus('neighborhood')">
-                  <el-select filterable clearable ref="neighborhood" slot="append" v-model="activo.aap.barr_id" name="barrio" :placeholder="$t('barrio.select')"  style="width:180px;" @change="changeFocus('latitude')">
-                    <el-option v-for="barrio in barrios" :key="barrio.barr_id" :label="barrio.barr_descripcion" :value="barrio.barr_id" >
-                    </el-option>   
-                  </el-select>
+                    <el-select filterable clearable ref="neighborhood" slot="append" v-model="activo.aap.barr_id" name="barrio" :placeholder="$t('barrio.select')"  style="width:180px;" @change="changeFocus('latitude')">
+                      <el-option v-for="barrio in barrios" :key="barrio.barr_id" :label="barrio.barr_descripcion" :value="barrio.barr_id" >
+                      </el-option>   
+                    </el-select>
                  </el-input>
                 </el-form-item>
               </el-col>
             </el-row>
             <el-row :gutter="4">
               <el-col :span="12">
-                <el-form-item :label="$t('gestion.lat')">
+                <el-form-item prop="aap.aap_lat" :label="$t('gestion.lat')">
                   <el-input ref="latitude" v-model="activo.aap.aap_lat" @keyup.enter.native="changeFocus('longitude')" @focus="$event.target.select()"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item :label="$t('gestion.lng')">
+                <el-form-item prop="aap.aap_lng" :label="$t('gestion.lng')">
                  <el-input ref="longitude" v-model="activo.aap.aap_lng" @keyup.enter.native="changeFocus('gettime')" @focus="$event.target.select()"></el-input>
                 </el-form-item>
               </el-col>
             </el-row>
             <el-row>
               <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                <el-form-item :label="$t('gestion.gettime')">
+                <el-form-item prop="aap.aap_fechatoma" :label="$t('gestion.gettime')"  >
                   <el-date-picker ref="gettime"
                                   v-model="activo.aap.aap_fechatoma"
                                   type="date"
@@ -61,7 +61,7 @@
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                <el-form-item :label="$t('gestion.brand')">
+                <el-form-item prop="aap.aama_id" :label="$t('gestion.brand')" >
                   <el-select clearable ref="brand" v-model="activo.aap.aama_id" name="brand" :placeholder="$t('brand.select')" @change="changeFocus('model')">
                     <el-option v-for="aapmarca in aap_marcas" :key="aapmarca.aama_id" :label="aapmarca.aama_descripcion" :value="aapmarca.aama_id" >
                     </el-option>       
@@ -69,7 +69,7 @@
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                <el-form-item :label="$t('gestion.model')">
+                <el-form-item prop="aap.aamo_id" :label="$t('gestion.model')" >
                   <el-select clearable ref="model" v-model="activo.aap.aamo_id" name="model" :placeholder="$t('model.select')" @change="changeFocus('cover')">
                     <el-option v-for="aapmodel in aap_modelos" :key="aapmodel.aamo_id" :label="aapmodel.aamo_descripcion" :value="aapmodel.aamo_id" >
                     </el-option>       
@@ -87,7 +87,7 @@
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="12" :md="6" :lg="6" :xl="6">
-                <el-form-item :label="$t('gestion.use')">
+                <el-form-item prop="uso" :label="$t('gestion.use')"  >
                   <el-select clearable ref="use" v-model="activo.aap.aaus_id" name="use" :placeholder="$t('use.select')" @change="changeFocus('connection')">
                     <el-option v-for="aapuso in aap_usos" :key="aapuso.aaus_id" :label="aapuso.aaus_descripcion" :value="aapuso.aaus_id" >
                     </el-option>       
@@ -95,7 +95,7 @@
                 </el-form-item>
               </el-col> 
               <el-col :xs="24" :sm="12" :md="6" :lg="6" :xl="6">
-                <el-form-item :label="$t('gestion.connection.title')">
+                <el-form-item prop="medida" :label="$t('gestion.connection.title')"  >
                  <el-select clearable ref="connection" v-model="activo.aap.aaco_id" name="conexion" :placeholder="$t('gestion.connection.select')" @change="validateConnection()">
                   <el-option v-for="aap_conexion in aap_conexiones" :key="aap_conexion.aaco_id" :label="aap_conexion.aaco_descripcion" :value="aap_conexion.aaco_id" >
                   </el-option>       
@@ -121,7 +121,7 @@
             </el-row>
             <el-row :gutter="4">
               <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                <el-form-item :label="$t('gestion.tecnology.title')">
+                <el-form-item prop="tecnologia" :label="$t('gestion.tecnology.title')"  >
                   <el-select clearable ref="tecnology" v-model="activo.aap_adicional.aap_tecnologia" name="tecnology" :placeholder="$t('gestion.tecnology.select')">
                     <el-option v-for="tecno in tecnologias" :key="tecno" :label="tecno" :value="tecno" >
                     </el-option>       
@@ -129,7 +129,7 @@
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
-                <el-form-item :label="$t('gestion.power.title')">
+                <el-form-item prop="potencia" :label="$t('gestion.power.title')"  >
                   <el-select clearable ref="power" v-model="activo.aap_adicional.aap_potencia" name="power" :placeholder="$t('gestion.power.select')">
                     <el-option v-for="power in potencias" :key="parseFloat(power)" :label="power" :value="parseFloat(power)" >
                     </el-option>       
@@ -214,7 +214,7 @@
           <el-collapse-item name="3" :title="$t('gestion.additional')">
             <el-row :gutter="4">
               <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                <el-form-item :label="$t('gestion.account')">
+                <el-form-item prop="cuenta" :label="$t('gestion.account')"  >
                  <el-select clearable ref="account" v-model="activo.aap.aacu_id" name="account" :placeholder="$t('account.select')" @change="changeFocus('modern')">
                   <el-option v-for="aapcuentaap in aap_cuentasap" :key="aapcuentaap.aacu_id" :label="aapcuentaap.aacu_descripcion" :value="aapcuentaap.aacu_id" >
                   </el-option>       
@@ -457,8 +457,41 @@ export default {
         })
     },
     validate() {
-      if (this.activo.aap.aap_direccion && this.activo.aap.barr_id) {
-        return true
+      if (this.activo.aap.aap_id &&
+          this.activo.aap.aap_direccion &&
+          this.activo.aap.barr_id &&
+          this.activo.aap.aap_fechatoma &&
+          this.activo.aap.aama_id &&
+          this.activo.aap.aamo_id &&
+          this.activo.aap.aatc_id &&
+          this.activo.aap.aaus_id &&
+          this.activo.aap.aaco_id &&
+          this.activo.aap.aacu_id &&
+          this.activo.aap_adicional.aap_tecnologia &&
+          this.activo.aap_adicional.aap_potencia &&
+          this.activo.aap_adicional.tipo_id &&
+          this.activo.aap_adicional.aap_poste_altura &&
+          this.activo.aap_adicional.aap_poste_propietario &&
+          this.activo.aap_adicional.aap_brazo &&
+          this.activo.aap_adicional.aap_collarin) {
+        if (this.activo.aap_adicional.aap_tecnologia === 'SODIO' || this.activo.aap_adicional.aap_tecnologia === 'METAL HALIDE') {
+          if (this.activo.aap_elemento.aap_bombillo !== null && this.activo.aap_elemento.aap_balasto !== null && this.activo.aap_elemento.aap_arrancador !== null && this.activo.aap_elemento.aap_condensador !== null && this.activo.aap_elemento.aap_fotocelda !== null &&
+              this.activo.aap_elemento.aap_bombillo !== '' && this.activo.aap_elemento.aap_balasto !== '' && this.activo.aap_elemento.aap_arrancador !== '' && this.activo.aap_elemento.aap_condensador !== '' && this.activo.aap_elemento.aap_fotocelda !== '') {
+            if (this.activo.aap.aaco_id === 2 && this.activo.aame.medi_id == null) {
+              return false
+            } else {
+              return true
+            }
+          } else {
+            return false
+          }
+        } else {
+          if (this.activo.aap_elemento.aap_fotocelda !== null && this.activo.aap_elemento.aap_fotocelda !== '') {
+            return true
+          } else {
+            return false
+          }
+        }
       } else {
         return false
       }

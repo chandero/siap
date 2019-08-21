@@ -3515,7 +3515,7 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
                         'zperiodo -> periodo                        
                     ).executeUpdate()
             }                                    
-
+            println("Por Expansion")
             val _qcargaPorExpansion = """
             SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
             (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
@@ -3555,6 +3555,7 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
                 println("Lineas Expansion Actualizadas: " + updated)
             }
 
+            println("Por Reubicacion")
             val _qcargaPorReubicacion = """
             SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
             (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
@@ -3594,6 +3595,7 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
                     println("Lineas Reubicación Actualizadas: " + updated)
                 }
 
+            println("Por Repotenciacion")
             val _qcargaPorRepotenciacion = """
             SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
             (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
@@ -3633,6 +3635,7 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
                     println("Lineas Repotenciacion Actualizadas: " + updated)
                 }
 
+            println("Por Actualizacion")
             val _qcargaPorActualizacion = """
             SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
             (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
@@ -3671,6 +3674,8 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
                     ).executeUpdate()
                     println("Lineas Actualización Actualizadas: " + updated)
                 }
+
+            println("Por Modernizacion")
 
             val _qcargaPorModernizacion = """
             SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
@@ -3711,6 +3716,8 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
                 println("Lineas Modernización Actualizadas: " + updated)
             }
 
+            println("Por Reposicion")
+
             val _qcargaPorReposicion = """
             SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
             (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
@@ -3749,6 +3756,9 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
                 ).executeUpdate()
                 println("Lineas Reposición Actualizadas: " + updated)
             }
+
+
+            println("Por Retiro")
 
             val _qcargarPorRetiro = """
             SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from

@@ -188,12 +188,18 @@
               type="warning"
               @click="handleEdit(scope.$index, scope.row)"
               title="Modificar Luminaria"><i class="el-icon-edit"></i></el-button>
-            <el-button
+            <el-button v-if="scope.row.esta_id !== 9"
               size="mini"
               circle
               type="danger"
               title="Borrar Luminaria"
               @click="handleDelete(scope.$index, scope.row)"><i class="el-icon-delete"></i></el-button>
+            <el-button v-if="scope.row.esta_id === 9"
+              size="mini"
+              circle
+              type="success"
+              title="Recuperar Luminaria"
+              @click="handleDelete(scope.$index, scope.row)"><i class="el-icon-refresh-left"></i></el-button>              
           </template>
         </el-table-column>
       </el-table> 
@@ -252,6 +258,7 @@ export default {
       qtecnologias: [{ label: this.$i18n.t('gestion.tecnology.select'), value: '' }],
       qtiposluminaria: [{ label: this.$i18n.t('cover.select'), value: '' }],
       qmodelos: [{ label: this.$i18n.t('model.select'), value: '' }],
+      qestado: [{ label: 'Seleccione el Estado', value: '' }],
       tipobarrio_filters: [],
       barrios_filters: [],
       potencias: [],
@@ -319,6 +326,16 @@ export default {
           id: 'a.aamo_id',
           label: this.$i18n.t('gestion.model'),
           choices: []
+        },
+        {
+          type: 'select',
+          id: 'a.esta_id',
+          label: 'Estado Actual',
+          choices: [
+            { label: 'Activa', value: 1 },
+            { label: 'Suspendida', value: 2 },
+            { label: 'Eliminada', value: 9 }
+          ]
         }
       ],
       qlabels: {
