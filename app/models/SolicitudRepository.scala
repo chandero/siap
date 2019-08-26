@@ -45,11 +45,13 @@ import utilities.Utility
 
 case class Soli(soli_id: Option[Long],
                 soti_id: Option[Long],
+                soti_descripcion: Option[String],
                 soli_fecha: Option[DateTime],
                 soli_nombre: Option[String],
                 soli_radicado: Option[String],
                 soli_direccion: Option[String],
                 barr_id: Option[Int],
+                barr_descripcion: Option[String],
                 soli_telefono: Option[String],
                 soli_email: Option[String],
                 soli_solicitud: Option[String],
@@ -71,12 +73,13 @@ case class Soli(soli_id: Option[Long],
                 soli_codigorespuesta: Option[String],
                 soli_luminarias: Option[Int],
                 soli_estado: Option[Int],
+                soli_estado_descripcion: Option[String],
                 empr_id: Option[Long],
                 usua_id: Option[Long]
                )
 
 case class SolicitudA(soli_id: Option[Long],
-                     soti_id: Option[Long],   
+                     soti_id: Option[Long],
                      soli_fecha: Option[DateTime],
                      soli_nombre: Option[String],
                      soli_radicado: Option[String],
@@ -110,6 +113,44 @@ case class SolicitudB(
 
 case class Solicitud(a: SolicitudA,
                      b: SolicitudB)
+
+case class SolicitudAR(soli_id: Option[Long],
+                     soti_id: Option[Long],
+                     soti_descripcion: Option[String],
+                     soli_fecha: Option[DateTime],
+                     soli_nombre: Option[String],
+                     soli_radicado: Option[String],
+                     soli_direccion: Option[String],
+                     barr_id: Option[Int],
+                     barr_descripcion: Option[String],
+                     soli_telefono: Option[String],
+                     soli_email: Option[String],
+                     soli_solicitud: Option[String],
+                     soli_respuesta: Option[String],
+                     soli_informe: Option[String],
+                     soli_consecutivo: Option[Int])
+
+case class SolicitudBR(
+                     soli_fecharespuesta: Option[DateTime],
+                     soli_fechadigitado: Option[DateTime],
+                     soli_fechalimite: Option[DateTime],
+                     soli_fechasupervisor: Option[DateTime],
+                     soli_fechainforme: Option[DateTime],
+                     soli_fechavisita: Option[DateTime],
+                     soli_fecharte: Option[DateTime],
+                     soli_fechaalmacen: Option[DateTime],
+                     soli_numerorte: Option[Int],
+                     soli_puntos: Option[Int],
+                     soli_tipoexpansion: Option[String],
+                     soli_aprobada: Option[Boolean],
+                     soli_codigorespuesta: Option[String],
+                     soli_luminarias: Option[Int],
+                     soli_estado: Option[Int],
+                     soli_estado_descripcion: Option[String],
+                     empr_id: Option[Long],
+                     usua_id: Option[Long])
+
+case class SolicitudR(a: SolicitudAR, b: SolicitudBR)                     
 
 object SolicitudA {
     implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -214,15 +255,126 @@ object Solicitud {
     )(Solicitud.apply _)
 }
 
+object SolicitudAR {
+    implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+
+    implicit val swWrites = new Writes[SolicitudAR] {
+        def writes(sw: SolicitudAR) = Json.obj(
+            "soli_id" -> sw.soli_id,
+            "soti_id" -> sw.soti_id, 
+            "soti_descripcion" -> sw.soti_descripcion,
+            "soli_fecha" -> sw.soli_fecha,
+            "soli_nombre" -> sw.soli_nombre,
+            "soli_radicado" -> sw.soli_radicado,
+            "soli_direccion" -> sw.soli_direccion,
+            "barr_id" -> sw.barr_id,
+            "barr_descripcion" -> sw.barr_descripcion,
+            "soli_telefono" -> sw.soli_telefono,
+            "soli_email" -> sw.soli_email,
+            "soli_solicitud" -> sw.soli_solicitud,
+            "soli_respuesta" -> sw.soli_respuesta,
+            "soli_informe" -> sw.soli_informe,
+            "soli_consecutivo" -> sw.soli_consecutivo
+        )
+    }
+
+    implicit val srReads: Reads[SolicitudAR] = (
+        (__ \ "soli_id").readNullable[Long] and
+        (__ \ "soti_id").readNullable[Long] and
+        (__ \ "soti_descripcion").readNullable[String] and
+        (__ \ "soli_fecha").readNullable[DateTime] and
+        (__ \ "soli_nombre").readNullable[String] and
+        (__ \ "soli_radicado").readNullable[String] and
+        (__ \ "soli_direccion").readNullable[String] and
+        (__ \ "barr_id").readNullable[Int] and
+        (__ \ "barr_descripcion").readNullable[String] and
+        (__ \ "soli_telefono").readNullable[String] and
+        (__ \ "soli_email").readNullable[String] and
+        (__ \ "soli_solicitud").readNullable[String] and
+        (__ \ "soli_respuesta").readNullable[String] and
+        (__ \ "soli_informe").readNullable[String] and
+        (__ \ "soli_consecutivo").readNullable[Int]
+    )(SolicitudAR.apply _)
+}
+
+object SolicitudBR {
+    implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
+
+    implicit val soliWrites = new Writes[SolicitudBR] {
+        def writes(soli: SolicitudBR) = Json.obj(
+            "soli_fecharespuesta" -> soli.soli_fecharespuesta,
+            "soli_fechadigitado" -> soli.soli_fechadigitado,
+            "soli_fechalimite" -> soli.soli_fechalimite,
+            "soli_fechasupervisor" -> soli.soli_fechasupervisor,
+            "soli_fechainforme" -> soli.soli_fechainforme,
+            "soli_fechavisita" -> soli.soli_fechavisita,
+            "soli_fecharte" -> soli.soli_fecharte,
+            "soli_fechaalmacen" -> soli.soli_fechaalmacen,
+            "soli_numerorte" -> soli.soli_numerorte,
+            "soli_puntos" -> soli.soli_puntos,
+            "soli_tipoexpansion" -> soli.soli_tipoexpansion,
+            "soli_aprobada" -> soli.soli_aprobada,
+            "soli_codigorespuesta" -> soli.soli_codigorespuesta,
+            "soli_luminarias" -> soli.soli_luminarias,
+            "soli_estado" -> soli.soli_estado,
+            "soli_estado_descripcion" -> soli.soli_estado_descripcion,
+            "empr_id" -> soli.empr_id,
+            "usua_id" -> soli.usua_id
+        )
+    }
+
+    implicit val soliReads: Reads[SolicitudBR] = (
+        (__ \ "soli_fecharespuesta").readNullable[DateTime] and
+        (__ \ "soli_fechadigitado").readNullable[DateTime] and
+        (__ \ "soli_fechalimite").readNullable[DateTime] and
+        (__ \ "soli_fechasupervisor").readNullable[DateTime] and
+        (__ \ "soli_fechainforme").readNullable[DateTime] and
+        (__ \ "soli_fechavisita").readNullable[DateTime] and
+        (__ \ "soli_fecharte").readNullable[DateTime] and
+        (__ \ "soli_fechaalmacen").readNullable[DateTime] and
+        (__ \ "soli_numerorte").readNullable[Int] and
+        (__ \ "soli_puntos").readNullable[Int] and
+        (__ \ "soli_tipoexpansion").readNullable[String] and
+        (__ \ "soli_aprobada").readNullable[Boolean] and
+        (__ \ "soli_codigorespuesta").readNullable[String] and
+        (__ \ "soli_luminarias").readNullable[Int] and
+        (__ \ "soli_estado").readNullable[Int] and
+        (__ \ "soli_estado_descripcion").readNullable[String] and
+        (__ \ "empr_id").readNullable[Long] and
+        (__ \ "usua_id").readNullable[Long]
+    )(SolicitudBR.apply _)
+}
+
+object SolicitudR {
+    implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
+
+    implicit val soliWrites = new Writes[SolicitudR] {
+        def writes(soli: SolicitudR) = Json.obj(
+            "a" -> soli.a,
+            "b" -> soli.b
+        )
+    }
+
+    implicit val soliReads: Reads[SolicitudR] = (
+        (__ \ "a").read[SolicitudAR] and
+        (__ \ "b").read[SolicitudBR]
+    )(SolicitudR.apply _)
+}
+
 object Soli {
     val _set = {
         get[Option[Long]]("soli_id") ~
         get[Option[Long]]("soti_id") ~
+        get[Option[String]]("soti_descripcion") ~
         get[Option[DateTime]]("soli_fecha") ~
         get[Option[String]]("soli_nombre") ~
         get[Option[String]]("soli_radicado") ~
         get[Option[String]]("soli_direccion") ~
         get[Option[Int]]("barr_id") ~
+        get[Option[String]]("barr_descripcion") ~
         get[Option[String]]("soli_telefono") ~
         get[Option[String]]("soli_email") ~
         get[Option[String]]("soli_solicitud") ~
@@ -244,15 +396,18 @@ object Soli {
         get[Option[String]]("soli_codigorespuesta") ~
         get[Option[Int]]("soli_luminarias") ~
         get[Option[Int]]("soli_estado") ~
+        get[Option[String]]("soli_estado_descripcion") ~        
         get[Option[Long]]("empr_id") ~ 
         get[Option[Long]]("usua_id") map {
             case soli_id ~ 
                  soti_id ~
+                 soti_descripcion ~
                  soli_fecha ~ 
                  soli_nombre ~ 
                  soli_radicado ~ 
                  soli_direccion ~
                  barr_id ~
+                 barr_descripcion ~
                  soli_telefono ~ 
                  soli_email ~ 
                  soli_solicitud ~ 
@@ -274,14 +429,17 @@ object Soli {
                  soli_codigorespuesta ~
                  soli_luminarias ~
                  soli_estado ~ 
+                 soli_estado_descripcion ~
                  empr_id ~ 
                  usua_id => Soli(soli_id,
                       soti_id,
+                      soti_descripcion,
                       soli_fecha, 
                       soli_nombre, 
                       soli_radicado, 
                       soli_direccion, 
                       barr_id,
+                      barr_descripcion,
                       soli_telefono, 
                       soli_email, 
                       soli_solicitud, 
@@ -303,6 +461,7 @@ object Soli {
                       soli_codigorespuesta,
                       soli_luminarias,
                       soli_estado, 
+                      soli_estado_descripcion,
                       empr_id, 
                       usua_id)
         }
@@ -1242,4 +1401,5 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
         }
         os
     }
+
 }

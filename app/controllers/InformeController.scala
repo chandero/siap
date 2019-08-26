@@ -269,5 +269,14 @@ class InformeController @Inject()(
    } else {
       Forbidden("Dude, you’re not logged in.")
    }
-  }  
+  }
+  
+  def siap_informe_solicitud_xls(fecha_inicial: Long, fecha_final: Long) = authenticatedUserAction.async {
+   implicit request: Request[AnyContent] =>
+   var empr_id = Utility.extraerEmpresa(request)
+   informeService.siap_informe_solicitud_xls(fecha_inicial, fecha_final, empr_id.get).map { solicitudes =>
+     Ok(Json.toJson(solicitudes))
+   }
+ }
+ 
 }

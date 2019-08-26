@@ -847,7 +847,7 @@ export default {
           ],
           muot_id: [
             { required: true, message: 'Debe digitar el número de Orden de Trabajo', trigger: 'blur' }
-          ],          
+          ],
           urba_id: [
             { required: false, message: 'Debe Seleccionar la Urbanizadora', trigger: 'change' }
           ],

@@ -159,7 +159,8 @@ export const asyncRouterMap = [
       { path: 'edit/:id?', component: _import('solicitud/edit'), name: 'solicitudedit', hidden: true, meta: { title: 'solicitudedit', roles: ['super', 'admin', 'auxiliar', 'almacen', 'supervisor'] }},
       { path: 'almacen', component: _import('solicitud/almacen'), name: 'solicitudalmacen', meta: { title: 'solicitudalmacen', roles: ['super', 'admin', 'auxiliar', 'almacen', 'supervisor'] }},
       { path: 'porvencer', component: _import('solicitud/porvencer'), name: 'solicitudporvencer', hidden: true, meta: { title: 'solicitudporvencer', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }},
-      { path: 'ver/:id', component: _import('solicitud/ver'), name: 'solicitudver', hidden: true, meta: { title: 'solicitudver', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }}
+      { path: 'ver/:id', component: _import('solicitud/ver'), name: 'solicitudver', hidden: true, meta: { title: 'solicitudver', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }},
+      { path: 'informexls', component: _import('solicitud/informexls'), name: 'solicitudinformexls', meta: { title: 'solicitudinformexls', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }}
     ]
   },
   {

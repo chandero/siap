@@ -1106,7 +1106,6 @@ object Siap_detallado_reposicion {
     }
 }
 
-
 object Siap_detallado_repotenciacion {
     implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy/MM/dd")
     implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy/MM/dd")
@@ -1440,6 +1439,8 @@ object Siap_retiro_reubicacion {
         )
     }
 }
+
+
 
 class InformeRepository @Inject()(dbapi: DBApi, usuarioService: UsuarioRepository, empresaService: EmpresaRepository, municipioService: MunicipioRepository)(implicit ec:DatabaseExecutionContext) {
 
@@ -4549,5 +4550,76 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
         os.toByteArray
         }
     }
+    }
+
+    def siap_informe_solicitud_xls(fecha_inicial: Long, fecha_final: Long, empr_id: Long): Future[Iterable[SolicitudR]] = {
+        val result = db.withConnection { implicit connection => 
+            var query: String = """SELECT * FROM siap.solicitud s 
+                                            LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
+                                            LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
+                                            WHERE s.empr_id = {empr_id} and s.soli_fecha between {fecha_inicial} and {fecha_final}
+                                            and s.soli_estado <> 9 ORDER BY s.soli_id, s.soli_fecha ASC """
+            var fi = Calendar.getInstance()
+            var ff = Calendar.getInstance()
+            fi.setTimeInMillis(fecha_inicial)
+            ff.setTimeInMillis(fecha_final)
+            fi.set(Calendar.MILLISECOND, 0)
+            fi.set(Calendar.SECOND, 0)
+            fi.set(Calendar.MINUTE, 0)
+            fi.set(Calendar.HOUR, 0)
+                                
+            ff.set(Calendar.MILLISECOND, 59)
+            ff.set(Calendar.SECOND, 59)
+            ff.set(Calendar.MINUTE, 59)
+            ff.set(Calendar.HOUR, 23)
+            val reps = SQL(query)
+                .on(
+                    'empr_id -> empr_id,
+                    'fecha_inicial -> fi.getTime(),
+                    'fecha_final -> ff.getTime()
+                )
+                .as(Soli._set *)
+              
+              var _listBuffer = new ListBuffer[SolicitudR]()
+              reps.map { s =>
+                        val a = new SolicitudAR(s.soli_id, 
+                                               s.soti_id,
+                                               s.soti_descripcion,
+                                               s.soli_fecha, 
+                                               s.soli_nombre, 
+                                               s.soli_radicado, 
+                                               s.soli_direccion, 
+                                               s.barr_id,
+                                               s.barr_descripcion,
+                                               s.soli_telefono,
+                                               s.soli_email,
+                                               s.soli_solicitud,
+                                               s.soli_respuesta,
+                                               s.soli_informe,
+                                               s.soli_consecutivo)
+                        val b = new SolicitudBR(s.soli_fecharespuesta,
+                                               s.soli_fechadigitado,
+                                               s.soli_fechalimite,
+                                               s.soli_fechasupervisor,
+                                               s.soli_fechainforme,
+                                               s.soli_fechavisita,
+                                               s.soli_fecharte,
+                                               s.soli_fechaalmacen,
+                                               s.soli_numerorte,
+                                               s.soli_puntos,
+                                               s.soli_tipoexpansion,
+                                               s.soli_aprobada,
+                                               s.soli_codigorespuesta,
+                                               s.soli_luminarias,
+                                               s.soli_estado,
+                                               s.soli_estado_descripcion,
+                                               s.empr_id,
+                                               s.usua_id)
+                        val solicitud = new SolicitudR(a, b)
+                        _listBuffer += solicitud
+            }
+            _listBuffer.toList           
+           }
+           Future.successful(result)
     }
 }

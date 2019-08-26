@@ -336,6 +336,7 @@ GET     /api/info/sifx/:fc/:o/:f/:e             controllers.InformeController.si
 GET     /api/info/smx/:e/:t                     controllers.InformeController.siap_medidor_xls(e: Long, t:String)
 GET     /api/info/stx/:e/:t                     controllers.InformeController.siap_transformador_xls(e: Long, t:String)
 GET     /api/info/sucx/:fi/:ff/:e               controllers.InformeController.siap_ucap_xls(fi: Long, ff: Long, e: Long)
+GET     /api/info/sisx/:fi/:ff                  controllers.InformeController.siap_informe_solicitud_xls(fi: Long, ff: Long)
 
 # Graficas
 GET     /api/graf/sgrp                           controllers.GraficaController.siap_grafica_reporte_pendiente()

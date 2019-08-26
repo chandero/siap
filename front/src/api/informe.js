@@ -300,3 +300,14 @@ export function informe_siap_transformador_xls(empr_id) {
   const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + ':9091/api' + '/info/stx/' + data.empr_id + '/' + token
   window.open(url, '_self', 'location=no, menubar=no')
 }
+
+export function informe_siap_solicitud_xls(fecha_inicial, fecha_final) {
+  const data = {
+    fecha_inicial,
+    fecha_final
+  }
+  return request({
+    url: '/info/sisx/' + data.fecha_inicial + '/' + data.fecha_final,
+    method: 'get'
+  })
+}
