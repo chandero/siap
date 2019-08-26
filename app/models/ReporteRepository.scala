@@ -66,7 +66,8 @@ case class ReporteAdicional( repo_id: Option[scala.Long],
                              acti_id: Option[scala.Long],
                              repo_codigo: Option[String],
                              repo_apoyo: Option[String],
-                             urba_id: Option[scala.Long]
+                             urba_id: Option[scala.Long],
+                             muot_id: Option[scala.Long]
                             )
 
 case class ReporteDireccionDato(aatc_id: Option[scala.Long],
@@ -186,7 +187,7 @@ case class ReporteConsulta(repo_id: Option[scala.Long],
                    barr_id: Option[scala.Long],
                    empr_id: Option[scala.Long],
                    tiba_id: Option[scala.Long],
-                   usua_id: Option[scala.Long], 
+                   usua_id: Option[scala.Long],
                    adicional: Option[ReporteAdicional])
 
 case class ReporteTipo(reti_id: Option[scala.Long],
@@ -329,7 +330,8 @@ object ReporteAdicional {
           "acti_id" -> adicional.acti_id,
           "repo_codigo" -> adicional.repo_codigo,
           "repo_apoyo" -> adicional.repo_apoyo,
-          "urba_id" -> adicional.urba_id
+          "urba_id" -> adicional.urba_id,
+          "muot_id" -> adicional.muot_id
       )
     }
 
@@ -347,7 +349,8 @@ object ReporteAdicional {
         (__ \ "acti_id").readNullable[scala.Long] and
         (__ \ "repo_codigo").readNullable[String] and
         (__ \ "repo_apoyo").readNullable[String] and
-        (__ \ "urba_id").readNullable[scala.Long]
+        (__ \ "urba_id").readNullable[scala.Long] and
+        (__ \ "muot_id").readNullable[scala.Long]
     )(ReporteAdicional.apply _)
 
    val reporteAdicionalSet = {
@@ -364,8 +367,9 @@ object ReporteAdicional {
        get[Option[scala.Long]]("reporte_adicional.acti_id") ~
        get[Option[String]]("reporte_adicional.repo_codigo") ~ 
        get[Option[String]]("reporte_adicional.repo_apoyo") ~
-       get[Option[scala.Long]]("urba_id") map {
-           case repo_id ~ repo_fechadigitacion ~ repo_modificado ~ repo_tipo_expansion ~ repo_luminaria ~ repo_redes ~ repo_poste ~ repo_subreporte ~ repo_subid ~ repo_email ~ acti_id ~ repo_codigo ~ repo_apoyo ~ urba_id => ReporteAdicional(
+       get[Option[scala.Long]]("urba_id") ~
+       get[Option[scala.Long]]("muot_id") map {
+           case repo_id ~ repo_fechadigitacion ~ repo_modificado ~ repo_tipo_expansion ~ repo_luminaria ~ repo_redes ~ repo_poste ~ repo_subreporte ~ repo_subid ~ repo_email ~ acti_id ~ repo_codigo ~ repo_apoyo ~ urba_id ~ muot_id => ReporteAdicional(
                                                                                                                                         repo_id,
                                                                                                                                         repo_fechadigitacion,
                                                                                                                                         repo_modificado,
@@ -379,7 +383,8 @@ object ReporteAdicional {
                                                                                                                                         acti_id,
                                                                                                                                         repo_codigo,
                                                                                                                                         repo_apoyo,
-                                                                                                                                        urba_id
+                                                                                                                                        urba_id,
+                                                                                                                                        muot_id
                                                                                                                                     )
        }
    }
@@ -1876,7 +1881,8 @@ class ReporteRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository,
                                                                acti_id,
                                                                repo_codigo,
                                                                repo_apoyo,
-                                                               urba_id) VALUES (
+                                                               urba_id,
+                                                               muot_id) VALUES (
                                                                 {repo_id}, 
                                                                 {repo_fechadigitacion}, 
                                                                 {repo_tipo_expansion}, 
@@ -1890,7 +1896,8 @@ class ReporteRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository,
                                                                 {acti_id},
                                                                 {repo_codigo},
                                                                 {repo_apoyo},
-                                                                {urba_id}
+                                                                {urba_id},
+                                                                {muot_id}
                                                                )""").
                     on(
                     'repo_fechadigitacion -> adicional.repo_fechadigitacion,
@@ -1906,6 +1913,7 @@ class ReporteRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository,
                     'repo_codigo -> adicional.repo_codigo,
                     'repo_apoyo -> adicional.repo_apoyo,
                     'urba_id -> adicional.urba_id,
+                    'muot_id -> adicional.muot_id,
                     'repo_id -> id
                     ).executeInsert()
               }
@@ -1962,7 +1970,7 @@ class ReporteRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository,
 
             // actualizar reporte adicional
             reporte.adicional.map { adicional => 
-                val hayAdicional:Boolean = SQL("""UPDATE siap.reporte_adicional SET repo_fechadigitacion = {repo_fechadigitacion}, repo_tipo_expansion = {repo_tipo_expansion}, repo_luminaria = {repo_luminaria}, repo_redes = {repo_redes}, repo_poste = {repo_poste}, repo_modificado = {repo_modificado}, repo_subreporte = {repo_subreporte}, repo_subid = {repo_subid}, repo_email = {repo_email}, acti_id = {acti_id}, repo_codigo = {repo_codigo}, repo_apoyo = {repo_apoyo}, urba_id = {urba_id} WHERE repo_id = {repo_id}""").
+                val hayAdicional:Boolean = SQL("""UPDATE siap.reporte_adicional SET repo_fechadigitacion = {repo_fechadigitacion}, repo_tipo_expansion = {repo_tipo_expansion}, repo_luminaria = {repo_luminaria}, repo_redes = {repo_redes}, repo_poste = {repo_poste}, repo_modificado = {repo_modificado}, repo_subreporte = {repo_subreporte}, repo_subid = {repo_subid}, repo_email = {repo_email}, acti_id = {acti_id}, repo_codigo = {repo_codigo}, repo_apoyo = {repo_apoyo}, urba_id = {urba_id}, muot_id = {muot_id} WHERE repo_id = {repo_id}""").
                 on(
                     'repo_fechadigitacion -> adicional.repo_fechadigitacion,
                     'repo_tipo_expansion -> adicional.repo_tipo_expansion,
@@ -1977,6 +1985,7 @@ class ReporteRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository,
                     'repo_codigo -> adicional.repo_codigo,
                     'repo_apoyo -> adicional.repo_apoyo,
                     'urba_id -> adicional.urba_id,
+                    'muot_id -> adicional.muot_id,
                     'repo_id -> reporte.repo_id
                 ).executeUpdate() > 0
                 if (!hayAdicional){
@@ -1992,7 +2001,9 @@ class ReporteRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository,
                                                                repo_subid, 
                                                                acti_id,
                                                                repo_codigo,
-                                                               repo_apoyo) VALUES (
+                                                               repo_apoyo,
+                                                               urba_id,
+                                                               muot_id) VALUES (
                                                                 {repo_id}, 
                                                                 {repo_fechadigitacion}, 
                                                                 {repo_tipo_expansion}, 
@@ -2005,7 +2016,9 @@ class ReporteRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository,
                                                                 {repo_email},
                                                                 {acti_id},
                                                                 {repo_codigo},
-                                                                {repo_apoyo}                                                              
+                                                                {repo_apoyo},
+                                                                {urba_id},
+                                                                {muot_id}                                                            
                                                                )""").
                     on(
                     'repo_fechadigitacion -> adicional.repo_fechadigitacion,
@@ -2020,6 +2033,8 @@ class ReporteRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository,
                     'acti_id -> adicional.acti_id,
                     'repo_codigo -> adicional.repo_codigo,
                     'repo_apoyo -> adicional.repo_apoyo,
+                    'urba_id -> adicional.urba_id,
+                    'muot_id -> adicional.muot_id,
                     'repo_id -> reporte.repo_id
                     ).executeInsert()
                 }

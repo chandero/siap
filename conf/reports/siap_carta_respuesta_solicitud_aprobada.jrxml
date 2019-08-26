@@ -23,7 +23,7 @@
 	<parameter name="LUMINARIAS_LETRAS" class="java.lang.String"/>
 	<parameter name="GERENTE" class="java.lang.String"/>
 	<parameter name="EMPR_SIGLA" class="java.lang.String"/>
-	<parameter name="FIRMA" class="java.net.URL" isForPrompting="false"/>
+	<parameter name="FIRMA" class="java.io.InputStream" isForPrompting="false"/>
 	<queryString language="SQL">
 		<![CDATA[SELECT 
 	s.soli_nombre, 

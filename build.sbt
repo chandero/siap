@@ -38,8 +38,7 @@ libraryDependencies ++= Seq(
   "net.sf.jasperreports" % "jasperreports" % "6.7.0",
   "net.sf.jasperreports" % "jasperreports-functions" % "6.7.0",
   "net.sf.jasperreports" % "jasperreports-chart-themes" % "6.7.0",
-  "com.norbitltd" %% "spoiwo" % "1.4.1",
-  "org.eclipse.birt.runtime.3_7_1" % "org.mozilla.javascript" % "1.7.2"
+  "com.norbitltd" %% "spoiwo" % "1.4.1"
 )
 
 // Play framework hooks for development
@@ -48,15 +47,8 @@ PlayKeys.playRunHooks += WebpackServer(file("./front"))
 unmanagedResourceDirectories in Test +=  baseDirectory ( _ /"target/web/public/test" ).value
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
-resolvers += "JasperOther" at "https://jaspersoft.artifactoryonline.com/jaspersoft/jr-ce-releases/"
-resolvers += "JasperOther2" at "https://jaspersoft.jfrog.io/jaspersoft/jaspersoft-repo/"
-resolvers += "Jasper" at "https://jaspersoft.artifactoryonline.com/jaspersoft/repo/"
-resolvers += "JasperSoft" at "https://jaspersoft.artifactoryonline.com/jaspersoft/jaspersoft-repo/"
-resolvers += "Jasper3rd" at "https://jaspersoft.artifactoryonline.com/jaspersoft/jaspersoft-3rd-party/"
-resolvers += "mondrian-repo-cache" at "https://jaspersoft.artifactoryonline.com/jaspersoft/mondrian-repo-cache/"
-resolvers += "spring-mil" at "http://repo.spring.io/libs-milestone"
-resolvers += "spring-rel" at "http://repo.spring.io/libs-release"
-resolvers += "oss" at "https://oss.sonatype.org/content/groups/public/"
+resolvers += "Jasper" at "https://jaspersoft.artifactoryonline.com/jaspersoft/jr-ce-releases/"
+resolvers += "Jasper2" at "https://jaspersoft.jfrog.io/jaspersoft/jaspersoft-repo/"
 
 // Production front-end build
 lazy val cleanFrontEndBuild = taskKey[Unit]("Remove the old front-end build")

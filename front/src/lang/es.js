@@ -574,7 +574,8 @@ export default {
     number: 'Número',
     duetime: 'Fecha Límite',
     hour: 'Hora(s)',
-    cuadrilla: 'Cuadrilla'
+    cuadrilla: 'Cuadrilla',
+    ot: 'Orden de Trabajo'
   },
   obra: {
     tipo: {
