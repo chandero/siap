@@ -29,6 +29,11 @@
                                 </el-select>
                               </el-form-item>
                         </el-col>
+                        <el-col v-if="reporte.reti_id===2 && reporte.adicional.repo_tipo_expansion < 4" :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
+                          <el-form-item prop="muot_id" :label="$t('reporte.ot')">
+                            <el-input type="number" style="font-size: 30px;" v-model="reporte.adicional.muot_id" @input="reporte.adicional.muot_id = parseInt($event)"></el-input>
+                          </el-form-item>
+                        </el-col>                        
                         <el-col v-if="reporte.adicional.repo_tipo_expansion === 5" :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
                               <el-form-item :label="$t('reporte.urba.title')" prop="adicional.urba_id">
                                 <el-select clearable :title="$t('reporte.urba.select')" style="width: 80%" ref="tipo" v-model="reporte.adicional.urba_id" name="urbanizadora" :placeholder="$t('reporte.urba.select')">
@@ -216,6 +221,9 @@ export default {
           repo_tipo_expansion: [
             { required: false, message: 'Debe Seleccionar el Tipo de Expansión', trigger: 'change' }
           ],
+          muot_id: [
+            { required: true, message: 'Debe digitar el número de Orden de Trabajo', trigger: 'blur' }
+          ],
           urba_id: [
             { required: false, message: 'Debe Seleccionar la Urbanizadora', trigger: 'change' }
           ],
@@ -261,7 +269,8 @@ export default {
           acti_id: null,
           repo_codigo: null,
           repo_apoyo: null,
-          urba_id: null
+          urba_id: null,
+          muot_id: null
         },
         eventos: [],
         direcciones: []
@@ -444,7 +453,8 @@ export default {
           acti_id: null,
           repo_codigo: null,
           repo_apoyo: null,
-          urba_id: null
+          urba_id: null,
+          muot_id: null
         },
         eventos: [],
         direcciones: []

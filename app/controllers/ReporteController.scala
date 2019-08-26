@@ -177,6 +177,7 @@ class ReporteController @Inject()(
                                       Some(acti_id),
                                       None,
                                       None,
+                                      None,
                                       None)
         val usua_id = 1
         val reportenuevo = new Reporte(null,

@@ -16,9 +16,4 @@ dist
 /.settings
 node_modules
 front/package-lock.json
-front/node_modules
 *.log
-*.rar
-.metals
-*.xls
-*.backup
