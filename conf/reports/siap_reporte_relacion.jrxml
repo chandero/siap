@@ -125,7 +125,13 @@ order by r.reti_id, r.repo_id]]>
 	<field name="repo_apoyo" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="repo_apoyo"/>
 	</field>
-	<field name="COLUMN_33" class="java.lang.Integer">
+	<field name="urba_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="urba_id"/>
+	</field>
+	<field name="muot_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="muot_id"/>
+	</field>
+	<field name="COLUMN_35" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="orig_id"/>
 	</field>
 	<field name="orig_descripcion" class="java.lang.String">
@@ -134,10 +140,10 @@ order by r.reti_id, r.repo_id]]>
 	<field name="orig_estado" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="orig_estado"/>
 	</field>
-	<field name="COLUMN_36" class="java.lang.Integer">
+	<field name="COLUMN_38" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
-	<field name="COLUMN_37" class="java.lang.Integer">
+	<field name="COLUMN_39" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="reti_id"/>
 	</field>
 	<field name="reti_descripcion" class="java.lang.String">
@@ -149,10 +155,10 @@ order by r.reti_id, r.repo_id]]>
 	<field name="reti_estado" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="reti_estado"/>
 	</field>
-	<field name="COLUMN_41" class="java.lang.Integer">
+	<field name="COLUMN_43" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
-	<field name="COLUMN_42" class="java.lang.Integer">
+	<field name="COLUMN_44" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="acti_id"/>
 	</field>
 	<field name="acti_descripcion" class="java.lang.String">
@@ -161,10 +167,10 @@ order by r.reti_id, r.repo_id]]>
 	<field name="acti_estado" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="acti_estado"/>
 	</field>
-	<field name="COLUMN_45" class="java.lang.Integer">
+	<field name="COLUMN_47" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
-	<field name="COLUMN_46" class="java.lang.Integer">
+	<field name="COLUMN_48" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="barr_id"/>
 	</field>
 	<field name="barr_descripcion" class="java.lang.String">
@@ -176,10 +182,10 @@ order by r.reti_id, r.repo_id]]>
 	<field name="muni_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="muni_id"/>
 	</field>
-	<field name="COLUMN_50" class="java.lang.Integer">
+	<field name="COLUMN_52" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="tiba_id"/>
 	</field>
-	<field name="COLUMN_51" class="java.lang.Integer">
+	<field name="COLUMN_53" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
 	<field name="barr_estado" class="java.lang.Integer">

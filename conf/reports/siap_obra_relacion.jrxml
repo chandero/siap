@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_relacion" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="781" leftMargin="56" rightMargin="5" topMargin="5" bottomMargin="5" uuid="05a69750-b169-4a0d-b037-910a744e89b1">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -10,7 +10,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="siap"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Siap_Adapter"/>
 	<parameter name="FECHA_INICIAL" class="java.sql.Timestamp"/>
 	<parameter name="FECHA_FINAL" class="java.sql.Timestamp"/>
 	<parameter name="EMPRESA" class="java.lang.String"/>
@@ -77,7 +77,16 @@ order by r.obra_id]]>
 	<field name="obra_nombre" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="obra_nombre"/>
 	</field>
-	<field name="COLUMN_18" class="java.lang.Integer">
+	<field name="obra_solicitante" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="obra_solicitante"/>
+	</field>
+	<field name="obra_telefono" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="obra_telefono"/>
+	</field>
+	<field name="obra_email" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="obra_email"/>
+	</field>
+	<field name="COLUMN_21" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="orig_id"/>
 	</field>
 	<field name="orig_descripcion" class="java.lang.String">
@@ -86,10 +95,10 @@ order by r.obra_id]]>
 	<field name="orig_estado" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="orig_estado"/>
 	</field>
-	<field name="COLUMN_21" class="java.lang.Integer">
+	<field name="COLUMN_24" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
-	<field name="COLUMN_22" class="java.lang.Integer">
+	<field name="COLUMN_25" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="barr_id"/>
 	</field>
 	<field name="barr_descripcion" class="java.lang.String">
@@ -104,7 +113,7 @@ order by r.obra_id]]>
 	<field name="tiba_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="tiba_id"/>
 	</field>
-	<field name="COLUMN_27" class="java.lang.Integer">
+	<field name="COLUMN_30" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
 	<field name="barr_estado" class="java.lang.Integer">

@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject.Inject
 import java.util.Base64
+import java.util.Calendar
 
 import models._
 import play.api.mvc._
@@ -279,4 +280,23 @@ class InformeController @Inject()(
    }
  }
  
+ def siap_informe_solicitud_x_vencer_xls() = authenticatedUserAction.async {
+   implicit request: Request[AnyContent] =>
+   var empr_id = Utility.extraerEmpresa(request)
+   informeService.siap_informe_solicitud_x_vencer_xls(empr_id.get).map { solicitudes =>
+     Ok(Json.toJson(solicitudes))
+   }
+ }
+
+ def siap_informe_muot_xls(fecha_inicial: Long, fecha_final: Long, empr_id: Long, token: String) = Action {
+   if (config.get[String]("play.http.secret.key") == token) {
+      val os = informeService.siap_informe_muot_xls(fecha_inicial, fecha_final, empr_id)
+      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+      val filename = "Informe_Muot_" + fmt.print(fecha_inicial) + "_a_" + fmt.print(fecha_final) + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Ok(os).as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").withHeaders("Content-Disposition" -> attach )
+   } else {
+      Forbidden("Dude, you’re not logged in.")
+   }
+}
 }

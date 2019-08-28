@@ -160,7 +160,8 @@ export const asyncRouterMap = [
       { path: 'almacen', component: _import('solicitud/almacen'), name: 'solicitudalmacen', meta: { title: 'solicitudalmacen', roles: ['super', 'admin', 'auxiliar', 'almacen', 'supervisor'] }},
       { path: 'porvencer', component: _import('solicitud/porvencer'), name: 'solicitudporvencer', hidden: true, meta: { title: 'solicitudporvencer', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }},
       { path: 'ver/:id', component: _import('solicitud/ver'), name: 'solicitudver', hidden: true, meta: { title: 'solicitudver', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }},
-      { path: 'informexls', component: _import('solicitud/informexls'), name: 'solicitudinformexls', meta: { title: 'solicitudinformexls', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }}
+      { path: 'informexls', component: _import('solicitud/informexls'), name: 'solicitudinformexls', meta: { title: 'solicitudinformexls', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }},
+      { path: 'informexvencerxls', component: _import('solicitud/informexvencerxls'), name: 'solicitudinformexvencerxls', meta: { title: 'solicitudinformexvencerxls', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }}
     ]
   },
   {
@@ -186,7 +187,7 @@ export const asyncRouterMap = [
       { path: 'rdetalladorepotenciacion', component: _import('informe/rdetalladorepotenciacion'), name: 'rdetalladorepotenciacion', meta: { title: 'rdetalladorepotenciacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
       { path: 'rdetalladoretiro', component: _import('informe/rdetalladoretiro'), name: 'rdetalladoretiro', meta: { title: 'rdetalladoretiro', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
       { path: 'rdetalladoretiroreubicacion', component: _import('informe/rdetalladoretiroreubicacion'), name: 'rdetalladoretiroreubicacion', meta: { title: 'rdetalladoretiroreubicacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rmaterialrepetido', component: _import('informe/rmaterialrepetido'), name: 'rmaterialrepetido', meta: { title: 'rmaterialrepetido', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
+      { path: 'rmaterialrepetido', component: _import('informe/rmaterialrepetido'), hidden: true, name: 'rmaterialrepetido', meta: { title: 'rmaterialrepetido', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
       { path: 'rvisitaporbarrio', component: _import('informe/rvisitaporbarrio'), name: 'rvisitaporbarrio', meta: { title: 'rvisitaporbarrio', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
       { path: 'rinventario', component: _import('informe/rinventario'), name: 'rinventario', meta: { title: 'rinventario', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor'] }},
       { path: 'rdisponibilidad', component: _import('informe/rdisponibilidad'), name: 'rdisponibilidad', meta: { title: 'rdisponibilidad', roles: ['super', 'admin', 'ingeniero', 'almacenista', 'auxiliar', 'gerencia', 'supervisor'] }},
@@ -196,7 +197,8 @@ export const asyncRouterMap = [
       { path: 'rgraficos', component: _import('informe/rgraficos'), name: 'rgraficos', meta: { title: 'rgraficos', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor'] }},
       { path: 'rmedidores', component: _import('informe/rmedidores'), name: 'rmedidores', meta: { title: 'rmedidores', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor'] }},
       { path: 'rtransformadores', component: _import('informe/rtransformadores'), name: 'rtransformadores', meta: { title: 'rtransformadores', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor'] }},
-      { path: 'rucap', component: _import('informe/rucap'), name: 'rucap', meta: { title: 'rucap', roles: ['super', 'admin', 'ingeniero', 'supervisor'] }}
+      { path: 'rucap', component: _import('informe/rucap'), name: 'rucap', meta: { title: 'rucap', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor'] }},
+      { path: 'rmuot', component: _import('informe/rmuot'), name: 'rmuot', meta: { title: 'rmuot', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor', 'auxiliar'] }}
     ]
   },
   {

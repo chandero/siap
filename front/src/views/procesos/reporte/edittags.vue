@@ -26,7 +26,7 @@
                                 </el-select>
                               </el-form-item>
                         </el-col>
-                        <el-col v-if="reporte.reti_id===2 && reporte.adicional.repo_tipo_expansion < 4" :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
+                        <el-col v-if="reporte.reti_id===2 && reporte.adicional.repo_tipo_expansion !== null && reporte.adicional.repo_tipo_expansion < 4" :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
                           <el-form-item prop="muot_id" :label="$t('reporte.ot')">
                             <el-input type="number" style="font-size: 30px;" v-model="reporte.adicional.muot_id" @input="reporte.adicional.muot_id = parseInt($event)"></el-input>
                           </el-form-item>

@@ -25,16 +25,18 @@ class SolicitudController @Inject()(
     implicit ec: ExecutionContext)
     extends AbstractController(cc) {
   def todos(page_size: Long, current_page: Long): Action[AnyContent] =
-    authenticatedUserAction.async {
-      val total = soliService.cuenta()
-      soliService.todos(page_size, current_page).map { solicitudes =>
+    authenticatedUserAction.async { implicit request =>
+      val empr_id = Utility.extraerEmpresa(request)
+      val total = soliService.cuenta(empr_id.get)
+      soliService.todos(page_size, current_page, empr_id.get).map { solicitudes =>
         Ok(Json.obj("solicitudes" -> solicitudes, "total" -> total))
       }
     }
 
   def solis(): Action[AnyContent] = authenticatedUserAction.async {
     implicit request : Request[AnyContent] =>
-    soliService.solis().map { solicitudes =>
+    val empr_id = Utility.extraerEmpresa(request)
+    soliService.solis(empr_id.get).map { solicitudes =>
       Ok(Json.toJson(solicitudes))
     }
   } 
@@ -267,6 +269,13 @@ class SolicitudController @Inject()(
     } else {
        Forbidden("Dude, you’re not logged in.")
     }
+  }
+
+  def tipos() = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] => 
+      soliService.tipos().map { tipos =>
+        Ok(Json.toJson(tipos))
+      }
   }
 
 }

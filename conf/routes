@@ -89,6 +89,9 @@ GET     /api/soli/arte/:id/:f/:n        controllers.SolicitudController.asignarR
 POST    /api/soli/inin                  controllers.SolicitudController.ingresarInforme
 POST    /api/soli/inre                  controllers.SolicitudController.ingresarRespuesta
 GET     /api/soli/frte/:id/:e/:t        controllers.SolicitudController.formatoRTE(id: Long, e: Long, t: String)
+GET     /api/soti/get                   controllers.SolicitudController.tipos
+GET     /api/soli/frs/:id/:e/:f/:t         controllers.SolicitudController.imprimirRespuesta(id: Long, e: Long, f:Int, t: String)
+
 
 # Tipo Solicitud
 GET     /api/soti/get/:p/:c             controllers.SolicitudTipoController.todos(p:Long, c:Long)
@@ -337,6 +340,9 @@ GET     /api/info/smx/:e/:t                     controllers.InformeController.si
 GET     /api/info/stx/:e/:t                     controllers.InformeController.siap_transformador_xls(e: Long, t:String)
 GET     /api/info/sucx/:fi/:ff/:e               controllers.InformeController.siap_ucap_xls(fi: Long, ff: Long, e: Long)
 GET     /api/info/sisx/:fi/:ff                  controllers.InformeController.siap_informe_solicitud_xls(fi: Long, ff: Long)
+GET     /api/info/sisvx                         controllers.InformeController.siap_informe_solicitud_x_vencer_xls
+GET     /api/info/simox/:fi/:ff/:e/:t           controllers.InformeController.siap_informe_muot_xls(fi: Long, ff:Long, e: Long, t:String)
+
 
 # Graficas
 GET     /api/graf/sgrp                           controllers.GraficaController.siap_grafica_reporte_pendiente()

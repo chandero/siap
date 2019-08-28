@@ -77,6 +77,28 @@
           </template>
         </el-table-column>
         <el-table-column
+          :label="$t('solicitud.tipo')"
+          width="100"
+          sortable="custom"
+          prop="a.soti_descripcion"
+          resizable
+           >
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ soti_descripcion(scope.row.a.soti_id) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('solicitud.estado')"
+          width="100"
+          sortable="custom"
+          prop="b.soli_estado"
+          resizable
+           >
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ estado(scope.row.b.soli_estado) }}</span>
+          </template>
+        </el-table-column>        
+        <el-table-column
           :label="$t('solicitud.nombre')"
           width="210"
           sortable="custom"
@@ -178,7 +200,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import { getSolicitudesRango, deleteSolicitud, entregarSupervisor, entregarFormatoRTE, imprimirFormatoRTE, imprimirRespuestaSolicitud } from '@/api/solicitud'
+import { getSolicitudesRango, deleteSolicitud, entregarSupervisor, entregarFormatoRTE, imprimirFormatoRTE, imprimirRespuestaSolicitud, getTipos } from '@/api/solicitud'
 import { getBarriosEmpresa } from '@/api/barrio'
 
 export default {
@@ -459,6 +481,13 @@ export default {
         }
       }
     },
+    soti_descripcion(id) {
+      if (id === undefined || id === null) {
+        return ''
+      } else {
+        return this.tipos.find(t => t.soti_id === id, { soti_descripcion: '' }).soti_descripcion
+      }
+    },
     estado(soli_estado) {
       if (soli_estado === 1) {
         return 'PENDIENTE'
@@ -526,6 +555,11 @@ export default {
         this.barrios = response.data
         this.getData(this.anho, this.mes, 0, this.tabsData[0].tabPeriodo)
         this.activeTab = this.tabsData[0].tabPeriodo
+        getTipos().then(response => {
+          this.tipos = response.data
+        }).catch(error => {
+          console.log('getTipos Error:' + error)
+        })
       }).catch(error => {
         console.log(error)
       })
