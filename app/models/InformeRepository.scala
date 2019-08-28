@@ -4554,7 +4554,7 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
 
     def siap_informe_solicitud_xls(fecha_inicial: Long, fecha_final: Long, empr_id: Long): Future[Iterable[SolicitudR]] = {
         val result = db.withConnection { implicit connection => 
-            var query: String = """SELECT * FROM siap.solicitud s 
+            var query: String = """SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' END) as soli_estado_descripcion FROM siap.solicitud s
                                             LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
                                             LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
                                             WHERE s.empr_id = {empr_id} and s.soli_fecha between {fecha_inicial} and {fecha_final}
@@ -4622,4 +4622,61 @@ ORDER BY e.reti_id, e.elem_codigo""").on(
            }
            Future.successful(result)
     }
+
+    def siap_informe_solicitud_x_vencer_xls(empr_id: Long): Future[Iterable[SolicitudR]] = {
+        val result = db.withConnection { implicit connection => 
+            var query: String = """SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' END) as soli_estado_descripcion FROM siap.solicitud s
+                                            LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
+                                            LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
+                                            WHERE s.empr_id = {empr_id} and ((s.soli_fechalimite - CURRENT_TIMESTAMP)) <= (4 * '1 day'::interval)
+                                            and s.soli_estado < 6 ORDER BY s.soli_fecha DESC """
+            val reps = SQL(query)
+                .on(
+                    'empr_id -> empr_id
+                )
+                .as(Soli._set *)
+              
+              var _listBuffer = new ListBuffer[SolicitudR]()
+              reps.map { s =>
+                        val a = new SolicitudAR(s.soli_id, 
+                                               s.soti_id,
+                                               s.soti_descripcion,
+                                               s.soli_fecha, 
+                                               s.soli_nombre, 
+                                               s.soli_radicado, 
+                                               s.soli_direccion, 
+                                               s.barr_id,
+                                               s.barr_descripcion,
+                                               s.soli_telefono,
+                                               s.soli_email,
+                                               s.soli_solicitud,
+                                               s.soli_respuesta,
+                                               s.soli_informe,
+                                               s.soli_consecutivo)
+                        val b = new SolicitudBR(s.soli_fecharespuesta,
+                                               s.soli_fechadigitado,
+                                               s.soli_fechalimite,
+                                               s.soli_fechasupervisor,
+                                               s.soli_fechainforme,
+                                               s.soli_fechavisita,
+                                               s.soli_fecharte,
+                                               s.soli_fechaalmacen,
+                                               s.soli_numerorte,
+                                               s.soli_puntos,
+                                               s.soli_tipoexpansion,
+                                               s.soli_aprobada,
+                                               s.soli_codigorespuesta,
+                                               s.soli_luminarias,
+                                               s.soli_estado,
+                                               s.soli_estado_descripcion,
+                                               s.empr_id,
+                                               s.usua_id)
+                        val solicitud = new SolicitudR(a, b)
+                        _listBuffer += solicitud
+            }
+            _listBuffer.toList           
+           }
+           Future.successful(result)
+    }    
+    
 }

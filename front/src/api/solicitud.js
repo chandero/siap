@@ -168,3 +168,10 @@ export function imprimirRespuestaSolicitud(soli_id, empr_id, firma) {
   window.open(url, '_blank', 'location=no, menubar=no')
 }
 
+export function getTipos() {
+  return request({
+    url: '/soti/get',
+    method: 'get'
+  })
+}
+

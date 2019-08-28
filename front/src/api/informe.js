@@ -311,3 +311,10 @@ export function informe_siap_solicitud_xls(fecha_inicial, fecha_final) {
     method: 'get'
   })
 }
+
+export function informe_siap_solicitud_x_vencer_xls() {
+  return request({
+    url: '/info/sisvx',
+    method: 'get'
+  })
+}

@@ -279,4 +279,12 @@ class InformeController @Inject()(
    }
  }
  
+ def siap_informe_solicitud_x_vencer_xls() = authenticatedUserAction.async {
+   implicit request: Request[AnyContent] =>
+   var empr_id = Utility.extraerEmpresa(request)
+   informeService.siap_informe_solicitud_x_vencer_xls(empr_id.get).map { solicitudes =>
+     Ok(Json.toJson(solicitudes))
+   }
+ }
+
 }

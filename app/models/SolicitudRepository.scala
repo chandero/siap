@@ -43,6 +43,8 @@ import net.sf.jasperreports.export.SimpleXlsxReportConfiguration
 import utilities.N2T
 import utilities.Utility
 
+case class TipoSolicitud(soti_id: Option[Long], soti_descripcion: Option[String])
+
 case class Soli(soli_id: Option[Long],
                 soti_id: Option[Long],
                 soti_descripcion: Option[String],
@@ -150,7 +152,31 @@ case class SolicitudBR(
                      empr_id: Option[Long],
                      usua_id: Option[Long])
 
-case class SolicitudR(a: SolicitudAR, b: SolicitudBR)                     
+case class SolicitudR(a: SolicitudAR, b: SolicitudBR)
+
+object TipoSolicitud {
+    implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
+    
+    implicit val stWrites = new Writes[TipoSolicitud] {
+        def writes(st: TipoSolicitud) = Json.obj(
+            "soti_id" -> st.soti_id,
+            "soti_descripcion" -> st.soti_descripcion
+        )
+    }
+
+    implicit val stReads: Reads[TipoSolicitud] = (
+        (__ \ "soti_id").readNullable[Long] and
+        (__ \ "soti_descripcion").readNullable[String]
+    )(TipoSolicitud.apply _)
+
+    val _set = {
+      get[Option[Long]]("soti_id") ~
+      get[Option[String]]("soti_descripcion") map {
+          case soti_id ~ soti_descripcion => TipoSolicitud(soti_id, soti_descripcion)
+      }
+    }
+}
 
 object SolicitudA {
     implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -478,7 +504,10 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
     */
     def buscarPorId(soli_id:Long) : Option[Solicitud] = {
         db.withConnection { implicit connection => 
-            val s = SQL("SELECT * FROM siap.solicitud WHERE soli_id = {soli_id} and soli_estado <> 9").
+            val s = SQL("""SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' END) as soli_estado_descripcion FROM siap.solicitud s
+            LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
+            LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
+            WHERE s.soli_id = {soli_id} and s.soli_estado <> 9""").
             on(
                 'soli_id -> soli_id
             ).as(Soli._set.singleOpt)
@@ -558,7 +587,10 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
     */
     def buscarPorRadicado(soli_radicado: String, empr_id: Long) : Option[Solicitud] = {
         db.withConnection { implicit connection => 
-            val s = SQL("SELECT * FROM siap.solicitud WHERE soli_radicado = {soli_radicado} and empr_id = {empr_id} and soli_estado <> 9").
+            val s = SQL("""SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' END) as soli_estado_descripcion FROM siap.solicitud 
+            LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
+            LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
+            WHERE soli_radicado = {soli_radicado} and empr_id = {empr_id} and soli_estado <> 9""").
             on(
                 'soli_radicado -> soli_radicado,
                 'empr_id -> empr_id
@@ -637,12 +669,16 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
     * Recuperar un Solicitud dado su soli_descripcion
     * @param soli_descripcion: String
     */
-    def buscarPorDescripcion(soli_descripcion: String) : Future[Iterable[Solicitud]] = Future[Iterable[Solicitud]] {
+    def buscarPorDescripcion(soli_descripcion: String, empr_id: Long) : Future[Iterable[Solicitud]] = Future[Iterable[Solicitud]] {
         db.withConnection { implicit connection =>
             var _listBuffer = new ListBuffer[Solicitud]()
-            val lsoli = SQL("SELECT * FROM siap.soli WHERE soli_descripcion LIKE %{soli_descripcion}% and soli_estado = 1 ORDER BY soli_descripcion").
+            val lsoli = SQL("""SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' END) as soli_estado_descripcion FROM siap.solicitud s
+            LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
+            LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
+            WHERE soli_descripcion LIKE %{soli_descripcion}% and soli_estado <> 9 and empr_id = {empr_id} ORDER BY soli_descripcion""").
             on(
-                'soli_descripcion -> soli_descripcion
+                'soli_descripcion -> soli_descripcion,
+                'empr_id -> empr_id
             ).as(Soli._set *)
             lsoli.map { s =>
                         val a = new SolicitudA(s.soli_id, 
@@ -687,9 +723,13 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
    * Recuperar total de registros
    * @return total
    */
-   def cuenta(): Long =  {
+   def cuenta(empr_id: Long): Long =  {
      db.withConnection{ implicit connection =>
-       val result = SQL("SELECT COUNT(*) AS c FROM siap.soli WHERE soli_estado <> 9").as(SqlParser.scalar[Long].single)
+       val result = SQL("SELECT COUNT(*) AS c FROM siap.solicitud WHERE soli_estado <> 9 and empr_id = {empr_id}").
+       on(
+           'empr_id -> empr_id
+       ).
+       as(SqlParser.scalar[Long].single)
        result
      }
    }
@@ -699,13 +739,17 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
     * @param page_size: Long
     * @param current_page: Long
     */
-    def todos(page_size:Long, current_page:Long): Future[Iterable[Solicitud]] = Future[Iterable[Solicitud]] {
+    def todos(page_size:Long, current_page:Long, empr_id: Long): Future[Iterable[Solicitud]] = Future[Iterable[Solicitud]] {
         db.withConnection { implicit connection =>
             var _listBuffer = new ListBuffer[Solicitud]()
-            val lsoli = SQL("SELECT soli_id, soli_descripcion, soli_estado, usua_id FROM siap.soli WHERE soli_estado = 1 ORDER BY soli_id LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)").
+            val lsoli = SQL("""SELECT soli_id, soli_descripcion, soli_estado, usua_id FROM siap.solicitud s
+                            LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
+                            LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
+                            WHERE soli_estado <> 9 and empr_id = {empr_id} ORDER BY soli_id LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)""").
             on(
               'page_size -> page_size,
-              'current_page -> current_page                
+              'current_page -> current_page,
+              'empr_id -> empr_id               
             ).as(Soli._set *)
             lsoli.map { s =>
                         val a = new SolicitudA(s.soli_id, 
@@ -748,10 +792,16 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
     /**
     * Recuperar todos los Solicitud activas
     */
-    def solis(): Future[Iterable[Solicitud]] = Future[Iterable[Solicitud]] {
+    def solis(empr_id: Long): Future[Iterable[Solicitud]] = Future[Iterable[Solicitud]] {
         db.withConnection { implicit connection =>
             var _listBuffer = new ListBuffer[Solicitud]()
-            val lsoli = SQL("SELECT soli_id, soli_descripcion, soli_estado, usua_id FROM siap.soli WHERE soli_estado <> 9 ORDER BY soli_descripcion").
+            val lsoli = SQL("""SELECT soli_id, soli_descripcion, soli_estado, usua_id FROM siap.solicitud
+                            LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
+                            LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
+                            WHERE soli_estado <> 9 and empr_id = {empr_id} ORDER BY soli_descripcion""").
+            on(
+                'empr_id -> empr_id
+            ).
             as(Soli._set *)
             lsoli.map { s =>
                     val a = new SolicitudA(s.soli_id, 
@@ -789,7 +839,14 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
             }
             _listBuffer.toList            
         }
-    }    
+    }
+
+    def tipos(): Future[Iterable[TipoSolicitud]] = {
+        val result = db.withConnection { implicit connection =>
+            SQL("""SELECT * FROM siap.solicitud_tipo st""").as(TipoSolicitud._set *)
+        }
+        Future.successful(result)
+    }
 
     /**
     * Recuperar todos los Reporte dado su rango de fecha de recepcion
@@ -799,8 +856,9 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
     */
     def buscarPorRango(anho: Int, mes: Int, empr_id: scala.Long) : Future[Iterable[Solicitud]] = Future[Iterable[Solicitud]] {
         db.withConnection { implicit connection => 
-        var query: String = """SELECT * FROM siap.solicitud s 
+        var query: String = """SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' END) as soli_estado_descripcion FROM siap.solicitud s 
                                         LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
+                                        LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
                                         WHERE s.empr_id = {empr_id} and s.soli_fecha between {fecha_inicial} and {fecha_final}
                                         and s.soli_estado <> 9 ORDER BY s.soli_id, s.soli_fecha DESC """
           val fechaini = new DateTime(anho,mes,1,0,0,0,0)
@@ -865,8 +923,8 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
         db.withConnection { implicit connection => 
         var query: String = """SELECT * FROM siap.solicitud s 
                                LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
-                               WHERE s.empr_id = {empr_id} and ((s.soli_fechalimite - CURRENT_TIMESTAMP)) <= (5 * '1 day'::interval)
-                               and s.soli_estado < 4 ORDER BY s.soli_fecha DESC """
+                               WHERE s.empr_id = {empr_id} and ((s.soli_fechalimite - CURRENT_TIMESTAMP)) <= (4 * '1 day'::interval)
+                               and s.soli_estado < 6 ORDER BY s.soli_fecha DESC """
           val reps = SQL(query)
           .on(
             'empr_id -> empr_id
@@ -1365,7 +1423,7 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                         'soli_id -> soli_id,
                                         'empr_id -> empr_id,
                                         'soli_fecharespuesta -> hora,
-                                        'soli_estado -> 4
+                                        'soli_estado -> 6
                                     ).executeUpdate()
                                     s.b.soli_aprobada match {  
                                         case Some(true) => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_aprobada.jasper"

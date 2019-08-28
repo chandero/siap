@@ -2,12 +2,12 @@
   <el-container>
   <el-header>
     <el-col :span="24">
-      <span>{{ $t('informe.sisx')}}</span>
+      <span>{{ $t('informe.sisvx')}}</span>
     </el-col>
   </el-header>
   <el-main>
   <el-form :label-position="labelPosition">
-  <el-row :gutter="4">
+  <!-- <el-row :gutter="4">
     <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
       <el-form-item :label="$t('informe.initialDate')">
         <el-date-picker v-model="fecha_inicial" format="yyyy/MM/dd"></el-date-picker>
@@ -18,7 +18,7 @@
         <el-date-picker v-model="fecha_final" format="yyyy/MM/dd"></el-date-picker>
       </el-form-item>
     </el-col>
-  </el-row>
+  </el-row> -->
   <el-row>
     <el-col :span="24">
       <el-button type="primary" @click="obtenerDatos()">{{ $t('informe.process')}}</el-button>
@@ -36,50 +36,62 @@
   >
     <el-table-column 
       :label="$t('informe.soli_radicado')"
-      prop="soli_radicado"
+      prop="a.soli_radicado"
       width="100"
     >
     </el-table-column>
     <el-table-column 
-      :label="$t('informe.soli_fecha')"
-      prop="soli_fecha"
+      :label="$t('informe.soti_descripcion')"
+      prop="a.soti_descripcion"
       width="100"
     >
+    </el-table-column>    
+    <el-table-column 
+      :label="$t('informe.soli_fecha')"
+      prop="a.soli_fecha"
+      width="100"
+    >
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ scope.row.a.soli_fecha | moment('YYYY/MM/DD HH:mm:ss') }}</span>
+          </template>    
     </el-table-column>
     <el-table-column 
       :label="$t('informe.soli_solicitud')"
-      prop="soli_solicitud"
+      prop="a.soli_solicitud"
       width="100"
     >
     </el-table-column>
     <el-table-column 
       :label="$t('informe.soli_fechalimite')"
-      prop="soli_fechalimite"
+      prop="b.soli_fechalimite"
       width="100"
     >
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ scope.row.b.soli_fechalimite | moment('YYYY/MM/DD HH:mm:ss') }}</span>
+          </template>     
     </el-table-column>
     <el-table-column 
       :label="$t('informe.soli_consecutivo')"
-      prop="soli_consecutivo"
+      prop="a.soli_consecutivo"
       width="100"
     >
     </el-table-column>        
     <el-table-column 
       :label="$t('informe.soli_direccion')"
-      prop="soli_direccion"
+      prop="a.soli_direccion"
       width="100"
     >
     </el-table-column>        
     </el-table-column>
     <el-table-column 
       :label="$t('informe.barr_descripcion')"
-      prop="soli_barr_descripcion"
+      prop="a.barr_descripcion"
       width="100"
     >
     </el-table-column>            
     <el-table-column 
       :label="$t('informe.soli_nombre')"
-      prop="soli_nombre"
+      prop="a.soli_nombre"
       width="100"
     >
     </el-table-column>
@@ -87,53 +99,62 @@
       :label="$t('informe.soli_fecharespuesta')"
       prop="soli_fecharespuesta"
       width="100"
-    > 
+    >
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ scope.row.b.soli_fecharespuesta | moment('YYYY/MM/DD HH:mm:ss') }}</span>
+          </template>     
     </el-table-column>
     <el-table-column 
       :label="$t('informe.soli_informetecnico')"
-      prop="soli_informetecnico"
+      prop="a.soli_informe"
       width="100"
     >
     </el-table-column>
     <el-table-column 
       :label="$t('informe.soli_fechaalmacen')"
-      prop="soli_fechaalmacen"
+      prop="b.soli_fechaalmacen"
       width="100"
     >
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ scope.row.b.soli_fechaalmacen | moment('YYYY/MM/DD HH:mm:ss') }}</span>
+          </template>     
     </el-table-column>      
     <el-table-column 
       :label="$t('informe.soli_codigorespuesta')"
-      prop="soli_codigorespuesta"
+      prop="b.soli_codigorespuesta"
       width="100"
     >
     </el-table-column>    
     <el-table-column 
       :label="$t('informe.soli_fecharte')"
-      prop="soli_fecharte"
+      prop="b.soli_fechaalmacen"
       width="100"
     >
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ scope.row.b.soli_fechaalmacen | moment('YYYY/MM/DD HH:mm:ss') }}</span>
+          </template>     
     </el-table-column>
     <el-table-column 
       :label="$t('informe.soli_numerorte')"
-      prop="soli_numerorte"
+      prop="b.soli_numerorte"
       width="100"
     >
     </el-table-column>        
     <el-table-column 
       :label="$t('informe.soli_puntos')"
-      prop="soli_puntos"
+      prop="b.soli_puntos"
       width="100"
     >
     </el-table-column>        
     <el-table-column 
       :label="$t('informe.soli_luminarias')"
-      prop="soli_luminarias"
+      prop="b.soli_luminarias"
       width="100"
     >
     </el-table-column>        
     <el-table-column 
       :label="$t('informe.soli_tipoexpansion')"
-      prop="soli_tipoexpansion"
+      prop="b.soli_tipoexpansion"
       width="100"
     >
     </el-table-column>
@@ -151,7 +172,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { parseTime } from '@/utils'
-import { informe_siap_detallado_actualizacion_xls } from '@/api/informe'
+import { informe_siap_solicitud_x_vencer_xls } from '@/api/informe'
 export default {
   data() {
     return {
@@ -171,22 +192,50 @@ export default {
   methods: {
     obtenerDatos() {
       this.loading = true
-      informe_siap_detallado_actualizacion_xls(this.fecha_inicial.getTime(), this.fecha_final.getTime()).then(response => {
+      informe_siap_solicitud_x_vencer_xls().then(response => {
         this.loading = false
         this.tableData = response.data
       }).catch(error => {
         this.loading = false
-        console.log('Error Actualización: ' + error)
+        console.log('Error Solicitud x Vencer: ' + error)
       })
     },
     exportarXls() {
       this.downloadLoading = true
+      var datos = []
+      this.tableData.forEach(d => {
+        const data = {
+          soti_descripcion: d.a.soti_descripcion,
+          soli_fecha: d.a.soli_fecha,
+          soli_nombre: d.a.soli_nombre,
+          soli_radicado: d.a.soli_radicado,
+          soli_direccion: d.a.soli_direccion,
+          barr_descripcion: d.a.barr_descripcion,
+          soli_telefono: d.a.soli_telefono,
+          soli_email: d.a.soli_email,
+          soli_solicitud: d.a.soli_solicitud,
+          soli_informe: d.a.soli_informe,
+          soli_consecutivo: d.a.soli_consecutivo,
+          soli_fecharespuesta: d.b.soli_fecharespuesta,
+          soli_fechalimite: d.b.soli_fechalimite,
+          soli_fechasupervisor: d.b.soli_fechasupervisor,
+          soli_fechainforme: d.b.soli_fechainforme,
+          soli_fechaalmacen: d.b.soli_fechaalmacen,
+          soli_numerorte: d.b.soli_numerorte,
+          soli_puntos: d.b.soli_puntos,
+          soli_tipoexpansion: d.b.soli_tipoexpansion,
+          soli_codigorespuesta: d.b.soli_codigorespuesta,
+          soli_luminarias: d.b.soli_luminarias,
+          soli_estado_descripcion: d.b.soli_estado_descripcion
+        }
+        datos.push(data)
+      })
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['Fecha Reporte', 'Fecha Digitación', 'Reporte', 'Código Luminaria Anterior', 'Dirección', 'Barrio', 'Uso', 'Cuenta Alumbrado', 'Tipo Anterior', 'Pot.(W) Anterior', 'Tecnología Anterior', 'Tipo Actual', 'Pot.(W) Actual', 'Tecnología Actual', 'Tipo Medida']
-        const filterVal = ['repo_fechasolucion', 'repo_fechasolucion', 'aap_rte', 'aap_id', 'aap_direccion', 'barr_descripcion', 'aaus_descripcion', 'aacu_descripcion', 'aamo_descripcion_anterior', 'aap_potencia_anterior', 'aap_tecnologia_anterior', 'aamo_descripcion', 'aap_potencia', 'aap_tecnologia', 'aaco_descripcion']
-        const list = this.tableData
+        const tHeader = ['Radicado', 'Tipo', 'Fecha Radicado', 'Fecha Límite', 'Nombre', 'Direccion', 'Barrio', 'Teléfono', 'Email', 'Descripción', 'Fecha Supervisor', 'Csc Atención', 'Informe', 'Fecha Informe', 'Fecha Programa', 'Puntos', 'Puesto', 'Luminarias', 'Tipo Expansión', 'Fecha Respuesta', 'Código Respuesta', 'Estado']
+        const filterVal = ['soli_radicado', 'soti_descripcion', 'soli_fecha', 'soli_fechalimite', 'soli_nombre', 'soli_direccion', 'barr_descripcion', 'soli_telefono', 'soli_email', 'soli_solicitud', 'soli_fechasupervisor', 'soli_consecutivo', 'soli_informe', 'soli_fechainforme', 'soli_fechaalmacen', 'soli_puntos', 'soli_numerorte', 'soli_luminarias', 'soli_tipoexpansion', 'soli_fecharespuesta', 'soli_codigorespuesta', 'soli_estado_descripcion']
+        const list = datos
         const data = this.formatJson(filterVal, list)
-        excel.export_json_to_excel(tHeader, data, 'detallado_actualizacion_' + this.$moment(this.fecha_inicial).format('YYYYMMDD') + '_' + this.$moment(this.fecha_final).format('YYYYMMDD'))
+        excel.export_json_to_excel(tHeader, data, 'detallado_solicitud_x_vencer' + this.$moment(this.fecha_inicial).format('YYYYMMDD') + '_' + this.$moment(this.fecha_final).format('YYYYMMDD'))
         this.downloadLoading = false
       })
     },
