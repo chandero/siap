@@ -29,7 +29,7 @@
                                 </el-select>
                               </el-form-item>
                         </el-col>
-                        <el-col v-if="reporte.reti_id===2 && reporte.adicional.repo_tipo_expansion < 4" :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
+                        <el-col v-if="reporte.reti_id===2 || reporte.reti_id===9" :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
                           <el-form-item prop="muot_id" :label="$t('reporte.ot')">
                             <el-input type="number" style="font-size: 30px;" v-model="reporte.adicional.muot_id" @input="reporte.adicional.muot_id = parseInt($event)"></el-input>
                           </el-form-item>
@@ -42,7 +42,40 @@
                                 </el-select>
                               </el-form-item>
                         </el-col>
-                        </el-row>      
+                    </el-row>
+                    <el-row :gutter="4">
+                      <el-col v-if="reporte.reti_id === 9" :xs="24" :sm="24" :md="3" :lg="3" :xl="3">
+                        <el-form-item :label="$t('reporte.aaco_id_anterior')" prop="adicional.aaco_id_anterior">
+                          <el-select clearable filterable ref="aaco_id_anterior" v-model="reporte.adicional.aaco_id_anterior" name="aaco_id_anterior" :placeholder="$t('gestion.connection.select')" @change="cambiarMedidaAnterior()">
+                            <el-option v-for="conexion in conexiones" :key="conexion.aaco_id" :label="conexion.aaco_descripcion" :value="parseInt(conexion.aaco_id)">
+                            </el-option>       
+                          </el-select>
+                        </el-form-item>
+                      </el-col>
+                      <el-col v-if="reporte.reti_id === 9" :xs="24" :sm="24" :md="3" :lg="3" :xl="3">
+                        <el-form-item :label="$t('reporte.aaco_id_nuevo')" prop="adicional.aaco_id_nuevo">
+                          <el-select clearable filterable ref="aaco_id_nuevo" v-model="reporte.adicional.aaco_id_nuevo" name="aaco_id_anterior" :placeholder="$t('gestion.connection.select')" @change="cambiarMedidaNuevo()">
+                            <el-option v-for="conexion in conexiones" :key="conexion.aaco_id" :label="conexion.aaco_descripcion" :value="parseInt(conexion.aaco_id)">
+                            </el-option>       
+                          </el-select>
+                        </el-form-item>
+                      </el-col>
+                      <el-col v-if="reporte.reti_id === 9 & reporte.adicional.aaco_id_nuevo == 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                        <el-form-item prop="adicional.medi_id" :label="$t('gestion.medidor.title')">
+                          <el-select clearable filterable ref="medi_id" v-model="reporte.adicional.medi_id" name="medi_id" :placeholder="$t('gestion.medidor.select')">
+                            <el-option v-for="m in medidores" :key="m.medi_id" :label="m.medi_numero" :value="m.medi_id">
+                            </el-option>       
+                          </el-select>
+                        </el-form-item>
+                      </el-col>
+                      <el-col v-if="reporte.reti_id === 9 & reporte.adicional.aaco_id_nuevo == 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                        <el-form-item prop="adicional.tran_id" :label="$t('gestion.transformador.title')">
+                          <el-select clearable filterable ref="transformador" v-model="reporte.adicional.tran_id" name="transformador" :placeholder="$t('gestion.transformador.select')">
+                            <el-option v-for="t in transformadores" :key="t.tran_id" :label="t.tran_numero" :value="t.tran_id">
+                            </el-option>       
+                          </el-select>
+                        </el-form-item>
+                      </el-col> 
                     </el-row>
                     <el-row :gutter="4">
                         <el-col :xs="24" :sm="24" :md="3" :lg="3" :xl="3">
@@ -177,6 +210,9 @@ import { saveReporte, printReporte, getTipos } from '@/api/reporte'
 import { getActividades, saveActividad } from '@/api/actividad'
 import { getAap, getAapApoyo } from '@/api/aap'
 import { getUrbanizadoraTodas } from '@/api/urbanizadora'
+import { getAapConexiones } from '@/api/aap_conexion'
+import { getMedidors } from '@/api/medidor'
+import { getTransformadors } from '@/api/transformador'
 
 export default {
   data() {
@@ -289,6 +325,9 @@ export default {
       tiposbarrio: [],
       actividades: [],
       urbanizadoras: [],
+      conexiones: [],
+      medidores: [],
+      transformadores: [],
       dialogonuevodanhovisible: false,
       actividad: {
         acti_id: null,
@@ -341,6 +380,14 @@ export default {
     ])
   },
   methods: {
+    cambiarMedidaAnterior() {
+      this.reporte.adicional.aaco_id_nuevo = 3 - this.reporte.adicional.aaco_id_anterior
+      console.log('cambiando medida nueva')
+    },
+    cambiarMedidaNuevo() {
+      this.reporte.adicional.aaco_id_anterior = 3 - this.reporte.adicional.aaco_id_nuevo
+      console.log('cambiando medida anterior')
+    },
     validarTipo() {
       if (this.reporte.reti_id === 2) {
         this.reporte.orig_id = 5
@@ -454,7 +501,12 @@ export default {
           repo_codigo: null,
           repo_apoyo: null,
           urba_id: null,
-          muot_id: null
+          muot_id: null,
+          medi_id: null,
+          tran_id: null,
+          medi_acta: null,
+          aaco_id_anterior: null,
+          aaco_id_nuevo: null
         },
         eventos: [],
         direcciones: []
@@ -510,13 +562,6 @@ export default {
     },
     imprimir() {
       printReporte(this.reporte.repo_id, this.empresa.empr_id)
-    },
-    getActividades() {
-      getActividades().then(response => {
-        this.actividades = response.data
-      }).catch(error => {
-        console.log('getActividades :' + error)
-      })
     },
     buscarAap() {
       if (this.reporte.adicional.repo_codigo === null || this.reporte.adicional.repo_codigo === '' || this.aap !== null) {
@@ -600,7 +645,25 @@ export default {
     getUrbanizadoraTodas().then(response => {
       this.urbanizadoras = response.data
     })
-    this.getActividades()
+    getAapConexiones().then(response => {
+      this.conexiones = response.data
+      this.conexiones.splice(2, 1)
+    })
+    getMedidors().then(response => {
+      this.medidores = response.data
+      getTransformadors().then(response => {
+        this.transformadores = response.data
+      }).catch(error => {
+        console.log('Error Transformadores: ' + error)
+      })
+    }).catch(error => {
+      console.log('Error Medidores' + error)
+    })
+    getActividades().then(response => {
+      this.actividades = response.data
+    }).catch(error => {
+      console.log('getActividades :' + error)
+    })
   }
 }
 </script>

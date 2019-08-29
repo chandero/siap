@@ -175,18 +175,18 @@
         <el-table-column
           fixed="right"
           :label="$t('table.accion')"
-          width="150">
+          width="100">
           <template slot-scope="scope">
-            <el-button
+            <!-- <el-button
               size="mini"
               circle
               type="warning"
               @click="handleEdit(scope.$index, scope.row)" :title="$t('edit')"><i class="el-icon-edit"></i>
-            </el-button>
+            </el-button> -->
             <el-button
               size="mini"
               circle
-              type="info"
+              type="warning"
               @click="handleEdit2(scope.$index, scope.row)" :title="$t('edit')"><i class="el-icon-edit"></i>
             </el-button>            
             <el-button
