@@ -179,6 +179,7 @@ POST    /api/cuad/save                  controllers.CuadrillaController.guardarC
 POST    /api/cuad/upd                   controllers.CuadrillaController.actualizarCuadrilla
 # Aap
 POST    /api/aap/get                   controllers.AapController.todos
+POST    /api/aap/gte                   controllers.AapController.todosEliminados
 POST    /api/aap/all                   controllers.AapController.aaps
 GET     /api/aap/next                  controllers.AapController.buscarSiguienteACrear()
 GET     /api/aap/:id                   controllers.AapController.buscarPorId(id: Long)
@@ -186,6 +187,7 @@ GET     /api/aap/vali/:id              controllers.AapController.buscarParaVerif
 GET     /api/aap/apoyo/:id             controllers.AapController.buscarPorApoyo(id: String)
 GET     /api/aap/bpm/:c/:t             controllers.AapController.buscarPorMaterial(c: String, t: scala.Long)
 GET     /api/aap/del/:id               controllers.AapController.borrarAap(id: Long)
+GET     /api/aap/rec/:id               controllers.AapController.recuperarAap(id: Long)
 POST    /api/aap/save                  controllers.AapController.guardarAap
 POST    /api/aap/upd                   controllers.AapController.actualizarAap
 # Aap Tipo Carcasa

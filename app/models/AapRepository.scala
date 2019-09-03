@@ -933,7 +933,33 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
         LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
         LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
         LEFT JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
-        WHERE a.empr_id = {empr_id} 
+        WHERE a.empr_id = {empr_id} AND a.esta_id <> 9
+      """
+      if (!filter.isEmpty){
+          query = query + " and " + filter
+      }
+      val result = SQL(query).
+      on(
+          'empr_id -> empr_id
+      ).as(SqlParser.scalar[Long].single)
+      result
+    }
+  }
+
+
+  /**
+  * Recuperar total de registros
+  * @return total
+  */
+  def cuentaEliminados(empr_id: Long, filter: String): Long =  {
+    db.withConnection{ implicit connection =>
+      var query: String = 
+      """
+        SELECT COUNT(*) AS c FROM siap.aap a
+        LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
+        LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
+        LEFT JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
+        WHERE a.empr_id = {empr_id} and a.esta_id = 9
       """
       if (!filter.isEmpty){
           query = query + " and " + filter
@@ -983,7 +1009,7 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                         LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
                         LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
                         LEFT JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
-                        WHERE a.empr_id = {empr_id} and a.aap_id <> 9999999"""
+                        WHERE a.empr_id = {empr_id} and a.aap_id <> 9999999 and a.esta_id <> 9"""
                     if (!filter.isEmpty) {
                         query = query + " and " + filter
                     }
@@ -1016,6 +1042,78 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                 }
         lista_result.toList
     }
+
+    /**
+    *  Recuperar todas la Aap de la empresa
+    *  @param empr_id: Long
+    *  @param page_size: Int
+    *  @param current_page: Int
+    */
+    def todosEliminados(empr_id:Long, page_size:Long, current_page: Long, orderby:String, filter:String): Future[Iterable[Aap]] = Future[Iterable[Aap]] {
+        var lista_result = new ListBuffer[Aap]
+        db.withConnection { implicit connection => 
+        var query: String =
+            """SELECT   a.aap_id, 
+                        a.aap_apoyo, 
+                        a.aap_descripcion, 
+                        a.aap_direccion, 
+                        a.aap_lat::text, 
+                        a.aap_lng::text, 
+                        a.barr_id,
+                        b.tiba_id,
+                        a.empr_id, 
+                        a.aap_fechacreacion, 
+                        a.usua_id, 
+                        a.aaus_id, 
+                        a.aap_modernizada, 
+                        a.aatc_id, 
+                        a.aap_medidor, 
+                        a.aap_fechatoma, 
+                        a.aama_id, 
+                        a.aamo_id, 
+                        a.aacu_id, 
+                        a.aaco_id,
+                        b.barr_descripcion,
+                        t.tiba_descripcion,
+                        a.esta_id
+                FROM siap.aap a
+                LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
+                LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
+                LEFT JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
+                WHERE a.empr_id = {empr_id} and a.aap_id <> 9999999 and a.esta_id = 9"""
+            if (!filter.isEmpty) {
+                query = query + " and " + filter
+            }
+            if (!orderby.isEmpty) {
+                query = query + s" ORDER BY $orderby"
+            }
+            query = query + """
+                LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)"""
+            val lista:List[Aap]=SQL(query).
+            on(
+                'empr_id -> empr_id,
+                'page_size -> page_size,
+                'current_page -> current_page
+                ).as(simple *)
+            for ( e <- lista ) {
+                val c = SQL("SELECT aael.* FROM siap.aap_elemento aael WHERE aap_id = {aap_id}").
+                on(
+                    'aap_id -> e.aap_id
+                ).as(AapElemento.aapelementoSet.singleOpt)
+            
+                val aap = e.copy(aap_elemento = c)
+
+                val h = SQL("SELECT * FROM siap.aap_elemento_historia WHERE aap_id = {aap_id} ORDER BY aael_fecha DESC").
+                on(
+                    'aap_id -> e.aap_id
+                ).as(AapHistoria.aapelementohistoriaSet *)
+                val aaph = aap.copy(historia = Some(h))
+                lista_result += aaph
+            }
+        }
+        lista_result.toList
+    }
+
 
     /**
     *  Recuperar todas la Aap de la empresa
@@ -1563,7 +1661,8 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
             val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())
             val count:Long = SQL("UPDATE siap.aap SET esta_id = 9 WHERE aap_id = {aap_id} and empr_id = {empr_id}").
             on(
-                'aap_id -> aap_id
+                'aap_id -> aap_id,
+                'empr_id -> empr_id
             ).executeUpdate
 
             SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
@@ -1582,4 +1681,36 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
             count > 0
         }
     }
+
+    /**
+    * Recuperar Aap 
+    * @param aap_id: Long
+    */
+
+    def recuperar(aap_id: Long, usua_id: Long, empr_id: Long) : Boolean = {
+        db.withConnection { implicit connection =>
+            val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
+            val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+            val count:Long = SQL("UPDATE siap.aap SET esta_id = 1 WHERE aap_id = {aap_id} and empr_id = {empr_id}").
+            on(
+                'aap_id -> aap_id,
+                'empr_id -> empr_id
+            ).executeUpdate
+
+            SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
+                on(
+                    'audi_fecha -> fecha,
+                    'audi_hora -> hora,
+                    'usua_id -> usua_id,
+                    'audi_tabla -> "aap", 
+                    'audi_uid -> aap_id,
+                    'audi_campo -> "", 
+                    'audi_valorantiguo -> "",
+                    'audi_valornuevo -> "",
+                    'audi_evento -> "R").
+                    executeInsert()
+
+            count > 0
+        }
+    }    
 }

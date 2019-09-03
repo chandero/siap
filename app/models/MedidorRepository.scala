@@ -22,7 +22,7 @@ import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 
 
-case class Medidor(medi_id: Option[Long], medi_numero: Option[String], amem_id: Option[Long], amet_id: Option[Long], aacu_id: Option[Long], empr_id: Option[Long], usua_id: Option[Long], medi_direccion: Option[String], medi_estado: Option[Int])
+case class Medidor(medi_id: Option[Long], medi_numero: Option[String], amem_id: Option[Long], amet_id: Option[Long], aacu_id: Option[Long], empr_id: Option[Long], usua_id: Option[Long], medi_direccion: Option[String], medi_estado: Option[Int], medi_acta: Option[String])
 case class Informe(medi_numero: Option[String], medi_direccion: Option[String], aacu_descripcion: Option[String], cantidad: Option[Int])
 
 object Medidor {
@@ -39,7 +39,8 @@ object Medidor {
             "empr_id" -> m.empr_id,
             "usua_id" -> m.usua_id,
             "medi_direccion" -> m.medi_direccion,
-            "medi_estado" -> m.medi_estado
+            "medi_estado" -> m.medi_estado,
+            "medi_acta" -> m.medi_acta
         )
     }
 
@@ -52,7 +53,8 @@ object Medidor {
         (__ \ "empr_id").readNullable[Long] and
         (__ \ "usua_id").readNullable[Long] and
         (__ \ "medi_direccion").readNullable[String] and
-        (__ \ "medi_estado").readNullable[Int]
+        (__ \ "medi_estado").readNullable[Int] and
+        (__ \ "medi_acta").readNullable[String]
     )(Medidor.apply _)
 
     val _set = {
@@ -64,7 +66,8 @@ object Medidor {
       get[Option[Long]]("empr_id") ~
       get[Option[Long]]("usua_id") ~
       get[Option[String]]("medi_direccion") ~
-      get[Option[Int]]("medi_estado") map {
+      get[Option[Int]]("medi_estado") ~
+      get[Option[String]]("medi_acta") map {
           case medi_id ~
                medi_numero ~
                amem_id ~
@@ -73,7 +76,8 @@ object Medidor {
                empr_id ~
                usua_id ~
                medi_direccion ~
-               medi_estado => Medidor(medi_id,
+               medi_estado ~
+               medi_acta => Medidor(medi_id,
                medi_numero,
                amem_id,
                amet_id,
@@ -81,7 +85,8 @@ object Medidor {
                empr_id,
                usua_id,
                medi_direccion,
-               medi_estado)
+               medi_estado,
+               medi_acta)
       }
   }    
 }
@@ -200,7 +205,8 @@ class MedidorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
             empr_id,
             usua_id,
             medi_direccion,
-            medi_estado) VALUES (
+            medi_estado,
+            medi_acta) VALUES (
             {medi_numero},
             {amem_id},
             {amet_id},
@@ -208,7 +214,8 @@ class MedidorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
             {empr_id},
             {usua_id},
             {medi_direccion},
-            {medi_estado})""").
+            {medi_estado},
+            {medi_acta})""").
             on(
               'medi_numero -> medidor.medi_numero,
               'amem_id -> medidor.amem_id,
@@ -217,7 +224,8 @@ class MedidorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
               'empr_id -> medidor.empr_id,
               'usua_id -> medidor.usua_id,
               'medi_direccion -> medidor.medi_direccion,
-              'medi_estado -> 1
+              'medi_estado -> 1,
+              'medi_acta -> medidor.medi_acta
             ).executeInsert().get
 
             SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
@@ -247,7 +255,7 @@ class MedidorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
         db.withConnection { implicit connection =>
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())
-            val result: Boolean = SQL("UPDATE siap.medidor SET medi_numero = {medi_numero}, amem_id = {amem_id}, amet_id = {amet_id}, aacu_id = {aacu_id}, usua_id = {usua_id}, medi_direccion = {medi_direccion}, medi_estado = {medi_estado} WHERE medi_id = {medi_id} and empr_id = {empr_id}").
+            val result: Boolean = SQL("UPDATE siap.medidor SET medi_numero = {medi_numero}, amem_id = {amem_id}, amet_id = {amet_id}, aacu_id = {aacu_id}, usua_id = {usua_id}, medi_direccion = {medi_direccion}, medi_estado = {medi_estado}, medi_acta = {medi_acta} WHERE medi_id = {medi_id} and empr_id = {empr_id}").
             on(
               'medi_id -> medidor.medi_id,
               'medi_numero -> medidor.medi_numero,
@@ -257,7 +265,8 @@ class MedidorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
               'empr_id -> medidor.empr_id,
               'usua_id -> medidor.usua_id,
               'medi_direccion -> medidor.medi_direccion,
-              'medi_estado -> medidor.medi_estado
+              'medi_estado -> medidor.medi_estado,
+              'medi_acta -> medidor.medi_acta
             ).executeUpdate() > 0
 
             if (medidor_ant != None){
@@ -346,8 +355,21 @@ class MedidorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
                               'audi_valornuevo -> medidor.medi_direccion,
                               'audi_evento -> "A").
                               executeInsert()                    
+                        }
+                        if (medidor_ant.get.medi_acta != medidor.medi_acta){
+                            SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
+                            on(
+                                'audi_fecha -> fecha,
+                                'audi_hora -> hora,
+                                'usua_id -> medidor.usua_id,
+                                'audi_tabla -> "medidor", 
+                                'audi_uid -> medidor.medi_acta,
+                                'audi_campo -> "medi_acta", 
+                                'audi_valorantiguo -> medidor_ant.get.medi_acta,
+                                'audi_valornuevo -> medidor.medi_acta,
+                                'audi_evento -> "A").
+                                executeInsert()                    
                           }
-        
             }
 
 

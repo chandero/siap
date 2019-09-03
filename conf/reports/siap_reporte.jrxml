@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte" pageWidth="612" pageHeight="792" whenNoDataType="NoDataSection" columnWidth="587" leftMargin="10" rightMargin="15" topMargin="14" bottomMargin="15" isSummaryNewPage="true" isFloatColumnFooter="true" whenResourceMissingType="Error" uuid="f8caebe0-c17f-4691-ac5f-60e5854f08eb">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Siap_Adapter"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="siap"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="520"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="467"/>
 	<subDataset name="Dataset1" uuid="dbc9354d-619c-4173-8573-a3f7cee7dbff">
@@ -126,7 +126,25 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="urba_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="urba_id"/>
 	</field>
-	<field name="COLUMN_34" class="java.lang.Integer">
+	<field name="muot_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="muot_id"/>
+	</field>
+	<field name="aaco_id_anterior" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="aaco_id_anterior"/>
+	</field>
+	<field name="aaco_id_nuevo" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="aaco_id_nuevo"/>
+	</field>
+	<field name="medi_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="medi_id"/>
+	</field>
+	<field name="tran_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="tran_id"/>
+	</field>
+	<field name="medi_acta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="medi_acta"/>
+	</field>
+	<field name="COLUMN_40" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="reti_id"/>
 	</field>
 	<field name="reti_descripcion" class="java.lang.String">
@@ -138,22 +156,22 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="reti_estado" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="reti_estado"/>
 	</field>
-	<field name="COLUMN_38" class="java.lang.Integer">
+	<field name="COLUMN_44" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
 	<field name="aap_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="aap_id"/>
 	</field>
-	<field name="COLUMN_40" class="java.lang.Integer">
+	<field name="COLUMN_46" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="repo_id"/>
 	</field>
 	<field name="elem_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="elem_id"/>
 	</field>
-	<field name="COLUMN_42" class="java.lang.Integer">
+	<field name="COLUMN_48" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
-	<field name="COLUMN_43" class="java.lang.Integer">
+	<field name="COLUMN_49" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
 	</field>
 	<field name="even_estado" class="java.lang.Integer">
@@ -177,7 +195,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="even_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="even_id"/>
 	</field>
-	<field name="COLUMN_51" class="java.lang.Integer">
+	<field name="COLUMN_57" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="elem_id"/>
 	</field>
 	<field name="elem_descripcion" class="java.lang.String">
@@ -192,10 +210,10 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="tiel_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="tiel_id"/>
 	</field>
-	<field name="COLUMN_56" class="java.lang.Integer">
+	<field name="COLUMN_62" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
-	<field name="COLUMN_57" class="java.lang.Integer">
+	<field name="COLUMN_63" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
 	</field>
 	<field name="elem_estado" class="java.lang.Integer">
@@ -204,7 +222,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="ucap_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="ucap_id"/>
 	</field>
-	<field name="COLUMN_60" class="java.lang.Integer">
+	<field name="COLUMN_66" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="acti_id"/>
 	</field>
 	<field name="acti_descripcion" class="java.lang.String">
@@ -213,10 +231,10 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="acti_estado" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="acti_estado"/>
 	</field>
-	<field name="COLUMN_63" class="java.lang.Integer">
+	<field name="COLUMN_69" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
-	<field name="COLUMN_64" class="java.lang.Integer">
+	<field name="COLUMN_70" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="orig_id"/>
 	</field>
 	<field name="orig_descripcion" class="java.lang.String">
@@ -225,10 +243,10 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="orig_estado" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="orig_estado"/>
 	</field>
-	<field name="COLUMN_67" class="java.lang.Integer">
+	<field name="COLUMN_73" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
-	<field name="COLUMN_68" class="java.lang.Integer">
+	<field name="COLUMN_74" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="barr_id"/>
 	</field>
 	<field name="barr_descripcion" class="java.lang.String">
@@ -240,10 +258,10 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="muni_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="muni_id"/>
 	</field>
-	<field name="COLUMN_72" class="java.lang.Integer">
+	<field name="COLUMN_78" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="tiba_id"/>
 	</field>
-	<field name="COLUMN_73" class="java.lang.Integer">
+	<field name="COLUMN_79" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
 	<field name="barr_estado" class="java.lang.Integer">
@@ -252,7 +270,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="depa_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="depa_id"/>
 	</field>
-	<field name="COLUMN_76" class="java.lang.Integer">
+	<field name="COLUMN_82" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="aap_id"/>
 	</field>
 	<field name="aap_apoyo" class="java.lang.String">
@@ -264,10 +282,10 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="aap_direccion" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="aap_direccion"/>
 	</field>
-	<field name="COLUMN_80" class="java.lang.Integer">
+	<field name="COLUMN_86" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="barr_id"/>
 	</field>
-	<field name="COLUMN_81" class="java.lang.Integer">
+	<field name="COLUMN_87" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
 	</field>
 	<field name="esta_id" class="java.lang.Integer">
@@ -276,7 +294,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="aap_fechacreacion" class="java.sql.Date">
 		<property name="com.jaspersoft.studio.field.label" value="aap_fechacreacion"/>
 	</field>
-	<field name="COLUMN_84" class="java.lang.Integer">
+	<field name="COLUMN_90" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
 	<field name="aaus_id" class="java.lang.Integer">
@@ -312,28 +330,28 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="aap_lng" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="aap_lng"/>
 	</field>
-	<field name="COLUMN_96" class="java.lang.Integer">
+	<field name="COLUMN_102" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="barr_id"/>
 	</field>
-	<field name="COLUMN_97" class="java.lang.String">
+	<field name="COLUMN_103" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="barr_descripcion"/>
 	</field>
-	<field name="COLUMN_98" class="java.lang.String">
+	<field name="COLUMN_104" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="barr_codigo"/>
 	</field>
-	<field name="COLUMN_99" class="java.lang.Integer">
+	<field name="COLUMN_105" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="muni_id"/>
 	</field>
-	<field name="COLUMN_100" class="java.lang.Integer">
+	<field name="COLUMN_106" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="tiba_id"/>
 	</field>
-	<field name="COLUMN_101" class="java.lang.Integer">
+	<field name="COLUMN_107" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
-	<field name="COLUMN_102" class="java.lang.Integer">
+	<field name="COLUMN_108" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="barr_estado"/>
 	</field>
-	<field name="COLUMN_103" class="java.lang.Integer">
+	<field name="COLUMN_109" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="depa_id"/>
 	</field>
 	<group name="repo_id">

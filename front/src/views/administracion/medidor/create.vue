@@ -12,7 +12,11 @@
         <span>{{ $t('gestion.medidor.direccion')}}</span>
         <el-input name="direccion" v-model="medidor.medi_direccion" v-validate="'required'"></el-input>
         <span>{{ errors.first('direccion') }}</span>
-        <p/>     
+        <p/> 
+        <span>{{ $t('gestion.medidor.acta')}}</span>
+        <el-input name="acta" v-model="medidor.medi_acta" v-validate="'required'"></el-input>
+        <span>{{ errors.first('direccion') }}</span>
+        <p/>             
         <span>{{ $t('gestion.medidor.tipo.title')}}</span>
         <el-select v-model="medidor.amet_id" filterable clearable name="tipo" :placeholder="$t('gestion.medidor.tipo.select')">
           <el-option v-for="t in tiposMedidor" :key="t.amet_id" :label="t.amet_descripcion" :value="t.amet_id">
@@ -52,7 +56,8 @@ export default {
         amet_id: null,
         aacu_id: null,
         empr_id: null,
-        usua_id: null
+        usua_id: null,
+        medi_acta: null
       },
       tiposMedidor: [],
       tiposMarcaMedidor: [],
@@ -92,7 +97,8 @@ export default {
         amet_id: null,
         aacu_id: null,
         empr_id: null,
-        usua_id: null
+        usua_id: null,
+        medi_acta: null
       }
     },
     limpiar() {
@@ -104,7 +110,8 @@ export default {
         amet_id: null,
         aacu_id: null,
         empr_id: null,
-        usua_id: null
+        usua_id: null,
+        medi_acta: null
       }
     },
     success() {

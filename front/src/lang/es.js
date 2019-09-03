@@ -102,7 +102,8 @@ export default {
     rucap: 'Informe Unidades Constructivas',
     rmuot: 'Informe Municipio OT',
     inventario: 'Inventario Luminaria',
-    gestion: 'Luminarias',
+    gestion: 'Luminarias Activas',
+    eliminada: 'Luminarias Eliminadas',
     gestioncreate: 'Luminarias / Nueva Luminaria',
     gestionedit: 'Luminarias / Modificar Información Luminaria',
     consultaporcodigo: 'Consultar Luminaria por Código',
@@ -191,6 +192,7 @@ export default {
     reporteporuso: 'Informe por Uso',
     autorizacion: 'Código de Autorización',
     crearaap: 'Crear Luminaria',
+    recuperaraap: 'Recuperar Luminaria',
     cargarreporte: 'Cargar Reporte',
     abrirreporte: 'Abrir Reporte',
     consultarautorizacion: 'Consultar Códigos',
@@ -578,7 +580,9 @@ export default {
     duetime: 'Fecha Límite',
     hour: 'Hora(s)',
     cuadrilla: 'Cuadrilla',
-    ot: 'Orden de Trabajo'
+    ot: 'Orden de Trabajo',
+    aaco_id_anterior: 'Tipo Medida Anterior',
+    aaco_id_nuevo: 'Tipo Medida Nuevo'
   },
   obra: {
     tipo: {
@@ -648,8 +652,17 @@ export default {
   actividad: {
     select: 'Seleccione el Daño'
   },
+  eliminada: {
+    tabletitle: 'Luminarias Eliminadas',
+    success: 'Éxito',
+    recoveredsuccessful: 'Luminaria recuperada con exito!',
+    error: 'Error',
+    recoveredfail: 'No se pudo recuperar la luminaria, error =>',
+    confirmationmsg: 'Se procederá a recuperar la luminaria seleccionada, continuar?',
+    recovercancelled: 'Se canceló la recuperación de la luminaria'
+  },
   gestion: {
-    tabletitle: 'Gestión de Inventario',
+    tabletitle: 'Gestión de Luminarias Activas',
     select: 'Seleccione el Activo',
     submit: 'Seleccionar',
     description: 'Descripción',

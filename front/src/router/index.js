@@ -76,7 +76,7 @@ export const asyncRouterMap = [
     single: false,
     meta: {
       title: 'procesos',
-      icon: 'form',
+      icon: 'table',
       roles: ['super', 'gerencia', 'admin', 'ingeniero', 'supervisor', 'auxiliar', 'almacenista', 'liniero']
     },
     children: [
@@ -150,7 +150,7 @@ export const asyncRouterMap = [
     single: false,
     meta: {
       title: 'solicitud',
-      icon: 'form',
+      icon: 'message',
       roles: ['super', 'admin', 'auxiliar', 'supervisor']
     },
     children: [
@@ -172,7 +172,7 @@ export const asyncRouterMap = [
     single: false,
     meta: {
       title: 'informe',
-      icon: 'form',
+      icon: 'excel',
       roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'almacenista']
     },
     children: [
@@ -214,6 +214,7 @@ export const asyncRouterMap = [
     },
     children: [
       { path: 'gestion', component: _import('inventario/gestion'), name: 'gestion', meta: { title: 'gestion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'eliminada', component: _import('inventario/eliminado'), name: 'eliminada', meta: { title: 'eliminada', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
       { path: 'gestion/editar/:id', component: _import('inventario/gestion/edit'), name: 'gestionedit', hidden: true, redirect: false, meta: { title: 'gestionedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
       { path: 'gestion/crear', component: _import('inventario/gestion/create'), name: 'gestioncreate', hidden: true, meta: { title: 'gestioncreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
       { path: 'consultaporcodigo', component: _import('inventario/consultaporcodigo'), name: 'consultaporcodigo', meta: { title: 'consultaporcodigo', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
@@ -229,11 +230,12 @@ export const asyncRouterMap = [
     single: false,
     meta: {
       title: 'autorizacion',
-      icon: 'form',
+      icon: 'lock',
       roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor']
     },
     children: [
       { path: 'crearaap', component: _import('autorizacion/crearaap/index'), name: 'crearaap', meta: { title: 'crearaap', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor'] }},
+      { path: 'recuperaraap', component: _import('autorizacion/recuperaraap/index'), name: 'recuperaraap', meta: { title: 'recuperaraap', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor'] }},
       { path: 'abrirreporte', component: _import('autorizacion/abrirreporte/index'), name: 'abrirreporte', meta: { title: 'abrirreporte', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor'] }},
       { path: 'cargarreporte', component: _import('autorizacion/cargarreporte/index'), name: 'cargarreporte', meta: { title: 'cargarreporte', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor'] }}
     ]
@@ -246,7 +248,7 @@ export const asyncRouterMap = [
     single: false,
     meta: {
       title: 'gerencia',
-      icon: 'form',
+      icon: 'star',
       roles: ['super', 'admin', 'ingeniero', 'gerencia']
     },
     children: [
@@ -262,7 +264,7 @@ export const asyncRouterMap = [
     single: false,
     meta: {
       title: 'administracion',
-      icon: 'form',
+      icon: 'people',
       roles: ['super', 'admin', 'ingeniero', 'auxiliar']
     },
     children: [

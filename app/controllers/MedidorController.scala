@@ -49,7 +49,7 @@ class MedidorController @Inject()(mService: MedidorRepository, cc: ControllerCom
       var m = json.as[Medidor]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
-      val mnuevo = new Medidor(Some(0),m.medi_numero, m.amem_id, m.amet_id, m.aacu_id, empr_id, usua_id, m.medi_direccion, m.medi_estado)
+      val mnuevo = new Medidor(Some(0),m.medi_numero, m.amem_id, m.amet_id, m.aacu_id, empr_id, usua_id, m.medi_direccion, m.medi_estado, m.medi_acta)
       mService.crear(mnuevo).map { result =>
         if (result > 0){
           Created(Json.toJson("true"))
@@ -64,7 +64,7 @@ class MedidorController @Inject()(mService: MedidorRepository, cc: ControllerCom
       var m = json.as[Medidor]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)      
-      val mnuevo = new Medidor(m.medi_id,m.medi_numero, m.amem_id, m.amet_id, m.aacu_id, empr_id, usua_id, m.medi_direccion, m.medi_estado)
+      val mnuevo = new Medidor(m.medi_id,m.medi_numero, m.amem_id, m.amet_id, m.aacu_id, empr_id, usua_id, m.medi_direccion, m.medi_estado, m.medi_acta)
       if (mService.actualizar(mnuevo)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {

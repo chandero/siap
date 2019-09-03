@@ -13,6 +13,19 @@ export function getTodos(page_size, current_page, orderby, filter) {
     data: data
   })
 }
+export function getTodosEliminados(page_size, current_page, orderby, filter) {
+  const data = {
+    page_size,
+    current_page,
+    orderby,
+    filter
+  }
+  return request({
+    url: '/aap/gte',
+    method: 'post',
+    data: data
+  })
+}
 
 export function getAaps(filter) {
   const data = {
@@ -103,6 +116,16 @@ export function deleteAap(aap_id) {
   }
   return request({
     url: '/aap/del/' + data.aap_id,
+    method: 'get'
+  })
+}
+
+export function recuperarAap(aap_id) {
+  const data = {
+    aap_id
+  }
+  return request({
+    url: '/aap/rec/' + data.aap_id,
     method: 'get'
   })
 }

@@ -188,18 +188,12 @@
               type="warning"
               @click="handleEdit(scope.$index, scope.row)"
               title="Modificar Luminaria"><i class="el-icon-edit"></i></el-button>
-            <el-button v-if="scope.row.esta_id !== 9"
+            <el-button
               size="mini"
               circle
               type="danger"
               title="Borrar Luminaria"
               @click="handleDelete(scope.$index, scope.row)"><i class="el-icon-delete"></i></el-button>
-            <el-button v-if="scope.row.esta_id === 9"
-              size="mini"
-              circle
-              type="success"
-              title="Recuperar Luminaria"
-              @click="handleDelete(scope.$index, scope.row)"><i class="el-icon-refresh-left"></i></el-button>              
           </template>
         </el-table-column>
       </el-table> 
