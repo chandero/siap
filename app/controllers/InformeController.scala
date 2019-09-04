@@ -107,6 +107,14 @@ class InformeController @Inject()(
       }
   }
 
+  def siap_detallado_cambio_medida_xls(fecha_inicial: scala.Long, fecha_final: scala.Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+   val empr_id = Utility.extraerEmpresa(request)
+   informeService.siap_detallado_cambio_medida_xls(fecha_inicial, fecha_final, empr_id.get).map { data =>
+      Ok(Json.toJson(data))
+   }
+  }
+  
+
   def siap_detallado_modernizacion_xls(fecha_inicial: scala.Long, fecha_final: scala.Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
       informeService.siap_detallado_modernizacion_xls(fecha_inicial, fecha_final, empr_id.get).map { data =>

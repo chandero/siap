@@ -565,6 +565,31 @@ case class Siap_detallado_reubicacion(
     aaco_descripcion: Option[String]
 )
 
+case class Siap_detallado_cambio_medida(
+    repo_fechasolucion: Option[DateTime],
+    repo_fechadigitacion: Option[DateTime],
+    aap_rte: Option[String],
+    aap_id: Option[scala.Long],
+    aap_direccion_anterior: Option[String],
+    barr_descripcion_anterior: Option[String],
+    aap_direccion: Option[String],
+    barr_descripcion: Option[String],
+    aaus_descripcion_anterior: Option[String],
+    aacu_descripcion_anterior: Option[String],
+    aamo_descripcion_anterior: Option[String],
+    aap_potencia_anterior: Option[Int],
+    aap_tecnologia_anterior: Option[String],
+    aaco_descripcion_anterior: Option[String],
+    aamo_descripcion: Option[String],
+    aap_potencia: Option[Int],
+    aap_tecnologia: Option[String],
+    aaus_descripcion: Option[String],
+    aacu_descripcion: Option[String],
+    aaco_descripcion: Option[String],
+    medi_numero: Option[String],
+    tran_numero: Option[String]
+)
+
 case class Siap_detallado_modernizacion(
     repo_fecharecepcion: Option[DateTime],
     repo_fechasolucion: Option[DateTime],
@@ -957,6 +982,110 @@ object Siap_detallado_reubicacion {
           aaus_descripcion,
           aacu_descripcion,
           aaco_descripcion
+        )
+    }
+  }
+}
+
+object Siap_detallado_cambio_medida {
+  implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy/MM/dd")
+  implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy/MM/dd")
+
+  implicit val sdrWrites = new Writes[Siap_detallado_cambio_medida] {
+    def writes(srm: Siap_detallado_cambio_medida) = Json.obj(
+      "repo_fechasolucion" -> srm.repo_fechasolucion,
+      "repo_fechadigitacion" -> srm.repo_fechadigitacion,
+      "aap_rte" -> srm.aap_rte,
+      "aap_id" -> srm.aap_id,
+      "aap_direccion_anterior" -> srm.aap_direccion_anterior,
+      "barr_descripcion_anterior" -> srm.barr_descripcion_anterior,
+      "aap_direccion" -> srm.aap_direccion,
+      "barr_descripcion" -> srm.barr_descripcion,
+      "aaus_descripcion_anterior" -> srm.aaus_descripcion_anterior,
+      "aacu_descripcion_anterior" -> srm.aacu_descripcion_anterior,
+      "aamo_descripcion_anterior" -> srm.aamo_descripcion_anterior,
+      "aap_potencia_anterior" -> srm.aap_potencia_anterior,
+      "aap_tecnologia_anterior" -> srm.aap_tecnologia,
+      "aaco_descripcion_anterior" -> srm.aaco_descripcion_anterior,
+      "aamo_descripcion" -> srm.aamo_descripcion,
+      "aap_potencia" -> srm.aap_potencia,
+      "aap_tecnologia" -> srm.aap_tecnologia,
+      "aaus_descripcion" -> srm.aaus_descripcion,
+      "aacu_descripcion" -> srm.aacu_descripcion,
+      "aaco_descripcion" -> srm.aaco_descripcion,
+      "medi_numero" -> srm.medi_numero,
+      "tran_numero" -> srm.tran_numero
+    )
+  }
+
+  val _set = {
+    get[Option[DateTime]]("repo_fechasolucion") ~
+      get[Option[DateTime]]("repo_fechadigitacion") ~
+      get[Option[String]]("aap_rte") ~
+      get[Option[scala.Long]]("aap_id") ~
+      get[Option[String]]("aap_direccion_anterior") ~
+      get[Option[String]]("barr_descripcion_anterior") ~
+      get[Option[String]]("aap_direccion") ~
+      get[Option[String]]("barr_descripcion") ~
+      get[Option[String]]("aaus_descripcion_anterior") ~
+      get[Option[String]]("aacu_descripcion_anterior") ~
+      get[Option[String]]("aamo_descripcion_anterior") ~
+      get[Option[Int]]("aap_potencia_anterior") ~
+      get[Option[String]]("aap_tecnologia_anterior") ~
+      get[Option[String]]("aaco_descripcion_anterior") ~
+      get[Option[String]]("aamo_descripcion") ~
+      get[Option[Int]]("aap_potencia") ~
+      get[Option[String]]("aap_tecnologia") ~
+      get[Option[String]]("aaus_descripcion") ~
+      get[Option[String]]("aacu_descripcion") ~
+      get[Option[String]]("aaco_descripcion") ~
+      get[Option[String]]("medi_numero") ~
+      get[Option[String]]("tran_numero") map {
+      case repo_fechasolucion ~
+            repo_fechadigitacion ~
+            aap_rte ~
+            aap_id ~
+            aap_direccion_anterior ~
+            barr_descripcion_anterior ~
+            aap_direccion ~
+            barr_descripcion ~
+            aaus_descripcion_anterior ~
+            aacu_descripcion_anterior ~
+            aamo_descripcion_anterior ~
+            aap_potencia_anterior ~
+            aap_tecnologia_anterior ~
+            aaco_descripcion_anterior ~
+            aamo_descripcion ~
+            aap_potencia ~
+            aap_tecnologia ~
+            aaus_descripcion ~
+            aacu_descripcion ~
+            aaco_descripcion ~
+            medi_numero ~
+            tran_numero =>
+        new Siap_detallado_cambio_medida(
+          repo_fechasolucion,
+          repo_fechadigitacion,
+          aap_rte,
+          aap_id,
+          aap_direccion_anterior,
+          barr_descripcion_anterior,
+          aap_direccion,
+          barr_descripcion,
+          aaus_descripcion_anterior,
+          aacu_descripcion_anterior,
+          aamo_descripcion_anterior,
+          aap_potencia_anterior,
+          aap_tecnologia_anterior,
+          aaco_descripcion_anterior,
+          aamo_descripcion,
+          aap_potencia,
+          aap_tecnologia,
+          aaus_descripcion,
+          aacu_descripcion,
+          aaco_descripcion,
+          medi_numero,
+          tran_numero
         )
     }
   }
@@ -2820,6 +2949,83 @@ ORDER BY e.reti_id, e.elem_codigo""")
           .as(Siap_detallado_reubicacion.siap_detallado_reubicacion_set *)
       }
     }
+
+  /**
+    *  imprimir
+    * @param repo_id: scala.Long
+    * @return OutputStream
+    */
+    def siap_detallado_cambio_medida_xls(
+      fecha_inicial: scala.Long,
+      fecha_final: scala.Long,
+      empr_id: scala.Long
+    ): Future[Iterable[Siap_detallado_cambio_medida]] =
+    Future[Iterable[Siap_detallado_cambio_medida]] {
+      db.withConnection { implicit connection =>
+        var fi = Calendar.getInstance()
+        var ff = Calendar.getInstance()
+        fi.setTimeInMillis(fecha_inicial)
+        ff.setTimeInMillis(fecha_final)
+        fi.set(Calendar.MILLISECOND, 0)
+        fi.set(Calendar.SECOND, 0)
+        fi.set(Calendar.MINUTE, 0)
+        fi.set(Calendar.HOUR, 0)
+
+        ff.set(Calendar.MILLISECOND, 59)
+        ff.set(Calendar.SECOND, 59)
+        ff.set(Calendar.MINUTE, 59)
+        ff.set(Calendar.HOUR, 23)
+        SQL("""select distinct
+            r.repo_fechasolucion,
+            ra.repo_fechadigitacion,
+            a.aap_id,
+            r.repo_consecutivo::text as aap_rte,
+            rd.even_direccion_anterior as aap_direccion_anterior,
+            ba.barr_descripcion as barr_descripcion_anterior,
+            rd.even_direccion as aap_direccion,
+            b.barr_descripcion,
+            coa.aaco_descripcion as aaco_descripcion_anterior,
+            moa.aamo_descripcion as aamo_descripcion_anterior,
+            rdd.aap_potencia_anterior as aap_potencia_anterior,
+            rdd.aap_tecnologia_anterior as aap_tecnologia_anterior,
+            aua.aaus_descripcion as aaus_descripcion_anterior,
+            aca.aacu_descripcion as aacu_descripcion_anterior,                    
+            mo.aamo_descripcion,
+            rdd.aap_potencia,
+            rdd.aap_tecnologia,
+            au.aaus_descripcion,
+            ac.aacu_descripcion,
+            co.aaco_descripcion,
+            m.medi_numero,
+            t.tran_numero from siap.reporte r
+            left join siap.reporte_adicional ra on ra.repo_id = r.repo_id
+            left join siap.reporte_direccion rd on rd.repo_id = r.repo_id
+            left join siap.reporte_direccion_dato rdd on rdd.repo_id = rd.repo_id and rdd.even_id = rd.even_id and rdd.aap_id = rd.aap_id
+            left join siap.reporte_direccion_dato_adicional rdda on rdda.repo_id = rd.repo_id and rdda.even_id = rd.even_id and rdda.aap_id = rd.aap_id
+            left join siap.aap a on a.aap_id = rd.aap_id
+            left join siap.aap_adicional d on d.aap_id = a.aap_id
+            left join siap.barrio b on b.barr_id = rd.barr_id
+            left join siap.barrio ba on ba.barr_id = rd.barr_id_anterior
+            left join siap.aap_cuentaap aca on aca.aacu_id = rdda.aacu_id_anterior
+            left join siap.aap_cuentaap ac on ac.aacu_id = rdda.aacu_id
+            left join siap.aap_modelo moa on moa.aamo_id = rdd.aamo_id_anterior
+            left join siap.aap_modelo mo on mo.aamo_id = rdd.aamo_id
+            left join siap.aap_conexion coa on coa.aaco_id = rdd.aaco_id_anterior
+            left join siap.aap_conexion co on co.aaco_id = rdd.aaco_id
+            left join siap.medidor m on m.medi_id = ra.medi_id
+            left join siap.transformador t on t.tran_id = ra.tran_id
+            left join siap.aap_uso aua on aua.aaus_id = rdda.aaus_id_anterior
+            left join siap.aap_uso au on au.aaus_id = rdda.aaus_id                    
+            where r.reti_id = 9 and r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.empr_id = {empr_id} and r.rees_id = 3 and a.aap_id <> 9999999
+            order by r.repo_fechasolucion, a.aap_id""").on(
+                    'fecha_inicial -> fi.getTime(),
+                    'fecha_final -> ff.getTime(),
+                    'empr_id -> empr_id
+                    ).as(Siap_detallado_cambio_medida._set *)
+      }
+    }
+
+
 
   /**
     *  imprimir
@@ -6804,6 +7010,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
       val muots = SQL(
         """SELECT o.muot_id, MIN(o.obra_fecharecepcion) AS fecha FROM siap.obra o
             WHERE o.obra_fecharecepcion BETWEEN {fecha_inicial} AND {fecha_final} AND o.empr_id = {empr_id}
+            AND o.rees_id = 3
             GROUP BY o.muot_id
             ORDER BY fecha"""
       ).on(
@@ -6862,25 +7069,11 @@ ORDER BY e.reti_id, e.elem_codigo""")
       // Recorrer muots y buscar reportes
 
       muots.map { ot =>
-        val reportes = SQL("""SELECT 'EXPANSION' as tipo,
-		                             r.repo_consecutivo as consecutivo, 
-		                             r.repo_fecharecepcion as fecharecepcion, 
-		                             r.repo_fechasolucion as fechasolucion, 
-		                             concat(r.repo_descripcion) as descripcion,
-		                             r.repo_direccion as direccion,
-		                             b.barr_descripcion as barrio
-                              FROM siap.reporte r
-                              LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
-                              LEFT JOIN siap.barrio b on b.barr_id = r.barr_id
-                              WHERE r.empr_id = {empr_id} and ra.muot_id = {muot_id}
-                              ORDER BY fecharecepcion""").on(
-                                  'empr_id -> empr_id,
-                                  'muot_id -> ot._1
-                              ).as(_rParser *)
         var j = 3
  
         val fmt = DateTimeFormat.forPattern("yyyy/MM/dd")
         val fmdt = DateTimeFormat.forPattern("yyyy/MM/dd HH:mm:ss")
+        println("Creando Hoja")
         val sheet = Sheet(
             name = "OT" + ot._1,
             rows = {
@@ -6888,8 +7081,24 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 val header1Row = com.norbitltd.spoiwo.model
                 .Row()
                 .withCellValues("Tipo Reporte", "Consecutivo", "Fecha Recepción", "Fecha Solución", "Descripción", "Dirección", "Barrio")
+                val reportes = SQL("""SELECT 'EXPANSION' as tipo,
+                  r.repo_consecutivo as consecutivo, 
+                  r.repo_fecharecepcion as fecharecepcion, 
+                  r.repo_fechasolucion as fechasolucion, 
+                  concat(r.repo_descripcion) as descripcion,
+                  r.repo_direccion as direccion,
+                  b.barr_descripcion as barrio
+                  FROM siap.reporte r
+                  LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
+                  LEFT JOIN siap.barrio b on b.barr_id = r.barr_id
+                  WHERE r.empr_id = {empr_id} and ra.muot_id = {muot_id}
+                  ORDER BY fecharecepcion""").on(
+                    'empr_id -> empr_id,
+                    'muot_id -> ot._1
+                    ).as(_rParser *)                
                 val rows = reportes.map { r =>
-                    com.norbitltd.spoiwo.model.Row(
+                    println("Agregando reporte a la OT")
+                    val row = com.norbitltd.spoiwo.model.Row(
                       StringCell(
                         r._1,
                         Some(0),
@@ -6940,11 +7149,12 @@ ORDER BY e.reti_id, e.elem_codigo""")
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       )
                     )
+                    row
                 }
                 header0Row :: header1Row :: rows.toList
             }
         )
-        _listSheet += sheet
+        //_listSheet += sheet
       }
       // 
       println("Escribiendo en el Stream")

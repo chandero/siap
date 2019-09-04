@@ -324,6 +324,7 @@ GET     /api/info/srmrx/:fi/:ff                 controllers.InformeController.si
 GET     /api/info/srcx/:fi/:ff                  controllers.InformeController.siap_reporte_consolidado_xls(fi: Long, ff: Long)
 GET     /api/info/sdex/:fi/:ff                  controllers.InformeController.siap_detallado_expansion_xls(fi: Long, ff: Long)
 GET     /api/info/sdrx/:fi/:ff                  controllers.InformeController.siap_detallado_reubicacion_xls(fi: Long, ff: Long)
+GET     /api/info/sdcmx/:fi/:ff                 controllers.InformeController.siap_detallado_cambio_medida_xls(fi: Long, ff: Long)
 GET     /api/info/sdzx/:fi/:ff                  controllers.InformeController.siap_detallado_modernizacion_xls(fi: Long, ff: Long)
 GET     /api/info/sdax/:fi/:ff                  controllers.InformeController.siap_detallado_actualizacion_xls(fi: Long, ff: Long)
 GET     /api/info/sdpx/:fi/:ff                  controllers.InformeController.siap_detallado_reposicion_xls(fi: Long, ff: Long)

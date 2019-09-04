@@ -88,6 +88,17 @@ export function informe_siap_detallado_reubicacion_xls(fecha_inicial, fecha_fina
   })
 }
 
+export function informe_siap_detallado_cambio_medida_xls(fecha_inicial, fecha_final) {
+  const data = {
+    fecha_inicial,
+    fecha_final
+  }
+  return request({
+    url: '/info/sdcmx/' + data.fecha_inicial + '/' + data.fecha_final,
+    method: 'get'
+  })
+}
+
 export function informe_siap_detallado_modernizacion_xls(fecha_inicial, fecha_final) {
   const data = {
     fecha_inicial,
