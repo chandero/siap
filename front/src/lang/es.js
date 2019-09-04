@@ -494,6 +494,7 @@ export default {
     fecharespuesta: 'Fecha Respuesta',
     fechavisita: 'Fecha Visita',
     numerorte: 'Puesto Reporte Técnico',
+    codigorespuesta: 'Código Respuesta',
     respuesta: 'Detalle de la Respuesta',
     informe: 'Informe Técnico',
     asupervisor: 'Entregar a Supervisor',
@@ -770,7 +771,8 @@ export default {
     condenser: 'Condensador',
     photocell: 'Fotocelda',
     report: 'No. Reporte',
-    tiporetiro: 'Motivo Retiro'
+    tiporetiro: 'Motivo Retiro',
+    estado: 'Estado Luminaria'
   },
   evento: {
     element: 'Material',

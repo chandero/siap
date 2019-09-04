@@ -1075,21 +1075,51 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
             var estado = 0
             soli.b.soli_fecharespuesta match {
                 case Some(f) => estado = 6
-                case _ => estado = 5
+                case None => 
+                    soli.b.soli_fechaalmacen match {
+                        case Some(f) => estado = 5
+                        case None => 
+                            soli.b.soli_fechainforme match {
+                                case Some(f) => estado = 4
+                                case None => 
+                                    soli.b.soli_fecharte match {
+                                        case Some(f) => estado = 3
+                                        case None => 
+                                            soli.b.soli_fechasupervisor match {
+                                                case Some(f) => estado = 2
+                                                case None => estado = 1
+                                            }
+                                    }
+                            }
+                    }
             }
-            val result: Boolean = SQL("""UPDATE siap.solicitud SET 
+            val result: Boolean = SQL("""UPDATE siap.solicitud SET
+                                          soli_direccion = {soli_direccion},
+                                          soli_telefono = {soli_telefono},
+                                          soli_email = {soli_email},
+                                          soli_fechavisita = {soli_fechavisita},
+                                          soli_fechasupervisor = {soli_fechasupervisor},  
                                           soli_fechainforme = {soli_fechainforme},
                                           soli_informe = {soli_informe},
                                           soli_fecharespuesta = {soli_fecharespuesta},
                                           soli_respuesta = {soli_respuesta},
+                                          soli_codigorespuesta = {soli_codigorespuesta},
+                                          soli_aprobada = {soli_aprobada},
                                           soli_estado = {soli_estado},
                                           usua_id = {usua_id} WHERE soli_id = {soli_id}""").
             on(
                'soli_id -> soli.a.soli_id,
+               'soli_direccion -> soli.a.soli_direccion,
+               'soli_telefono -> soli.a.soli_telefono,
+               'soli_email -> soli.a.soli_email,
+               'soli_fechavisita -> soli.b.soli_fechavisita,
+               'soli_fechasupervisor -> soli.b.soli_fechasupervisor,
                'soli_fechainforme -> soli.b.soli_fechainforme,
                'soli_informe -> soli.a.soli_informe,
                'soli_fecharespuesta -> soli.b.soli_fecharespuesta,
+               'soli_codigorespuesta -> soli.b.soli_codigorespuesta,
                'soli_respuesta -> soli.a.soli_respuesta,
+               'soli_aprobada -> true,
                'soli_estado -> estado,
                'usua_id -> soli.b.usua_id 
             ).executeUpdate() > 0
@@ -1451,7 +1481,10 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                     reportParams.put("CODIGO_RESPUESTA", s.b.soli_codigorespuesta.get)
                                     reportParams.put("CIUDAD_CORTA", ciudad)
                                     reportParams.put("FECHA_RADICADO_LARGA", Utility.fechaatexto(s.a.soli_fecha))
-                                    reportParams.put("LUMINARIAS_LETRAS", N2T.convertirLetras(s.b.soli_luminarias.get))
+                                    s.b.soli_luminarias match {
+                                        case Some(l) => reportParams.put("LUMINARIAS_LETRAS", N2T.convertirLetras(l))
+                                        case None => None
+                                    }
                                     reportParams.put("GERENTE", gerente)
                                     os = JasperRunManager.runReportToPdf(compiledFile, reportParams, connection)
                  case None => os = new Array[Byte](0)

@@ -8,13 +8,17 @@
           <el-collapse v-model="activePages" @change="handleActivePagesChange">
           <el-collapse-item name="1" :title="$t('gestion.codes')">
            <el-row :gutter="4">
-             <el-col :span="12">
+             <el-col :span="8">
                <el-form-item :label="$t('gestion.code')">
-                <el-input v-model="activo.aap.aap_id" @input="activo.aap.aap_id = parseInt($event)" ref="code" @keyup.enter.native="getAap()"></el-input>
+                <el-input v-model="activo.aap.aap_id" @input="activo.aap.aap_id = parseInt($event)" ref="code" @keyup.enter.native="getAap()" @blur="getAap()"></el-input>
                </el-form-item>
              </el-col>
-             <el-col :span="12"><el-form-item :label="$t('gestion.support')">
+             <el-col :span="8"><el-form-item :label="$t('gestion.support')">
                       <el-input readonly v-model="activo.aap.aap_apoyo" autofocus ref="support" @keyup.enter.native="changeFocus('description')"></el-input>
+                     </el-form-item> 
+             </el-col>
+             <el-col :span="8"><el-form-item :label="$t('gestion.estado')">
+                      <span style="font-size:18px; font-weight: bold">{{ activo.esta_id > 0? activo.esta_id === 9? 'Dada de Baja': 'Activa' : '' }}</span>
                      </el-form-item> 
              </el-col>
            </el-row>
@@ -329,7 +333,7 @@
         </el-form>
       </el-main>
      <el-footer>
-      <el-button ref="submit" :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="aplicar">Guardar Luminaria</el-button>
+     <!-- <el-button ref="submit" :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="aplicar">Guardar Luminaria</el-button> -->
      </el-footer>
       <el-dialog
         title="Consulta"
@@ -413,7 +417,12 @@ export default {
   },
   methods: {
     getAap() {
+      const loading = this.$loading({
+        lock: true,
+        text: 'Buscando....'
+      })
       getAapEdit(this.activo.aap.aap_id).then(response => {
+        loading.close()
         if (response.status === 200) {
           this.activo = response.data
           if (this.activo.aame === null || this.activo.aame === undefined) {
@@ -457,6 +466,7 @@ export default {
           this.dialogVisible = true
         }
       }).catch(() => {
+        loading.close()
         this.limpiar()
         this.dialogVisible = true
       })

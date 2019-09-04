@@ -20,19 +20,19 @@
        <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
               <el-form-item :label="$t('solicitud.fecha')">
-                <el-date-picker readonly type="datetime" name="fecha" v-model="solicitud.a.soli_fecha"></el-date-picker>
+                <el-date-picker  type="datetime" name="fecha" v-model="solicitud.a.soli_fecha"></el-date-picker>
               </el-form-item>
             </el-col>         
           <el-col :xs="24" :sm="24" :md="19" :lg="19" :xl="19">
             <el-form-item :label="$t('solicitud.nombre')">
-              <el-input readonly name="nombre" v-model="solicitud.a.soli_nombre" ></el-input>
+              <el-input name="nombre" v-model="solicitud.a.soli_nombre" ></el-input>
             </el-form-item>
          </el-col>
        </el-row>
        <el-row :gutter="4">
           <el-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
             <el-form-item :label="$t('solicitud.direccion')">
-              <el-input readonly name="direccion" v-model="solicitud.a.soli_direccion"></el-input>
+              <el-input  name="direccion" v-model="solicitud.a.soli_direccion"></el-input>
             </el-form-item>
          </el-col>
           <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
@@ -47,19 +47,19 @@
        <el-row :gutter="4">
           <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
             <el-form-item :label="$t('solicitud.telefono')">
-              <el-input readonly name="telefono" v-model="solicitud.a.soli_telefono"></el-input>
+              <el-input  name="telefono" v-model="solicitud.a.soli_telefono"></el-input>
             </el-form-item>
          </el-col>
           <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
             <el-form-item :label="$t('solicitud.email')">
-              <el-input readonly name="email" v-model="solicitud.a.soli_email"></el-input>
+              <el-input  name="email" v-model="solicitud.a.soli_email"></el-input>
             </el-form-item>
          </el-col>
        </el-row>
        <el-row :gutter="4">
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
             <el-form-item :label="$t('solicitud.descripcion')">
-              <el-input readonly type="textarea" :rows="5" name="telefono" v-model="solicitud.a.soli_solicitud"></el-input>
+              <el-input  type="textarea" :rows="5" name="telefono" v-model="solicitud.a.soli_solicitud"></el-input>
             </el-form-item>
          </el-col>
        </el-row>
@@ -68,60 +68,69 @@
           <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
               <el-form-item :label="$t('solicitud.fechasupervisor')">
-                <el-date-picker readonly type="datetime" name="fechasupervisor" v-model="solicitud.b.soli_fechasupervisor"></el-date-picker>
+                <el-date-picker  type="datetime" name="fechasupervisor" v-model="solicitud.b.soli_fechasupervisor"></el-date-picker>
               </el-form-item>
             </el-col>
           </el-row>
          </el-collapse-item>
-         <el-collapse-item v-if="solicitud.b.soli_estado >= 3" name="1" title="Fecha Formato Reporte Técnico">
+         <el-collapse-item v-if="solicitud.b.soli_estado >= 2" name="1" title="Visita Técnica">
+          <el-row :gutter="4">
+            <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+              <el-form-item :label="$t('solicitud.fechavisita')">
+                <el-date-picker  type="datetime" name="fechavisita" v-model="solicitud.b.soli_fechavisita"></el-date-picker>
+              </el-form-item>
+            </el-col>
+          </el-row>
+         </el-collapse-item>         
+         <el-collapse-item v-if="solicitud.b.soli_estado >= 2" name="1" title="Fecha Formato Reporte Técnico">
           <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
               <el-form-item :label="$t('solicitud.fecharte')">
-                <el-date-picker readonly type="datetime" name="fecharte" v-model="solicitud.b.soli_fecharte"></el-date-picker>
+                <el-date-picker  type="datetime" name="fecharte" v-model="solicitud.b.soli_fecharte"></el-date-picker>
               </el-form-item>
             </el-col>
           </el-row>
          </el-collapse-item>
-         <el-collapse-item v-if="solicitud.b.soli_estado >= 3" name="1" title="Recibido En Almacén">
+         <el-collapse-item v-if="solicitud.b.soli_estado >= 2" name="1" title="Recibido En Almacén">
           <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
               <el-form-item :label="$t('solicitud.fechaalmacen')">
-                <el-date-picker readonly type="datetime" name="fechaalmacen" v-model="solicitud.b.soli_fechaalmacen"></el-date-picker>
+                <el-date-picker  type="datetime" name="fechaalmacen" v-model="solicitud.b.soli_fechaalmacen" style="width: 90%;"></el-date-picker>
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
               <el-form-item prop="b.puntos" :label="$t('solicitud.puntos')">
-                <el-input readonly type="number" v-model="solicitud.b.soli_puntos" />
+                <el-input  type="number" v-model="solicitud.b.soli_puntos" />
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
               <el-form-item prop="b.numerorte" :label="$t('solicitud.numerorte')">
-                <el-input readonly ref="numerorte" name="numerorte" v-model="solicitud.b.soli_numerorte" @input="solicitud.b.numerorte = parseInt($event)"></el-input>
+                <el-input  ref="numerorte" name="numerorte" v-model="solicitud.b.soli_numerorte" @input="solicitud.b.numerorte = parseInt($event)"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
-                    <el-row>
+          <el-row>
             <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
               <el-form-item :label="$t('solicitud.aprobado')">
                 <el-checkbox disabled v-model="solicitud.b.soli_aprobada" />
               </el-form-item>
             </el-col>            
             <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-              <el-form-item v-if="solicitud.b.soli_aprobada" :label="$t('solicitud.tipo_expansion.title')">
-                <el-select disabled clearable :title="$t('solicitud.tipo_expansion.select')" style="width: 80%" ref="tipo" v-model="solicitud.b.soli_tipoexpansion" name="tipo_expansion" :placeholder="$t('solicitud.tipo_expansion.select')">
+              <el-form-item :label="$t('solicitud.tipo_expansion.title')">
+                <el-select clearable :title="$t('solicitud.tipo_expansion.select')" style="width: 80%" ref="tipo" v-model="solicitud.b.soli_tipoexpansion" name="tipo_expansion" :placeholder="$t('solicitud.tipo_expansion.select')">
                   <el-option v-for="te in tipos_expansion" :key="te.tiex_id" :label="te.tiex_descripcion" :value="te.tiex_id" >
                   </el-option>   
                 </el-select>
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-              <el-form-item v-if="solicitud.b.soli_aprobada" :label="$t('solicitud.numero_luminarias')">
-                <el-input readonly type="number" v-model="solicitud.b.soli_luminarias" @input="solicitud.b.soli_luminarias = parseInt($event)" />
+              <el-form-item :label="$t('solicitud.numero_luminarias')">
+                <el-input type="number" v-model="solicitud.b.soli_luminarias" @input="solicitud.b.soli_luminarias = parseInt($event)" />
               </el-form-item>
             </el-col>
           </el-row>
          </el-collapse-item>                 
-         <el-collapse-item v-if="solicitud.b.soli_estado >= 3" name="2" title="Informe">
+         <el-collapse-item v-if="solicitud.b.soli_estado >= 2" name="2" title="Informe">
           <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
               <el-form-item :label="$t('solicitud.fechainforme')">
@@ -137,13 +146,18 @@
             </el-col>
           </el-row>
         </el-collapse-item>  
-         <el-collapse-item v-if="solicitud.b.soli_estado >= 5 || solicitud.b.soli_estado === 3" name="3" title="Respuesta">
+         <el-collapse-item v-if="solicitud.b.soli_estado >= 2 || solicitud.b.soli_estado === 3" name="3" title="Respuesta">
           <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
               <el-form-item :label="$t('solicitud.fecharespuesta')">
-                <el-date-picker type="datetime" name="fecharespuesta" v-model="solicitud.b.soli_fecharespuesta"></el-date-picker>
+                <el-date-picker type="datetime" name="fecharespuesta" v-model="solicitud.b.soli_fecharespuesta" style="width: 90%;"></el-date-picker>
               </el-form-item>
             </el-col>
+            <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+              <el-form-item :label="$t('solicitud.codigorespuesta')">
+                <el-input name="codigorespuesta" v-model="solicitud.b.soli_codigorespuesta"></el-input>
+              </el-form-item>
+            </el-col>            
           </el-row>
           <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
@@ -203,7 +217,7 @@ export default {
           soli_numerorte: null,
           soli_puntos: null,
           soli_tipoexpansion: null,
-          soli_aprobada: null,
+          soli_aprobada: true,
           soli_codigorespuesta: null,
           soli_luminarias: null,
           soli_estado: null,
@@ -337,12 +351,7 @@ export default {
       })
     },
     validate() {
-      if (this.solicitud.b.soli_fechainforme &&
-          this.solicitud.a.soli_informe) {
-        return true
-      } else {
-        return false
-      }
+      return true
     },
     limpiarAndBack() {
       this.solicitud = {
@@ -373,7 +382,7 @@ export default {
           soli_numerorte: null,
           soli_puntos: null,
           soli_tipoexpansion: null,
-          soli_aprobada: null,
+          soli_aprobada: true,
           soli_codigorespuesta: null,
           soli_luminarias: null,
           soli_estado: null,
@@ -423,7 +432,7 @@ export default {
             soli_numerorte: null,
             soli_puntos: null,
             soli_tipoexpansion: null,
-            soli_aprobada: null,
+            soli_aprobada: true,
             soli_codigorespuesta: null,
             soli_luminarias: null,
             soli_estado: null,

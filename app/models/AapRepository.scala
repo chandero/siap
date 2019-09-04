@@ -570,7 +570,7 @@ object Aap_transformador {
     }
 }
 
-case class Activo(aap: Option[Aap], aame: Option[Aap_medidor], aatr: Option[Aap_transformador], aap_adicional: Option[AapAdicional], aap_elemento: Option[AapElemento], autorizacion: Option[String])
+case class Activo(aap: Option[Aap], aame: Option[Aap_medidor], aatr: Option[Aap_transformador], aap_adicional: Option[AapAdicional], aap_elemento: Option[AapElemento], autorizacion: Option[String], esta_id: Option[Int])
 
 object Activo {
     implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -583,7 +583,8 @@ object Activo {
             "aatr" -> activo.aatr,
             "aap_adicional" -> activo.aap_adicional,
             "aap_elemento" -> activo.aap_elemento,
-            "autorizacion" -> activo.autorizacion
+            "autorizacion" -> activo.autorizacion,
+            "esta_id" -> activo.esta_id
         )
     }
 
@@ -593,7 +594,8 @@ object Activo {
        (__ \ "aatr").readNullable[Aap_transformador] and
        (__ \ "aap_adicional").readNullable[AapAdicional] and
        (__ \ "aap_elemento").readNullable[AapElemento] and
-       (__ \ "autorizacion").readNullable[String]
+       (__ \ "autorizacion").readNullable[String] and
+       (__ \ "esta_id").readNullable[Int]
     )(Activo.apply _)
 }
 
@@ -774,7 +776,12 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                             'aap_id -> a.aap_id,
                             'empr_id -> a.empr_id
                         ).as(AapAdicional.aapadicionalSet.singleOpt)
-                        val activo = new Activo(Some(aap_n), aame, aatr, aap_adicional, aap_elemento, None)
+
+                        val estado = SQL("""SELECT esta_id FROM siap.aap WHERE aap_id = {aap_id} and empr_id = {empr_id}""").on(
+                            'aap_id -> a.aap_id,
+                            'empr_id -> a.empr_id
+                        ).as(SqlParser.scalar[Int].singleOpt)
+                        val activo = new Activo(Some(aap_n), aame, aatr, aap_adicional, aap_elemento, None, estado)
                         Some(activo)
         }
       }

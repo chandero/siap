@@ -155,7 +155,7 @@
               <i class="el-icon-view"></i>
             </el-button>            
             <el-button
-              :disabled="scope.row.b.soli_estado != 1"
+              :disabled="scope.row.b.soli_estado >= 2"
               size="mini"
               circle
               type="primary"
@@ -164,7 +164,7 @@
               <i class="el-icon-s-custom"></i>
             </el-button>
             <el-button
-              :disabled="scope.row.b.soli_estado != 2"
+              :disabled="scope.row.b.soli_estado < 2 || scope.row.b.soli_estado === 6"
               size="mini"
               circle
               type="primary"
@@ -173,7 +173,7 @@
               <i class="el-icon-s-order"></i>
             </el-button>            
             <el-button
-              :disabled="scope.row.b.soli_estado != 3 && scope.row.b.soli_estado != 4"
+              :disabled="scope.row.b.soli_estado < 2 || scope.row.b.soli_estado === 6"
               size="mini"
               circle
               type="warning"
@@ -181,7 +181,7 @@
               <i class="el-icon-edit"></i>
             </el-button>
             <el-button
-              :disabled="scope.row.b.soli_estado != 5"
+              :disabled="scope.row.b.soli_estado === 1"
               size="mini"
               circle
               type="success"
