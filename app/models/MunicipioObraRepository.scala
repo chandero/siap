@@ -198,7 +198,7 @@ class MunicipioObraRepository @Inject()(dbapi: DBApi)(
     @param empr_id: scala.Long
     @return Future[Iterable[MunicipioObra]]
     */
-  def mots(empr_id: scala.Long): Future[Iterable[MunicipioObra]] =
+  def muobs(empr_id: scala.Long): Future[Iterable[MunicipioObra]] =
     Future[Iterable[MunicipioObra]] {
       db.withConnection { implicit connection =>
         var query: String = """SELECT *
@@ -219,15 +219,10 @@ class MunicipioObraRepository @Inject()(dbapi: DBApi)(
     @param mot: MunicipioObra
     @return id: scala.Long
   */
-  def crear(mot: MunicipioObra): Future[(scala.Long, scala.Long)] = Future[(scala.Long, scala.Long)] {
+  def crear(mot: MunicipioObra): Future[scala.Long] = Future[scala.Long] {
         db.withConnection { implicit connection => 
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())
-            var consec = SQL("SELECT COUNT(*) FROM siap.muniobra WHERE empr_id = {empr_id}").
-                         on(
-                           'empr_id -> mot.empr_id
-                         ).as(SqlParser.scalar[scala.Long].single)
-            consec = consec + 1
             val id:scala.Long = SQL("""INSERT INTO siap.muniobra (
                                                   empr_id, 
                                                   muob_consecutivo, 
@@ -250,13 +245,13 @@ class MunicipioObraRepository @Inject()(dbapi: DBApi)(
                                                   {usua_id},
                                                   {muob_fecharecepcion},
                                                   {muob_radicado},
-                                                  {muob_fechaejecucion},
+                                                  {muob_fechaentrega},
                                                   {muob_direccion},
                                                   {barr_id}
                                        )
             """).on(
               'empr_id -> mot.empr_id,
-              'muob_consecutivo -> consec,
+              'muob_consecutivo -> mot.muob_consecutivo,
               'muob_descripcion -> mot.muob_descripcion,
               'muob_reportetecnico -> mot.muob_reportetecnico,
               'muob_estado -> mot.muob_estado,
@@ -280,7 +275,7 @@ class MunicipioObraRepository @Inject()(dbapi: DBApi)(
                 'audi_valornuevo -> id,
                 'audi_evento -> "I").
                 executeInsert()            
-            (id, consec)
+            id
         }
   }
 

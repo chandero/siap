@@ -1966,6 +1966,60 @@ ORDER BY e.reti_id, e.elem_codigo""")
     }
 
   /**
+    * return sql response to excel export
+    * resumen material municipio obra reporte
+    */
+    def siap_informe_detallado_material_muob_xls(
+      muob_consecutivo: Int,
+      empr_id: scala.Long
+  ): Future[Iterable[Siap_detallado_material]] =
+    Future[Iterable[Siap_detallado_material]] {
+      db.withConnection { implicit connection =>
+        /*
+        var fi = Calendar.getInstance()
+        var ff = Calendar.getInstance()
+        fi.setTimeInMillis(fecha_inicial)
+        ff.setTimeInMillis(fecha_final)
+        fi.set(Calendar.MILLISECOND, 0)
+        fi.set(Calendar.SECOND, 0)
+        fi.set(Calendar.MINUTE, 0)
+        fi.set(Calendar.HOUR, 0)
+
+        ff.set(Calendar.MILLISECOND, 59)
+        ff.set(Calendar.SECOND, 59)
+        ff.set(Calendar.MINUTE, 59)
+        ff.set(Calendar.HOUR, 23)
+        */
+        SQL("""SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
+                          r.repo_consecutivo, 
+                          r.repo_fechasolucion, 
+                          t.even_codigo_retirado, t.even_cantidad_retirado, 
+                          t.even_codigo_instalado, t.even_cantidad_instalado 
+                    FROM siap.reporte r
+                    LEFT JOIN siap.reporte_adicional a on a.repo_id = r.repo_id
+                    LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
+                    LEFT JOIN siap.reporte_evento t on t.repo_id = r.repo_id
+                    INNER JOIN siap.elemento e on e.elem_id = t.elem_id
+                    WHERE a.muot_id = {muot_id} and r.rees_id <> 9 and t.even_estado <> 9 and r.empr_id = {empr_id}
+                    UNION ALL
+                    SELECT e.elem_codigo, e.elem_descripcion,  CONCAT('OBRA', ' ', r.obra_nombre) as reti_descripcion, 
+                          r.obra_consecutivo as repo_consecutivo, 
+                          r.obra_fechasolucion, 
+                          t.even_codigo_retirado, t.even_cantidad_retirado, 
+                          t.even_codigo_instalado, t.even_cantidad_instalado 
+                    FROM siap.obra r
+                    LEFT JOIN siap.obra_evento t on t.obra_id = r.obra_id
+                    INNER JOIN siap.elemento e on e.elem_id = t.elem_id
+                    WHERE r.muot_id = {muot_id} and r.rees_id <> 9 and t.even_estado <> 9 and r.empr_id = {empr_id}
+                    ORDER BY reti_descripcion, elem_codigo""")
+          .on(
+            'muot_id -> muob_consecutivo,
+            'empr_id -> empr_id
+          ).as(siap_detallado_material_set *)
+      }
+    }
+
+  /**
     *  imprimir
     * @param repo_id: scala.Long
     * @return OutputStream

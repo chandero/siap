@@ -137,6 +137,10 @@ export const asyncRouterMap = [
       { path: 'ordentrabajo', component: _import('procesos/ordentrabajo'), name: 'ordentrabajo', hidden: false, meta: { title: 'ordentrabajo', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
       { path: 'ordentrabajo/editar/:id', component: _import('procesos/ordentrabajo/edit'), name: 'ordentrabajoedit', hidden: true, redirect: false, meta: { title: 'ordentrabajoedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
       { path: 'ordentrabajo/crear', component: _import('procesos/ordentrabajo/create'), name: 'ordentrabajocreate', hidden: true, meta: { title: 'ordentrabajocreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'muob', component: _import('procesos/municipioobra'), name: 'municipioobra', meta: { title: 'municipioobra', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'muob/editar/:id', components: { default: _import('procesos/municipioobra/edit'), aap_create: Aap }, name: 'muobedit', hidden: true, redirect: false, meta: { title: 'muobedit', roles: ['super', 'admin', 'auxiliar'] }},
+      { path: 'muob/crear', component: _import('procesos/municipioobra/create'), name: 'muobcreate', hidden: true, meta: { title: 'muobcreate', roles: ['super', 'admin', 'auxiliar'] }},
+      { path: 'muob/info/:consecutivo', components: { default: _import('procesos/municipioobra/rdetalladomat'), aap_create: Aap }, name: 'muobinfo', hidden: true, redirect: false, meta: { title: 'muobinfo', roles: ['super', 'admin', 'auxiliar', 'ingeniero'] }},
       { path: 'entregamaterial', component: _import('procesos/entregamaterial'), name: 'entregamaterial', hidden: true, meta: { title: 'entregamaterial', roles: ['super', 'admin', 'ingeniero', 'almacenista'] }},
       { path: 'recepcionmaterial', component: _import('procesos/recepcionmaterial'), name: 'recepcionmaterial', hidden: true, meta: { title: 'recepcionmaterial', roles: ['super', 'admin', 'ingeniero', 'almacenista'] }},
       { path: 'vencido', component: _import('procesos/vencido'), name: 'vencido', hidden: true, meta: { title: 'vencido', roles: ['super', 'gerencia', 'admin', 'ingeniero', 'auxiliar'] }}

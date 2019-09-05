@@ -65,6 +65,14 @@ GET     /api/ucap/del/:id               controllers.UcapController.borrarUcap(id
 POST    /api/ucap/save                  controllers.UcapController.guardarUcap
 POST    /api/ucap/upd                   controllers.UcapController.actualizarUcap
 
+# Municipio Obra
+POST    /api/muob/get                   controllers.MunicipioObraController.todos()
+GET     /api/muob/all                   controllers.MunicipioObraController.muobs
+GET     /api/muob/:id                   controllers.MunicipioObraController.buscarPorId(id: Long)
+GET     /api/muob/del/:id               controllers.MunicipioObraController.borrar(id: Long)
+POST    /api/muob/save                  controllers.MunicipioObraController.guardar
+POST    /api/muob/upd                   controllers.MunicipioObraController.actualizar
+
 # Urbanizadora
 GET     /api/urba/get/:p/:c             controllers.UrbanizadoraController.todos(p:Long, c:Long)
 GET     /api/urba/all                   controllers.UrbanizadoraController.urbanizadoras
@@ -345,6 +353,7 @@ GET     /api/info/sucx/:fi/:ff/:e               controllers.InformeController.si
 GET     /api/info/sisx/:fi/:ff                  controllers.InformeController.siap_informe_solicitud_xls(fi: Long, ff: Long)
 GET     /api/info/sisvx                         controllers.InformeController.siap_informe_solicitud_x_vencer_xls
 GET     /api/info/simox/:fi/:ff/:e/:t           controllers.InformeController.siap_informe_muot_xls(fi: Long, ff:Long, e: Long, t:String)
+GET     /api/info/isdmmx/:c                     controllers.InformeController.siap_informe_detallado_material_muob_xls(c: Int)
 
 
 # Graficas
