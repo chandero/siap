@@ -24,6 +24,12 @@
     stripe 
   >
     <el-table-column 
+      :label="$t('gestion.medidor.codigo')"
+      prop="medi_codigo"
+      width="120"
+    >
+    </el-table-column>  
+    <el-table-column 
       :label="$t('gestion.medidor.numero')"
       prop="medi_numero"
       width="120"

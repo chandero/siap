@@ -23,7 +23,7 @@ import org.joda.time.LocalDateTime
 
 
 case class Medidor(medi_id: Option[Long], medi_numero: Option[String], amem_id: Option[Long], amet_id: Option[Long], aacu_id: Option[Long], empr_id: Option[Long], usua_id: Option[Long], medi_direccion: Option[String], medi_estado: Option[Int], medi_acta: Option[String])
-case class Informe(medi_numero: Option[String], medi_direccion: Option[String], aacu_descripcion: Option[String], cantidad: Option[Int])
+case class Informe(medi_codigo: Option[String], medi_numero: Option[String], medi_direccion: Option[String], aacu_descripcion: Option[String], cantidad: Option[Int])
 
 object Medidor {
     implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -97,6 +97,7 @@ object Informe {
 
     implicit val mWrites = new Writes[Informe] {
         def writes(m: Informe) = Json.obj(
+            "medi_codigo" -> m.medi_codigo,
             "medi_numero" -> m.medi_numero,
             "medi_direccion" -> m.medi_direccion,
             "aacu_descripcion" -> m.aacu_descripcion,
@@ -105,14 +106,19 @@ object Informe {
     }
 
     val _set = {
+      get[Option][Int]("medi_id") ~
       get[Option[String]]("medi_numero") ~ 
       get[Option[String]]("medi_direccion") ~
       get[Option[String]]("aacu_descripcion") ~
+      get[Option[Long]]("empr_id") ~
       get[Option[Int]]("cantidad") map {
-          case medi_numero ~
+          case medi_id ~
+               medi_numero ~
                medi_direccion ~
                aacu_descripcion ~
-               cantidad => Informe(medi_numero,
+               empr_id ~
+               cantidad => Informe("%02d".format(empr_id) + "%04d".format(medi_id),
+                                   medi_numero,
                                    medi_direccion,
                                    aacu_descripcion,
                                    cantidad)
@@ -410,7 +416,7 @@ class MedidorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
 
     def informe_siap_medidor(empr_id: scala.Long): Future[Iterable[Informe]] = Future[Iterable[Informe]] {
         db.withConnection { implicit connection => 
-            SQL("""SELECT m.medi_id, m.medi_numero, m.medi_direccion, ac.aacu_descripcion, COUNT(a.*) AS cantidad FROM siap.medidor m
+            SQL("""SELECT m.medi_id, m.medi_numero, m.medi_direccion, m.empr_id, ac.aacu_descripcion, COUNT(a.*) AS cantidad FROM siap.medidor m
             LEFT JOIN siap.aap_medidor am ON am.medi_id = m.medi_id AND am.empr_id = m.empr_id
             LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = m.aacu_id
             LEFT JOIN siap.aap a ON a.aap_id = am.aap_id and a.empr_id = am.empr_id

@@ -6057,9 +6057,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
             """SELECT m.medi_id, m.medi_numero, m.medi_direccion, ac.aacu_descripcion, COUNT(a.*) AS cantidad FROM siap.medidor m
                                  LEFT JOIN siap.aap_medidor am ON am.medi_id = m.medi_id AND am.empr_id = m.empr_id
                                  LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = m.aacu_id
-                                 LEFT JOIN siap.aap a ON a.aap_id = am.aap_id and a.empr_id = am.empr_id
+                                 LEFT JOIN siap.aap a ON a.aap_id = am.aap_id and a.empr_id = am.empr_id and a.esta_id <> 9 and a.aap_id <> 999999
                                  WHERE m.empr_id = {empr_id}
-                                 GROUP BY m.medi_id, m.medi_numero, m.medi_direccion, ac.aacu_descripcion """
+                                 GROUP BY m.medi_id, m.medi_numero, m.medi_direccion, ac.aacu_descripcion 
+                                 ORDER BY m.medi_id"""
           ).on(
               'empr_id -> empr_id
             )
@@ -6082,6 +6083,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
               val headerRow = com.norbitltd.spoiwo.model
                 .Row()
                 .withCellValues(
+                  "Código",
                   "Número",
                   "Dirección",
                   "Cuenta Alumbrado",
@@ -6099,9 +6101,18 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     case None    => ""
                   }))
                   com.norbitltd.spoiwo.model.Row(
+                    StringCell(
+                      med._1 match {
+                        case Some(m) => "%02d".format(empr_id) + "%04d".format(m)
+                        case None    => ""
+                      },
+                      Some(0),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
                     HyperLinkUrlCell(
                       link,
-                      Some(0),
+                      Some(1),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
@@ -6110,7 +6121,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                         case Some(m) => m
                         case None    => ""
                       },
-                      Some(1),
+                      Some(2),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
@@ -6119,13 +6130,13 @@ ORDER BY e.reti_id, e.elem_codigo""")
                         case Some(m) => m
                         case None    => ""
                       },
-                      Some(2),
+                      Some(3),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
                     NumericCell(
                       med._5.get,
-                      Some(3),
+                      Some(4),
                       style = Some(CellStyle(dataFormat = CellDataFormat("#0"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     )

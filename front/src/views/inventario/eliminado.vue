@@ -2,7 +2,7 @@
   <el-container class="gestion-container">
     <el-main>
       <el-container>
-        <el-header class="gestion_header">{{ $t('eliminado.tabletitle') }}
+        <el-header class="gestion_header">{{ $t('eliminada.tabletitle') }}
         </el-header>
         <el-main>  
           <vue-query-builder v-model="qbquery" :rules="qrules" :labels="qlabels" :styled="qstyled" :maxDepth="3"></vue-query-builder>
