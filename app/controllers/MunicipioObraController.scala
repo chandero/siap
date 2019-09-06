@@ -41,10 +41,10 @@ class MunicipioObraController @Inject()(
       }
     }
 
-  def mots(): Action[AnyContent] = authenticatedUserAction.async {
+  def muobs(): Action[AnyContent] = authenticatedUserAction.async {
     implicit request : Request[AnyContent] =>
     val empr_id = Utility.extraerEmpresa(request)
-    motService.mots(empr_id.get).map { mots =>
+    motService.muobs(empr_id.get).map { mots =>
       Ok(Json.toJson(mots))
     }
   }
@@ -95,9 +95,9 @@ class MunicipioObraController @Inject()(
                                                 mot.muob_direccion,
                                                 mot.barr_id
                                               )
-      motService.crear(motnuevo).map { case (id, consec) =>
+      motService.crear(motnuevo).map { id =>
         if (id > 0) {
-          Created(Json.obj("id" ->id, "consec" -> consec))
+          Created(Json.obj("id" ->id))
         } else {
           NotAcceptable(Json.toJson("true"))
         }
@@ -127,6 +127,17 @@ class MunicipioObraController @Inject()(
           Future.successful(Ok(Json.toJson("true")))
       } else {
           Future.successful(NotAcceptable(Json.toJson("false")))
+      }
+  }  
+
+  def borrar(muob_id: Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)
+      if (motService.borrar(muob_id, usua_id.get)) {
+        Future.successful(Ok(Json.toJson("true")))
+      } else {
+        Future.successful(ServiceUnavailable(Json.toJson("false")))
       }
   }  
 }

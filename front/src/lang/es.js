@@ -66,6 +66,10 @@ export default {
     ordentrabajo: 'Orden de Trabajo',
     ordentrabajocreate: 'Orden de Trabajo / Nueva Orden de Trabajo',
     ordentrabajoedit: 'Orden de Trabajo / Modificar Orden de Trabajo',
+    municipioobra: 'Municipio Obra',
+    muobcreate: 'Municipio Obra / Nueva Obra',
+    muobedit: 'Municipio Obra / Modificar Obra',
+    muobinfo: 'Municipio Obra / Informe de Materiales',
     entregamaterial: 'Entrega de Material',
     recepcionmaterial: 'Recepción de Material',
     solicitud: 'Solicitud',
@@ -101,7 +105,7 @@ export default {
     rmedidores: 'Informe de Medidores',
     rtransformadores: 'Informe de Transformadores',
     rucap: 'Informe Unidades Constructivas',
-    rmuot: 'Informe Municipio OT',
+    rmuot: 'Informe Municipio Obra',
     inventario: 'Inventario Luminaria',
     gestion: 'Luminarias Activas',
     eliminada: 'Luminarias Eliminadas',
@@ -516,6 +520,22 @@ export default {
     },
     numero_luminarias: 'Cantidad de Luminarias',
     puntos: 'Total Puntos'
+  },
+  muob: {
+    tabletitle: 'Municipio Obra',
+    muob_consecutivo: 'Consecutivo',
+    muob_fecharecepcion: 'Fecha Recepción',
+    muob_descripcion: 'Descripción Obra',
+    muob_direccion: 'Dirección Obra',
+    barr_descripcion: 'Barrio',
+    general: 'Datos Generales',
+    error: 'Error',
+    notcreated: 'No se puedo crear la Municipio Obra, error =>',
+    success: 'Éxito',
+    created: 'Nueva Municipio Obra Creada',
+    updated: 'Municipio Obra actualizada con exito!',
+    notupdated: 'Municipio Obra no fue actualizada, error =>',
+    confirmationmsg: 'Se procederá a borrar la Municipio Obra seleccionada, continuar?'
   },
   reporte: {
     tipo: {

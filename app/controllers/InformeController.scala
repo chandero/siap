@@ -77,6 +77,14 @@ class InformeController @Inject()(
       }
   }
 
+  def siap_informe_detallado_material_muob_xls(muob_consecutivo: Int) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+   val usua_id = Utility.extraerUsuario(request)
+   val empr_id = Utility.extraerEmpresa(request)
+   informeService.siap_informe_detallado_material_muob_xls(muob_consecutivo, empr_id.get).map { data =>
+      Ok(Json.toJson(data))
+   }
+}
+
   def siap_resumen_material_reporte_xls(fecha_inicial: scala.Long, fecha_final: scala.Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
