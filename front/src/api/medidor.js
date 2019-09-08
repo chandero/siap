@@ -18,6 +18,13 @@ export function getMedidors() {
   })
 }
 
+export function getMedidorTablaDato() {
+  return request({
+    url: '/medi/gmtd',
+    method: 'get'
+  })
+}
+
 export function getMedidor(medi_id) {
   const data = {
     medi_id

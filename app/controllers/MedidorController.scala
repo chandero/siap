@@ -44,12 +44,19 @@ class MedidorController @Inject()(mService: MedidorRepository, cc: ControllerCom
         }
     }
 
+    def medidor_tabla_dato() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      mService.medidor_tabla_dato().map { result =>
+         Ok(Json.toJson(result))
+      }
+    }
+
     def guardar() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
       var m = json.as[Medidor]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
-      val mnuevo = new Medidor(Some(0),m.medi_numero, m.amem_id, m.amet_id, m.aacu_id, empr_id, usua_id, m.medi_direccion, m.medi_estado, m.medi_acta)
+      val mnuevo = new Medidor(Some(0),m.medi_numero, m.amem_id, m.amet_id, m.aacu_id, empr_id, usua_id, m.medi_direccion, m.medi_estado, m.medi_acta, m.datos)
       mService.crear(mnuevo).map { result =>
         if (result > 0){
           Created(Json.toJson("true"))
@@ -64,7 +71,7 @@ class MedidorController @Inject()(mService: MedidorRepository, cc: ControllerCom
       var m = json.as[Medidor]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)      
-      val mnuevo = new Medidor(m.medi_id,m.medi_numero, m.amem_id, m.amet_id, m.aacu_id, empr_id, usua_id, m.medi_direccion, m.medi_estado, m.medi_acta)
+      val mnuevo = new Medidor(m.medi_id,m.medi_numero, m.amem_id, m.amet_id, m.aacu_id, empr_id, usua_id, m.medi_direccion, m.medi_estado, m.medi_acta, m.datos)
       if (mService.actualizar(mnuevo)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {

@@ -267,7 +267,7 @@ class InformeController @Inject()(
       val os = informeService.siap_medidor_xls(empr_id)
       val fi = new DateTime()
       val fmt = DateTimeFormat.forPattern("yyyyMMdd")
-      val filename = "Informe_Medidores" + fmt.print(fi) + ".xlsx"
+      val filename = "Informe_Medidores_" + fmt.print(fi) + ".xlsx"
       val attach = "attachment; filename=" + filename
       Ok(os).as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").withHeaders("Content-Disposition" -> attach )
    } else {

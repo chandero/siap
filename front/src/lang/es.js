@@ -743,10 +743,12 @@ export default {
       tabletitle: 'Medidores',
       select: 'Seleccione el Medidor',
       title: 'Medidor',
+      codigo: 'Código',
       numero: 'Número',
       direccion: 'Dirección',
       barr_descripcion: 'Barrio',
       cantidad: 'Cantidad Luminarias',
+      acta: 'Acta',
       tipo: {
         title: 'Tipo',
         select: 'Seleccione el Tipo de Medidor'

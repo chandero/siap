@@ -33,14 +33,57 @@
         <el-select v-model="medidor.aacu_id" filterable clearable name="cuenta" :placeholder="$t('gestion.medidor.cuentaap.select')">
           <el-option v-for="t in tiposCuenta" :key="t.aacu_id" :label="t.aacu_descripcion" :value="t.aacu_id">
           </el-option>       
-        </el-select>            
+        </el-select>
+        <p/>
+        <el-row>
+          <el-col :span="24" style="font-weight: bold; text-align: center;"><span >DATOS DEL EQUIPO DE MEDIDA</span></el-col>
+        </el-row>
+        <el-row :gutter="4">
+          <el-col :xs="9" :sm="9" :md="9" :lg="9" :xl="9">
+            <span>&nbsp;</span>
+          </el-col>
+          <el-col :xs="10" :sm="10" :md="10" :lg="10" :xl="10" style="text-align: center;">
+            <span>EXISTENTES Y/O RETIRADOS</span>
+          </el-col>
+          <el-col :xs="5" :sm="5" :md="5" :lg="5" :xl="5">
+            <span>&nbsp;</span>
+          </el-col>
+        </el-row>        
+        <el-row :gutter="4">
+          <el-col :xs="9" :sm="9" :md="9" :lg="9" :xl="9">
+            <span>DESCRIPCION</span>
+          </el-col>
+          <el-col :xs="5" :sm="5" :md="5" :lg="5" :xl="5">
+            <span>ACTIVA</span>
+          </el-col>
+          <el-col :xs="5" :sm="5" :md="5" :lg="5" :xl="5">
+            <span>REACTIVA</span>
+          </el-col>
+          <el-col :xs="5" :sm="5" :md="5" :lg="5" :xl="5">
+            <span>NUEVO</span>
+          </el-col>
+        </el-row>        
+        <el-row v-for="d in medidor.datos" :key="d.metd_id" :gutter="4">
+          <el-col :xs="9" :sm="9" :md="9" :lg="9" :xl="9">
+            <span>{{ d.metd_descripcion }}</span>
+          </el-col>
+          <el-col :xs="5" :sm="5" :md="5" :lg="5" :xl="5">
+            <el-input v-model="d.meda_activa" />
+          </el-col>
+          <el-col :xs="5" :sm="5" :md="5" :lg="5" :xl="5">
+            <el-input v-model="d.meda_reactiva" />
+          </el-col>
+          <el-col :xs="5" :sm="5" :md="5" :lg="5" :xl="5">
+            <el-input v-model="d.meda_nuevo" />
+          </el-col>
+        </el-row>            
         <el-button :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="aplicar"></el-button>
       </el-form>
      </el-main>
     </el-container>
 </template>
 <script>
-import { saveMedidor } from '@/api/medidor'
+import { saveMedidor, getMedidorTablaDato } from '@/api/medidor'
 import { getTiposMedidor } from '@/api/tipomedidor'
 import { getAapMedidorMarcas } from '@/api/aap_medidor_marca'
 import { getAapCuentasAp } from '@/api/aap_cuentaap'
@@ -57,11 +100,13 @@ export default {
         aacu_id: null,
         empr_id: null,
         usua_id: null,
-        medi_acta: null
+        medi_acta: null,
+        datos: []
       },
       tiposMedidor: [],
       tiposMarcaMedidor: [],
       tiposCuenta: [],
+      medidorTablaDato: [],
       isIndeterminate: false,
       checkAll: false,
       message: '',
@@ -149,12 +194,29 @@ export default {
       getAapCuentasAp().then(response => {
         this.tiposCuenta = response.data
       }).catch(() => {})
+    },
+    getTablaDatos() {
+      getMedidorTablaDato().then(response => {
+        this.medidorTablaDato = response.data
+        this.medidorTablaDato.forEach(d => {
+          var dato = {
+            medi_id: null,
+            metd_id: d.metd_id,
+            metd_descripcion: d.metd_descripcion,
+            meda_activa: null,
+            meda_reactiva: null,
+            meda_nuevo: null
+          }
+          this.medidor.datos.push(dato)
+        })
+      })
     }
   },
   mounted() {
     this.getTipos()
     this.getTiposMarcaMedidor()
     this.getTiposCuenta()
+    this.getTablaDatos()
   }
 }
 </script>
