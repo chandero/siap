@@ -6100,20 +6100,20 @@ ORDER BY e.reti_id, e.elem_codigo""")
             _listMerged += CellRange((2, 2), (0, 3))
             _listMerged.toList
           }
-          val _mParser = get[Option[Int]]("medi_id") ~ get[Option[String]](
+          val _mParser = get[Option[Int]]("medi_id") ~ get[Option[String]]("medi_codigo") ~ get[Option[String]](
             "medi_numero"
           ) ~ get[Option[String]]("medi_direccion") ~ get[Option[String]](
             "aacu_descripcion"
           ) ~ get[Option[Int]]("cantidad") map {
-            case a ~ b ~ c ~ d ~ e => (a, b, c, d, e)
+            case a ~ b ~ c ~ d ~ e ~ f => (a, b, c, d, e, f)
           }
           val resultSet = SQL(
-            """SELECT m.medi_id, m.medi_numero, m.medi_direccion, ac.aacu_descripcion, COUNT(a.*) AS cantidad FROM siap.medidor m
+            """SELECT m.medi_id, to_char(m.medi_id, '0000') as medi_codigo, m.medi_numero, m.medi_direccion, ac.aacu_descripcion, COUNT(a.*) AS cantidad FROM siap.medidor m
                                  LEFT JOIN siap.aap_medidor am ON am.medi_id = m.medi_id AND am.empr_id = m.empr_id
                                  LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = m.aacu_id
                                  LEFT JOIN siap.aap a ON a.aap_id = am.aap_id and a.empr_id = am.empr_id and a.esta_id <> 9 and a.aap_id <> 999999
                                  WHERE m.empr_id = {empr_id}
-                                 GROUP BY m.medi_id, m.medi_numero, m.medi_direccion, ac.aacu_descripcion 
+                                 GROUP BY m.medi_id, medi_codigo, m.medi_numero, m.medi_direccion, ac.aacu_descripcion 
                                  ORDER BY m.medi_id"""
           ).on(
               'empr_id -> empr_id
@@ -6147,35 +6147,26 @@ ORDER BY e.reti_id, e.elem_codigo""")
               val rows = resultSet.map {
                 med =>
                   j += 1
-                  val link = new HyperLinkUrl(med._2 match {
+                  val link = new HyperLinkUrl(med._3 match {
                     case Some(m) => m
                     case None    => ""
-                  }, "#M" + (med._2 match {
+                  }, "#M" + (med._3 match {
                     case Some(m) => m
                     case None    => ""
                   }))
                   com.norbitltd.spoiwo.model.Row(
                     StringCell(
-                      med._1 match {
-                        case Some(m) => "%02d".format(empr_id) + "%04d".format(m)
+                      med._2 match {
+                        case Some(m) => m
                         case None    => ""
                       },
                       Some(0),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
-                    ),
+                    ),                    
                     HyperLinkUrlCell(
                       link,
                       Some(1),
-                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                      CellStyleInheritance.CellThenRowThenColumnThenSheet
-                    ),
-                    StringCell(
-                      med._3 match {
-                        case Some(m) => m
-                        case None    => ""
-                      },
-                      Some(2),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
@@ -6184,12 +6175,21 @@ ORDER BY e.reti_id, e.elem_codigo""")
                         case Some(m) => m
                         case None    => ""
                       },
+                      Some(2),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      med._5 match {
+                        case Some(m) => m
+                        case None    => ""
+                      },
                       Some(3),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
                     NumericCell(
-                      med._5.get,
+                      med._6.get,
                       Some(4),
                       style = Some(CellStyle(dataFormat = CellDataFormat("#0"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -6205,7 +6205,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
           resultSet.map { m =>
             val fmt = DateTimeFormat.forPattern("yyyyMMdd")
             val sheet = Sheet(
-              name = "M" + (m._2 match {
+              name = "M" + (m._3 match {
                 case Some(m) => m
                 case None    => ""
               }),

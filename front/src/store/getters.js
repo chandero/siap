@@ -17,6 +17,7 @@ const getters = {
   addRouters: state => state.permission.addRouters,
   errorLogs: state => state.errorLog.logs,
   months: state => state.app.months,
-  secret: state => state.app.secret
+  secret: state => state.app.secret,
+  baseurl: state => state.app.baseurl
 }
 export default getters

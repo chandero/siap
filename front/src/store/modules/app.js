@@ -7,7 +7,8 @@ const app = {
     },
     language: Cookies.get('language') || 'en',
     months: [{ id: 1, label: 'm1' }, { id: 2, label: 'm2' }, { id: 3, label: 'm3' }, { id: 4, label: 'm4' }, { id: 5, label: 'm5' }, { id: 6, label: 'm6' }, { id: 7, label: 'm7' }, { id: 8, label: 'm8' }, { id: 9, label: 'm9' }, { id: 10, label: 'm10' }, { id: 11, label: 'm11' }, { id: 12, label: 'm12' }],
-    secret: '43f44388-5cd1-4657-9f7e-ea4e014e9333'
+    secret: '43f44388-5cd1-4657-9f7e-ea4e014e9333',
+    baseurl: null
   },
   mutations: {
     TOGGLE_SIDEBAR: state => {
@@ -21,6 +22,9 @@ const app = {
     SET_LANGUAGE: (state, language) => {
       state.language = language
       Cookies.set('language', language)
+    },
+    SET_BASEURL: (state, url) => {
+      state.baseurl = url
     }
   },
   actions: {
@@ -29,6 +33,9 @@ const app = {
     },
     setLanguage({ commit }, language) {
       commit('SET_LANGUAGE', language)
+    },
+    setBaseUrl({ commit }, url) {
+      commit('SET_BASEURL', url)
     }
   }
 }

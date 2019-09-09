@@ -230,11 +230,13 @@ POST    /api/aama/upd                   controllers.AapMarcaController.actualiza
 # Medidor
 GET     /api/medi/get/:p/:c             controllers.MedidorController.todos(p:Long, c:Long)
 GET     /api/medi/all                   controllers.MedidorController.medidores
+GET     /api/medi/gmtd                  controllers.MedidorController.medidor_tabla_dato
 GET     /api/medi/:id                   controllers.MedidorController.buscarPorId(id: Long)
 GET     /api/medi/del/:id               controllers.MedidorController.borrar(id: Long)
 POST    /api/medi/save                  controllers.MedidorController.guardar
 POST    /api/medi/upd                   controllers.MedidorController.actualizar
 GET     /api/medi/ism/:e                controllers.MedidorController.informe_siap_medidor(e: Long)
+POST    /api/medi/upload                controllers.MedidorController.upload
 
 # Transformador
 GET     /api/tran/get/:p/:c             controllers.TransformadorController.todos(p:Long, c:Long)

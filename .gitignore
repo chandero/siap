@@ -18,3 +18,4 @@ node_modules
 front/package-lock.json
 *.log
 *.rar
+.metals
