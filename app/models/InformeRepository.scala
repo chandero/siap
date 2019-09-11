@@ -710,6 +710,7 @@ case class Siap_retiro_reubicacion_b(
     repo_fecharecepcion: Option[DateTime],
     repo_fechasolucion: Option[DateTime],
     repo_fechadigitacion: Option[DateTime],
+    reti_descripcion: Option[String],
     aap_rte: Option[String],
     aap_id: Option[scala.Long],
     aap_direccion: Option[String],
@@ -1596,6 +1597,7 @@ object Siap_retiro_reubicacion_b {
       "repo_fecharecepcion" -> srm.repo_fecharecepcion,
       "repo_fechasolucion" -> srm.repo_fechasolucion,
       "repo_fechadigitacion" -> srm.repo_fechadigitacion,
+      "reti_descripcion" -> srm.reti_descripcion,
       "aap_rte" -> srm.aap_rte,
       "aap_id" -> srm.aap_id,
       "aap_direccion" -> srm.aap_direccion,
@@ -1615,6 +1617,7 @@ object Siap_retiro_reubicacion_b {
     get[Option[DateTime]]("repo_fecharecepcion") ~
       get[Option[DateTime]]("repo_fechasolucion") ~
       get[Option[DateTime]]("repo_fechadigitacion") ~
+      get[Option[String]]("reti_descripcion") ~
       get[Option[String]]("aap_rte") ~
       get[Option[scala.Long]]("aap_id") ~
       get[Option[String]]("aap_direccion") ~
@@ -1630,6 +1633,7 @@ object Siap_retiro_reubicacion_b {
       case repo_fecharecepcion ~
             repo_fechasolucion ~
             repo_fechadigitacion ~
+            reti_descripcion ~
             aap_rte ~
             aap_id ~
             aap_direccion ~
@@ -1646,6 +1650,7 @@ object Siap_retiro_reubicacion_b {
           repo_fecharecepcion,
           repo_fechasolucion,
           repo_fechadigitacion,
+          reti_descripcion,
           aap_rte,
           aap_id,
           aap_direccion,
@@ -3467,6 +3472,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             """select r.repo_fecharecepcion,
                                             r.repo_fechasolucion,
                                             ra.repo_modificado as repo_fechadigitacion,
+                                            rt.reti_descripcion,
                                             r.repo_consecutivo::text as aap_rte,
                                             a.aap_id, 
                                             e.even_direccion as aap_direccion,
@@ -3484,6 +3490,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                                             left join siap.reporte_direccion e on e.repo_id = r.repo_id
                                             left join siap.reporte_direccion_dato ed on ed.repo_id = e.repo_id and ed.even_id = e.even_id and ed.aap_id = e.aap_id
                                             left join siap.reporte_direccion_dato_adicional eda on eda.repo_id = e.repo_id and eda.even_id = e.even_id and eda.aap_id = e.aap_id
+                                            left join siap.reporte_tipo rt ON rt.reti_id = r.reti_id
                                             left join siap.aap a on a.aap_id = e.aap_id
                                             left join siap.aap_adicional d on d.aap_id = a.aap_id
                                             left join siap.barrio b on b.barr_id = e.barr_id
@@ -3491,7 +3498,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                                             left join siap.aap_conexion co on co.aaco_id = ed.aaco_id
                                             left join siap.aap_uso au on au.aaus_id = eda.aaus_id
                                             LEFT JOIN siap.aap_cuentaap ac on ac.aacu_id = eda.aacu_id
-                                            where r.reti_id = 3 and r.rees_id = 3 and r.empr_id = {empr_id} and a.aap_id = {aap_id} and e.even_estado <> 9
+                                            where r.reti_id IN (3,7) and r.rees_id = 3 and r.empr_id = {empr_id} and a.aap_id = {aap_id} and e.even_estado <> 9
                                             ORDER BY r.repo_fechasolucion desc LIMIT 1"""
           ).on(
               'fecha_inicial -> fi.getTime(),
@@ -3506,9 +3513,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
         }
 
         val reubicaciones = SQL(
-          """select r.repo_fecharecepcion,
+                                  """select r.repo_fecharecepcion,
                                             r.repo_fechasolucion,
                                             ra.repo_modificado as repo_fechadigitacion,
+                                            rt.reti_descripcion,
                                             r.repo_consecutivo::text as aap_rte,
                                             a.aap_id, 
                                             e.even_direccion as aap_direccion,
@@ -3526,6 +3534,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                                             left join siap.reporte_direccion e on e.repo_id = r.repo_id
                                             left join siap.reporte_direccion_dato ed on ed.repo_id = e.repo_id and ed.even_id = e.even_id and ed.aap_id = e.aap_id
                                             left join siap.reporte_direccion_dato_adicional eda on eda.repo_id = e.repo_id and eda.even_id = e.even_id and eda.aap_id = e.aap_id
+                                            left join siap.reporte_tipo rt ON rt.reti_id = r.reti_id
                                             left join siap.aap a on a.aap_id = e.aap_id
                                             left join siap.aap_adicional d on d.aap_id = a.aap_id
                                             left join siap.barrio b on b.barr_id = e.barr_id
@@ -3533,7 +3542,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                                             left join siap.aap_conexion co on co.aaco_id = ed.aaco_id
                                             left join siap.aap_uso au on au.aaus_id = eda.aaus_id
                                             LEFT JOIN siap.aap_cuentaap ac on ac.aacu_id = eda.aacu_id
-                                            where r.reti_id = 3 and r.rees_id = 3 and r.repo_fechasolucion between {fecha_inicial} AND {fecha_final} and r.empr_id = {empr_id} and e.even_estado <> 9"""
+                                            where r.reti_id IN (3,7) and r.rees_id = 3 and r.repo_fechasolucion between {fecha_inicial} AND {fecha_final} and r.empr_id = {empr_id} and e.even_estado <> 9"""
         ).on(
             'fecha_inicial -> fi.getTime(),
             'fecha_final -> ff.getTime(),

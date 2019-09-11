@@ -998,7 +998,8 @@ export default {
     soli_puntos: 'Puntos',
     soli_luminarias: 'Luminarias',
     soli_tipoexpansion: 'Tipo Expansión',
-    soli_estado_descripcion: 'Estado'
+    soli_estado_descripcion: 'Estado',
+    enbaja: 'Dada de Baja'
   },
   grafica: {
     cantidad: 'Cantidad',

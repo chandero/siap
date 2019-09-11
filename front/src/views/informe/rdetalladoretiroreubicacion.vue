@@ -123,7 +123,13 @@
       prop="reubicacion.repo_fechasolucion"
       width="100"
     >
-    </el-table-column>   
+    </el-table-column> 
+    <el-table-column 
+      :label="$t('informe.reti_descripcion')"
+      prop="reubicacion.reti_descripcion"
+      width="100"
+    >
+    </el-table-column>      
     <el-table-column 
       :label="$t('informe.repo_consecutivo')"
       prop="reubicacion.aap_rte"
@@ -246,6 +252,7 @@ export default {
           dato.reubicacion_repo_fecharecepcion = data.reubicacion.repo_fecharecepcion
           dato.reubicacion_repo_fechasolucion = data.reubicacion.repo_fechasolucion
           dato.reubicacion_repo_fechadigitacion = data.reubicacion.repo_fechadigitacion
+          dato.reubicacion_reti_descripcion = data.reubicacion.reti_descripcion
           dato.reubicacion_aap_rte = data.reubicacion.aap_rte
           dato.reubicacion_aap_id = data.reubicacion.aap_id
           dato.reubicacion_aap_direccion = data.reubicacion.aap_direccion
@@ -261,11 +268,11 @@ export default {
         dataTable.push(dato)
       })
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['Retiro Fecha Reporte', 'Retiro Fecha Solución', 'Retiro Fecha Digitación', 'Retiro Reporte', 'Retiro Código Luminaria', 'Retiro Dirección', 'Retiro Barrio', 'Retiro Uso', 'Retiro Tipo', 'Retiro Pot.(W)', 'Retiro Tecnología', 'Retiro Tipo Medida', 'Dada De Baja', 'Reubicación Fecha Reporte', 'Reubicación Fecha Solución', 'Reubicación Fecha Digitación', 'Reubicación Reporte', 'Reubicación Código Luminaria', 'Reubicación Dirección', 'Reubicación Barrio', 'Reubicación Uso', 'Reubicación Tipo', 'Reubicación Pot.(W)', 'Reubicación Tecnología', 'Reubicación Tipo Medida']
-        const filterVal = ['retiro_repo_fecharecepcion', 'retiro_repo_fechasolucion', 'retiro_repo_fechadigitacion', 'retiro_repo_consecutivo', 'retiro_aap_id', 'retiro_aap_direccion', 'retiro_barr_descripcion', 'retiro_aaus_descripcion', 'retiro_aamo_descripcion', 'retiro_aap_potencia', 'retiro_aap_tecnologia', 'retiro_aaco_descripcion', 'retiro_enbaja', 'reubicacion_repo_fecharecepcion', 'reubicacion_repo_fechasolucion', 'reubicacion_repo_fechadigitacion', 'reubicacion_aap_rte', 'reubicacion_aap_id', 'reubicacion_aap_direccion', 'reubicacion_barr_descripcion', 'reubicacion_aaus_descripcion', 'reubicacion_aamo_descripcion', 'reubicacion_aap_potencia', 'reubicacion_aap_tecnologia', 'reubicacion_aaco_descripcion']
+        const tHeader = ['Retiro Fecha Reporte', 'Retiro Fecha Solución', 'Retiro Fecha Digitación', 'Retiro Reporte', 'Retiro Código Luminaria', 'Retiro Dirección', 'Retiro Barrio', 'Retiro Uso', 'Retiro Tipo', 'Retiro Pot.(W)', 'Retiro Tecnología', 'Retiro Tipo Medida', 'Dada De Baja', 'Reubicación Fecha Reporte', 'Reubicación Fecha Solución', 'Reubicación Fecha Digitación', 'Tipo Reporte', 'Reubicación Reporte', 'Reubicación Código Luminaria', 'Reubicación Dirección', 'Reubicación Barrio', 'Reubicación Uso', 'Reubicación Tipo', 'Reubicación Pot.(W)', 'Reubicación Tecnología', 'Reubicación Tipo Medida']
+        const filterVal = ['retiro_repo_fecharecepcion', 'retiro_repo_fechasolucion', 'retiro_repo_fechadigitacion', 'retiro_repo_consecutivo', 'retiro_aap_id', 'retiro_aap_direccion', 'retiro_barr_descripcion', 'retiro_aaus_descripcion', 'retiro_aamo_descripcion', 'retiro_aap_potencia', 'retiro_aap_tecnologia', 'retiro_aaco_descripcion', 'retiro_enbaja', 'reubicacion_repo_fecharecepcion', 'reubicacion_repo_fechasolucion', 'reubicacion_repo_fechadigitacion', 'reubicacion_reti_descripcion', 'reubicacion_aap_rte', 'reubicacion_aap_id', 'reubicacion_aap_direccion', 'reubicacion_barr_descripcion', 'reubicacion_aaus_descripcion', 'reubicacion_aamo_descripcion', 'reubicacion_aap_potencia', 'reubicacion_aap_tecnologia', 'reubicacion_aaco_descripcion']
         const list = dataTable
         const data = this.formatJson(filterVal, list)
-        excel.export_json_to_excel(tHeader, data, 'detallado_retiro_reubicacion' + this.$moment(this.fecha_inicial).format('YYYYMMDD') + '_' + this.$moment(this.fecha_final).format('YYYYMMDD'))
+        excel.export_json_to_excel(tHeader, data, 'detallado_retiro_reubicacion_reposicion_' + this.$moment(this.fecha_inicial).format('YYYYMMDD') + '_' + this.$moment(this.fecha_final).format('YYYYMMDD'))
         this.downloadLoading = false
       })
     },
