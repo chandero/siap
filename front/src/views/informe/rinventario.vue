@@ -41,7 +41,13 @@
       prop="aap_apoyo"
       width="80"
     >
-    </el-table-column>    
+    </el-table-column>  
+    <el-table-column 
+      :label="$t('informe.esta_descripcion')"
+      prop="esta_descripcion"
+      width="80"
+    >
+    </el-table-column>  
     <el-table-column 
       :label="$t('informe.aap_direccion')"
       prop="aap_direccion"
@@ -110,12 +116,6 @@
       width="80"
     >
     </el-table-column>  
-    <el-table-column 
-      :label="$t('informe.aacu_descripcion')"
-      prop="aacu_descripcion"
-      width="250"
-    >
-    </el-table-column>    
     <el-table-column 
       :label="$t('informe.tipo_descripcion')"
       prop="tipo_descripcion"
@@ -193,7 +193,25 @@
       prop="aap_fotocelda"
       width="100"
     >
+    </el-table-column>
+    <el-table-column 
+      :label="$t('informe.medi_codigo')"
+      prop="medi_codigo"
+      width="100"
+    >
+    </el-table-column>
+    <el-table-column 
+      :label="$t('informe.medi_numero')"
+      prop="medi_numero"
+      width="100"
+    >
     </el-table-column>    
+    <el-table-column 
+      :label="$t('informe.aacu_descripcion')"
+      prop="aacu_descripcion"
+      width="150"
+    >
+    </el-table-column>        
   </el-table>
     </el-col>
   </el-row>
@@ -248,6 +266,7 @@ export default {
           this.tableData.push({
             aap_id: i.a.aap_id,
             aap_apoyo: i.a.aap_apoyo,
+            esta_descripcion: i.a.esta_descripcion,
             aap_direccion: i.a.aap_direccion,
             barr_descripcion: i.a.barr_descripcion,
             tiba_descripcion: i.a.tiba_descripcion,

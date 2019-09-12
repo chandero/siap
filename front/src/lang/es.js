@@ -999,7 +999,10 @@ export default {
     soli_luminarias: 'Luminarias',
     soli_tipoexpansion: 'Tipo Expansión',
     soli_estado_descripcion: 'Estado',
-    enbaja: 'Dada de Baja'
+    enbaja: 'Dada de Baja',
+    medi_codigo: 'Medidor Código',
+    medi_numero: 'Medidor Número',
+    esta_descripcion: 'Estado'
   },
   grafica: {
     cantidad: 'Cantidad',

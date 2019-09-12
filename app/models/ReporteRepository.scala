@@ -3399,7 +3399,34 @@ class ReporteRepository @Inject()(
                         'aap_id -> d.aap_id,
                         'empr_id -> reporte.empr_id
                       )
-                      .executeUpdate() > 0
+                    .executeUpdate()
+                    // si se conecta en aforo, eliminar la conexión con medidor
+                    if (aaco_id == 1) {
+                      println("Borrando Relacion con el Medidor")
+                      SQL("DELETE FROM siap.aap_medidor WHERE aap_id = {aap_id} and empr_id = {empr_id}").
+                      on(
+                        'aap_id -> d.aap_id,
+                        'empr_id -> reporte.empr_id
+                      ).executeUpdate()
+                    }
+                    if (aaco_id == 3) {
+                      println("Cambiando estado a RETIRADA")
+                      SQL("UPDATE siap.aap SET esta_id = {esta_id} WHERE aap_id = {aap_id} and empr_id = {empr_id}").
+                      on(
+                        'esta_id -> 2,
+                        'aap_id -> d.aap_id,
+                        'empr_id -> reporte.empr_id                      
+                      ).executeUpdate()
+                    }
+                    if (aaco_id == 1 || aaco_id == 2) {
+                      println("Cambiando estado a ACTIVA")
+                      SQL("UPDATE siap.aap SET esta_id = {esta_id} WHERE aap_id = {aap_id} and empr_id = {empr_id}").
+                      on(
+                        'esta_id -> 1,
+                        'aap_id -> d.aap_id,
+                        'empr_id -> reporte.empr_id                      
+                      ).executeUpdate()
+                    }
                   case None => false
                 }
               case None => false

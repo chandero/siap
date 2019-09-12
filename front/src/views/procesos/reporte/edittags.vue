@@ -1244,6 +1244,9 @@ export default {
                   direccion.dato_adicional.tran_id = null
                 }
               }
+              if (this.reporte.reti_id === 8) {
+                direccion.dato.aaco_id = 3
+              }
               direccion.materiales.forEach(m => {
                 m.aap_id = direccion.aap_id
               })
@@ -1758,6 +1761,11 @@ export default {
       this.validarTipo()
       this.pending()
       this.didx = 0
+      if (this.reporte.reti_id === 8) {
+        this.conexiones.splice(0, 2)
+      } else {
+        this.conexiones.splice(2, 1)
+      }
     },
     validarConsecutivo() {
       // var consecutivo = 1

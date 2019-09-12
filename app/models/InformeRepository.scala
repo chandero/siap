@@ -86,6 +86,7 @@ case class Siap_detallado_material(
 case class Siap_inventario_a(
     aap_id: Option[scala.Long],
     aap_apoyo: Option[String],
+    esta_descripcion: Option[String],
     aap_direccion: Option[String],
     barr_descripcion: Option[String],
     tiba_descripcion: Option[String],
@@ -96,8 +97,7 @@ case class Siap_inventario_a(
     aap_medidor: Option[Boolean],
     aaco_descripcion: Option[String],
     aama_descripcion: Option[String],
-    aamo_descripcion: Option[String],
-    aacu_descripcion: Option[String]
+    aamo_descripcion: Option[String]
 )
 case class Siap_inventario_b(
     tipo_descripcion: Option[String],
@@ -112,12 +112,16 @@ case class Siap_inventario_b(
     aap_balasto: Option[String],
     aap_arrancador: Option[String],
     aap_condensador: Option[String],
-    aap_fotocelda: Option[String]
+    aap_fotocelda: Option[String],
+    medi_codigo: Option[String],
+    medi_numero: Option[String],
+    aacu_descripcion: Option[String]
 )
 
 case class Inventario(
     aap_id: Option[scala.Long],
     aap_apoyo: Option[String],
+    esta_descripcion: Option[String],
     aap_direccion: Option[String],
     barr_descripcion: Option[String],
     tiba_descripcion: Option[String],
@@ -129,7 +133,6 @@ case class Inventario(
     aaco_descripcion: Option[String],
     aama_descripcion: Option[String],
     aamo_descripcion: Option[String],
-    aacu_descripcion: Option[String],
     tipo_descripcion: Option[String],
     aap_poste_altura: Option[Double],
     aap_brazo: Option[String],
@@ -142,7 +145,10 @@ case class Inventario(
     aap_balasto: Option[String],
     aap_arrancador: Option[String],
     aap_condensador: Option[String],
-    aap_fotocelda: Option[String]
+    aap_fotocelda: Option[String],
+    medi_codigo: Option[String],
+    medi_numero: Option[String],
+    aacu_descripcion: Option[String]
 )
 
 case class Siap_inventario(a: Siap_inventario_a, b: Siap_inventario_b)
@@ -284,6 +290,7 @@ object Siap_inventario_a {
     def writes(sia: Siap_inventario_a) = Json.obj(
       "aap_id" -> sia.aap_id,
       "aap_apoyo" -> sia.aap_apoyo,
+      "esta_descripcion" -> sia.esta_descripcion,
       "aap_direccion" -> sia.aap_direccion,
       "barr_descripcion" -> sia.barr_descripcion,
       "tiba_descripcion" -> sia.tiba_descripcion,
@@ -294,8 +301,7 @@ object Siap_inventario_a {
       "aap_medidor" -> sia.aap_medidor,
       "aaco_descripcion" -> sia.aaco_descripcion,
       "aama_descripcion" -> sia.aama_descripcion,
-      "aamo_descripcion" -> sia.aamo_descripcion,
-      "aacu_descripcion" -> sia.aacu_descripcion
+      "aamo_descripcion" -> sia.aamo_descripcion
     )
   }
 }
@@ -315,7 +321,10 @@ object Siap_inventario_b {
       "aap_balasto" -> sib.aap_balasto,
       "aap_arrancador" -> sib.aap_arrancador,
       "aap_condensador" -> sib.aap_condensador,
-      "aap_fotocelda" -> sib.aap_fotocelda
+      "aap_fotocelda" -> sib.aap_fotocelda,
+      "medi_codigo" -> sib.medi_codigo,
+      "medi_numero" -> sib.medi_numero,
+      "aacu_descripcion" -> sib.aacu_descripcion
     )
   }
 }
@@ -352,6 +361,7 @@ object Siap_inventario {
   val Siap_inventario_set = {
     get[Option[scala.Long]]("aap_id") ~
       get[Option[String]]("aap_apoyo") ~
+      get[Option[String]]("esta_descripcion") ~
       get[Option[String]]("aap_direccion") ~
       get[Option[String]]("barr_descripcion") ~
       get[Option[String]]("tiba_descripcion") ~
@@ -363,7 +373,6 @@ object Siap_inventario {
       get[Option[String]]("aaco_descripcion") ~
       get[Option[String]]("aama_descripcion") ~
       get[Option[String]]("aamo_descripcion") ~
-      get[Option[String]]("aacu_descripcion") ~
       get[Option[String]]("tipo_descripcion") ~
       get[Option[Double]]("aap_poste_altura") ~
       get[Option[String]]("aap_brazo") ~
@@ -376,9 +385,13 @@ object Siap_inventario {
       get[Option[String]]("aap_balasto") ~
       get[Option[String]]("aap_arrancador") ~
       get[Option[String]]("aap_condensador") ~
-      get[Option[String]]("aap_fotocelda") map {
+      get[Option[String]]("aap_fotocelda") ~
+      get[Option[String]]("medi_codigo") ~
+      get[Option[String]]("medi_numero") ~
+      get[Option[String]]("aacu_descripcion") map {
       case aap_id ~
             aap_apoyo ~
+            esta_descripcion ~
             aap_direccion ~
             barr_descripcion ~
             tiba_descripcion ~
@@ -390,7 +403,6 @@ object Siap_inventario {
             aaco_descripcion ~
             aama_descripcion ~
             aamo_descripcion ~
-            aacu_descripcion ~
             tipo_descripcion ~
             aap_poste_altura ~
             aap_brazo ~
@@ -403,10 +415,14 @@ object Siap_inventario {
             aap_balasto ~
             aap_arrancador ~
             aap_condensador ~
-            aap_fotocelda =>
+            aap_fotocelda ~
+            medi_codigo ~
+            medi_numero ~
+            aacu_descripcion =>
         new Inventario(
           aap_id,
           aap_apoyo,
+          esta_descripcion,
           aap_direccion,
           barr_descripcion,
           tiba_descripcion,
@@ -418,7 +434,6 @@ object Siap_inventario {
           aaco_descripcion,
           aama_descripcion,
           aamo_descripcion,
-          aacu_descripcion,
           tipo_descripcion,
           aap_poste_altura,
           aap_brazo,
@@ -431,7 +446,10 @@ object Siap_inventario {
           aap_balasto,
           aap_arrancador,
           aap_condensador,
-          aap_fotocelda
+          aap_fotocelda,
+          medi_codigo,
+          medi_numero,
+          aacu_descripcion
         )
     }
   }
@@ -2231,7 +2249,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
     db.withConnection { implicit connection =>
       var result =
         SQL("""SELECT
-	                        COUNT(*)
+	                  COUNT(*)
                     FROM siap.aap a
                     LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id
                     LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id
@@ -2244,7 +2262,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     LEFT JOIN siap.aap_modelo mo on mo.aamo_id = a.aamo_id
                     LEFT JOIN siap.aap_cuentaap cu on cu.aacu_id = a.aacu_id
                     LEFT JOIN siap.tipo_poste tp on tp.tipo_id = d.tipo_id
-                    WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id}
+                    WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999
                     """)
           .on(
             'fecha_corte -> new DateTime(fecha_corte),
@@ -2266,7 +2284,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
       var resultSet =
         SQL("""SELECT
 	                        a.aap_id,
-	                        a.aap_apoyo,
+                          a.aap_apoyo,
+                          s.esta_descripcion,
 	                        a.aap_direccion,
 	                        b.barr_descripcion,
 	                        tb.tiba_descripcion,
@@ -2278,7 +2297,6 @@ ORDER BY e.reti_id, e.elem_codigo""")
 	                        co.aaco_descripcion,
 	                        ma.aama_descripcion,
 	                        mo.aamo_descripcion,
-	                        cu.aacu_descripcion,
 	                        tp.tipo_descripcion,
 	                        d.aap_poste_altura,
 	                        d.aap_brazo,
@@ -2291,10 +2309,14 @@ ORDER BY e.reti_id, e.elem_codigo""")
 	                        e.aap_balasto,
 	                        e.aap_arrancador,
 	                        e.aap_condensador,
-	                        e.aap_fotocelda
+                          e.aap_fotocelda,
+                          to_char(m.medi_id, '0000') as medi_codigo,
+                          m.medi_numero,
+                          (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion
                     FROM siap.aap a
-                    LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id
-                    LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id
+                    LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
+                    LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
+                    LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id AND e.empr_id = a.empr_id
                     LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
                     LEFT JOIN siap.tipobarrio tb on tb.tiba_id = b.tiba_id
                     LEFT JOIN siap.aap_uso us on us.aaus_id = a.aaus_id	
@@ -2304,7 +2326,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     LEFT JOIN siap.aap_modelo mo on mo.aamo_id = a.aamo_id
                     LEFT JOIN siap.aap_cuentaap cu on cu.aacu_id = a.aacu_id
                     LEFT JOIN siap.tipo_poste tp on tp.tipo_id = d.tipo_id
-                    WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id}
+                    LEFT JOIN siap.aap_medidor am ON am.aap_id = a.aap_id AND am.empr_id = a.empr_id
+                    LEFT JOIN siap.medidor m ON m.medi_id = am.medi_id and m.empr_id = am.empr_id
+                    LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id
+                    WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999
                     ORDER BY a.aap_id ASC LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)
                     """)
           .on(
@@ -2318,6 +2343,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
         val a = new Siap_inventario_a(
           i.aap_id,
           i.aap_apoyo,
+          i.esta_descripcion,
           i.aap_direccion,
           i.barr_descripcion,
           i.tiba_descripcion,
@@ -2328,8 +2354,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
           i.aap_medidor,
           i.aaco_descripcion,
           i.aama_descripcion,
-          i.aamo_descripcion,
-          i.aacu_descripcion
+          i.aamo_descripcion
         )
         val b = new Siap_inventario_b(
           i.tipo_descripcion,
@@ -2344,7 +2369,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
           i.aap_balasto,
           i.aap_arrancador,
           i.aap_condensador,
-          i.aap_fotocelda
+          i.aap_fotocelda,
+          i.medi_codigo,
+          i.medi_numero,
+          i.aacu_descripcion
         )
         val si = new Siap_inventario(a, b)
         _list += si
@@ -2365,6 +2393,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             .withCellValues(
               "Código",
               "Apoyo",
+              "Estado",
               "Dirección",
               "Barrio",
               "Sector",
@@ -2376,7 +2405,6 @@ ORDER BY e.reti_id, e.elem_codigo""")
               "Tipo Medida",
               "Marca",
               "Modelo",
-              "Cuenta Alumbrado",
               "Poste",
               "Poste Altura",
               "Poste Propietario",
@@ -2389,12 +2417,16 @@ ORDER BY e.reti_id, e.elem_codigo""")
               "Balasto",
               "Arrancador",
               "Condensador",
-              "Fotocelda"
+              "Fotocelda",
+              "Medidor Código",
+              "Medidor Número",
+              "Cuenta Alumbrado",              
             )
           val resultSet =
             SQL("""SELECT
 	                        a.aap_id,
-	                        a.aap_apoyo,
+                          a.aap_apoyo,
+                          s.esta_descripcion,
 	                        a.aap_direccion,
 	                        b.barr_descripcion,
 	                        tb.tiba_descripcion,
@@ -2419,10 +2451,14 @@ ORDER BY e.reti_id, e.elem_codigo""")
 	                        e.aap_balasto,
 	                        e.aap_arrancador,
 	                        e.aap_condensador,
-	                        e.aap_fotocelda
+                          e.aap_fotocelda,
+                          to_char(m.medi_id, '0000') as medi_codigo,
+                          m.medi_numero,
+                          (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion
                     FROM siap.aap a
-                    LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id
-                    LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id
+                    LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
+                    LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
+                    LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id AND e.empr_id = a.empr_id
                     LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
                     LEFT JOIN siap.tipobarrio tb on tb.tiba_id = b.tiba_id
                     LEFT JOIN siap.aap_uso us on us.aaus_id = a.aaus_id	
@@ -2432,7 +2468,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     LEFT JOIN siap.aap_modelo mo on mo.aamo_id = a.aamo_id
                     LEFT JOIN siap.aap_cuentaap cu on cu.aacu_id = a.aacu_id
                     LEFT JOIN siap.tipo_poste tp on tp.tipo_id = d.tipo_id
-                    WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and esta_id <> 9 and a.aap_id <> 9999999
+                    LEFT JOIN siap.aap_medidor am ON am.aap_id = a.aap_id AND am.empr_id = a.empr_id
+                    LEFT JOIN siap.medidor m ON m.medi_id = am.medi_id and m.empr_id = am.empr_id
+                    LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id                    
+                    WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999
                     ORDER BY a.aap_id ASC
                     """)
               .on(
@@ -2450,6 +2489,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     case None        => ""
                   },
                   i.aap_apoyo match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.esta_descripcion match {
                     case Some(value) => value
                     case None        => ""
                   },
@@ -2494,10 +2537,6 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     case None        => ""
                   },
                   i.aamo_descripcion match {
-                    case Some(value) => value
-                    case None        => ""
-                  },
-                  i.aacu_descripcion match {
                     case Some(value) => value
                     case None        => ""
                   },
@@ -2550,6 +2589,18 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     case None        => ""
                   },
                   i.aap_fotocelda match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.medi_codigo match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.medi_numero match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.aacu_descripcion match {
                     case Some(value) => value
                     case None        => ""
                   }
@@ -2635,6 +2686,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             .withCellValues(
               "Código",
               "Apoyo",
+              "Estado",
               "Dirección",
               "Barrio",
               "Sector",
@@ -2646,7 +2698,6 @@ ORDER BY e.reti_id, e.elem_codigo""")
               "Tipo Medida",
               "Marca",
               "Modelo",
-              "Cuenta Alumbrado",
               "Poste",
               "Poste Altura",
               "Poste Propietario",
@@ -2659,50 +2710,61 @@ ORDER BY e.reti_id, e.elem_codigo""")
               "Balasto",
               "Arrancador",
               "Condensador",
-              "Fotocelda"
+              "Fotocelda",
+              "Medidor Código",
+              "Medidor Número",
+              "Cuenta Alumbrado",              
             )
-          var query =
-            """SELECT
-	                        a.aap_id,
-	                        a.aap_apoyo,
-	                        a.aap_direccion,
-	                        b.barr_descripcion,
-	                        tb.tiba_descripcion,
-	                        us.aaus_descripcion,
-	                        a.aap_modernizada,
-	                        ad.aap_modernizada_anho,
-	                        tc.aatc_descripcion,
-	                        a.aap_medidor,
-	                        co.aaco_descripcion,
-	                        ma.aama_descripcion,
-	                        mo.aamo_descripcion,
-	                        cu.aacu_descripcion,
-	                        tp.tipo_descripcion,
-	                        ad.aap_poste_altura,
-	                        ad.aap_brazo,
-	                        ad.aap_collarin,
-	                        ad.aap_potencia,
-	                        ad.aap_tecnologia,
-	                        ad.aap_rte,
-	                        ad.aap_poste_propietario,
-	                        e.aap_bombillo,
-	                        e.aap_balasto,
-	                        e.aap_arrancador,
-	                        e.aap_condensador,
-	                        e.aap_fotocelda
-                    FROM siap.aap a
-                    LEFT JOIN siap.aap_adicional ad on ad.aap_id = a.aap_id
-                    LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id
-                    LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
-                    LEFT JOIN siap.tipobarrio tb on tb.tiba_id = b.tiba_id
-                    LEFT JOIN siap.aap_uso us on us.aaus_id = a.aaus_id	
-                    LEFT JOIN siap.aap_tipo_carcasa tc on tc.aatc_id = a.aatc_id
-                    LEFT JOIN siap.aap_conexion co on co.aaco_id = a.aaco_id
-                    LEFT JOIN siap.aap_marca ma on ma.aama_id = a.aama_id
-                    LEFT JOIN siap.aap_modelo mo on mo.aamo_id = a.aamo_id
-                    LEFT JOIN siap.aap_cuentaap cu on cu.aacu_id = a.aacu_id
-                    LEFT JOIN siap.tipo_poste tp on tp.tipo_id = ad.tipo_id
-                    WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and a.esta_id <> 9"""
+          var query = """SELECT
+                          a.aap_id,
+                          a.aap_apoyo,
+                          s.esta_descripcion,
+                          a.aap_direccion,
+                          b.barr_descripcion,
+                          tb.tiba_descripcion,
+                          us.aaus_descripcion,
+                          a.aap_modernizada,
+                          d.aap_modernizada_anho,
+                          tc.aatc_descripcion,
+                          a.aap_medidor,
+                          co.aaco_descripcion,
+                          ma.aama_descripcion,
+                          mo.aamo_descripcion,
+                          cu.aacu_descripcion,
+                          tp.tipo_descripcion,
+                          d.aap_poste_altura,
+                          d.aap_brazo,
+                          d.aap_collarin,
+                          d.aap_potencia,
+                          d.aap_tecnologia,
+                          d.aap_rte,
+                          d.aap_poste_propietario,
+                          e.aap_bombillo,
+                          e.aap_balasto,
+                          e.aap_arrancador,
+                          e.aap_condensador,
+                          e.aap_fotocelda,
+                          to_char(m.medi_id, '0000') as medi_codigo,
+                          m.medi_numero,
+                          (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion
+                        FROM siap.aap a
+                        LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
+                        LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
+                        LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id AND e.empr_id = a.empr_id
+                        LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
+                        LEFT JOIN siap.tipobarrio tb on tb.tiba_id = b.tiba_id
+                        LEFT JOIN siap.aap_uso us on us.aaus_id = a.aaus_id	
+                        LEFT JOIN siap.aap_tipo_carcasa tc on tc.aatc_id = a.aatc_id
+                        LEFT JOIN siap.aap_conexion co on co.aaco_id = a.aaco_id
+                        LEFT JOIN siap.aap_marca ma on ma.aama_id = a.aama_id
+                        LEFT JOIN siap.aap_modelo mo on mo.aamo_id = a.aamo_id
+                        LEFT JOIN siap.aap_cuentaap cu on cu.aacu_id = a.aacu_id
+                        LEFT JOIN siap.tipo_poste tp on tp.tipo_id = d.tipo_id
+                        LEFT JOIN siap.aap_medidor am ON am.aap_id = a.aap_id AND am.empr_id = a.empr_id
+                        LEFT JOIN siap.medidor m ON m.medi_id = am.medi_id and m.empr_id = am.empr_id
+                        LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id                    
+                        WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999 
+                      """
           println("filtro a aplicar:" + filter)
           if (!filter.isEmpty) {
             query = query + " and " + filter
@@ -2710,13 +2772,14 @@ ORDER BY e.reti_id, e.elem_codigo""")
           println("orderby a aplicar: " + orderby)
           if (!orderby.isEmpty) {
             query = query + s" ORDER BY $orderby"
-          }
-          val resultSet = SQL(query)
-            .on(
-              'fecha_corte -> new DateTime(fecha_corte),
-              'empr_id -> empr_id
-            )
-            .as(Siap_inventario.Siap_inventario_set *)
+          }  
+          val resultSet =
+            SQL(query)
+              .on(
+                'fecha_corte -> new DateTime(fecha_corte),
+                'empr_id -> empr_id
+              )
+              .as(Siap_inventario.Siap_inventario_set *)
           val rows = resultSet.map {
             i =>
               com.norbitltd.spoiwo.model
@@ -2727,6 +2790,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     case None        => ""
                   },
                   i.aap_apoyo match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.esta_descripcion match {
                     case Some(value) => value
                     case None        => ""
                   },
@@ -2771,10 +2838,6 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     case None        => ""
                   },
                   i.aamo_descripcion match {
-                    case Some(value) => value
-                    case None        => ""
-                  },
-                  i.aacu_descripcion match {
                     case Some(value) => value
                     case None        => ""
                   },
@@ -2827,6 +2890,18 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     case None        => ""
                   },
                   i.aap_fotocelda match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.medi_codigo match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.medi_numero match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.aacu_descripcion match {
                     case Some(value) => value
                     case None        => ""
                   }
