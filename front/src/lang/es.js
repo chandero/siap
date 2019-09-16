@@ -1002,7 +1002,9 @@ export default {
     enbaja: 'Dada de Baja',
     medi_codigo: 'Medidor Código',
     medi_numero: 'Medidor Número',
-    esta_descripcion: 'Estado'
+    esta_descripcion: 'Estado',
+    tran_codigo: 'Transformador Código',
+    tran_numero: 'Transformador Número'
   },
   grafica: {
     cantidad: 'Cantidad',

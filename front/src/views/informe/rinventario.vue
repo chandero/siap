@@ -211,7 +211,19 @@
       prop="aacu_descripcion"
       width="150"
     >
-    </el-table-column>        
+    </el-table-column>    
+    <el-table-column 
+      :label="$t('informe.tran_codigo')"
+      prop="tran_codigo"
+      width="100"
+    >
+    </el-table-column>
+    <el-table-column 
+      :label="$t('informe.tran_numero')"
+      prop="tran_numero"
+      width="100"
+    >
+    </el-table-column>          
   </el-table>
     </el-col>
   </el-row>
@@ -278,7 +290,6 @@ export default {
             aaco_descripcion: i.a.aaco_descripcion,
             aama_descripcion: i.a.aama_descripcion,
             aamo_descripcion: i.a.aamo_descripcion,
-            aacu_descripcion: i.a.aacu_descripcion,
             tipo_descripcion: i.b.tipo_descripcion,
             aap_poste_altura: i.b.aap_poste_altura,
             aap_poste_propietario: i.b.aap_poste_propietario,
@@ -291,7 +302,12 @@ export default {
             aap_balasto: i.b.aap_balasto,
             aap_arrancador: i.b.aap_arrancador,
             aap_condensador: i.b.aap_condensador,
-            aap_fotocelda: i.b.aap_fotocelda
+            aap_fotocelda: i.b.aap_fotocelda,
+            medi_codigo: i.b.medi_codigo,
+            medi_numero: i.b.medi_numero,
+            aacu_descripcion: i.b.aacu_descripcion,
+            tran_codigo: i.b.tran_codigo,
+            tran_numero: i.b.tran_numero
           })
         })
       }).catch(error => {

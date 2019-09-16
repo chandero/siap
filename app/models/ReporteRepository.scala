@@ -3541,7 +3541,7 @@ class ReporteRepository @Inject()(
                       .executeUpdate()
                   case _ =>
                     SQL(
-                      """UPDATE siap.aap SET esta_id = 1 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
+                      """UPDATE siap.aap SET esta_id = 2 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
                     ).on(
                         'aap_id -> d.aap_id,
                         'empr_id -> reporte.empr_id

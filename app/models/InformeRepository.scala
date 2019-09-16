@@ -36,6 +36,7 @@ import anorm.JodaParameterMetaData._
 
 import scala.util.{Failure, Success}
 import scala.concurrent.{Await, Future}
+import scala.collection.immutable.List
 import scala.collection.mutable.Map
 import scala.collection.mutable.ListBuffer
 
@@ -115,7 +116,9 @@ case class Siap_inventario_b(
     aap_fotocelda: Option[String],
     medi_codigo: Option[String],
     medi_numero: Option[String],
-    aacu_descripcion: Option[String]
+    aacu_descripcion: Option[String],
+    tran_codigo: Option[String],
+    tran_numero: Option[String],
 )
 
 case class Inventario(
@@ -148,7 +151,9 @@ case class Inventario(
     aap_fotocelda: Option[String],
     medi_codigo: Option[String],
     medi_numero: Option[String],
-    aacu_descripcion: Option[String]
+    aacu_descripcion: Option[String],
+    tran_codigo: Option[String],
+    tran_numero: Option[String]
 )
 
 case class Siap_inventario(a: Siap_inventario_a, b: Siap_inventario_b)
@@ -324,7 +329,9 @@ object Siap_inventario_b {
       "aap_fotocelda" -> sib.aap_fotocelda,
       "medi_codigo" -> sib.medi_codigo,
       "medi_numero" -> sib.medi_numero,
-      "aacu_descripcion" -> sib.aacu_descripcion
+      "aacu_descripcion" -> sib.aacu_descripcion,
+      "tran_codigo" -> sib.tran_codigo,
+      "tran_numero" -> sib.tran_numero
     )
   }
 }
@@ -388,7 +395,9 @@ object Siap_inventario {
       get[Option[String]]("aap_fotocelda") ~
       get[Option[String]]("medi_codigo") ~
       get[Option[String]]("medi_numero") ~
-      get[Option[String]]("aacu_descripcion") map {
+      get[Option[String]]("aacu_descripcion") ~
+      get[Option[String]]("tran_codigo") ~
+      get[Option[String]]("tran_numero") map {
       case aap_id ~
             aap_apoyo ~
             esta_descripcion ~
@@ -418,7 +427,9 @@ object Siap_inventario {
             aap_fotocelda ~
             medi_codigo ~
             medi_numero ~
-            aacu_descripcion =>
+            aacu_descripcion ~
+            tran_codigo ~
+            tran_numero =>
         new Inventario(
           aap_id,
           aap_apoyo,
@@ -449,7 +460,9 @@ object Siap_inventario {
           aap_fotocelda,
           medi_codigo,
           medi_numero,
-          aacu_descripcion
+          aacu_descripcion,
+          tran_codigo,
+          tran_numero
         )
     }
   }
@@ -604,8 +617,8 @@ case class Siap_detallado_cambio_medida(
     aaus_descripcion: Option[String],
     aacu_descripcion: Option[String],
     aaco_descripcion: Option[String],
-    medi_numero: Option[String],
-    tran_numero: Option[String]
+    medi_codigo: Option[String],
+    tran_codigo: Option[String]
 )
 
 case class Siap_detallado_modernizacion(
@@ -1032,8 +1045,8 @@ object Siap_detallado_cambio_medida {
       "aaus_descripcion" -> srm.aaus_descripcion,
       "aacu_descripcion" -> srm.aacu_descripcion,
       "aaco_descripcion" -> srm.aaco_descripcion,
-      "medi_numero" -> srm.medi_numero,
-      "tran_numero" -> srm.tran_numero
+      "medi_codigo" -> srm.medi_codigo,
+      "tran_codigo" -> srm.tran_codigo
     )
   }
 
@@ -1058,8 +1071,8 @@ object Siap_detallado_cambio_medida {
       get[Option[String]]("aaus_descripcion") ~
       get[Option[String]]("aacu_descripcion") ~
       get[Option[String]]("aaco_descripcion") ~
-      get[Option[String]]("medi_numero") ~
-      get[Option[String]]("tran_numero") map {
+      get[Option[String]]("medi_codigo") ~
+      get[Option[String]]("tran_codigo") map {
       case repo_fechasolucion ~
             repo_fechadigitacion ~
             aap_rte ~
@@ -1080,8 +1093,8 @@ object Siap_detallado_cambio_medida {
             aaus_descripcion ~
             aacu_descripcion ~
             aaco_descripcion ~
-            medi_numero ~
-            tran_numero =>
+            medi_codigo ~
+            tran_codigo =>
         new Siap_detallado_cambio_medida(
           repo_fechasolucion,
           repo_fechadigitacion,
@@ -1103,8 +1116,8 @@ object Siap_detallado_cambio_medida {
           aaus_descripcion,
           aacu_descripcion,
           aaco_descripcion,
-          medi_numero,
-          tran_numero
+          medi_codigo,
+          tran_codigo
         )
     }
   }
@@ -2312,7 +2325,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           e.aap_fotocelda,
                           to_char(m.medi_id, '0000') as medi_codigo,
                           m.medi_numero,
-                          (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion
+                          (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
+                          to_char(t.tran_id, '0000') as tran_codigo,
+                          t.tran_numero
                     FROM siap.aap a
                     LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
                     LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
@@ -2329,6 +2344,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     LEFT JOIN siap.aap_medidor am ON am.aap_id = a.aap_id AND am.empr_id = a.empr_id
                     LEFT JOIN siap.medidor m ON m.medi_id = am.medi_id and m.empr_id = am.empr_id
                     LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id
+                    LEFT JOIN siap.aap_transformador at ON at.aap_id = a.aap_id and at.empr_id = a.empr_id
+                    LEFT JOIN siap.transformador t ON t.tran_id = at.tran_id and t.empr_id = at.empr_id
                     WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999
                     ORDER BY a.aap_id ASC LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)
                     """)
@@ -2372,7 +2389,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
           i.aap_fotocelda,
           i.medi_codigo,
           i.medi_numero,
-          i.aacu_descripcion
+          i.aacu_descripcion,
+          i.tran_codigo,
+          i.tran_numero
         )
         val si = new Siap_inventario(a, b)
         _list += si
@@ -2420,7 +2439,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
               "Fotocelda",
               "Medidor Código",
               "Medidor Número",
-              "Cuenta Alumbrado",              
+              "Cuenta Alumbrado",
+              "Transformador Código",
+              "Transformador Número"              
             )
           val resultSet =
             SQL("""SELECT
@@ -2438,7 +2459,6 @@ ORDER BY e.reti_id, e.elem_codigo""")
 	                        co.aaco_descripcion,
 	                        ma.aama_descripcion,
 	                        mo.aamo_descripcion,
-	                        cu.aacu_descripcion,
 	                        tp.tipo_descripcion,
 	                        d.aap_poste_altura,
 	                        d.aap_brazo,
@@ -2454,7 +2474,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           e.aap_fotocelda,
                           to_char(m.medi_id, '0000') as medi_codigo,
                           m.medi_numero,
-                          (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion
+                          (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
+                          to_char(t.tran_id, '0000') as tran_codigo,
+                          t.tran_numero
                     FROM siap.aap a
                     LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
                     LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
@@ -2470,7 +2492,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     LEFT JOIN siap.tipo_poste tp on tp.tipo_id = d.tipo_id
                     LEFT JOIN siap.aap_medidor am ON am.aap_id = a.aap_id AND am.empr_id = a.empr_id
                     LEFT JOIN siap.medidor m ON m.medi_id = am.medi_id and m.empr_id = am.empr_id
-                    LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id                    
+                    LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id
+                    LEFT JOIN siap.aap_transformador at ON at.aap_id = a.aap_id and at.empr_id = a.empr_id
+                    LEFT JOIN siap.transformador t ON t.tran_id = at.tran_id and t.empr_id = at.empr_id
                     WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999
                     ORDER BY a.aap_id ASC
                     """)
@@ -2603,7 +2627,15 @@ ORDER BY e.reti_id, e.elem_codigo""")
                   i.aacu_descripcion match {
                     case Some(value) => value
                     case None        => ""
-                  }
+                  },
+                  i.tran_codigo match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.tran_numero match {
+                    case Some(value) => value
+                    case None        => ""
+                  },                  
                 )
           }
           headerRow :: rows.toList
@@ -2713,7 +2745,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
               "Fotocelda",
               "Medidor Código",
               "Medidor Número",
-              "Cuenta Alumbrado",              
+              "Cuenta Alumbrado",
+              "Transformador Código",
+              "Transformador Número"
             )
           var query = """SELECT
                           a.aap_id,
@@ -2746,7 +2780,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           e.aap_fotocelda,
                           to_char(m.medi_id, '0000') as medi_codigo,
                           m.medi_numero,
-                          (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion
+                          (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
+                          to_char(t.tran_id, '0000') as tran_codigo,
+                          t.tran_numero
                         FROM siap.aap a
                         LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
                         LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
@@ -2763,7 +2799,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
                         LEFT JOIN siap.aap_medidor am ON am.aap_id = a.aap_id AND am.empr_id = a.empr_id
                         LEFT JOIN siap.medidor m ON m.medi_id = am.medi_id and m.empr_id = am.empr_id
                         LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id                    
-                        WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999 
+                        LEFT JOIN siap.aap_transformador at ON at.aap_id = a.aap_id and at.empr_id = a.empr_id
+                        LEFT JOIN siap.transformador t ON t.tran_id = at.tran_id and t.empr_id = at.empr_id
+                        WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999
                       """
           println("filtro a aplicar:" + filter)
           if (!filter.isEmpty) {
@@ -2902,6 +2940,14 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     case None        => ""
                   },
                   i.aacu_descripcion match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.tran_codigo match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.tran_numero match {
                     case Some(value) => value
                     case None        => ""
                   }

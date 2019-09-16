@@ -10,12 +10,13 @@
            <el-row :gutter="4">
              <el-col :span="8">
                <el-form-item :label="$t('gestion.code')">
-                <el-input v-model="activo.aap.aap_id" @input="activo.aap.aap_id = parseInt($event)" ref="code" @keyup.enter.native="getAap()" @blur="getAap()"></el-input>
+                <el-input v-model="activo.aap.aap_id" autofocus @input="activo.aap.aap_id = parseInt($event)" ref="code" @keyup.enter.native="getAap()" @blur="getAap()"></el-input>
                </el-form-item>
              </el-col>
-             <el-col :span="8"><el-form-item :label="$t('gestion.support')">
-                      <el-input readonly v-model="activo.aap.aap_apoyo" autofocus ref="support" @keyup.enter.native="changeFocus('description')"></el-input>
-                     </el-form-item> 
+             <el-col :span="8">
+                <el-form-item :label="$t('gestion.support')">
+                  <el-input readonly v-model="activo.aap.aap_apoyo" ref="support" @keyup.enter.native="changeFocus('description')"></el-input>
+                </el-form-item> 
              </el-col>
              <el-col :span="8"><el-form-item :label="$t('gestion.estado')">
                       <span style="font-size:18px; font-weight: bold">{{ activo.esta_id > 0? activo.esta_id === 9? 'Dada de Baja': 'Activa' : '' }}</span>
@@ -417,59 +418,61 @@ export default {
   },
   methods: {
     getAap() {
-      const loading = this.$loading({
-        lock: true,
-        text: 'Buscando....'
-      })
-      getAapEdit(this.activo.aap.aap_id).then(response => {
-        loading.close()
-        if (response.status === 200) {
-          this.activo = response.data
-          if (this.activo.aame === null || this.activo.aame === undefined) {
-            this.activo.aame = {
-              aap_id: this.activo.aap.aap_id,
-              amem_id: null,
-              amet_id: null,
-              aame_numero: null,
-              medi_id: null
-            }
-          }
-          if (this.activo.aap_adicional === null || this.activo.aap_adicional === undefined) {
-            this.activo.aap_adicional = {
-              aap_brazo: null,
-              aap_collarin: null,
-              aap_id: this.activo.aap.aap_id,
-              aap_modernizada_anho: null,
-              aap_poste_altura: null,
-              aap_poste_propietario: null,
-              aap_potencia: null,
-              aap_rte: null,
-              aap_tecnologia: null,
-              tipo_id: null
-            }
-            if (this.activo.aap_elemento === null || this.activo.aap_elemento === undefined) {
-              this.activos.aap_elemento = {
-                aael_fecha: null,
-                aap_arrancador: null,
-                aap_balasto: null,
-                aap_bombillo: null,
-                aap_condensador: null,
-                aap_fotocelda: null,
+      if (this.activo.aap.aap_id) {
+        const loading = this.$loading({
+          lock: true,
+          text: 'Buscando....'
+        })
+        getAapEdit(this.activo.aap.aap_id).then(response => {
+          loading.close()
+          if (response.status === 200) {
+            this.activo = response.data
+            if (this.activo.aame === null || this.activo.aame === undefined) {
+              this.activo.aame = {
                 aap_id: this.activo.aap.aap_id,
-                repo_consecutivo: null,
-                reti_id: null
+                amem_id: null,
+                amet_id: null,
+                aame_numero: null,
+                medi_id: null
               }
             }
+            if (this.activo.aap_adicional === null || this.activo.aap_adicional === undefined) {
+              this.activo.aap_adicional = {
+                aap_brazo: null,
+                aap_collarin: null,
+                aap_id: this.activo.aap.aap_id,
+                aap_modernizada_anho: null,
+                aap_poste_altura: null,
+                aap_poste_propietario: null,
+                aap_potencia: null,
+                aap_rte: null,
+                aap_tecnologia: null,
+                tipo_id: null
+              }
+              if (this.activo.aap_elemento === null || this.activo.aap_elemento === undefined) {
+                this.activos.aap_elemento = {
+                  aael_fecha: null,
+                  aap_arrancador: null,
+                  aap_balasto: null,
+                  aap_bombillo: null,
+                  aap_condensador: null,
+                  aap_fotocelda: null,
+                  aap_id: this.activo.aap.aap_id,
+                  repo_consecutivo: null,
+                  reti_id: null
+                }
+              }
+            }
+          } else {
+            this.limpiar()
+            this.dialogVisible = true
           }
-        } else {
+        }).catch(() => {
+          loading.close()
           this.limpiar()
           this.dialogVisible = true
-        }
-      }).catch(() => {
-        loading.close()
-        this.limpiar()
-        this.dialogVisible = true
-      })
+        })
+      }
     },
     accion(acci_id) {
       return this.acciones.find(o => o.acci_id === acci_id).acci_descripcion
