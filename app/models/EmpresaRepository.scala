@@ -248,11 +248,12 @@ class EmpresaRepository @Inject()(dbapi: DBApi)(
         new LocalDate(Calendar.getInstance().getTimeInMillis())
       val hora: LocalDate = fecha
       val result: Boolean = SQL(
-        "UPDATE siap.empresa SET empr_descripcion = {empr_descripcion}, empr_identificacion = {empr_identificacion}, empr_direccion = {empr_direccion}, empr_telefono = {empr_telefono}, empr_concesion = {empr_concesion}, empr_estado = {empr_estado}, usua_id = {usua_id}, depa_id = {depa_id}, muni_id = {muni_id} WHERE empr_id = {empr_id}")
+        "UPDATE siap.empresa SET empr_descripcion = {empr_descripcion}, empr_identificacion = {empr_identificacion}, empr_sigla = {empr_sigla}, empr_direccion = {empr_direccion}, empr_telefono = {empr_telefono}, empr_concesion = {empr_concesion}, empr_estado = {empr_estado}, usua_id = {usua_id}, depa_id = {depa_id}, muni_id = {muni_id} WHERE empr_id = {empr_id}")
         .on(
           'empr_id -> empresa.empr_id,
           'empr_descripcion -> empresa.empr_descripcion,
           'empr_identificacion -> empresa.empr_identificacion,
+          'empr_sigla -> empresa.empr_sigla,
           'empr_direccion -> empresa.empr_direccion,
           'empr_telefono -> empresa.empr_telefono,
           'empr_concesion -> empresa.empr_concesion,

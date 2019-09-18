@@ -19,7 +19,7 @@
         </el-option>       
      </el-select>
      <p/>
-     <span>{{ $t('barrio.tipo')}}</span>
+     <span>{{ $t('barrio.type')}}</span>
      <el-select v-model="barrio.tiba_id" name="tipobarrio" :placeholder="$t('tipobarrio.select')">
         <el-option v-for="tipobarrio in tiposbarrio" :key="tipobarrio.tiba_id" :label="tipobarrio.tiba_descripcion" :value="tipobarrio.tiba_id" >
         </el-option>       

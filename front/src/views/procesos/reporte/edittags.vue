@@ -60,7 +60,7 @@
                       <el-col v-if="reporte.reti_id === 9 & reporte.adicional.aaco_id_nuevo == 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                         <el-form-item prop="adicional.medi_id" :label="$t('gestion.medidor.title')">
                           <el-select clearable filterable ref="medi_id" v-model="reporte.adicional.medi_id" name="medi_id" :placeholder="$t('gestion.medidor.select')">
-                            <el-option v-for="m in medidores" :key="m.medi_id" :label="m.medi_numero" :value="m.medi_id">
+                            <el-option v-for="m in medidores" :key="m.medi_id" :label="m.medi_id | fillZeros(4)" :value="m.medi_id">
                             </el-option>       
                           </el-select>
                         </el-form-item>
@@ -68,7 +68,7 @@
                       <el-col v-if="reporte.reti_id === 9 & reporte.adicional.aaco_id_nuevo == 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                         <el-form-item prop="adicional.tran_id" :label="$t('gestion.transformador.title')">
                           <el-select clearable filterable ref="transformador" v-model="reporte.adicional.tran_id" name="transformador" :placeholder="$t('gestion.transformador.select')">
-                            <el-option v-for="t in transformadores" :key="t.tran_id" :label="t.tran_numero" :value="t.tran_id">
+                            <el-option v-for="t in transformadores" :key="t.tran_id" :label="t.tran_id | fillZeros(4)" :value="t.tran_id">
                             </el-option>       
                           </el-select>
                         </el-form-item>
@@ -332,7 +332,7 @@
                             <el-col v-if="reporte.reti_id !== 1 & reporte.direcciones[didx].dato.aaco_id === 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                               <el-form-item prop="dato_adicional.medi_id" :label="$t('gestion.medidor.title')">
                                 <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="medidor" v-model="reporte.direcciones[didx].dato_adicional.medi_id" name="medidor" :placeholder="$t('gestion.medidor.select')">
-                                  <el-option v-for="m in medidores" :key="m.medi_id" :label="m.medi_numero" :value="m.medi_id">
+                                  <el-option v-for="m in medidores" :key="m.medi_id" :label="m.medi_id | fillZeros(4)" :value="m.medi_id">
                                   </el-option>       
                                 </el-select>
                               </el-form-item>
@@ -340,7 +340,7 @@
                             <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                               <el-form-item prop="dato_adicional.tran_id" :label="$t('gestion.transformador.title')">
                                 <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="transformador" v-model="reporte.direcciones[didx].dato_adicional.tran_id" name="transformador" :placeholder="$t('gestion.transformador.select')">
-                                  <el-option v-for="t in transformadores" :key="t.tran_id" :label="t.tran_numero" :value="t.tran_id">
+                                  <el-option v-for="t in transformadores" :key="t.tran_id" :label="t.tran_id | fillZeros(4)" :value="t.tran_id">
                                   </el-option>       
                                 </el-select>
                               </el-form-item>
