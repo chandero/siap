@@ -1503,7 +1503,7 @@ class ReporteRepository @Inject()(
         var _list: ListBuffer[Reporte] = new ListBuffer[Reporte]()
         val reps = SQL("""SELECT * FROM siap.reporte r 
                                           WHERE r.empr_id = {empr_id} 
-                                          and r.rees_id <> 9""")
+                                          and r.rees_id <> 9 ORDER BY r.repo_id""")
           .on(
             'empr_id -> empr_id
           )
@@ -3864,10 +3864,13 @@ class ReporteRepository @Inject()(
   def actualizarHistoria(empr_id: scala.Long): Boolean = {
     db.withConnection { implicit connection =>
       reportes(empr_id).map { reportes =>
-        for (reporte <- reportes) {
-          reporte.eventos.map { eventos =>
-            for (e <- eventos) {
+        reportes.foreach { reporte =>
+          println("procesando reporte: " + reporte.repo_consecutivo)
+          reporte.eventos.foreach { eventos =>
+            eventos.foreach { e =>
+              println("procesando eventos")
               if (e.aap_id != None) {
+                println("procesando aap: " + e.aap_id)
                 var elemento: Elemento = null
                 var bombillo_retirado = None: Option[String]
                 var bombillo_instalado = None: Option[String]
@@ -3896,6 +3899,7 @@ class ReporteRepository @Inject()(
                 }
                 if (estado != 9) {
                   // validar elemento y actualizar aap_elemento
+                  println("elemento tipo:" + elemento.tiel_id)
                   elemento.tiel_id match {
                     case Some(1) =>
                       SQL(
@@ -3958,21 +3962,21 @@ class ReporteRepository @Inject()(
                           .on(
                             'aap_bombillo_retirado -> e.even_codigo_retirado,
                             'aap_bombillo_instalado -> e.even_codigo_instalado,
-                            'aap_balasto_retirado -> "",
-                            'aap_balasto_instalado -> "",
-                            'aap_arrancador_retirado -> "",
-                            'aap_arrancador_instalado -> "",
-                            'aap_condensador_retirado -> "",
-                            'aap_condensador_instalado -> "",
-                            'aap_fotocelda_retirado -> "",
-                            'aap_fotocelda_instalado -> "",
+                            'aap_balasto_retirado -> Option.empty[String],
+                            'aap_balasto_instalado -> Option.empty[String],
+                            'aap_arrancador_retirado -> Option.empty[String],
+                            'aap_arrancador_instalado -> Option.empty[String],
+                            'aap_condensador_retirado -> Option.empty[String],
+                            'aap_condensador_instalado -> Option.empty[String],
+                            'aap_fotocelda_retirado -> Option.empty[String],
+                            'aap_fotocelda_instalado -> Option.empty[String],
                             'aap_id -> e.aap_id,
                             'aael_fecha -> reporte.repo_fechasolucion,
                             'reti_id -> reporte.reti_id,
                             'repo_consecutivo -> reporte.repo_consecutivo,
                             'empr_id -> reporte.empr_id
                           )
-                          .executeInsert()
+                          .executeUpdate()
                       }
                     case Some(2) =>
                       SQL(
@@ -4034,23 +4038,23 @@ class ReporteRepository @Inject()(
                                                     )                                                    
                                                 """
                         ).on(
-                            'aap_bombillo_retirado -> "",
-                            'aap_bombillo_instalado -> "",
+                            'aap_bombillo_retirado -> Option.empty[String],
+                            'aap_bombillo_instalado -> Option.empty[String],
                             'aap_balasto_retirado -> e.even_codigo_retirado,
                             'aap_balasto_instalado -> e.even_codigo_instalado,
-                            'aap_arrancador_retirado -> "",
-                            'aap_arrancador_instalado -> "",
-                            'aap_condensador_retirado -> "",
-                            'aap_condensador_instalado -> "",
-                            'aap_fotocelda_retirado -> "",
-                            'aap_fotocelda_instalado -> "",
+                            'aap_arrancador_retirado -> Option.empty[String],
+                            'aap_arrancador_instalado -> Option.empty[String],
+                            'aap_condensador_retirado -> Option.empty[String],
+                            'aap_condensador_instalado -> Option.empty[String],
+                            'aap_fotocelda_retirado -> Option.empty[String],
+                            'aap_fotocelda_instalado -> Option.empty[String],
                             'aap_id -> e.aap_id,
                             'aael_fecha -> reporte.repo_fechasolucion,
                             'reti_id -> reporte.reti_id,
                             'repo_consecutivo -> reporte.repo_consecutivo,
                             'empr_id -> reporte.empr_id
                           )
-                          .executeInsert()
+                          .executeUpdate()
                       }
                     case Some(3) =>
                       SQL(
@@ -4112,23 +4116,23 @@ class ReporteRepository @Inject()(
                                                     )                                                    
                                                 """
                         ).on(
-                            'aap_bombillo_retirado -> "",
-                            'aap_bombillo_instalado -> "",
-                            'aap_balasto_retirado -> "",
-                            'aap_balasto_instalado -> "",
+                            'aap_bombillo_retirado -> Option.empty[String],
+                            'aap_bombillo_instalado -> Option.empty[String],
+                            'aap_balasto_retirado -> Option.empty[String],
+                            'aap_balasto_instalado -> Option.empty[String],
                             'aap_arrancador_retirado -> e.even_codigo_retirado,
                             'aap_arrancador_instalado -> e.even_codigo_instalado,
-                            'aap_condensador_retirado -> "",
-                            'aap_condensador_instalado -> "",
-                            'aap_fotocelda_retirado -> "",
-                            'aap_fotocelda_instalado -> "",
+                            'aap_condensador_retirado -> Option.empty[String],
+                            'aap_condensador_instalado -> Option.empty[String],
+                            'aap_fotocelda_retirado -> Option.empty[String],
+                            'aap_fotocelda_instalado -> Option.empty[String],
                             'aap_id -> e.aap_id,
                             'aael_fecha -> reporte.repo_fechasolucion,
                             'reti_id -> reporte.reti_id,
                             'repo_consecutivo -> reporte.repo_consecutivo,
                             'empr_id -> reporte.empr_id
                           )
-                          .executeInsert()
+                          .executeUpdate()
                       }
                     case Some(4) =>
                       SQL(
@@ -4190,25 +4194,25 @@ class ReporteRepository @Inject()(
                                                     )                                                    
                                                 """
                         ).on(
-                            'aap_bombillo_retirado -> "",
-                            'aap_bombillo_instalado -> "",
-                            'aap_balasto_retirado -> "",
-                            'aap_balasto_instalado -> "",
-                            'aap_arrancador_retirado -> "",
-                            'aap_arrancador_instalado -> "",
+                            'aap_bombillo_retirado -> Option.empty[String],
+                            'aap_bombillo_instalado -> Option.empty[String],
+                            'aap_balasto_retirado -> Option.empty[String],
+                            'aap_balasto_instalado -> Option.empty[String],
+                            'aap_arrancador_retirado -> Option.empty[String],
+                            'aap_arrancador_instalado -> Option.empty[String],
                             'aap_condensador_retirado -> e.even_codigo_retirado,
                             'aap_condensador_instalado -> e.even_codigo_instalado,
-                            'aap_fotocelda_retirado -> "",
-                            'aap_fotocelda_instalado -> "",
+                            'aap_fotocelda_retirado -> Option.empty[String],
+                            'aap_fotocelda_instalado -> Option.empty[String],
                             'aap_id -> e.aap_id,
                             'aael_fecha -> reporte.repo_fechasolucion,
                             'reti_id -> reporte.reti_id,
                             'repo_consecutivo -> reporte.repo_consecutivo,
                             'empr_id -> reporte.empr_id
                           )
-                          .executeInsert()
+                          .executeUpdate()
                       }
-                    case Some(5) =>
+                    case Some(5) => {
                       SQL(
                         """UPDATE siap.aap_elemento SET aap_fotocelda = {aap_fotocelda} where aap_id = {aap_id} and empr_id = {empr_id}"""
                       ).on(
@@ -4268,14 +4272,14 @@ class ReporteRepository @Inject()(
                                                     )                                                    
                                                 """
                         ).on(
-                            'aap_bombillo_retirado -> "",
-                            'aap_bombillo_instalado -> "",
-                            'aap_balasto_retirado -> "",
-                            'aap_balasto_instalado -> "",
-                            'aap_arrancador_retirado -> "",
-                            'aap_arrancador_instalado -> "",
-                            'aap_condensador_retirado -> "",
-                            'aap_condensador_instalado -> "",
+                            'aap_bombillo_retirado -> Option.empty[String],
+                            'aap_bombillo_instalado -> Option.empty[String],
+                            'aap_balasto_retirado -> Option.empty[String],
+                            'aap_balasto_instalado -> Option.empty[String],
+                            'aap_arrancador_retirado -> Option.empty[String],
+                            'aap_arrancador_instalado -> Option.empty[String],
+                            'aap_condensador_retirado -> Option.empty[String],
+                            'aap_condensador_instalado -> Option.empty[String],
                             'aap_fotocelda_retirado -> e.even_codigo_retirado,
                             'aap_fotocelda_instalado -> e.even_codigo_instalado,
                             'aap_id -> e.aap_id,
@@ -4284,12 +4288,14 @@ class ReporteRepository @Inject()(
                             'repo_consecutivo -> reporte.repo_consecutivo,
                             'empr_id -> reporte.empr_id
                           )
-                          .executeInsert()
+                          .executeUpdate()
                       }
-                    case _ => None
+                    }
+                    case _ => println("no existe el elemento")
                   }
                 }
               }
+              println("eventos procesados")
             }
           }
         }
