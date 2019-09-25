@@ -2635,7 +2635,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                   i.tran_numero match {
                     case Some(value) => value
                     case None        => ""
-                  },                  
+                  }               
                 )
           }
           headerRow :: rows.toList
@@ -3839,7 +3839,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                       ),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
-                    NumericCell(
+                    NumericCell( 
                       i.repo_consecutivo.get,
                       Some(2),
                       style = Some(CellStyle(dataFormat = CellDataFormat("#0"))),
@@ -6345,6 +6345,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                   .withCellValues(
                     "Código",
                     "Apoyo",
+                    "Estado",
                     "Dirección",
                     "Barrio",
                     "Sector",
@@ -6369,52 +6370,67 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     "Balasto",
                     "Arrancador",
                     "Condensador",
-                    "Fotocelda"
+                    "Fotocelda",
+                    "Medidor Código",
+                    "Medidor Número",
+                    "Cuenta Alumbrado",
+                    "Transformador Código",
+                    "Transformador Número"
                   )
                 val aapSet =
                   SQL("""SELECT
-                                        a.aap_id,
-                                        a.aap_apoyo,
-                                        a.aap_direccion,
-                                        b.barr_descripcion,
-                                        tb.tiba_descripcion,
-                                        us.aaus_descripcion,
-                                        a.aap_modernizada,
-                                        d.aap_modernizada_anho,
-                                        tc.aatc_descripcion,
-                                        a.aap_medidor,
-                                        co.aaco_descripcion,
-                                        ma.aama_descripcion,
-                                        mo.aamo_descripcion,
-                                        cu.aacu_descripcion,
-                                        tp.tipo_descripcion,
-                                        d.aap_poste_altura,
-                                        d.aap_brazo,
-                                        d.aap_collarin,
-                                        d.aap_potencia,
-                                        d.aap_tecnologia,
-                                        d.aap_rte,
-                                        d.aap_poste_propietario,
-                                        e.aap_bombillo,
-                                        e.aap_balasto,
-                                        e.aap_arrancador,
-                                        e.aap_condensador,
-                                        e.aap_fotocelda
-                                FROM siap.aap a
-                                LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id
-                                LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id
-                                LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
-                                LEFT JOIN siap.tipobarrio tb on tb.tiba_id = b.tiba_id
-                                LEFT JOIN siap.aap_uso us on us.aaus_id = a.aaus_id	
-                                LEFT JOIN siap.aap_tipo_carcasa tc on tc.aatc_id = a.aatc_id
-                                LEFT JOIN siap.aap_conexion co on co.aaco_id = a.aaco_id
-                                LEFT JOIN siap.aap_marca ma on ma.aama_id = a.aama_id
-                                LEFT JOIN siap.aap_modelo mo on mo.aamo_id = a.aamo_id
-                                LEFT JOIN siap.aap_cuentaap cu on cu.aacu_id = a.aacu_id
-                                LEFT JOIN siap.tipo_poste tp on tp.tipo_id = d.tipo_id
-                                INNER JOIN siap.aap_medidor am ON am.aap_id = a.aap_id and am.empr_id = a.empr_id
-                                WHERE a.empr_id = {empr_id} and esta_id <> 9 and a.aap_id <> 9999999 and am.medi_id = {medi_id}
-                                ORDER BY a.aap_id ASC
+                          a.aap_id,
+                          a.aap_apoyo,
+                          s.esta_descripcion,
+                          a.aap_direccion,
+                          b.barr_descripcion,
+                          tb.tiba_descripcion,
+                          us.aaus_descripcion,
+                          a.aap_modernizada,
+                          d.aap_modernizada_anho,
+                          tc.aatc_descripcion,
+                          a.aap_medidor,
+                          co.aaco_descripcion,
+                          ma.aama_descripcion,
+                          mo.aamo_descripcion,
+                          tp.tipo_descripcion,
+                          d.aap_poste_altura,
+                          d.aap_brazo,
+                          d.aap_collarin,
+                          d.aap_potencia,
+                          d.aap_tecnologia,
+                          d.aap_rte,
+                          d.aap_poste_propietario,
+                          e.aap_bombillo,
+                          e.aap_balasto,
+                          e.aap_arrancador,
+                          e.aap_condensador,
+                          e.aap_fotocelda,
+                          to_char(m.medi_id, '0000') as medi_codigo,
+                          m.medi_numero,
+                          (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
+                          to_char(t.tran_id, '0000') as tran_codigo,
+                          t.tran_numero
+                         FROM siap.aap a
+                         LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
+                         LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
+                         LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id AND e.empr_id = a.empr_id
+                         LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
+                         LEFT JOIN siap.tipobarrio tb on tb.tiba_id = b.tiba_id
+                         LEFT JOIN siap.aap_uso us on us.aaus_id = a.aaus_id	
+                         LEFT JOIN siap.aap_tipo_carcasa tc on tc.aatc_id = a.aatc_id
+                         LEFT JOIN siap.aap_conexion co on co.aaco_id = a.aaco_id
+                         LEFT JOIN siap.aap_marca ma on ma.aama_id = a.aama_id
+                         LEFT JOIN siap.aap_modelo mo on mo.aamo_id = a.aamo_id
+                         LEFT JOIN siap.aap_cuentaap cu on cu.aacu_id = a.aacu_id
+                         LEFT JOIN siap.tipo_poste tp on tp.tipo_id = d.tipo_id
+                         LEFT JOIN siap.aap_medidor am ON am.aap_id = a.aap_id AND am.empr_id = a.empr_id
+                         LEFT JOIN siap.medidor m ON m.medi_id = am.medi_id and m.empr_id = am.empr_id
+                         LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id
+                         LEFT JOIN siap.aap_transformador at ON at.aap_id = a.aap_id and at.empr_id = a.empr_id
+                         LEFT JOIN siap.transformador t ON t.tran_id = at.tran_id and t.empr_id = at.empr_id
+                         WHERE a.empr_id = {empr_id} and esta_id <> 9 and a.aap_id <> 9999999 and am.medi_id = {medi_id}
+                         ORDER BY a.aap_id ASC
                                 """)
                     .on(
                       'empr_id -> empr_id,
@@ -6431,6 +6447,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           case None        => ""
                         },
                         i.aap_apoyo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.esta_descripcion match {
                           case Some(value) => value
                           case None        => ""
                         },
@@ -6475,10 +6495,6 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           case None        => ""
                         },
                         i.aamo_descripcion match {
-                          case Some(value) => value
-                          case None        => ""
-                        },
-                        i.aacu_descripcion match {
                           case Some(value) => value
                           case None        => ""
                         },
@@ -6531,6 +6547,26 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           case None        => ""
                         },
                         i.aap_fotocelda match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.medi_codigo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.medi_numero match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aacu_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.tran_codigo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.tran_numero match {
                           case Some(value) => value
                           case None        => ""
                         }
@@ -6651,6 +6687,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                   .withCellValues(
                     "Código",
                     "Apoyo",
+                    "Estado",
                     "Dirección",
                     "Barrio",
                     "Sector",
@@ -6675,51 +6712,66 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     "Balasto",
                     "Arrancador",
                     "Condensador",
-                    "Fotocelda"
+                    "Fotocelda",
+                    "Medidor Código",
+                    "Medidor Número",
+                    "Cuenta Alumbrado",
+                    "Transformador Código",
+                    "Transformador Número"
                   )
                 val aapSet =
                   SQL("""SELECT
-                                        a.aap_id,
-                                        a.aap_apoyo,
-                                        a.aap_direccion,
-                                        b.barr_descripcion,
-                                        tb.tiba_descripcion,
-                                        us.aaus_descripcion,
-                                        a.aap_modernizada,
-                                        d.aap_modernizada_anho,
-                                        tc.aatc_descripcion,
-                                        a.aap_medidor,
-                                        co.aaco_descripcion,
-                                        ma.aama_descripcion,
-                                        mo.aamo_descripcion,
-                                        cu.aacu_descripcion,
-                                        tp.tipo_descripcion,
-                                        d.aap_poste_altura,
-                                        d.aap_brazo,
-                                        d.aap_collarin,
-                                        d.aap_potencia,
-                                        d.aap_tecnologia,
-                                        d.aap_rte,
-                                        d.aap_poste_propietario,
-                                        e.aap_bombillo,
-                                        e.aap_balasto,
-                                        e.aap_arrancador,
-                                        e.aap_condensador,
-                                        e.aap_fotocelda
-                                FROM siap.aap a
-                                LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id
-                                LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id
-                                LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
-                                LEFT JOIN siap.tipobarrio tb on tb.tiba_id = b.tiba_id
-                                LEFT JOIN siap.aap_uso us on us.aaus_id = a.aaus_id	
-                                LEFT JOIN siap.aap_tipo_carcasa tc on tc.aatc_id = a.aatc_id
-                                LEFT JOIN siap.aap_conexion co on co.aaco_id = a.aaco_id
-                                LEFT JOIN siap.aap_marca ma on ma.aama_id = a.aama_id
-                                LEFT JOIN siap.aap_modelo mo on mo.aamo_id = a.aamo_id
-                                LEFT JOIN siap.aap_cuentaap cu on cu.aacu_id = a.aacu_id
-                                LEFT JOIN siap.tipo_poste tp on tp.tipo_id = d.tipo_id
-                                INNER JOIN siap.aap_transformador am ON am.aap_id = a.aap_id and am.empr_id = a.empr_id
-                                WHERE a.empr_id = {empr_id} and esta_id <> 9 and a.aap_id <> 9999999 and am.tran_id = {tran_id}
+                  a.aap_id,
+                  a.aap_apoyo,
+                  s.esta_descripcion,
+                  a.aap_direccion,
+                  b.barr_descripcion,
+                  tb.tiba_descripcion,
+                  us.aaus_descripcion,
+                  a.aap_modernizada,
+                  d.aap_modernizada_anho,
+                  tc.aatc_descripcion,
+                  a.aap_medidor,
+                  co.aaco_descripcion,
+                  ma.aama_descripcion,
+                  mo.aamo_descripcion,
+                  tp.tipo_descripcion,
+                  d.aap_poste_altura,
+                  d.aap_brazo,
+                  d.aap_collarin,
+                  d.aap_potencia,
+                  d.aap_tecnologia,
+                  d.aap_rte,
+                  d.aap_poste_propietario,
+                  e.aap_bombillo,
+                  e.aap_balasto,
+                  e.aap_arrancador,
+                  e.aap_condensador,
+                  e.aap_fotocelda,
+                  to_char(m.medi_id, '0000') as medi_codigo,
+                  m.medi_numero,
+                  (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
+                  to_char(t.tran_id, '0000') as tran_codigo,
+                  t.tran_numero
+                 FROM siap.aap a
+                 LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
+                 LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
+                 LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id AND e.empr_id = a.empr_id
+                 LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
+                 LEFT JOIN siap.tipobarrio tb on tb.tiba_id = b.tiba_id
+                 LEFT JOIN siap.aap_uso us on us.aaus_id = a.aaus_id	
+                 LEFT JOIN siap.aap_tipo_carcasa tc on tc.aatc_id = a.aatc_id
+                 LEFT JOIN siap.aap_conexion co on co.aaco_id = a.aaco_id
+                 LEFT JOIN siap.aap_marca ma on ma.aama_id = a.aama_id
+                 LEFT JOIN siap.aap_modelo mo on mo.aamo_id = a.aamo_id
+                 LEFT JOIN siap.aap_cuentaap cu on cu.aacu_id = a.aacu_id
+                 LEFT JOIN siap.tipo_poste tp on tp.tipo_id = d.tipo_id
+                 LEFT JOIN siap.aap_medidor am ON am.aap_id = a.aap_id AND am.empr_id = a.empr_id
+                 LEFT JOIN siap.medidor m ON m.medi_id = am.medi_id and m.empr_id = am.empr_id
+                 LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id
+                 LEFT JOIN siap.aap_transformador at ON at.aap_id = a.aap_id and at.empr_id = a.empr_id
+                 LEFT JOIN siap.transformador t ON t.tran_id = at.tran_id and t.empr_id = at.empr_id
+                 WHERE a.empr_id = {empr_id} and esta_id <> 9 and a.aap_id <> 9999999 and am.tran_id = {tran_id}
                                 ORDER BY a.aap_id ASC
                                 """)
                     .on(
@@ -6737,6 +6789,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           case None        => ""
                         },
                         i.aap_apoyo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.esta_descripcion match {
                           case Some(value) => value
                           case None        => ""
                         },
@@ -6781,10 +6837,6 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           case None        => ""
                         },
                         i.aamo_descripcion match {
-                          case Some(value) => value
-                          case None        => ""
-                        },
-                        i.aacu_descripcion match {
                           case Some(value) => value
                           case None        => ""
                         },
@@ -6837,6 +6889,26 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           case None        => ""
                         },
                         i.aap_fotocelda match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.medi_codigo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.medi_numero match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aacu_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.tran_codigo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.tran_numero match {
                           case Some(value) => value
                           case None        => ""
                         }
