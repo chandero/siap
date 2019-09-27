@@ -33,7 +33,7 @@ import './errorLog'// error log
 import './permission' // permission control
 import './mock' // simulation data
 
-import VeeValidate from 'vee-validate'
+import * as VeeValidate from 'vee-validate'
 import es from 'vee-validate/dist/locale/es'
 
 import * as filters from './filters' // global filters
