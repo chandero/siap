@@ -12,14 +12,14 @@ import 'element-ui/lib/theme-chalk/icon.css'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCoffee } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import 'vue-awesome/icons'
+// import 'vue-awesome/icons'
 
 /* Register component with one of 2 methods */
 
-import Icon from 'vue-awesome/components/Icon'
+// import Icon from '@vue-awesome/components/Icon'
 
 // globally (in your main .js file)
-Vue.component('v-icon', Icon)
+// Vue.component('v-icon', Icon)
 
 import '@/styles/index.scss' // global css
 
@@ -33,7 +33,7 @@ import './errorLog'// error log
 import './permission' // permission control
 import './mock' // simulation data
 
-import VeeValidate from 'vee-validate'
+import * as VeeValidate from 'vee-validate'
 import es from 'vee-validate/dist/locale/es'
 
 import * as filters from './filters' // global filters
