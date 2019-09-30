@@ -6771,7 +6771,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                  LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id
                  LEFT JOIN siap.aap_transformador at ON at.aap_id = a.aap_id and at.empr_id = a.empr_id
                  LEFT JOIN siap.transformador t ON t.tran_id = at.tran_id and t.empr_id = at.empr_id
-                 WHERE a.empr_id = {empr_id} and esta_id <> 9 and a.aap_id <> 9999999 and am.tran_id = {tran_id}
+                 WHERE a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999 and am.tran_id = {tran_id}
                                 ORDER BY a.aap_id ASC
                                 """)
                     .on(
