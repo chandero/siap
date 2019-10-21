@@ -100,12 +100,12 @@
             </el-col>
             <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
               <el-form-item prop="b.puntos" :label="$t('solicitud.puntos')">
-                <el-input  type="number" v-model="solicitud.b.soli_puntos" />
+                <el-input  type="number" v-model="solicitud.b.soli_puntos" @blur="solicitud.b.soli_puntos = parseInt(solicitud.b.soli_puntos)" />
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
               <el-form-item prop="b.numerorte" :label="$t('solicitud.numerorte')">
-                <el-input  ref="numerorte" name="numerorte" v-model="solicitud.b.soli_numerorte" @input="solicitud.b.numerorte = parseInt($event)"></el-input>
+                <el-input  ref="numerorte" name="numerorte" v-model="solicitud.b.soli_numerorte" @input="solicitud.b.soli_numerorte = parseInt($event)" @blur="solicitud.b.soli_numerorte = parseInt(solicitud.b.soli_numerorte)"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -118,7 +118,7 @@
             <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
               <el-form-item :label="$t('solicitud.tipo_expansion.title')">
                 <el-select clearable :title="$t('solicitud.tipo_expansion.select')" style="width: 80%" ref="tipo" v-model="solicitud.b.soli_tipoexpansion" name="tipo_expansion" :placeholder="$t('solicitud.tipo_expansion.select')">
-                  <el-option v-for="te in tipos_expansion" :key="te.tiex_id" :label="te.tiex_descripcion" :value="te.tiex_id" >
+                  <el-option v-for="te in tipos_expansion" :key="te.tiex_id" :label="te.tiex_descripcion" :value="te.tiex_id.toString()" >
                   </el-option>   
                 </el-select>
               </el-form-item>

@@ -56,7 +56,19 @@ class ElementoController @Inject()(
           Future.successful(Ok(Json.toJson(elemento)))
         }
       }
+  }
 
+  def buscarPorCodigo(elem_codigo: String) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] => 
+      var elemento = elementoService.buscarPorCodigo(elem_codigo)
+      elemento match {
+        case None => {
+          Future.successful(NotFound(Json.toJson("false")))
+        }
+        case Some(elemento) => {
+          Future.successful(Ok(Json.toJson(elemento)))
+        }
+      }
   }
 
   def buscarPorDescripcion(query: String) = authenticatedUserAction.async {

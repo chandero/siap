@@ -498,11 +498,14 @@
                               <span style="font-weight: bold;">Nombre del Material</span>
                             </el-col>
                             <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2">
-                              <span style="width: 100%;">{{ codigoElemento(evento.elem_id) }}</span>
+                                <el-form-item prop="elem_codigo">
+                                    <el-input :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.elem_codigo" @blur="buscarCodigoElemento(evento)"></el-input>
+                                </el-form-item>
+                              <!-- <span style="width: 100%;">{{ codigoElemento(evento.elem_id) }}</span> -->
                             </el-col>
                             <el-col :xs="15" :sm="15" :md="9" :lg="9" :xl="9">
                              <el-form-item prop="elem_id">
-                                <el-select :disabled="evento.even_estado > 7" filterable :clearable="evento.even_estado === 1" v-model="evento.elem_id" :placeholder="$t('elemento.select')" style="width: 100%;" @focus="limpiarElemento()" 
+                                <el-select :disabled="evento.even_estado > 7" filterable :clearable="evento.even_estado === 1" v-model="evento.elem_id" :placeholder="$t('elemento.select')" style="width: 100%;" @focus="limpiarElemento()" @change="codigoElemento(evento)"
                                           remote :remote-method="remoteMethodElemento"
                                           :loading="loadingElemento">
                                     <el-option v-for="elemento in elementos" :key="elemento.elem_id" :label="elemento.elem_descripcion" :value="elemento.elem_id" >
@@ -629,7 +632,7 @@ import { getBarriosEmpresa } from '@/api/barrio'
 import { getTiposBarrio } from '@/api/tipobarrio'
 import { getReporte, updateReporte, getTipos, getEstados, validarCodigo, validarReporteDiligenciado } from '@/api/reporte'
 import { getAcciones } from '@/api/accion'
-import { getElementos, getElementoByDescripcion } from '@/api/elemento'
+import { getElementos, getElementoByDescripcion, getElementoByCode } from '@/api/elemento'
 import { getAapEdit, getAapValidar, validar } from '@/api/aap'
 import { getMedioambiente } from '@/api/medioambiente'
 import { getAapTiposCarcasa } from '@/api/aap_tipo_carcasa'
@@ -791,6 +794,7 @@ export default {
         aap_id: null,
         repo_id: null,
         elem_id: null,
+        elem_codigo: null,
         elem_descripcion: null,
         empr_id: 0,
         usua_id: 0,
@@ -1287,12 +1291,47 @@ export default {
         })
       }
     },
-    codigoElemento(elem_id) {
-      if (elem_id === '' || elem_id === null || elem_id === undefined) {
+    codigoElemento(evento) {
+      if (evento.elem_id === '' || evento.elem_id === null || evento.elem_id === undefined) {
         return '-'
       } else {
         this.completarMaterial()
-        return this.elementos_list.find(o => o.elem_id === elem_id, { elem_codigo: '-' }).elem_codigo
+        evento.elem_codigo = this.elementos_list.find(o => o.elem_id === evento.elem_id, { elem_codigo: '-' }).elem_codigo
+      }
+    },
+    buscarCodigoElemento(evento) {
+      this.elementos = []
+      console.log('Elementos: ' + JSON.stringify(this.elementos))
+      if (evento.elem_codigo !== undefined && evento.elem_codigo !== null && evento.elem_codigo !== '') {
+        getElementoByCode(evento.elem_codigo).then(response => {
+          if (response.status === 200) {
+            const elemento = response.data
+            this.elementos.push(elemento)
+            // if (!this.elementos.find(o => o.elem_id === elemento.elem_id)) {
+            // this.elementos.push(elemento)
+            // }
+            // evento.elem_id = elemento.elem_id
+            // evento.elem_codigo = elemento.elem_codigo
+            // //this.reporte.direcciones[this.didx].materiales.forEach(m => {
+            // //  if (m.even_id === evento.even_id) {
+            // //    m.elem_id = elemento.elem_id
+            // //    m.elem_codigo = elemento.elem_codigo
+            // //  }
+            // //})
+          } else {
+            this.$notify({
+              title: 'Atención',
+              message: 'No se encontró Material con ese código: (' + response.status + ')',
+              type: 'warning'
+            })
+          }
+        }).catch((error) => {
+          this.$notify({
+            title: 'Error',
+            message: 'No se encontró Material con ese código: (' + error + ')',
+            type: 'warning'
+          })
+        })
       }
     },
     validarCodigoElementoRetirado(elem_id, codigo) {
@@ -1487,6 +1526,7 @@ export default {
           aap_id: this.reporte.direcciones[this.didx].aap_id,
           repo_id: this.reporte.repo_id,
           elem_id: null,
+          elem_codigo: null,
           empr_id: 0,
           usua_id: 0,
           even_id: this.evento_siguiente_consecutivo,
@@ -1590,15 +1630,15 @@ export default {
       }
     },
     limpiarElemento() {
-      for (var j = 0; j < this.reporte.direcciones.length; j++) {
-        for (var i = 0; i < this.reporte.direcciones[j].materiales.length; i++) {
-          if (this.reporte.direcciones[j].materiales[i].elem_id !== undefined && this.reporte.direcciones[j].materiales[i].elem_id > 0) {
-            if (this.elementos.find(e => e.elem_id === this.reporte.direcciones[j].materiales[i].elem_id) === undefined) {
-              this.elementos.push({ elem_id: this.reporte.direcciones[j].materiales[i].elem_id, elem_descripcion: this.elemento(this.reporte.direcciones[j].materiales[i].elem_id) })
-            }
-          }
-        }
-      }
+      // for (var j = 0; j < this.reporte.direcciones.length; j++) {
+      //  for (var i = 0; i < this.reporte.direcciones[j].materiales.length; i++) {
+      //    if (this.reporte.direcciones[j].materiales[i].elem_id !== undefined && this.reporte.direcciones[j].materiales[i].elem_id > 0) {
+      //      if (this.elementos.find(e => e.elem_id === this.reporte.direcciones[j].materiales[i].elem_id) === undefined) {
+      //        this.elementos.push({ elem_id: this.reporte.direcciones[j].materiales[i].elem_id, elem_descripcion: this.elemento(this.reporte.direcciones[j].materiales[i].elem_id) })
+      //      }
+      //    }
+      //  }
+      // }
     },
     getElementos() {
       return this.elementos_list
@@ -1908,6 +1948,7 @@ export default {
                   aap_id: e.aap_id,
                   repo_id: e.repo_id,
                   elem_id: e.elem_id,
+                  elem_codigo: e.elem_codigo,
                   empr_id: e.empr_id,
                   usua_id: e.usua_id,
                   even_id: e.even_id,
@@ -2056,6 +2097,7 @@ export default {
               aap_id: d.aap_id,
               repo_id: this.reporte_previo.repo_id,
               elem_id: null,
+              elem_codigo: null,
               empr_id: 0,
               usua_id: 0,
               even_id: even_length + i,

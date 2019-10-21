@@ -39,6 +39,16 @@ export function getElementoByDescripcion(query) {
   })
 }
 
+export function getElementoByCode(code) {
+  const data = {
+    code
+  }
+  return request({
+    url: '/elem/bcode/' + data.code,
+    method: 'get'
+  })
+}
+
 export function saveElemento(elemento) {
   const data = {
     elemento

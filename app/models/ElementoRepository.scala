@@ -200,6 +200,21 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
     }
 
   /**
+    Recuperar un Elemento por su elem_id
+    */
+    def buscarPorCodigo(elem_codigo: String): Option[ElementoD] = {
+      db.withConnection { implicit connection =>
+          var elemen:Option[ElementoD]= SQL("SELECT * FROM siap.elemento WHERE elem_codigo::integer = {elem_codigo} and elem_estado <> 9")
+          .on(
+            'elem_codigo -> elem_codigo.toInt
+          )
+          .as(ElementoD._set.singleOpt)
+          elemen
+      }
+    }
+    
+    
+  /**
   * Recuperar total de registros
   * @param empr_id: Long
   * @return total
