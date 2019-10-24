@@ -1105,6 +1105,10 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                           soli_respuesta = {soli_respuesta},
                                           soli_codigorespuesta = {soli_codigorespuesta},
                                           soli_aprobada = {soli_aprobada},
+                                          soli_numerorte = {soli_numerorte},
+                                          soli_puntos = {soli_puntos},
+                                          soli_luminarias = {soli_luminarias},
+                                          soli_tipoexpansion = {soli_tipoexpansion},
                                           soli_estado = {soli_estado},
                                           usua_id = {usua_id} WHERE soli_id = {soli_id}""").
             on(
@@ -1120,6 +1124,10 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                'soli_codigorespuesta -> soli.b.soli_codigorespuesta,
                'soli_respuesta -> soli.a.soli_respuesta,
                'soli_aprobada -> true,
+               'soli_numerorte -> soli.b.soli_numerorte,
+               'soli_puntos -> soli.b.soli_puntos,
+               'soli_luminarias -> soli.b.soli_luminarias,
+               'soli_tipoexpansion -> soli.b.soli_tipoexpansion,
                'soli_estado -> estado,
                'usua_id -> soli.b.usua_id 
             ).executeUpdate() > 0

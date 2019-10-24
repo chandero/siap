@@ -251,7 +251,7 @@
                               <el-button v-else-if="reporte.rees_id != 3" size="small" @click="showInputAddress01">+ Agregar Luminaria</el-button>
                             </el-col>
                           </el-row>
-                          <el-form :disabled="reporte.rees_id == 3" :model="reporte.direcciones[didx]" ref="dirform" label-position="left" :rules="dirrules">
+                          <el-form :disabled="reporte.rees_id == 3" :model="reporte.direcciones[didx]" :ref="'dirform_' + reporte.direcciones[didx].even_id" :name="'dirform_' + reporte.direcciones[didx].even_id" label-position="left" :rules="dirrules">
                           <el-row :gutter="4">
                             <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
                               <span style="font-weight: bold;">No.</span>
@@ -1234,10 +1234,12 @@ export default {
                   } else {
                     this.retiradoDialogVisible = false
                     direccion.even_valido.aap_id = true
+                    direccion.dato.aaco_id = null
                   }
                 } else {
                   this.retiradoDialogVisible = false
                 }
+                // validar si es retiro y está ya retirada
                 if (this.reporte.reti_id === 8) {
                   if (activo.aap.aaco_id === 3) {
                     this.yaretiradoDialogVisible = true
@@ -1386,6 +1388,18 @@ export default {
           // // even_length++
         })
       })
+      // Validar cada direccion dato por todos sus valores requeridos
+      this.reporte.direcciones.forEach(d => {
+        const dt = d.dato
+        if (dt.aatc_id === null || dt.aama_id === null || dt.aamo_id === null || dt.aaco_id === null ||
+            dt.aap_potencia === null || dt.aap_tecnologia === null || dt.aap_brazo === null ||
+            dt.aap_collarin === null || dt.tipo_id === null || dt.aap_poste_altura === null ||
+            dt.aap_poste_propietario === null) {
+          this.$refs['dirform_' + d.even_id].validate()
+          validacion = false
+        }
+      })
+      //
       const start = async() => {
         /*
         for (let index = 0; index < this.reporte.direcciones.length; index++) {
@@ -1404,7 +1418,7 @@ export default {
         */
         valido = validacion && await this.validatForm('reporteForm')
         if (!valido) {
-          this.error('1. error en información, por favor verifique')
+          this.alerta('1. Falta información de algunas luminarias, por favor verifique')
           return false
         }
         /*
