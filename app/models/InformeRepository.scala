@@ -6357,7 +6357,6 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     "Tipo Medida",
                     "Marca",
                     "Modelo",
-                    "Cuenta Alumbrado",
                     "Poste",
                     "Poste Altura",
                     "Poste Propietario",
