@@ -180,14 +180,23 @@
               @click="handleEdit(scope.$index, scope.row)" :title="$t('solicitud.dinforme')">
               <i class="el-icon-edit"></i>
             </el-button>
-            <el-button
-              :disabled="scope.row.b.soli_estado === 1"
-              size="mini"
-              circle
-              type="success"
-              :title="$t('solicitud.drespuesta')"
-              @click="handleRespuesta(scope.$index, scope.row)"><i class="el-icon-document"></i>
-            </el-button>
+            <el-popover 
+              placement="bottom"
+              width="160">
+              <el-menu @select="handleMenuRespuesta" class="el-menu-respuesta">
+                <el-menu-item :index="scope.row.a.soli_id + '-1'">Imprimir</el-menu-item>
+                <el-menu-item :index="scope.row.a.soli_id + '-2'">Editar</el-menu-item>
+              </el-menu>
+              <el-button
+                slot="reference"
+                :disabled="scope.row.b.soli_estado === 1"
+                size="mini"
+                circle
+                type="success"
+                :title="$t('solicitud.drespuesta')"
+              ><i class="el-icon-document"></i>
+              </el-button>              
+            </el-popover>
            </template>
           </el-table-column>
         </el-table> 
@@ -382,16 +391,16 @@ export default {
         })
       })
     },
-    handleRespuesta(index, row) {
+    handleRespuesta(soli_id, editable) {
       console.log('ingresar respuesta')
       this.$confirm('Desea Incluir la Firma de Gerencia?', 'Respuesta', {
         confirmButtonText: 'No',
         cancelButtonText: 'Sí',
         customClass: 'infoclass'
       }).then(() => {
-        imprimirRespuestaSolicitud(row.a.soli_id, row.b.empr_id, 0)
+        imprimirRespuestaSolicitud(soli_id, this.empresa.empr_id, 0, editable)
       }).catch(() => {
-        imprimirRespuestaSolicitud(row.a.soli_id, row.b.empr_id, 1)
+        imprimirRespuestaSolicitud(soli_id, this.empresa.empr_id, 1, editable)
       })
     },
     handleDelete(index, row) {
@@ -419,6 +428,18 @@ export default {
         })
       })
       console.log(index, row)
+    },
+    handleMenuRespuesta(key, keyPath) {
+      console.log('key:' + key)
+      const res = key.split('-')
+      const soli_id = res[0]
+      const editable = res[1]
+      if (editable === '2') {
+        console.log('Es Editable')
+        this.handleRespuesta(soli_id, true)
+      } else {
+        this.handleRespuesta(soli_id, false)
+      }
     },
     handleSizeChange(val) {
       this.page_size = val

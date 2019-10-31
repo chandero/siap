@@ -4,6 +4,7 @@ import javax.inject.Inject
 import java.util.Calendar
 import java.util.{ Map, HashMap }
 import java.io.InputStream
+import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.net.URL
 
@@ -37,7 +38,11 @@ import net.sf.jasperreports.engine.export.JRPdfExporter
 import net.sf.jasperreports.export.SimpleExporterInput
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter
+import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter
+import net.sf.jasperreports.engine.export.ooxml.JRDocxExporterParameter
 import net.sf.jasperreports.export.SimpleXlsxReportConfiguration
+import net.sf.jasperreports.export.SimpleDocxReportConfiguration
+import net.sf.jasperreports.export.SimpleDocxExporterConfiguration
 //
 
 import utilities.N2T
@@ -1444,7 +1449,7 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
     * @param soli_id: scala.Long
     * @return OutputStream
     */
-    def imprimirRespuesta(soli_id: scala.Long, empr_id: scala.Long, con_firma: Int): Array[Byte] = {
+    def imprimirRespuesta(soli_id: scala.Long, empr_id: scala.Long, con_firma: Int, editable: Boolean): Array[Byte] = {
         var os = Array[Byte]()
 
         db.withConnection { implicit connection => 
@@ -1494,7 +1499,20 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                         case None => None
                                     }
                                     reportParams.put("GERENTE", gerente)
-                                    os = JasperRunManager.runReportToPdf(compiledFile, reportParams, connection)
+                                    if (editable) {
+                                        println("Es Editable")
+                                        var docExporter = new JRDocxExporter()
+                                        val jasperPrint = JasperFillManager.fillReport(compiledFile, reportParams, connection)
+                                        var config = new SimpleDocxExporterConfiguration()
+                                        var ostream = new ByteArrayOutputStream()
+                                        docExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+                                        docExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(ostream));
+                                        docExporter.setConfiguration(config);
+                                        docExporter.exportReport();
+                                        os = ostream.toByteArray
+                                    } else {
+                                        os = JasperRunManager.runReportToPdf(compiledFile, reportParams, connection)
+                                    }
                  case None => os = new Array[Byte](0)
              }
            }
