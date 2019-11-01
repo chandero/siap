@@ -43,7 +43,11 @@ import net.sf.jasperreports.engine.export.ooxml.JRDocxExporterParameter
 import net.sf.jasperreports.export.SimpleXlsxReportConfiguration
 import net.sf.jasperreports.export.SimpleDocxReportConfiguration
 import net.sf.jasperreports.export.SimpleDocxExporterConfiguration
-//
+// https://www.tutorialspoint.com/apache_poi_word/apache_poi_word_quick_guide.htm
+import org.apache.poi.xwpf.usermodel.VerticalAlign
+import org.apache.poi.xwpf.usermodel.XWPFDocument
+import org.apache.poi.xwpf.usermodel.XWPFParagraph
+import org.apache.poi.xwpf.usermodel.XWPFRun
 
 import utilities.N2T
 import utilities.Utility

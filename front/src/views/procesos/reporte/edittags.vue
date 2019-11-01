@@ -257,15 +257,16 @@
                               <span style="font-weight: bold;">No.</span>
                             </el-col>                            
                             <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ reporte.direcciones[didx].even_id }}</el-col>
-                            <el-col :xs="13" :sm="13" :md="3" :lg="3" :xl="3">
+                            <el-col :xs="13" :sm="13" :md="4" :lg="4" :xl="4">
                                 <el-form-item prop="aap_id" label="Código Luminaria">
                                   <div style="display: table;">
                                    <el-input :disabled="reporte.direcciones[didx].even_estado === 2 || reporte.direcciones[didx].even_estado > 7" autofocus :ref="'aap_id_' + didx" type="number" class="sinpadding" style="display: table-cell;" v-model="reporte.direcciones[didx].aap_id" @input="reporte.direcciones[didx].aap_id = parseInt($event,10)" @blur="validateAap(reporte.direcciones[didx], didx)">
                                    </el-input>
+                                   <span :class="reporte.direcciones[didx].dato.aaco_id_anterior === 3 ? 'errorClass': 'activeClass'">{{ reporte.direcciones[didx].dato.aaco_id_anterior === 3? 'RETIRADA': 'ACTIVA'}}</span>
                                   </div>
                                 </el-form-item>
                             </el-col>
-                            <el-col v-if="reporte.reti_id !== 1" :xs="16" :sm="16" :md="11" :lg="11" :xl="11">
+                            <el-col v-if="reporte.reti_id !== 1" :xs="16" :sm="16" :md="10" :lg="10" :xl="10">
                              <el-form-item prop="even_direccion" label="Nueva Dirección">
                                <el-input :disabled="reporte.direcciones[didx].even_estado > 7" :name="'even_direccion_'+didx" v-model="reporte.direcciones[didx].even_direccion" @input="reporte.direcciones[didx].even_direccion = $event.toUpperCase()" ></el-input>
                              </el-form-item>
@@ -1389,14 +1390,44 @@ export default {
         })
       })
       // Validar cada direccion dato por todos sus valores requeridos
+      const dirForm = 'dirform_' + (this.didx + 1)
+      this.$refs[dirForm].validate()
       this.reporte.direcciones.forEach(d => {
-        const dt = d.dato
-        if (dt.aatc_id === null || dt.aama_id === null || dt.aamo_id === null || dt.aaco_id === null ||
+        if (d.aap_id !== null && this.reporte.reti_id !== 1 && d.even_estado < 8) {
+          // Validar Información
+          const dt = d.dato
+          if (dt.aatc_id === null || dt.aama_id === null || dt.aamo_id === null || dt.aaco_id === null ||
             dt.aap_potencia === null || dt.aap_tecnologia === null || dt.aap_brazo === null ||
             dt.aap_collarin === null || dt.tipo_id === null || dt.aap_poste_altura === null ||
             dt.aap_poste_propietario === null) {
-          this.$refs['dirform_' + d.even_id].validate()
-          validacion = false
+            validacion = false
+          }
+          // Validar estado de la luminaria y tipo de reporte
+          var aap_no_en_retiro = []
+          if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
+            if (dt.aaco_id_anterior !== 3) {
+              aap_no_en_retiro.push(d.aap_id)
+              this.$notify.error({
+                title: 'Luminaria No Retirada',
+                message: 'Verifique la luminaria: ' + d.aap_id,
+                offset: 0
+              })
+            }
+          }
+          if (aap_no_en_retiro.length > 0) {
+            validacion = false
+          }
+          // validar luminaria ya retirada
+          if (this.reporte.reti_id === 8) {
+            if (dt.aaco_id_anterior === 3) {
+              validacion = false
+              this.$notify.error({
+                title: 'Luminaria Ya Está Retirada',
+                message: 'Verifique la luminaria: ' + d.aap_id,
+                offset: 0
+              })
+            }
+          }
         }
       })
       //
@@ -1418,7 +1449,11 @@ export default {
         */
         valido = validacion && await this.validatForm('reporteForm')
         if (!valido) {
-          this.alerta('1. Falta información de algunas luminarias, por favor verifique')
+          this.$notify.info({
+            title: 'Atención',
+            message: 'Por favor verifique la información',
+            offset: 100
+          })
           return false
         }
         /*
@@ -2297,5 +2332,14 @@ div.el-input input {
   width: 90px;
   margin-left: 10px;
   vertical-align: bottom;
+}
+
+.activeClass{
+  background-color: green;
+  color: whitesmoke;
+}
+.errorClass {
+  background-color: red;
+  color: whitesmoke;  
 }
 </style>

@@ -184,8 +184,8 @@
               placement="bottom"
               width="160">
               <el-menu @select="handleMenuRespuesta" class="el-menu-respuesta">
-                <el-menu-item :index="scope.row.a.soli_id + '-1'">Imprimir</el-menu-item>
-                <el-menu-item :index="scope.row.a.soli_id + '-2'">Editar</el-menu-item>
+                <el-menu-item :index="scope.row.a.soli_id + '-1'">Para Imprimir</el-menu-item>
+                <el-menu-item :index="scope.row.a.soli_id + '-2'">Para Modificar</el-menu-item>
               </el-menu>
               <el-button
                 slot="reference"
