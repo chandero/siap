@@ -45,9 +45,12 @@ import net.sf.jasperreports.export.SimpleDocxReportConfiguration
 import net.sf.jasperreports.export.SimpleDocxExporterConfiguration
 // https://www.tutorialspoint.com/apache_poi_word/apache_poi_word_quick_guide.htm
 import org.apache.poi.xwpf.usermodel.VerticalAlign
+import org.apache.poi.xwpf.usermodel.Document
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 import org.apache.poi.xwpf.usermodel.XWPFParagraph
 import org.apache.poi.xwpf.usermodel.XWPFRun
+import org.apache.poi.xwpf.usermodel.ParagraphAlignment
+import org.apache.poi.util.Units
 
 import utilities.N2T
 import utilities.Utility
@@ -588,6 +591,25 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
             }
         }
     }
+
+    /**
+    * Recuperar un Solicitud dado su soli_id retornar datos completos
+    * @param soli_id: Long
+    * @return Soli
+    */
+    def buscarPorIdCompleto(soli_id:Long) : Option[Soli] = {
+        db.withConnection { implicit connection => 
+            val s = SQL("""SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' END) as soli_estado_descripcion FROM siap.solicitud s
+            LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
+            LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
+            WHERE s.soli_id = {soli_id} and s.soli_estado <> 9""").
+            on(
+                'soli_id -> soli_id
+            ).as(Soli._set.singleOpt)
+            s
+        }
+    }
+
 
     /**
     * Recuperar un Solicitud dado su soli_radicado
@@ -1458,7 +1480,7 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
 
         db.withConnection { implicit connection => 
           empresaService.buscarPorId(empr_id).map { empresa =>
-              buscarPorId(soli_id) match {
+              buscarPorIdCompleto(soli_id) match {
                 case Some(s) =>
                                     var compiledFile = ""
                                     var gerente = ""
@@ -1473,7 +1495,7 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                         'soli_fecharespuesta -> hora,
                                         'soli_estado -> 6
                                     ).executeUpdate()
-                                    s.b.soli_aprobada match {  
+                                    s.soli_aprobada match {  
                                         case Some(true) => compiledFile = REPORT_DEFINITION_PATH + "siap_carta_respuesta_solicitud_aprobada.jasper"
                                                            if (con_firma == 1) {
                                                              val firma:URL = new URL("file", "localhost", REPORT_DEFINITION_PATH + "firma.png")
@@ -1490,29 +1512,172 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                     generalService.buscarPorId(4, empr_id).map { g =>
                                         gerente = g.gene_valor.get
                                     }
-                                    
+                                    var luminarias = 0
+                                    var tipoexpansion = ""
+                                    var puntos = 0
+                                    var puesto = 0
+                                    var reporteTecnico = 0
                                     reportParams.put("SOLI_ID", new java.lang.Long(soli_id.longValue()))
                                     reportParams.put("EMPR_SIGLA", empresa.empr_sigla)
                                     reportParams.put("CIUDAD_LARGA", ciudad)
-                                    reportParams.put("FECHA_LARGA", Utility.fechaatexto(s.b.soli_fecharespuesta))
-                                    reportParams.put("CODIGO_RESPUESTA", s.b.soli_codigorespuesta.get)
+                                    reportParams.put("FECHA_LARGA", Utility.fechaatexto(s.soli_fecharespuesta))
+                                    reportParams.put("CODIGO_RESPUESTA", s.soli_codigorespuesta.get)
                                     reportParams.put("CIUDAD_CORTA", ciudad)
-                                    reportParams.put("FECHA_RADICADO_LARGA", Utility.fechaatexto(s.a.soli_fecha))
-                                    s.b.soli_luminarias match {
-                                        case Some(l) => reportParams.put("LUMINARIAS_LETRAS", N2T.convertirLetras(l))
+                                    reportParams.put("FECHA_RADICADO_LARGA", Utility.fechaatexto(s.soli_fecha))
+                                    s.soli_luminarias match {
+                                        case Some(l) => luminarias = l
                                         case None => None
                                     }
+                                    s.soli_tipoexpansion match {
+                                        case Some(l) => tipoexpansion = l
+                                        case None => None
+                                    }  
+                                    s.soli_puntos match {
+                                        case Some(l) => puntos = l
+                                        case None => None
+                                    }  
+                                    s.soli_numerorte match {
+                                        case Some(l) => puesto = l
+                                        case None => None
+                                    }
+                                    s.soli_consecutivo match {
+                                        case Some(l) => reporteTecnico = l
+                                        case None => None
+                                    }                                                                                                                        
+                                    reportParams.put("LUMINARIAS_LETRAS", N2T.convertirLetras(luminarias))
                                     reportParams.put("GERENTE", gerente)
                                     if (editable) {
                                         println("Es Editable")
-                                        var docExporter = new JRDocxExporter()
-                                        val jasperPrint = JasperFillManager.fillReport(compiledFile, reportParams, connection)
-                                        var config = new SimpleDocxExporterConfiguration()
+                                        //// var docExporter = new JRDocxExporter()
+                                        //// val jasperPrint = JasperFillManager.fillReport(compiledFile, reportParams, connection)
+                                        //// var config = new SimpleDocxExporterConfiguration()
                                         var ostream = new ByteArrayOutputStream()
-                                        docExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-                                        docExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(ostream));
-                                        docExporter.setConfiguration(config);
-                                        docExporter.exportReport();
+                                        //// docExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+                                        //// docExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(ostream));
+                                        //// docExporter.setConfiguration(config);
+                                        //// docExporter.exportReport();
+                                        //// os = ostream.toByteArray
+                                        // Word usando POI directamente
+                                        
+                                        var document:XWPFDocument = new XWPFDocument()
+                                        var headerParagraph:XWPFParagraph = document.createParagraph()
+                                        var headerRun: XWPFRun = headerParagraph.createRun()
+                                        headerRun.setFontFamily("Arial")
+                                        headerRun.setFontSize(13)
+                                        headerRun.setText(ciudad + ", " + Utility.fechaatexto(s.soli_fecharespuesta))
+                                        headerRun.addBreak()
+                                        var responseCodeParagraph: XWPFParagraph = document.createParagraph()
+                                        responseCodeParagraph.setAlignment(ParagraphAlignment.RIGHT)
+                                        var responseCodeRun: XWPFRun = responseCodeParagraph.createRun()
+                                        responseCodeRun.setFontFamily("Arial")
+                                        responseCodeRun.setFontSize(13)
+                                        responseCodeRun.setText(s.soli_codigorespuesta.get)
+                                        responseCodeRun.addBreak()
+                                        var paragraph:XWPFParagraph = document.createParagraph()
+                                        var run: XWPFRun = paragraph.createRun()
+                                        run.setFontFamily("Arial")  
+                                        run.setFontSize(13)
+                                        run.setText("Señor(a)")
+                                        paragraph = document.createParagraph()
+                                        run = paragraph.createRun()
+                                        run.setFontFamily("Arial")
+                                        run.setFontSize(13)
+                                        run.setBold(true)
+                                        run.setText(s.soli_nombre.get)
+                                        paragraph = document.createParagraph()
+                                        run = paragraph.createRun()
+                                        run.setFontFamily("Arial")
+                                        run.setFontSize(13) 
+                                        run.setText(s.soli_direccion.get)
+                                        paragraph = document.createParagraph()
+                                        run = paragraph.createRun()
+                                        run.setFontFamily("Arial")
+                                        run.setFontSize(13)
+                                        run.setText(s.barr_descripcion.get)
+                                        paragraph = document.createParagraph()
+                                        run = paragraph.createRun()
+                                        run.setFontFamily("Arial")
+                                        run.setFontSize(13) 
+                                        run.setText(ciudad)
+                                        run.addBreak()
+                                        run.addBreak()
+                                        run.addBreak()
+                                        paragraph = document.createParagraph()
+                                        run = paragraph.createRun()
+                                        run.setFontFamily("Arial")
+                                        run.setFontSize(13)
+                                        run.setText("Respetado Señor(a)")
+                                        run.addBreak()
+                                        paragraph = document.createParagraph()
+                                        paragraph.setAlignment(ParagraphAlignment.BOTH)
+                                        run = paragraph.createRun()
+                                        run.setFontFamily("Arial")
+                                        run.setFontSize(13)
+                                        run.setText("Para dar respuesta a su solicitud radicada con fecha " + 
+                                                    Utility.fechaatexto(s.soli_fecha) + ", mediante la cuál " +
+                                                    "solicita '" + s.soli_solicitud.get + "', me permito informarle " +
+                                                    "que mediante visita técnica realizada por funcionarios de nuestra " +
+                                                    "empresa (ingeniero residente y supervisor), se ha verificado la " + 
+                                                    "necesidad de instalar " + luminarias + "(" + N2T.convertirLetras(luminarias) + ") luminarias " + 
+                                                    "en expansión tipo " + tipoexpansion + " en el sitio señalado.")
+                                        run.addBreak()
+                                        paragraph = document.createParagraph()
+                                        paragraph.setAlignment(ParagraphAlignment.BOTH)
+                                        run = paragraph.createRun()
+                                        run.setFontFamily("Arial")
+                                        run.setFontSize(13)                                        
+                                        run.setText("Esta obra ha obtenido " + puntos + " puntos según criterio de calificación" +
+                                                    " y está ubicada en el puesto No. " + puesto + " con Reporte Técnico No. " + 
+                                                    reporteTecnico + " dentro del plan de expansión, la cual se realizará según orden " + 
+                                                    " de trabajo impartida por el Municipio de " + ciudad + " y disponibilidad de recursos.")
+                                        run.addBreak()
+                                        run.addBreak()
+                                        paragraph = document.createParagraph()
+                                        paragraph.setAlignment(ParagraphAlignment.LEFT)
+                                        run = paragraph.createRun()
+                                        run.setFontFamily("Arial")
+                                        run.setFontSize(13) 
+                                        run.setText("Cordialmente,")
+                                        run.addBreak()
+                                        if (con_firma == 1) {
+                                            val firma:String = REPORT_DEFINITION_PATH + "firma.png"
+                                            println("Ruta Firma : " + firma)
+                                            val is:FileInputStream = new FileInputStream(firma)
+                                            run.addPicture(is, Document.PICTURE_TYPE_JPEG, firma, Units.toEMU(221), Units.toEMU(101))
+                                        } else {
+                                            run.addBreak()
+                                            run.addBreak()
+                                            run.addBreak()
+                                            run.addBreak()
+                                        }
+                                        paragraph = document.createParagraph()
+                                        paragraph.setAlignment(ParagraphAlignment.LEFT)
+                                        run = paragraph.createRun()
+                                        run.setFontFamily("Arial")
+                                        run.setFontSize(13)  
+                                        run.setBold(true)                                      
+                                        run.setText(gerente)
+                                        paragraph = document.createParagraph()
+                                        paragraph.setAlignment(ParagraphAlignment.LEFT)
+                                        run = paragraph.createRun()
+                                        run.setFontFamily("Arial")
+                                        run.setFontSize(13)                                        
+                                        run.setText("Gerente")
+                                        paragraph = document.createParagraph()
+                                        paragraph.setAlignment(ParagraphAlignment.LEFT)
+                                        run = paragraph.createRun()
+                                        run.setFontFamily("Arial")
+                                        run.setFontSize(13)                                        
+                                        run.setText(empresa.empr_sigla)
+                                        run.addBreak()
+                                        run.addBreak()                                                                             
+                                        paragraph = document.createParagraph()
+                                        paragraph.setAlignment(ParagraphAlignment.LEFT)
+                                        run = paragraph.createRun()
+                                        run.setFontFamily("Arial")
+                                        run.setFontSize(10)                                        
+                                        run.setText("C.c. Archivo")
+                                        document.write(ostream)
                                         os = ostream.toByteArray
                                     } else {
                                         os = JasperRunManager.runReportToPdf(compiledFile, reportParams, connection)
