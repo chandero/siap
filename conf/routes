@@ -41,6 +41,7 @@ GET     /api/barr/byid/:id              controllers.BarrioController.buscarporid
 GET     /api/barr/del/:id               controllers.BarrioController.borrarBarrio(id: Long)
 POST    /api/barr/save                  controllers.BarrioController.guardarBarrio
 POST    /api/barr/upd                   controllers.BarrioController.actualizarBarrio
+GET     /api/barr/gbi/:e/:t             controllers.BarrioController.listarBarrios(e: Long, t: String)
 
 GET     /api/tipobarr/get               controllers.BarrioController.obtenertipobarrio
 
@@ -140,6 +141,7 @@ GET     /api/acti/:id                   controllers.ActividadController.buscarPo
 GET     /api/acti/del/:id               controllers.ActividadController.borrarActividad(id: Long)
 POST    /api/acti/save                  controllers.ActividadController.guardarActividad
 POST    /api/acti/upd                   controllers.ActividadController.actualizarActividad
+GET     /api/acti/gai/:t                controllers.ActividadController.listarActividades(t: String)
 # Origen
 GET     /api/orig/get/:p/:c             controllers.OrigenController.todos(p:Long, c:Long)
 GET     /api/orig/all                   controllers.OrigenController.origenes
@@ -296,6 +298,7 @@ GET     /api/repo/gbtc/:t/:n             controllers.ReporteController.buscarPor
 GET     /api/repo/vali/:e/:c             controllers.ReporteController.validarCodigo(e: Long, c: String)
 GET     /api/repo/venc/get               controllers.ReporteController.siap_reporte_vencido
 GET     /api/repo/vadi/:t/:n             controllers.ReporteController.validarReporteDiligenciado(t: Long, n: Int)
+POST    /api/repo/grw                    controllers.ReporteController.guardarReporteWeb 
 
 # Obra
 POST    /api/obra/get                    controllers.ObraController.todos

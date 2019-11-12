@@ -455,7 +455,7 @@ export default {
       }
     },
     origen(id) {
-      if (id === null) {
+      if (id === undefined || id === null) {
         return ''
       } else {
         return this.origenes.find(e => e.orig_id === id, { orig_descripcion: '' }).orig_descripcion
