@@ -227,7 +227,7 @@ class ReporteController @Inject()(
       val reporte = reporteService.buscarPorConsecutivoWeb(repo_consecutivo, empr_id)
       reporte match {
         case None => {
-          Future.successful(NotFound(Json.toJson("false")))
+          Future.successful(NotFound(Json.toJson("{}")))
         }
         case Some(reporte) => {
           Future.successful(Ok(Json.toJson(reporte)))

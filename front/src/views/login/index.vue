@@ -105,6 +105,11 @@ export default {
             this.loading = false
             this.$router.push({ path: '/empresa' })
           }).catch(() => {
+            this.$message({
+              message: 'Atención, Usuario y/o Contraseña inválidos, verifique sus credenciales.',
+              type: 'warning',
+              duration: 5000
+            })
             this.loading = false
           })
         } else {
