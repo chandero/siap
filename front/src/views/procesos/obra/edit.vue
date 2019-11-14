@@ -369,10 +369,16 @@
                             </el-col>
                             <el-col class="hidden-md-and-up" :xs="8" :sm="8">
                               <span style="font-weight: bold;">Nombre del Material</span>
-                            </el-col>                            
-                            <el-col :xs="16" :sm="16" :md="11" :lg="11" :xl="11">
+                            </el-col>  
+                            <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2">
+                                <el-form-item prop="elem_codigo">
+                                    <el-input :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.elem_codigo" @blur="buscarCodigoElemento(evento)"></el-input>
+                                </el-form-item>
+                              <!-- <span style="width: 100%;">{{ codigoElemento(evento.elem_id) }}</span> -->
+                            </el-col>                                                      
+                            <el-col :xs="15" :sm="15" :md="9" :lg="9" :xl="9">
                              <el-form-item>
-                                <el-select :disabled="evento.even_estado > 7" clearable filterable v-model="evento.elem_id" :placeholder="$t('elemento.select')" style="width: 100%;" 
+                                <el-select :disabled="evento.even_estado > 7" clearable filterable v-model="evento.elem_id" :placeholder="$t('elemento.select')" @change="codigoElemento(evento)" style="width: 100%;" 
                                           remote :remote-method="remoteMethodElemento"
                                           :loading="loadingElemento">
                                     <el-option v-for="elemento in elementos" :key="elemento.elem_id" :label="elemento.elem_descripcion" :value="elemento.elem_id" >
@@ -464,7 +470,7 @@ import { getBarriosEmpresa } from '@/api/barrio'
 import { getTiposBarrio } from '@/api/tipobarrio'
 import { getObra, updateObra, getEstados, validarCodigo } from '@/api/obra'
 import { getAcciones } from '@/api/accion'
-import { getElementos, getElementoByDescripcion } from '@/api/elemento'
+import { getElementos, getElementoByDescripcion, getElementoByCode } from '@/api/elemento'
 import { getAapEdit, getAapValidar } from '@/api/aap'
 import { getMedioambiente } from '@/api/medioambiente'
 import { getAapTiposCarcasa } from '@/api/aap_tipo_carcasa'
@@ -533,6 +539,7 @@ export default {
         aap_id: null,
         obra_id: null,
         elem_id: null,
+        elem_codigo: null,
         elem_descripcion: null,
         empr_id: 0,
         usua_id: 0,
@@ -784,6 +791,7 @@ export default {
       for (var i = 0; i < this.obra.eventos.length; i++) {
         if (this.obra.eventos[i].elem_id === '') {
           this.obra.eventos[i].elem_id = null
+          this.obra.eventos[i].elem_codigo = null
         }
       }
       this.obra.rees_id = 3
@@ -837,6 +845,58 @@ export default {
         duration: 5000
       })
     },
+    codigoElemento(evento) {
+      if (evento.elem_id === '' || evento.elem_id === null || evento.elem_id === undefined) {
+        return '-'
+      } else {
+        this.completarMaterial()
+        evento.elem_codigo = this.elementos_list.find(o => o.elem_id === evento.elem_id, { elem_codigo: '-' }).elem_codigo
+      }
+    },
+    buscarCodigoElemento(evento) {
+      this.elementos = []
+      console.log('Elementos: ' + JSON.stringify(this.elementos))
+      if (evento.elem_codigo !== undefined && evento.elem_codigo !== null && evento.elem_codigo !== '') {
+        getElementoByCode(evento.elem_codigo).then(response => {
+          if (response.status === 200) {
+            const elemento = response.data
+            this.elementos.push(elemento)
+            // if (!this.elementos.find(o => o.elem_id === elemento.elem_id)) {
+            // this.elementos.push(elemento)
+            // }
+            // evento.elem_id = elemento.elem_id
+            // evento.elem_codigo = elemento.elem_codigo
+            // //this.reporte.direcciones[this.didx].materiales.forEach(m => {
+            // //  if (m.even_id === evento.even_id) {
+            // //    m.elem_id = elemento.elem_id
+            // //    m.elem_codigo = elemento.elem_codigo
+            // //  }
+            // //})
+          } else {
+            this.$notify({
+              title: 'Atención',
+              message: 'No se encontró Material con ese código: (' + response.status + ')',
+              type: 'warning'
+            })
+          }
+        }).catch((error) => {
+          this.$notify({
+            title: 'Error',
+            message: 'No se encontró Material con ese código: (' + error + ')',
+            type: 'warning'
+          })
+        })
+      }
+    },
+    completarMaterial() {
+      for (var j = 0; j < this.obra.eventos.length; j++) {
+        if (this.obra.eventos[j] !== undefined && this.obra.eventos[j].elem_id !== undefined && this.obra.eventos[j].elem_id > 0) {
+          if (this.elementos.find(e => e.elem_id === this.obra.eventos[j].elem_id) === undefined) {
+            this.elementos.push({ elem_id: this.obra.eventos[j].elem_id, elem_descripcion: this.elemento(this.obra.eventos[j].elem_id) })
+          }
+        }
+      }
+    },
     onAddEvent() {
       var evento = {
         even_fecha: null,
@@ -848,6 +908,7 @@ export default {
         aap_id: null,
         obra_id: this.obra.obra_id,
         elem_id: null,
+        elem_codigo: null,
         empr_id: 0,
         usua_id: 0,
         even_id: this.evento_siguiente_consecutivo
@@ -983,7 +1044,11 @@ export default {
           even_length = even_length + 1
         }
       })
-
+      this.obra_previo.eventos.forEach(e => {
+        if (e.elem_id !== undefined && e.elem_id !== null && e.elem_id > 0) {
+          e.elem_codigo = this.codigoElemento(e.elem_id)
+        }
+      })
       if (even_length === 0) {
         for (var i = 1; i <= 10; i++) {
           var evento = {
@@ -996,6 +1061,7 @@ export default {
             aap_id: null,
             obra_id: this.obra_previo.obra_id,
             elem_id: null,
+            elem_codigo: null,
             empr_id: 0,
             usua_id: 0,
             even_id: even_length + i
