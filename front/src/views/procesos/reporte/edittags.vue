@@ -509,7 +509,7 @@
                                 <el-select :disabled="evento.even_estado > 7" filterable :clearable="evento.even_estado === 1" v-model="evento.elem_id" :placeholder="$t('elemento.select')" style="width: 100%;" @focus="limpiarElemento()" @change="codigoElemento(evento)"
                                           remote :remote-method="remoteMethodElemento"
                                           :loading="loadingElemento">
-                                    <el-option v-for="elemento in elementos" :key="elemento.elem_id" :label="elemento.elem_descripcion" :value="elemento.elem_id" >
+                                    <el-option v-for="elemento in elementos" :key="elemento.elem_codigo" :label="elemento.elem_descripcion" :value="elemento.elem_id" >
                                     </el-option>       
                                 </el-select> 
                              </el-form-item>
@@ -1303,38 +1303,31 @@ export default {
       }
     },
     buscarCodigoElemento(evento) {
-      this.elementos = []
-      console.log('Elementos: ' + JSON.stringify(this.elementos))
       if (evento.elem_codigo !== undefined && evento.elem_codigo !== null && evento.elem_codigo !== '') {
-        getElementoByCode(evento.elem_codigo).then(response => {
-          if (response.status === 200) {
-            const elemento = response.data
-            this.elementos.push(elemento)
-            // if (!this.elementos.find(o => o.elem_id === elemento.elem_id)) {
-            // this.elementos.push(elemento)
-            // }
-            // evento.elem_id = elemento.elem_id
-            // evento.elem_codigo = elemento.elem_codigo
-            // //this.reporte.direcciones[this.didx].materiales.forEach(m => {
-            // //  if (m.even_id === evento.even_id) {
-            // //    m.elem_id = elemento.elem_id
-            // //    m.elem_codigo = elemento.elem_codigo
-            // //  }
-            // //})
-          } else {
+        const elemento = this.elementos.find(e => parseInt(e.elem_codigo) === parseInt(evento.elem_codigo))
+        if (!elemento) {
+          getElementoByCode(evento.elem_codigo).then(response => {
+            if (response.status === 200) {
+              var elemento = response.data
+              elemento.elem_descripcion = elemento.elem_codigo + ':' + elemento.elem_descripcion
+              this.elementos.unshift(elemento)
+            } else {
+              this.$notify({
+                title: 'Atención',
+                message: 'No se encontró Material con ese código: (' + response.status + ')',
+                type: 'warning'
+              })
+            }
+          }).catch((error) => {
             this.$notify({
               title: 'Atención',
-              message: 'No se encontró Material con ese código: (' + response.status + ')',
+              message: 'No se encontró Material con ese código: (' + error + ')',
               type: 'warning'
             })
-          }
-        }).catch((error) => {
-          this.$notify({
-            title: 'Error',
-            message: 'No se encontró Material con ese código: (' + error + ')',
-            type: 'warning'
           })
-        })
+        } else {
+          evento.elem_id = elemento.elem_id
+        }
       }
     },
     validarCodigoElementoRetirado(elem_id, codigo) {
@@ -1675,7 +1668,8 @@ export default {
       if (elem_id === null) {
         return ''
       } else {
-        return this.elementos_list.find(o => o.elem_id === elem_id, { elem_descripcion: null }).elem_descripcion
+        const elemento = this.elementos_list.find(o => o.elem_id === elem_id, { elem_descripcion: null })
+        return elemento.elem_codigo + ':' + elemento.elem_descripcion
       }
     },
     limpiarElemento() {
