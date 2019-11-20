@@ -506,7 +506,7 @@
                             </el-col>
                             <el-col :xs="15" :sm="15" :md="9" :lg="9" :xl="9">
                              <el-form-item prop="elem_id">
-                                <el-select :disabled="evento.even_estado > 7" filterable :clearable="evento.even_estado === 1" v-model="evento.elem_id" :placeholder="$t('elemento.select')" style="width: 100%;" @focus="limpiarElemento()" @change="codigoElemento(evento)"
+                                <el-select :disabled="evento.even_estado > 7" filterable :clearable="evento.even_estado === 1" v-model="evento.elem_id" :placeholder="$t('elemento.select')" style="width: 100%;" @change="codigoElemento(evento)"
                                           remote :remote-method="remoteMethodElemento"
                                           :loading="loadingElemento">
                                     <el-option v-for="elemento in elementos" :key="elemento.elem_codigo" :label="elemento.elem_descripcion" :value="elemento.elem_id" >
@@ -1067,6 +1067,7 @@ export default {
         if (d.even_id === even_id) {
           d.type = 'success'
           this.didx = even_id - 1
+          this.completarMaterial()
         } else {
           d.type = 'info'
         }
@@ -1308,8 +1309,8 @@ export default {
         if (!elemento) {
           getElementoByCode(evento.elem_codigo).then(response => {
             if (response.status === 200) {
+              this.elementos = []
               var elemento = response.data
-              elemento.elem_descripcion = elemento.elem_codigo + ':' + elemento.elem_descripcion
               this.elementos.unshift(elemento)
             } else {
               this.$notify({
@@ -1326,7 +1327,8 @@ export default {
             })
           })
         } else {
-          evento.elem_id = elemento.elem_id
+          this.elementos = []
+          this.elementos.unshift(elemento)
         }
       }
     },
@@ -1669,19 +1671,8 @@ export default {
         return ''
       } else {
         const elemento = this.elementos_list.find(o => o.elem_id === elem_id, { elem_descripcion: null })
-        return elemento.elem_codigo + ':' + elemento.elem_descripcion
+        return elemento.elem_descripcion
       }
-    },
-    limpiarElemento() {
-      // for (var j = 0; j < this.reporte.direcciones.length; j++) {
-      //  for (var i = 0; i < this.reporte.direcciones[j].materiales.length; i++) {
-      //    if (this.reporte.direcciones[j].materiales[i].elem_id !== undefined && this.reporte.direcciones[j].materiales[i].elem_id > 0) {
-      //      if (this.elementos.find(e => e.elem_id === this.reporte.direcciones[j].materiales[i].elem_id) === undefined) {
-      //        this.elementos.push({ elem_id: this.reporte.direcciones[j].materiales[i].elem_id, elem_descripcion: this.elemento(this.reporte.direcciones[j].materiales[i].elem_id) })
-      //      }
-      //    }
-      //  }
-      // }
     },
     getElementos() {
       return this.elementos_list

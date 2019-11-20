@@ -374,7 +374,6 @@
                                 <el-form-item prop="elem_codigo">
                                     <el-input :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.elem_codigo" @blur="buscarCodigoElemento(evento)"></el-input>
                                 </el-form-item>
-                              <!-- <span style="width: 100%;">{{ codigoElemento(evento.elem_id) }}</span> -->
                             </el-col>                                                      
                             <el-col :xs="15" :sm="15" :md="9" :lg="9" :xl="9">
                              <el-form-item>
@@ -505,6 +504,7 @@ export default {
       obra_previo: null,
       evento_siguiente_consecutivo: 1,
       direccion_siguiente_consecutivo: 1,
+      guardando: false,
       obra: {
         obra_id: null,
         obra_consecutivo: 0,
@@ -642,22 +642,6 @@ export default {
   },
   methods: {
     autosave() {
-      /*
-      var valido = true
-      valido = this.validatForm('obraForm')
-      if (!valido) {
-        return false
-      }
-      this.obra.rees_id = 1
-      updateObra(this.obra)
-        .then(response => {
-          if (response.status === 200) {
-          }
-        })
-        .catch(error => {
-          this.error(error)
-        })
-      */
       localStorage.setItem('currEditObra', JSON.stringify(this.obra))
     },
     pending() {
@@ -686,7 +670,7 @@ export default {
       this.isIndeterminate = meamCount > 0 && meamCount < this.medioambiente_keys.length
     },
     validate() {
-      if (this.obra.obra_fechasolucion && this.obra.obra_horainicio && this.obra.obra_horafin) {
+      if (!this.guardando && this.obra.obra_fechasolucion && this.obra.obra_horainicio && this.obra.obra_horafin) {
         return true
       } else {
         return false
@@ -786,6 +770,7 @@ export default {
     },
     aplicar() {
       // var valido = true
+      this.guardando = true
       this.confirmacionGuardar = false
       // valido = this.validatForm('obraForm')
       for (var i = 0; i < this.obra.eventos.length; i++) {
@@ -850,42 +835,38 @@ export default {
         return '-'
       } else {
         this.completarMaterial()
-        evento.elem_codigo = this.elementos_list.find(o => o.elem_id === evento.elem_id, { elem_codigo: '-' }).elem_codigo
+        const elemento = this.elementos_list.find(o => o.elem_id === evento.elem_id, { elem_codigo: '-' })
+        console.log('Elemento encontrado: ' + JSON.stringify(elemento))
+        evento.elem_codigo = elemento.elem_codigo
       }
     },
     buscarCodigoElemento(evento) {
-      this.elementos = []
-      console.log('Elementos: ' + JSON.stringify(this.elementos))
       if (evento.elem_codigo !== undefined && evento.elem_codigo !== null && evento.elem_codigo !== '') {
-        getElementoByCode(evento.elem_codigo).then(response => {
-          if (response.status === 200) {
-            const elemento = response.data
-            this.elementos.push(elemento)
-            // if (!this.elementos.find(o => o.elem_id === elemento.elem_id)) {
-            // this.elementos.push(elemento)
-            // }
-            // evento.elem_id = elemento.elem_id
-            // evento.elem_codigo = elemento.elem_codigo
-            // //this.reporte.direcciones[this.didx].materiales.forEach(m => {
-            // //  if (m.even_id === evento.even_id) {
-            // //    m.elem_id = elemento.elem_id
-            // //    m.elem_codigo = elemento.elem_codigo
-            // //  }
-            // //})
-          } else {
+        const elemento = this.elementos.find(e => parseInt(e.elem_codigo) === parseInt(evento.elem_codigo))
+        if (!elemento) {
+          getElementoByCode(evento.elem_codigo).then(response => {
+            if (response.status === 200) {
+              this.elementos = []
+              var elemento = response.data
+              this.elementos.unshift(elemento)
+            } else {
+              this.$notify({
+                title: 'Atención',
+                message: 'No se encontró Material con ese código: (' + response.status + ')',
+                type: 'warning'
+              })
+            }
+          }).catch((error) => {
             this.$notify({
               title: 'Atención',
-              message: 'No se encontró Material con ese código: (' + response.status + ')',
+              message: 'No se encontró Material con ese código: (' + error + ')',
               type: 'warning'
             })
-          }
-        }).catch((error) => {
-          this.$notify({
-            title: 'Error',
-            message: 'No se encontró Material con ese código: (' + error + ')',
-            type: 'warning'
           })
-        })
+        } else {
+          this.elementos = []
+          this.elementos.unshift(elemento)
+        }
       }
     },
     completarMaterial() {
@@ -1000,10 +981,14 @@ export default {
     obtenerObra() {
       getObra(this.$route.params.id).then(response => {
         this.obra_previo = response.data
-        localStorage.setItem('currEditObraIni', JSON.stringify(this.obra))
+        this.obra_previo.eventos.forEach(e => {
+          e.elem_codigo = null
+        })
+        localStorage.setItem('currEditObraIni', JSON.stringify(this.obra_previo))
         this.cargarEventos()
         this.validarConsecutivo()
         this.obra = this.obra_previo
+        console.log('Obra cargada: ' + JSON.stringify(this.obra))
         this.obra.tiba_id = this.tiposector(this.obra.barr_id)
         this.$timer.start('autosave')
         this.$timer.start('pending')
@@ -1017,7 +1002,7 @@ export default {
       for (var i = 0; i < this.obra_previo.eventos.length; i++) {
         if (this.obra_previo.eventos[i].elem_id !== undefined && this.obra_previo.eventos[i].elem_id > 0) {
           if (this.elementos.find(e => e.elem_id === this.obra_previo.eventos[i].elem_id) === undefined) {
-            this.elementos.push({ elem_id: this.obra_previo.eventos[i].elem_id, elem_descripcion: this.elemento(this.obra_previo.eventos[i].elem_id) })
+            this.elementos.push({ elem_id: this.obra_previo.eventos[i].elem_id, elem_codigo: this.obra_previo.eventos[i].elem_codigo, elem_descripcion: this.elemento(this.obra_previo.eventos[i].elem_id) })
           }
         }
         // consecutivo++
@@ -1044,11 +1029,14 @@ export default {
           even_length = even_length + 1
         }
       })
-      this.obra_previo.eventos.forEach(e => {
+      /* this.obra_previo.eventos.forEach(e => {
         if (e.elem_id !== undefined && e.elem_id !== null && e.elem_id > 0) {
-          e.elem_codigo = this.codigoElemento(e.elem_id)
+          e.elem_codigo = this.codigoElemento(e)
+        } else {
+          e.elem_codigo = null
         }
-      })
+      }) */
+      console.log('Obra previo:' + JSON.stringify(this.obra_previo))
       if (even_length === 0) {
         for (var i = 1; i <= 10; i++) {
           var evento = {

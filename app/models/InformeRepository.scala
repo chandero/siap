@@ -3730,11 +3730,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
           )
           retiro match {
             case Some(r) => ret = r
-            case None    => None
+            case None    => val retiro_reubicacion = new Siap_retiro_reubicacion(Some(ret), Some(reubicacion))
+                            _listData += retiro_reubicacion
           }
-          val retiro_reubicacion =
-            new Siap_retiro_reubicacion(Some(ret), Some(reubicacion))
-          _listData += retiro_reubicacion
+
         }
 
       }
