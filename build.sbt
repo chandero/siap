@@ -39,7 +39,6 @@ libraryDependencies ++= Seq(
   "net.sf.jasperreports" % "jasperreports-functions" % "6.7.0",
   "net.sf.jasperreports" % "jasperreports-chart-themes" % "6.7.0",
   "com.norbitltd" %% "spoiwo" % "1.6.1",
-  "org.apache.poi" % "poi" % "4.1.1",
   "org.mozilla" % "rhino" % "1.7R3"
 )
 

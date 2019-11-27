@@ -44,6 +44,7 @@ import net.sf.jasperreports.export.SimpleXlsxReportConfiguration
 import net.sf.jasperreports.export.SimpleDocxReportConfiguration
 import net.sf.jasperreports.export.SimpleDocxExporterConfiguration
 // https://www.tutorialspoint.com/apache_poi_word/apache_poi_word_quick_guide.htm
+/*
 import org.apache.poi.xwpf.usermodel.VerticalAlign
 import org.apache.poi.xwpf.usermodel.Document
 import org.apache.poi.xwpf.usermodel.XWPFDocument
@@ -51,7 +52,7 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph
 import org.apache.poi.xwpf.usermodel.XWPFRun
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment
 import org.apache.poi.util.Units
-
+*/
 import utilities.N2T
 import utilities.Utility
 
@@ -1548,17 +1549,17 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                     reportParams.put("GERENTE", gerente)
                                     if (editable) {
                                         println("Es Editable")
-                                        //// var docExporter = new JRDocxExporter()
-                                        //// val jasperPrint = JasperFillManager.fillReport(compiledFile, reportParams, connection)
-                                        //// var config = new SimpleDocxExporterConfiguration()
+                                        var docExporter = new JRDocxExporter()
+                                        val jasperPrint = JasperFillManager.fillReport(compiledFile, reportParams, connection)
+                                        var config = new SimpleDocxExporterConfiguration()
                                         var ostream = new ByteArrayOutputStream()
-                                        //// docExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-                                        //// docExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(ostream));
-                                        //// docExporter.setConfiguration(config);
-                                        //// docExporter.exportReport();
-                                        //// os = ostream.toByteArray
+                                        docExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+                                        docExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(ostream));
+                                        docExporter.setConfiguration(config);
+                                        docExporter.exportReport();
+                                        os = ostream.toByteArray
                                         // Word usando POI directamente
-                                        
+                                        /*
                                         var document:XWPFDocument = new XWPFDocument()
                                         var headerParagraph:XWPFParagraph = document.createParagraph()
                                         var headerRun: XWPFRun = headerParagraph.createRun()
@@ -1679,6 +1680,7 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                         run.setText("C.c. Archivo")
                                         document.write(ostream)
                                         os = ostream.toByteArray
+                                        */
                                     } else {
                                         os = JasperRunManager.runReportToPdf(compiledFile, reportParams, connection)
                                     }
