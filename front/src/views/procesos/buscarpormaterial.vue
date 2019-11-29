@@ -311,6 +311,7 @@ export default {
               this.aap_usos.push(b)
             })
             getBarriosEmpresa().then(response => {
+              this.barrios = response.data
               getCaracteristica(7).then(response => {
                 this.tecnologias = response.data.cara_valores.split(',')
                 getCaracteristica(5).then(response => {
