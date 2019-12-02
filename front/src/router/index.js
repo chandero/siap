@@ -77,7 +77,7 @@ export const asyncRouterMap = [
     meta: {
       title: 'procesos',
       icon: 'table',
-      roles: ['super', 'gerencia', 'admin', 'ingeniero', 'supervisor', 'auxiliar', 'almacenista', 'liniero']
+      roles: ['super', 'gerencia', 'admin', 'ingeniero', 'supervisor', 'auxiliar', 'almacenista', 'liniero', 'reporte']
     },
     children: [
       { path: 'reporte', component: _import('procesos/reporte2'), name: 'reporte', meta: { title: 'reporte', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
@@ -104,7 +104,7 @@ export const asyncRouterMap = [
         meta: { title: 'reporteedittags', roles: ['super', 'admin', 'auxiliar'] }
       },
       { path: 'reporte/crear', component: _import('procesos/reporte/create'), name: 'reportecreate', hidden: true, meta: { title: 'reportecreate', roles: ['super', 'admin', 'auxiliar'] }},
-      { path: 'reporte/relacion', component: _import('procesos/reporte/relacion'), name: 'reporterelacion', meta: { title: 'reporterelacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'reporte/relacion', component: _import('procesos/reporte/relacion'), name: 'reporterelacion', meta: { title: 'reporterelacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'reporte'] }},
       { path: 'obra', component: _import('procesos/obra2'), name: 'obra', meta: { title: 'obra', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
       {
         path: 'obra/editar/:id',
@@ -118,7 +118,7 @@ export const asyncRouterMap = [
         meta: { title: 'obraedit', roles: ['super', 'admin', 'auxiliar'] }
       },
       { path: 'obra/crear', component: _import('procesos/obra/create'), name: 'obracreate', hidden: true, meta: { title: 'obracreate', roles: ['super', 'admin', 'auxiliar'] }},
-      { path: 'obra/relacion', component: _import('procesos/obra/relacion'), name: 'obrarelacion', meta: { title: 'obrarelacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'obra/relacion', component: _import('procesos/obra/relacion'), name: 'obrarelacion', meta: { title: 'obrarelacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'reporte'] }},
       { path: 'buscarpormaterial', component: _import('procesos/buscarpormaterial'), name: 'buscarpormaterial', meta: { title: 'buscarpormaterial', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'almacenista'] }},
       {
         path: 'subreporte/editar/:id',
@@ -143,7 +143,7 @@ export const asyncRouterMap = [
       { path: 'muob/info/:consecutivo', components: { default: _import('procesos/municipioobra/rdetalladomat'), aap_create: Aap }, name: 'muobinfo', hidden: true, redirect: false, meta: { title: 'muobinfo', roles: ['super', 'admin', 'auxiliar', 'ingeniero'] }},
       { path: 'entregamaterial', component: _import('procesos/entregamaterial'), name: 'entregamaterial', hidden: true, meta: { title: 'entregamaterial', roles: ['super', 'admin', 'ingeniero', 'almacenista'] }},
       { path: 'recepcionmaterial', component: _import('procesos/recepcionmaterial'), name: 'recepcionmaterial', hidden: true, meta: { title: 'recepcionmaterial', roles: ['super', 'admin', 'ingeniero', 'almacenista'] }},
-      { path: 'vencido', component: _import('procesos/vencido'), name: 'vencido', hidden: true, meta: { title: 'vencido', roles: ['super', 'gerencia', 'admin', 'ingeniero', 'auxiliar'] }}
+      { path: 'vencido', component: _import('procesos/vencido'), name: 'vencido', hidden: true, meta: { title: 'vencido', roles: ['super', 'gerencia', 'admin', 'ingeniero', 'auxiliar', 'reporte'] }}
     ]
   },
   {
@@ -155,7 +155,7 @@ export const asyncRouterMap = [
     meta: {
       title: 'solicitud',
       icon: 'message',
-      roles: ['super', 'admin', 'auxiliar', 'supervisor']
+      roles: ['super', 'admin', 'auxiliar', 'supervisor', 'reporte']
     },
     children: [
       { path: 'solicitud', component: _import('solicitud/solicitud'), name: 'solicitudlista', meta: { title: 'solicitudlista', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }},
@@ -164,8 +164,8 @@ export const asyncRouterMap = [
       { path: 'almacen', component: _import('solicitud/almacen'), name: 'solicitudalmacen', meta: { title: 'solicitudalmacen', roles: ['super', 'admin', 'auxiliar', 'almacen', 'supervisor'] }},
       { path: 'porvencer', component: _import('solicitud/porvencer'), name: 'solicitudporvencer', hidden: true, meta: { title: 'solicitudporvencer', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }},
       { path: 'ver/:id', component: _import('solicitud/ver'), name: 'solicitudver', hidden: true, meta: { title: 'solicitudver', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }},
-      { path: 'informexls', component: _import('solicitud/informexls'), name: 'solicitudinformexls', meta: { title: 'solicitudinformexls', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }},
-      { path: 'informexvencerxls', component: _import('solicitud/informexvencerxls'), name: 'solicitudinformexvencerxls', meta: { title: 'solicitudinformexvencerxls', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }}
+      { path: 'informexls', component: _import('solicitud/informexls'), name: 'solicitudinformexls', meta: { title: 'solicitudinformexls', roles: ['super', 'admin', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'informexvencerxls', component: _import('solicitud/informexvencerxls'), name: 'solicitudinformexvencerxls', meta: { title: 'solicitudinformexvencerxls', roles: ['super', 'admin', 'auxiliar', 'supervisor', 'reporte'] }}
     ]
   },
   {
@@ -177,33 +177,33 @@ export const asyncRouterMap = [
     meta: {
       title: 'informe',
       icon: 'excel',
-      roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'almacenista']
+      roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'almacenista', 'reporte']
     },
     children: [
-      { path: 'rmaterial', component: _import('informe/rmaterial'), name: 'rmaterial', meta: { title: 'rmaterial', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rmaterepo', component: _import('informe/rmaterepo'), name: 'rmaterepo', meta: { title: 'rmaterepo', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rmaterepodet', component: _import('informe/rmaterepodet'), name: 'rmaterepodet', meta: { title: 'rmaterepodet', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rdetalladoexpansion', component: _import('informe/rdetalladoexpansion'), name: 'rdetalladoexpansion', meta: { title: 'rdetalladoexpansion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rdetalladoreubicacion', component: _import('informe/rdetalladoreubicacion'), name: 'rdetalladoreubicacion', meta: { title: 'rdetalladoreubicacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rdetalladomodernizacion', component: _import('informe/rdetalladomodernizacion'), name: 'rdetalladomodernizacion', meta: { title: 'rdetalladomodernizacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rdetalladoactualizacion', component: _import('informe/rdetalladoactualizacion'), name: 'rdetalladoactualizacion', meta: { title: 'rdetalladoactualizacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rdetalladoreposicion', component: _import('informe/rdetalladoreposicion'), name: 'rdetalladoreposicion', meta: { title: 'rdetalladoreposicion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rdetalladorepotenciacion', component: _import('informe/rdetalladorepotenciacion'), name: 'rdetalladorepotenciacion', meta: { title: 'rdetalladorepotenciacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rdetalladoretiro', component: _import('informe/rdetalladoretiro'), name: 'rdetalladoretiro', meta: { title: 'rdetalladoretiro', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rdetalladoretiroreubicacion', component: _import('informe/rdetalladoretiroreubicacion'), name: 'rdetalladoretiroreubicacion', meta: { title: 'rdetalladoretiroreubicacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rdetalladocambiomedida', component: _import('informe/rdetalladocambiomedida'), name: 'rdetalladocambiomedida', meta: { title: 'rdetalladocambiomedida', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rmaterialrepetido', component: _import('informe/rmaterialrepetido'), hidden: false, name: 'rmaterialrepetido', meta: { title: 'rmaterialrepetido', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rvisitaporbarrio', component: _import('informe/rvisitaporbarrio'), name: 'rvisitaporbarrio', meta: { title: 'rvisitaporbarrio', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rinventario', component: _import('informe/rinventario'), name: 'rinventario', meta: { title: 'rinventario', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor'] }},
-      { path: 'rdisponibilidad', component: _import('informe/rdisponibilidad'), name: 'rdisponibilidad', meta: { title: 'rdisponibilidad', roles: ['super', 'admin', 'ingeniero', 'almacenista', 'auxiliar', 'gerencia', 'supervisor'] }},
-      { path: 'rcalculocarga', component: _import('informe/rcalculocarga'), name: 'rcalculocarga', meta: { title: 'rcalculocarga', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor'] }},
-      { path: 'rconsolidadoreportes', component: _import('informe/rconsolidadoreportes'), name: 'rconsolidadoreportes', meta: { title: 'rconsolidadoreportes', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'reficiencia', component: _import('informe/reficiencia'), name: 'reficiencia', meta: { title: 'reficiencia', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] }},
-      { path: 'rgraficos', component: _import('informe/rgraficos'), name: 'rgraficos', meta: { title: 'rgraficos', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor'] }},
-      { path: 'rmedidores', component: _import('informe/rmedidores'), name: 'rmedidores', meta: { title: 'rmedidores', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor'] }},
-      { path: 'rtransformadores', component: _import('informe/rtransformadores'), name: 'rtransformadores', meta: { title: 'rtransformadores', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor'] }},
-      { path: 'rucap', component: _import('informe/rucap'), name: 'rucap', meta: { title: 'rucap', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor'] }},
-      { path: 'rmuot', component: _import('informe/rmuot'), name: 'rmuot', meta: { title: 'rmuot', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor', 'auxiliar'] }}
+      { path: 'rmaterial', component: _import('informe/rmaterial'), name: 'rmaterial', meta: { title: 'rmaterial', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rmaterepo', component: _import('informe/rmaterepo'), name: 'rmaterepo', meta: { title: 'rmaterepo', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rmaterepodet', component: _import('informe/rmaterepodet'), name: 'rmaterepodet', meta: { title: 'rmaterepodet', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rdetalladoexpansion', component: _import('informe/rdetalladoexpansion'), name: 'rdetalladoexpansion', meta: { title: 'rdetalladoexpansion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rdetalladoreubicacion', component: _import('informe/rdetalladoreubicacion'), name: 'rdetalladoreubicacion', meta: { title: 'rdetalladoreubicacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rdetalladomodernizacion', component: _import('informe/rdetalladomodernizacion'), name: 'rdetalladomodernizacion', meta: { title: 'rdetalladomodernizacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rdetalladoactualizacion', component: _import('informe/rdetalladoactualizacion'), name: 'rdetalladoactualizacion', meta: { title: 'rdetalladoactualizacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rdetalladoreposicion', component: _import('informe/rdetalladoreposicion'), name: 'rdetalladoreposicion', meta: { title: 'rdetalladoreposicion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rdetalladorepotenciacion', component: _import('informe/rdetalladorepotenciacion'), name: 'rdetalladorepotenciacion', meta: { title: 'rdetalladorepotenciacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rdetalladoretiro', component: _import('informe/rdetalladoretiro'), name: 'rdetalladoretiro', meta: { title: 'rdetalladoretiro', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rdetalladoretiroreubicacion', component: _import('informe/rdetalladoretiroreubicacion'), name: 'rdetalladoretiroreubicacion', meta: { title: 'rdetalladoretiroreubicacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rdetalladocambiomedida', component: _import('informe/rdetalladocambiomedida'), name: 'rdetalladocambiomedida', meta: { title: 'rdetalladocambiomedida', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rmaterialrepetido', component: _import('informe/rmaterialrepetido'), hidden: false, name: 'rmaterialrepetido', meta: { title: 'rmaterialrepetido', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rvisitaporbarrio', component: _import('informe/rvisitaporbarrio'), name: 'rvisitaporbarrio', meta: { title: 'rvisitaporbarrio', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rinventario', component: _import('informe/rinventario'), name: 'rinventario', meta: { title: 'rinventario', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'reporte'] }},
+      { path: 'rdisponibilidad', component: _import('informe/rdisponibilidad'), name: 'rdisponibilidad', meta: { title: 'rdisponibilidad', roles: ['super', 'admin', 'ingeniero', 'almacenista', 'auxiliar', 'gerencia', 'supervisor', 'reporte'] }},
+      { path: 'rcalculocarga', component: _import('informe/rcalculocarga'), name: 'rcalculocarga', meta: { title: 'rcalculocarga', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'reporte'] }},
+      { path: 'rconsolidadoreportes', component: _import('informe/rconsolidadoreportes'), name: 'rconsolidadoreportes', meta: { title: 'rconsolidadoreportes', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'reficiencia', component: _import('informe/reficiencia'), name: 'reficiencia', meta: { title: 'reficiencia', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor', 'reporte'] }},
+      { path: 'rgraficos', component: _import('informe/rgraficos'), name: 'rgraficos', meta: { title: 'rgraficos', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'reporte'] }},
+      { path: 'rmedidores', component: _import('informe/rmedidores'), name: 'rmedidores', meta: { title: 'rmedidores', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'reporte'] }},
+      { path: 'rtransformadores', component: _import('informe/rtransformadores'), name: 'rtransformadores', meta: { title: 'rtransformadores', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'reporte'] }},
+      { path: 'rucap', component: _import('informe/rucap'), name: 'rucap', meta: { title: 'rucap', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor', 'reporte'] }},
+      { path: 'rmuot', component: _import('informe/rmuot'), name: 'rmuot', meta: { title: 'rmuot', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor', 'auxiliar', 'reporte'] }}
     ]
   },
   {
