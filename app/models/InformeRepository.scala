@@ -3093,7 +3093,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     LEFT JOIN siap.reporte_direccion d on d.repo_id = r.repo_id
                     LEFT JOIN siap.reporte_direccion_dato dd on dd.repo_id = r.repo_id and dd.even_id = d.even_id and dd.aap_id = d.aap_id
                     LEFT JOIN siap.aap_conexion co on co.aaco_id = dd.aaco_id_anterior
-                    WHERE r.reti_id = 8 AND r.empr_id = 1 AND r.rees_id = 3 and d.even_estado <> 9 and d.aap_id = a.aap_id
+                    WHERE r.reti_id = 8 AND r.empr_id = {empr_id} AND r.rees_id = 3 and d.even_estado <> 9 and d.aap_id = a.aap_id
                     ORDER BY r.repo_fechasolucion desc, r.repo_consecutivo, a.aap_id
                     LIMIT 1) as aaco_descripcion_anterior,
                     mo.aamo_descripcion, 
@@ -3774,7 +3774,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                            inner join siap.aap a on a.aap_id = v.aap_id
                            left join siap.aap_adicional d on d.aap_id = a.aap_id
                            left join siap.barrio b on b.barr_id = a.barr_id
-                           where r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.reti_id = 1 and r.rees_id = 3 and r.empr_id = 1
+                           where r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.reti_id = 1 and r.rees_id = 3 and r.empr_id = {empr_id}
                            and a.aap_id <> 9999999
                            order by r.repo_fechasolucion::text asc"""
           ).on(
