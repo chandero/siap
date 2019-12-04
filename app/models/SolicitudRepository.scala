@@ -1046,6 +1046,7 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                                             soli_solicitud,
                                                             soli_fechalimite,
                                                             soli_estado,
+                                                            soli_fechadigitado,
                                                             empr_id,
                                                             usua_id) VALUES (
                                                                 {soti_id},
@@ -1059,6 +1060,7 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                                                                 {soli_solicitud},
                                                                 {soli_fechalimite},
                                                                 {soli_estado},
+                                                                {soli_fechadigitado},
                                                                 {empr_id}, 
                                                                 {usua_id})""").
             on(
@@ -1073,6 +1075,7 @@ class SolicitudRepository @Inject()(dbapi: DBApi, empresaService: EmpresaReposit
                'soli_solicitud -> soli.a.soli_solicitud,
                'soli_fechalimite -> ff,
                'soli_estado -> 1,
+               'soli_fechadigitado -> Calendar.getInstance().getTime(),
                'empr_id -> soli.b.empr_id,
                'usua_id -> soli.b.usua_id 
             ).executeInsert().get

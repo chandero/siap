@@ -159,7 +159,7 @@
               size="mini"
               circle
               type="primary"
-              @click="handleSupervisor(scope.$index, scope.row)"
+              @click="dialogEntregaSupervisorVisible = true"
               :title="$t('solicitud.asupervisor')">
               <i class="el-icon-s-custom"></i>
             </el-button>
@@ -205,6 +205,17 @@
     </el-main>
    </el-container>
   </el-main>
+  <el-dialog title="Entrega a Supervisor" :visible.sync="dialogEntregaSupervisorVisible">
+    <el-form :model="formSupervisor">
+      <el-form-item label="Fecha y Hora de Entrega" label-width="150">
+        <el-date-picker v-model="formSupervisor.date" type="datetime"></el-date-picker>
+      </el-form-item>
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+     <el-button @click="dialogEntregaSupervisorVisible = false">Cancelar</el-button>
+     <el-button type="primary" @click="handleSupervisor()">Confirmar</el-button>
+    </span>
+  </el-dialog>  
  </el-container>
 </template>
 <script>
@@ -215,6 +226,11 @@ import { getBarriosEmpresa } from '@/api/barrio'
 export default {
   data() {
     return {
+      formSupervisor: {
+        date: null,
+        time: null
+      },
+      dialogEntregaSupervisorVisible: false,
       tabPosition: 'left',
       filtro: '',
       loading: false,
