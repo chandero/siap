@@ -159,7 +159,7 @@
               size="mini"
               circle
               type="primary"
-              @click="dialogEntregaSupervisorVisible = true"
+              @click="handleClickSupervisor(scope.$index, scope.row)"
               :title="$t('solicitud.asupervisor')">
               <i class="el-icon-s-custom"></i>
             </el-button>
@@ -205,15 +205,15 @@
     </el-main>
    </el-container>
   </el-main>
-  <el-dialog title="Entrega a Supervisor" :visible.sync="dialogEntregaSupervisorVisible">
+  <el-dialog :title="'Seguro de entregar la solicitud Radicado No.' + registro.a.soli_radicado + ' al Supervisor?'" :visible.sync="dialogEntregaSupervisorVisible">
     <el-form :model="formSupervisor">
       <el-form-item label="Fecha y Hora de Entrega" label-width="150">
         <el-date-picker v-model="formSupervisor.date" type="datetime"></el-date-picker>
       </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
-     <el-button @click="dialogEntregaSupervisorVisible = false">Cancelar</el-button>
-     <el-button type="primary" @click="handleSupervisor()">Confirmar</el-button>
+     <el-button @click="dialogEntregaSupervisorVisible = false">No</el-button>
+     <el-button type="primary" @click="handleSupervisor()">Sí</el-button>
     </span>
   </el-dialog>  
  </el-container>
@@ -227,8 +227,7 @@ export default {
   data() {
     return {
       formSupervisor: {
-        date: null,
-        time: null
+        date: new Date()
       },
       dialogEntregaSupervisorVisible: false,
       tabPosition: 'left',
@@ -271,6 +270,13 @@ export default {
       page_size: 10,
       current_page: 1,
       total: 0,
+      registro: {
+        a: {
+          soli_radicado: null
+        },
+        b: {}
+      },
+      index: null,
       barrios: [],
       estados: [],
       tipos: [],
@@ -322,27 +328,27 @@ export default {
     handleVer(index, row) {
       this.$router.push({ path: '/solicitud/ver/' + row.a.soli_id })
     },
-    handleSupervisor(index, row) {
-      console.log('enviar a suervisor')
-      this.$confirm('Seguro de entregar la solicitud Radicado No.' + row.a.soli_radicado + ' al Supervisor?', 'Atención', {
-        confirmButtonText: 'Sí',
-        cancelButtonText: 'No',
-        type: 'warning'
-      }).then(() => {
-        entregarSupervisor(row.a.soli_id).then(response => {
-          if (response.status === 200) {
-            row.b.soli_estado = 2
-            this.$message({
-              type: 'info',
-              message: 'Entrega Confirmada'
-            })
-          } else {
-            this.$message({
-              type: 'warning',
-              message: 'No se pudo Confirmar la entrega'
-            })
-          }
-        })
+    handleClickSupervisor(index, row) {
+      this.registro = row
+      this.index = index
+      this.dialogEntregaSupervisorVisible = true
+    },
+    handleSupervisor() {
+      console.log('enviar a supervisor')
+      this.dialogEntregaSupervisorVisible = false
+      entregarSupervisor(this.registro.a.soli_id).then(response => {
+        if (response.status === 200) {
+          this.registro.b.soli_estado = 2
+          this.$message({
+            type: 'info',
+            message: 'Entrega Confirmada'
+          })
+        } else {
+          this.$message({
+            type: 'warning',
+            message: 'No se pudo Confirmar la entrega'
+          })
+        }
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -519,7 +525,7 @@ export default {
       }
     },
     soti_descripcion(id) {
-      if (id === undefined || id === null) {
+      if (id === undefined || id === null || id < 1) {
         return ''
       } else {
         return this.tipos.find(t => t.soti_id === id, { soti_descripcion: '' }).soti_descripcion
@@ -590,10 +596,10 @@ export default {
     const start = async() => {
       getBarriosEmpresa().then(response => {
         this.barrios = response.data
-        this.getData(this.anho, this.mes, 0, this.tabsData[0].tabPeriodo)
-        this.activeTab = this.tabsData[0].tabPeriodo
         getTipos().then(response => {
           this.tipos = response.data
+          this.getData(this.anho, this.mes, 0, this.tabsData[0].tabPeriodo)
+          this.activeTab = this.tabsData[0].tabPeriodo
         }).catch(error => {
           console.log('getTipos Error:' + error)
         })

@@ -940,7 +940,7 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
         LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
         LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
         LEFT JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
-        WHERE a.empr_id = {empr_id} AND a.esta_id <> 9
+        WHERE a.empr_id = {empr_id} AND a.esta_id <> 9 AND a.aap_id <> 9999999
       """
       if (!filter.isEmpty){
           query = query + " and " + filter
