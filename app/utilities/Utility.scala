@@ -85,6 +85,7 @@ class Utility {
               None
             }
             case Some(emprId) => {
+              println("Empresa Id:" + emprId)
               Option(emprId.as[Long])
             }
           }

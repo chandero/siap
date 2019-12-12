@@ -80,6 +80,7 @@ class ReporteController @Inject()(
           Future.successful(NotFound(Json.toJson("false")))
         }
         case Some(reporte) => {
+          println("Reporte: " + reporte)
           Future.successful(Ok(Json.toJson(reporte)))
         }
       }

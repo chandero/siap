@@ -1172,8 +1172,8 @@ class ReporteRepository @Inject()(
             rees_id ~
             orig_id ~
             barr_id ~
+            empr_id ~            
             tiba_id ~
-            empr_id ~
             usua_id =>
         Reporte(
           repo_id,
@@ -1767,6 +1767,7 @@ class ReporteRepository @Inject()(
         val direccion = d.copy(dato = dat, dato_adicional = adi)
         _listDireccion += direccion
       }
+      println("R: "+ r)
       r.map { r =>
         val reporte = new Reporte(
           r.repo_id,
