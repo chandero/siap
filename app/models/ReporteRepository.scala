@@ -2981,7 +2981,7 @@ class ReporteRepository @Inject()(
 
       reporte.direcciones.map { direcciones =>
         for (d <- direcciones) {
-          if (d.aap_id != None) {
+          if (d.aap_id != None && d.aap_id.get != null) {
             var dirActualizado: Boolean = false
             var dirInsertado: Boolean = false
             var datoActualizado: Boolean = false
