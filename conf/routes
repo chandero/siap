@@ -351,7 +351,7 @@ GET     /api/info/sdx/:fi/:ff/:wt/:e            controllers.InformeController.si
 GET     /api/info/sde/:fi/:ff/:e                controllers.InformeController.siap_eficiencia_xls(fi: Long, ff: Long, e: Long)
 GET     /api/info/sgr/:fi/:ff/:uid/:eid/:num    controllers.InformeController.siap_graficos_reporte(fi: Long, ff: Long, uid: Long, eid: Long, num: Int)
 GET     /api/info/svpb/:fi/:ff                  controllers.InformeController.siap_visita_por_barrio_xls(fi: Long, ff: Long)
-GET     /api/info/scc/:p/:a/:e                  controllers.InformeController.siap_calculo_carga_xls(p: Long, a: Long, e: Long)
+GET     /api/info/scc/:fi/:ff/:e                controllers.InformeController.siap_calculo_carga_xls(fi: Long, ff: Long, e: Long)
 GET     /api/info/sdrr/:fi/:ff                  controllers.InformeController.siap_detallado_retiro_reubicacion_xls(fi:Long, ff:Long)
 GET     /api/info/sifx/:fc/:o/:f/:e             controllers.InformeController.siap_inventario_filtro_xls(fc: Long, o: String, f:String, e: Long)
 GET     /api/info/smx/:e/:t                     controllers.InformeController.siap_medidor_xls(e: Long, t:String)

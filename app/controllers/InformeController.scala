@@ -255,9 +255,12 @@ class InformeController @Inject()(
    Ok(os).as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").withHeaders("Content-Disposition" -> attach )
   } 
 
-  def siap_calculo_carga_xls(periodo: scala.Long, anho: scala.Long, empr_id: scala.Long) = Action {
-   val os = informeService.siap_calculo_carga_xls(periodo, anho, empr_id)
-   val filename = "Informe_Calculo_Carga_" + periodo + "_" + anho + ".xlsx"
+  def siap_calculo_carga_xls(fecha_inicial: scala.Long, fecha_final: scala.Long, empr_id: scala.Long) = Action {
+   val os = informeService.siap_calculo_carga_xls(fecha_inicial, fecha_final, empr_id)
+   val fi = new DateTime(fecha_inicial)
+   val ff = new DateTime(fecha_final)
+   val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+   val filename = "Informe_Calculo_Carga_" + fmt.print(fi) + "_" + fmt.print(ff) + ".xlsx"
    val attach = "attachment; filename=" + filename
    Ok(os).as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").withHeaders("Content-Disposition" -> attach )
   } 

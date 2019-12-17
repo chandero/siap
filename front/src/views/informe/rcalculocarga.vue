@@ -8,16 +8,14 @@
   <el-main>
   <el-form :label-position="labelPosition">
   <el-row :gutter="4">
-    <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-      <el-form-item :label="$t('informe.periodo')">
-        <el-select v-model="periodo">
-            <el-option v-for="m in months" :key="m.id" :value="m.id" :label="$t('months.' + m.label)"></el-option>
-        </el-select>
+    <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+      <el-form-item :label="$t('informe.initialDate')">
+        <el-date-picker v-model="fecha_inicial" format="yyyy/MM/dd"></el-date-picker>
       </el-form-item>
     </el-col>
-    <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-      <el-form-item :label="$t('informe.anho')">
-        <el-input v-model="anho" type="number"></el-input>
+    <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+      <el-form-item :label="$t('informe.endDate')">
+        <el-date-picker v-model="fecha_final" format="yyyy/MM/dd"></el-date-picker>
       </el-form-item>
     </el-col>
   </el-row>
@@ -37,8 +35,8 @@ export default {
   data() {
     return {
       labelPosition: 'top',
-      periodo: new Date().getMonth() + 1,
-      anho: new Date().getFullYear()
+      fecha_inicial: null,
+      fecha_final: null
     }
   },
   computed: {
@@ -50,7 +48,7 @@ export default {
   },
   methods: {
     obtenerDatos() {
-      informe_siap_calculo_carga_xls(this.periodo, this.anho, this.empresa.empr_id)
+      informe_siap_calculo_carga_xls(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.empresa.empr_id)
     }
   }
 }

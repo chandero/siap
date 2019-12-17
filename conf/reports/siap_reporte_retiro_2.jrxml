@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_expansion_2" pageWidth="612" pageHeight="792" whenNoDataType="AllSectionsNoDetail" columnWidth="612" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" uuid="888c5c82-0359-4836-814e-8f60c493d7a1">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
@@ -122,7 +122,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[MATERIAL UTILIZADO]]></text>
+				<text><![CDATA[MATERIAL RETIRADO]]></text>
 			</staticText>
 			<line>
 				<reportElement x="1" y="141" width="586" height="1" uuid="2bd0de45-6b86-4fc3-96f0-d1db79d81935"/>
@@ -289,7 +289,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[MATERIAL UTILIZADO]]></text>
+				<text><![CDATA[MATERIAL RETIRADO]]></text>
 			</staticText>
 			<line>
 				<reportElement x="1" y="201" width="586" height="1" uuid="24a471b7-998f-4762-99b2-3de952130341"/>
@@ -479,7 +479,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[MATERIAL UTILIZADO]]></text>
+				<text><![CDATA[MATERIAL RETIRADO]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="489" y="72" width="97" height="13" backcolor="#FFFFFF" uuid="231fa424-14cf-4036-8b07-905ab0fb9b6d"/>
@@ -501,7 +501,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[MATERIAL UTILIZADO]]></text>
+				<text><![CDATA[MATERIAL RETIRADO]]></text>
 			</staticText>
 			<line>
 				<reportElement x="200" y="388" width="1" height="159" uuid="7dd7fee9-6e6e-4776-a881-e35b3abf968e"/>
