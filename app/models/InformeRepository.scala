@@ -4950,7 +4950,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
           val municipio = municipioService.buscarPorId(empresa.muni_id)
           val fi = new DateTime(fecha_inicial)
           val ff = new DateTime(fecha_final)
-          val ft = new DateTime(fecha_inicial)
+          val ft = new DateTime(fecha_final)
 
           val anho = ff.getYear()
           val periodo = ff.getMonthOfYear()
@@ -4999,29 +4999,31 @@ ORDER BY e.reti_id, e.elem_codigo""")
           val rand = r.nextInt(500)
           val tablename = "tmp_" + rand
           val _parseTemp = get[Int]("aap_id") ~ 
+                           get[Int]("esta_id") ~
                            get[Int]("aaco_id") ~ 
                            get[String]("aap_tecnologia") ~ 
-                           get[Int]("aap_potencia") map { case a ~ b ~ c ~ d => (a, b, c, d) }
+                           get[Int]("aap_potencia") map { case a ~ b ~ c ~ d ~ e => (a, b, c, d, e) }
           println("Temp Table Name:" + tablename)
-          val _queryTemp = f"""CREATE TEMP TABLE $tablename%s AS (select a.aap_id, a.aaco_id, ad.aap_tecnologia, ad.aap_potencia from siap.aap a
+          val _queryTemp = f"""CREATE TEMP TABLE $tablename%s AS (select a.aap_id, a.esta_id, a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia from siap.aap a
           inner join siap.aap_adicional ad on ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
           where a.aap_fechatoma <= {fecha_toma} and a.aap_id <> 9999999
           order by ad.aap_tecnologia desc, ad.aap_potencia, a.aap_id)"""
 
           val _querySelTemp = f"SELECT * FROM $tablename%s a ORDER BY a.aap_tecnologia desc, a.aap_potencia, a.aap_id"
 
-          val _queryUpdTemp = f"UPDATE $tablename%s SET aaco_id = {aaco_id}, aap_tecnologia = {aap_tecnologia}, aap_potencia = {aap_potencia} WHERE aap_id = {aap_id}"
+          val _queryUpdTemp = f"UPDATE $tablename%s SET aaco_id = {aaco_id}, aap_tecnologia = {aap_tecnologia}, aap_potencia = {aap_potencia}, esta_id = {esta_id} WHERE aap_id = {aap_id}"
 
-          val _querySearchLastReport = """SELECT distinct on (aap_id) dd.aap_id, r.repo_id, r.repo_fechasolucion, dd.aaco_id_anterior, dd.aaco_id, dd.aap_tecnologia_anterior, dd.aap_tecnologia, dd.aap_potencia_anterior, dd.aap_potencia FROM siap.reporte_direccion_dato dd
+          val _querySearchLastReport = """SELECT distinct on (aap_id) dd.aap_id, r.repo_id, r.repo_fechasolucion, d.tire_id, dd.aaco_id_anterior, dd.aaco_id, dd.aap_tecnologia_anterior, dd.aap_tecnologia, dd.aap_potencia_anterior, dd.aap_potencia FROM siap.reporte_direccion_dato dd
+                                          INNER JOIN siap.reporte_direccion d on d.aap_id = dd.aap_id and d.repo_id = dd.repo_id and d.even_id = dd.even_id
                                           INNER JOIN siap.reporte r ON r.repo_id = dd.repo_id
                                           WHERE r.repo_fechasolucion < {fecha_corte} and r.reti_id <> 1 and dd.aap_id  = {aap_id}
                                           ORDER BY dd.aap_id, r.repo_fechasolucion desc"""
           
-          val _parseSearch = get[Int]("aap_id") ~ get[Int]("repo_id") ~ get[DateTime]("repo_fechasolucion") ~
+          val _parseSearch = get[Int]("aap_id") ~ get[Int]("repo_id") ~ get[DateTime]("repo_fechasolucion") ~ get[Option[Int]]("tire_id") ~
                              get[Option[Int]]("aaco_id_anterior") ~ get[Option[Int]]("aaco_id") ~ 
                              get[Option[String]]("aap_tecnologia_anterior") ~ get[Option[String]]("aap_tecnologia") ~
                              get[Option[Int]]("aap_potencia_anterior") ~ get[Option[Int]]("aap_potencia") map 
-                             { case a ~ b ~ c ~ d ~ e ~ f ~ g ~ h ~ i=> (a, b, c, d, e, f, g, h, i) }
+                             { case a ~ b ~ c ~ d ~ e ~ f ~ g ~ h ~ i ~ j => (a, b, c, d, e, f, g, h, i, j) }
           // Analizamos la información por cada luminaria seleccionada
           val _rCreateTemp = SQL(_queryTemp)
             .on(
@@ -5038,24 +5040,32 @@ ORDER BY e.reti_id, e.elem_codigo""")
               ).as(_parseSearch.singleOpt)
               _r match {
                 case Some(r) => // Actualizar la tabla con los valores existentes
-                     var conexion = aaps._2
-                     var tecnologia = aaps._3
-                     var potencia = aaps._4
-                     r._5 match {
+                     var conexion = aaps._3
+                     var tecnologia = aaps._4
+                     var potencia = aaps._5
+                     var estado = aaps._2
+                     r._4 match {
+                       case Some(3) => estado = 9
+                       case Some(1) => estado = 1
+                       case Some(2) => estado = 2
+                       case None => None 
+                     } 
+                     r._6 match {
                        case Some(aaco_id) => conexion = aaco_id
                        case None => None
                      }
-                     r._7 match {
+                     r._8 match {
                        case Some(aap_tecnologia) => tecnologia = aap_tecnologia
                        case None => None
                      }
-                     r._9 match {
+                     r._10 match {
                        case Some(aap_potencia) => potencia = aap_potencia
                        case None => None 
                      }
 
                      SQL(_queryUpdTemp).on(
                        'aaco_id -> conexion,
+                       'esta_id -> estado,
                        'aap_tecnologia -> tecnologia,
                        'aap_potencia -> potencia,
                        'aap_id -> aaps._1
@@ -5067,17 +5077,13 @@ ORDER BY e.reti_id, e.elem_codigo""")
 
 
           val _rcargaInicial = SQL(
-            """SELECT a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia, COUNT(a) AS cantidad FROM siap.aap a
+            f"""SELECT a.aaco_id, a.aacu_id, a.aap_tecnologia, a.aap_potencia, COUNT(a) AS cantidad FROM $tablename a
             INNER JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id
             LEFT JOIN siap.aap_potenciareal ap ON ap.aapr_tecnologia = ad.aap_tecnologia AND ap.aapr_potencia = ad.aap_potencia 
-            WHERE a.aap_id <> 9999999 AND a.esta_id <> 9 AND a.aaco_id <> 3 AND a.aap_fechatoma <= {fecha_toma} AND a.empr_id = {empr_id}
-            GROUP BY a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia 
-            ORDER BY a.aaco_id, a.aacu_id, ad.aap_tecnologia DESC, ad.aap_potencia"""
-          ).on(
-              'empr_id -> empr_id,
-              'fecha_toma -> ft
-            )
-            .as(_cargaInicialParser.*)
+            WHERE a.esta_id <> 9 AND a.aaco_id <> 3
+            GROUP BY a.aaco_id, a.aacu_id, a.aap_tecnologia, a.aap_potencia 
+            ORDER BY a.aaco_id, a.aacu_id, a.aap_tecnologia DESC, a.aap_potencia"""
+          ).as(_cargaInicialParser.*)
 
           // Eliminar anterior
           println("Eliminando Carga Anterior mismo Periodo")
@@ -5104,7 +5110,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                   'aacu_id -> r._2,
                   'aap_tecnologia -> r._3,
                   'aap_potencia -> r._4,
-                  'cantidad -> 0,
+                  'cantidad -> r._5,
                   'retirada -> 0,
                   'instalada -> 0
                 )
@@ -5117,6 +5123,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
             case a ~ b ~ c ~ d ~ e => (a, b, c, d, e)
           }
 
+
+          /*
           println("Actualizando Cantidades Anteriores")
           var zanho_ant = anho
           var zperiodo_ant = periodo - 1
@@ -5152,6 +5160,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
               )
               .executeUpdate()
           }
+          */
           println("Por Expansion")
           val _qcargaPorExpansion =
             """
@@ -5239,11 +5248,11 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 'zperiodo -> periodo
               )
               .executeUpdate()
-            println("Lineas Reubicación Actualizadas: " + updated)
           }
 
           println("Por Repotenciacion")
-          val _qcargaPorRepotenciacion =
+          // Instalada
+          var _qcargaPorRepotenciacion =
             """
             SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
             (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
@@ -5261,7 +5270,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
-          val _rcargaPorRepotenciacion = SQL(_qcargaPorRepotenciacion)
+          var _rcargaPorRepotenciacion = SQL(_qcargaPorRepotenciacion)
             .on(
               'fecha_inicial -> fi,
               'fecha_final -> ff,
@@ -5284,11 +5293,55 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 'zperiodo -> periodo
               )
               .executeUpdate()
-            println("Lineas Repotenciacion Actualizadas: " + updated)
           }
+          // Retirada
+            _qcargaPorRepotenciacion =
+            """
+            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id 
+            FROM siap.reporte r
+            LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
+            LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
+            LEFT join siap.reporte_direccion_dato dd ON dd.repo_id = d.repo_id AND dd.even_id = d.even_id AND dd.aap_id = d.aap_id
+            LEFT JOIN siap.reporte_direccion_dato_adicional dda ON dda.repo_id = d.repo_id AND dda.even_id = d.even_id AND dda.aap_id = d.aap_id
+            LEFT JOIN siap.aap a ON a.aap_id = d.aap_id
+            LEFT JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id
+            LEFT JOIN siap.aap_conexion co ON co.aaco_id = dd.aaco_id
+            LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id
+            WHERE r.reti_id = 4 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id in (1,2) AND a.aap_fechatoma <= {fecha_toma}
+            ORDER BY ac.aacu_id, dd.aap_tecnologia_anterior, dd.aap_potencia_anterior) o
+            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
+
+          _rcargaPorRepotenciacion = SQL(_qcargaPorRepotenciacion)
+            .on(
+              'fecha_inicial -> fi,
+              'fecha_final -> ff,
+              'fecha_toma -> ft,
+              'empr_id -> empr_id
+            )
+            .as(_dataParser.*)
+
+          _rcargaPorRepotenciacion.map { r =>
+            val updated = SQL(sqlUpdate)
+              .on(
+                'aaco_id -> r._1,
+                'aacu_id -> r._2,
+                'aap_tecnologia -> r._3,
+                'aap_potencia -> r._4,
+                'retirada -> r._5,
+                'instalada -> 0,
+                'empr_id -> empr_id,
+                'zanho -> anho,
+                'zperiodo -> periodo
+              )
+              .executeUpdate()  
+          }          
 
           println("Por Actualizacion")
-          val _qcargaPorActualizacion =
+
+          // Ingresar
+          var _qcargaPorActualizacion =
             """
             SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
             (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
@@ -5306,7 +5359,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
-          val _rcargaPorActualizacion = SQL(_qcargaPorActualizacion)
+          var _rcargaPorActualizacion = SQL(_qcargaPorActualizacion)
             .on(
               'fecha_inicial -> fi,
               'fecha_final -> ff,
@@ -5329,12 +5382,55 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 'zperiodo -> periodo
               )
               .executeUpdate()
-            println("Lineas Actualización Actualizadas: " + updated)
           }
+          // Retirar
+            _qcargaPorActualizacion =
+            """
+            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id 
+            FROM siap.reporte r
+            LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
+            LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
+            LEFT join siap.reporte_direccion_dato dd ON dd.repo_id = d.repo_id AND dd.even_id = d.even_id AND dd.aap_id = d.aap_id
+            LEFT JOIN siap.reporte_direccion_dato_adicional dda ON dda.repo_id = d.repo_id AND dda.even_id = d.even_id AND dda.aap_id = d.aap_id
+            LEFT JOIN siap.aap a ON a.aap_id = d.aap_id
+            LEFT JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id
+            LEFT JOIN siap.aap_conexion co ON co.aaco_id = dd.aaco_id
+            LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id
+            WHERE r.reti_id = 5 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id in (1,2) AND a.aap_fechatoma <= {fecha_toma}
+            ORDER BY ac.aacu_id, dd.aap_tecnologia_anterior, dd.aap_potencia_anterior) o
+            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
+
+          _rcargaPorActualizacion = SQL(_qcargaPorActualizacion)
+            .on(
+              'fecha_inicial -> fi,
+              'fecha_final -> ff,
+              'fecha_toma -> ft,
+              'empr_id -> empr_id
+            )
+            .as(_dataParser.*)
+
+          _rcargaPorActualizacion.map { r =>
+            val updated = SQL(sqlUpdate)
+              .on(
+                'aaco_id -> r._1,
+                'aacu_id -> r._2,
+                'aap_tecnologia -> r._3,
+                'aap_potencia -> r._4,
+                'retirada -> 0,
+                'instalada -> r._5,
+                'empr_id -> empr_id,
+                'zanho -> anho,
+                'zperiodo -> periodo
+              )
+              .executeUpdate()   
+          }      
 
           println("Por Modernizacion")
-
-          val _qcargaPorModernizacion =
+          
+          // Instalada
+          var _qcargaPorModernizacion =
             """
             SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
             (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
@@ -5352,7 +5448,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
-          val _rcargaPorModernizacion = SQL(_qcargaPorModernizacion)
+          var _rcargaPorModernizacion = SQL(_qcargaPorModernizacion)
             .on(
               'fecha_inicial -> fi,
               'fecha_final -> ff,
@@ -5378,6 +5474,50 @@ ORDER BY e.reti_id, e.elem_codigo""")
             println("Lineas Modernización Actualizadas: " + updated)
           }
 
+          // Retirada
+          _qcargaPorModernizacion =
+            """
+            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id 
+            FROM siap.reporte r
+            LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
+            LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
+            LEFT join siap.reporte_direccion_dato dd ON dd.repo_id = d.repo_id AND dd.even_id = d.even_id AND dd.aap_id = d.aap_id
+            LEFT JOIN siap.reporte_direccion_dato_adicional dda ON dda.repo_id = d.repo_id AND dda.even_id = d.even_id AND dda.aap_id = d.aap_id
+            LEFT JOIN siap.aap a ON a.aap_id = d.aap_id
+            LEFT JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id
+            LEFT JOIN siap.aap_conexion co ON co.aaco_id = dd.aaco_id
+            LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id
+            WHERE r.reti_id = 6 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id in (1,2) AND a.aap_fechatoma <= {fecha_toma}
+            ORDER BY ac.aacu_id, dd.aap_tecnologia_anterior, dd.aap_potencia_anterior) o
+            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
+
+          _rcargaPorModernizacion = SQL(_qcargaPorModernizacion)
+            .on(
+              'fecha_inicial -> fi,
+              'fecha_final -> ff,
+              'fecha_toma -> ft,
+              'empr_id -> empr_id
+            )
+            .as(_dataParser.*)
+
+          _rcargaPorModernizacion.map { r =>
+            val updated = SQL(sqlUpdate)
+              .on(
+                'aaco_id -> r._1,
+                'aacu_id -> r._2,
+                'aap_tecnologia -> r._3,
+                'aap_potencia -> r._4,
+                'retirada -> r._5,
+                'instalada -> 0,
+                'empr_id -> empr_id,
+                'zanho -> anho,
+                'zperiodo -> periodo
+              )
+              .executeUpdate()
+            println("Lineas Modernización Actualizadas: " + updated)
+          }          
           println("Por Reposicion")
 
           val _qcargaPorReposicion =
@@ -5605,7 +5745,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 """SELECT c.aap_tecnologia, c.aap_potencia, ap.aap_potenciareal, c.cantidad, c.retirada, c.instalada FROM siap.carga c
                                     LEFT JOIN siap.aap_potenciareal ap ON ap.aapr_tecnologia = c.aap_tecnologia AND ap.aapr_potencia = c.aap_potencia
                                     WHERE c.aaco_id = {aaco_id} AND c.aacu_id = {aacu_id} AND c.empr_id = {empr_id} AND c.zanho = {zanho} and c.zperiodo = {zperiodo}
-                                    ORDER BY c.aap_tecnologia DESC, c.aap_potencia"""
+                                    ORDER BY c.aap_tecnologia, c.aap_potencia"""
               ).on(
                   'aaco_id -> 1,
                   'aacu_id -> cuenta._2,
@@ -5684,14 +5824,14 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     CellStyleInheritance.CellThenRowThenColumnThenSheet
                   ),
                   FormulaCell(
-                    "+I" + j + "*C" + j,
+                    "I" + j + "*C" + j,
                     Some(9),
                     style =
                       Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                     CellStyleInheritance.CellThenRowThenColumnThenSheet
                   ),
                   FormulaCell(
-                    "+J" + j + "/1000",
+                    "J" + j + "/1000",
                     Some(10),
                     style =
                       Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
@@ -5712,7 +5852,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     CellStyleInheritance.CellThenRowThenColumnThenSheet
                   ),
                   FormulaCell(
-                    "+K" + j + "*L" + j + "*M" + j,
+                    "K" + j + "*L" + j + "*M" + j,
                     Some(13),
                     style =
                       Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
@@ -5831,19 +5971,19 @@ ORDER BY e.reti_id, e.elem_codigo""")
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 FormulaCell(
-                  "+N" + (j + 1) + "*R7",
+                  "N" + (j + 1) + "*R7",
                   Some(17),
                   style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 FormulaCell(
-                  "+(N" + (j + 1) + "-R" + (j + 1) + ")*Q" + (j + 1),
+                  "(N" + (j + 1) + "-R" + (j + 1) + ")*Q" + (j + 1),
                   Some(18),
                   style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 FormulaCell(
-                  "+S" + (j + 1),
+                  "S" + (j + 1),
                   Some(19),
                   style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -6006,7 +6146,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             """SELECT c.aap_tecnologia, c.aap_potencia, ap.aap_potenciareal, c.cantidad, c.retirada, c.instalada FROM siap.carga c
             LEFT JOIN siap.aap_potenciareal ap ON ap.aapr_tecnologia = c.aap_tecnologia AND ap.aapr_potencia = c.aap_potencia
             WHERE c.aaco_id = {aaco_id} AND c.empr_id = {empr_id} and c.zanho = {zanho} and c.zperiodo = {zperiodo}
-            ORDER BY c.aap_tecnologia DESC, c.aap_potencia"""
+            ORDER BY c.aap_tecnologia, c.aap_potencia"""
           ).on(
               'empr_id -> empr_id,
               'aaco_id -> 2,
