@@ -8,6 +8,7 @@ import java.lang.Long
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.io.ByteArrayOutputStream
+import java.util.UUID.randomUUID
 
 // Jasper
 import net.sf.jasperreports.engine.JasperFillManager
@@ -39,6 +40,7 @@ import scala.concurrent.{Await, Future}
 import scala.collection.immutable.List
 import scala.collection.mutable.Map
 import scala.collection.mutable.ListBuffer
+import scala.util.Random
 
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
@@ -4933,8 +4935,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
     * @return OutputStream
     */
   def siap_calculo_carga_xls(
-      periodo: scala.Long,
-      anho: scala.Long,
+      fecha_inicial: scala.Long,
+      fecha_final: scala.Long,
       empr_id: scala.Long
   ): Array[Byte] = {
     import Height._
@@ -4946,37 +4948,17 @@ ORDER BY e.reti_id, e.elem_codigo""")
       empresa match {
         case Some(empresa) =>
           val municipio = municipioService.buscarPorId(empresa.muni_id)
-          var periodo_ant = periodo - 1
-          val mes = Utility.mes(periodo_ant.intValue())
-          var anho_ant = anho
-          if (periodo_ant < 1) {
-            periodo_ant = 12
-            anho_ant = anho - 1
-          }
-          var fecha_toma = Calendar.getInstance()
-          fecha_toma.set(Calendar.YEAR, anho.intValue())
-          fecha_toma.set(Calendar.MONTH, periodo.intValue() - 1)
-          val diafinal = fecha_toma.getActualMaximum(Calendar.DATE)
-          fecha_toma.set(Calendar.DATE, 20)
-
-          var fecha_inicial = Calendar.getInstance()
-          var fecha_final = Calendar.getInstance()
-
-          fecha_inicial.set(Calendar.DATE, 21)
-          fecha_inicial.set(Calendar.MONTH, periodo_ant.intValue() - 1)
-          fecha_inicial.set(Calendar.YEAR, anho_ant.intValue())
-
-          fecha_final.set(Calendar.DATE, 20)
-          fecha_final.set(Calendar.MONTH, periodo.intValue() - 1)
-          fecha_final.set(Calendar.YEAR, anho.intValue())
-
           val fi = new DateTime(fecha_inicial)
           val ff = new DateTime(fecha_final)
-          val ft = new DateTime(fecha_toma)
+          val ft = new DateTime(fecha_inicial)
 
-          println("Fecha Toma:" + fecha_toma.getTime)
-          println("Fecha Inicial:" + fecha_inicial.getTime)
-          println("Fecha Final:" + fecha_final.getTime)
+          val anho = ff.getYear()
+          val periodo = ff.getMonthOfYear()
+          val mes = periodo
+
+          println("Fecha Toma:" + ft)
+          println("Fecha Inicial:" + fi)
+          println("Fecha Final:" + ff)
 
           var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
           var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
@@ -5013,6 +4995,77 @@ ORDER BY e.reti_id, e.elem_codigo""")
             case a ~ b ~ c ~ d ~ e => (a, b, c, d, e)
           }
           println("Leyendo carga Inicial")
+          var r = Random
+          val rand = r.nextInt(500)
+          val tablename = "tmp_" + rand
+          val _parseTemp = get[Int]("aap_id") ~ 
+                           get[Int]("aaco_id") ~ 
+                           get[String]("aap_tecnologia") ~ 
+                           get[Int]("aap_potencia") map { case a ~ b ~ c ~ d => (a, b, c, d) }
+          println("Temp Table Name:" + tablename)
+          val _queryTemp = f"""CREATE TEMP TABLE $tablename%s AS (select a.aap_id, a.aaco_id, ad.aap_tecnologia, ad.aap_potencia from siap.aap a
+          inner join siap.aap_adicional ad on ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
+          where a.aap_fechatoma <= {fecha_toma} and a.aap_id <> 9999999
+          order by ad.aap_tecnologia desc, ad.aap_potencia, a.aap_id)"""
+
+          val _querySelTemp = f"SELECT * FROM $tablename%s a ORDER BY a.aap_tecnologia desc, a.aap_potencia, a.aap_id"
+
+          val _queryUpdTemp = f"UPDATE $tablename%s SET aaco_id = {aaco_id}, aap_tecnologia = {aap_tecnologia}, aap_potencia = {aap_potencia} WHERE aap_id = {aap_id}"
+
+          val _querySearchLastReport = """SELECT distinct on (aap_id) dd.aap_id, r.repo_id, r.repo_fechasolucion, dd.aaco_id_anterior, dd.aaco_id, dd.aap_tecnologia_anterior, dd.aap_tecnologia, dd.aap_potencia_anterior, dd.aap_potencia FROM siap.reporte_direccion_dato dd
+                                          INNER JOIN siap.reporte r ON r.repo_id = dd.repo_id
+                                          WHERE r.repo_fechasolucion < {fecha_corte} and r.reti_id <> 1 and dd.aap_id  = {aap_id}
+                                          ORDER BY dd.aap_id, r.repo_fechasolucion desc"""
+          
+          val _parseSearch = get[Int]("aap_id") ~ get[Int]("repo_id") ~ get[DateTime]("repo_fechasolucion") ~
+                             get[Option[Int]]("aaco_id_anterior") ~ get[Option[Int]]("aaco_id") ~ 
+                             get[Option[String]]("aap_tecnologia_anterior") ~ get[Option[String]]("aap_tecnologia") ~
+                             get[Option[Int]]("aap_potencia_anterior") ~ get[Option[Int]]("aap_potencia") map 
+                             { case a ~ b ~ c ~ d ~ e ~ f ~ g ~ h ~ i=> (a, b, c, d, e, f, g, h, i) }
+          // Analizamos la información por cada luminaria seleccionada
+          val _rCreateTemp = SQL(_queryTemp)
+            .on(
+              'fecha_toma -> fi
+            ).execute()
+          
+          val _rSel = SQL(_querySelTemp).as(_parseTemp.*)
+          _rSel.map {
+            aaps => 
+              val _r = SQL(_querySearchLastReport)
+              .on(
+                'aap_id -> aaps._1,
+                'fecha_corte -> fi
+              ).as(_parseSearch.singleOpt)
+              _r match {
+                case Some(r) => // Actualizar la tabla con los valores existentes
+                     var conexion = aaps._2
+                     var tecnologia = aaps._3
+                     var potencia = aaps._4
+                     r._5 match {
+                       case Some(aaco_id) => conexion = aaco_id
+                       case None => None
+                     }
+                     r._7 match {
+                       case Some(aap_tecnologia) => tecnologia = aap_tecnologia
+                       case None => None
+                     }
+                     r._9 match {
+                       case Some(aap_potencia) => potencia = aap_potencia
+                       case None => None 
+                     }
+
+                     SQL(_queryUpdTemp).on(
+                       'aaco_id -> conexion,
+                       'aap_tecnologia -> tecnologia,
+                       'aap_potencia -> potencia,
+                       'aap_id -> aaps._1
+                     )
+
+                case None => None
+              }
+          }
+
+
           val _rcargaInicial = SQL(
             """SELECT a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia, COUNT(a) AS cantidad FROM siap.aap a
             INNER JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id
@@ -5652,7 +5705,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     CellStyleInheritance.CellThenRowThenColumnThenSheet
                   ),
                   NumericCell(
-                    fecha_final.getActualMaximum(Calendar.DATE),
+                    ff.getDayOfMonth(), // fecha_final.getActualMaximum(Calendar.DATE),
                     Some(12),
                     style =
                       Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
