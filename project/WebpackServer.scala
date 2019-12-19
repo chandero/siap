@@ -14,7 +14,7 @@ object WebpackServer {
       override def afterStarted(add: InetSocketAddress): Unit = {
         val port = config.getInt("webpack.port")
         process = if (isWin)
-          Option(Process(s"cmd /c npm run dev -- --port $port", base).run)
+          Option(Process(s"cmd /c npm run dev -- --host 0.0.0.0 --port $port", base).run)
         else
           Option(Process(s"npm run watch -- --port $port", base).run)
       }

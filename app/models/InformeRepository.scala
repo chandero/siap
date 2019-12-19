@@ -4963,6 +4963,21 @@ ORDER BY e.reti_id, e.elem_codigo""")
           var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
           var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
           var _listMerged = new ListBuffer[CellRange]()
+          val _headerData = com.norbitltd.spoiwo.model
+            .Row(
+              style = CellStyle(
+                font = Font(bold = true, height = 8.points, fontName = "Arial"),
+                horizontalAlignment = HA.Center
+              )
+            )
+            .withCellValues(
+              "Conexión",
+              "Cuenta",
+              "Tecnología",
+              "Potencia",
+              "Retirada",
+              "Instalada"
+            )
 
           val _cuentaParser = str("aacu_descripcion") ~ int("aacu_id") map {
             case n ~ p => (n, p)
@@ -5006,7 +5021,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
           println("Temp Table Name:" + tablename)
           val _queryTemp = f"""CREATE TEMP TABLE $tablename%s AS (select a.aap_id, a.esta_id, a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia from siap.aap a
           inner join siap.aap_adicional ad on ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
-          where a.aap_fechatoma <= {fecha_toma} and a.aap_id <> 9999999
+          where a.aap_fechatoma < {fecha_inicial} and a.aap_id <> 9999999
           order by ad.aap_tecnologia desc, ad.aap_potencia, a.aap_id)"""
 
           val _querySelTemp = f"SELECT * FROM $tablename%s a ORDER BY a.aap_tecnologia desc, a.aap_potencia, a.aap_id"
@@ -5027,7 +5042,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
           // Analizamos la información por cada luminaria seleccionada
           val _rCreateTemp = SQL(_queryTemp)
             .on(
-              'fecha_toma -> fi
+              'fecha_inicial -> fi
             ).execute()
           
           val _rSel = SQL(_querySelTemp).as(_parseTemp.*)
@@ -5117,10 +5132,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 .executeUpdate()
           )
 
-          val _dataParser = int("aaco_id") ~ int("aacu_id") ~ str(
-            "aap_tecnologia"
-          ) ~ int("aap_potencia") ~ int("count") map {
-            case a ~ b ~ c ~ d ~ e => (a, b, c, d, e)
+          val _dataParser = int("aaco_id") ~ int("aacu_id") ~ str("aacu_descripcion") ~ 
+                            str("aap_tecnologia") ~ int("aap_potencia") ~ int("count") map {
+            case a ~ b ~ c ~ d ~ e ~ f => (a, b, c, d, e, f)
           }
 
 
@@ -5162,10 +5176,11 @@ ORDER BY e.reti_id, e.elem_codigo""")
           }
           */
           println("Por Expansion")
+          var _listExpansionRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
           val _qcargaPorExpansion =
             """
-            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
-            (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
+            SELECT o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id, ac.aacu_descripcion 
             FROM siap.reporte r
             LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
             LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
@@ -5177,7 +5192,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id
             WHERE r.reti_id = 2 AND ra.repo_tipo_expansion <> 4 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id in (1,2) AND a.aap_fechatoma <= {fecha_toma}
             ORDER BY ac.aacu_id, dd.aap_tecnologia, dd.aap_potencia) o
-            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            GROUP BY o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
           val _rcargaPorExpansion = SQL(_qcargaPorExpansion)
@@ -5188,16 +5203,59 @@ ORDER BY e.reti_id, e.elem_codigo""")
               'empr_id -> empr_id
             )
             .as(_dataParser.*)
-
+          _listExpansionRow += _headerData
           _rcargaPorExpansion.map { r =>
+            _listExpansionRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                r._3,
+                Some(1),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+              ),
+              StringCell(
+                r._4,
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                r._5,
+                Some(3),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                0,
+                Some(4),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                r._6,
+                Some(5),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )
+
             val updated = SQL(sqlUpdate)
               .on(
                 'aaco_id -> r._1,
                 'aacu_id -> r._2,
-                'aap_tecnologia -> r._3,
-                'aap_potencia -> r._4,
+                'aap_tecnologia -> r._4,
+                'aap_potencia -> r._5,
                 'retirada -> 0,
-                'instalada -> r._5,
+                'instalada -> r._6,
                 'empr_id -> empr_id,
                 'zanho -> anho,
                 'zperiodo -> periodo
@@ -5207,10 +5265,11 @@ ORDER BY e.reti_id, e.elem_codigo""")
           }
 
           println("Por Reubicacion")
+          var _listReubicacionRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
           val _qcargaPorReubicacion =
             """
-            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
-            (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
+            SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id, ac.aacu_descripcion
             FROM siap.reporte r
             LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
             LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
@@ -5222,7 +5281,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id
             WHERE r.reti_id = 3 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id in (1,2) AND a.aap_fechatoma <= {fecha_toma}
             ORDER BY ac.aacu_id, dd.aap_tecnologia, dd.aap_potencia) o
-            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            GROUP BY o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
           val _rcargaPorReubicacion = SQL(_qcargaPorReubicacion)
@@ -5233,16 +5292,59 @@ ORDER BY e.reti_id, e.elem_codigo""")
               'empr_id -> empr_id
             )
             .as(_dataParser.*)
-
+          _listReubicacionRow += _headerData
           _rcargaPorReubicacion.map { r =>
+            _listReubicacionRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                r._3,
+                Some(1),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+              ),
+              StringCell(
+                r._4,
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                r._5,
+                Some(3),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                0,
+                Some(4),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                r._6,
+                Some(5),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )
+
             val updated = SQL(sqlUpdate)
               .on(
                 'aaco_id -> r._1,
                 'aacu_id -> r._2,
-                'aap_tecnologia -> r._3,
-                'aap_potencia -> r._4,
+                'aap_tecnologia -> r._4,
+                'aap_potencia -> r._5,
                 'retirada -> 0,
-                'instalada -> r._5,
+                'instalada -> r._6,
                 'empr_id -> empr_id,
                 'zanho -> anho,
                 'zperiodo -> periodo
@@ -5252,10 +5354,11 @@ ORDER BY e.reti_id, e.elem_codigo""")
 
           println("Por Repotenciacion")
           // Instalada
+          var _listRepotenciacionRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()          
           var _qcargaPorRepotenciacion =
             """
-            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
-            (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
+            SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id, ac.aacu_descripcion
             FROM siap.reporte r
             LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
             LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
@@ -5267,7 +5370,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id
             WHERE r.reti_id = 4 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id in (1,2) AND a.aap_fechatoma <= {fecha_toma}
             ORDER BY ac.aacu_id, dd.aap_tecnologia, dd.aap_potencia) o
-            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            GROUP BY o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
           var _rcargaPorRepotenciacion = SQL(_qcargaPorRepotenciacion)
@@ -5278,16 +5381,58 @@ ORDER BY e.reti_id, e.elem_codigo""")
               'empr_id -> empr_id
             )
             .as(_dataParser.*)
-
+          _listRepotenciacionRow += _headerData
           _rcargaPorRepotenciacion.map { r =>
+            _listRepotenciacionRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                r._3,
+                Some(1),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+              ),
+              StringCell(
+                r._4,
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                r._5,
+                Some(3),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                0,
+                Some(4),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                r._6,
+                Some(5),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )            
             val updated = SQL(sqlUpdate)
               .on(
                 'aaco_id -> r._1,
                 'aacu_id -> r._2,
-                'aap_tecnologia -> r._3,
-                'aap_potencia -> r._4,
+                'aap_tecnologia -> r._4,
+                'aap_potencia -> r._5,
                 'retirada -> 0,
-                'instalada -> r._5,
+                'instalada -> r._6,
                 'empr_id -> empr_id,
                 'zanho -> anho,
                 'zperiodo -> periodo
@@ -5297,8 +5442,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
           // Retirada
             _qcargaPorRepotenciacion =
             """
-            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
-            (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id 
+            SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id, ac.aacu_descripcion
             FROM siap.reporte r
             LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
             LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
@@ -5310,7 +5455,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id
             WHERE r.reti_id = 4 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id in (1,2) AND a.aap_fechatoma <= {fecha_toma}
             ORDER BY ac.aacu_id, dd.aap_tecnologia_anterior, dd.aap_potencia_anterior) o
-            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            GROUP BY o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
           _rcargaPorRepotenciacion = SQL(_qcargaPorRepotenciacion)
@@ -5323,13 +5468,55 @@ ORDER BY e.reti_id, e.elem_codigo""")
             .as(_dataParser.*)
 
           _rcargaPorRepotenciacion.map { r =>
+            _listRepotenciacionRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                r._3,
+                Some(1),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+              ),
+              StringCell(
+                r._4,
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                r._5,
+                Some(3),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                r._6,
+                Some(4),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                0,
+                Some(5),
+                style =
+                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )              
             val updated = SQL(sqlUpdate)
               .on(
                 'aaco_id -> r._1,
                 'aacu_id -> r._2,
-                'aap_tecnologia -> r._3,
-                'aap_potencia -> r._4,
-                'retirada -> r._5,
+                'aap_tecnologia -> r._4,
+                'aap_potencia -> r._5,
+                'retirada -> r._6,
                 'instalada -> 0,
                 'empr_id -> empr_id,
                 'zanho -> anho,
@@ -5343,8 +5530,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
           // Ingresar
           var _qcargaPorActualizacion =
             """
-            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
-            (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
+            SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id, ac.aacu_descripcion 
             FROM siap.reporte r
             LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
             LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
@@ -5356,7 +5543,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id
             WHERE r.reti_id = 5 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id in (1,2) AND a.aap_fechatoma <= {fecha_toma}
             ORDER BY ac.aacu_id, dd.aap_tecnologia, dd.aap_potencia) o
-            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            GROUP BY o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
           var _rcargaPorActualizacion = SQL(_qcargaPorActualizacion)
@@ -5373,10 +5560,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
               .on(
                 'aaco_id -> r._1,
                 'aacu_id -> r._2,
-                'aap_tecnologia -> r._3,
-                'aap_potencia -> r._4,
+                'aap_tecnologia -> r._4,
+                'aap_potencia -> r._5,
                 'retirada -> 0,
-                'instalada -> r._5,
+                'instalada -> r._6,
                 'empr_id -> empr_id,
                 'zanho -> anho,
                 'zperiodo -> periodo
@@ -5386,8 +5573,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
           // Retirar
             _qcargaPorActualizacion =
             """
-            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
-            (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id 
+            SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id, ac.aacu_descripcion 
             FROM siap.reporte r
             LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
             LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
@@ -5399,7 +5586,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id
             WHERE r.reti_id = 5 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id in (1,2) AND a.aap_fechatoma <= {fecha_toma}
             ORDER BY ac.aacu_id, dd.aap_tecnologia_anterior, dd.aap_potencia_anterior) o
-            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            GROUP BY o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
           _rcargaPorActualizacion = SQL(_qcargaPorActualizacion)
@@ -5416,10 +5603,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
               .on(
                 'aaco_id -> r._1,
                 'aacu_id -> r._2,
-                'aap_tecnologia -> r._3,
-                'aap_potencia -> r._4,
+                'aap_tecnologia -> r._4,
+                'aap_potencia -> r._5,
                 'retirada -> 0,
-                'instalada -> r._5,
+                'instalada -> r._6,
                 'empr_id -> empr_id,
                 'zanho -> anho,
                 'zperiodo -> periodo
@@ -5432,8 +5619,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
           // Instalada
           var _qcargaPorModernizacion =
             """
-            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
-            (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
+            SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id, ac.aacu_descripcion 
             FROM siap.reporte r
             LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
             LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
@@ -5445,7 +5632,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id
             WHERE r.reti_id = 6 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id in (1,2) AND a.aap_fechatoma <= {fecha_toma}
             ORDER BY ac.aacu_id, dd.aap_tecnologia, dd.aap_potencia) o
-            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            GROUP BY o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
           var _rcargaPorModernizacion = SQL(_qcargaPorModernizacion)
@@ -5462,10 +5649,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
               .on(
                 'aaco_id -> r._1,
                 'aacu_id -> r._2,
-                'aap_tecnologia -> r._3,
-                'aap_potencia -> r._4,
+                'aap_tecnologia -> r._4,
+                'aap_potencia -> r._5,
                 'retirada -> 0,
-                'instalada -> r._5,
+                'instalada -> r._6,
                 'empr_id -> empr_id,
                 'zanho -> anho,
                 'zperiodo -> periodo
@@ -5477,8 +5664,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
           // Retirada
           _qcargaPorModernizacion =
             """
-            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
-            (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id 
+            SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id, ac.aacu_descripcion
             FROM siap.reporte r
             LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
             LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
@@ -5490,7 +5677,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id
             WHERE r.reti_id = 6 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id in (1,2) AND a.aap_fechatoma <= {fecha_toma}
             ORDER BY ac.aacu_id, dd.aap_tecnologia_anterior, dd.aap_potencia_anterior) o
-            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            GROUP BY o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
           _rcargaPorModernizacion = SQL(_qcargaPorModernizacion)
@@ -5507,9 +5694,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
               .on(
                 'aaco_id -> r._1,
                 'aacu_id -> r._2,
-                'aap_tecnologia -> r._3,
-                'aap_potencia -> r._4,
-                'retirada -> r._5,
+                'aap_tecnologia -> r._4,
+                'aap_potencia -> r._5,
+                'retirada -> r._6,
                 'instalada -> 0,
                 'empr_id -> empr_id,
                 'zanho -> anho,
@@ -5522,8 +5709,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
 
           val _qcargaPorReposicion =
             """
-            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
-            (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id 
+            SELECT o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia, dd.aap_tecnologia, co.aaco_id, ac.aacu_id, ac.aacu_descripcion 
             FROM siap.reporte r
             LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
             LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
@@ -5535,7 +5722,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id
             WHERE r.reti_id = 7 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id in (1,2) AND a.aap_fechatoma <= {fecha_toma}
             ORDER BY ac.aacu_id, dd.aap_tecnologia, dd.aap_potencia) o
-            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            GROUP BY o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
           val _rcargaPorReposicion = SQL(_qcargaPorReposicion)
@@ -5552,10 +5739,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
               .on(
                 'aaco_id -> r._1,
                 'aacu_id -> r._2,
-                'aap_tecnologia -> r._3,
-                'aap_potencia -> r._4,
+                'aap_tecnologia -> r._4,
+                'aap_potencia -> r._5,
                 'retirada -> 0,
-                'instalada -> r._5,
+                'instalada -> r._6,
                 'empr_id -> empr_id,
                 'zanho -> anho,
                 'zperiodo -> periodo
@@ -5568,8 +5755,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
 
           val _qcargarPorRetiro =
             """
-            SELECT o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia, count(o) from
-            (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id 
+            SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
+            (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id, ac.aacu_descripcion 
             FROM siap.reporte r
             LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
             LEFT JOIN siap.reporte_direccion d ON d.repo_id = r.repo_id
@@ -5581,7 +5768,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             LEFT JOIN siap.aap_cuentaap ac ON ac.aacu_id = dda.aacu_id_anterior
             WHERE r.reti_id = 8 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id} AND a.aap_id <> 9999999 AND d.even_estado <> 9 AND dd.aaco_id_anterior in (1,2) AND a.aap_fechatoma <= {fecha_toma}
             ORDER BY ac.aacu_id, dd.aap_tecnologia_anterior, dd.aap_potencia_anterior) o
-            GROUP BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia
+            GROUP BY o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia
             ORDER BY o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia"""
 
           val _rcargarPorRetiro = SQL(_qcargarPorRetiro)
@@ -5598,9 +5785,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
               .on(
                 'aaco_id -> r._1,
                 'aacu_id -> r._2,
-                'aap_tecnologia -> r._3,
-                'aap_potencia -> r._4,
-                'retirada -> r._5,
+                'aap_tecnologia -> r._4,
+                'aap_potencia -> r._5,
+                'retirada -> r._6,
                 'instalada -> 0,
                 'empr_id -> empr_id,
                 'zanho -> anho,
@@ -6143,9 +6330,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
 
           fila_suma_inicial = j
           var medidor = SQL(
-            """SELECT c.aap_tecnologia, c.aap_potencia, ap.aap_potenciareal, c.cantidad, c.retirada, c.instalada FROM siap.carga c
+            """SELECT c.aap_tecnologia, c.aap_potencia, ap.aap_potenciareal, SUM(c.cantidad) AS cantidad, SUM(c.retirada) AS retirada, SUM(c.instalada) AS instalada FROM siap.carga c
             LEFT JOIN siap.aap_potenciareal ap ON ap.aapr_tecnologia = c.aap_tecnologia AND ap.aapr_potencia = c.aap_potencia
             WHERE c.aaco_id = {aaco_id} AND c.empr_id = {empr_id} and c.zanho = {zanho} and c.zperiodo = {zperiodo}
+            GROUP BY c.aap_tecnologia, c.aap_potencia, ap.aap_potenciareal
             ORDER BY c.aap_tecnologia, c.aap_potencia"""
           ).on(
               'empr_id -> empr_id,
@@ -6395,10 +6583,22 @@ ORDER BY e.reti_id, e.elem_codigo""")
             mergedRegions = mergedColumns,
             columns = columnstyle
           )
+          val sheetExpansion = Sheet(
+            name = "Expansión",
+            rows = _listExpansionRow.toList,
+          )
+          val sheetReubicacion = Sheet(
+            name = "Reubicación",
+            rows = _listReubicacionRow.toList,
+          )     
+          val sheetRepotenciacion = Sheet(
+            name = "Repotenciación",
+            rows = _listRepotenciacionRow.toList,
+          )                  
 
           println("Escribiendo en el Stream")
           var os: ByteArrayOutputStream = new ByteArrayOutputStream()
-          Workbook(sheet1).writeToOutputStream(os)
+          Workbook(sheet1, sheetExpansion, sheetReubicacion, sheetRepotenciacion).writeToOutputStream(os)
           println("Stream Listo")
           os.toByteArray
       }

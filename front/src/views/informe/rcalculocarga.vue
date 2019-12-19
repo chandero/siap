@@ -10,7 +10,7 @@
   <el-row :gutter="4">
     <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
       <el-form-item :label="$t('informe.initialDate')">
-        <el-date-picker v-model="fecha_inicial" format="yyyy/MM/dd"></el-date-picker>
+        <el-date-picker v-model="fecha_inicial" format="yyyy/MM/dd" @change="establecerFechaFinal"></el-date-picker>
       </el-form-item>
     </el-col>
     <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
@@ -49,6 +49,12 @@ export default {
   methods: {
     obtenerDatos() {
       informe_siap_calculo_carga_xls(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.empresa.empr_id)
+    },
+    establecerFechaFinal() {
+      this.fecha_final = new Date()
+      this.fecha_final.setYear(this.fecha_inicial.getFullYear())
+      this.fecha_final.setMonth(this.fecha_inicial.getMonth() + 1)
+      this.fecha_final.setDate(this.fecha_inicial.getDate() - 1)
     }
   }
 }
