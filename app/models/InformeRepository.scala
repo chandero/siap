@@ -4952,6 +4952,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
           val ff = new DateTime(fecha_final)
           val ft = new DateTime(fecha_final)
 
+          val fecha_ant = fi.minusDays(1)
+          val zanho_ant = fecha_ant.getYear()
+          val zmes_ant = fecha_ant.getMonthOfYear()
           val anho = ff.getYear()
           val periodo = ff.getMonthOfYear()
           val mes = periodo
@@ -5090,16 +5093,28 @@ ORDER BY e.reti_id, e.elem_codigo""")
               }
           }
 
-
-          val _rcargaInicial = SQL(
-            f"""SELECT a.aaco_id, a.aacu_id, a.aap_tecnologia, a.aap_potencia, COUNT(a) AS cantidad FROM $tablename a
-            INNER JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id
-            LEFT JOIN siap.aap_potenciareal ap ON ap.aapr_tecnologia = ad.aap_tecnologia AND ap.aapr_potencia = ad.aap_potencia 
-            WHERE a.esta_id <> 9 AND a.aaco_id <> 3
-            GROUP BY a.aaco_id, a.aacu_id, a.aap_tecnologia, a.aap_potencia 
-            ORDER BY a.aaco_id, a.aacu_id, a.aap_tecnologia DESC, a.aap_potencia"""
+          /*
+          * Reemplazamos la lectura de la tabla temporal con el calculo de estado
+          * de las luminarias, por la lectura de las tabla corte
+          */
+            /* val _rcargaInicial = SQL(
+                f"""SELECT a.aaco_id, a.aacu_id, a.aap_tecnologia, a.aap_potencia, COUNT(a) AS cantidad FROM $tablename a
+                INNER JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id
+                LEFT JOIN siap.aap_potenciareal ap ON ap.aapr_tecnologia = ad.aap_tecnologia AND ap.aapr_potencia = ad.aap_potencia 
+                WHERE a.esta_id <> 9 AND a.aaco_id <> 3
+                GROUP BY a.aaco_id, a.aacu_id, a.aap_tecnologia, a.aap_potencia 
+                ORDER BY a.aaco_id, a.aacu_id, a.aap_tecnologia DESC, a.aap_potencia"""
+              ).as(_cargaInicialParser.*)
+            */  
+          val _rcargaInicial = SQL("""SELECT a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia, count(a) as cantidad FROM siap.aap_corte_periodo a
+          INNER JOIN siap.aap_adicional_corte_periodo ad ON ad.aap_id = a.aap_id and ad.empr_id = a.empr_id and ad.zanho = a.zanho and ad.zmes = a.zmes
+          LEFT JOIN siap.aap_potenciareal apr ON apr.aapr_tecnologia = ad.aap_tecnologia AND apr.aapr_potencia = ad.aap_potencia
+          WHERE a.esta_id <> 9 AND a.aaco_id <> 4 AND a.zanho = {zanho} AND a.zmes = {zmes} AND a.aap_id <> 9999999
+          GROUP BY a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia
+          ORDER BY a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia""").on(
+            'zanho -> zanho_ant,
+            'zmes -> zmes_ant
           ).as(_cargaInicialParser.*)
-
           // Eliminar anterior
           println("Eliminando Carga Anterior mismo Periodo")
           SQL(
