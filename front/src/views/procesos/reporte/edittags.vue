@@ -121,6 +121,7 @@
                              </el-select>
                             </el-form-item>                        
                         </el-col>
+                        <!--
                         <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
                             <el-form-item prop="tiba_id" :label="$t('reporte.sector')" :read-only="reporte.rees_id == 3">
                              <el-select :disabled="reporte.rees_id == 3" style="width:100%;" filterable ref="tiba" v-model="reporte.tiba_id" name="tiba" :placeholder="$t('tipobarrio.select')"  @change="changeFocus('telefono')">
@@ -129,6 +130,7 @@
                              </el-select>
                             </el-form-item>                        
                         </el-col>
+                        -->
                         <el-col :xs="24" :sm="24" :md="7" :lg="7" :xl="7">
                             <el-form-item prop="repo_telefono" :label="$t('reporte.phone')">
                                 <el-input readonly ref="telefono" v-model="reporte.repo_telefono" @keyup.enter.native="changeFocus('descripcion')"></el-input>
@@ -877,8 +879,8 @@ export default {
         barr_id: [
           { required: true, message: 'Debe Seleccionar el Barrio del Daño o Actividad', trigger: 'change' }
         ],
-        tiba_id: [
-          { required: true, message: 'Debe Seleccionar el Tipo de Sector del Daño o Actividad', trigger: 'blur' }
+        tire_id: [
+          { required: true, message: 'Debe Seleccionar el Tipo de Reporte del Daño o Actividad', trigger: 'blur' }
         ],
         adicional: {
           repo_tipo_expansion: [

@@ -129,6 +129,7 @@
                              </el-select>
                             </el-form-item>                        
                         </el-col>
+                        <!-- 
                         <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
                             <el-form-item prop="tiba_id" :label="$t('reporte.sector')">
                              <el-select  style="width:100%;" filterable clearable ref="tiba" v-model="reporte.tiba_id" name="tiba" :placeholder="$t('tipobarrio.select')"  @change="changeFocus('telefono')">
@@ -137,6 +138,7 @@
                              </el-select>
                             </el-form-item>                        
                         </el-col>
+                        -->
                         <el-col :xs="24" :sm="24" :md="7" :lg="7" :xl="7">
                             <el-form-item prop="repo_telefono" :label="$t('reporte.phone')">
                                 <el-input ref="telefono" v-model="reporte.repo_telefono" @keyup.enter.native="changeFocus('descripcion')"></el-input>
@@ -250,8 +252,8 @@ export default {
         barr_id: [
           { required: true, message: 'Debe Seleccionar el Barrio del Daño o Actividad', trigger: 'change' }
         ],
-        tiba_id: [
-          { required: true, message: 'Debe Seleccionar el Tipo de Sector del Daño o Actividad', trigger: 'blur' }
+        tire_id: [
+          { required: true, message: 'Debe Seleccionar el Tipo de Reporte del Daño o Actividad', trigger: 'blur' }
         ],
         adicional: {
           repo_tipo_expansion: [
@@ -277,7 +279,7 @@ export default {
         reti_id: 1,
         repo_id: null,
         repo_consecutivo: null,
-        tiba_id: null,
+        tire_id: null,
         repo_numero: null,
         repo_fecharecepcion: new Date(),
         repo_direccion: null,
@@ -472,7 +474,7 @@ export default {
         reti_id: 1,
         repo_id: null,
         repo_consecutivo: null,
-        tiba_id: null,
+        tire_id: null,
         repo_numero: null,
         repo_fecharecepcion: new Date(),
         repo_direccion: null,
@@ -573,10 +575,7 @@ export default {
             this.reporte.repo_apoyo = aap.aap_apoyo
             this.reporte.repo_direccion = aap.aap_direccion
             this.reporte.barr_id = aap.barr_id
-            var barrio = this.barrios.find(b => b.barr_id === aap.barr_id)
-            if (barrio != null || barrio !== undefined) {
-              this.reporte.tiba_id = barrio.tiba_id
-            }
+            // var barrio = this.barrios.find(b => b.barr_id === aap.barr_id)
           }
         }).catch(error => {
           console.log('getAap: ' + error)
@@ -593,10 +592,7 @@ export default {
             this.reporte.repo_codigo = aap.aap_id
             this.reporte.repo_direccion = aap.aap_direccion
             this.reporte.barr_id = aap.barr_id
-            var barrio = this.barrios.find(b => b.barr_id === aap.barr_id)
-            if (barrio != null || barrio !== undefined) {
-              this.reporte.tiba_id = barrio.tiba_id
-            }
+            // var barrio = this.barrios.find(b => b.barr_id === aap.barr_id)
             this.changeFocus('nombre')
           }
         }).catch(error => {
@@ -614,7 +610,6 @@ export default {
     actualizarSector() {
       var barrio = this.barrios.find(b => b.barr_id === this.reporte.barr_id)
       if (barrio != null || barrio !== undefined) {
-        this.reporte.tiba_id = barrio.tiba_id
         this.changeFocus('telefono')
       }
     }
