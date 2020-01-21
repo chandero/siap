@@ -156,6 +156,15 @@ GET     /api/tire/:id                   controllers.TipoRetiroController.buscarP
 GET     /api/tire/del/:id               controllers.TipoRetiroController.borrar(id: Long)
 POST    /api/tire/save                  controllers.TipoRetiroController.guardar
 POST    /api/tire/upd                   controllers.TipoRetiroController.actualizar
+
+# TipoActivo
+GET     /api/tiac/get/:p/:c             controllers.TipoActivoController.todos(p:Long, c:Long)
+GET     /api/tiac/all                   controllers.TipoActivoController.tiposretiro
+GET     /api/tiac/:id                   controllers.TipoActivoController.buscarPorId(id: Long)
+GET     /api/tiac/del/:id               controllers.TipoActivoController.borrar(id: Long)
+POST    /api/tiac/save                  controllers.TipoActivoController.guardar
+POST    /api/tiac/upd                   controllers.TipoActivoController.actualizar
+
 # Accion
 GET     /api/acci/get/:p/:c             controllers.AccionController.todos(p:Long, c:Long)
 GET     /api/acci/all                   controllers.AccionController.acciones

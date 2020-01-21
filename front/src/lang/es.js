@@ -538,6 +538,10 @@ export default {
     confirmationmsg: 'Se procederá a borrar la Municipio Obra seleccionada, continuar?'
   },
   reporte: {
+    activo: {
+      title: 'Activo',
+      select: 'Selecione el Tipo de Activo'
+    },
     tipo: {
       select: 'Seleccione el Tipo de Reporte'
     },

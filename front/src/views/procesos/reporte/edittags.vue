@@ -18,6 +18,14 @@
                                 <span style="font-size: 24px;">{{ reporte_tipo(reporte.reti_id) }}</span>
                             </el-form-item>
                         </el-col>
+                        <el-col v-if="reporte.reti_id === 1" :xs="24" :sm="24" :md="9" :lg="9" :xl="9">
+                            <el-form-item prop="tiac_id" :label="$t('reporte.activo.title')">
+                                <el-select autofocus :title="$t('reporte.activo.select')" style="width: 80%" ref="tipo" v-model="reporte.tiac_id" name="tipo" :placeholder="$t('reporte.activo.select')" @change="validarActivo()">
+                                    <el-option v-for="activo in tipos_activos" :key="activo.tiac_id" :label="activo.tiac_descripcion" :value="activo.tiac_id" >
+                                    </el-option>   
+                                </el-select>
+                            </el-form-item>
+                        </el-col>                        
                         <el-col v-if="reporte.reti_id===2" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
                               <el-form-item prop="adicional.repo_tipo_expansion" :label="$t('reporte.tipo_expansion.title')">
                                 <el-select :disabled="reporte.rees_id == 3" clearable :title="$t('reporte.tipo_expansion.select')" style="width: 80%" ref="tipo" v-model="reporte.adicional.repo_tipo_expansion" name="tipo_expansion" :placeholder="$t('reporte.tipo_expansion.select')" @change="validarExpansion()">
@@ -649,6 +657,7 @@ import { getTiposRetiro } from '@/api/tiporetiro'
 import { getUrbanizadoraTodas } from '@/api/urbanizadora'
 import { getMedidors } from '@/api/medidor'
 import { getTransformadors } from '@/api/transformador'
+import { getTiposActivo } from '@/api/tipoactivo'
 // component
 import AapCreate from '@/views/inventario/gestion/create'
 
@@ -864,6 +873,12 @@ export default {
         }
       },
       rules: {
+        repo_fecharecepcion: [
+          { required: true, message: 'Debe diligencia la Fecha de Recepción del Reporte', trigger: 'change' }
+        ],
+        reti_id: [
+          { required: true, message: 'Debe Seleccionar el Tipo de Reporte', trigger: 'change' }
+        ],
         orig_id: [
           { required: true, message: 'Debe Seleccionar el Origen del Reporte', trigger: 'change' }
         ],
@@ -879,8 +894,8 @@ export default {
         barr_id: [
           { required: true, message: 'Debe Seleccionar el Barrio del Daño o Actividad', trigger: 'change' }
         ],
-        tire_id: [
-          { required: true, message: 'Debe Seleccionar el Tipo de Reporte del Daño o Actividad', trigger: 'blur' }
+        tiac_id: [
+          { required: true, message: 'Debe Seleccionar el Tipo de Activo del Daño o Actividad', trigger: 'blur' }
         ],
         adicional: {
           repo_tipo_expansion: [
@@ -992,6 +1007,7 @@ export default {
       conexiones: [],
       medidores: [],
       transformadores: [],
+      tipos_activos: [],
       aap_usos: [],
       aap_cuentasap: [],
       tiposretiro: [],
@@ -1064,6 +1080,8 @@ export default {
     pending: { name: 'pending', time: 30000, autostart: false, repeat: true }
   },
   methods: {
+    validarActivo() {
+    },
     handleTag(even_id) {
       this.reporte.direcciones.forEach(d => {
         if (d.even_id === even_id) {
@@ -2236,7 +2254,12 @@ export default {
                                                 this.medidores = response.data
                                                 getTransformadors().then(response => {
                                                   this.transformadores = response.data
-                                                  this.obtenerReporte()
+                                                  getTiposActivo().then(response => {
+                                                    this.tipos_activos = response.data
+                                                    this.obtenerReporte()
+                                                  }).catch(error => {
+                                                    console.log('Error Tipo Activo: ' + error)
+                                                  })
                                                 }).catch(error => {
                                                   console.log('Error Transformadores: ' + error)
                                                 })

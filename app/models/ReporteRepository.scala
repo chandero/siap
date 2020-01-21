@@ -127,7 +127,7 @@ case class ReporteDireccion(
     barr_id_anterior: Option[scala.Long],
     even_id: Option[Int],
     even_estado: Option[Int],
-    tire_id: Option[scala.Long],
+    tiac_id: Option[scala.Long],
     dato: Option[ReporteDireccionDato],
     dato_adicional: Option[ReporteDireccionDatoAdicional]
 )
@@ -150,7 +150,7 @@ case class Reporte(
     orig_id: Option[scala.Long],
     barr_id: Option[scala.Long],
     empr_id: Option[scala.Long],
-    tire_id: Option[scala.Long],
+    tiac_id: Option[scala.Long],
     usua_id: Option[scala.Long],
     adicional: Option[ReporteAdicional],
     meams: Option[List[scala.Long]],
@@ -205,7 +205,7 @@ case class ReporteConsulta(
     orig_id: Option[scala.Long],
     barr_id: Option[scala.Long],
     empr_id: Option[scala.Long],
-    tire_id: Option[scala.Long],
+    tiac_id: Option[scala.Long],
     usua_id: Option[scala.Long],
     adicional: Option[ReporteAdicional]
 )
@@ -679,7 +679,7 @@ object ReporteDireccion {
       "barr_id_anterior" -> direccion.barr_id_anterior,
       "even_id" -> direccion.even_id,
       "even_estado" -> direccion.even_estado,
-      "tire_id" -> direccion.tire_id,
+      "tiac_id" -> direccion.tiac_id,
       "dato" -> direccion.dato,
       "dato_adicional" -> direccion.dato_adicional
     )
@@ -694,7 +694,7 @@ object ReporteDireccion {
       (__ \ "barr_id_anterior").readNullable[scala.Long] and
       (__ \ "even_id").readNullable[Int] and
       (__ \ "even_estado").readNullable[Int] and
-      (__ \ "tire_id").readNullable[scala.Long] and
+      (__ \ "tiac_id").readNullable[scala.Long] and
       (__ \ "dato").readNullable[ReporteDireccionDato] and
       (__ \ "dato_adicional").readNullable[ReporteDireccionDatoAdicional]
   )(ReporteDireccion.apply _)
@@ -708,8 +708,8 @@ object ReporteDireccion {
       get[Option[scala.Long]]("reporte_direccion.barr_id_anterior") ~
       get[Option[Int]]("reporte_direccion.even_id") ~
       get[Option[Int]]("reporte_direccion.even_estado") ~
-      get[Option[scala.Long]]("reporte_direccion.tire_id") map {
-      case repo_id ~ aap_id ~ even_direccion ~ barr_id ~ even_direccion_anterior ~ barr_id_anterior ~ even_id ~ even_estado ~ tire_id =>
+      get[Option[scala.Long]]("reporte_direccion.tiac_id") map {
+      case repo_id ~ aap_id ~ even_direccion ~ barr_id ~ even_direccion_anterior ~ barr_id_anterior ~ even_id ~ even_estado ~ tiac_id =>
         ReporteDireccion(
           repo_id,
           aap_id,
@@ -719,7 +719,7 @@ object ReporteDireccion {
           barr_id_anterior,
           even_id,
           even_estado,
-          tire_id,
+          tiac_id,
           null,
           null
         )
@@ -752,7 +752,7 @@ object Reporte {
       "orig_id" -> reporte.orig_id,
       "barr_id" -> reporte.barr_id,
       "empr_id" -> reporte.empr_id,
-      "tire_id" -> reporte.tire_id,
+      "tiac_id" -> reporte.tiac_id,
       "usua_id" -> reporte.usua_id,
       "adicional" -> reporte.adicional,
       "meams" -> reporte.meams,
@@ -778,7 +778,7 @@ object Reporte {
       (__ \ "orig_id").readNullable[scala.Long] and
       (__ \ "barr_id").readNullable[scala.Long] and
       (__ \ "empr_id").readNullable[scala.Long] and
-      (__ \ "tire_id").readNullable[scala.Long] and
+      (__ \ "tiac_id").readNullable[scala.Long] and
       (__ \ "usua_id").readNullable[scala.Long] and
       (__ \ "adicional").readNullable[ReporteAdicional] and
       (__ \ "meams").readNullable[List[scala.Long]] and
@@ -988,7 +988,7 @@ object ReporteConsulta {
       "orig_id" -> reporte.orig_id,
       "barr_id" -> reporte.barr_id,
       "empr_id" -> reporte.empr_id,
-      "tire_id" -> reporte.tire_id,
+      "tiac_id" -> reporte.tiac_id,
       "usua_id" -> reporte.usua_id,
       "adicional" -> reporte.adicional
     )
@@ -1008,7 +1008,7 @@ object ReporteConsulta {
       (__ \ "orig_id").readNullable[scala.Long] and
       (__ \ "barr_id").readNullable[scala.Long] and
       (__ \ "empr_id").readNullable[scala.Long] and
-      (__ \ "tire_id").readNullable[scala.Long] and
+      (__ \ "tiac_id").readNullable[scala.Long] and
       (__ \ "usua_id").readNullable[scala.Long] and
       (__ \ "adicional").readNullable[ReporteAdicional]
   )(ReporteConsulta.apply _)
@@ -1155,7 +1155,7 @@ class ReporteRepository @Inject()(
       get[Option[scala.Long]]("reporte.orig_id") ~
       get[Option[scala.Long]]("reporte.barr_id") ~
       get[Option[scala.Long]]("reporte.empr_id") ~
-      get[Option[scala.Long]]("reporte.tire_id") ~
+      get[Option[scala.Long]]("reporte.tiac_id") ~
       get[Option[scala.Long]]("reporte.usua_id") map {
       case repo_id ~
             reti_id ~
@@ -1173,7 +1173,7 @@ class ReporteRepository @Inject()(
             orig_id ~
             barr_id ~
             empr_id ~            
-            tire_id ~
+            tiac_id ~
             usua_id =>
         Reporte(
           repo_id,
@@ -1192,7 +1192,7 @@ class ReporteRepository @Inject()(
           orig_id,
           barr_id,
           empr_id,
-          tire_id,
+          tiac_id,
           usua_id,
           null,
           null,
@@ -1481,7 +1481,7 @@ class ReporteRepository @Inject()(
             r.orig_id,
             r.barr_id,
             r.empr_id,
-            r.tire_id,
+            r.tiac_id,
             r.usua_id,
             adicional,
             Some(meams),
@@ -1593,7 +1593,7 @@ class ReporteRepository @Inject()(
             r.orig_id,
             r.barr_id,
             r.empr_id,
-            r.tire_id,
+            r.tiac_id,
             r.usua_id,
             adicional,
             Some(meams),
@@ -1786,7 +1786,7 @@ class ReporteRepository @Inject()(
           r.orig_id,
           r.barr_id,
           r.empr_id,
-          r.tire_id,
+          r.tiac_id,
           r.usua_id,
           adicional,
           Some(meams),
@@ -1936,7 +1936,7 @@ class ReporteRepository @Inject()(
             r.orig_id,
             r.barr_id,
             r.empr_id,
-            r.tire_id,
+            r.tiac_id,
             r.usua_id,
             adicional,
             Some(meams),
@@ -2000,7 +2000,7 @@ class ReporteRepository @Inject()(
             r.orig_id,
             r.barr_id,
             r.empr_id,
-            r.tire_id,
+            r.tiac_id,
             r.usua_id,
             adicional
           )
@@ -2112,7 +2112,7 @@ class ReporteRepository @Inject()(
           r.orig_id,
           r.barr_id,
           r.empr_id,
-          r.tire_id,
+          r.tiac_id,
           r.usua_id,
           adicional,
           None, //Some(meams),
@@ -2237,7 +2237,7 @@ class ReporteRepository @Inject()(
         val consec = consecutivo(reporte.reti_id.get)
         if (consec > 0) {
           val id: scala.Long = SQL(
-            "INSERT INTO siap.reporte (repo_fecharecepcion, repo_direccion, repo_nombre, repo_telefono, repo_fechasolucion, repo_horainicio, repo_horafin, repo_reportetecnico, repo_descripcion, rees_id, orig_id, barr_id, empr_id, tire_id, usua_id, reti_id, repo_consecutivo) VALUES ({repo_fecharecepcion}, {repo_direccion}, {repo_nombre}, {repo_telefono}, {repo_fechasolucion}, {repo_horainicio}, {repo_horafin}, {repo_reportetecnico}, {repo_descripcion}, {rees_id}, {orig_id}, {barr_id}, {empr_id}, {tire_id}, {usua_id}, {reti_id}, {repo_consecutivo})"
+            "INSERT INTO siap.reporte (repo_fecharecepcion, repo_direccion, repo_nombre, repo_telefono, repo_fechasolucion, repo_horainicio, repo_horafin, repo_reportetecnico, repo_descripcion, rees_id, orig_id, barr_id, empr_id, tiac_id, usua_id, reti_id, repo_consecutivo) VALUES ({repo_fecharecepcion}, {repo_direccion}, {repo_nombre}, {repo_telefono}, {repo_fechasolucion}, {repo_horainicio}, {repo_horafin}, {repo_reportetecnico}, {repo_descripcion}, {rees_id}, {orig_id}, {barr_id}, {empr_id}, {tiac_id}, {usua_id}, {reti_id}, {repo_consecutivo})"
           ).on(
               'repo_fecharecepcion -> reporte.repo_fecharecepcion,
               'repo_direccion -> reporte.repo_direccion,
@@ -2255,7 +2255,7 @@ class ReporteRepository @Inject()(
               'repo_horafin -> reporte.repo_horafin,
               'reti_id -> reporte.reti_id,
               'repo_consecutivo -> consec,
-              'tire_id -> reporte.tire_id
+              'tiac_id -> reporte.tiac_id
             )
             .executeInsert()
             .get
@@ -2368,7 +2368,7 @@ class ReporteRepository @Inject()(
       var historia =
         scala.collection.mutable.Map[scala.Long, ElementoHistoria]()
       val result: Boolean = SQL(
-        "UPDATE siap.reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tire_id = {tire_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
+        "UPDATE siap.reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tiac_id = {tiac_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
       ).on(
           'repo_id -> reporte.repo_id,
           'repo_direccion -> reporte.repo_direccion,
@@ -2383,7 +2383,7 @@ class ReporteRepository @Inject()(
           'orig_id -> reporte.orig_id,
           'barr_id -> reporte.barr_id,
           'empr_id -> reporte.empr_id,
-          'tire_id -> reporte.tire_id,
+          'tiac_id -> reporte.tiac_id,
           'usua_id -> reporte.usua_id
         )
         .executeUpdate() > 0
@@ -3006,7 +3006,7 @@ class ReporteRepository @Inject()(
                                                 even_direccion_anterior = {even_direccion_anterior},
                                                 barr_id_anterior = {barr_id_anterior},
                                                 even_estado = {even_estado},
-                                                tire_id = {tire_id}
+                                                tiac_id = {tiac_id}
                                             WHERE
                                                 repo_id = {repo_id} and
                                                 aap_id = {aap_id} and
@@ -3017,7 +3017,7 @@ class ReporteRepository @Inject()(
                 'even_direccion_anterior -> d.even_direccion_anterior,
                 'barr_id_anterior -> d.barr_id_anterior,
                 'even_estado -> estado,
-                'tire_id -> d.tire_id,
+                'tiac_id -> d.tiac_id,
                 'repo_id -> reporte.repo_id,
                 'aap_id -> d.aap_id,
                 'even_id -> d.even_id
@@ -3026,14 +3026,14 @@ class ReporteRepository @Inject()(
 
             if (!dirActualizado) {
               dirInsertado = SQL(
-                """INSERT INTO siap.reporte_direccion (repo_id, aap_id, even_direccion, barr_id, even_id, even_direccion_anterior, barr_id_anterior, even_estado, tire_id) VALUES ({repo_id}, {aap_id}, {even_direccion}, {barr_id}, {even_id}, {even_direccion_anterior}, {barr_id_anterior}, {even_estado}, {tire_id})"""
+                """INSERT INTO siap.reporte_direccion (repo_id, aap_id, even_direccion, barr_id, even_id, even_direccion_anterior, barr_id_anterior, even_estado, tiac_id) VALUES ({repo_id}, {aap_id}, {even_direccion}, {barr_id}, {even_id}, {even_direccion_anterior}, {barr_id_anterior}, {even_estado}, {tiac_id})"""
               ).on(
                   'repo_id -> reporte.repo_id,
                   'aap_id -> d.aap_id,
                   'even_direccion -> d.even_direccion,
                   'barr_id -> d.barr_id,
                   'even_id -> d.even_id,
-                  'tire_id -> d.tire_id,
+                  'tiac_id -> d.tiac_id,
                   'even_direccion_anterior -> aap.aap_direccion,
                   'barr_id_anterior -> aap.barr_id,
                   'even_estado -> estado
@@ -3530,8 +3530,8 @@ class ReporteRepository @Inject()(
                     'empr_id -> reporte.empr_id
                   )
                   .executeUpdate()
-                println("tipo retiro: " + d.tire_id)
-                d.tire_id match {
+                println("tipo retiro: " + d.tiac_id)
+                d.tiac_id match {
                   case Some(3) =>
                     SQL(
                       """UPDATE siap.aap SET esta_id = 9 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
@@ -3846,7 +3846,7 @@ class ReporteRepository @Inject()(
       var historia =
         scala.collection.mutable.Map[scala.Long, ElementoHistoria]()
       val result: Boolean = SQL(
-        "UPDATE siap.reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tire_id = {tire_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
+        "UPDATE siap.reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tiac_id = {tiac_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
       ).on(
           'repo_id -> reporte.repo_id,
           'repo_direccion -> reporte.repo_direccion,
@@ -3861,7 +3861,7 @@ class ReporteRepository @Inject()(
           'orig_id -> reporte.orig_id,
           'barr_id -> reporte.barr_id,
           'empr_id -> reporte.empr_id,
-          'tire_id -> reporte.tire_id,
+          'tiac_id -> reporte.tiac_id,
           'usua_id -> reporte.usua_id
         )
         .executeUpdate() > 0
@@ -4484,7 +4484,7 @@ class ReporteRepository @Inject()(
                                                 even_direccion_anterior = {even_direccion_anterior},
                                                 barr_id_anterior = {barr_id_anterior},
                                                 even_estado = {even_estado},
-                                                tire_id = {tire_id}
+                                                tiac_id = {tiac_id}
                                             WHERE
                                                 repo_id = {repo_id} and
                                                 aap_id = {aap_id} and
@@ -4495,7 +4495,7 @@ class ReporteRepository @Inject()(
                 'even_direccion_anterior -> d.even_direccion_anterior,
                 'barr_id_anterior -> d.barr_id_anterior,
                 'even_estado -> estado,
-                'tire_id -> d.tire_id,
+                'tiac_id -> d.tiac_id,
                 'repo_id -> reporte.repo_id,
                 'aap_id -> d.aap_id,
                 'even_id -> d.even_id
@@ -4504,14 +4504,14 @@ class ReporteRepository @Inject()(
 
             if (!dirActualizado) {
               dirInsertado = SQL(
-                """INSERT INTO siap.reporte_direccion (repo_id, aap_id, even_direccion, barr_id, even_id, even_direccion_anterior, barr_id_anterior, even_estado, tire_id) VALUES ({repo_id}, {aap_id}, {even_direccion}, {barr_id}, {even_id}, {even_direccion_anterior}, {barr_id_anterior}, {even_estado}, {tire_id})"""
+                """INSERT INTO siap.reporte_direccion (repo_id, aap_id, even_direccion, barr_id, even_id, even_direccion_anterior, barr_id_anterior, even_estado, tiac_id) VALUES ({repo_id}, {aap_id}, {even_direccion}, {barr_id}, {even_id}, {even_direccion_anterior}, {barr_id_anterior}, {even_estado}, {tiac_id})"""
               ).on(
                   'repo_id -> reporte.repo_id,
                   'aap_id -> d.aap_id,
                   'even_direccion -> d.even_direccion,
                   'barr_id -> d.barr_id,
                   'even_id -> d.even_id,
-                  'tire_id -> d.tire_id,
+                  'tiac_id -> d.tiac_id,
                   'even_direccion_anterior -> aap.aap_direccion,
                   'barr_id_anterior -> aap.barr_id,
                   'even_estado -> estado
@@ -5008,8 +5008,8 @@ class ReporteRepository @Inject()(
                     'empr_id -> reporte.empr_id
                   )
                   .executeUpdate()
-                println("tipo retiro: " + d.tire_id)
-                d.tire_id match {
+                println("tipo retiro: " + d.tiac_id)
+                d.tiac_id match {
                   case Some(3) =>
                     SQL(
                       """UPDATE siap.aap SET esta_id = 9 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
