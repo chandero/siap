@@ -5,7 +5,7 @@
         <el-header class="gestion_header">{{ $t('gestion.tabletitle') }}
         </el-header>
         <el-main>  
-          <vue-query-builder v-model="qbquery" :rules="qrules" :labels="qlabels" :styled="qstyled" :maxDepth="3"></vue-query-builder>
+          <vue-query-builder :rules="qrules" :labels="qlabels" :styled="qstyled" :maxDepth="3" v-model="qbquery"></vue-query-builder>
           <el-button type="warning" icon="el-icon-search" circle @click="actualizar" title="Actualizar Aplicando el Filtro"></el-button>
         </el-main>        
       </el-container>
@@ -261,8 +261,7 @@ export default {
       aap_tipos_carcasa: [],
       qrules: [
         {
-          type: 'custom',
-          default: 0,
+          type: 'text',
           id: 'a.aap_id',
           label: this.$i18n.t('gestion.code'),
           operators: ['=', '<>', '<', '<=', '>', '>=']
@@ -327,8 +326,8 @@ export default {
           label: 'Estado Actual',
           choices: [
             { label: 'Activa', value: 1 },
-            { label: 'Suspendida', value: 2 },
-            { label: 'Eliminada', value: 9 }
+            { label: 'Retirada', value: 2 },
+            { label: 'En Baja', value: 9 }
           ]
         }
       ],
@@ -616,8 +615,5 @@ div.match-type-container {
     color: #409eff;
     border-color: #c6e2ff;
     background-color: #ecf5ff;
-}
-.vue-query-builder >>> .btn-default {
-  
 }
 </style>
