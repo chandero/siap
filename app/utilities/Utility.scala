@@ -110,7 +110,7 @@ class Utility {
                 }
                 case "query-builder-rule" => {
                   val rule = child.query.as[RuleDto]
-                  resultString = resultString + rule.rule + " " + rule.selectedOperator + " " + rule.value + " "
+                  resultString = resultString + rule.rule + " " + rule.operator + " " + rule.value + " "
                 }
               }
               resultString = resultString + " " + logicalOperator + " "

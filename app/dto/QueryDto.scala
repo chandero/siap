@@ -5,7 +5,7 @@ import play.api.libs.json.JodaReads
 import play.api.libs.json.JodaWrites
 import play.api.libs.functional.syntax._
 
-case class RuleDto(rule: String, selectedOperator: String, selectedOperand: String, value: JsValue)
+case class RuleDto(rule: String, operator: String, operand: String, value: JsValue)
 
 case class QueryDto(logicalOperator: Option[String], children: Option[List[ChildrenDto]])
 
@@ -37,16 +37,16 @@ object RuleDto {
     implicit val ruleWrites = new Writes[RuleDto] {
         def writes(rule: RuleDto) = Json.obj(
             "rule" -> rule.rule,
-            "selectedOperator" -> rule.selectedOperator,
-            "selectedOperand" -> rule.selectedOperand,
+            "operator" -> rule.operator,
+            "operand" -> rule.operand,
             "value" -> rule.value
         )
     }
 
     implicit val ruleReads: Reads[RuleDto] = (
         (__ \ "rule").read[String] and
-        (__ \ "selectedOperator").read[String] and
-        (__ \ "selectedOperand").read[String] and
+        (__ \ "operator").read[String] and
+        (__ \ "operand").read[String] and
         (__ \ "value").read[JsValue]
     )(RuleDto.apply _)
 }

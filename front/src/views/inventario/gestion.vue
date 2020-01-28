@@ -5,7 +5,7 @@
         <el-header class="gestion_header">{{ $t('gestion.tabletitle') }}
         </el-header>
         <el-main>  
-          <vue-query-builder :rules="qrules" :labels="qlabels" :styled="qstyled" :maxDepth="3" v-model="qbquery"></vue-query-builder>
+          <query-builder :labels="qlabels" :rules="qrules" :styled="qstyled" :maxDepth="3" v-model="qbquery"></query-builder>
           <el-button type="warning" icon="el-icon-search" circle @click="actualizar" title="Actualizar Aplicando el Filtro"></el-button>
         </el-main>        
       </el-container>
@@ -231,9 +231,6 @@ import { getAapModelos } from '@/api/aap_modelo'
 import { informe_siap_inventario_filtro_xls } from '@/api/informe'
 
 export default {
-  components: {
-    VueQueryBuilder
-  },
   data() {
     return {
       tableData: [],
@@ -261,7 +258,7 @@ export default {
       aap_tipos_carcasa: [],
       qrules: [
         {
-          type: 'text',
+          type: 'custom',
           id: 'a.aap_id',
           label: this.$i18n.t('gestion.code'),
           operators: ['=', '<>', '<', '<=', '>', '>=']
@@ -333,8 +330,16 @@ export default {
       ],
       qlabels: {
         matchType: this.$i18n.t('qb.matchType'),
-        matchTypeAll: this.$i18n.t('qb.matchTypeAll'),
-        matchTypeAny: this.$i18n.t('qb.matchTypeAny'),
+        matchTypes: [
+          {
+            id: 'all',
+            label: this.$i18n.t('qb.matchTypeAll')
+          },
+          {
+            id: 'any',
+            label: this.$i18n.t('qb.matchTypeAny')
+          }
+        ],
         addRule: this.$i18n.t('qb.addRule'),
         removeRule: this.$i18n.t('qb.removeRule'),
         addGroup: this.$i18n.t('qb.addGroup'),
@@ -348,6 +353,9 @@ export default {
       order: '',
       filter: ''
     }
+  },
+  components: {
+    'query-builder': VueQueryBuilder
   },
   computed: {
     ...mapGetters([
