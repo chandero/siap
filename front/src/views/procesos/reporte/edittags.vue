@@ -227,12 +227,12 @@
                             <el-col :span="24">
                               <el-tag
                                 v-for="tag in reporte.direcciones"
-                                :key="tag.even_id"
+                                :key="tag.idx"
                                 closable
                                 :type="tag.type"
                                 effect="dark"
                                 size="medium"
-                                @click="handleTag(tag.even_id)"
+                                @click="handleTag(tag.idx)"
                                 :title="'Información Luminaria ' + tag.aap_id"
                                 style="cursor: pointer;"
                               >
@@ -281,11 +281,10 @@
                             </el-col>
                             <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
                              <el-form-item prop="dato.aatc_id" label="Tipo Luminaria"> 
-                             <el-select :disabled="reporte.direcciones[didx].even_estado > 7" v-validate="'required|excluded:0'" style="width:100%;" filterable clearable v-model="reporte.direcciones[didx].dato.aatc_id" :name="'aatc_id_'+didx" :placeholder="$t('cover.select')" >
+                             <el-select :disabled="reporte.direcciones[didx].even_estado > 7" style="width:100%;" filterable clearable v-model="reporte.direcciones[didx].dato.aatc_id" :name="'aatc_id_'+didx" :placeholder="$t('cover.select')" >
                               <el-option v-for="carcasa in carcasas" :key="carcasa.aatc_id" :label="carcasa.aatc_descripcion" :value="parseInt(carcasa.aatc_id)">
                               </el-option>   
                              </el-select>
-                             <span>{{ errors.first('aatc_id_'+didx) }}</span>
                              </el-form-item>
                             </el-col>
                             <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
@@ -425,12 +424,12 @@
                             <el-col :span="24">
                               <el-tag
                                 v-for="tag in reporte.direcciones"
-                                :key="tag.even_id"
+                                :key="tag.idx"
                                 closable
                                 :type="tag.type"
                                 effect="dark"
                                 size="medium"
-                                @click="handleTag(tag.even_id)"
+                                @click="handleTag(tag.idx)"
                                 :title="'Material Luminaria ' + tag.aap_id"
                                 style="cursor: pointer;"
                               >
@@ -1015,6 +1014,7 @@ export default {
       conDirecciones: false,
       didx: 0,
       eidx: 0,
+      idx: 1,
       tipos_expansion: [
         {
           tiex_id: 1,
@@ -1062,11 +1062,11 @@ export default {
     pending: { name: 'pending', time: 30000, autostart: false, repeat: true }
   },
   methods: {
-    handleTag(even_id) {
+    handleTag(idx) {
       this.reporte.direcciones.forEach(d => {
-        if (d.even_id === even_id) {
+        if (d.idx === idx) {
           d.type = 'success'
-          this.didx = even_id - 1
+          this.didx = idx - 1
           this.completarMaterial()
         } else {
           d.type = 'info'
@@ -1385,7 +1385,7 @@ export default {
         })
       })
       // Validar cada direccion dato por todos sus valores requeridos
-      const dirForm = 'dirform_' + (this.didx + 1)
+      const dirForm = 'dirform_' + (this.reporte.direcciones[this.didx + 1].even_id)
       this.$refs[dirForm].validate()
       this.reporte.direcciones.forEach(d => {
         if (d.aap_id !== null && this.reporte.reti_id !== 1 && d.even_estado < 8) {
@@ -1650,13 +1650,15 @@ export default {
             tran_id_anterior: null,
             tran_id: null
           },
-          materiales: []
+          materiales: [],
+          idx: this.idx
         }
         this.reporte.direcciones.push(direccion)
         this.validateAap(direccion, (direccion.even_id - 1))
-        this.handleTag(direccion.even_id)
+        this.handleTag(direccion.idx)
         this.onAddEvent(10)
         this.direccion_siguiente_consecutivo = this.direccion_siguiente_consecutivo + 1
+        this.idx++
       }
       this.inputVisible01 = false
       this.inputVisible02 = false
@@ -1902,6 +1904,7 @@ export default {
         }
       })
       if (this.reporte_previo.direcciones.length === 0) {
+        this.idx = 1
         if (this.reporte_previo.eventos.length > 0) {
           var aap_id = ''
           this.reporte_previo.eventos.forEach(e => {
@@ -1967,8 +1970,10 @@ export default {
                   tran_id_anterior: null,
                   tran_id: null
                 },
-                materiales: []
+                materiales: [],
+                idx: this.idx
               }
+              this.idx++
               // materiales: this.reporte_previo.eventos.filter(m => m.aap_id === e.aap_id)
               var eventos = this.reporte_previo.eventos.filter(m => m.aap_id === e.aap_id)
               eventos.forEach(e => {
@@ -2065,10 +2070,12 @@ export default {
                 tran_id_anterior: null,
                 tran_id: null
               },
-              materiales: []
+              materiales: [],
+              idx: this.idx
             }
             this.reporte_previo.direcciones.push(direccion)
             dire_length++
+            this.idx++
           }
         }
       }
@@ -2108,6 +2115,8 @@ export default {
             d.materiales.push(evento)
           })
         }
+        d.idx = this.idx
+        this.idx++
       })
       this.reporte_previo.direcciones.forEach(d => {
         if (d.even_id === 1) {
