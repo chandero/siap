@@ -943,6 +943,7 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
         WHERE a.empr_id = {empr_id} AND a.esta_id <> 9 AND a.aap_id <> 9999999
       """
       if (!filter.isEmpty){
+          println("Filtro: " + filter)
           query = query + " and " + filter
       }
       val result = SQL(query).
@@ -1367,6 +1368,180 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
             id            
         }
     }
+
+    /**
+    * Crear Directo Aap
+    * @param aap: Aap
+    */
+    def creardirecto(activo: Activo, empr_id: Long, usua_id: Long) : Long = {
+        db.withConnection { implicit connection =>
+            val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
+            val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+            val aap = activo.aap.get
+            val id: Long = SQL("""INSERT INTO siap.aap 
+                               (aap_id,
+                                aaco_id,
+                                aap_apoyo, 
+                                aap_descripcion, 
+                                aap_direccion, 
+                                aap_lat, 
+                                aap_lng, 
+                                barr_id, 
+                                empr_id, 
+                                esta_id,
+                                aap_fechacreacion, 
+                                usua_id, 
+                                aaus_id, 
+                                aap_modernizada, 
+                                aatc_id, 
+                                aap_medidor,                                 
+                                aap_fechatoma, 
+                                aama_id, 
+                                aamo_id,
+                                aacu_id) VALUES (
+                                {aap_id},
+                                {aaco_id},
+                                {aap_apoyo}, 
+                                {aap_descripcion}, 
+                                {aap_direccion}, 
+                                {aap_lat}, 
+                                {aap_lng}, 
+                                {barr_id}, 
+                                {empr_id}, 
+                                {esta_id}, 
+                                {aap_fechacreacion}, 
+                                {usua_id}, 
+                                {aaus_id}, 
+                                {aap_modernizada}, 
+                                {aatc_id}, 
+                                {aap_medidor}, 
+                                {aap_fechatoma}, 
+                                {aama_id},
+                                {aamo_id}, 
+                                {aacu_id})""").
+            on(
+                "aap_id" -> aap.aap_id,
+                "aaco_id" -> aap.aaco_id,
+                "aap_apoyo" -> aap.aap_apoyo,
+                "aap_descripcion" -> aap.aap_descripcion,
+                "aap_direccion" -> aap.aap_direccion,
+                "aap_lat" -> aap.aap_lat,
+                "aap_lng" -> aap.aap_lng,
+                "barr_id" -> aap.barr_id,
+                "empr_id" -> empr_id,
+                "esta_id" -> 1,
+                "aap_fechacreacion" -> aap.aap_fechacreacion,
+                "usua_id" -> usua_id,
+                "aaus_id" -> aap.aaus_id, 
+                "aap_modernizada" -> aap.aap_modernizada,
+                "aatc_id" -> aap.aatc_id,
+                "aap_medidor" -> aap.aap_medidor, 
+                "aap_fechatoma" -> aap.aap_fechatoma,
+                "aama_id" -> aap.aama_id,
+                "aamo_id" -> aap.aamo_id,
+                "aacu_id" -> aap.aacu_id, 
+            ).executeInsert().get
+
+            activo.aame match {
+                case None => None
+                case Some(aame) =>
+                    SQL("INSERT INTO siap.aap_medidor (aap_id, amem_id, amet_id, aame_numero, empr_id, medi_id) VALUES ({aap_id}, {amem_id}, {amet_id}, {aame_numero}, {empr_id}, {medi_id})").
+                    on(
+                        'aap_id -> aap.aap_id,
+                        'amem_id -> aame.amem_id,
+                        'amet_id -> aame.amet_id,
+                        'aame_numero -> aame.aame_numero,
+                        'empr_id -> empr_id,
+                        'medi_id -> aame.medi_id
+                    ).executeInsert()
+            }
+
+            activo.aatr match {
+                case None => None
+                case Some(aatr) =>
+                    SQL("INSERT INTO siap.aap_transformador (aap_id, empr_id, tran_id) VALUES ({aap_id}, {empr_id}, {tran_id})").
+                    on(
+                        'aap_id -> aap.aap_id,
+                        'empr_id -> empr_id,
+                        'tran_id -> aatr.tran_id
+                    ).executeInsert()
+            }
+
+            activo.aap_elemento match {
+                case None => None
+                case Some(aap_elemento) => 
+                        SQL("INSERT INTO siap.aap_elemento (aap_id, aael_fecha, aap_bombillo, aap_balasto, aap_arrancador, aap_condensador, aap_fotocelda, reti_id, repo_consecutivo, empr_id) VALUES ({aap_id}, {aael_fecha}, {aap_bombillo}, {aap_balasto}, {aap_arrancador}, {aap_condensador}, {aap_fotocelda}, {reti_id}, {repo_consecutivo}, {empr_id})").
+                            on(
+                                'aap_id -> aap.aap_id,
+                                'aael_fecha -> aap_elemento.aael_fecha, 
+                                'aap_bombillo -> aap_elemento.aap_bombillo, 
+                                'aap_balasto -> aap_elemento.aap_balasto, 
+                                'aap_arrancador -> aap_elemento.aap_arrancador, 
+                                'aap_condensador -> aap_elemento.aap_condensador,
+                                'aap_fotocelda -> aap_elemento.aap_fotocelda, 
+                                'reti_id -> aap_elemento.reti_id, 
+                                'repo_consecutivo -> aap_elemento.repo_consecutivo,
+                                'empr_id -> empr_id
+                            ).executeInsert()
+            }
+
+            activo.aap_adicional match {
+                case None => None
+                case Some(aap_adicional) =>
+                        SQL("INSERT INTO siap.aap_adicional (aap_id, tipo_id, aap_poste_altura, aap_brazo, aap_collarin, aap_potencia, aap_tecnologia, aap_modernizada_anho, aap_rte, aap_poste_propietario, empr_id) VALUES ({aap_id}, {tipo_id}, {aap_poste_altura}, {aap_brazo}, {aap_collarin}, {aap_potencia}, {aap_tecnologia}, {aap_modernizada_anho}, {aap_rte}, {aap_poste_propietario}, {empr_id})").
+                            on(
+                                'aap_id -> aap.aap_id,
+                                'tipo_id -> aap_adicional.tipo_id,
+                                'aap_poste_altura -> aap_adicional.aap_poste_altura,
+                                'aap_brazo -> aap_adicional.aap_brazo,
+                                'aap_collarin -> aap_adicional.aap_collarin,
+                                'aap_potencia -> aap_adicional.aap_potencia,
+                                'aap_tecnologia -> aap_adicional.aap_tecnologia,
+                                'aap_modernizada_anho -> aap_adicional.aap_modernizada_anho,
+                                'aap_rte -> aap_adicional.aap_rte,
+                                'aap_poste_propietario -> aap_adicional.aap_poste_propietario,
+                                'empr_id -> empr_id
+                            ).executeInsert()
+            }
+
+            activo.autorizacion match {
+                case Some(autorizacion) => SQL("""INSERT INTO siap.aap_codigo_autorizacion (aap_id, coau_codigo, empr_id) VALUES ({aap_id}, {coau_codigo}, {empr_id})""").
+                                                on(
+                                                  'aap_id -> aap.aap_id,
+                                                  'coau_codigo -> autorizacion,
+                                                  'empr_id -> empr_id
+                                                ).executeInsert()
+
+                                           SQL("""UPDATE siap.codigo_autorizacion SET coau_fechauso = {coau_fechauso}, coau_usua_id = {usua_id}, coau_estado = {coau_estado} WHERE coau_tipo = {coau_tipo} and coau_codigo = {coau_codigo} and empr_id = {empr_id}""").
+                                               on(
+                                                'coau_fechauso -> hora,
+                                                'usua_id -> usua_id,
+                                                'coau_estado -> 1,
+                                                'empr_id -> empr_id,
+                                                'coau_tipo -> 1,
+                                                'coau_codigo -> autorizacion
+                                               ).executeUpdate()
+                case None => None
+            }
+
+            /*
+            */
+            SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
+            on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> aap.usua_id,
+                'audi_tabla -> "aap", 
+                'audi_uid -> id,
+                'audi_campo -> "aap_id", 
+                'audi_valorantiguo -> "",
+                'audi_valornuevo -> aap.aap_id,
+                'audi_evento -> "I").
+                executeInsert()
+            
+            id            
+        }
+    }    
 
     /**
         Actualizar Aap

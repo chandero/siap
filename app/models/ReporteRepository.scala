@@ -2988,8 +2988,15 @@ class ReporteRepository @Inject()(
             var datoInsertado: Boolean = false
             var datoadicionalInsertado: Boolean = false
             var datoadicionalActualizado: Boolean = false
-            val aap =
-              aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get).get
+            var aap: Aap = new Aap(d.aap_id, None, None, None, None, None, None, None, reporte.empr_id.get, None, None, None, None, None, None, None, None, None, None, reporte.usua_id.get, None, None)
+            var aap_adicional: AapAdicional = new AapAdicional(d.aap_id, None, None, None, None, None, None, None, None, None)
+            val aapOption =
+              aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get)
+            var activo = new Activo(Some(aap), None, None, Some(aap_adicional), None, None, Some(1))
+            aapOption match {
+              case None => aapService.creardirecto(activo, reporte.empr_id.get, reporte.usua_id.get)
+              case (a) => aap = a.get
+            }
             var estado = 0
             d.even_estado match {
               case Some(1) => estado = 2

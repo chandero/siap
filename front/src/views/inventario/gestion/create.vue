@@ -13,7 +13,6 @@
                   <el-input
                     autofocus
                     name='code'
-                    v-validate="'required|numeric'"
                     type='number'
                     v-model='activo.aap.aap_id'
                     @input='activo.aap.aap_id = parseInt($event)'
@@ -21,7 +20,6 @@
                     @blur='validarNumero($event)'
                     @keyup.enter.native="changeFocus('support')"
                   ></el-input>
-                  <span>{{ errors.first('code')}}</span>
                 </el-form-item>
               </el-col>
               <el-col :span='12'>

@@ -262,7 +262,7 @@
                                   <div style="display: table;">
                                    <el-input :disabled="reporte.direcciones[didx].even_estado === 2 || reporte.direcciones[didx].even_estado > 7" autofocus :ref="'aap_id_' + didx" type="number" class="sinpadding" style="display: table-cell;" v-model="reporte.direcciones[didx].aap_id" @input="reporte.direcciones[didx].aap_id = parseInt($event,10)" @blur="validateAap(reporte.direcciones[didx], didx)">
                                    </el-input>
-                                   <span :class="reporte.direcciones[didx].dato.aaco_id_anterior === 3 ? 'errorClass': 'activeClass'">{{ reporte.direcciones[didx].dato.aaco_id_anterior === 3? 'RETIRADA': 'ACTIVA'}}</span>
+                                   <span :class="reporte.direcciones[didx].dato.aaco_id_anterior === 3 ? 'errorClass': 'activeClass'">{{ status }}</span>
                                   </div>
                                 </el-form-item>
                             </el-col>
@@ -667,13 +667,20 @@ export default {
           var result = response.data
           if (result === 404) {
             this.existe = false
-            callback(new Error('No Existe'))
+            if (this.reporte.reti_id !== 2) {
+              callback(new Error('No Existe'))
+            } else {
+              callback()
+            }
           } else if (result === 401) {
             this.existe = false
             callback(new Error('Dada de Baja'))
           } else if (result === 200) {
             if (this.reporte.reti_id === 3) {
               callback(new Error('No Retirada'))
+            } else if (this.reporte.reti_id === 2) {
+              this.existe = true
+              callback(new Error('Ya Existe'))
             } else {
               this.existe = true
               callback()
@@ -681,6 +688,9 @@ export default {
           } else if (result === 204) {
             if (this.reporte.reti_id === 1 || this.reporte.reti_id === 8) {
               callback(new Error('Retirada'))
+            } else if (this.reporte.reti_id === 2) {
+              this.existe = true
+              callback(new Error('Ya Existe'))
             } else {
               this.existe = true
               callback()
@@ -999,6 +1009,7 @@ export default {
       tiposbarrio: [],
       actividades: [],
       urbanizadoras: [],
+      status: '',
       dialogonuevodanhovisible: false,
       actividad: {
         acti_id: null,
@@ -1062,6 +1073,18 @@ export default {
     pending: { name: 'pending', time: 30000, autostart: false, repeat: true }
   },
   methods: {
+    estadoLuminaria() {
+      console.log('existe: ' + this.existe)
+      if (this.existe === undefined) {
+        this.status = ''
+      } else if (this.existe === false) {
+        this.status = 'NUEVA'
+      } else if (this.reporte.direcciones[this.didx].dato.aaco_id_anterior === 3) {
+        this.status = 'RETIRADA'
+      } else {
+        this.status = 'ACTIVA'
+      }
+    },
     handleTag(idx) {
       this.reporte.direcciones.forEach(d => {
         if (d.idx === idx) {
@@ -1185,97 +1208,107 @@ export default {
             const activo = response.data
             if (activo.aap === null || activo.aap.aap_id < 1 || activo.aap.esta_id === 9) {
               this.existe = false
-              this.centerDialogVisible = true
+              if (this.reporte.reti_id !== 2) {
+                // this.centerDialogVisible = true
+              }
             } else {
-              if (direccion.even_estado === 1) {
-                direccion.even_direccion_anterior = activo.aap.aap_direccion
-                direccion.barr_id_anterior = activo.aap.barr_id
-                direccion.dato.aatc_id_anterior = activo.aap.aatc_id
-                direccion.dato.aama_id_anterior = activo.aap.aama_id
-                direccion.dato.aamo_id_anterior = activo.aap.aamo_id
-                direccion.dato.aaco_id_anterior = activo.aap.aaco_id
-                direccion.dato.aap_potencia_anterior = activo.aap_adicional.aap_potencia
-                direccion.dato.aap_tecnologia_anterior = activo.aap_adicional.aap_tecnologia
-                direccion.dato_adicional.aacu_id_anterior = activo.aap.aacu_id
-                direccion.dato_adicional.aaus_id_anterior = activo.aap.aaus_id
-                direccion.even_direccion = activo.aap.aap_direccion
-                direccion.barr_id = activo.aap.barr_id
-                direccion.dato.aatc_id = activo.aap.aatc_id
-                direccion.dato.aama_id = activo.aap.aama_id
-                direccion.dato.aamo_id = activo.aap.aamo_id
-                direccion.dato.aaco_id = activo.aap.aaco_id
-                direccion.dato.aap_potencia = activo.aap_adicional.aap_potencia
-                direccion.dato.aap_tecnologia = activo.aap_adicional.aap_tecnologia
-                direccion.dato_adicional.aacu_id = activo.aap.aacu_id
-                direccion.dato_adicional.aaus_id = activo.aap.aaus_id
-                if (activo.aap_adicional.aap_brazo !== null && activo.aap_adicional.aap_brazo !== undefined) {
-                  direccion.dato.aap_brazo_anterior = activo.aap_adicional.aap_brazo.toString()
-                  direccion.dato.aap_brazo = activo.aap_adicional.aap_brazo.toString()
-                } else {
-                  direccion.dato.aap_brazo_anterior = ''
-                  direccion.dato.aap_brazo = ''
-                }
-                direccion.dato.aap_collarin_anterior = activo.aap_adicional.aap_collarin
-                direccion.dato.tipo_id_anterior = activo.aap_adicional.tipo_id
-                direccion.dato.aap_poste_altura_anterior = activo.aap_adicional.aap_poste_altura
-                direccion.dato.aap_collarin = activo.aap_adicional.aap_collarin
-                direccion.dato.tipo_id = activo.aap_adicional.tipo_id
-                direccion.dato.aap_poste_altura = activo.aap_adicional.aap_poste_altura
-                if (activo.aap_adicional.aap_poste_propietario !== null && activo.aap_adicional.aap_poste_propietario !== undefined) {
-                  direccion.dato.aap_poste_propietario_anterior = activo.aap_adicional.aap_poste_propietario
-                  direccion.dato.aap_poste_propietario = activo.aap_adicional.aap_poste_propietario
-                } else {
-                  direccion.dato.aap_poste_propietario = null
-                  direccion.dato.aap_poste_propietario_anterior = null
-                }
-                // validar si es reubicación y no es retirada
-                if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
-                  if (activo.aap.aaco_id !== 3) {
-                    this.retiradoDialogVisible = true
-                    direccion.even_valido.aap_id = false
+              this.existe = true
+              if (this.reporte.reti_id !== 2) {
+                if (direccion.even_estado === 1) {
+                  direccion.even_direccion_anterior = activo.aap.aap_direccion
+                  direccion.barr_id_anterior = activo.aap.barr_id
+                  direccion.dato.aatc_id_anterior = activo.aap.aatc_id
+                  direccion.dato.aama_id_anterior = activo.aap.aama_id
+                  direccion.dato.aamo_id_anterior = activo.aap.aamo_id
+                  direccion.dato.aaco_id_anterior = activo.aap.aaco_id
+                  direccion.dato.aap_potencia_anterior = activo.aap_adicional.aap_potencia
+                  direccion.dato.aap_tecnologia_anterior = activo.aap_adicional.aap_tecnologia
+                  direccion.dato_adicional.aacu_id_anterior = activo.aap.aacu_id
+                  direccion.dato_adicional.aaus_id_anterior = activo.aap.aaus_id
+                  direccion.even_direccion = activo.aap.aap_direccion
+                  direccion.barr_id = activo.aap.barr_id
+                  direccion.dato.aatc_id = activo.aap.aatc_id
+                  direccion.dato.aama_id = activo.aap.aama_id
+                  direccion.dato.aamo_id = activo.aap.aamo_id
+                  direccion.dato.aaco_id = activo.aap.aaco_id
+                  direccion.dato.aap_potencia = activo.aap_adicional.aap_potencia
+                  direccion.dato.aap_tecnologia = activo.aap_adicional.aap_tecnologia
+                  direccion.dato_adicional.aacu_id = activo.aap.aacu_id
+                  direccion.dato_adicional.aaus_id = activo.aap.aaus_id
+                  if (activo.aap_adicional.aap_brazo !== null && activo.aap_adicional.aap_brazo !== undefined) {
+                    direccion.dato.aap_brazo_anterior = activo.aap_adicional.aap_brazo.toString()
+                    direccion.dato.aap_brazo = activo.aap_adicional.aap_brazo.toString()
+                  } else {
+                    direccion.dato.aap_brazo_anterior = ''
+                    direccion.dato.aap_brazo = ''
+                  }
+                  direccion.dato.aap_collarin_anterior = activo.aap_adicional.aap_collarin
+                  direccion.dato.tipo_id_anterior = activo.aap_adicional.tipo_id
+                  direccion.dato.aap_poste_altura_anterior = activo.aap_adicional.aap_poste_altura
+                  direccion.dato.aap_collarin = activo.aap_adicional.aap_collarin
+                  direccion.dato.tipo_id = activo.aap_adicional.tipo_id
+                  direccion.dato.aap_poste_altura = activo.aap_adicional.aap_poste_altura
+                  if (activo.aap_adicional.aap_poste_propietario !== null && activo.aap_adicional.aap_poste_propietario !== undefined) {
+                    direccion.dato.aap_poste_propietario_anterior = activo.aap_adicional.aap_poste_propietario
+                    direccion.dato.aap_poste_propietario = activo.aap_adicional.aap_poste_propietario
+                  } else {
+                    direccion.dato.aap_poste_propietario = null
+                    direccion.dato.aap_poste_propietario_anterior = null
+                  }
+                  // validar si es reubicación y no es retirada
+                  if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
+                    if (activo.aap.aaco_id !== 3) {
+                      this.retiradoDialogVisible = true
+                      direccion.even_valido.aap_id = false
+                    } else {
+                      this.retiradoDialogVisible = false
+                      direccion.even_valido.aap_id = true
+                      direccion.dato.aaco_id = null
+                    }
                   } else {
                     this.retiradoDialogVisible = false
-                    direccion.even_valido.aap_id = true
-                    direccion.dato.aaco_id = null
                   }
+                  // validar si es retiro y está ya retirada
+                  if (this.reporte.reti_id === 8) {
+                    if (activo.aap.aaco_id === 3) {
+                      this.yaretiradoDialogVisible = true
+                      direccion.even_valido.aap_id = false
+                    } else {
+                      this.yaretiradoDialogVisible = false
+                      direccion.even_valido.aap_id = true
+                    }
+                  }
+                  if (this.reporte.reti_id === 9) {
+                    console.log('Cambiando tipo de medida a : ' + this.reporte.adicional.aaco_id_nuevo)
+                    direccion.dato.aaco_id = this.reporte.adicional.aaco_id_nuevo
+                    if (this.reporte.adicional.aaco_id_nuevo === 2) {
+                      direccion.dato_adicional.medi_id = this.reporte.adicional.medi_id
+                      direccion.dato_adicional.tran_id = this.reporte.adicional.tran_id
+                    } else {
+                      direccion.dato_adicional.medi_id = null
+                      direccion.dato_adicional.tran_id = null
+                    }
+                  }
+                  if (this.reporte.reti_id === 8) {
+                    direccion.dato.aaco_id = 3
+                  }
+                  direccion.materiales.forEach(m => {
+                    m.aap_id = direccion.aap_id
+                  })
+                  this.estadoLuminaria()
                 } else {
-                  this.retiradoDialogVisible = false
+                  this.estadoLuminaria()
+                  console.log('No se puede cambiar la info')
                 }
-                // validar si es retiro y está ya retirada
-                if (this.reporte.reti_id === 8) {
-                  if (activo.aap.aaco_id === 3) {
-                    this.yaretiradoDialogVisible = true
-                    direccion.even_valido.aap_id = false
-                  } else {
-                    this.yaretiradoDialogVisible = false
-                    direccion.even_valido.aap_id = true
-                  }
-                }
-                if (this.reporte.reti_id === 9) {
-                  console.log('Cambiando tipo de medida a : ' + this.reporte.adicional.aaco_id_nuevo)
-                  direccion.dato.aaco_id = this.reporte.adicional.aaco_id_nuevo
-                  if (this.reporte.adicional.aaco_id_nuevo === 2) {
-                    direccion.dato_adicional.medi_id = this.reporte.adicional.medi_id
-                    direccion.dato_adicional.tran_id = this.reporte.adicional.tran_id
-                  } else {
-                    direccion.dato_adicional.medi_id = null
-                    direccion.dato_adicional.tran_id = null
-                  }
-                }
-                if (this.reporte.reti_id === 8) {
-                  direccion.dato.aaco_id = 3
-                }
-                direccion.materiales.forEach(m => {
-                  m.aap_id = direccion.aap_id
-                })
               } else {
-                console.log('No se puede cambiar la info')
+                this.existe = true
               }
             }
           }).catch(error => {
-            console.log('Estoy en Error: ' + error)
             this.existe = false
-            this.centerDialogVisible = true
+            this.estadoLuminaria()
+            console.log('Estoy en Error: ' + error)
+            // this.centerDialogVisible = true
           })
         }
       }
@@ -1385,7 +1418,7 @@ export default {
         })
       })
       // Validar cada direccion dato por todos sus valores requeridos
-      const dirForm = 'dirform_' + (this.reporte.direcciones[this.didx + 1].even_id)
+      const dirForm = 'dirform_' + (this.reporte.direcciones[this.didx].even_id)
       this.$refs[dirForm].validate()
       this.reporte.direcciones.forEach(d => {
         if (d.aap_id !== null && this.reporte.reti_id !== 1 && d.even_estado < 8) {
