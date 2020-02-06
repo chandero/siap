@@ -2474,6 +2474,27 @@ class ReporteRepository @Inject()(
         }
       }
 
+      // Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
+      reporte.direcciones.map { direcciones =>
+        for (d <- direcciones) {
+          if (d.aap_id != None && d.aap_id.get != null) {
+            var aap_elemento: AapElemento = new AapElemento(d.aap_id, None, None, None, None, None, None, reporte.reti_id, reporte.repo_consecutivo.map(_.toInt))
+            var aap: Aap = new Aap(d.aap_id, None, None, None, None, None, None, None, reporte.empr_id.get, None, None, None, None, None, None, None, None, None, None, reporte.usua_id.get, Some(aap_elemento), None)
+            var aap_adicional: AapAdicional = new AapAdicional(d.aap_id, None, None, None, None, None, None, None, None, None)
+            val aapOption =
+              aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get)
+            var activo = new Activo(Some(aap), None, None, Some(aap_adicional), None, None, Some(1))
+            aapOption match {
+              case None => aapService.creardirecto(activo, reporte.empr_id.get, reporte.usua_id.get)
+              case (a) => aap = a.get
+            }
+
+      // Fin Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
+          }
+        }
+      }
+
+
       reporte.eventos.map { eventos =>
         for (e <- eventos) {
           if (e.aap_id != None) {
@@ -2988,15 +3009,8 @@ class ReporteRepository @Inject()(
             var datoInsertado: Boolean = false
             var datoadicionalInsertado: Boolean = false
             var datoadicionalActualizado: Boolean = false
-            var aap: Aap = new Aap(d.aap_id, None, None, None, None, None, None, None, reporte.empr_id.get, None, None, None, None, None, None, None, None, None, None, reporte.usua_id.get, None, None)
-            var aap_adicional: AapAdicional = new AapAdicional(d.aap_id, None, None, None, None, None, None, None, None, None)
-            val aapOption =
-              aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get)
-            var activo = new Activo(Some(aap), None, None, Some(aap_adicional), None, None, Some(1))
-            aapOption match {
-              case None => aapService.creardirecto(activo, reporte.empr_id.get, reporte.usua_id.get)
-              case (a) => aap = a.get
-            }
+            val aap = aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get).get
+
             var estado = 0
             d.even_estado match {
               case Some(1) => estado = 2

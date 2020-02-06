@@ -33,7 +33,7 @@
                         </el-col>                         
                         <el-col v-if="reporte.adicional.repo_tipo_expansion === 5" :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
                               <el-form-item :label="$t('reporte.urba.title')" prop="adicional.urba_id">
-                                <el-select :disabled="reporte.rees_id == 3" clearable :title="$t('reporte.urba.select')" style="width: 80%" ref="tipo" v-model="reporte.adicional.urba_id" name="urbanizadora" :placeholder="$t('reporte.urba.select')">
+                                <el-select :disabled="reporte.rees_id == 3 || reporte.direcciones.lenght" clearable :title="$t('reporte.urba.select')" style="width: 80%" ref="tipo" v-model="reporte.adicional.urba_id" name="urbanizadora" :placeholder="$t('reporte.urba.select')">
                                     <el-option v-for="u in urbanizadoras" :key="u.urba_id" :label="u.urba_descripcion" :value="u.urba_id" >
                                     </el-option>   
                                 </el-select>
@@ -680,7 +680,11 @@ export default {
               callback(new Error('No Retirada'))
             } else if (this.reporte.reti_id === 2) {
               this.existe = true
-              callback(new Error('Ya Existe'))
+              if (this.reporte.adicional.repo_tipo_expansion === 3) {
+                callback(new Error('Ya Existe'))
+              } else {
+                callback()
+              }
             } else {
               this.existe = true
               callback()
@@ -690,7 +694,11 @@ export default {
               callback(new Error('Retirada'))
             } else if (this.reporte.reti_id === 2) {
               this.existe = true
-              callback(new Error('Ya Existe'))
+              if (this.reporte.adicional.repo_tipo_expansion === 3) {
+                callback(new Error('Ya Existe'))
+              } else {
+                callback()
+              }
             } else {
               this.existe = true
               callback()
@@ -1302,6 +1310,7 @@ export default {
                 }
               } else {
                 this.existe = true
+                this.estadoLuminaria()
               }
             }
           }).catch(error => {
@@ -1432,6 +1441,7 @@ export default {
           }
           // Validar estado de la luminaria y tipo de reporte
           var aap_no_en_retiro = []
+          var aap_no_nueva = []
           if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
             if (dt.aaco_id_anterior !== 3) {
               aap_no_en_retiro.push(d.aap_id)
@@ -1442,6 +1452,18 @@ export default {
               })
             }
           }
+
+          if (this.reporte.reti_id === 2 && this.reporte.adicional.repo_tipo_expansion === 3) {
+            if (d.esnueva === false) {
+              aap_no_nueva.push(d.aap)
+              this.$notify.error({
+                title: 'Luminaria Ya Existe',
+                message: 'Verifique el código de la luminaria: ' + d.aap_id,
+                offset: 0
+              })
+            }
+          }
+
           if (aap_no_en_retiro.length > 0) {
             validacion = false
           }
@@ -1684,6 +1706,8 @@ export default {
             tran_id: null
           },
           materiales: [],
+          esnueva: null,
+          codigoautorizacion: null,
           idx: this.idx
         }
         this.reporte.direcciones.push(direccion)
@@ -1866,6 +1890,8 @@ export default {
           aap_poste_propietario: true
         }
         d.materiales = []
+        d.esnueva = false
+        d.codigoautorizacion = null
       })
       if (this.reporte_previo.reti_id === 2 || this.reporte_previo.reti_id === 3 || this.reporte_previo.reti_id === 4 || this.reporte_previo.reti_id === 5 || this.reporte_previo.reti_id === 6 || this.reporte_previo.reti_id === 7 || this.reporte_previo.reti_id === 8) {
         this.conDirecciones = true

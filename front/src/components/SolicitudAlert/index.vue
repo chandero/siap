@@ -1,5 +1,6 @@
 <template>
     <el-dropdown trigger="click" class='alert-container' @command="listaSolicitud" title="Alerta de Solicitudes Por Vencer">
+      <el-dropdown-menu slot="dropdown" />
       <div class="alert-wrapper" @click="listaSolicitud()">
        <el-badge class='alert-container' :max="99" :value="conteo">
         <i style="font-size: 32px; width: 32px; height: 32px;" class="el-icon-postcard"></i>
