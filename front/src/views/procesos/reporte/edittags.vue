@@ -266,6 +266,11 @@
                                   </div>
                                 </el-form-item>
                             </el-col>
+                            <el-col v-if="reporte.reti_id !== 1" :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
+                              <el-form-item prop="dato_adicional.aap_apoyo" :label="$t('reporte.apoyo')">
+                                <el-input :disabled="reporte.direcciones[didx].even_estado > 7" ref="postsize" v-model="reporte.direcciones[didx].dato_adicional.aap_apoyo" name="aap_apoyo" />
+                              </el-form-item>
+                            </el-col>                              
                             <el-col v-if="reporte.reti_id !== 1" :xs="16" :sm="16" :md="10" :lg="10" :xl="10">
                              <el-form-item prop="even_direccion" label="Nueva Dirección">
                                <el-input :disabled="reporte.direcciones[didx].even_estado > 7" :name="'even_direccion_'+didx" v-model="reporte.direcciones[didx].even_direccion" @input="reporte.direcciones[didx].even_direccion = $event.toUpperCase()" ></el-input>
@@ -633,7 +638,7 @@ import { getTiposBarrio } from '@/api/tipobarrio'
 import { getReporte, updateReporte, getTipos, getEstados, validarCodigo, validarReporteDiligenciado } from '@/api/reporte'
 import { getAcciones } from '@/api/accion'
 import { getElementos, getElementoByDescripcion, getElementoByCode } from '@/api/elemento'
-import { getAapEdit, getAapValidar, validar } from '@/api/aap'
+import { getAapEdit, getAapValidar, validar, buscarSiguiente } from '@/api/aap'
 import { getMedioambiente } from '@/api/medioambiente'
 import { getAapTiposCarcasa } from '@/api/aap_tipo_carcasa'
 import { getAapMarcas } from '@/api/aap_marca'
@@ -680,7 +685,7 @@ export default {
               callback(new Error('No Retirada'))
             } else if (this.reporte.reti_id === 2) {
               this.existe = true
-              if (this.reporte.adicional.repo_tipo_expansion === 3) {
+              if (this.reporte.adicional.repo_tipo_expansion !== 4) {
                 callback(new Error('Ya Existe'))
               } else {
                 callback()
@@ -875,7 +880,9 @@ export default {
           medi_id_anterior: null,
           medi_id: null,
           tran_id_anterior: null,
-          tran_id: null
+          tran_id: null,
+          aap_apoyo_anterior: null,
+          aap_apoyo: null
         }
       },
       rules: {
@@ -1212,12 +1219,47 @@ export default {
           }
         }
         if (direccion.aap_id) {
+          // Limpiar Datos Direccion
+          direccion.even_direccion_anterior = null
+          direccion.barr_id_anterior = null
+          direccion.dato.aatc_id_anterior = null
+          direccion.dato.aama_id_anterior = null
+          direccion.dato.aamo_id_anterior = null
+          direccion.dato.aaco_id_anterior = null
+          direccion.dato.aap_potencia_anterior = null
+          direccion.dato.aap_tecnologia_anterior = null
+          direccion.dato_adicional.aacu_id_anterior = null
+          direccion.dato_adicional.aaus_id_anterior = null
+          direccion.dato_adicional.aap_apoyo_anterior = null
+          direccion.even_direccion = null
+          direccion.barr_id = null
+          direccion.dato.aatc_id = null
+          direccion.dato.aama_id = null
+          direccion.dato.aamo_id = null
+          direccion.dato.aaco_id = null
+          direccion.dato.aap_potencia = null
+          direccion.dato.aap_tecnologia = null
+          direccion.dato_adicional.aacu_id = null
+          direccion.dato_adicional.aaus_id = null
+          direccion.dato_adicional.aap_apoyo = null
+          direccion.dato.aap_brazo_anterior = null
+          direccion.dato.aap_brazo = null
+          direccion.dato.aap_collarin_anterior = null
+          direccion.dato.tipo_id_anterior = null
+          direccion.dato.aap_poste_altura_anterior = null
+          direccion.dato.aap_collarin = null
+          direccion.dato.tipo_id = null
+          direccion.dato.aap_poste_altura = null
+          direccion.dato.aap_poste_propietario = null
+          direccion.dato.aap_poste_propietario_anterior = null
+          // Fin Limpiar Datos Direccion
           getAapEdit(direccion.aap_id).then(response => {
             const activo = response.data
             if (activo.aap === null || activo.aap.aap_id < 1 || activo.aap.esta_id === 9) {
               this.existe = false
-              if (this.reporte.reti_id !== 2) {
-                // this.centerDialogVisible = true
+              if (this.reporte.reti_id === 2 && this.reporte.adicional.repo_tipo_expansion !== 4) {
+                console.log('Ingrese a llamar validar siguiente consecutivo')
+                this.validarSiguienteConsecutivo(direccion)
               }
             } else {
               this.existe = true
@@ -1233,6 +1275,7 @@ export default {
                   direccion.dato.aap_tecnologia_anterior = activo.aap_adicional.aap_tecnologia
                   direccion.dato_adicional.aacu_id_anterior = activo.aap.aacu_id
                   direccion.dato_adicional.aaus_id_anterior = activo.aap.aaus_id
+                  direccion.dato_adicional.aap_apoyo_anterior = activo.aap.aap_apoyo
                   direccion.even_direccion = activo.aap.aap_direccion
                   direccion.barr_id = activo.aap.barr_id
                   direccion.dato.aatc_id = activo.aap.aatc_id
@@ -1243,6 +1286,7 @@ export default {
                   direccion.dato.aap_tecnologia = activo.aap_adicional.aap_tecnologia
                   direccion.dato_adicional.aacu_id = activo.aap.aacu_id
                   direccion.dato_adicional.aaus_id = activo.aap.aaus_id
+                  direccion.dato_adicional.aap_apoyo = activo.aap.aap_apoyo
                   if (activo.aap_adicional.aap_brazo !== null && activo.aap_adicional.aap_brazo !== undefined) {
                     direccion.dato.aap_brazo_anterior = activo.aap_adicional.aap_brazo.toString()
                     direccion.dato.aap_brazo = activo.aap_adicional.aap_brazo.toString()
@@ -1310,17 +1354,133 @@ export default {
                 }
               } else {
                 this.existe = true
+                // Cargar datos de la luminaria
+                if (direccion.even_estado === 1) {
+                  direccion.even_direccion_anterior = activo.aap.aap_direccion
+                  direccion.barr_id_anterior = activo.aap.barr_id
+                  direccion.dato.aatc_id_anterior = activo.aap.aatc_id
+                  direccion.dato.aama_id_anterior = activo.aap.aama_id
+                  direccion.dato.aamo_id_anterior = activo.aap.aamo_id
+                  direccion.dato.aaco_id_anterior = activo.aap.aaco_id
+                  direccion.dato.aap_potencia_anterior = activo.aap_adicional.aap_potencia
+                  direccion.dato.aap_tecnologia_anterior = activo.aap_adicional.aap_tecnologia
+                  direccion.dato_adicional.aacu_id_anterior = activo.aap.aacu_id
+                  direccion.dato_adicional.aaus_id_anterior = activo.aap.aaus_id
+                  direccion.dato_adicional.aap_apoyo_anterior = activo.aap.aap_apoyo
+                  direccion.even_direccion = activo.aap.aap_direccion
+                  direccion.barr_id = activo.aap.barr_id
+                  direccion.dato.aatc_id = activo.aap.aatc_id
+                  direccion.dato.aama_id = activo.aap.aama_id
+                  direccion.dato.aamo_id = activo.aap.aamo_id
+                  direccion.dato.aaco_id = activo.aap.aaco_id
+                  direccion.dato.aap_potencia = activo.aap_adicional.aap_potencia
+                  direccion.dato.aap_tecnologia = activo.aap_adicional.aap_tecnologia
+                  direccion.dato_adicional.aacu_id = activo.aap.aacu_id
+                  direccion.dato_adicional.aaus_id = activo.aap.aaus_id
+                  direccion.dato_adicional.aap_apoyo = activo.aap.aap_apoyo
+                  if (activo.aap_adicional.aap_brazo !== null && activo.aap_adicional.aap_brazo !== undefined) {
+                    direccion.dato.aap_brazo_anterior = activo.aap_adicional.aap_brazo.toString()
+                    direccion.dato.aap_brazo = activo.aap_adicional.aap_brazo.toString()
+                  } else {
+                    direccion.dato.aap_brazo_anterior = ''
+                    direccion.dato.aap_brazo = ''
+                  }
+                  direccion.dato.aap_collarin_anterior = activo.aap_adicional.aap_collarin
+                  direccion.dato.tipo_id_anterior = activo.aap_adicional.tipo_id
+                  direccion.dato.aap_poste_altura_anterior = activo.aap_adicional.aap_poste_altura
+                  direccion.dato.aap_collarin = activo.aap_adicional.aap_collarin
+                  direccion.dato.tipo_id = activo.aap_adicional.tipo_id
+                  direccion.dato.aap_poste_altura = activo.aap_adicional.aap_poste_altura
+                  if (activo.aap_adicional.aap_poste_propietario !== null && activo.aap_adicional.aap_poste_propietario !== undefined) {
+                    direccion.dato.aap_poste_propietario_anterior = activo.aap_adicional.aap_poste_propietario
+                    direccion.dato.aap_poste_propietario = activo.aap_adicional.aap_poste_propietario
+                  } else {
+                    direccion.dato.aap_poste_propietario = null
+                    direccion.dato.aap_poste_propietario_anterior = null
+                  }
+                  direccion.materiales.forEach(m => {
+                    m.aap_id = direccion.aap_id
+                  })
+                }
+                // Fin Cargar datos de la luminaria
                 this.estadoLuminaria()
               }
             }
           }).catch(error => {
             this.existe = false
+            direccion.materiales.forEach(m => {
+              m.aap_id = direccion.aap_id
+            })
+            if (this.reporte.reti_id === 2 && this.reporte.adicional.repo_tipo_expansion !== 4) {
+              console.log('Ingrese a llamar validar siguiente consecutivo')
+              this.validarSiguienteConsecutivo(direccion)
+            }
             this.estadoLuminaria()
             console.log('Estoy en Error: ' + error)
             // this.centerDialogVisible = true
           })
         }
       }
+    },
+    validarSiguienteConsecutivo(direccion) {
+      console.log('Estoy en validar siguiente consecutivo')
+      buscarSiguiente().then(response => {
+        if (direccion.aap_id !== response.data) {
+          this.$prompt(
+            'Por favor ingrese el código de autorización si lo tiene:',
+            'El consecutivo digitado no es el siguiente',
+            {
+              confirmButtonText: 'Confirmar',
+              cancelButtonText: 'Cancelar'
+            }
+          )
+            .then(({ value }) => {
+              validar(1, value)
+                .then(response => {
+                  if (response.data === true) {
+                    this.invalid = false
+                    direccion.coau_codigo = value
+                    this.$message({
+                      type: 'success',
+                      message: 'El código es válido, puede continuar',
+                      duration: 5000
+                    })
+                  } else {
+                    direccion.aap_id = null
+                    this.$alert(
+                      'El código ingresado no es válido, por favor confirmelo',
+                      'Error',
+                      {
+                        confirmButtonText: 'Cerrar'
+                      }
+                    )
+                    this.invalid = true
+                  }
+                })
+                .catch(error => {
+                  direccion.aap_id = null
+                  this.$message({
+                    type: 'error',
+                    message:
+                      'Se presentó error al válidar el código (' +
+                      error +
+                      ')',
+                    duration: 5000
+                  })
+                  this.invalid = true
+                })
+            })
+            .catch(() => {
+              direccion.aap_id = null
+              this.$message({
+                type: 'info',
+                message: 'Cancelado',
+                duration: 5000
+              })
+              this.invalid = true
+            })
+        }
+      })
     },
     validateAapEvento(aap_id, id) {
       if (aap_id) {
@@ -1703,7 +1863,9 @@ export default {
             medi_id_anterior: null,
             medi_id: null,
             tran_id_anterior: null,
-            tran_id: null
+            tran_id: null,
+            aap_apoyo_anterior: null,
+            aap_apoyo: null
           },
           materiales: [],
           esnueva: null,
@@ -2027,7 +2189,9 @@ export default {
                   medi_id_anterior: null,
                   medi_id: null,
                   tran_id_anterior: null,
-                  tran_id: null
+                  tran_id: null,
+                  aap_apoyo_anterior: null,
+                  aap_apoyo: null
                 },
                 materiales: [],
                 idx: this.idx
@@ -2127,7 +2291,9 @@ export default {
                 medi_id_anterior: null,
                 medi_id: null,
                 tran_id_anterior: null,
-                tran_id: null
+                tran_id: null,
+                aap_apoyo_anterior: null,
+                aap_apoyo: null
               },
               materiales: [],
               idx: this.idx

@@ -988,6 +988,7 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
     */
     def todos(empr_id:Long, page_size:Long, current_page: Long, orderby:String, filter:String): Future[Iterable[Aap]] = Future[Iterable[Aap]] {
                 var lista_result = new ListBuffer[Aap]
+                var curr_page = 0L
                 db.withConnection { implicit connection => 
                 var query: String =
                     """SELECT   a.aap_id, 
@@ -1018,11 +1019,15 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                         LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
                         LEFT JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
                         WHERE a.empr_id = {empr_id} and a.aap_id <> 9999999 and a.esta_id <> 9"""
+                    curr_page = current_page
                     if (!filter.isEmpty) {
                         query = query + " and " + filter
+                        curr_page = 1
                     }
                     if (!orderby.isEmpty) {
                         query = query + s" ORDER BY $orderby"
+                    } else {
+                        query = query + s" ORDER BY empr_id, aap_id"
                     }
                     query = query + """
                         LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)"""
@@ -1030,7 +1035,7 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                     on(
                         'empr_id -> empr_id,
                         'page_size -> page_size,
-                        'current_page -> current_page
+                        'current_page -> curr_page
                         ).as(simple *)
                     for ( e <- lista ) {
                         val c = SQL("SELECT aael.* FROM siap.aap_elemento aael WHERE aap_id = {aap_id}").

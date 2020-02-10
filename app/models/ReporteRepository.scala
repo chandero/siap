@@ -115,7 +115,9 @@ case class ReporteDireccionDatoAdicional(
     medi_id_anterior: Option[scala.Long],
     medi_id: Option[scala.Long],
     tran_id_anterior: Option[scala.Long],
-    tran_id: Option[scala.Long]
+    tran_id: Option[scala.Long],
+    aap_apoyo_anterior: Option[String],
+    aap_apoyo: Option[String]
 )
 
 case class ReporteDireccion(
@@ -128,6 +130,7 @@ case class ReporteDireccion(
     even_id: Option[Int],
     even_estado: Option[Int],
     tire_id: Option[scala.Long],
+    coau_codigo: Option[String],
     dato: Option[ReporteDireccionDato],
     dato_adicional: Option[ReporteDireccionDatoAdicional]
 )
@@ -615,7 +618,9 @@ object ReporteDireccionDatoAdicional {
       "medi_id_anterior" -> dato.medi_id_anterior,
       "medi_id" -> dato.medi_id,
       "tran_id_anterior" -> dato.tran_id_anterior,
-      "tran_id" -> dato.tran_id
+      "tran_id" -> dato.tran_id,
+      "aap_apoyo_anterior" -> dato.aap_apoyo_anterior,
+      "aap_apoyo" -> dato.aap_apoyo
     )
   }
 
@@ -627,7 +632,9 @@ object ReporteDireccionDatoAdicional {
       (__ \ "medi_id_anterior").readNullable[scala.Long] and
       (__ \ "medi_id").readNullable[scala.Long] and
       (__ \ "tran_id_anterior").readNullable[scala.Long] and
-      (__ \ "tran_id").readNullable[scala.Long]
+      (__ \ "tran_id").readNullable[scala.Long] and
+      (__ \ "aap_apoyo_anterior").readNullable[String] and
+      (__ \ "aap_apoyo").readNullable[String]
   )(ReporteDireccionDatoAdicional.apply _)
 
   val _set = {
@@ -638,7 +645,9 @@ object ReporteDireccionDatoAdicional {
       get[Option[scala.Long]]("medi_id_anterior") ~
       get[Option[scala.Long]]("medi_id") ~
       get[Option[scala.Long]]("tran_id_anterior") ~
-      get[Option[scala.Long]]("tran_id") map {
+      get[Option[scala.Long]]("tran_id") ~
+      get[Option[String]]("aap_apoyo_anterior") ~
+      get[Option[String]]("aap_apoyo") map {
       case aacu_id_anterior ~
             aacu_id ~
             aaus_id_anterior ~
@@ -646,7 +655,9 @@ object ReporteDireccionDatoAdicional {
             medi_id_anterior ~
             medi_id ~
             tran_id_anterior ~
-            tran_id =>
+            tran_id ~
+            aap_apoyo_anterior ~
+            aap_apoyo =>
         ReporteDireccionDatoAdicional(
           aacu_id_anterior,
           aacu_id,
@@ -655,7 +666,9 @@ object ReporteDireccionDatoAdicional {
           medi_id_anterior,
           medi_id,
           tran_id_anterior,
-          tran_id
+          tran_id,
+          aap_apoyo_anterior,
+          aap_apoyo
         )
     }
   }
@@ -680,6 +693,7 @@ object ReporteDireccion {
       "even_id" -> direccion.even_id,
       "even_estado" -> direccion.even_estado,
       "tire_id" -> direccion.tire_id,
+      "coau_codigo" -> direccion.coau_codigo,
       "dato" -> direccion.dato,
       "dato_adicional" -> direccion.dato_adicional
     )
@@ -695,6 +709,7 @@ object ReporteDireccion {
       (__ \ "even_id").readNullable[Int] and
       (__ \ "even_estado").readNullable[Int] and
       (__ \ "tire_id").readNullable[scala.Long] and
+      (__ \ "coau_codigo").readNullable[String] and
       (__ \ "dato").readNullable[ReporteDireccionDato] and
       (__ \ "dato_adicional").readNullable[ReporteDireccionDatoAdicional]
   )(ReporteDireccion.apply _)
@@ -708,8 +723,9 @@ object ReporteDireccion {
       get[Option[scala.Long]]("reporte_direccion.barr_id_anterior") ~
       get[Option[Int]]("reporte_direccion.even_id") ~
       get[Option[Int]]("reporte_direccion.even_estado") ~
-      get[Option[scala.Long]]("reporte_direccion.tire_id") map {
-      case repo_id ~ aap_id ~ even_direccion ~ barr_id ~ even_direccion_anterior ~ barr_id_anterior ~ even_id ~ even_estado ~ tire_id =>
+      get[Option[scala.Long]]("reporte_direccion.tire_id") ~
+      get[Option[String]]("reporte_direccion.coau_codigo") map {
+      case repo_id ~ aap_id ~ even_direccion ~ barr_id ~ even_direccion_anterior ~ barr_id_anterior ~ even_id ~ even_estado ~ tire_id ~ coau_codigo =>
         ReporteDireccion(
           repo_id,
           aap_id,
@@ -720,6 +736,7 @@ object ReporteDireccion {
           even_id,
           even_estado,
           tire_id,
+          coau_codigo,
           null,
           null
         )
@@ -1456,6 +1473,8 @@ class ReporteRepository @Inject()(
                     None,
                     None,
                     None,
+                    None,
+                    None,
                     None
                   )
                 )
@@ -1759,6 +1778,8 @@ class ReporteRepository @Inject()(
                 None,
                 None,
                 None,
+                None,
+                None,
                 None
               )
             )
@@ -1904,6 +1925,8 @@ class ReporteRepository @Inject()(
               case None =>
                 adi = Some(
                   new ReporteDireccionDatoAdicional(
+                    None,
+                    None,
                     None,
                     None,
                     None,
