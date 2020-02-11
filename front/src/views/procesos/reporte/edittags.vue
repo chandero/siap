@@ -763,6 +763,7 @@ export default {
       autorizacion: '',
       addinputevent: 4,
       coau_tipo: 0,
+      siguiente_consecutivo: null,
       reporte: {
         reti_id: null,
         repo_id: null,
@@ -1206,7 +1207,6 @@ export default {
       }
     },
     validateAap(direccion, id) {
-      console.log('Direccion: ' + JSON.stringify(direccion))
       if (direccion.aap_id) {
         this.aap.aap_id = direccion.aap_id
         for (var i = 0; i < this.reporte.direcciones.length; i++) {
@@ -1425,7 +1425,19 @@ export default {
     validarSiguienteConsecutivo(direccion) {
       console.log('Estoy en validar siguiente consecutivo')
       buscarSiguiente().then(response => {
-        if (direccion.aap_id !== response.data) {
+        var siguiente_consecutivo = response.data
+        this.reporte.direcciones.forEach(d => {
+          console.log('validando direccion por crear: ' + d.aap_id)
+          if (d.aap_id >= siguiente_consecutivo) {
+            console.log('aap_id por crear mayor que siguiente consecutivo: ' + d.aap_id)
+            if (d.aap_id !== direccion.aap_id) {
+              console.log('validando aap_id: ' + d.aap_id)
+              siguiente_consecutivo = d.aap_id + 1
+            }
+          }
+        })
+        console.log('Siguiente Consecutivo: ' + siguiente_consecutivo)
+        if (direccion.aap_id !== siguiente_consecutivo) {
           this.$prompt(
             'Por favor ingrese el código de autorización si lo tiene:',
             'El consecutivo digitado no es el siguiente',
@@ -1472,6 +1484,9 @@ export default {
             })
             .catch(() => {
               direccion.aap_id = null
+              direccion.materiales.forEach(m => {
+                m.aap_id = null
+              })
               this.$message({
                 type: 'info',
                 message: 'Cancelado',
@@ -1870,6 +1885,7 @@ export default {
           materiales: [],
           esnueva: null,
           codigoautorizacion: null,
+          aap_fechatoma: null,
           idx: this.idx
         }
         this.reporte.direcciones.push(direccion)
@@ -2054,6 +2070,7 @@ export default {
         d.materiales = []
         d.esnueva = false
         d.codigoautorizacion = null
+        d.aap_fechatoma = null
       })
       if (this.reporte_previo.reti_id === 2 || this.reporte_previo.reti_id === 3 || this.reporte_previo.reti_id === 4 || this.reporte_previo.reti_id === 5 || this.reporte_previo.reti_id === 6 || this.reporte_previo.reti_id === 7 || this.reporte_previo.reti_id === 8) {
         this.conDirecciones = true
@@ -2194,6 +2211,8 @@ export default {
                   aap_apoyo: null
                 },
                 materiales: [],
+                codigoautorizacion: null,
+                aap_fechatoma: null,
                 idx: this.idx
               }
               this.idx++
@@ -2296,6 +2315,8 @@ export default {
                 aap_apoyo: null
               },
               materiales: [],
+              codigoautorizacion: null,
+              aap_fechatoma: null,
               idx: this.idx
             }
             this.reporte_previo.direcciones.push(direccion)

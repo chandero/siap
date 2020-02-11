@@ -68,4 +68,7 @@ export default {
   .app_main {
     max-height: 800px;
   }
+  .sidebar-container {
+    max-height: 800px;
+  }
 </style>

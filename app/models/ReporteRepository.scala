@@ -117,7 +117,11 @@ case class ReporteDireccionDatoAdicional(
     tran_id_anterior: Option[scala.Long],
     tran_id: Option[scala.Long],
     aap_apoyo_anterior: Option[String],
-    aap_apoyo: Option[String]
+    aap_apoyo: Option[String],
+    aap_lat_anterior: Option[String],
+    aap_lat: Option[String],
+    aap_lng_anterior: Option[String],
+    aap_lng: Option[String]
 )
 
 case class ReporteDireccion(
@@ -131,6 +135,7 @@ case class ReporteDireccion(
     even_estado: Option[Int],
     tire_id: Option[scala.Long],
     coau_codigo: Option[String],
+    aap_fechatoma: Option[DateTime],
     dato: Option[ReporteDireccionDato],
     dato_adicional: Option[ReporteDireccionDatoAdicional]
 )
@@ -620,7 +625,11 @@ object ReporteDireccionDatoAdicional {
       "tran_id_anterior" -> dato.tran_id_anterior,
       "tran_id" -> dato.tran_id,
       "aap_apoyo_anterior" -> dato.aap_apoyo_anterior,
-      "aap_apoyo" -> dato.aap_apoyo
+      "aap_apoyo" -> dato.aap_apoyo,
+      "aap_lat_anterior" -> dato.aap_lat_anterior,
+      "aap_lat" -> dato.aap_lat,
+      "aap_lng_anterior" -> dato.aap_lng_anterior,
+      "aap_lng" -> dato.aap_lng
     )
   }
 
@@ -634,7 +643,11 @@ object ReporteDireccionDatoAdicional {
       (__ \ "tran_id_anterior").readNullable[scala.Long] and
       (__ \ "tran_id").readNullable[scala.Long] and
       (__ \ "aap_apoyo_anterior").readNullable[String] and
-      (__ \ "aap_apoyo").readNullable[String]
+      (__ \ "aap_apoyo").readNullable[String] and
+      (__ \ "aap_lat_anterior").readNullable[String] and
+      (__ \ "aap_lat").readNullable[String] and
+      (__ \ "aap_lng_anterior").readNullable[String] and
+      (__ \ "aap_lng").readNullable[String]
   )(ReporteDireccionDatoAdicional.apply _)
 
   val _set = {
@@ -647,8 +660,12 @@ object ReporteDireccionDatoAdicional {
       get[Option[scala.Long]]("tran_id_anterior") ~
       get[Option[scala.Long]]("tran_id") ~
       get[Option[String]]("aap_apoyo_anterior") ~
-      get[Option[String]]("aap_apoyo") map {
-      case aacu_id_anterior ~
+      get[Option[String]]("aap_apoyo") ~
+      get[Option[String]]("aap_lat_anterior") ~ 
+      get[Option[String]]("aap_lat") ~
+      get[Option[String]]("aap_lng_anterior") ~
+      get[Option[String]]("aap_lng") map {
+      case  aacu_id_anterior ~
             aacu_id ~
             aaus_id_anterior ~
             aaus_id ~
@@ -657,19 +674,26 @@ object ReporteDireccionDatoAdicional {
             tran_id_anterior ~
             tran_id ~
             aap_apoyo_anterior ~
-            aap_apoyo =>
-        ReporteDireccionDatoAdicional(
-          aacu_id_anterior,
-          aacu_id,
-          aaus_id_anterior,
-          aaus_id,
-          medi_id_anterior,
-          medi_id,
-          tran_id_anterior,
-          tran_id,
-          aap_apoyo_anterior,
-          aap_apoyo
-        )
+            aap_apoyo ~
+            aap_lat_anterior ~ 
+            aap_lat ~
+            aap_lng_anterior ~
+            aap_lng => ReporteDireccionDatoAdicional(
+              aacu_id_anterior,
+              aacu_id,
+              aaus_id_anterior,
+              aaus_id,
+              medi_id_anterior,
+              medi_id,
+              tran_id_anterior,
+              tran_id,
+              aap_apoyo_anterior,
+              aap_apoyo,
+              aap_lat_anterior,
+              aap_lat,
+              aap_lng_anterior,
+              aap_lng
+            )
     }
   }
 
@@ -694,6 +718,7 @@ object ReporteDireccion {
       "even_estado" -> direccion.even_estado,
       "tire_id" -> direccion.tire_id,
       "coau_codigo" -> direccion.coau_codigo,
+      "aap_fechatoma" -> direccion.aap_fechatoma,
       "dato" -> direccion.dato,
       "dato_adicional" -> direccion.dato_adicional
     )
@@ -710,6 +735,7 @@ object ReporteDireccion {
       (__ \ "even_estado").readNullable[Int] and
       (__ \ "tire_id").readNullable[scala.Long] and
       (__ \ "coau_codigo").readNullable[String] and
+      (__ \ "aap_fechatoma").readNullable[DateTime] and
       (__ \ "dato").readNullable[ReporteDireccionDato] and
       (__ \ "dato_adicional").readNullable[ReporteDireccionDatoAdicional]
   )(ReporteDireccion.apply _)
@@ -724,8 +750,9 @@ object ReporteDireccion {
       get[Option[Int]]("reporte_direccion.even_id") ~
       get[Option[Int]]("reporte_direccion.even_estado") ~
       get[Option[scala.Long]]("reporte_direccion.tire_id") ~
-      get[Option[String]]("reporte_direccion.coau_codigo") map {
-      case repo_id ~ aap_id ~ even_direccion ~ barr_id ~ even_direccion_anterior ~ barr_id_anterior ~ even_id ~ even_estado ~ tire_id ~ coau_codigo =>
+      get[Option[String]]("reporte_direccion.coau_codigo") ~
+      get[Option[DateTime]]("reporte_direccion.aap_fechatoma") map {
+      case repo_id ~ aap_id ~ even_direccion ~ barr_id ~ even_direccion_anterior ~ barr_id_anterior ~ even_id ~ even_estado ~ tire_id ~ coau_codigo ~ aap_fechatoma =>
         ReporteDireccion(
           repo_id,
           aap_id,
@@ -737,6 +764,7 @@ object ReporteDireccion {
           even_estado,
           tire_id,
           coau_codigo,
+          aap_fechatoma,
           null,
           null
         )
@@ -1475,6 +1503,10 @@ class ReporteRepository @Inject()(
                     None,
                     None,
                     None,
+                    None,
+                    None,
+                    None,
+                    None,
                     None
                   )
                 )
@@ -1780,7 +1812,11 @@ class ReporteRepository @Inject()(
                 None,
                 None,
                 None,
-                None
+                None,
+                None,
+                None,
+                None,
+                None                
               )
             )
           case Some(adi) => None
@@ -1925,6 +1961,10 @@ class ReporteRepository @Inject()(
               case None =>
                 adi = Some(
                   new ReporteDireccionDatoAdicional(
+                    None,
+                    None,
+                    None,
+                    None,
                     None,
                     None,
                     None,
@@ -2502,17 +2542,17 @@ class ReporteRepository @Inject()(
         for (d <- direcciones) {
           if (d.aap_id != None && d.aap_id.get != null) {
             var aap_elemento: AapElemento = new AapElemento(d.aap_id, None, None, None, None, None, None, reporte.reti_id, reporte.repo_consecutivo.map(_.toInt))
-            var aap: Aap = new Aap(d.aap_id, None, None, None, None, None, None, None, reporte.empr_id.get, None, None, None, None, None, None, None, None, None, None, reporte.usua_id.get, Some(aap_elemento), None)
+            var aap: Aap = new Aap(d.aap_id, None, None, None, None, None, None, None, reporte.empr_id.get, reporte.repo_fechasolucion, d.aap_fechatoma, None, None, None, None, None, None, None, None, reporte.usua_id.get, Some(aap_elemento), None)
             var aap_adicional: AapAdicional = new AapAdicional(d.aap_id, None, None, None, None, None, None, None, None, None)
             val aapOption =
               aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get)
-            var activo = new Activo(Some(aap), None, None, Some(aap_adicional), None, None, Some(1))
+            var activo = new Activo(Some(aap), None, None, Some(aap_adicional), Some(aap_elemento), None, Some(1))
             aapOption match {
               case None => aapService.creardirecto(activo, reporte.empr_id.get, reporte.usua_id.get)
               case (a) => aap = a.get
             }
 
-      // Fin Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
+      // Fin Proceso de Creación de Luminarias Nuevas por Expansión Tipo I,II,III,V
           }
         }
       }
@@ -3551,10 +3591,52 @@ class ReporteRepository @Inject()(
                   case None => false
                 }
 
+                dato_adicional.aap_apoyo match {
+                  case Some(aap_apoyo) =>
+                    println("Actualizando Código de Apoyo")
+                    val actualizar = SQL(
+                      "UPDATE siap.aap SET aap_apoyo = {aap_apoyo} WHERE aap_id = {aap_id} and empr_id = {empr_id}"
+                    ).on(
+                        'aap_apoyo -> aap_apoyo,
+                        'aap_id -> d.aap_id,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate() > 0
+                  case None => false
+                }
+
+                dato_adicional.aap_lat match {
+                  case Some(aap_lat) =>
+                    println("Actualizando Latitud")
+                    val actualizar = SQL(
+                      "UPDATE siap.aap SET aap_lat = {aap_lat} WHERE aap_id = {aap_id} and empr_id = {empr_id}"
+                    ).on(
+                        'aap_lat -> aap_lat,
+                        'aap_id -> d.aap_id,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate() > 0
+                  case None => false
+                }
+                
+                dato_adicional.aap_lng match {
+                  case Some(aap_lng) =>
+                    println("Actualizando Código de Apoyo")
+                    val actualizar = SQL(
+                      "UPDATE siap.aap SET aap_lng = {aap_lng} WHERE aap_id = {aap_id} and empr_id = {empr_id}"
+                    ).on(
+                        'aap_lng -> aap_lng,
+                        'aap_id -> d.aap_id,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate() > 0
+                  case None => false
+                }                
+
               case None => false
             }
             // actualizar direccion de la luminaria y datos adicionales
-            if (reporte.reti_id.get == 3) {
+            if (reporte.reti_id.get == 2 || reporte.reti_id.get == 3) {
               val res = SQL(
                 """UPDATE siap.aap SET aap_direccion = {aap_direccion}, barr_id = {barr_id} WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
               ).on(

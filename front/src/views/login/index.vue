@@ -152,10 +152,13 @@ $light_gray:#eee;
 
 /* reset element-ui css */
 .login-container {
+  .login-form {
+    width: 50%;
+  }
   .el-input {
     display: inline-block;
     height: 47px;
-    width: 85%;
+    width: 75%;
     input {
       background: transparent;
       border: 0px;
@@ -194,9 +197,9 @@ $light_gray:#eee;
     position: absolute;
     left: 0;
     right: 0;
-    width: 520px;
+    width: 80%;
     padding: 35px 35px 15px 35px;
-    margin: 120px auto;
+    margin: 0px auto;
   }
   .tips {
     font-size: 14px;
