@@ -1,29 +1,77 @@
 <template>
   <div class="login-container">
-    <el-form class="login-form" autoComplete="on" :model="loginForm" :rules="loginRules" ref="loginForm" label-position="left">
-      <div class="title-container">
-        <h3 class="title">{{$t('login.title')}}</h3>
-        <lang-select class="set-language"></lang-select>
-      </div>
-      <el-form-item prop="username">
-        <span class="svg-container svg-container_login">
-          <svg-icon icon-class="user" />
-        </span>
-        <el-input name="username" type="text" v-model="loginForm.username" autoComplete="on" :placeholder="$t('login.username')" />
-      </el-form-item>
-
-      <el-form-item prop="password">
-        <span class="svg-container">
-          <svg-icon icon-class="password" />
-        </span>
-        <el-input name="password" :type="passwordType" @keyup.enter.native="handleLogin" v-model="loginForm.password" autoComplete="on" :placeholder="$t('login.password')" />
-        <span class="show-pwd" @click="showPwd">
-          <svg-icon icon-class="eye" />
-        </span>
-      </el-form-item>
-      <span><a class="password-forgot" v-on:click="recovery()">{{ $t('login.forgot')}}</a></span>
-      <p></p>
-      <el-button type="primary" style="width:100%;margin-bottom:30px;" :loading="loading" @click.native.prevent="handleLogin">{{$t('login.logIn')}}</el-button>
+      <el-form class="login-form" autoComplete="on" :model="loginForm" :rules="loginRules" ref="loginForm" label-position="left">
+      <el-row>
+        <el-col :xs="1" :sm="8" :md="8" :lg="8" :xl="8">
+          <span>&nbsp;</span>          
+        </el-col>
+        <el-col :xs="22" :sm="8" :md="8" :lg="8" :xl="8">
+          <div class="title-container">
+            <h3 class="title">{{$t('login.title')}}</h3>
+            <lang-select class="set-language"></lang-select>
+          </div>
+        </el-col>
+        <el-col :xs="1" :sm="8" :md="8" :lg="8" :xl="8">
+          <span>&nbsp;</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :xs="1" :sm="8" :md="8" :lg="8" :xl="8">
+          <span>&nbsp;</span>
+        </el-col>
+        <el-col :xs="22" :sm="8" :md="8" :lg="8" :xl="8">
+          <el-form-item prop="username">
+            <span class="svg-container svg-container_login">
+              <svg-icon icon-class="user" />
+            </span>
+            <el-input name="username" type="text" v-model="loginForm.username" autoComplete="on" :placeholder="$t('login.username')" />
+          </el-form-item>
+        </el-col>
+        <el-col :xs="1" :sm="8" :md="8" :lg="8" :xl="8">
+          <span>&nbsp;</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :xs="1" :sm="8" :md="8" :lg="8" :xl="8">
+          <span>&nbsp;</span>
+        </el-col>
+        <el-col :xs="22" :sm="8" :md="8" :lg="8" :xl="8">
+          <el-form-item prop="password">
+            <span class="svg-container">
+              <svg-icon icon-class="password" />
+            </span>
+            <el-input name="password" :type="passwordType" @keyup.enter.native="handleLogin" v-model="loginForm.password" autoComplete="on" :placeholder="$t('login.password')" />
+            <span class="show-pwd" @click="showPwd">
+              <svg-icon icon-class="eye" />
+            </span>
+          </el-form-item>
+        </el-col>
+        <el-col :xs="1" :sm="8" :md="8" :lg="8" :xl="8">
+          <span>&nbsp;</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :xs="1" :sm="8" :md="8" :lg="8" :xl="8">
+          <span>&nbsp;</span>
+        </el-col>
+        <el-col :xs="22" :sm="8" :md="8" :lg="8" :xl="8">
+          <span><a class="password-forgot" v-on:click="recovery()">{{ $t('login.forgot')}}</a></span>
+        </el-col>
+        <el-col :xs="1" :sm="8" :md="8" :lg="8" :xl="8">
+          <span>&nbsp;</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :xs="1" :sm="8" :md="8" :lg="8" :xl="8">
+          <span>&nbsp;</span>
+        </el-col>
+        <el-col :xs="22" :sm="8" :md="8" :lg="8" :xl="8">
+          <el-button type="primary" style="width:100%;margin-bottom:30px;" :loading="loading" @click.native.prevent="handleLogin">{{$t('login.logIn')}}</el-button>
+        </el-col>
+        <el-col :xs="1" :sm="8" :md="8" :lg="8" :xl="8">
+          <span>&nbsp;</span>
+        </el-col>
+      </el-row>
 <!--
       <div class="tips">
         <span>{{$t('login.username')}} : admin</span>
@@ -152,13 +200,10 @@ $light_gray:#eee;
 
 /* reset element-ui css */
 .login-container {
-  .login-form {
-    width: 50%;
-  }
   .el-input {
     display: inline-block;
     height: 47px;
-    width: 75%;
+    width: 88%;
     input {
       background: transparent;
       border: 0px;
@@ -193,14 +238,14 @@ $light_gray:#eee;
   height: 100%;
   width: 100%;
   background-color: $bg;
-  .login-form {
+  /*.login-form {
     position: absolute;
     left: 0;
     right: 0;
-    width: 80%;
+    width: 100%;
     padding: 35px 35px 15px 35px;
     margin: 0px auto;
-  }
+  }*/
   .tips {
     font-size: 14px;
     color: #fff;
