@@ -883,7 +883,11 @@ export default {
           tran_id_anterior: null,
           tran_id: null,
           aap_apoyo_anterior: null,
-          aap_apoyo: null
+          aap_apoyo: null,
+          aap_lat_anterior: null,
+          aap_lat: null,
+          aap_lng_anterior: null,
+          aap_lng: null
         }
       },
       rules: {
@@ -1106,6 +1110,7 @@ export default {
         if (d.idx === idx) {
           d.type = 'success'
           this.didx = idx - 1
+          console.log('Didx =' + this.didx)
           this.completarMaterial()
         } else {
           d.type = 'info'
@@ -1231,6 +1236,8 @@ export default {
           direccion.dato_adicional.aacu_id_anterior = null
           direccion.dato_adicional.aaus_id_anterior = null
           direccion.dato_adicional.aap_apoyo_anterior = null
+          direccion.dato_adicional.aap_lat_anterior = null
+          direccion.dato_adicional.aap_lng_anterior = null
           direccion.even_direccion = null
           direccion.barr_id = null
           direccion.dato.aatc_id = null
@@ -1242,6 +1249,8 @@ export default {
           direccion.dato_adicional.aacu_id = null
           direccion.dato_adicional.aaus_id = null
           direccion.dato_adicional.aap_apoyo = null
+          direccion.dato_adicional.aap_lat = null
+          direccion.dato_adicional.aap_lng = null
           direccion.dato.aap_brazo_anterior = null
           direccion.dato.aap_brazo = null
           direccion.dato.aap_collarin_anterior = null
@@ -1276,6 +1285,8 @@ export default {
                   direccion.dato_adicional.aacu_id_anterior = activo.aap.aacu_id
                   direccion.dato_adicional.aaus_id_anterior = activo.aap.aaus_id
                   direccion.dato_adicional.aap_apoyo_anterior = activo.aap.aap_apoyo
+                  direccion.dato_adicional.aap_lat_anterior = activo.aap.aap_lat
+                  direccion.dato_adicional.aap_lng_anterior = activo.aap.aap_lng
                   direccion.even_direccion = activo.aap.aap_direccion
                   direccion.barr_id = activo.aap.barr_id
                   direccion.dato.aatc_id = activo.aap.aatc_id
@@ -1287,6 +1298,8 @@ export default {
                   direccion.dato_adicional.aacu_id = activo.aap.aacu_id
                   direccion.dato_adicional.aaus_id = activo.aap.aaus_id
                   direccion.dato_adicional.aap_apoyo = activo.aap.aap_apoyo
+                  direccion.dato_adicional.aap_lat = activo.aap.aap_lat
+                  direccion.dato_adicional.aap_lng = activo.aap.aap_lng
                   if (activo.aap_adicional.aap_brazo !== null && activo.aap_adicional.aap_brazo !== undefined) {
                     direccion.dato.aap_brazo_anterior = activo.aap_adicional.aap_brazo.toString()
                     direccion.dato.aap_brazo = activo.aap_adicional.aap_brazo.toString()
@@ -1367,6 +1380,8 @@ export default {
                   direccion.dato_adicional.aacu_id_anterior = activo.aap.aacu_id
                   direccion.dato_adicional.aaus_id_anterior = activo.aap.aaus_id
                   direccion.dato_adicional.aap_apoyo_anterior = activo.aap.aap_apoyo
+                  direccion.dato_adicional.aap_lat_anterior = activo.aap.aap_lat
+                  direccion.dato_adicional.aap_lng_anterior = activo.aap.aap_lng
                   direccion.even_direccion = activo.aap.aap_direccion
                   direccion.barr_id = activo.aap.barr_id
                   direccion.dato.aatc_id = activo.aap.aatc_id
@@ -1378,6 +1393,8 @@ export default {
                   direccion.dato_adicional.aacu_id = activo.aap.aacu_id
                   direccion.dato_adicional.aaus_id = activo.aap.aaus_id
                   direccion.dato_adicional.aap_apoyo = activo.aap.aap_apoyo
+                  direccion.dato_adicional.aap_lat = activo.aap.aap_lat
+                  direccion.dato_adicional.aap_lng = activo.aap.aap_lng
                   if (activo.aap_adicional.aap_brazo !== null && activo.aap_adicional.aap_brazo !== undefined) {
                     direccion.dato.aap_brazo_anterior = activo.aap_adicional.aap_brazo.toString()
                     direccion.dato.aap_brazo = activo.aap_adicional.aap_brazo.toString()
@@ -1880,7 +1897,11 @@ export default {
             tran_id_anterior: null,
             tran_id: null,
             aap_apoyo_anterior: null,
-            aap_apoyo: null
+            aap_apoyo: null,
+            aap_lat_anterior: null,
+            aap_lat: null,
+            aap_lng_anterior: null,
+            aap_lng: null
           },
           materiales: [],
           esnueva: null,
@@ -2208,14 +2229,18 @@ export default {
                   tran_id_anterior: null,
                   tran_id: null,
                   aap_apoyo_anterior: null,
-                  aap_apoyo: null
+                  aap_apoyo: null,
+                  aap_lat_anterior: null,
+                  aap_lat: null,
+                  aap_lng_anterior: null,
+                  aap_lng: null
                 },
                 materiales: [],
                 codigoautorizacion: null,
                 aap_fechatoma: null,
                 idx: this.idx
               }
-              this.idx++
+
               // materiales: this.reporte_previo.eventos.filter(m => m.aap_id === e.aap_id)
               var eventos = this.reporte_previo.eventos.filter(m => m.aap_id === e.aap_id)
               eventos.forEach(e => {
@@ -2245,11 +2270,13 @@ export default {
               })
               console.log('agregando direccion vacio a reporte: ' + this.reporte_previo.repo_id)
               this.reporte_previo.direcciones.push(direccion)
+              this.idx++
               dire_length++
               aap_id = e.aap_id
             }
           })
         } else {
+          this.idx = 1
           for (var i = 1; i <= 4; i++) {
             var direccion = {
               repo_id: this.reporte_previo.repo_id,
@@ -2312,7 +2339,11 @@ export default {
                 tran_id_anterior: null,
                 tran_id: null,
                 aap_apoyo_anterior: null,
-                aap_apoyo: null
+                aap_apoyo: null,
+                aap_lat_anterior: null,
+                aap_lat: null,
+                aap_lng_anterior: null,
+                aap_lng: null
               },
               materiales: [],
               codigoautorizacion: null,
@@ -2325,6 +2356,7 @@ export default {
           }
         }
       }
+      this.idx = 1
       this.reporte_previo.direcciones.forEach(d => {
         if (d.even_id > dire_length) {
           dire_length = d.even_id

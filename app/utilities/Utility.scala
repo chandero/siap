@@ -97,7 +97,8 @@ class Utility {
       var resultString = "( "
       var logicalOperator =
       query.logicalOperator match {
-        case Some(logicalOperator) => logicalOperator
+        case Some("all") => "and"
+        case Some("any") => "or"
         case None => ""
       }
       query.children match {

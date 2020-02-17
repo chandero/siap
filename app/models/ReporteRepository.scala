@@ -2462,7 +2462,7 @@ class ReporteRepository @Inject()(
                     urba_id = {urba_id}, muot_id = {muot_id}, medi_id = {medi_id}, tran_id = {tran_id}, 
                     medi_acta = {medi_acta}, aaco_id_anterior = {aaco_id_anterior}, aaco_id_nuevo = {aaco_id_nuevo} WHERE repo_id = {repo_id}"""
         ).on(
-            'repo_fechadigitacion -> adicional.repo_fechadigitacion,
+            'repo_fechadigitacion -> hora,
             'repo_tipo_expansion -> adicional.repo_tipo_expansion,
             'repo_luminaria -> adicional.repo_luminaria,
             'repo_redes -> adicional.repo_redes,
