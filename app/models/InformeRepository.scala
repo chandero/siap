@@ -2992,7 +2992,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
         ff.set(Calendar.MINUTE, 59)
         ff.set(Calendar.HOUR, 23)
         SQL(
-          """select distinct r.repo_fechasolucion, r.repo_fechasolucion as repo_fechadigitacion, r.repo_consecutivo::text as aap_rte, a.aap_id, a.aap_direccion, b.barr_descripcion, case when b.tiba_id = 2 then 'X' else '' end as vereda, case when b.tiba_id = 5 then 'X' else '' end as parque, au.aaus_descripcion, ac.aacu_descripcion, r.repo_descripcion, tp.tipo_descripcion, case when tp.tipo_id = 1 then 'X' else '' end as concreto, case when tp.tipo_id = 2 then 'X'  else '' end as metalico, mo.aamo_descripcion, d.aap_potencia, d.aap_tecnologia, co.aaco_descripcion, case when co.aaco_id = 2 then 'X' else '' end as medidor, case when co.aaco_id = 1 then 'X' else ' ' end as aforo, u.urba_descripcion from siap.reporte r 
+          """select distinct r.repo_fechasolucion, ra.repo_fechadigitacion, r.repo_consecutivo::text as aap_rte, a.aap_id, a.aap_direccion, b.barr_descripcion, case when b.tiba_id = 2 then 'X' else '' end as vereda, case when b.tiba_id = 5 then 'X' else '' end as parque, au.aaus_descripcion, ac.aacu_descripcion, r.repo_descripcion, tp.tipo_descripcion, case when tp.tipo_id = 1 then 'X' else '' end as concreto, case when tp.tipo_id = 2 then 'X'  else '' end as metalico, mo.aamo_descripcion, d.aap_potencia, d.aap_tecnologia, co.aaco_descripcion, case when co.aaco_id = 2 then 'X' else '' end as medidor, case when co.aaco_id = 1 then 'X' else ' ' end as aforo, u.urba_descripcion from siap.reporte r 
                     left join siap.reporte_adicional ra on ra.repo_id = r.repo_id
                     left join siap.reporte_direccion e on e.repo_id = r.repo_id
                     left join siap.aap a on a.aap_id = e.aap_id
@@ -3556,7 +3556,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
         val retiros =
           SQL("""SELECT distinct r.repo_fecharecepcion, 
                     r.repo_fechasolucion,
-                    ra.repo_modificado as repo_fechadigitacion,
+                    ra.repo_fechadigitacion,
                     r.repo_consecutivo,
                     a.aap_id, 
                     d.even_direccion_anterior as aap_direccion, 
@@ -3594,7 +3594,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
           val reubicacion = SQL(
             """select r.repo_fecharecepcion,
                                             r.repo_fechasolucion,
-                                            ra.repo_modificado as repo_fechadigitacion,
+                                            ra.repo_fechadigitacion,
                                             rt.reti_descripcion,
                                             r.repo_consecutivo::text as aap_rte,
                                             a.aap_id, 
@@ -3638,7 +3638,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
         val reubicaciones = SQL(
                                   """select r.repo_fecharecepcion,
                                             r.repo_fechasolucion,
-                                            ra.repo_modificado as repo_fechadigitacion,
+                                            ra.repo_fechadigitacion,
                                             rt.reti_descripcion,
                                             r.repo_consecutivo::text as aap_rte,
                                             a.aap_id, 

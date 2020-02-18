@@ -51,8 +51,9 @@
             </el-row>
             <el-row>
               <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                <el-form-item prop="aap.aap_fechatoma" :label="$t('gestion.gettime')"  >
+                <el-form-item prop="aap.aap_fechatoma" :label="$t('gestion.gettime')" >
                   <el-date-picker ref="gettime"
+                                  disabled
                                   v-model="activo.aap.aap_fechatoma"
                                   type="date"
                                   :placeholder="$t('selectdate')"

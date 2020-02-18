@@ -604,7 +604,8 @@ export default {
     cuadrilla: 'Cuadrilla',
     ot: 'Orden de Trabajo',
     aaco_id_anterior: 'Tipo Medida Anterior',
-    aaco_id_nuevo: 'Tipo Medida Nuevo'
+    aaco_id_nuevo: 'Tipo Medida Nuevo',
+    aap_fechatoma: 'Fecha Toma'
   },
   obra: {
     tipo: {

@@ -256,8 +256,8 @@
                             <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
                               <span style="font-weight: bold;">No.</span>
                             </el-col>                            
-                            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ reporte.direcciones[didx].even_id }}</el-col>
-                            <el-col :xs="13" :sm="13" :md="4" :lg="4" :xl="4">
+                            <el-col :xs="24" :sm="1" :md="1" :lg="1" :xl="1">{{ reporte.direcciones[didx].even_id }}</el-col>
+                            <el-col :xs="24" :sm="10" :md="10" :lg="10" :xl="10">
                                 <el-form-item prop="aap_id" label="Código Luminaria">
                                   <div style="display: table;">
                                    <el-input :disabled="reporte.direcciones[didx].even_estado === 2 || reporte.direcciones[didx].even_estado > 7" autofocus :ref="'aap_id_' + didx" type="number" class="sinpadding" style="display: table-cell;" v-model="reporte.direcciones[didx].aap_id" @input="reporte.direcciones[didx].aap_id = parseInt($event,10)" @blur="validateAap(reporte.direcciones[didx], didx)">
@@ -266,17 +266,24 @@
                                   </div>
                                 </el-form-item>
                             </el-col>
-                            <el-col v-if="reporte.reti_id !== 1" :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="7" :md="7" :lg="7" :xl="7">
                               <el-form-item prop="dato_adicional.aap_apoyo" :label="$t('reporte.apoyo')">
                                 <el-input :disabled="reporte.direcciones[didx].even_estado > 7" ref="postsize" v-model="reporte.direcciones[didx].dato_adicional.aap_apoyo" name="aap_apoyo" />
                               </el-form-item>
-                            </el-col>                              
-                            <el-col v-if="reporte.reti_id !== 1" :xs="16" :sm="16" :md="10" :lg="10" :xl="10">
+                            </el-col>       
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="5" :md="5" :lg="5" :xl="5">
+                              <el-form-item prop="aap_fechatoma" :label="$t('reporte.aap_fechatoma')">
+                                <el-date-picker :disabled="reporte.direcciones[didx].even_estado > 7" ref="aap_fechatoma" v-model="reporte.direcciones[didx].aap_fechatoma" name="aap_fechatoma" />
+                              </el-form-item>
+                            </el-col> 
+                          </el-row>
+                          <el-row>                       
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
                              <el-form-item prop="even_direccion" label="Nueva Dirección">
                                <el-input :disabled="reporte.direcciones[didx].even_estado > 7" :name="'even_direccion_'+didx" v-model="reporte.direcciones[didx].even_direccion" @input="reporte.direcciones[didx].even_direccion = $event.toUpperCase()" ></el-input>
                              </el-form-item>
                             </el-col>
-                            <el-col v-if="reporte.reti_id !== 1" :xs="16" :sm="16" :md="8" :lg="8" :xl="8">
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                              <el-form-item prop="barr_id" label="Barrio/Vereda"> 
                              <el-select :disabled="reporte.direcciones[didx].even_estado > 7" style="width:100%;" filterable clearable v-model="reporte.direcciones[didx].barr_id" name="barrio" :placeholder="$t('barrio.select')" >
                               <el-option v-for="barrio in barrios" :key="barrio.barr_id" :label="barrio.barr_descripcion" :value="barrio.barr_id">
@@ -284,6 +291,18 @@
                              </el-select>
                              </el-form-item>
                             </el-col>
+                          </el-row>
+                          <el-row>
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                             <el-form-item prop="dato_adicional.aap_lat" label="Latitud">
+                               <el-input :disabled="reporte.direcciones[didx].even_estado > 7" :name="'aap_lat_'+didx" v-model="reporte.direcciones[didx].dato_adicional.aap_lat" />
+                             </el-form-item>
+                            </el-col>                            
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                             <el-form-item prop="dato_adicional.aap_lng" label="Longitud">
+                               <el-input :disabled="reporte.direcciones[didx].even_estado > 7" :name="'aap_lng_'+didx" v-model="reporte.direcciones[didx].dato_adicional.aap_lng" />
+                             </el-form-item>
+                            </el-col>                            
                             <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
                              <el-form-item prop="dato.aatc_id" label="Tipo Luminaria"> 
                              <el-select :disabled="reporte.direcciones[didx].even_estado > 7" style="width:100%;" filterable clearable v-model="reporte.direcciones[didx].dato.aatc_id" :name="'aatc_id_'+didx" :placeholder="$t('cover.select')" >
@@ -344,7 +363,7 @@
                             </el-col>
                             <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                               <el-form-item prop="dato_adicional.tran_id" :label="$t('gestion.transformador.title')">
-                                <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="transformador" v-model="reporte.direcciones[didx].dato_adicional.tran_id" name="transformador" :placeholder="$t('gestion.transformador.select')">
+                                <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="transformador" v-model="reporte.direcciones[didx].dato_adicional.tran_id" name="transformador" :placeholder="$t('gestion.transformador.select')" :change="reporte.direcciones[didx].dato_adicional.tran_id == '' ? reporte.direcciones[didx].dato_adicional.tran_id=null: reporte.direcciones[didx].dato_adicional.tran_id=reporte.direcciones[didx].dato_adicional.tran_id">
                                   <el-option v-for="t in transformadores" :key="t.tran_id" :label="t.tran_id | fillZeros(4)" :value="t.tran_id">
                                   </el-option>       
                                 </el-select>
@@ -352,7 +371,7 @@
                             </el-col>  
                           </el-row>  
                           <el-row>                                                                               
-                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                               <el-form-item prop="dato.tipo_id" :label="$t('gestion.post.title')">
                                 <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="post" v-model="reporte.direcciones[didx].dato.tipo_id" name="post" :placeholder="$t('gestion.post.select')">
                                   <el-option v-for="post in postes" :key="post.tipo_id" :label="post.tipo_descripcion" :value="post.tipo_id">
@@ -360,30 +379,32 @@
                                 </el-select>
                               </el-form-item>
                             </el-col>
-                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="4" :md="4" :lg="4" :xl="4">
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                               <el-form-item prop="dato.aap_poste_altura" :label="$t('gestion.post.size')">
                                 <el-input :disabled="reporte.direcciones[didx].even_estado > 7" ref="postsize" v-model="reporte.direcciones[didx].dato.aap_poste_altura" @input="reporte.direcciones[didx].dato.aap_poste_altura=parseInt($event)" name="postsize" />
                               </el-form-item>
                             </el-col>  
-                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="4" :md="4" :lg="4" :xl="4">
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                               <el-form-item prop="dato.aap_poste_propietario" :label="$t('gestion.post.own')">
                                 <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="postowner" v-model="reporte.direcciones[didx].dato.aap_poste_propietario" name="postowner" :placeholder="$t('gestion.post.selectown')">
                                   <el-option v-for="own in owns" :key="own" :label="own" :value="own" >
                                   </el-option>       
                               </el-select>
                               </el-form-item>
-                            </el-col>                            
-                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                            </el-col>
+                          </el-row>
+                          <el-row>
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                               <el-form-item prop="dato.aap_brazo" :label="$t('gestion.arm')">
                                 <el-input :disabled="reporte.direcciones[didx].even_estado > 7" ref="arm" v-model="reporte.direcciones[didx].dato.aap_brazo" name="arm" />    
                               </el-form-item>
                             </el-col>
-                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                               <el-form-item prop="dato.aap_collarin" :label="$t('gestion.collar')">
                                 <el-input :disabled="reporte.direcciones[didx].even_estado > 7" ref="collar" v-model="reporte.direcciones[didx].dato.aap_collarin" name="collar" />
                               </el-form-item>
                             </el-col>   
-                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                               <el-form-item prop="dato_adicional.aaus_id" :label="$t('gestion.use')">
                                 <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="use" v-model="reporte.direcciones[didx].dato_adicional.aaus_id" name="use" :placeholder="$t('use.select')">
                                   <el-option v-for="aapuso in aap_usos" :key="aapuso.aaus_id" :label="aapuso.aaus_descripcion" :value="aapuso.aaus_id" >
@@ -391,7 +412,7 @@
                                 </el-select>
                               </el-form-item>
                             </el-col>
-                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                            <el-col v-if="reporte.reti_id !== 1" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                               <el-form-item prop="dato_adicional.aacu_id" :label="$t('gestion.account')">
                                 <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="account" v-model="reporte.direcciones[didx].dato_adicional.aacu_id" name="account" :placeholder="$t('account.select')">
                                   <el-option v-for="aapcuentaap in aap_cuentasap" :key="aapcuentaap.aacu_id" :label="aapcuentaap.aacu_descripcion" :value="aapcuentaap.aacu_id" >
@@ -2070,6 +2091,7 @@ export default {
         }
       } else {
         this.reporte_previo.adicional.repo_modificado = new Date()
+        this.reporte_previo.adicional.repo_fechadigitacion = new Date()
       }
       this.reporte_previo.direcciones.forEach(d => {
         d.even_valido = {
