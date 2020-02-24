@@ -13,6 +13,8 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCoffee } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 // import 'vue-awesome/icons'
+// Session Idle
+import IdleVue from 'idle-vue'
 
 /* Register component with one of 2 methods */
 
@@ -109,6 +111,15 @@ Vue.prototype.$equals = function(o1, o2) {
 }
 
 Vue.config.productionTip = false
+
+const eventsHub = new Vue()
+
+Vue.use(IdleVue, {
+  eventEmmiter: eventsHub,
+  store,
+  idleTime: 300000, // 3 segundos
+  startAtIdle: false
+})
 
 new Vue({
   el: '#app',

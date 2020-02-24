@@ -8,20 +8,22 @@
 		<sidebar class="sidebar-container"></sidebar>
 		<div class="main-container">
 			<navbar></navbar>
-			<tags-view></tags-view>
+			<tags-view><span>Is Idle - {{ isIdle }}</span></tags-view>
 			<app-main></app-main>
 		</div>
 	</div>
+  <ModalIdle v-if="isIdle"/>  
 </el-container>
 </template>
-
 <script>
 import { isReachable } from '@/api/isreachable'
 import { Navbar, Sidebar, AppMain, TagsView } from './components'
+import ModalIdle from '@/components/ModalIdle'
 
 export default {
   name: 'layout',
   components: {
+    ModalIdle,
     Navbar,
     Sidebar,
     AppMain,
@@ -38,6 +40,9 @@ export default {
   computed: {
     sidebar() {
       return this.$store.state.app.sidebar
+    },
+    isIdle() {
+      return this.$store.state.idleVue.isIdle
     }
   },
   methods: {
