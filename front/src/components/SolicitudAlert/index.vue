@@ -28,7 +28,6 @@ export default {
   beforeMount() {
     buscarPorVencer().then(response => {
       this.listData = response.data
-      console.log('response: ' + JSON.stringify(response.data))
       this.listData.forEach(o => {
         this.conteo = this.conteo + 1
       })

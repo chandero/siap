@@ -32,7 +32,6 @@ export default {
   beforeMount() {
     siap_grafica_reporte_vencido().then(response => {
       this.listData = response.data
-      console.log('response: ' + JSON.stringify(response.data))
       this.listData.forEach(o => {
         this.conteo = this.conteo + o.pendiente
       })

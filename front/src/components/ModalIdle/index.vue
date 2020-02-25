@@ -4,13 +4,13 @@
       title="SIAP-Sesión"
       :visible.sync="dialogVisible"
       width="50%"
-      close-on-click-modal="false"
-      close-on-press-escape="false"
-      show-close="false">
-      <span>Ud ha dejado este aplicativo inactivo por más de 10 minutos. Se cerrara la sesión.</span>
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false">
+      <span>Después de 10 minutos de inactividad, SIAP finalizará la sesión.</span>
+      <span>Tiempo Faltante {{ hora(time/1000) }} </span>
       <span slot="footer" class="dialog-footer">
-      <el-button type="primary" @click="cancelar">Cancelar</el-button>
-  </span>      
+  </span>
     </el-dialog>
   </el-container>
 </template>
@@ -18,16 +18,14 @@
 export default {
   data() {
     return {
-      time: 10000,
-      dialogVisible: false,
-      reset: false
+      time: 600000,
+      dialogVisible: false
     }
   },
   created() {
     const timerId = setInterval(() => {
       this.time -= 1000
       if (!this.$store.state.idleVue.isIdle) clearInterval(timerId)
-      if (this.reset) clearInterval(timerId)
       if (this.time < 1) {
         clearInterval(timerId)
         this.logout()
@@ -35,8 +33,14 @@ export default {
     }, 1000)
   },
   methods: {
-    cancelar() {
-      this.reset = true
+    hora(time) {
+      var minutes = Math.floor(time / 60)
+      var seconds = time % 60
+      // Anteponiendo un 0 a los minutos si son menos de 10
+      minutes = minutes < 10 ? '0' + minutes : minutes
+      // Anteponiendo un 0 a los segundos si son menos de 10
+      seconds = seconds < 10 ? '0' + seconds : seconds
+      return minutes + ':' + seconds
     },
     logout() {
       this.dialogVisible = false

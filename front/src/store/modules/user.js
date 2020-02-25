@@ -56,6 +56,7 @@ const user = {
     },
     SET_USUARIO: (state, usuario) => {
       state.usuario = usuario
+      localStorage.setItem('siapusr', usuario)
     }
   },
 
@@ -77,6 +78,7 @@ const user = {
     GetUserInfo({ commit, store, state }) {
       return new Promise((resolve, reject) => {
         getUserInfo().then(response => {
+          console.log('Info Usuario: ' + JSON.stringify(response.data))
           if (!response.data) {
             reject('error')
           }

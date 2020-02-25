@@ -2,7 +2,7 @@
   <el-menu class="navbar" mode="horizontal">
     <hamburger class="hamburger-container" :toggleClick="toggleSideBar" :isActive="sidebar.opened"></hamburger>
     <div class="breadcrumb-container">
-      <userinfo/>
+      <div style="display: inline;"><userinfo/><span style="padding: 10px; font-size: 12px;">Estado Actual del Sistema: {{ isIdle? "Inactivo": "Activo" }}</span></div>
       <breadcrumb></breadcrumb>
     </div>
     <div class="right-menu">
@@ -66,7 +66,10 @@ export default {
       'sidebar',
       'name',
       'avatar'
-    ])
+    ]),
+    isIdle() {
+      return this.$store.state.idleVue.isIdle
+    }
   },
   methods: {
     toggleSideBar() {

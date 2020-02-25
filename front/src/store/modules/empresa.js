@@ -19,13 +19,13 @@ const empresa = {
       state.empresas = data
     },
     SET_EMPRESA: (state, empresa) => {
-      console.log('empresa: ' + JSON.stringify(empresa))
       state.empresa.empr_id = empresa.empr_id
       state.empresa.empr_descripcion = empresa.empr_descripcion
       state.empresa.empr_sigla = empresa.empr_sigla
       state.role = empresa.perfil
       state.empresa.muni_descripcion = empresa.muni_descripcion
       state.empresa.depa_descripcion = empresa.depa_descripcion
+      localStorage.setItem('siapempr', empresa.empr_id)
     }
   },
 
