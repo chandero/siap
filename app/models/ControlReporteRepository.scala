@@ -59,6 +59,7 @@ import com.norbitltd.spoiwo.model.enums.{
 // Utility
 import utilities.Utility
 
+/*
 case class ReporteAdicional(
     repo_id: Option[scala.Long],
     repo_fechadigitacion: Option[DateTime],
@@ -81,7 +82,7 @@ case class ReporteAdicional(
     aaco_id_anterior: Option[scala.Long],
     aaco_id_nuevo: Option[scala.Long]
 )
-
+ 
 case class ReporteDireccionDato(
     aatc_id: Option[scala.Long],
     aatc_id_anterior: Option[scala.Long],
@@ -1168,14 +1169,14 @@ object RepoElemento {
     }
   }
 }
-
-class ReporteRepository @Inject()(
+*/
+class ControlReporteRepository @Inject()(
     dbapi: DBApi,
     eventoService: EventoRepository,
     elementoService: ElementoRepository,
     empresaService: EmpresaRepository,
     usuarioService: UsuarioRepository,
-    aapService: AapRepository
+    aapService: ControlRepository
 )(implicit ec: DatabaseExecutionContext) {
   private val db = dbapi.database("default")
   private val REPORT_DEFINITION_PATH = System.getProperty("user.dir") + "/conf/reports/"
@@ -1184,24 +1185,24 @@ class ReporteRepository @Inject()(
     * Parsear un Reporte desde un ResultSet
     */
   private val simple = {
-    get[Option[scala.Long]]("reporte.repo_id") ~
-      get[Option[scala.Long]]("reporte.reti_id") ~
-      get[Option[scala.Long]]("reporte.repo_consecutivo") ~
-      get[Option[DateTime]]("reporte.repo_fecharecepcion") ~
-      get[Option[String]]("reporte.repo_direccion") ~
-      get[Option[String]]("reporte.repo_nombre") ~
-      get[Option[String]]("reporte.repo_telefono") ~
-      get[Option[DateTime]]("reporte.repo_fechasolucion") ~
-      get[Option[String]]("reporte.repo_horainicio") ~
-      get[Option[String]]("reporte.repo_horafin") ~
-      get[Option[String]]("reporte.repo_reportetecnico") ~
-      get[Option[String]]("reporte.repo_descripcion") ~
-      get[Option[scala.Long]]("reporte.rees_id") ~
-      get[Option[scala.Long]]("reporte.orig_id") ~
-      get[Option[scala.Long]]("reporte.barr_id") ~
-      get[Option[scala.Long]]("reporte.empr_id") ~
-      get[Option[scala.Long]]("reporte.tiba_id") ~
-      get[Option[scala.Long]]("reporte.usua_id") map {
+    get[Option[scala.Long]]("repo_id") ~
+      get[Option[scala.Long]]("reti_id") ~
+      get[Option[scala.Long]]("repo_consecutivo") ~
+      get[Option[DateTime]]("repo_fecharecepcion") ~
+      get[Option[String]]("repo_direccion") ~
+      get[Option[String]]("repo_nombre") ~
+      get[Option[String]]("repo_telefono") ~
+      get[Option[DateTime]]("repo_fechasolucion") ~
+      get[Option[String]]("repo_horainicio") ~
+      get[Option[String]]("repo_horafin") ~
+      get[Option[String]]("repo_reportetecnico") ~
+      get[Option[String]]("repo_descripcion") ~
+      get[Option[scala.Long]]("rees_id") ~
+      get[Option[scala.Long]]("orig_id") ~
+      get[Option[scala.Long]]("barr_id") ~
+      get[Option[scala.Long]]("empr_id") ~
+      get[Option[scala.Long]]("tiba_id") ~
+      get[Option[scala.Long]]("usua_id") map {
       case repo_id ~
             reti_id ~
             repo_consecutivo ~
@@ -1261,7 +1262,7 @@ class ReporteRepository @Inject()(
       val lista = ListBuffer[String]()
       if (reti_id > 1) {
         val reportes = SQL(
-          """SELECT r.repo_consecutivo FROM siap.reporte r 
+          """SELECT r.repo_consecutivo FROM siap.control_reporte r 
                               LEFT JOIN siap.barrio b ON b.barr_id = r.barr_id
                               LEFT JOIN siap.tipobarrio tb ON tb.tiba_id = b.tiba_id 
                               WHERE r.reti_id = {reti_id} and r.repo_consecutivo < {repo_consecutivo} and r.rees_id in (1,2) and r.empr_id = {empr_id}
@@ -1299,8 +1300,8 @@ class ReporteRepository @Inject()(
           )
           .as(SqlParser.scalar[scala.Long].single)
       val conteo1: scala.Long = SQL(
-        """SELECT COUNT(*) AS conteo FROM siap.reporte_evento r
-                           INNER JOIN siap.reporte s ON s.repo_id = r.repo_id
+        """SELECT COUNT(*) AS conteo FROM siap.control_reporte_evento r
+                           INNER JOIN siap.control_reporte s ON s.repo_id = r.repo_id
                            INNER JOIN siap.elemento e ON e.elem_id = r.elem_id
                            INNER JOIN siap.tipoelemento t ON t.tiel_id = e.tiel_id
                            WHERE r.even_codigo_retirado = {codigo} and s.empr_id = {empr_id} and t.tiel_id = {tiel_id}"""
@@ -1311,8 +1312,8 @@ class ReporteRepository @Inject()(
         )
         .as(SqlParser.scalar[scala.Long].single)
       val conteo2: scala.Long = SQL(
-        """SELECT COUNT(*) AS conteo FROM siap.reporte_evento r
-                           INNER JOIN siap.reporte s ON s.repo_id = r.repo_id
+        """SELECT COUNT(*) AS conteo FROM siap.control_reporte_evento r
+                           INNER JOIN siap.control_reporte s ON s.repo_id = r.repo_id
                            INNER JOIN siap.elemento e ON e.elem_id = r.elem_id
                            INNER JOIN siap.tipoelemento t ON t.tiel_id = e.tiel_id
                            WHERE r.even_codigo_instalado = {codigo} and s.empr_id = {empr_id} and t.tiel_id = {tiel_id}"""
@@ -1395,7 +1396,7 @@ class ReporteRepository @Inject()(
   def cuenta(empr_id: scala.Long): scala.Long = {
     db.withConnection { implicit connection =>
       val result = SQL(
-        "SELECT COUNT(*) AS c FROM siap.reporte WHERE empr_id = {empr_id} and rees_id <> 9"
+        "SELECT COUNT(*) AS c FROM siap.control_reporte WHERE empr_id = {empr_id} and rees_id <> 9"
       ).on(
           'empr_id -> empr_id
         )
@@ -1422,7 +1423,7 @@ class ReporteRepository @Inject()(
       db.withConnection { implicit connection =>
         var _list: ListBuffer[Reporte] = new ListBuffer[Reporte]()
         var query: String = """SELECT *
-                                          FROM siap.reporte r 
+                                          FROM siap.control_reporte r 
                                           LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                                           WHERE r.empr_id = {empr_id}
                                           and r.rees_id <> 9 """
@@ -1445,25 +1446,25 @@ class ReporteRepository @Inject()(
           .as(simple *)
         reps.map { r =>
           val adicional = SQL(
-            """SELECT * FROM siap.reporte_adicional WHERE repo_id = {repo_id}"""
+            """SELECT * FROM siap.control_reporte_adicional WHERE repo_id = {repo_id}"""
           ).on(
               'repo_id -> r.repo_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
           val eventos = SQL(
-            """SELECT * FROM siap.reporte_evento WHERE repo_id = {repo_id} and even_estado < 8"""
+            """SELECT * FROM siap.control_reporte_evento WHERE repo_id = {repo_id} and even_estado < 8"""
           ).on(
               'repo_id -> r.repo_id
             )
             .as(Evento.eventoSet *)
           val meams = SQL(
-            """SELECT m.meam_id FROM siap.reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
+            """SELECT m.meam_id FROM siap.control_reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
           ).on(
               'repo_id -> r.repo_id
             )
             .as(scalar[scala.Long].*)
           val direcciones = SQL(
-            """SELECT * FROM siap.reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
+            """SELECT * FROM siap.control_reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
           ).on(
               'repo_id -> r.repo_id
             )
@@ -1471,7 +1472,7 @@ class ReporteRepository @Inject()(
           var _listDireccion = new ListBuffer[ReporteDireccion]()
           direcciones.map { d =>
             var dat = SQL(
-              """SELECT * FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+              """SELECT * FROM siap.control_reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
             ).on(
                 'repo_id -> d.repo_id,
                 'aap_id -> d.aap_id,
@@ -1509,7 +1510,7 @@ class ReporteRepository @Inject()(
               case Some(dat) => None
             }
             var adi = SQL(
-              """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+              """SELECT * FROM siap.control_reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
             ).on(
                 'repo_id -> d.repo_id,
                 'aap_id -> d.aap_id,
@@ -1578,7 +1579,7 @@ class ReporteRepository @Inject()(
     Future[Iterable[Reporte]] {
       db.withConnection { implicit connection =>
         var _list: ListBuffer[Reporte] = new ListBuffer[Reporte]()
-        val reps = SQL("""SELECT * FROM siap.reporte r 
+        val reps = SQL("""SELECT * FROM siap.control_reporte r 
                                           WHERE r.empr_id = {empr_id} 
                                           and r.rees_id <> 9 ORDER BY r.repo_id""")
           .on(
@@ -1587,25 +1588,25 @@ class ReporteRepository @Inject()(
           .as(simple *)
         reps.map { r =>
           val eventos = SQL(
-            """SELECT * FROM siap.reporte_evento WHERE repo_id = {repo_id} and even_estado < 8"""
+            """SELECT * FROM siap.control_reporte_evento WHERE repo_id = {repo_id} and even_estado < 8"""
           ).on(
               'repo_id -> r.repo_id
             )
             .as(Evento.eventoSet *)
           val meams = SQL(
-            """SELECT m.meam_id FROM siap.reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
+            """SELECT m.meam_id FROM siap.control_reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
           ).on(
               'repo_id -> r.repo_id
             )
             .as(scalar[scala.Long].*)
           val adicional = SQL(
-            """SELECT * FROM siap.reporte_adicional WHERE repo_id = {repo_id}"""
+            """SELECT * FROM siap.control_reporte_adicional WHERE repo_id = {repo_id}"""
           ).on(
               'repo_id -> r.repo_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
           val direcciones = SQL(
-            """SELECT * FROM siap.reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
+            """SELECT * FROM siap.control_reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
           ).on(
               'repo_id -> r.repo_id
             )
@@ -1613,7 +1614,7 @@ class ReporteRepository @Inject()(
           var _listDireccion = new ListBuffer[ReporteDireccion]()
           direcciones.map { d =>
             var dat = SQL(
-              """SELECT * FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+              """SELECT * FROM siap.control_reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
             ).on(
                 'repo_id -> d.repo_id,
                 'aap_id -> d.aap_id,
@@ -1692,8 +1693,8 @@ class ReporteRepository @Inject()(
          (select r.repo_id, r.repo_fecharecepcion, r.reti_id, r.repo_consecutivo,  
          ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval) as fecha_limite,
          (current_timestamp - ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval)) as horas, 
-         o.orig_descripcion, r.repo_nombre, r.repo_telefono, r.repo_direccion, b.barr_descripcion, r.repo_descripcion, r.rees_id from siap.reporte r
-        inner join siap.reporte_tipo rt on rt.reti_id = r.reti_id
+         o.orig_descripcion, r.repo_nombre, r.repo_telefono, r.repo_direccion, b.barr_descripcion, r.repo_descripcion, r.rees_id from siap.control_reporte r
+        inner join siap.control_reporte_tipo rt on rt.reti_id = r.reti_id
         left join siap.barrio b on b.barr_id = r.barr_id
         left join siap.origen o on o.orig_id = r.orig_id
         where r.rees_id = 1 and r.empr_id = {empr_id}
@@ -1718,12 +1719,12 @@ class ReporteRepository @Inject()(
   ): Option[ReporteWeb] = {
     db.withConnection { implicit connection =>
       val r = SQL(
-        """SELECT * FROM siap.reporte r
-                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
-                            LEFT JOIN siap.reporte_adicional ra on r.repo_id = ra.repo_id
+        """SELECT * FROM siap.control_reporte r
+                            INNER JOIN siap.control_reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.control_reporte_adicional ra on r.repo_id = ra.repo_id
                             LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
-                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                            INNER JOIN siap.control_reporte_estado e on r.rees_id = e.rees_id
                     WHERE r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id}"""
       ).on(
           'repo_consecutivo -> repo_consecutivo,
@@ -1740,13 +1741,13 @@ class ReporteRepository @Inject()(
     */
   def buscarPorId(repo_id: scala.Long): Option[Reporte] = {
     db.withConnection { implicit connection =>
-      val r = SQL("""SELECT * FROM siap.reporte r
-                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
-                            LEFT JOIN siap.reporte_adicional ra on r.repo_id = ra.repo_id
+      val r = SQL("""SELECT * FROM siap.control_reporte r
+                            INNER JOIN siap.control_reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.control_reporte_adicional ra on r.repo_id = ra.repo_id
                             LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
                             LEFT JOIN siap.origen o on r.orig_id = o.orig_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
-                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                            INNER JOIN siap.control_reporte_estado e on r.rees_id = e.rees_id
                     WHERE r.repo_id = {repo_id}""")
         .on(
           'repo_id -> repo_id
@@ -1754,25 +1755,25 @@ class ReporteRepository @Inject()(
         .as(simple.singleOpt)
 
       val eventos = SQL(
-        """SELECT * FROM siap.reporte_evento WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
+        """SELECT * FROM siap.control_reporte_evento WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
       ).on(
           'repo_id -> repo_id
         )
         .as(Evento.eventoSet *)
       val meams = SQL(
-        """SELECT m.meam_id FROM siap.reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
+        """SELECT m.meam_id FROM siap.control_reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
       ).on(
           'repo_id -> repo_id
         )
         .as(scalar[scala.Long].*)
       val adicional = SQL(
-        """SELECT * FROM siap.reporte_adicional WHERE repo_id = {repo_id}"""
+        """SELECT * FROM siap.control_reporte_adicional WHERE repo_id = {repo_id}"""
       ).on(
           'repo_id -> repo_id
         )
         .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
       val direcciones = SQL(
-        """SELECT * FROM siap.reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
+        """SELECT * FROM siap.control_reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
       ).on(
           'repo_id -> repo_id
         )
@@ -1780,7 +1781,7 @@ class ReporteRepository @Inject()(
       var _listDireccion = new ListBuffer[ReporteDireccion]()
       direcciones.map { d =>
         var dat = SQL(
-          """SELECT * FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+          """SELECT * FROM siap.control_reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
         ).on(
             'repo_id -> d.repo_id,
             'aap_id -> d.aap_id,
@@ -1818,7 +1819,7 @@ class ReporteRepository @Inject()(
           case Some(dat) => None
         }
         var adi = SQL(
-          """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+          """SELECT * FROM siap.control_reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
         ).on(
             'repo_id -> d.repo_id,
             'aap_id -> d.aap_id,
@@ -1894,13 +1895,13 @@ class ReporteRepository @Inject()(
   ): Option[Reporte] = {
     db.withConnection { implicit connection =>
       val r = SQL(
-        """SELECT * FROM siap.reporte r
-                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
-                            LEFT JOIN siap.reporte_adicional ra on r.repo_id = ra.repo_id
+        """SELECT * FROM siap.control_reporte r
+                            INNER JOIN siap.control_reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.control_reporte_adicional ra on r.repo_id = ra.repo_id
                             LEFT JOIN siap.actividad a on ra.acti_id = a.acti_id
                             LEFT JOIN siap.origen o on r.orig_id = o.orig_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
-                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                            INNER JOIN siap.control_reporte_estado e on r.rees_id = e.rees_id
                     WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9"""
       ).on(
           'reti_id -> reti_id,
@@ -1912,25 +1913,25 @@ class ReporteRepository @Inject()(
       r match {
         case Some(r) =>
           val eventos = SQL(
-            """SELECT * FROM siap.reporte_evento WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
+            """SELECT * FROM siap.control_reporte_evento WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
           ).on(
               'repo_id -> r.repo_id
             )
             .as(Evento.eventoSet *)
           val meams = SQL(
-            """SELECT m.meam_id FROM siap.reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
+            """SELECT m.meam_id FROM siap.control_reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
           ).on(
               'repo_id -> r.repo_id
             )
             .as(scalar[scala.Long].*)
           val adicional = SQL(
-            """SELECT * FROM siap.reporte_adicional WHERE repo_id = {repo_id}"""
+            """SELECT * FROM siap.control_reporte_adicional WHERE repo_id = {repo_id}"""
           ).on(
               'repo_id -> r.repo_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
           val direcciones = SQL(
-            """SELECT * FROM siap.reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
+            """SELECT * FROM siap.control_reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
           ).on(
               'repo_id -> r.repo_id
             )
@@ -1938,7 +1939,7 @@ class ReporteRepository @Inject()(
           var _listDireccion = new ListBuffer[ReporteDireccion]()
           direcciones.map { d =>
             var dat = SQL(
-              """SELECT * FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+              """SELECT * FROM siap.control_reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
             ).on(
                 'repo_id -> d.repo_id,
                 'aap_id -> d.aap_id,
@@ -1976,7 +1977,7 @@ class ReporteRepository @Inject()(
               case Some(dat) => None
             }
             var adi = SQL(
-              """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+              """SELECT * FROM siap.control_reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
             ).on(
                 'repo_id -> d.repo_id,
                 'aap_id -> d.aap_id,
@@ -2052,13 +2053,13 @@ class ReporteRepository @Inject()(
   ): Option[ReporteConsulta] = {
     db.withConnection { implicit connection =>
       val r = SQL(
-        """SELECT * FROM siap.reporte r
-                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
-                            LEFT JOIN siap.reporte_adicional ra on r.repo_id = ra.repo_id
+        """SELECT * FROM siap.control_reporte r
+                            INNER JOIN siap.control_reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.control_reporte_adicional ra on r.repo_id = ra.repo_id
                             LEFT JOIN siap.actividad a on ra.acti_id = a.acti_id
                             LEFT JOIN siap.origen o on r.orig_id = o.orig_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
-                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                            INNER JOIN siap.control_reporte_estado e on r.rees_id = e.rees_id
                     WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <>9"""
       ).on(
           'reti_id -> reti_id,
@@ -2070,7 +2071,7 @@ class ReporteRepository @Inject()(
       r match {
         case Some(r) =>
           val adicional = SQL(
-            """SELECT * FROM siap.reporte_adicional WHERE repo_id = {repo_id}"""
+            """SELECT * FROM siap.control_reporte_adicional WHERE repo_id = {repo_id}"""
           ).on(
               'repo_id -> r.repo_id
             )
@@ -2114,7 +2115,7 @@ class ReporteRepository @Inject()(
       var _list: ListBuffer[Reporte] = new ListBuffer[Reporte]()
       var query: String =
         """SELECT *
-                                          FROM siap.reporte r 
+                                          FROM siap.control_reporte r 
                                           LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                                           WHERE r.empr_id = {empr_id} and r.repo_fecharecepcion between {fecha_inicial} and {fecha_final}
                                           and r.rees_id <> 9 ORDER BY r.rees_id, r.repo_fecharecepcion DESC """
@@ -2140,25 +2141,25 @@ class ReporteRepository @Inject()(
         .as(simple *)
       reps.map { r =>
         val adicional = SQL(
-          """SELECT * FROM siap.reporte_adicional WHERE repo_id = {repo_id}"""
+          """SELECT * FROM siap.control_reporte_adicional WHERE repo_id = {repo_id}"""
         ).on(
             'repo_id -> r.repo_id
           )
           .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
         val eventos = SQL(
-          """SELECT * FROM siap.reporte_evento WHERE repo_id = {repo_id} """
+          """SELECT * FROM siap.control_reporte_evento WHERE repo_id = {repo_id} """
         ).on(
             'repo_id -> r.repo_id
           )
           .as(Evento.eventoSet *)
         val meams = SQL(
-          """SELECT m.meam_id FROM siap.reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
+          """SELECT m.meam_id FROM siap.control_reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
         ).on(
             'repo_id -> r.repo_id
           )
           .as(scalar[scala.Long].*)
         val direcciones = SQL(
-          """SELECT * FROM siap.reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
+          """SELECT * FROM siap.control_reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
         ).on(
             'repo_id -> r.repo_id
           )
@@ -2166,7 +2167,7 @@ class ReporteRepository @Inject()(
         var _listDireccion = new ListBuffer[ReporteDireccion]()
         direcciones.map { d =>
           val dat = SQL(
-            """SELECT * FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+            """SELECT * FROM siap.control_reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
           ).on(
               'repo_id -> d.repo_id,
               'aap_id -> d.aap_id,
@@ -2174,7 +2175,7 @@ class ReporteRepository @Inject()(
             )
             .as(ReporteDireccionDato.reporteDireccionDatoSet.singleOpt)
           val adi = SQL(
-            """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+            """SELECT * FROM siap.control_reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
           ).on(
               'repo_id -> d.repo_id,
               'aap_id -> d.aap_id,
@@ -2227,7 +2228,7 @@ class ReporteRepository @Inject()(
   ): Future[Iterable[Reporte]] = Future[Iterable[Reporte]] {
     db.withConnection { implicit connection =>
       SQL(
-        "SELECT * FROM siap.reporte WHERE repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and empr_id = {empr_id}"
+        "SELECT * FROM siap.control_reporte WHERE repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and empr_id = {empr_id}"
       ).on(
           'fecha_inicial -> fecha_inicial,
           'fecha_final -> fecha_final,
@@ -2248,7 +2249,7 @@ class ReporteRepository @Inject()(
   ): Future[Iterable[Reporte]] = Future[Iterable[Reporte]] {
     db.withConnection { implicit connection =>
       SQL(
-        "SELECT * FROM siap.reporte WHERE rees_id = {rees_id} and empr_id = {empr_id}"
+        "SELECT * FROM siap.control_reporte WHERE rees_id = {rees_id} and empr_id = {empr_id}"
       ).on(
           'rees_id -> rees_id,
           'empr_id -> empr_id
@@ -2268,7 +2269,7 @@ class ReporteRepository @Inject()(
   ): Future[Iterable[Reporte]] = Future[Iterable[Reporte]] {
     db.withConnection { implicit connection =>
       SQL(
-        "SELECT * FROM siap.reporte WHERE acti_id = {acti_id} and empr_id = {empr_id}"
+        "SELECT * FROM siap.control_reporte WHERE acti_id = {acti_id} and empr_id = {empr_id}"
       ).on(
           'acti_id -> acti_id,
           'empr_id -> empr_id
@@ -2288,7 +2289,7 @@ class ReporteRepository @Inject()(
   ): Future[Iterable[Reporte]] = Future[Iterable[Reporte]] {
     db.withConnection { implicit connection =>
       SQL(
-        "SELECT * FROM siap.reporte WHERE orig_id = {orig_id} and empr_id = {empr_id}"
+        "SELECT * FROM siap.control_reporte WHERE orig_id = {orig_id} and empr_id = {empr_id}"
       ).on(
           'orig_id -> orig_id,
           'empr_id -> empr_id
@@ -2308,7 +2309,7 @@ class ReporteRepository @Inject()(
       filtro: scala.collection.mutable.Map[String, Object]
   ): Future[Iterable[Reporte]] = Future[Iterable[Reporte]] {
     db.withConnection { implicit connection =>
-      SQL("SELECT * FROM siap.reporte")
+      SQL("SELECT * FROM siap.control_reporte")
         .as(simple *)
     }
   }
@@ -2326,7 +2327,7 @@ class ReporteRepository @Inject()(
         val consec = consecutivo(reporte.reti_id.get)
         if (consec > 0) {
           val id: scala.Long = SQL(
-            "INSERT INTO siap.reporte (repo_fecharecepcion, repo_direccion, repo_nombre, repo_telefono, repo_fechasolucion, repo_horainicio, repo_horafin, repo_reportetecnico, repo_descripcion, rees_id, orig_id, barr_id, empr_id, tiba_id, usua_id, reti_id, repo_consecutivo) VALUES ({repo_fecharecepcion}, {repo_direccion}, {repo_nombre}, {repo_telefono}, {repo_fechasolucion}, {repo_horainicio}, {repo_horafin}, {repo_reportetecnico}, {repo_descripcion}, {rees_id}, {orig_id}, {barr_id}, {empr_id}, {tiba_id}, {usua_id}, {reti_id}, {repo_consecutivo})"
+            "INSERT INTO siap.control_reporte (repo_fecharecepcion, repo_direccion, repo_nombre, repo_telefono, repo_fechasolucion, repo_horainicio, repo_horafin, repo_reportetecnico, repo_descripcion, rees_id, orig_id, barr_id, empr_id, tiba_id, usua_id, reti_id, repo_consecutivo) VALUES ({repo_fecharecepcion}, {repo_direccion}, {repo_nombre}, {repo_telefono}, {repo_fechasolucion}, {repo_horainicio}, {repo_horafin}, {repo_reportetecnico}, {repo_descripcion}, {rees_id}, {orig_id}, {barr_id}, {empr_id}, {tiba_id}, {usua_id}, {reti_id}, {repo_consecutivo})"
           ).on(
               'repo_fecharecepcion -> reporte.repo_fecharecepcion,
               'repo_direccion -> reporte.repo_direccion,
@@ -2350,7 +2351,7 @@ class ReporteRepository @Inject()(
             .get
 
           reporte.adicional.map { adicional =>
-            SQL("""INSERT INTO siap.reporte_adicional (repo_id, 
+            SQL("""INSERT INTO siap.control_reporte_adicional (repo_id, 
                                                                repo_fechadigitacion, 
                                                                repo_tipo_expansion, 
                                                                repo_luminaria, 
@@ -2457,7 +2458,7 @@ class ReporteRepository @Inject()(
       var historia =
         scala.collection.mutable.Map[scala.Long, ElementoHistoria]()
       val result: Boolean = SQL(
-        "UPDATE siap.reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tiba_id = {tiba_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
+        "UPDATE siap.control_reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tiba_id = {tiba_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
       ).on(
           'repo_id -> reporte.repo_id,
           'repo_direccion -> reporte.repo_direccion,
@@ -2480,7 +2481,7 @@ class ReporteRepository @Inject()(
       // actualizar reporte adicional
       reporte.adicional.map { adicional =>
         val hayAdicional: Boolean = SQL(
-          """UPDATE siap.reporte_adicional SET repo_fechadigitacion = {repo_fechadigitacion}, 
+          """UPDATE siap.control_reporte_adicional SET repo_fechadigitacion = {repo_fechadigitacion}, 
                     repo_tipo_expansion = {repo_tipo_expansion}, repo_luminaria = {repo_luminaria}, 
                     repo_redes = {repo_redes}, repo_poste = {repo_poste}, repo_modificado = {repo_modificado}, 
                     repo_subreporte = {repo_subreporte}, repo_subid = {repo_subid}, repo_email = {repo_email}, 
@@ -2511,7 +2512,7 @@ class ReporteRepository @Inject()(
           )
           .executeUpdate() > 0
         if (!hayAdicional) {
-          SQL("""INSERT INTO siap.reporte_adicional (repo_id, 
+          SQL("""INSERT INTO siap.control_reporte_adicional (repo_id, 
                                                                repo_fechadigitacion, 
                                                                repo_tipo_expansion, 
                                                                repo_luminaria, 
@@ -2566,15 +2567,14 @@ class ReporteRepository @Inject()(
       // Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
       reporte.direcciones.map { direcciones =>
         for (d <- direcciones) {
-          if (d.aap_id != None && d.aap_id.get != null) {
-            var aap_elemento: AapElemento = new AapElemento(d.aap_id, None, None, None, None, None, None, reporte.reti_id, reporte.repo_consecutivo.map(_.toInt))
-            var aap: Aap = new Aap(d.aap_id, None, None, None, None, None, None, None, reporte.empr_id.get, reporte.repo_fechasolucion, d.aap_fechatoma, None, None, None, None, None, None, None, None, reporte.usua_id.get, Some(aap_elemento), None)
-            var aap_adicional: AapAdicional = new AapAdicional(d.aap_id, None, None, None, None, None, None, None, None, None)
+          if (d.aap_id != None) {
+            // var aap_elemento: AapElemento = new AapElemento(d.aap_id, None, None, None, None, None, None, reporte.reti_id, reporte.repo_consecutivo.map(_.toInt))
+            var aap: Control = new Control(d.aap_id, reporte.empr_id, reporte.usua_id, None, None, Some(1))
+            // var aap_adicional: AapAdicional = new AapAdicional(d.aap_id, None, None, None, None, None, None, None, None, None)
             val aapOption =
               aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get)
-            var activo = new Activo(Some(aap), None, None, Some(aap_adicional), Some(aap_elemento), None, Some(1))
             aapOption match {
-              case None => aapService.creardirecto(activo, reporte.empr_id.get, reporte.usua_id.get)
+              case None => aapService.crear(aap)
               case (a) => aap = a.get
             }
 
@@ -2582,7 +2582,6 @@ class ReporteRepository @Inject()(
           }
         }
       }
-
 
       reporte.eventos.map { eventos =>
         for (e <- eventos) {
@@ -2616,7 +2615,7 @@ class ReporteRepository @Inject()(
             var eventoActualizado: Boolean = false
             var eventoInsertado: Boolean = false
             eventoActualizado = SQL(
-              """UPDATE siap.reporte_evento SET 
+              """UPDATE siap.control_reporte_evento SET 
                                                                 even_fecha = {even_fecha}, 
                                                                 elem_id = {elem_id},
                                                                 even_estado = {even_estado},
@@ -2644,7 +2643,7 @@ class ReporteRepository @Inject()(
               .executeUpdate() > 0
             if (!eventoActualizado) {
               eventoInsertado = SQL(
-                """INSERT INTO siap.reporte_evento (even_fecha, 
+                """INSERT INTO siap.control_reporte_evento (even_fecha, 
                                     even_codigo_instalado,
                                     even_cantidad_instalado,
                                     even_codigo_retirado,
@@ -2684,6 +2683,7 @@ class ReporteRepository @Inject()(
                 )
                 .executeUpdate() > 0
             }
+            /* Para el Caso de Control no es necesario verificar elemento
             if ((eventoActualizado || eventoInsertado) && (estado != 9)) {
               // validar elemento y actualizar aap_elemento
               elemento.tiel_id match {
@@ -3085,13 +3085,14 @@ class ReporteRepository @Inject()(
                 case _ => None
               }
             }
+            */
           }
         }
       }
 
       reporte.direcciones.map { direcciones =>
         for (d <- direcciones) {
-          if (d.aap_id != None && d.aap_id.get != null) {
+          if (d.aap_id != None) {
             var dirActualizado: Boolean = false
             var dirInsertado: Boolean = false
             var datoActualizado: Boolean = false
@@ -3110,7 +3111,7 @@ class ReporteRepository @Inject()(
             }
             // Direccion
             dirActualizado = SQL(
-              """UPDATE siap.reporte_direccion SET
+              """UPDATE siap.control_reporte_direccion SET
                                                 even_direccion = {even_direccion},
                                                 barr_id = {barr_id},
                                                 even_direccion_anterior = {even_direccion_anterior},
@@ -3136,7 +3137,7 @@ class ReporteRepository @Inject()(
 
             if (!dirActualizado) {
               dirInsertado = SQL(
-                """INSERT INTO siap.reporte_direccion (repo_id, aap_id, even_direccion, barr_id, even_id, even_direccion_anterior, barr_id_anterior, even_estado, tire_id) VALUES ({repo_id}, {aap_id}, {even_direccion}, {barr_id}, {even_id}, {even_direccion_anterior}, {barr_id_anterior}, {even_estado}, {tire_id})"""
+                """INSERT INTO siap.control_reporte_direccion (repo_id, aap_id, even_direccion, barr_id, even_id, even_direccion_anterior, barr_id_anterior, even_estado, tire_id) VALUES ({repo_id}, {aap_id}, {even_direccion}, {barr_id}, {even_id}, {even_direccion_anterior}, {barr_id_anterior}, {even_estado}, {tire_id})"""
               ).on(
                   'repo_id -> reporte.repo_id,
                   'aap_id -> d.aap_id,
@@ -3153,7 +3154,7 @@ class ReporteRepository @Inject()(
             // Fin Direccion
             // Direccion Dato
             datoActualizado = SQL(
-              """UPDATE siap.reporte_direccion_dato SET
+              """UPDATE siap.control_reporte_direccion_dato SET
                             aatc_id = {aatc_id},
                             aatc_id_anterior = {aatc_id_anterior},
                             aama_id = {aama_id},
@@ -3209,7 +3210,7 @@ class ReporteRepository @Inject()(
               )
               .executeUpdate() > 0
             if (!datoActualizado) {
-              datoInsertado = SQL("""INSERT INTO siap.reporte_direccion_dato (
+              datoInsertado = SQL("""INSERT INTO siap.control_reporte_direccion_dato (
                                 repo_id,
                                 even_id,
                                 aap_id,
@@ -3295,7 +3296,7 @@ class ReporteRepository @Inject()(
             // Fin Direccion Dato
             // Direccion Dato Adicional
             datoadicionalActualizado = SQL(
-              """UPDATE siap.reporte_direccion_dato_adicional SET 
+              """UPDATE siap.control_reporte_direccion_dato_adicional SET 
                                 aacu_id_anterior = {aacu_id_anterior},
                                 aacu_id = {aacu_id},
                                 aaus_id_anterior = {aaus_id_anterior},
@@ -3325,7 +3326,7 @@ class ReporteRepository @Inject()(
               .executeUpdate() > 0
             if (!datoadicionalActualizado) {
               datoadicionalInsertado = SQL(
-                """INSERT INTO siap.reporte_direccion_dato_adicional (
+                """INSERT INTO siap.control_reporte_direccion_dato_adicional (
                                     repo_id,
                                     even_id,
                                     aap_id,
@@ -3710,7 +3711,7 @@ class ReporteRepository @Inject()(
       //
       // guardar medio ambiente
       SQL(
-        """DELETE FROM siap.reporte_medioambiente WHERE repo_id = {repo_id}"""
+        """DELETE FROM siap.control_reporte_medioambiente WHERE repo_id = {repo_id}"""
       ).on(
           'repo_id -> reporte.repo_id
         )
@@ -3719,7 +3720,7 @@ class ReporteRepository @Inject()(
       reporte.meams.map { meams =>
         for (m <- meams) {
           SQL(
-            """INSERT INTO siap.reporte_medioambiente (repo_id, meam_id) VALUES ({repo_id}, {meam_id})"""
+            """INSERT INTO siap.control_reporte_medioambiente (repo_id, meam_id) VALUES ({repo_id}, {meam_id})"""
           ).on(
               'repo_id -> reporte.repo_id.get,
               'meam_id -> m
@@ -3731,7 +3732,7 @@ class ReporteRepository @Inject()(
       // Registrar Código de Autorización
       if (!coau_codigo.trim.isEmpty) {
         SQL(
-          """INSERT INTO siap.reporte_codigo_autorizacion (repo_id, coau_codigo, empr_id) VALUES ({repo_id}, {coau_codigo}, {empr_id})"""
+          """INSERT INTO siap.control_reporte_codigo_autorizacion (repo_id, coau_codigo, empr_id) VALUES ({repo_id}, {coau_codigo}, {empr_id})"""
         ).on(
             'repo_id -> reporte.repo_id,
             'coau_codigo -> coau_codigo,
@@ -3989,7 +3990,7 @@ class ReporteRepository @Inject()(
       val hora: LocalDate = fecha
 
       val count: scala.Long =
-        SQL("UPDATE siap.reporte SET rees_id = 9 WHERE repo_id = {repo_id}")
+        SQL("UPDATE siap.control_reporte SET rees_id = 9 WHERE repo_id = {repo_id}")
           .on(
             'repo_id -> repo_id
           )
@@ -4463,7 +4464,7 @@ class ReporteRepository @Inject()(
   def estados(): Future[Iterable[ReporteEstado]] =
     Future[Iterable[ReporteEstado]] {
       db.withConnection { implicit connection =>
-        SQL("""SELECT * FROM siap.reporte_estado WHERE rees_estado <> 9""").as(
+        SQL("""SELECT * FROM siap.control_reporte_estado WHERE rees_estado <> 9""").as(
           ReporteEstado.oEstado *
         )
       }
@@ -4475,7 +4476,7 @@ class ReporteRepository @Inject()(
   def tipos(): Future[Iterable[ReporteTipo]] = Future[Iterable[ReporteTipo]] {
     db.withConnection { implicit connection =>
       SQL(
-        """SELECT * FROM siap.reporte_tipo WHERE reti_estado <> 9 ORDER BY reti_id"""
+        """SELECT * FROM siap.control_reporte_tipo WHERE reti_estado <> 9 ORDER BY reti_id"""
       ).as(ReporteTipo.repoTipoSet *)
     }
   }
@@ -4529,7 +4530,7 @@ class ReporteRepository @Inject()(
     var os = Array[Byte]()
     db.withConnection { implicit connection =>
       val tipoReporte: ReporteTipo = SQL(
-        """SELECT * FROM siap.reporte_tipo WHERE reti_id = {reti_id}"""
+        """SELECT * FROM siap.control_reporte_tipo WHERE reti_id = {reti_id}"""
       ).on('reti_id -> reti_id).as(ReporteTipo.repoTipoSet.single)
       empresaService.buscarPorId(empr_id).map { empresa =>
         try {
@@ -4682,9 +4683,9 @@ class ReporteRepository @Inject()(
                 )
               var j = 2
               val resultSet =
-                SQL("""select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.reporte r 
-                        left join siap.reporte_adicional a on r.repo_id = a.repo_id
-                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
+                SQL("""select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.control_reporte r 
+                        left join siap.control_reporte_adicional a on r.repo_id = a.repo_id
+                        left join siap.control_reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
@@ -4822,11 +4823,11 @@ class ReporteRepository @Inject()(
   def consecutivo(reti_id: scala.Long): scala.Long = {
     db.withConnection { implicit connection =>
       val count: scala.Long = SQL(
-        "UPDATE siap.reporte_tipo SET reti_consecutivo = reti_consecutivo + 1 WHERE reti_id = {reti_id}"
+        "UPDATE siap.control_reporte_tipo SET reti_consecutivo = reti_consecutivo + 1 WHERE reti_id = {reti_id}"
       ).on('reti_id -> reti_id).executeUpdate()
       if (count > 0) {
         val consec = SQL(
-          "SELECT reti_consecutivo FROM siap.reporte_tipo WHERE reti_id = {reti_id}"
+          "SELECT reti_consecutivo FROM siap.control_reporte_tipo WHERE reti_id = {reti_id}"
         ).on(
             'reti_id -> reti_id
           )

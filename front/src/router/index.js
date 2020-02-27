@@ -105,6 +105,31 @@ export const asyncRouterMap = [
       },
       { path: 'reporte/crear', component: _import('procesos/reporte/create'), name: 'reportecreate', hidden: true, meta: { title: 'reportecreate', roles: ['super', 'admin', 'auxiliar'] }},
       { path: 'reporte/relacion', component: _import('procesos/reporte/relacion'), name: 'reporterelacion', meta: { title: 'reporterelacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'reporte'] }},
+      { path: 'control', component: _import('procesos/control2'), name: 'controlreporte', meta: { title: 'controlreporte', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      {
+        path: 'control/editar/:id',
+        components: {
+          default: _import('procesos/control/edit'),
+          aap_create: Aap
+        },
+        name: 'controlreporteedit',
+        hidden: true,
+        redirect: false,
+        meta: { title: 'controlreporteedit', roles: ['super', 'admin', 'auxiliar'] }
+      },
+      {
+        path: 'control/editartags/:id',
+        components: {
+          default: _import('procesos/control/edittags'),
+          aap_create: Aap
+        },
+        name: 'controlreporteedittags',
+        hidden: true,
+        redirect: false,
+        meta: { title: 'controlreporteedittags', roles: ['super', 'admin', 'auxiliar'] }
+      },
+      { path: 'control/crear', component: _import('procesos/control/create'), name: 'controlreportecreate', hidden: true, meta: { title: 'controlreportecreate', roles: ['super', 'admin', 'auxiliar'] }},
+      { path: 'control/relacion', component: _import('procesos/control/relacion'), name: 'controlreporterelacion', meta: { title: 'controlreporterelacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'reporte'] }},
       { path: 'obra', component: _import('procesos/obra2'), name: 'obra', meta: { title: 'obra', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
       {
         path: 'obra/editar/:id',
