@@ -1350,7 +1350,7 @@ class ControlReporteRepository @Inject()(
 
       val conteo5: scala.Long = SQL(
         """SELECT COUNT(*) AS conteo FROM siap.control_reporte_evento r
-                           INNER JOIN siap.obra s ON s.obra_id = r.obra_id            
+                           INNER JOIN siap.control_reporte s ON s.repo_id = r.repo_id            
                            INNER JOIN siap.elemento e ON e.elem_id = r.elem_id
                            INNER JOIN siap.tipoelemento t ON t.tiel_id = e.tiel_id
                            WHERE r.even_codigo_retirado = {codigo} and s.empr_id = {empr_id} and t.tiel_id = {tiel_id}"""
@@ -1363,7 +1363,7 @@ class ControlReporteRepository @Inject()(
 
       val conteo6: scala.Long = SQL(
         """SELECT COUNT(*) AS conteo FROM siap.control_reporte_evento r
-                           INNER JOIN siap.obra s ON s.obra_id = r.obra_id            
+                           INNER JOIN siap.control_reporte s ON s.repo_id = r.repo_id            
                            INNER JOIN siap.elemento e ON e.elem_id = r.elem_id
                            INNER JOIN siap.tipoelemento t ON t.tiel_id = e.tiel_id
                            WHERE r.even_codigo_instalado = {codigo} and s.empr_id = {empr_id} and t.tiel_id = {tiel_id}"""
@@ -4823,11 +4823,11 @@ class ControlReporteRepository @Inject()(
   def consecutivo(reti_id: scala.Long): scala.Long = {
     db.withConnection { implicit connection =>
       val count: scala.Long = SQL(
-        "UPDATE siap.control_reporte_tipo SET reti_consecutivo = reti_consecutivo + 1 WHERE reti_id = {reti_id}"
+        "UPDATE siap.reporte_tipo SET reti_consecutivo = reti_consecutivo + 1 WHERE reti_id = {reti_id}"
       ).on('reti_id -> reti_id).executeUpdate()
       if (count > 0) {
         val consec = SQL(
-          "SELECT reti_consecutivo FROM siap.control_reporte_tipo WHERE reti_id = {reti_id}"
+          "SELECT reti_consecutivo FROM siap.reporte_tipo WHERE reti_id = {reti_id}"
         ).on(
             'reti_id -> reti_id
           )

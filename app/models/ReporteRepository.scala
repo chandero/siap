@@ -405,19 +405,19 @@ object ReporteAdicional {
   )(ReporteAdicional.apply _)
 
   val reporteAdicionalSet = {
-    get[Option[scala.Long]]("reporte_adicional.repo_id") ~
-      get[Option[DateTime]]("reporte_adicional.repo_fechadigitacion") ~
-      get[Option[DateTime]]("reporte_adicional.repo_modificado") ~
-      get[Option[Int]]("reporte_adicional.repo_tipo_expansion") ~
-      get[Option[Boolean]]("reporte_adicional.repo_luminaria") ~
-      get[Option[Boolean]]("reporte_adicional.repo_redes") ~
-      get[Option[Boolean]]("reporte_adicional.repo_poste") ~
-      get[Option[Boolean]]("reporte_adicional.repo_subreporte") ~
-      get[Option[scala.Long]]("reporte_adicional.repo_subid") ~
-      get[Option[String]]("reporte_adicional.repo_email") ~
-      get[Option[scala.Long]]("reporte_adicional.acti_id") ~
-      get[Option[String]]("reporte_adicional.repo_codigo") ~
-      get[Option[String]]("reporte_adicional.repo_apoyo") ~
+    get[Option[scala.Long]]("repo_id") ~
+      get[Option[DateTime]]("repo_fechadigitacion") ~
+      get[Option[DateTime]]("repo_modificado") ~
+      get[Option[Int]]("repo_tipo_expansion") ~
+      get[Option[Boolean]]("repo_luminaria") ~
+      get[Option[Boolean]]("repo_redes") ~
+      get[Option[Boolean]]("repo_poste") ~
+      get[Option[Boolean]]("repo_subreporte") ~
+      get[Option[scala.Long]]("repo_subid") ~
+      get[Option[String]]("repo_email") ~
+      get[Option[scala.Long]]("acti_id") ~
+      get[Option[String]]("repo_codigo") ~
+      get[Option[String]]("repo_apoyo") ~
       get[Option[scala.Long]]("urba_id") ~
       get[Option[scala.Long]]("muot_id") ~
       get[Option[scala.Long]]("medi_id") ~
@@ -875,17 +875,17 @@ object Vencido {
   )(Vencido.apply _)
 
   val _set = {
-    get[Option[scala.Long]]("reporte.repo_id") ~
-      get[Option[scala.Long]]("reporte.reti_id") ~
-      get[Option[scala.Long]]("reporte.repo_consecutivo") ~
-      get[Option[DateTime]]("reporte.repo_fecharecepcion") ~
+    get[Option[scala.Long]]("repo_id") ~
+      get[Option[scala.Long]]("reti_id") ~
+      get[Option[scala.Long]]("repo_consecutivo") ~
+      get[Option[DateTime]]("repo_fecharecepcion") ~
       get[Option[DateTime]]("fecha_limite") ~
       get[Option[Int]]("horas") ~
-      get[Option[String]]("reporte.repo_direccion") ~
-      get[Option[String]]("reporte.repo_nombre") ~
-      get[Option[String]]("reporte.repo_telefono") ~
-      get[Option[String]]("reporte.repo_descripcion") ~
-      get[Option[scala.Long]]("reporte.rees_id") ~
+      get[Option[String]]("repo_direccion") ~
+      get[Option[String]]("repo_nombre") ~
+      get[Option[String]]("repo_telefono") ~
+      get[Option[String]]("repo_descripcion") ~
+      get[Option[scala.Long]]("rees_id") ~
       get[Option[String]]("orig_descripcion") ~
       get[Option[String]]("barr_descripcion") ~
       get[Option[String]]("cuad_descripcion") map {
@@ -1084,11 +1084,11 @@ object ReporteTipo {
   )(ReporteTipo.apply _)
 
   val repoTipoSet = {
-    get[Option[scala.Long]]("reporte_tipo.reti_id") ~
-      get[String]("reporte_tipo.reti_descripcion") ~
-      get[scala.Long]("reporte_tipo.reti_consecutivo") ~
-      get[Int]("reporte_tipo.reti_estado") ~
-      get[scala.Long]("reporte_tipo.usua_id") map {
+    get[Option[scala.Long]]("reti_id") ~
+      get[String]("reti_descripcion") ~
+      get[scala.Long]("reti_consecutivo") ~
+      get[Int]("reti_estado") ~
+      get[scala.Long]("usua_id") map {
       case reti_id ~ reti_descripcion ~ reti_consecutivo ~ reti_estado ~ usua_id =>
         ReporteTipo(
           reti_id,
@@ -1125,10 +1125,10 @@ object ReporteEstado {
   )(ReporteEstado.apply _)
 
   val oEstado = {
-    get[Option[scala.Long]]("reporte_estado.rees_id") ~
-      get[String]("reporte_estado.rees_descripcion") ~
-      get[Int]("reporte_estado.rees_estado") ~
-      get[scala.Long]("reporte_estado.usua_id") map {
+    get[Option[scala.Long]]("rees_id") ~
+      get[String]("rees_descripcion") ~
+      get[Int]("rees_estado") ~
+      get[scala.Long]("usua_id") map {
       case rees_id ~ rees_descripcion ~ rees_estado ~ usua_id =>
         new ReporteEstado(rees_id, rees_descripcion, rees_estado, usua_id)
     }
@@ -1349,7 +1349,7 @@ class ReporteRepository @Inject()(
 
       val conteo5: scala.Long = SQL(
         """SELECT COUNT(*) AS conteo FROM siap.control_reporte_evento r
-                           INNER JOIN siap.obra s ON s.obra_id = r.obra_id            
+                           INNER JOIN siap.control_reporte s ON s.repo_id = r.repo_id            
                            INNER JOIN siap.elemento e ON e.elem_id = r.elem_id
                            INNER JOIN siap.tipoelemento t ON t.tiel_id = e.tiel_id
                            WHERE r.even_codigo_retirado = {codigo} and s.empr_id = {empr_id} and t.tiel_id = {tiel_id}"""
@@ -1362,7 +1362,7 @@ class ReporteRepository @Inject()(
 
       val conteo6: scala.Long = SQL(
         """SELECT COUNT(*) AS conteo FROM siap.control_reporte_evento r
-                           INNER JOIN siap.obra s ON s.obra_id = r.obra_id            
+                           INNER JOIN siap.control_reporte s ON s.repo_id = r.repo_id            
                            INNER JOIN siap.elemento e ON e.elem_id = r.elem_id
                            INNER JOIN siap.tipoelemento t ON t.tiel_id = e.tiel_id
                            WHERE r.even_codigo_instalado = {codigo} and s.empr_id = {empr_id} and t.tiel_id = {tiel_id}"""
@@ -2615,6 +2615,10 @@ class ReporteRepository @Inject()(
             }
             var eventoActualizado: Boolean = false
             var eventoInsertado: Boolean = false
+            println("empr_id: " + reporte.empr_id)
+            println("repo_id: " + reporte.repo_id)
+            println("aap_id: " + e.aap_id)
+            println("even_id: " + e.even_id)
             eventoActualizado = SQL(
               """UPDATE siap.reporte_evento SET 
                                                                 even_fecha = {even_fecha}, 

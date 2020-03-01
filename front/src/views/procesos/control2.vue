@@ -382,11 +382,11 @@ export default {
       }
     },
     handleEdit(index, row) {
-      this.$router.push({ path: '/procesos/reporte/editar/' + row.repo_id })
+      this.$router.push({ path: '/procesos/control/editar/' + row.repo_id })
       console.log(index, row)
     },
     handleEdit2(index, row) {
-      this.$router.push({ path: '/procesos/reporte/editartags/' + row.repo_id })
+      this.$router.push({ path: '/procesos/control/editartags/' + row.repo_id })
       console.log(index, row)
     },
     handleDelete(index, row) {
@@ -435,7 +435,7 @@ export default {
       this.filtro = this.freti_id + '|' + this.fconsec
     },
     nuevo() {
-      this.$router.push({ path: '/procesos/reporte/crear' })
+      this.$router.push({ path: '/procesos/control/crear' })
     },
     subreporte() {
       this.$router.push({ path: '/procesos/subreporte/crear' })

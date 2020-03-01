@@ -11,7 +11,7 @@ import play.api.libs.functional.syntax._
 import play.api.db.DBApi
 
 import anorm._
-import anorm.SqlParser.{ get, str }
+import anorm.SqlParser.{ get, str, int }
 import anorm.JodaParameterMetaData._
 
 import scala.util.{ Failure, Success }
@@ -339,6 +339,44 @@ class ControlRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
             count > 0            
         }
     }
+
+    def buscarParaVerificar(aap_id: Long, empr_id: Long): Int = {
+      db.withConnection { implicit connection =>
+        var result = 0
+        val _aapParser = int("aap_id") ~ int("esta_id") map { case a ~ e => (a,e)}
+        val a = SQL("""SELECT a.aap_id, a.esta_id FROM siap.control a
+               LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
+               LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
+               WHERE a.aap_id = {aap_id} and a.empr_id = {empr_id}""").
+        on(
+            'aap_id -> aap_id,
+            'empr_id -> empr_id
+        ).as(_aapParser.singleOpt)
+        a match {
+            case None => result = 404
+            case Some(a) => 
+                if (a._2 == 9) {
+                  result = 401
+                } else {
+                  result = 200
+                }
+        }
+        result
+      }
+    }   
+    
+    /**
+    * Recuperar un aap por su aap_id
+    */
+    def buscarParaEditar(aap_id: Long, empr_id: Long): Option[Control] = {
+      db.withConnection { implicit connection => 
+        SQL("""SELECT a.*, b.*, t.* FROM siap.control a
+               LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
+               LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
+               WHERE aap_id = {aap_id} and empr_id = {empr_id}""").
+        on('aap_id -> aap_id, 'empr_id-> empr_id).as(Control._set.singleOpt)
+      }
+    }     
 
     def informe_siap_control(empr_id: scala.Long): Future[Iterable[InformeC]] = Future[Iterable[InformeC]] {
         db.withConnection { implicit connection => 

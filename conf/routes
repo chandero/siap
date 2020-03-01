@@ -201,6 +201,7 @@ GET     /api/aap/del/:id               controllers.AapController.borrarAap(id: L
 GET     /api/aap/rec/:id               controllers.AapController.recuperarAap(id: Long)
 POST    /api/aap/save                  controllers.AapController.guardarAap
 POST    /api/aap/upd                   controllers.AapController.actualizarAap
+
 # Aap Tipo Carcasa
 GET     /api/aatc/get/:p/:c             controllers.AapTipoCarcasaController.todos(p:Long, c:Long)
 GET     /api/aatc/all                   controllers.AapTipoCarcasaController.aaptiposcarcasa
@@ -208,6 +209,7 @@ GET     /api/aatc/:id                   controllers.AapTipoCarcasaController.bus
 GET     /api/aatc/del/:id               controllers.AapTipoCarcasaController.borrarAapTipoCarcasa(id: Long)
 POST    /api/aatc/save                  controllers.AapTipoCarcasaController.guardarAapTipoCarcasa
 POST    /api/aatc/upd                   controllers.AapTipoCarcasaController.actualizarAapTipoCarcasa
+
 # Aap Conexion
 GET     /api/aaco/get/:p/:c             controllers.AapConexionController.todos(p:Long, c:Long)
 GET     /api/aaco/all                   controllers.AapConexionController.aapconexiones
@@ -215,6 +217,7 @@ GET     /api/aaco/:id                   controllers.AapConexionController.buscar
 GET     /api/aaco/del/:id               controllers.AapConexionController.borrarAapConexion(id: Long)
 POST    /api/aaco/save                  controllers.AapConexionController.guardarAapConexion
 POST    /api/aaco/upd                   controllers.AapConexionController.actualizarAapConexion
+
 # Aap Uso
 GET     /api/aaus/get/:p/:c             controllers.AapUsoController.todos(p:Long, c:Long)
 GET     /api/aaus/all                   controllers.AapUsoController.aapusos
@@ -222,6 +225,7 @@ GET     /api/aaus/:id                   controllers.AapUsoController.buscarPorId
 GET     /api/aaus/del/:id               controllers.AapUsoController.borrarAapUso(id: Long)
 POST    /api/aaus/save                  controllers.AapUsoController.guardarAapUso
 POST    /api/aaus/upd                   controllers.AapUsoController.actualizarAapUso
+
 # Aap Marca
 GET     /api/aama/get/:p/:c             controllers.AapMarcaController.todos(p:Long, c:Long)
 GET     /api/aama/all                   controllers.AapMarcaController.aapmarcas
@@ -249,6 +253,17 @@ GET     /api/tran/del/:id               controllers.TransformadorController.borr
 POST    /api/tran/save                  controllers.TransformadorController.guardar
 POST    /api/tran/upd                   controllers.TransformadorController.actualizar
 GET     /api/tran/ism/:e                controllers.TransformadorController.informe_siap_transformador(e: Long)
+
+# Control
+GET     /api/cont/get/:p/:c             controllers.ControlController.todos(p:Long, c:Long)
+GET     /api/cont/all                   controllers.ControlController.controles
+GET     /api/cont/:id                   controllers.ControlController.buscarPorId(id: Long)
+GET     /api/cont/del/:id               controllers.ControlController.borrar(id: Long)
+POST    /api/cont/save                  controllers.ControlController.guardar
+POST    /api/cont/upd                   controllers.ControlController.actualizar
+GET     /api/cont/vali/:id              controllers.ControlController.buscarParaVerificar(id: Long)
+GET     /api/cont/edit/:id              controllers.ControlController.buscarParaEditar(id: Long)
+
 
 # Aap Medidor Marca
 GET     /api/amem/get/:p/:c             controllers.AapMedidorMarcaController.todos(p:Long, c:Long)
@@ -280,6 +295,7 @@ GET     /api/aacu/del/:id               controllers.AapCuentaApController.borrar
 POST    /api/aacu/save                  controllers.AapCuentaApController.guardarAapCuentaAp
 POST    /api/aacu/upd                   controllers.AapCuentaApController.actualizarAapCuentaAp
 GET     /api/aap/edit/:id               controllers.AapController.buscarParaEditar(id: Long)
+
 # Reporte
 POST    /api/repo/get                        controllers.ReporteController.todos
 GET     /api/repo/updh                       controllers.ReporteController.actualizarHistoria()
@@ -300,6 +316,27 @@ GET     /api/repo/venc/get                   controllers.ReporteController.siap_
 GET     /api/repo/vadi/:t/:n                 controllers.ReporteController.validarReporteDiligenciado(t: Long, n: Int)
 POST    /api/repo/grw                        controllers.ReporteController.guardarReporteWeb 
 GET     /api/repo/gbtc/:c/:e/:t              controllers.ReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
+
+# ControlReporte
+POST    /api/core/get                        controllers.ControlReporteController.todos
+GET     /api/core/updh                       controllers.ControlReporteController.actualizarHistoria()
+GET     /api/core/all                        controllers.ControlReporteController.reportes
+GET     /api/core/:id                        controllers.ControlReporteController.buscarPorId(id: Long)
+GET     /api/core/del/:id                    controllers.ControlReporteController.borrarReporte(id: Long)
+POST    /api/core/save                       controllers.ControlReporteController.guardarReporte
+POST    /api/core/upd                        controllers.ControlReporteController.actualizarReporte
+GET     /api/core/st/get                     controllers.ControlReporteController.estados
+GET     /api/core/tp/get                     controllers.ControlReporteController.tipos
+GET     /api/core/prn/repo/:id/:em           controllers.ControlReporteController.imprimirReporte(id: Long, em: Long)
+GET     /api/core/prn/rela/:fi/:ff/:e/:u/:t  controllers.ControlReporteController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long, t:String)
+GET     /api/core/prn/form/:i/:e             controllers.ControlReporteController.imprimirFormato(i:Long, e:Long)
+GET     /api/core/rang/:y/:m                 controllers.ControlReporteController.buscarPorRango(y: Int, m: Int)
+GET     /api/core/gbtc/:t/:n                 controllers.ControlReporteController.buscarPorConsecutivo(t: Long, n:Int)
+GET     /api/core/vali/:e/:c                 controllers.ControlReporteController.validarCodigo(e: Long, c: String)
+GET     /api/core/venc/get                   controllers.ControlReporteController.siap_reporte_vencido
+GET     /api/core/vadi/:t/:n                 controllers.ControlReporteController.validarReporteDiligenciado(t: Long, n: Int)
+POST    /api/core/grw                        controllers.ControlReporteController.guardarReporteWeb 
+GET     /api/core/gbtc/:c/:e/:t              controllers.ControlReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
 
 # Obra
 POST    /api/obra/get                    controllers.ObraController.todos

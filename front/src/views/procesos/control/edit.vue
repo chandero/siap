@@ -1,7 +1,7 @@
 <template>
   <el-container>
       <el-header>
-          <span>{{ $t('route.reporteedit') }} - Estado Actual: {{ estado() }}</span>
+          <span>{{ $t('route.controlreporteedit') }} - Estado Actual: {{ estado() }}</span>
       </el-header>
       <el-main>
           <el-form ref="reporteForm" :model="reporte" :rules="rules" :label-position="labelPosition">
@@ -537,10 +537,10 @@ import { getActividades } from '@/api/actividad'
 import { getOrigenes } from '@/api/origen'
 import { getBarriosEmpresa } from '@/api/barrio'
 import { getTiposBarrio } from '@/api/tipobarrio'
-import { getReporte, updateReporte, getTipos, getEstados, validarCodigo, validarReporteDiligenciado } from '@/api/reporte'
+import { getReporte, updateReporte, getTipos, getEstados, validarCodigo, validarReporteDiligenciado } from '@/api/controlreporte'
 import { getAcciones } from '@/api/accion'
 import { getElementos, getElementoByDescripcion } from '@/api/elemento'
-import { getAapEdit, getAapValidar, validar } from '@/api/aap'
+import { getAapEdit, getAapValidar, validar } from '@/api/control'
 import { getMedioambiente } from '@/api/medioambiente'
 import { getAapTiposCarcasa } from '@/api/aap_tipo_carcasa'
 import { getAapMarcas } from '@/api/aap_marca'

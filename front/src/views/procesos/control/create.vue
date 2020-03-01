@@ -1,7 +1,7 @@
 <template>
   <el-container>
       <el-header>
-          <span>{{ $t('route.reportecreate') }}</span>
+          <span>{{ $t('route.controlreportecreate') }}</span>
       </el-header>
       <el-main>
           <el-form :disabled="inactivo" ref="reporte" :model="reporte" :rules="rules" :label-position="labelPosition">
@@ -206,9 +206,9 @@ import { mapGetters } from 'vuex'
 import { getOrigenes } from '@/api/origen'
 import { getBarriosEmpresa } from '@/api/barrio'
 import { getTiposBarrio } from '@/api/tipobarrio'
-import { saveReporte, printReporte, getTipos } from '@/api/reporte'
+import { saveReporte, printReporte, getTipos } from '@/api/controlreporte'
 import { getActividades, saveActividad } from '@/api/actividad'
-import { getAap, getAapApoyo } from '@/api/aap'
+import { getAap, getAapApoyo } from '@/api/control'
 import { getUrbanizadoraTodas } from '@/api/urbanizadora'
 import { getAapConexiones } from '@/api/aap_conexion'
 import { getMedidors } from '@/api/medidor'

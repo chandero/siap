@@ -9,10 +9,10 @@ import 'element-ui/lib/theme-chalk/index.css'
 import 'element-ui/lib/theme-chalk/display.css'
 import 'element-ui/lib/theme-chalk/icon.css'
 
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCoffee } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-// import 'vue-awesome/icons'
+// import { library } from '@fortawesome/fontawesome-svg-core'
+// import { faCoffee } from '@fortawesome/free-solid-svg-icons'
+// import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+// -- import 'vue-awesome/icons'
 // Session Idle
 import IdleVue from 'idle-vue'
 
@@ -77,9 +77,9 @@ Vue.use(Element, {
   i18n: (key, value) => i18n.t(key, value)
 })
 
-library.add(faCoffee)
+// library.add(faCoffee)
 
-Vue.component('font-awesome-icon', FontAwesomeIcon)
+// Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 // register global utility filters.
 Object.keys(filters).forEach(key => {
