@@ -255,14 +255,16 @@ POST    /api/tran/upd                   controllers.TransformadorController.actu
 GET     /api/tran/ism/:e                controllers.TransformadorController.informe_siap_transformador(e: Long)
 
 # Control
-GET     /api/cont/get/:p/:c             controllers.ControlController.todos(p:Long, c:Long)
+POST    /api/cont/get                  controllers.ControlController.todos
 GET     /api/cont/all                   controllers.ControlController.controles
+GET     /api/cont/next                  controllers.ControlController.buscarSiguienteACrear()
 GET     /api/cont/:id                   controllers.ControlController.buscarPorId(id: Long)
 GET     /api/cont/del/:id               controllers.ControlController.borrar(id: Long)
 POST    /api/cont/save                  controllers.ControlController.guardar
 POST    /api/cont/upd                   controllers.ControlController.actualizar
 GET     /api/cont/vali/:id              controllers.ControlController.buscarParaVerificar(id: Long)
 GET     /api/cont/edit/:id              controllers.ControlController.buscarParaEditar(id: Long)
+
 
 
 # Aap Medidor Marca

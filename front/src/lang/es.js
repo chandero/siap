@@ -55,6 +55,8 @@ export default {
     reportereparar: 'Reporte Luminaria/ Reparar Datos Según Reportes',
     control: 'Inventario Control',
     controlgestion: 'Control Activos',
+    controlgestioncreate: 'Crear Nuevo Control',
+    controlgestionedit: 'Modificar Control',
     controleliminada: 'Control Eliminadas',
     controlconsultaporcodigo: 'Control por Código Material',
     controlhistoria: 'Historia Control',
@@ -236,6 +238,16 @@ export default {
     any: 'cualquier',
     thirdparty: 'O connectar con',
     thirdpartyTips: 'No puede ser simulado en local, por favor combine su propia simulacón del negocio! ! !'
+  },
+  control: {
+    gestion: {
+      tabletitle: 'Control Activos',
+      code: 'Código del Control',
+      neighborhood: 'Barrio',
+      neighborhoodtype: 'Sector',
+      address: 'Dirección del Control',
+      codes: 'Códigos'
+    }
   },
   recovery: {
     title: 'Recuperar Contraseña',

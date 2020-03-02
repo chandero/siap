@@ -266,8 +266,8 @@ export const asyncRouterMap = [
     children: [
       { path: 'gestion', component: _import('control/gestion'), name: 'controlgestion', meta: { title: 'controlgestion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
       { path: 'eliminada', component: _import('control/eliminado'), name: 'controleliminada', meta: { title: 'controleliminada', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
-      { path: 'gestion/editar/:id', component: _import('control/gestion/edit'), name: 'controlgestionedit', hidden: true, redirect: false, meta: { title: 'gestionedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
-      { path: 'gestion/crear', component: _import('control/gestion/create'), name: 'controlgestioncreate', hidden: true, meta: { title: 'gestioncreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'gestion/editar/:id', component: _import('control/gestion/edit'), name: 'controlgestionedit', hidden: true, redirect: false, meta: { title: 'controlgestionedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'gestion/crear', component: _import('control/gestion/create'), name: 'controlgestioncreate', hidden: true, meta: { title: 'controlgestioncreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
       { path: 'consultaporcodigo', component: _import('control/consultaporcodigo'), name: 'controlconsultaporcodigo', meta: { title: 'controlconsultaporcodigo', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
       { path: 'historia', component: _import('control/historia'), name: 'controlhistoria', meta: { title: 'controlhistoria', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
       { path: 'geoposicion', component: _import('control/geoposicion'), name: 'controlgeoposicion', meta: { title: 'controlgeoposicionamiento', roles: ['super', 'admin', 'ingeniero', 'gerencia'] }}

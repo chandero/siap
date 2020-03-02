@@ -27,7 +27,8 @@ case class Control(aap_id: Option[Long],
                    usua_id: Option[Long], 
                    aap_direccion: Option[String], 
                    barr_id: Option[Long], 
-                   esta_id: Option[Int])
+                   esta_id: Option[Int],
+                   aap_fechacreacion: Option[DateTime])
 
 case class InformeC(aap_id: Option[Int],
                     aap_direccion: Option[String], 
@@ -45,7 +46,8 @@ object Control {
             "usua_id" -> m.usua_id,            
             "aap_direccion" -> m.aap_direccion,
             "barr_id" -> m.barr_id,
-            "esta_id" -> m.esta_id
+            "esta_id" -> m.esta_id,
+            "aap_fechacreacion" -> m.aap_fechacreacion
         )
     }
 
@@ -55,7 +57,8 @@ object Control {
         (__ \ "usua_id").readNullable[Long] and
         (__ \ "aap_direccion").readNullable[String] and
         (__ \ "barr_id").readNullable[Long] and
-        (__ \ "esta_id").readNullable[Int]
+        (__ \ "esta_id").readNullable[Int] and
+        (__ \ "aap_fechacreacion").readNullable[DateTime]
     )(Control.apply _)
 
     val _set = {
@@ -64,18 +67,21 @@ object Control {
       get[Option[Long]]("usua_id") ~
       get[Option[String]]("aap_direccion") ~      
       get[Option[Long]]("barr_id") ~
-      get[Option[Int]]("esta_id") map {
+      get[Option[Int]]("esta_id") ~
+      get[Option[DateTime]]("aap_fechacreacion") map {
           case aap_id ~
                empr_id ~
                usua_id ~
                aap_direccion ~
                barr_id ~               
-               esta_id => Control(aap_id,
+               esta_id ~
+               aap_fechacreacion => Control(aap_id,
                empr_id,
                usua_id,
                aap_direccion,
                barr_id,
-               esta_id)
+               esta_id,
+               aap_fechacreacion)
       }
   }    
 }
@@ -133,13 +139,35 @@ class ControlRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
         }
     }
 
+    def buscarSiguienteACrear(empr_id: scala.Long): Int = {
+        db.withConnection { implicit connection =>
+            val ultimo = SQL("""SELECT a.aap_id FROM siap.control a WHERE a.empr_id = {empr_id} and a.aap_id <> 9999999
+                                ORDER BY a.aap_id DESC LIMIT 1""").
+                        on(
+                            'empr_id -> empr_id
+                        ).as(SqlParser.scalar[Int].singleOpt)
+            ultimo match {
+                case Some(u) => u + 1
+                case None => 1
+            }
+        }
+    }    
+
    /**
    * Recuperar total de registros
    * @return total
    */
-   def cuenta(empr_id: Long): Long =  {
+   def cuenta(empr_id: Long, filter: String): Long =  {
      db.withConnection{ implicit connection =>
-       val result = SQL("SELECT COUNT(*) AS c FROM siap.control WHERE esta_id <> 9 and empr_id = {empr_id}")
+
+      var query = """SELECT COUNT(*) AS c FROM siap.control a WHERE a.esta_id <> 9 and a.empr_id = {empr_id}"""
+         
+      if (!filter.isEmpty){
+          println("Filtro: " + filter)
+          query = query + " and " + filter
+      }        
+
+       val result = SQL(query)
        .on(
          'empr_id -> empr_id
        )
@@ -153,9 +181,25 @@ class ControlRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
     * @param current_page: Long
     * @param empr_id: Long
     */
-    def todos(page_size: Long, current_page: Long, empr_id: Long): Future[Iterable[Control]] = Future[Iterable[Control]] {
+    def todos(empr_id: Long, page_size: Long, current_page: Long, orderby: String, filter: String): Future[Iterable[Control]] = Future[Iterable[Control]] {
         db.withConnection { implicit connection =>
-            SQL("SELECT * FROM siap.control WHERE esta_id <> 9 and empr_id = {empr_id} LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1) ORDER BY aap_id").
+
+        var query = """SELECT * FROM siap.control a WHERE a.esta_id <> 9 and a.empr_id = {empr_id}"""
+        
+        if (!filter.isEmpty){
+          println("Filtro: " + filter)
+          query = query + " and " + filter
+        }     
+
+        if (!orderby.isEmpty) {
+            query = query + s" ORDER BY $orderby"
+        } else {
+            query = query + s" ORDER BY a.empr_id, a.aap_id"
+        }
+        query = query + """
+                        LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)"""
+
+        SQL(query).
             on(
               'page_size -> page_size,
               'current_page -> current_page,
@@ -193,20 +237,23 @@ class ControlRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
             usua_id,
             aap_direccion,
             barr_id,
-            esta_id) VALUES (
+            esta_id,
+            aap_fechacreacion) VALUES (
             {aap_id},
             {empr_id},
             {usua_id},
             {aap_direccion},
             {barr_id},
-            {esta_id})""").
+            {esta_id},
+            {aap_fechacreacion})""").
             on(
               'aap_id -> control.aap_id,
               'empr_id -> control.empr_id,
               'usua_id -> control.usua_id,
               'aap_direccion -> control.aap_direccion,
               'barr_id -> control.barr_id,
-              'esta_id -> 1
+              'esta_id -> 1,
+              'aap_fechacreacion -> control.aap_fechacreacion
             ).executeInsert().get
 
             SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
@@ -235,7 +282,7 @@ class ControlRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
         db.withConnection { implicit connection =>
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())
-            val result: Boolean = SQL("UPDATE siap.control SET aap_id = {aap_id}, usua_id = {usua_id}, aap_direccion = {aap_direccion}, barr_id = {barr_id}, esta_id = {esta_id} WHERE aap_id = {aap_id} and empr_id = {empr_id}").
+            val result: Boolean = SQL("UPDATE siap.control SET usua_id = {usua_id}, aap_direccion = {aap_direccion}, barr_id = {barr_id}, esta_id = {esta_id} WHERE aap_id = {aap_id} and empr_id = {empr_id}").
             on(
               'aap_id -> control.aap_id,
               'empr_id -> control.empr_id,

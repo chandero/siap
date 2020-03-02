@@ -6,28 +6,19 @@
     <el-main>
       <el-form :label-position='labelPosition'>
         <el-collapse v-model='activePages' @change='handleActivePagesChange'>
-          <el-collapse-item name='1' :title="$t('gestion.codes')">
+          <el-collapse-item name='1' :title="$t('control.gestion.codes')">
             <el-row :gutter='4'>
               <el-col :span='12'>
-                <el-form-item :label="$t('gestion.code')">
+                <el-form-item :label="$t('control.gestion.code')">
                   <el-input
                     autofocus
                     name='code'
                     type='number'
-                    v-model='activo.aap.aap_id'
-                    @input='activo.aap.aap_id = parseInt($event)'
+                    v-model='control.aap_id'
+                    @input='control.aap_id = parseInt($event)'
                     ref='code'
                     @blur='validarNumero($event)'
-                    @keyup.enter.native="changeFocus('support')"
-                  ></el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span='12'>
-                <el-form-item :label="$t('gestion.support')">
-                  <el-input
-                    v-model='activo.aap.aap_apoyo'
-                    ref='support'
-                    @keyup.enter.native="changeFocus('description')"
+                    @keyup.enter.native="changeFocus('address')"
                   ></el-input>
                 </el-form-item>
               </el-col>
@@ -35,21 +26,12 @@
           </el-collapse-item>
           <el-collapse-item name='2' :title="$t('gestion.generals')">
             <el-row :gutter='4'>
-              <el-col :xs='24' :sm='24' :md='10' :lg='10' :xl='10'>
-                <el-form-item :label="$t('gestion.description')">
-                  <el-input
-                    ref='description'
-                    v-model='activo.aap.aap_descripcion'
-                    @keyup.enter.native="changeFocus('address')"
-                  ></el-input>
-                </el-form-item>
-              </el-col>
               <el-col :xs='24' :sm='24' :md='14' :lg='14' :xl='14'>
-                <el-form-item :label="$t('gestion.address')">
+                <el-form-item :label="$t('control.gestion.address')">
                   <el-input
                     ref='address'
-                    v-model='activo.aap.aap_direccion'
-                    @input='activo.aap.aap_direccion = $event.toUpperCase()'
+                    v-model='control.aap_direccion'
+                    @input='control.aap_direccion = $event.toUpperCase()'
                     @keyup.enter.native="changeFocus('neighborhood')"
                   >
                     <el-select
@@ -57,7 +39,7 @@
                       clearable
                       ref='neighborhood'
                       slot='append'
-                      v-model='activo.aap.barr_id'
+                      v-model='control.barr_id'
                       name='barrio'
                       :placeholder="$t('barrio.select')"
                       style='width:180px'
@@ -74,6 +56,7 @@
                 </el-form-item>
               </el-col>
             </el-row>
+            <!--
             <el-row :gutter='4'>
               <el-col :span='12'>
                 <el-form-item :label="$t('gestion.lat')">
@@ -96,6 +79,8 @@
                 </el-form-item>
               </el-col>
             </el-row>
+            -->
+            <!--
             <el-row :gutter='4'>
               <el-col :xs='24' :sm='8' :md='8' :lg='8' :xl='8'>
                 <el-form-item :label="$t('gestion.gettime')">
@@ -149,6 +134,8 @@
                 </el-form-item>
               </el-col>
             </el-row>
+            -->
+            <!--
             <el-row :gutter='4'>
               <el-col :xs='24' :sm='12' :md='6' :lg='6' :xl='6'>
                 <el-form-item :label="$t('gestion.cover')">
@@ -249,7 +236,8 @@
                 </el-form-item>
               </el-col>
             </el-row>
-
+            -->
+            <!--
             <el-row :gutter='4'>
               <el-col :xs='24' :sm='8' :md='8' :lg='8' :xl='8'>
                 <el-form-item :label="$t('gestion.tecnology.title')">
@@ -319,7 +307,8 @@
                 </el-form-item>
               </el-col>
             </el-row>
-
+            -->
+            <!--
             <el-row :gutter='4'>
               <el-col :xs='24' :sm='8' :md='8' :lg='8' :xl='8'>
                 <el-form-item :label="$t('gestion.post.own')">
@@ -351,7 +340,8 @@
                 </el-form-item>
               </el-col>
             </el-row>
-
+            -->
+            <!--
             <el-row :gutter='4'>
               <el-col :xs='24' :sm='4' :md='4' :lg='4' :xl='4'>
                 <el-form-item :label="$t('gestion.bulb')">
@@ -401,7 +391,9 @@
                 </el-form-item>
               </el-col>
             </el-row>
+            -->
           </el-collapse-item>
+          <!--
           <el-collapse-item name='3' :title="$t('gestion.additional')">
             <el-row :gutter='4'>
               <el-col :xs='24' :sm='8' :md='8' :lg='8' :xl='8'>
@@ -450,6 +442,8 @@
               </el-col>
             </el-row>
           </el-collapse-item>
+          -->
+          <!--
           <el-collapse-item v-if='false' name='4' :title="$t('gestion.elements')">
             <el-form :label-position='labelPosition'>
               <el-row :gutter='4'>
@@ -567,6 +561,7 @@
               </el-row>
             </el-form>
           </el-collapse-item>
+          -->
         </el-collapse>
       </el-form>
     </el-main>
@@ -578,26 +573,14 @@
         type='primary'
         icon='el-icon-check'
         @click='aplicar'
-      >Guardar Luminaria</el-button>
+      >Guardar Control</el-button>
     </el-footer>
   </el-container>
 </template>
 <script>
 import { getBarriosEmpresa } from '@/api/barrio'
-import { getAapTiposCarcasa } from '@/api/aap_tipo_carcasa'
-import { getAapCuentasAp } from '@/api/aap_cuentaap'
-import { getAapModelos } from '@/api/aap_modelo'
-import { getAapConexiones } from '@/api/aap_conexion'
-import { getTiposMedidor } from '@/api/tipomedidor'
-import { getAapMarcas } from '@/api/aap_marca'
-import { getAapMedidorMarcas } from '@/api/aap_medidor_marca'
-import { getAapUsos } from '@/api/aap_uso'
-import { getAapValidar, saveAap, buscarSiguiente, validar } from '@/api/control'
-import { getElementos } from '@/api/elemento'
-import { getAcciones } from '@/api/accion'
-import { getCaracteristica } from '@/api/caracteristica'
-import { getMedidors } from '@/api/medidor'
-import { getTransformadors } from '@/api/transformador'
+import { getAapValidar, saveAap, buscarSiguiente /*, validar */} from '@/api/control'
+
 /* import { inspect } from 'util' */
 
 export default {
@@ -608,66 +591,14 @@ export default {
       labelPosition: 'top',
       activePages: ['1', '2', '3', '4'],
       invalid: true,
-      activo: {
-        aap: {
-          aap_id: null,
-          aap_apoyo: null,
-          aap_descripcion: null,
-          aap_direccion: null,
-          aap_lat: null,
-          aap_lng: null,
-          barr_id: null,
-          empr_id: 0,
-          esta_id: 1,
-          aap_fechacreacion: new Date(),
-          aap_fechatoma: new Date(),
-          aap_modernizada: false,
-          aama_id: null,
-          aacu_id: null,
-          aap_medidor: false,
-          aatc_id: null,
-          aaus_id: null,
-          aaco_id: null,
-          usua_id: 0,
-          elementos: [],
-          historia: []
-        },
-        aatr: {
-          aap_id: null,
-          tran_id: null
-        },
-        aame: {
-          aap_id: null,
-          amem_id: null,
-          amet_id: null,
-          aame_numero: null,
-          medi_id: null
-        },
-        aap_adicional: {
-          aap_id: null,
-          tipo_id: null, // tipo poste
-          aap_poste_altura: null,
-          aap_brazo: null,
-          aap_collarin: null,
-          aap_potencia: null,
-          aap_tecnologia: null,
-          aap_modernizada_anho: null,
-          aap_rte: null,
-          aap_poste_propietario: null
-        },
-        aap_elemento: {
-          aap_id: null,
-          aael_fecha: null,
-          aap_bombillo: null,
-          aap_balasto: null,
-          aap_arrancador: null,
-          aap_condensador: null,
-          aap_fotocelda: null,
-          reti_id: null,
-          repo_consecutivo: null
-        },
-        autorizacion: null,
-        events: []
+      control: {
+        aap_id: null,
+        empr_id: 0,
+        usua_id: 0,
+        aap_direccion: null,
+        barr_id: null,
+        esta_id: 1,
+        aap_fechacreacion: new Date()
       },
       current_event: {
         event: {
@@ -718,23 +649,24 @@ export default {
   methods: {
     validarNumero() {
       this.invalid = false
-      getAapValidar(this.activo.aap.aap_id)
+      getAapValidar(this.control.aap_id)
         .then(response => {
           if (response.data === 401) {
-            this.$alert('El código de luminaria ya existe y se encuentra en estado ELIMINADA', 'Buscar Luminaria', {
+            this.$alert('El código de control ya existe y se encuentra en estado ELIMINADA', 'Buscar Control', {
               confirmButtonText: 'Continuar'
             })
           } if (response.data === 204) {
-            this.$alert('El código de luminaria ya existe y se encuentra en estado RETIRADA', 'Buscar Luminaria', {
+            this.$alert('El código de control ya existe y se encuentra en estado RETIRADA', 'Buscar Control', {
               confirmButtonText: 'Continuar'
             })
           } if (response.data === 200) {
-            this.$alert('El código de luminaria ya existe', 'Buscar Luminaria', {
+            this.$alert('El código de control ya existe', 'Buscar Control', {
               confirmButtonText: 'Continuar'
             })
           } else if (response.data === 404) {
             buscarSiguiente().then(response => {
-              if (this.activo.aap.aap_id !== response.data) {
+              /*
+              if (this.control.aap_id !== response.data) {
                 this.$prompt(
                   'Por favor ingrese el código de autorización si lo tiene:',
                   'El consecutivo digitado no es el siguiente',
@@ -786,11 +718,12 @@ export default {
                     this.invalid = true
                   })
               }
+              */
             })
           }
         })
         .catch(error => {
-          this.$alert('No pude validar si la luminaria existe, error: ' + error, 'Buscar Luminaria', {
+          this.$alert('No pude validar si la control existe, error: ' + error, 'Buscar Control', {
             confirmButtonText: 'Continuar'
           })
         })
@@ -821,31 +754,31 @@ export default {
       this.$refs[next].focus()
     },
     validateConnection() {
-      if (this.activo.aap.aaco_id === 2) {
-        this.activo.aap.aap_medidor = true
+      if (this.control.aaco_id === 2) {
+        this.control.aap_medidor = true
       } else {
-        this.activo.aap.aap_medidor = false
+        this.control.aap_medidor = false
         this.activo.aame.medi_id = null
       }
       this.changeFocus('account')
     },
     aplicar() {
-      getAapValidar(this.activo.aap.aap_id)
+      getAapValidar(this.control.aap_id)
         .then(response => {
           if (response.data === 401) {
-            this.$alert('El código de luminaria ya existe y se encuentra en estado ELIMINADA', 'Buscar Luminaria', {
+            this.$alert('El código de control ya existe y se encuentra en estado ELIMINADA', 'Buscar Control', {
               confirmButtonText: 'Cancelar'
             })
           } if (response.data === 204) {
-            this.$alert('El código de luminaria ya existe y se encuentra en estado RETIRADA', 'Buscar Luminaria', {
+            this.$alert('El código de control ya existe y se encuentra en estado RETIRADA', 'Buscar Control', {
               confirmButtonText: 'Cancelar'
             })
           } if (response.data === 200) {
-            this.$alert('El código de luminaria ya existe', 'Buscar Luminaria', {
+            this.$alert('El código de control ya existe', 'Buscar Control', {
               confirmButtonText: 'Cancelar'
             })
           } else if (response.data === 404) {
-            saveAap(this.activo)
+            saveAap(this.control)
               .then(response => {
                 if (response.status === 201) {
                   this.invalid = true
@@ -856,70 +789,18 @@ export default {
               })
           }
         }).catch(error => {
-          this.$alert('No pude validar si la luminaria existe, error: ' + error, 'Buscar Luminaria', {
+          this.$alert('No pude validar si el control existe, error: ' + error, 'Buscar Control', {
             confirmButtonText: 'Cancelar'
           })
         })
     },
     validate() {
       if (
-        this.activo.aap.aap_id &&
-        this.activo.aap.aap_direccion &&
-        this.activo.aap.barr_id &&
-        this.activo.aap.aap_fechatoma &&
-        this.activo.aap.aama_id &&
-        this.activo.aap.aamo_id &&
-        this.activo.aap.aatc_id &&
-        this.activo.aap.aaus_id &&
-        this.activo.aap.aaco_id &&
-        this.activo.aap.aacu_id &&
-        this.activo.aap_adicional.aap_tecnologia &&
-        this.activo.aap_adicional.aap_potencia &&
-        this.activo.aap_adicional.tipo_id &&
-        this.activo.aap_adicional.aap_poste_altura &&
-        this.activo.aap_adicional.aap_poste_propietario &&
-        this.activo.aap_adicional.aap_brazo !== null &&
-        this.activo.aap_adicional.aap_collarin !== null
+        this.control.aap_id &&
+        this.control.aap_direccion &&
+        this.control.barr_id
       ) {
-        if (
-          this.activo.aap_adicional.aap_tecnologia === 'SODIO' ||
-          this.activo.aap_adicional.aap_tecnologia === 'METAL HALIDE'
-        ) {
-          if (
-            this.activo.aap_elemento.aap_bombillo !== null &&
-            this.activo.aap_elemento.aap_balasto !== null &&
-            this.activo.aap_elemento.aap_arrancador !== null &&
-            this.activo.aap_elemento.aap_condensador !== null &&
-            this.activo.aap_elemento.aap_fotocelda !== null &&
-            this.activo.aap_elemento.aap_bombillo !== '' &&
-            this.activo.aap_elemento.aap_balasto !== '' &&
-            this.activo.aap_elemento.aap_arrancador !== '' &&
-            this.activo.aap_elemento.aap_condensador !== '' &&
-            this.activo.aap_elemento.aap_fotocelda !== ''
-          ) {
-            if (
-              this.activo.aap.aaco_id === 2 &&
-              this.activo.aame.medi_id == null
-            ) {
-              return false
-            } else {
-              return true
-            }
-          } else {
-            return false
-          }
-        } else {
-          if (
-            this.activo.aap_elemento.aap_fotocelda !== null &&
-            this.activo.aap_elemento.aap_fotocelda !== ''
-          ) {
-            return true
-          } else {
-            return false
-          }
-        }
-      } else {
-        return false
+        return true
       }
     },
     remoteMethod(query) {
@@ -936,7 +817,7 @@ export default {
           })
         }, 200)
       } else {
-        this.activo.aap.barr_id = ''
+        this.control.barr_id = ''
       }
     },
     actualizarBarrios() {
@@ -947,65 +828,14 @@ export default {
       this.canSave = true
     },
     limpiar() {
-      this.activo = {
-        aap: {
-          aap_id: null,
-          aap_apoyo: null,
-          aap_descripcion: null,
-          aap_direccion: null,
-          aap_lat: null,
-          aap_lng: null,
-          barr_id: null,
-          empr_id: 0,
-          esta_id: 1,
-          aap_fechacreacion: new Date(),
-          aap_fechatoma: new Date(),
-          aap_modernizada: false,
-          aama_id: null,
-          aacu_id: null,
-          aap_medidor: false,
-          aatc_id: null,
-          aaus_id: null,
-          aaco_id: null,
-          usua_id: 0,
-          elementos: [],
-          historia: []
-        },
-        aatr: {
-          aap_id: null,
-          tran_id: null
-        },
-        aame: {
-          aap_id: null,
-          amem_id: null,
-          amet_id: null,
-          aame_numero: null,
-          medi_id: null
-        },
-        aap_adicional: {
-          aap_id: null,
-          tipo_id: null, // tipo poste
-          aap_poste_altura: null,
-          aap_brazo: null,
-          aap_collarin: null,
-          aap_potencia: null,
-          aap_tecnologia: null,
-          aap_modernizada_anho: null,
-          aap_rte: null,
-          aap_poste_propietario: null
-        },
-        aap_elemento: {
-          aap_id: null,
-          aael_fecha: null,
-          aap_bombillo: null,
-          aap_balasto: null,
-          aap_arrancador: null,
-          aap_condensador: null,
-          aap_fotocelda: null,
-          reti_id: null,
-          repo_consecutivo: null
-        },
-        events: []
+      this.control = {
+        aap_id: null,
+        aap_direccion: null,
+        barr_id: null,
+        empr_id: 0,
+        esta_id: 1,
+        usua_id: 0,
+        aap_fechacreacion: null
       }
     },
     limpiarEvent() {
@@ -1030,7 +860,7 @@ export default {
     success() {
       this.$notify({
         title: this.$i18n.t('gestion.success'),
-        message: this.$i18n.t('gestion.created') + ' ' + this.activo.aap.aap_id,
+        message: this.$i18n.t('gestion.created') + ' ' + this.control.aap_id,
         type: 'success',
         onClose: this.limpiarAndBack()
       })
@@ -1044,37 +874,6 @@ export default {
     }
   },
   mounted() {
-    getCaracteristica(7)
-      .then(response => {
-        this.tecnologias = response.data.cara_valores.split(',')
-      })
-      .catch(error => {
-        console.log('Caracteristica 7: ' + error)
-      })
-    getCaracteristica(5)
-      .then(response => {
-        this.potencias = response.data.cara_valores.split(',')
-      })
-      .catch(error => {
-        console.log('Caracteristica 5: ' + error)
-      })
-    getCaracteristica(8)
-      .then(response => {
-        const poste = response.data.cara_valores.split(',')
-        for (var i = 0; i < poste.length; i++) {
-          this.postes.push({ tipo_id: i + 1, tipo_descripcion: poste[i] })
-        }
-      })
-      .catch(error => {
-        console.log('Caracteristica 8: ' + error)
-      })
-    getCaracteristica(9)
-      .then(response => {
-        this.owns = response.data.cara_valores.split(',')
-      })
-      .catch(error => {
-        console.log('Caracteristica 9: ' + error)
-      })
     getBarriosEmpresa()
       .then(response => {
         this.barrios = response.data
@@ -1082,92 +881,6 @@ export default {
       })
       .catch(error => {
         console.log(error)
-      })
-    getAapTiposCarcasa()
-      .then(response => {
-        this.aap_tipos_carcasa = response.data
-      })
-      .catch(error => {
-        console.log(error)
-      })
-    getAapConexiones()
-      .then(response => {
-        this.aap_conexiones = response.data
-      })
-      .catch(error => {
-        console.log(error)
-      })
-    getAapUsos()
-      .then(response => {
-        this.aap_usos = response.data
-      })
-      .catch(error => {
-        console.log(error)
-      })
-    getTiposMedidor()
-      .then(response => {
-        this.tiposmedidor = response.data
-      })
-      .catch(error => {
-        console.log(error)
-      })
-    getAapMarcas()
-      .then(response => {
-        this.aap_marcas = response.data
-      })
-      .catch(error => {
-        console.log(error)
-      })
-    getAapCuentasAp()
-      .then(response => {
-        this.aap_cuentasap = response.data
-      })
-      .catch(error => {
-        console.log(error)
-      })
-    getAapModelos()
-      .then(response => {
-        this.aap_modelos = response.data
-      })
-      .catch(error => {
-        console.log(error)
-      })
-    getAapMedidorMarcas()
-      .then(response => {
-        this.aap_medidor_marcas = response.data
-      })
-      .catch(error => {
-        console.log(error)
-      })
-    getElementos()
-      .then(response => {
-        this.elementos_lista = response.data
-        this.elementos = response.data
-      })
-      .catch(error => {
-        console.log(error)
-      })
-    getAcciones()
-      .then(response => {
-        this.acciones = response.data
-        this.acciones_lista = response.data
-      })
-      .catch(error => {
-        console.log(error)
-      })
-    getMedidors()
-      .then(response => {
-        this.medidores = response.data
-      })
-      .catch(error => {
-        console.log('medidores get: ' + error)
-      })
-    getTransformadors()
-      .then(response => {
-        this.transformadores = response.data
-      })
-      .catch(error => {
-        console.log('transformadores get: ' + error)
       })
   }
 }

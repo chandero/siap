@@ -221,7 +221,7 @@
                       </el-col>
                     </el-row>                    
                     </el-collapse-item>
-                    <el-collapse-item name="3" title="DATOS LUMINARIAS">
+                    <el-collapse-item name="3" title="DATOS CONTROLES">
                         <div>
                           <el-row>
                             <el-col :span="24">
@@ -233,7 +233,7 @@
                                 effect="dark"
                                 size="medium"
                                 @click="handleTag(tag.idx)"
-                                :title="'Información Luminaria ' + tag.aap_id"
+                                :title="'Información Control ' + tag.aap_id"
                                 style="cursor: pointer;"
                               >
                                 L: {{tag.aap_id}}
@@ -248,7 +248,7 @@
                                 @blur="onAddAddress(inputValue01)"
                               >
                               </el-input>
-                              <el-button v-else-if="reporte.rees_id != 3" size="small" @click="showInputAddress01">+ Agregar Luminaria</el-button>
+                              <el-button v-else-if="reporte.rees_id != 3" size="small" @click="showInputAddress01">+ Agregar Control</el-button>
                             </el-col>
                           </el-row>
                           <el-form :disabled="reporte.rees_id == 3" :model="reporte.direcciones[didx]" :ref="'dirform_' + reporte.direcciones[didx].even_id" :name="'dirform_' + reporte.direcciones[didx].even_id" label-position="left" :rules="dirrules">
@@ -258,7 +258,7 @@
                             </el-col>                            
                             <el-col :xs="24" :sm="1" :md="1" :lg="1" :xl="1">{{ reporte.direcciones[didx].even_id }}</el-col>
                             <el-col :xs="24" :sm="10" :md="10" :lg="10" :xl="10">
-                                <el-form-item prop="aap_id" label="Código Luminaria">
+                                <el-form-item prop="aap_id" label="Código Control">
                                   <div style="display: table;">
                                    <el-input :disabled="reporte.direcciones[didx].even_estado === 2 || reporte.direcciones[didx].even_estado > 7" autofocus :ref="'aap_id_' + didx" type="number" class="sinpadding" style="display: table-cell;" v-model="reporte.direcciones[didx].aap_id" @input="reporte.direcciones[didx].aap_id = parseInt($event,10)" @blur="validateAap(reporte.direcciones[didx], didx)">
                                    </el-input>
@@ -266,11 +266,6 @@
                                   </div>
                                 </el-form-item>
                             </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="7" :md="7" :lg="7" :xl="7">
-                              <el-form-item prop="dato_adicional.aap_apoyo" :label="$t('reporte.apoyo')">
-                                <el-input :disabled="reporte.direcciones[didx].even_estado > 7" ref="aap_apoyo" v-model="reporte.direcciones[didx].dato_adicional.aap_apoyo" name="aap_apoyo" />
-                              </el-form-item>
-                            </el-col>       
                             <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="5" :md="5" :lg="5" :xl="5">
                               <el-form-item prop="aap_fechatoma" :label="$t('reporte.aap_fechatoma')">
                                 <el-date-picker :disabled="reporte.direcciones[didx].even_estado > 7 || reporte.reti_id !== 3" ref="aap_fechatoma" v-model="reporte.direcciones[didx].aap_fechatoma" name="aap_fechatoma" />
@@ -292,6 +287,7 @@
                              </el-form-item>
                             </el-col>
                           </el-row>
+                          <!--
                           <el-row>
                             <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                              <el-form-item prop="dato_adicional.aap_lat" label="Latitud">
@@ -328,6 +324,8 @@
                              </el-form-item>
                             </el-col>
                           </el-row>
+                          -->
+                          <!--
                           <el-row :gutter="4">
                             <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
                              <el-form-item prop="dato.aap_tecnologia" label="Tecnología"> 
@@ -369,7 +367,9 @@
                                 </el-select>
                               </el-form-item>
                             </el-col>  
-                          </el-row>  
+                          </el-row> 
+                          --> 
+                          <!--
                           <el-row>                                                                               
                             <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                               <el-form-item prop="dato.tipo_id" :label="$t('gestion.post.title')">
@@ -393,6 +393,8 @@
                               </el-form-item>
                             </el-col>
                           </el-row>
+                          -->
+                          <!--
                           <el-row>
                             <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                               <el-form-item prop="dato.aap_brazo" :label="$t('gestion.arm')">
@@ -421,6 +423,7 @@
                               </el-form-item>                              
                             </el-col>                                                                                                                                                                                           
                           </el-row>
+                          -->
                           <el-row>
                             <el-col v-if="reporte.reti_id == 8" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                               <el-form-item prop="tire_id" :label="$t('gestion.tiporetiro')">
@@ -456,7 +459,7 @@
                                 effect="dark"
                                 size="medium"
                                 @click="handleTag(tag.idx)"
-                                :title="'Material Luminaria ' + tag.aap_id"
+                                :title="'Material Control ' + tag.aap_id"
                                 style="cursor: pointer;"
                               >
                                 L: {{tag.aap_id}}
@@ -471,7 +474,7 @@
                                 @blur="onAddAddress(inputValue02)"
                               >
                               </el-input>
-                              <el-button v-else-if="reporte.rees_id != 3" size="small" @click="showInputAddress02">+ Agregar Luminaria</el-button>
+                              <el-button v-else-if="reporte.rees_id != 3" size="small" @click="showInputAddress02">+ Agregar Control</el-button>
                             </el-col>
                           </el-row>
                           <el-row>
@@ -673,7 +676,7 @@ import { getUrbanizadoraTodas } from '@/api/urbanizadora'
 import { getMedidors } from '@/api/medidor'
 import { getTransformadors } from '@/api/transformador'
 // component
-import AapCreate from '@/views/inventario/gestion/create'
+import AapCreate from '@/views/control/gestion/create'
 
 import Popper from 'vue-popperjs'
 import 'vue-popperjs/dist/css/vue-popper.css'
@@ -1284,7 +1287,8 @@ export default {
           direccion.dato.aap_poste_propietario_anterior = null
           // Fin Limpiar Datos Direccion
           getAapEdit(direccion.aap_id).then(response => {
-            const activo = response.data
+            const control = response.data
+            const activo = { aap: control }
             if (activo.aap === null || activo.aap.aap_id < 1 || activo.aap.esta_id === 9) {
               this.existe = false
               if (this.reporte.reti_id === 2 && this.reporte.adicional.repo_tipo_expansion !== 4) {
@@ -1297,53 +1301,11 @@ export default {
                 if (direccion.even_estado === 1) {
                   direccion.even_direccion_anterior = activo.aap.aap_direccion
                   direccion.barr_id_anterior = activo.aap.barr_id
-                  direccion.dato.aatc_id_anterior = activo.aap.aatc_id
-                  direccion.dato.aama_id_anterior = activo.aap.aama_id
-                  direccion.dato.aamo_id_anterior = activo.aap.aamo_id
-                  direccion.dato.aaco_id_anterior = activo.aap.aaco_id
-                  direccion.dato.aap_potencia_anterior = activo.aap_adicional.aap_potencia
-                  direccion.dato.aap_tecnologia_anterior = activo.aap_adicional.aap_tecnologia
-                  direccion.dato_adicional.aacu_id_anterior = activo.aap.aacu_id
-                  direccion.dato_adicional.aaus_id_anterior = activo.aap.aaus_id
-                  direccion.dato_adicional.aap_apoyo_anterior = activo.aap.aap_apoyo
-                  direccion.dato_adicional.aap_lat_anterior = activo.aap.aap_lat
-                  direccion.dato_adicional.aap_lng_anterior = activo.aap.aap_lng
                   direccion.even_direccion = activo.aap.aap_direccion
                   direccion.barr_id = activo.aap.barr_id
-                  direccion.dato.aatc_id = activo.aap.aatc_id
-                  direccion.dato.aama_id = activo.aap.aama_id
-                  direccion.dato.aamo_id = activo.aap.aamo_id
-                  direccion.dato.aaco_id = activo.aap.aaco_id
-                  direccion.dato.aap_potencia = activo.aap_adicional.aap_potencia
-                  direccion.dato.aap_tecnologia = activo.aap_adicional.aap_tecnologia
-                  direccion.dato_adicional.aacu_id = activo.aap.aacu_id
-                  direccion.dato_adicional.aaus_id = activo.aap.aaus_id
-                  direccion.dato_adicional.aap_apoyo = activo.aap.aap_apoyo
-                  direccion.dato_adicional.aap_lat = activo.aap.aap_lat
-                  direccion.dato_adicional.aap_lng = activo.aap.aap_lng
-                  if (activo.aap_adicional.aap_brazo !== null && activo.aap_adicional.aap_brazo !== undefined) {
-                    direccion.dato.aap_brazo_anterior = activo.aap_adicional.aap_brazo.toString()
-                    direccion.dato.aap_brazo = activo.aap_adicional.aap_brazo.toString()
-                  } else {
-                    direccion.dato.aap_brazo_anterior = ''
-                    direccion.dato.aap_brazo = ''
-                  }
-                  direccion.dato.aap_collarin_anterior = activo.aap_adicional.aap_collarin
-                  direccion.dato.tipo_id_anterior = activo.aap_adicional.tipo_id
-                  direccion.dato.aap_poste_altura_anterior = activo.aap_adicional.aap_poste_altura
-                  direccion.dato.aap_collarin = activo.aap_adicional.aap_collarin
-                  direccion.dato.tipo_id = activo.aap_adicional.tipo_id
-                  direccion.dato.aap_poste_altura = activo.aap_adicional.aap_poste_altura
-                  if (activo.aap_adicional.aap_poste_propietario !== null && activo.aap_adicional.aap_poste_propietario !== undefined) {
-                    direccion.dato.aap_poste_propietario_anterior = activo.aap_adicional.aap_poste_propietario
-                    direccion.dato.aap_poste_propietario = activo.aap_adicional.aap_poste_propietario
-                  } else {
-                    direccion.dato.aap_poste_propietario = null
-                    direccion.dato.aap_poste_propietario_anterior = null
-                  }
                   // validar si es reubicación y no es retirada
                   if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
-                    if (activo.aap.aaco_id !== 3) {
+                    if (activo.aap.esta_id !== 2) {
                       this.retiradoDialogVisible = true
                       direccion.even_valido.aap_id = false
                     } else {
@@ -1356,7 +1318,7 @@ export default {
                   }
                   // validar si es retiro y está ya retirada
                   if (this.reporte.reti_id === 8) {
-                    if (activo.aap.aaco_id === 3) {
+                    if (activo.aap.esta_id === 3) {
                       this.yaretiradoDialogVisible = true
                       direccion.even_valido.aap_id = false
                     } else {
@@ -1392,50 +1354,8 @@ export default {
                 if (direccion.even_estado === 1) {
                   direccion.even_direccion_anterior = activo.aap.aap_direccion
                   direccion.barr_id_anterior = activo.aap.barr_id
-                  direccion.dato.aatc_id_anterior = activo.aap.aatc_id
-                  direccion.dato.aama_id_anterior = activo.aap.aama_id
-                  direccion.dato.aamo_id_anterior = activo.aap.aamo_id
-                  direccion.dato.aaco_id_anterior = activo.aap.aaco_id
-                  direccion.dato.aap_potencia_anterior = activo.aap_adicional.aap_potencia
-                  direccion.dato.aap_tecnologia_anterior = activo.aap_adicional.aap_tecnologia
-                  direccion.dato_adicional.aacu_id_anterior = activo.aap.aacu_id
-                  direccion.dato_adicional.aaus_id_anterior = activo.aap.aaus_id
-                  direccion.dato_adicional.aap_apoyo_anterior = activo.aap.aap_apoyo
-                  direccion.dato_adicional.aap_lat_anterior = activo.aap.aap_lat
-                  direccion.dato_adicional.aap_lng_anterior = activo.aap.aap_lng
                   direccion.even_direccion = activo.aap.aap_direccion
                   direccion.barr_id = activo.aap.barr_id
-                  direccion.dato.aatc_id = activo.aap.aatc_id
-                  direccion.dato.aama_id = activo.aap.aama_id
-                  direccion.dato.aamo_id = activo.aap.aamo_id
-                  direccion.dato.aaco_id = activo.aap.aaco_id
-                  direccion.dato.aap_potencia = activo.aap_adicional.aap_potencia
-                  direccion.dato.aap_tecnologia = activo.aap_adicional.aap_tecnologia
-                  direccion.dato_adicional.aacu_id = activo.aap.aacu_id
-                  direccion.dato_adicional.aaus_id = activo.aap.aaus_id
-                  direccion.dato_adicional.aap_apoyo = activo.aap.aap_apoyo
-                  direccion.dato_adicional.aap_lat = activo.aap.aap_lat
-                  direccion.dato_adicional.aap_lng = activo.aap.aap_lng
-                  if (activo.aap_adicional.aap_brazo !== null && activo.aap_adicional.aap_brazo !== undefined) {
-                    direccion.dato.aap_brazo_anterior = activo.aap_adicional.aap_brazo.toString()
-                    direccion.dato.aap_brazo = activo.aap_adicional.aap_brazo.toString()
-                  } else {
-                    direccion.dato.aap_brazo_anterior = ''
-                    direccion.dato.aap_brazo = ''
-                  }
-                  direccion.dato.aap_collarin_anterior = activo.aap_adicional.aap_collarin
-                  direccion.dato.tipo_id_anterior = activo.aap_adicional.tipo_id
-                  direccion.dato.aap_poste_altura_anterior = activo.aap_adicional.aap_poste_altura
-                  direccion.dato.aap_collarin = activo.aap_adicional.aap_collarin
-                  direccion.dato.tipo_id = activo.aap_adicional.tipo_id
-                  direccion.dato.aap_poste_altura = activo.aap_adicional.aap_poste_altura
-                  if (activo.aap_adicional.aap_poste_propietario !== null && activo.aap_adicional.aap_poste_propietario !== undefined) {
-                    direccion.dato.aap_poste_propietario_anterior = activo.aap_adicional.aap_poste_propietario
-                    direccion.dato.aap_poste_propietario = activo.aap_adicional.aap_poste_propietario
-                  } else {
-                    direccion.dato.aap_poste_propietario = null
-                    direccion.dato.aap_poste_propietario_anterior = null
-                  }
                   direccion.materiales.forEach(m => {
                     m.aap_id = direccion.aap_id
                   })
@@ -1659,8 +1579,8 @@ export default {
             if (dt.aaco_id_anterior !== 3) {
               aap_no_en_retiro.push(d.aap_id)
               this.$notify.error({
-                title: 'Luminaria No Retirada',
-                message: 'Verifique la luminaria: ' + d.aap_id,
+                title: 'Control No Retirado',
+                message: 'Verifique el control: ' + d.aap_id,
                 offset: 0
               })
             }
@@ -1670,7 +1590,7 @@ export default {
             if (d.esnueva === false) {
               aap_no_nueva.push(d.aap)
               this.$notify.error({
-                title: 'Luminaria Ya Existe',
+                title: 'Control Ya Existe',
                 message: 'Verifique el código de la luminaria: ' + d.aap_id,
                 offset: 0
               })
@@ -1685,8 +1605,8 @@ export default {
             if (dt.aaco_id_anterior === 3) {
               validacion = false
               this.$notify.error({
-                title: 'Luminaria Ya Está Retirada',
-                message: 'Verifique la luminaria: ' + d.aap_id,
+                title: 'Control Ya Está Retirada',
+                message: 'Verifique el control: ' + d.aap_id,
                 offset: 0
               })
             }

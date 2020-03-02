@@ -23,70 +23,9 @@
         max-height="600"
         border
         @sort-change="handleSort"
-        @filter-change="handleFilter">
-        <el-table-column type="expand">
-          <template slot-scope="props">
-                <el-table 
-                  :data="Array(props.row.aap_elemento)"
-                  stripe
-                  style="width:100%"
-                 >
-                  <el-table-column
-                    :label="$t('elemento.fecha')"
-                    width="110"
-                  >
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.aael_fecha | moment('YYYY/MM/DD') }}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column
-                    :label="$t('elemento.reporte')"
-                    width="110"
-                  >
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.repo_consecutivo }}</span>
-                    </template>
-                  </el-table-column>                  
-                  <el-table-column
-                    :label="$t('elemento.bombillo')"
-                    width="100">
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.aap_bombillo }}</span>
-                    </template>
-                  </el-table-column>             
-                  <el-table-column
-                    :label="$t('elemento.balasto')"
-                    width="100">
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.aap_balasto }}</span>
-                    </template>
-                  </el-table-column>             
-                  <el-table-column
-                    :label="$t('elemento.arrancador')"
-                    width="100">
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.aap_arrancador }}</span>
-                    </template>
-                  </el-table-column>  
-                  <el-table-column
-                    :label="$t('elemento.condensador')"
-                    width="100">
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.aap_condensador }}</span>
-                    </template>
-                  </el-table-column>             
-                  <el-table-column
-                    :label="$t('elemento.fotocelda')"
-                    width="100">
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.aap_fotocelda }}</span>
-                    </template>
-                  </el-table-column>             
-              </el-table> 
-          </template>
-        </el-table-column>        
+        @filter-change="handleFilter"> 
         <el-table-column
-          :label="$t('gestion.code')"
+          :label="$t('control.gestion.code')"
           width="150"
           sortable="custom"
           prop="aap_id"
@@ -97,31 +36,7 @@
           </template>
         </el-table-column>
         <el-table-column
-          :label="$t('gestion.support')"
-          width="150"
-          sortable="custom"
-          prop="aap_apoyo"   
-          resizable       
-           >
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row.aap_apoyo }}</span>
-          </template>
-        </el-table-column>
-        <!--
-        <el-table-column
-          :label="$t('gestion.description')"
-          width="200"
-          sortable="custom"
-          prop="aap_descripcion"  
-          resizable        
-           >
-          <template slot-scope="scope">
-            <span >{{ scope.row.aap_descripcion }}</span>
-          </template>
-        </el-table-column>
-        -->
-        <el-table-column
-          :label="$t('gestion.address')"
+          :label="$t('control.gestion.address')"
           min-width="250"
           sortable="custom"
           prop="aap_direccion" 
@@ -132,7 +47,7 @@
           </template>
         </el-table-column>   
         <el-table-column
-          :label="$t('gestion.neighborhood')"
+          :label="$t('control.gestion.neighborhood')"
           min-width="250"
           sortable="custom"
           prop="barr_id"
@@ -142,41 +57,6 @@
             <span >{{ barrio(scope.row.barr_id) }}</span>
           </template>
         </el-table-column>   
-        <el-table-column
-          :label="$t('gestion.neighborhoodtype')"
-          width="200"
-          sortable="custom"
-          prop="tiba_id">
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ sector(scope.row.tiba_id) }}</span>
-          </template>
-        </el-table-column>                     
-        <el-table-column :label="$t('gestion.georeference')">
-        <el-table-column
-          :label="$t('gestion.lat')"
-          width="120">
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row.aap_lat }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('gestion.lng')"
-          width="120">
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row.aap_lng }}</span>
-          </template>
-        </el-table-column>
-        </el-table-column>
-        <el-table-column 
-          :label="$t('gestion.connection.title')"
-          width="120"
-          prop="aaco_id"
-          resizable
-          >
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ aap_conexion(scope.row.aaco_id) }}</span>
-          </template>
-        </el-table-column>
         <el-table-column
           fixed="right"
           :label="$t('table.accion')"
@@ -260,68 +140,20 @@ export default {
         {
           type: 'custom',
           id: 'a.aap_id',
-          label: this.$i18n.t('gestion.code'),
-          operators: ['=', '<>', '<', '<=', '>', '>=']
-        },
-        {
-          type: 'text',
-          id: 'a.aap_apoyo',
-          label: this.$i18n.t('gestion.support'),
+          label: this.$i18n.t('control.gestion.code'),
           operators: ['=', '<>', '<', '<=', '>', '>=']
         },
         {
           type: 'select',
           id: 'b.barr_id',
-          label: this.$i18n.t('gestion.neighborhood'),
+          label: this.$i18n.t('control.gestion.neighborhood'),
           choices: [],
           operators: ['=', '<>', '<', '<=', '>', '>=']
         },
         {
           type: 'select',
           id: 't.tiba_id',
-          label: this.$i18n.t('gestion.neighborhoodtype'),
-          choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
-        },
-        {
-          type: 'select',
-          id: 'a.aaco_id',
-          label: this.$i18n.t('gestion.connection.title'),
-          choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
-        },
-        {
-          type: 'select',
-          id: 'a.aaus_id',
-          label: this.$i18n.t('gestion.use'),
-          choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
-        },
-        {
-          type: 'select',
-          id: 'a.aatc_id',
-          label: this.$i18n.t('gestion.cover'),
-          choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
-        },
-        {
-          type: 'select',
-          id: 'ad.aap_tecnologia',
-          label: this.$i18n.t('gestion.tecnology.title'),
-          choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
-        },
-        {
-          type: 'select',
-          id: 'ad.aap_potencia',
-          label: this.$i18n.t('gestion.power.title'),
-          choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
-        },
-        {
-          type: 'select',
-          id: 'a.aamo_id',
-          label: this.$i18n.t('gestion.model'),
+          label: this.$i18n.t('control.gestion.neighborhoodtype'),
           choices: [],
           operators: ['=', '<>', '<', '<=', '>', '>=']
         },
@@ -452,44 +284,13 @@ export default {
         } else { return '' }
       }
     },
-    sector(tiba_id) {
-      if (tiba_id === null || tiba_id === undefined || tiba_id === 0) {
-        return ''
-      } else {
-        if (this.sectores.length > 0) {
-          return this.sectores.find(o => o.tiba_id === tiba_id, { tiba_descripcion: '' }).tiba_descripcion
-        }
-      }
-    },
-    elemento(elem_id) {
-      if (elem_id === null || elem_id === undefined || elem_id === 0) {
-        return ''
-      } else {
-        return this.elementos.find(o => o.elem_id === elem_id, { elem_descripcion: '' }).elem_descripcion
-      }
-    },
-    aap_conexion(aaco_id) {
-      if (aaco_id === null || aaco_id === undefined || aaco_id === 0) {
-        return ''
-      } else {
-        if (this.aap_conexiones.length > 0) {
-          return this.aap_conexiones.find(o => o.aaco_id === aaco_id, { aaco_descripcion: '' }).aaco_descripcion
-        }
-      }
-    },
     exportarXls() {
       informe_siap_inventario_filtro_xls(new Date().getTime(), btoa(this.order), btoa(JSON.stringify(this.qbquery)), this.empresa.empr_id)
     }
   },
   mounted() {
-    this.qrules[2].choices = this.qbarrios
-    this.qrules[3].choices = this.qtiposbarrio
-    this.qrules[4].choices = this.qconnections
-    this.qrules[5].choices = this.quses
-    this.qrules[6].choices = this.qtiposluminaria
-    this.qrules[7].choices = this.qtecnologias
-    this.qrules[8].choices = this.qpotencias
-    this.qrules[9].choices = this.qmodelos
+    this.qrules[1].choices = this.qbarrios
+    this.qrules[2].choices = this.qtiposbarrio
   },
   created() {
     getTiposBarrio().then(response => {

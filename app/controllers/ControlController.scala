@@ -1,8 +1,12 @@
 package controllers
 
 import javax.inject.Inject
+import java.util.Calendar
+
+import org.joda.time.LocalDateTime
 
 import models._
+import dto.QueryDto
 
 import play.api.mvc._
 import play.api.libs.json._
@@ -31,11 +35,22 @@ class ControlController @Inject()(mService: ControlRepository, cc: ControllerCom
       }             
     }
 
-    def todos(p:Long, c:Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
-        val empr_id = Utility.extraerEmpresa(request)
-        mService.todos(p, c, empr_id.get).map { result =>
-           Ok(Json.toJson(result))
-        }
+    def todos = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+      val json = request.body.asJson.get
+      val page_size = ( json \ "page_size").as[Long]
+      val current_page = ( json \ "current_page").as[Long]
+      val orderby = ( json \ "orderby").as[String]
+      val filter = ( json \ "filter").as[QueryDto]
+      val filtro_a = Utility.procesarFiltrado(filter)
+      var filtro = filtro_a.replace("\"", "'")
+      if (filtro == "()") {
+        filtro = ""
+      }
+      val empr_id = Utility.extraerEmpresa(request)
+      val total = mService.cuenta(empr_id.get, filtro)
+      mService.todos(empr_id.get, page_size, current_page, orderby, filtro).map { aaps =>
+        Ok(Json.obj("aaps" -> aaps, "total" -> total))
+      }
     }
 
     def controles() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
@@ -50,7 +65,9 @@ class ControlController @Inject()(mService: ControlRepository, cc: ControllerCom
       var m = json.as[Control]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
-      val mnuevo = new Control(Some(0),empr_id, usua_id, m.aap_direccion, m.barr_id, m.esta_id)
+      val hora: LocalDateTime =
+        new LocalDateTime(Calendar.getInstance().getTimeInMillis())      
+      val mnuevo = new Control(m.aap_id,empr_id, usua_id, m.aap_direccion, m.barr_id, m.esta_id, Some(hora.toDateTime))
       mService.crear(mnuevo).map { result =>
         if (result > 0){
           Created(Json.toJson("true"))
@@ -64,8 +81,8 @@ class ControlController @Inject()(mService: ControlRepository, cc: ControllerCom
       val json = request.body.asJson.get
       var m = json.as[Control]
       val usua_id = Utility.extraerUsuario(request)
-      val empr_id = Utility.extraerEmpresa(request)      
-      val mnuevo = new Control(m.aap_id, empr_id, usua_id, m.aap_direccion, m.barr_id, m.esta_id)
+      val empr_id = Utility.extraerEmpresa(request)
+      val mnuevo = new Control(m.aap_id, empr_id, usua_id, m.aap_direccion, m.barr_id, m.esta_id, m.aap_fechacreacion)
       if (mService.actualizar(mnuevo)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
@@ -100,6 +117,12 @@ class ControlController @Inject()(mService: ControlRepository, cc: ControllerCom
         Future.successful(Ok(Json.toJson(activo)))
       }
     }
+  }
+
+  def buscarSiguienteACrear() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+    val empr_id = Utility.extraerEmpresa(request)
+    val siguiente = mService.buscarSiguienteACrear(empr_id.get)
+    Future.successful(Ok(Json.toJson(siguiente)))
   }  
 
 }

@@ -4554,7 +4554,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                                     r.repo_fechasolucion
                                 from siap.reporte r 
                                 left join siap.barrio b on b.barr_id = r.barr_id
-                                inner join siap.reporte_evento e on e.repo_id = r.repo_id
+                                inner join siap.reporte_direccion e on e.repo_id = r.repo_id
                                 where r.reti_id = 1 and r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.reti_id = 1 and r.empr_id = {empr_id} and e.aap_id <> 9999999) o"""
           ).on(
               'fecha_inicial -> fi,
@@ -4574,7 +4574,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                                     (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion AND r.repo_fechasolucion) AS festivos
                                    from siap.reporte r 
                                    left join siap.barrio b on b.barr_id = r.barr_id
-                                   inner join siap.reporte_evento e on e.repo_id = r.repo_id
+                                   inner join siap.reporte_direccion e on e.repo_id = r.repo_id
                                    where r.reti_id = 1 and r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.reti_id = 1 and r.empr_id = {empr_id} and e.aap_id <> 9999999
                                    order by r.repo_fecharecepcion::text, r.repo_consecutivo, e.aap_id"""
           ).on(
