@@ -286,6 +286,17 @@ class ReporteController @Inject()(
       }
   }
 
+  def convertir(id: Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val usua_id = Utility.extraerUsuario(request)
+      val _id = reporteService.convertir(id)
+      if (_id > 0) {
+        Future.successful(Ok(Json.toJson(_id)))
+      } else {
+        Future.successful(ServiceUnavailable(Json.toJson(0)))
+      }
+  }
+
   def actualizarHistoria() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
     val empr_id = Utility.extraerEmpresa(request)

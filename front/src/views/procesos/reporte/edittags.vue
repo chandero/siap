@@ -1,7 +1,14 @@
 <template>
   <el-container>
       <el-header>
-          <span>{{ $t('route.reporteedit') }} - Estado Actual: {{ estado() }}</span>
+        <el-row>
+          <el-col :span="20">
+            <span>{{ $t('route.reporteedit') }} - Estado Actual: {{ estado() }}</span>
+          </el-col>
+          <el-col :span="4">
+            <el-button align="right" type="primary" title="Convertir en Reporte de Control" @click="showConvertirDlg=true">Convertir</el-button>
+          </el-col>
+        </el-row>
       </el-header>
       <el-main>
           <el-form ref="reporteForm" :model="reporte" :rules="rules" :label-position="labelPosition">
@@ -642,13 +649,24 @@
       :visible.sync="recoveryVisible"
       width="30%"
      >
-     <span>Existe información de Recuperación para el Reporte {{ reporte_previo.repo_consecutivo }}</span>
-     <span>Desea recuperarla ?</span>
-     <span slot="footer" class="dialog-footer">
-      <el-button @click="dialogVisible = false">No</el-button>
-      <el-button type="primary" @click="recuperarReporte()">Si</el-button>
-     </span>
-</el-dialog>           
+      <span>Existe información de Recuperación para el Reporte {{ reporte_previo.repo_consecutivo }}</span>
+      <span>Desea recuperarla ?</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">No</el-button>
+        <el-button type="primary" @click="recuperarReporte()">Si</el-button>
+      </span>
+    </el-dialog>   
+     <el-dialog
+      title="Convertir Reporte de Luminaria a Control"
+      :visible.sync="showConvertirDlg"
+      width="30%"
+     >
+      <span>Se convertirá el reporte en reporte de Control, continuar ?</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showConvertirDlg = false">No</el-button>
+        <el-button type="primary" @click="convertirReporte()">Si</el-button>
+      </span>
+    </el-dialog>            
   </el-container>
 </template>
 <script>
@@ -656,7 +674,7 @@ import { getActividades } from '@/api/actividad'
 import { getOrigenes } from '@/api/origen'
 import { getBarriosEmpresa } from '@/api/barrio'
 import { getTiposBarrio } from '@/api/tipobarrio'
-import { getReporte, updateReporte, getTipos, getEstados, validarCodigo, validarReporteDiligenciado } from '@/api/reporte'
+import { getReporte, updateReporte, getTipos, getEstados, validarCodigo, validarReporteDiligenciado, convertirReporte } from '@/api/reporte'
 import { getAcciones } from '@/api/accion'
 import { getElementos, getElementoByDescripcion, getElementoByCode } from '@/api/elemento'
 import { getAapEdit, getAapValidar, validar, buscarSiguiente } from '@/api/aap'
@@ -745,6 +763,7 @@ export default {
       labelPosition: 'top',
       loadingElemento: false,
       showAapModal: false,
+      showConvertirDlg: false,
       activePages: ['1', '2', '3', '4'],
       activePages2: ['2-1', '2-2'],
       nopopover: false,
@@ -1231,6 +1250,18 @@ export default {
       } else {
         return false
       }
+    },
+    convertirReporte() {
+      this.showConvertirDlg = false
+      convertirReporte(this.reporte.repo_id).then(response => {
+        if (response.status === 200) {
+          this.$router.push({ path: '/procesos/control/editar/' + response.data })
+        } else {
+          this.$alert('No se pudo convertir el reporte', 'Convertir Reporte', {
+            confirmButtonText: 'Aceptar'
+          })
+        }
+      })
     },
     validateAap(direccion, id) {
       if (direccion.aap_id) {

@@ -318,6 +318,7 @@ GET     /api/repo/venc/get                   controllers.ReporteController.siap_
 GET     /api/repo/vadi/:t/:n                 controllers.ReporteController.validarReporteDiligenciado(t: Long, n: Int)
 POST    /api/repo/grw                        controllers.ReporteController.guardarReporteWeb 
 GET     /api/repo/gbtc/:c/:e/:t              controllers.ReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
+GET     /api/repo/conv/:id                   controllers.ReporteController.convertir(id: Long)
 
 # ControlReporte
 POST    /api/core/get                        controllers.ControlReporteController.todos
@@ -339,6 +340,8 @@ GET     /api/core/venc/get                   controllers.ControlReporteControlle
 GET     /api/core/vadi/:t/:n                 controllers.ControlReporteController.validarReporteDiligenciado(t: Long, n: Int)
 POST    /api/core/grw                        controllers.ControlReporteController.guardarReporteWeb 
 GET     /api/core/gbtc/:c/:e/:t              controllers.ControlReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
+GET     /api/core/conv/:id                   controllers.ControlReporteController.convertir(id: Long)
+
 
 # Obra
 POST    /api/obra/get                    controllers.ObraController.todos

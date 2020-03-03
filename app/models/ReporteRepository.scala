@@ -1395,7 +1395,7 @@ class ReporteRepository @Inject()(
   def cuenta(empr_id: scala.Long): scala.Long = {
     db.withConnection { implicit connection =>
       val result = SQL(
-        "SELECT COUNT(*) AS c FROM siap.reporte WHERE empr_id = {empr_id} and rees_id <> 9"
+        "SELECT COUNT(*) AS c FROM siap.reporte WHERE empr_id = {empr_id} and rees_id < 9"
       ).on(
           'empr_id -> empr_id
         )
@@ -1425,7 +1425,7 @@ class ReporteRepository @Inject()(
                                           FROM siap.reporte r 
                                           LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                                           WHERE r.empr_id = {empr_id}
-                                          and r.rees_id <> 9 """
+                                          and r.rees_id < 9 """
         if (!filter.isEmpty) {
           query = query + " and " + filter
         }
@@ -1580,7 +1580,7 @@ class ReporteRepository @Inject()(
         var _list: ListBuffer[Reporte] = new ListBuffer[Reporte]()
         val reps = SQL("""SELECT * FROM siap.reporte r 
                                           WHERE r.empr_id = {empr_id} 
-                                          and r.rees_id <> 9 ORDER BY r.repo_id""")
+                                          and r.rees_id < 9 ORDER BY r.repo_id""")
           .on(
             'empr_id -> empr_id
           )
@@ -1901,7 +1901,7 @@ class ReporteRepository @Inject()(
                             LEFT JOIN siap.origen o on r.orig_id = o.orig_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
-                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9"""
+                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id < 9"""
       ).on(
           'reti_id -> reti_id,
           'repo_consecutivo -> repo_consecutivo,
@@ -2117,7 +2117,7 @@ class ReporteRepository @Inject()(
                                           FROM siap.reporte r 
                                           LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                                           WHERE r.empr_id = {empr_id} and r.repo_fecharecepcion between {fecha_inicial} and {fecha_final}
-                                          and r.rees_id <> 9 ORDER BY r.rees_id, r.repo_fecharecepcion DESC """
+                                          and r.rees_id < 9 ORDER BY r.rees_id, r.repo_fecharecepcion DESC """
       /*
                     if (!filter.isEmpty) {
                         query = query + " and " + filter
@@ -2439,6 +2439,160 @@ class ReporteRepository @Inject()(
     }
 
   /**
+    * convertir
+    * 
+    * @param reporte
+    * @return Boolean
+    */
+  def convertir(id: scala.Long): scala.Long = {
+    db.withConnection { implicit connection =>
+
+      var _id : scala.Long = 0
+      val reporte = SQL("SELECT * FROM siap.reporte WHERE repo_id = {repo_id}").on('repo_id -> id).as(simple.single)
+      // Validar si previamente fue convertido
+      val control = SQL("SELECT * FROM siap.control_reporte WHERE repo_consecutivo = {repo_consecutivo} and reti_id = {reti_id}")
+                    .on(
+                      'repo_consecutivo -> reporte.repo_consecutivo,
+                      'reti_id -> reporte.reti_id
+                    ).as(simple.singleOpt)
+      control match {
+        case None =>
+                val queryReporte = """INSERT INTO siap.control_reporte (
+                      repo_fecharecepcion, 
+                      repo_direccion, 
+                      repo_nombre, 
+                      repo_telefono, 
+                      repo_fechasolucion, 
+                      repo_reportetecnico, 
+                      orig_id, 
+                      barr_id, 
+                      usua_id, 
+                      empr_id, 
+                      rees_id, 
+                      repo_descripcion, 
+                      repo_horainicio, 
+                      repo_horafin, 
+                      reti_id, 
+                      repo_consecutivo, 
+                      tiba_id, 
+                      barr_id_anterior) 
+                      SELECT 
+                      repo_fecharecepcion, 
+                      repo_direccion, 
+                      repo_nombre, 
+                      repo_telefono, 
+                      repo_fechasolucion, 
+                      repo_reportetecnico, 
+                      orig_id, 
+                      barr_id, 
+                      usua_id, 
+                      empr_id, 
+                      rees_id, 
+                      repo_descripcion, 
+                      repo_horainicio, 
+                      repo_horafin, 
+                      reti_id, 
+                      repo_consecutivo, 
+                      tiba_id, 
+                      barr_id_anterior
+                      FROM siap.reporte r 
+                      WHERE r.repo_consecutivo = {repo_consecutivo} and r.reti_id = {reti_id}"""
+                val queryAdicional = """SELECT
+                               repo_id,
+                               repo_fechadigitacion,
+                               repo_tipo_expansion,
+                               repo_luminaria,
+                               repo_redes,
+                               repo_poste,
+                               repo_modificado,
+                               repo_subreporte,
+                               acti_id,
+                               repo_subid,
+                               repo_email,
+                               repo_codigo,
+                               repo_apoyo,
+                               urba_id,
+                               muot_id,
+                               aaco_id_anterior,
+                               aaco_id_nuevo,
+                               medi_id,
+                               tran_id,
+                               medi_acta
+                              FROM siap.reporte_adicional a WHERE a.repo_id = {repo_id}
+                              """
+
+            _id = SQL(queryReporte)
+            .on(
+                'repo_consecutivo -> reporte.repo_consecutivo,
+                'reti_id -> reporte.reti_id
+            )
+            .executeInsert().get
+
+            val resultSet = SQL(queryAdicional).on('repo_id -> reporte.repo_id).as(ReporteAdicional.reporteAdicionalSet *)
+            resultSet.map { r =>
+                SQL("""INSERT INTO siap.control_reporte_adicional VALUES(
+                               {repo_id},
+                               {repo_fechadigitacion},
+                               {repo_tipo_expansion},
+                               {repo_luminaria},
+                               {repo_redes},
+                               {repo_poste},
+                               {repo_modificado},
+                               {repo_subreporte},
+                               {acti_id},
+                               {repo_subid},
+                               {repo_email},
+                               {repo_codigo},
+                               {repo_apoyo},
+                               {urba_id},
+                               {muot_id},
+                               {aaco_id_anterior},
+                               {aaco_id_nuevo},
+                               {medi_id},
+                               {tran_id},
+                               {medi_acta}
+                )""").on(
+                      'repo_id -> _id,
+                      'repo_fechadigitacion -> r.repo_fechadigitacion,
+                      'repo_tipo_expansion -> r.repo_tipo_expansion,
+                      'repo_luminaria -> r.repo_luminaria,
+                      'repo_redes -> r.repo_redes,
+                      'repo_poste -> r.repo_poste,
+                      'repo_modificado -> r.repo_modificado,
+                      'repo_subreporte -> r.repo_subreporte,
+                      'acti_id -> r.acti_id,
+                      'repo_subid -> r.repo_subid,
+                      'repo_email -> r.repo_email,
+                      'repo_codigo -> r.repo_codigo,
+                      'repo_apoyo -> r.repo_apoyo,
+                      'urba_id -> r.urba_id,
+                      'muot_id -> r.muot_id,
+                      'aaco_id_anterior -> r.aaco_id_anterior,
+                      'aaco_id_nuevo -> r.aaco_id_nuevo,
+                      'medi_id -> r.medi_id,
+                      'tran_id -> r.tran_id,
+                      'medi_acta -> r.medi_acta
+                ).executeInsert()
+              }
+
+
+      case Some(c) => 
+              _id = c.repo_id.get
+              SQL("""UPDATE siap.control_reporte SET rees_id = 1 WHERE repo_id = {repo_id}""")
+              .on(
+                'repo_id -> c.repo_id
+              ).executeUpdate()
+      }
+                // Eliminar de Reporte y Reporte Adicional
+      SQL("""UPDATE siap.reporte SET rees_id = 10 WHERE r.repo_id = {repo_id}""")
+        .on(
+         'repo_id -> reporte.repo_id
+      ).executeUpdate()
+      _id
+    }
+  }  
+
+  /**
     * Actualizar Reporte
     * @param reporte: Reporte
     */
@@ -2566,7 +2720,7 @@ class ReporteRepository @Inject()(
       // Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
       reporte.direcciones.map { direcciones =>
         for (d <- direcciones) {
-          if (d.aap_id != None && d.aap_id.get != null) {
+          if (d.aap_id != None) {
             var aap_elemento: AapElemento = new AapElemento(d.aap_id, None, None, None, None, None, None, reporte.reti_id, reporte.repo_consecutivo.map(_.toInt))
             var aap: Aap = new Aap(d.aap_id, None, None, None, None, None, None, None, reporte.empr_id.get, reporte.repo_fechasolucion, d.aap_fechatoma, None, None, None, None, None, None, None, None, reporte.usua_id.get, Some(aap_elemento), None)
             var aap_adicional: AapAdicional = new AapAdicional(d.aap_id, None, None, None, None, None, None, None, None, None)
@@ -3095,7 +3249,7 @@ class ReporteRepository @Inject()(
 
       reporte.direcciones.map { direcciones =>
         for (d <- direcciones) {
-          if (d.aap_id != None && d.aap_id.get != null) {
+          if (d.aap_id != None) {
             var dirActualizado: Boolean = false
             var dirInsertado: Boolean = false
             var datoActualizado: Boolean = false
@@ -4467,7 +4621,7 @@ class ReporteRepository @Inject()(
   def estados(): Future[Iterable[ReporteEstado]] =
     Future[Iterable[ReporteEstado]] {
       db.withConnection { implicit connection =>
-        SQL("""SELECT * FROM siap.reporte_estado WHERE rees_estado <> 9""").as(
+        SQL("""SELECT * FROM siap.reporte_estado WHERE rees_estado < 9""").as(
           ReporteEstado.oEstado *
         )
       }
@@ -4479,7 +4633,7 @@ class ReporteRepository @Inject()(
   def tipos(): Future[Iterable[ReporteTipo]] = Future[Iterable[ReporteTipo]] {
     db.withConnection { implicit connection =>
       SQL(
-        """SELECT * FROM siap.reporte_tipo WHERE reti_estado <> 9 ORDER BY reti_id"""
+        """SELECT * FROM siap.reporte_tipo WHERE reti_estado < 9 ORDER BY reti_id"""
       ).as(ReporteTipo.repoTipoSet *)
     }
   }

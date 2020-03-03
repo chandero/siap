@@ -92,6 +92,16 @@ export function deleteReporte(repo_id) {
   })
 }
 
+export function convertirReporte(repo_id) {
+  const data = {
+    repo_id
+  }
+  return request({
+    url: '/repo/conv/' + data.repo_id,
+    method: 'get'
+  })
+}
+
 export function validarCodigo(elem_id, codigo) {
   const data = {
     elem_id,

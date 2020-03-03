@@ -1199,7 +1199,7 @@ export default {
           this.error(error)
         })
       */
-      localStorage.setItem('currEditRepFecha', JSON.stringify({ fecha: Date.now(), data: this.reporte }))
+      localStorage.setItem('currEditControlRepFecha', JSON.stringify({ fecha: Date.now(), data: this.reporte }))
     },
     pending() {
       /* const _ini = localStorage.getItem('currEditRepFechaIni')
@@ -1565,18 +1565,11 @@ export default {
       this.reporte.direcciones.forEach(d => {
         if (d.aap_id !== null && this.reporte.reti_id !== 0 && d.even_estado < 8) {
           // Validar Información
-          const dt = d.dato
-          if (dt.aatc_id === null || dt.aama_id === null || dt.aamo_id === null || dt.aaco_id === null ||
-            dt.aap_potencia === null || dt.aap_tecnologia === null || dt.aap_brazo === null ||
-            dt.aap_collarin === null || dt.tipo_id === null || dt.aap_poste_altura === null ||
-            dt.aap_poste_propietario === null) {
-            validacion = false
-          }
-          // Validar estado de la luminaria y tipo de reporte
+          // Validar estado del control y tipo de reporte
           var aap_no_en_retiro = []
           var aap_no_nueva = []
           if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
-            if (dt.aaco_id_anterior !== 3) {
+            if (d.esta_id !== 3) {
               aap_no_en_retiro.push(d.aap_id)
               this.$notify.error({
                 title: 'Control No Retirado',
@@ -1602,7 +1595,7 @@ export default {
           }
           // validar luminaria ya retirada
           if (this.reporte.reti_id === 8) {
-            if (dt.aaco_id_anterior === 3) {
+            if (d.esta_id === 3) {
               validacion = false
               this.$notify.error({
                 title: 'Control Ya Está Retirada',
@@ -1660,7 +1653,7 @@ export default {
         const data = { reporte: this.reporte, coau_tipo: this.coau_tipo, coau_codigo: this.autorizacion }
         updateReporte(data).then(response => {
           if (response.status === 200) {
-            localStorage.setItem('currEditRepFechaIni', JSON.stringify({ fecha: Date.now(), data: this.reporte }))
+            localStorage.setItem('currEditControlRepFechaIni', JSON.stringify({ fecha: Date.now(), data: this.reporte }))
             this.success()
           } else {
             this.reporte.rees_id = 2
@@ -2039,7 +2032,7 @@ export default {
       } else {
         this.conDirecciones = false
       }
-      localStorage.setItem('currEditRepFechaIni', JSON.stringify({ fecha: Date.now(), data: this.reporte }))
+      localStorage.setItem('currEditControlRepFechaIni', JSON.stringify({ fecha: Date.now(), data: this.reporte }))
       this.cargarEventos()
       this.validarConsecutivo()
       this.reporte = this.reporte_previo
@@ -2067,7 +2060,7 @@ export default {
     },
     cargarEventos() {
       // validar si existe un reporte previo
-      var stringReporteAnterior = localStorage.getItem('currEditRepFecha')
+      var stringReporteAnterior = localStorage.getItem('currEditControlRepFecha')
       if (stringReporteAnterior !== undefined &&
           stringReporteAnterior !== null &&
           stringReporteAnterior !== '') {
