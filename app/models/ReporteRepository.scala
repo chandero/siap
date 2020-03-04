@@ -532,30 +532,28 @@ object ReporteDireccionDato {
   )(ReporteDireccionDato.apply _)
 
   val reporteDireccionDatoSet = {
-    get[Option[scala.Long]]("reporte_direccion_dato.aatc_id") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aatc_id_anterior") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aama_id") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aama_id_anterior") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aamo_id") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aamo_id_anterior") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aaco_id") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aaco_id_anterior") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.tipo_id") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.tipo_id_anterior") ~
-      get[Option[Double]]("reporte_direccion_dato.aap_poste_altura") ~
-      get[Option[Double]]("reporte_direccion_dato.aap_poste_altura_anterior") ~
-      get[Option[String]]("reporte_direccion_dato.aap_poste_propietario") ~
-      get[Option[String]](
-        "reporte_direccion_dato.aap_poste_propietario_anterior"
-      ) ~
-      get[Option[Int]]("reporte_direccion_dato.aap_potencia") ~
-      get[Option[Int]]("reporte_direccion_dato.aap_potencia_anterior") ~
-      get[Option[String]]("reporte_direccion_dato.aap_tecnologia") ~
-      get[Option[String]]("reporte_direccion_dato.aap_tecnologia_anterior") ~
-      get[Option[String]]("reporte_direccion_dato.aap_brazo") ~
-      get[Option[String]]("reporte_direccion_dato.aap_brazo_anterior") ~
-      get[Option[String]]("reporte_direccion_dato.aap_collarin") ~
-      get[Option[String]]("reporte_direccion_dato.aap_collarin_anterior") map {
+    get[Option[scala.Long]]("aatc_id") ~
+      get[Option[scala.Long]]("aatc_id_anterior") ~
+      get[Option[scala.Long]]("aama_id") ~
+      get[Option[scala.Long]]("aama_id_anterior") ~
+      get[Option[scala.Long]]("aamo_id") ~
+      get[Option[scala.Long]]("aamo_id_anterior") ~
+      get[Option[scala.Long]]("aaco_id") ~
+      get[Option[scala.Long]]("aaco_id_anterior") ~
+      get[Option[scala.Long]]("tipo_id") ~
+      get[Option[scala.Long]]("tipo_id_anterior") ~
+      get[Option[Double]]("aap_poste_altura") ~
+      get[Option[Double]]("aap_poste_altura_anterior") ~
+      get[Option[String]]("aap_poste_propietario") ~
+      get[Option[String]]("aap_poste_propietario_anterior") ~
+      get[Option[Int]]("aap_potencia") ~
+      get[Option[Int]]("aap_potencia_anterior") ~
+      get[Option[String]]("aap_tecnologia") ~
+      get[Option[String]]("aap_tecnologia_anterior") ~
+      get[Option[String]]("aap_brazo") ~
+      get[Option[String]]("aap_brazo_anterior") ~
+      get[Option[String]]("aap_collarin") ~
+      get[Option[String]]("aap_collarin_anterior") map {
       case aatc_id ~
             aatc_id_anterior ~
             aama_id ~
@@ -741,17 +739,17 @@ object ReporteDireccion {
   )(ReporteDireccion.apply _)
 
   val reporteDireccionSet = {
-    get[Option[scala.Long]]("reporte_direccion.repo_id") ~
-      get[Option[scala.Long]]("reporte_direccion.aap_id") ~
-      get[Option[String]]("reporte_direccion.even_direccion") ~
-      get[Option[scala.Long]]("reporte_direccion.barr_id") ~
-      get[Option[String]]("reporte_direccion.even_direccion_anterior") ~
-      get[Option[scala.Long]]("reporte_direccion.barr_id_anterior") ~
-      get[Option[Int]]("reporte_direccion.even_id") ~
-      get[Option[Int]]("reporte_direccion.even_estado") ~
-      get[Option[scala.Long]]("reporte_direccion.tire_id") ~
-      get[Option[String]]("reporte_direccion.coau_codigo") ~
-      get[Option[DateTime]]("reporte_direccion.aap_fechatoma") map {
+    get[Option[scala.Long]]("repo_id") ~
+      get[Option[scala.Long]]("aap_id") ~
+      get[Option[String]]("even_direccion") ~
+      get[Option[scala.Long]]("barr_id") ~
+      get[Option[String]]("even_direccion_anterior") ~
+      get[Option[scala.Long]]("barr_id_anterior") ~
+      get[Option[Int]]("even_id") ~
+      get[Option[Int]]("even_estado") ~
+      get[Option[scala.Long]]("tire_id") ~
+      get[Option[String]]("coau_codigo") ~
+      get[Option[DateTime]]("aap_fechatoma") map {
       case repo_id ~ aap_id ~ even_direccion ~ barr_id ~ even_direccion_anterior ~ barr_id_anterior ~ even_id ~ even_estado ~ tire_id ~ coau_codigo ~ aap_fechatoma =>
         ReporteDireccion(
           repo_id,
@@ -1184,24 +1182,24 @@ class ReporteRepository @Inject()(
     * Parsear un Reporte desde un ResultSet
     */
   private val simple = {
-    get[Option[scala.Long]]("reporte.repo_id") ~
-      get[Option[scala.Long]]("reporte.reti_id") ~
-      get[Option[scala.Long]]("reporte.repo_consecutivo") ~
-      get[Option[DateTime]]("reporte.repo_fecharecepcion") ~
-      get[Option[String]]("reporte.repo_direccion") ~
-      get[Option[String]]("reporte.repo_nombre") ~
-      get[Option[String]]("reporte.repo_telefono") ~
-      get[Option[DateTime]]("reporte.repo_fechasolucion") ~
-      get[Option[String]]("reporte.repo_horainicio") ~
-      get[Option[String]]("reporte.repo_horafin") ~
-      get[Option[String]]("reporte.repo_reportetecnico") ~
-      get[Option[String]]("reporte.repo_descripcion") ~
-      get[Option[scala.Long]]("reporte.rees_id") ~
-      get[Option[scala.Long]]("reporte.orig_id") ~
-      get[Option[scala.Long]]("reporte.barr_id") ~
-      get[Option[scala.Long]]("reporte.empr_id") ~
-      get[Option[scala.Long]]("reporte.tiba_id") ~
-      get[Option[scala.Long]]("reporte.usua_id") map {
+    get[Option[scala.Long]]("repo_id") ~
+      get[Option[scala.Long]]("reti_id") ~
+      get[Option[scala.Long]]("repo_consecutivo") ~
+      get[Option[DateTime]]("repo_fecharecepcion") ~
+      get[Option[String]]("repo_direccion") ~
+      get[Option[String]]("repo_nombre") ~
+      get[Option[String]]("repo_telefono") ~
+      get[Option[DateTime]]("repo_fechasolucion") ~
+      get[Option[String]]("repo_horainicio") ~
+      get[Option[String]]("repo_horafin") ~
+      get[Option[String]]("repo_reportetecnico") ~
+      get[Option[String]]("repo_descripcion") ~
+      get[Option[scala.Long]]("rees_id") ~
+      get[Option[scala.Long]]("orig_id") ~
+      get[Option[scala.Long]]("barr_id") ~
+      get[Option[scala.Long]]("empr_id") ~
+      get[Option[scala.Long]]("tiba_id") ~
+      get[Option[scala.Long]]("usua_id") map {
       case repo_id ~
             reti_id ~
             repo_consecutivo ~
@@ -2584,7 +2582,7 @@ class ReporteRepository @Inject()(
               ).executeUpdate()
       }
                 // Eliminar de Reporte y Reporte Adicional
-      SQL("""UPDATE siap.reporte SET rees_id = 10 WHERE r.repo_id = {repo_id}""")
+      SQL("""UPDATE siap.reporte SET rees_id = 10 WHERE repo_id = {repo_id}""")
         .on(
          'repo_id -> reporte.repo_id
       ).executeUpdate()

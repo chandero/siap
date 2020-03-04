@@ -1,7 +1,14 @@
 <template>
   <el-container>
       <el-header>
-          <span>{{ $t('route.controlreporteedit') }} - Estado Actual: {{ estado() }}</span>
+        <el-row>
+          <el-col :span="20">
+            <span>{{ $t('route.controlreporteedit') }} - Estado Actual: {{ estado() }}</span>
+          </el-col>
+          <el-col :span="4">
+            <el-button align="right" type="primary" title="Convertir en Reporte de Luminaria" @click="showConvertirDlg=true">Convertir</el-button>
+          </el-col>
+        </el-row>
       </el-header>
       <el-main>
           <el-form ref="reporteForm" :model="reporte" :rules="rules" :label-position="labelPosition">
@@ -89,15 +96,17 @@
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-                            <el-form-item prop="repo_codigo" :label="$t('reporte.code')">
-                                <el-input readonly ref="code" v-model="reporte.adicional.repo_codigo" @input="reporte.adicional.repo_codigo = $event.toUpperCase()" @keyup.enter.native="changeFocus('apoyo')"></el-input>
+                            <el-form-item prop="repo_codigo" :label="$t('control.reporte.code')">
+                                <el-input readonly ref="code" v-model="reporte.adicional.repo_codigo" @input="reporte.adicional.repo_codigo = $event.toUpperCase()" @keyup.enter.native="changeFocus('nombre')"></el-input>
                             </el-form-item>                            
                         </el-col>
+                        <!--
                         <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
                             <el-form-item prop="repo_apoyo" :label="$t('reporte.apoyo')">
                                 <el-input readonly ref="apoyo" v-model="reporte.adicional.repo_apoyo" @input="reporte.adicional.repo_apoyo = $event.toUpperCase()" @keyup.enter.native="changeFocus('nombre')" ></el-input>
                             </el-form-item>                            
                         </el-col>
+                        -->
                     </el-row>
                     <el-row :gutter="4">
                         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
@@ -651,7 +660,18 @@
       <el-button @click="dialogVisible = false">No</el-button>
       <el-button type="primary" @click="recuperarReporte()">Si</el-button>
      </span>
-</el-dialog>           
+</el-dialog> 
+     <el-dialog
+      title="Convertir Reporte de Control a Reporte de Luminaria"
+      :visible.sync="showConvertirDlg"
+      width="50%"
+     >
+      <span>Se convertirá el reporte en reporte de Luminaria, continuar ?</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showConvertirDlg = false">No</el-button>
+        <el-button type="primary" @click="convertirReporte()">Si</el-button>
+      </span>
+    </el-dialog>          
   </el-container>
 </template>
 <script>
@@ -659,7 +679,7 @@ import { getActividades } from '@/api/actividad'
 import { getOrigenes } from '@/api/origen'
 import { getBarriosEmpresa } from '@/api/barrio'
 import { getTiposBarrio } from '@/api/tipobarrio'
-import { getReporte, updateReporte, getTipos, getEstados, validarCodigo, validarReporteDiligenciado } from '@/api/controlreporte'
+import { getReporte, updateReporte, getTipos, getEstados, validarCodigo, validarReporteDiligenciado, convertirReporte } from '@/api/controlreporte'
 import { getAcciones } from '@/api/accion'
 import { getElementos, getElementoByDescripcion, getElementoByCode } from '@/api/elemento'
 import { getAapEdit, getAapValidar, validar, buscarSiguiente } from '@/api/control'
@@ -748,6 +768,7 @@ export default {
       labelPosition: 'top',
       loadingElemento: false,
       showAapModal: false,
+      showConvertirDlg: false,
       activePages: ['1', '2', '3', '4'],
       activePages2: ['2-1', '2-2'],
       nopopover: false,
@@ -1235,6 +1256,18 @@ export default {
         return false
       }
     },
+    convertirReporte() {
+      this.showConvertirDlg = false
+      convertirReporte(this.reporte.repo_id).then(response => {
+        if (response.status === 200) {
+          this.$router.push({ path: '/procesos/reporte/editartags/' + response.data })
+        } else {
+          this.$alert('No se pudo convertir el reporte de control', 'Convertir Reporte de Control', {
+            confirmButtonText: 'Aceptar'
+          })
+        }
+      })
+    },
     validateAap(direccion, id) {
       if (direccion.aap_id) {
         this.aap.aap_id = direccion.aap_id
@@ -1653,7 +1686,8 @@ export default {
         const data = { reporte: this.reporte, coau_tipo: this.coau_tipo, coau_codigo: this.autorizacion }
         updateReporte(data).then(response => {
           if (response.status === 200) {
-            localStorage.setItem('currEditControlRepFechaIni', JSON.stringify({ fecha: Date.now(), data: this.reporte }))
+            localStorage.removeItem('currEditControlRepFechaIni')
+            localStorage.removeItem('currEditControlRepFecha')
             this.success()
           } else {
             this.reporte.rees_id = 2
@@ -1721,6 +1755,8 @@ export default {
           this.reporte.repo_consecutivo,
         type: 'success'
       })
+      this.$timer.stop('autosave')
+      this.$timer.stop('pending')
     },
     error(e) {
       this.$notify.error({
@@ -1912,6 +1948,8 @@ export default {
               duration: 5000
             })
             this.reporte.rees_id = 2
+            this.$timer.start('autosave')
+            this.$timer.start('pending')
           } else {
             this.$alert('El código ingresado no es válido, por favor confirmelo', 'Error', {
               confirmButtonText: 'Cerrar'

@@ -225,7 +225,7 @@ export default {
       }
     },
     handleEdit(index, row) {
-      this.$router.push({ path: '/control/gestion/editar/' + row.aap_id })
+      this.$router.push({ path: '/control/gestion/editartags/' + row.aap_id })
       console.log(index, row)
     },
     handleDelete(index, row) {

@@ -657,9 +657,9 @@
       </span>
     </el-dialog>   
      <el-dialog
-      title="Convertir Reporte de Luminaria a Control"
+      title="Convertir Reporte de Luminaria a Reporte de Control"
       :visible.sync="showConvertirDlg"
-      width="30%"
+      width="50%"
      >
       <span>Se convertirá el reporte en reporte de Control, continuar ?</span>
       <span slot="footer" class="dialog-footer">
@@ -1771,7 +1771,8 @@ export default {
         const data = { reporte: this.reporte, coau_tipo: this.coau_tipo, coau_codigo: this.autorizacion }
         updateReporte(data).then(response => {
           if (response.status === 200) {
-            localStorage.setItem('currEditRepFechaIni', JSON.stringify({ fecha: Date.now(), data: this.reporte }))
+            localStorage.removeItem('currEditRepFechaIni')
+            localStorage.removeItem('currEditRepFecha')
             this.success()
           } else {
             this.reporte.rees_id = 2
@@ -1839,6 +1840,8 @@ export default {
           this.reporte.repo_consecutivo,
         type: 'success'
       })
+      this.$timer.stop('autosave')
+      this.$timer.stop('pending')
     },
     error(e) {
       this.$notify.error({
@@ -2030,6 +2033,8 @@ export default {
               duration: 5000
             })
             this.reporte.rees_id = 2
+            this.$timer.start('autosave')
+            this.$timer.start('pending')
           } else {
             this.$alert('El código ingresado no es válido, por favor confirmelo', 'Error', {
               confirmButtonText: 'Cerrar'

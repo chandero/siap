@@ -382,7 +382,7 @@ export default {
       }
     },
     handleEdit(index, row) {
-      this.$router.push({ path: '/procesos/control/editar/' + row.repo_id })
+      this.$router.push({ path: '/procesos/control/editartags/' + row.repo_id })
       console.log(index, row)
     },
     handleEdit2(index, row) {
@@ -441,7 +441,7 @@ export default {
       this.$router.push({ path: '/procesos/subreporte/crear' })
     },
     estado(id) {
-      if (id === null) {
+      if (id === undefined || id === null || id <= 0) {
         return ''
       } else {
         return this.estados.find(e => e.rees_id === id, { rees_descripcion: '' }).rees_descripcion

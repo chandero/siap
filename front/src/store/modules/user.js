@@ -56,7 +56,7 @@ const user = {
     },
     SET_USUARIO: (state, usuario) => {
       state.usuario = usuario
-      localStorage.setItem('siapusr', usuario)
+      localStorage.setItem('siapusr', JSON.stringify(usuario))
     }
   },
 

@@ -1396,7 +1396,7 @@ class ControlReporteRepository @Inject()(
   def cuenta(empr_id: scala.Long): scala.Long = {
     db.withConnection { implicit connection =>
       val result = SQL(
-        "SELECT COUNT(*) AS c FROM siap.control_reporte WHERE empr_id = {empr_id} and rees_id <> 9"
+        "SELECT COUNT(*) AS c FROM siap.control_reporte WHERE empr_id = {empr_id} and rees_id < 9"
       ).on(
           'empr_id -> empr_id
         )
@@ -1426,7 +1426,7 @@ class ControlReporteRepository @Inject()(
                                           FROM siap.control_reporte r 
                                           LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                                           WHERE r.empr_id = {empr_id}
-                                          and r.rees_id <> 9 """
+                                          and r.rees_id < 9 """
         if (!filter.isEmpty) {
           query = query + " and " + filter
         }
@@ -1581,7 +1581,7 @@ class ControlReporteRepository @Inject()(
         var _list: ListBuffer[Reporte] = new ListBuffer[Reporte]()
         val reps = SQL("""SELECT * FROM siap.control_reporte r 
                                           WHERE r.empr_id = {empr_id} 
-                                          and r.rees_id <> 9 ORDER BY r.repo_id""")
+                                          and r.rees_id < 9 ORDER BY r.repo_id""")
           .on(
             'empr_id -> empr_id
           )
@@ -1902,7 +1902,7 @@ class ControlReporteRepository @Inject()(
                             LEFT JOIN siap.origen o on r.orig_id = o.orig_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                             INNER JOIN siap.control_reporte_estado e on r.rees_id = e.rees_id
-                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9"""
+                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id < 9"""
       ).on(
           'reti_id -> reti_id,
           'repo_consecutivo -> repo_consecutivo,
@@ -2118,7 +2118,7 @@ class ControlReporteRepository @Inject()(
                                           FROM siap.control_reporte r 
                                           LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                                           WHERE r.empr_id = {empr_id} and r.repo_fecharecepcion between {fecha_inicial} and {fecha_final}
-                                          and r.rees_id <> 9 ORDER BY r.rees_id, r.repo_fecharecepcion DESC """
+                                          and r.rees_id < 9 ORDER BY r.rees_id, r.repo_fecharecepcion DESC """
       /*
                     if (!filter.isEmpty) {
                         query = query + " and " + filter
@@ -2585,7 +2585,7 @@ class ControlReporteRepository @Inject()(
               ).executeUpdate()
       }
                 // Eliminar de Reporte y Reporte Adicional
-      SQL("""UPDATE siap.control_reporte SET rees_id = 10 WHERE r.repo_id = {repo_id}""")
+      SQL("""UPDATE siap.control_reporte SET rees_id = 10 WHERE repo_id = {repo_id}""")
         .on(
          'repo_id -> control.repo_id
       ).executeUpdate()
@@ -4618,7 +4618,7 @@ class ControlReporteRepository @Inject()(
   def estados(): Future[Iterable[ReporteEstado]] =
     Future[Iterable[ReporteEstado]] {
       db.withConnection { implicit connection =>
-        SQL("""SELECT * FROM siap.control_reporte_estado WHERE rees_estado <> 9""").as(
+        SQL("""SELECT * FROM siap.control_reporte_estado WHERE rees_estado < 9""").as(
           ReporteEstado.oEstado *
         )
       }
@@ -4630,7 +4630,7 @@ class ControlReporteRepository @Inject()(
   def tipos(): Future[Iterable[ReporteTipo]] = Future[Iterable[ReporteTipo]] {
     db.withConnection { implicit connection =>
       SQL(
-        """SELECT * FROM siap.control_reporte_tipo WHERE reti_estado <> 9 ORDER BY reti_id"""
+        """SELECT * FROM siap.control_reporte_tipo WHERE reti_estado < 9 ORDER BY reti_id"""
       ).as(ReporteTipo.repoTipoSet *)
     }
   }
