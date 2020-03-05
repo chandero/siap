@@ -1255,7 +1255,7 @@ export default {
       this.showConvertirDlg = false
       convertirReporte(this.reporte.repo_id).then(response => {
         if (response.status === 200) {
-          this.$router.push({ path: '/procesos/control/editar/' + response.data })
+          this.$router.push({ path: '/procesos/control/editartags/' + response.data })
         } else {
           this.$alert('No se pudo convertir el reporte', 'Convertir Reporte', {
             confirmButtonText: 'Aceptar'

@@ -115,7 +115,7 @@
                             </el-form-item>                            
                         </el-col>
                         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                            <el-form-item prop="repo_direccion" :label="$t('reporte.address')">
+                            <el-form-item prop="repo_direccion" :label="$t('control.reporte.address')">
                              <el-input readonly ref="direccion" v-model="reporte.repo_direccion" @input="reporte.repo_direccion = $event.toUpperCase()" @keyup.enter.native="changeFocus('barrio')">
                              </el-input>
                             </el-form-item>
@@ -488,7 +488,7 @@
                           </el-row>
                           <el-row>
                            <el-col :span="24">
-                            <span>MATERIAL LUMINARIA {{ reporte.direcciones[didx].aap_id }}</span>
+                            <span>MATERIAL CONTROL {{ reporte.direcciones[didx].aap_id }}</span>
                            </el-col>
                           </el-row>                          
                         <el-row :gutter="4" class="hidden-sm-and-down">
@@ -496,7 +496,7 @@
                             <span style="font-weight: bold;">No.</span>
                           </el-col>                        
                           <el-col :md="3" :lg="3" :xl="3">
-                            <span style="font-weight: bold;">Código de la Luminaria</span>
+                            <span style="font-weight: bold;">Código del Control</span>
                           </el-col>
                           <el-col :xs="24" :sm="24" :md="11" :lg="11" :xl="11">
                             <span style="font-weight: bold;">Nombre del Material</span>
@@ -522,7 +522,7 @@
                             </el-col>                            
                             <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ id + 1 }}</el-col>
                             <el-col class="hidden-md-and-up" :xs="9" :sm="9">
-                              <span style="font-weight: bold;">Código de la Luminaria</span>
+                              <span style="font-weight: bold;">Código del Control</span>
                             </el-col>
                             <el-col :xs="13" :sm="13" :md="3" :lg="3" :xl="3">
                                 <el-form-item prop="aap_id">
@@ -618,7 +618,7 @@
       title="Atención"
       :visible.sync="centerDialogVisible"
       center>
-      <span style="font-size: 20px;">El Código de Luminaria <b>{{ aap.aap_id }}</b>, No Existe, Por Favor Verifique.</span>
+      <span style="font-size: 20px;">El Código del Control <b>{{ aap.aap_id }}</b>, No Existe, Por Favor Verifique.</span>
       <span slot="footer" class="dialog-footer">
         <el-button v-if="reporte.reti_id === 2" type="primary" @click="centerDialogVisible = false; showAapModal=!showAapModal">Crear Nuevo Código</el-button>
         <el-button type="primary" @click="centerDialogVisible = false">Cerrar</el-button>
@@ -635,7 +635,7 @@
       title="Atención"
       :visible.sync="retiradoDialogVisible"
       center>
-      <span style="font-size: 20px;">El Código de Luminaria <b>{{ aap.aap_id }}</b>, No Esta en Estado RETIRADO, Por Favor Verifique.</span>
+      <span style="font-size: 20px;">El Código del Control <b>{{ aap.aap_id }}</b>, No Esta en Estado RETIRADO, Por Favor Verifique.</span>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="retiradoDialogVisible = false">Cerrar</el-button>
       </span>
@@ -644,7 +644,7 @@
       title="Atención"
       :visible.sync="yaretiradoDialogVisible"
       center>
-      <span style="font-size: 20px;">El Código de Luminaria <b>{{ aap.aap_id }}</b>, Se encuentra en Estado RETIRADO, Por Favor Verifique.</span>
+      <span style="font-size: 20px;">El Código del Control <b>{{ aap.aap_id }}</b>, Se encuentra en Estado RETIRADO, Por Favor Verifique.</span>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="yaretiradoDialogVisible = false">Cerrar</el-button>
       </span>

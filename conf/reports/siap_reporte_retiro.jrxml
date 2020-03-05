@@ -478,7 +478,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<textFieldExpression><![CDATA[$F{repo_consecutivo}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement mode="Opaque" x="0" y="0" width="588" height="20" backcolor="#FFFFFF" uuid="93700dfd-b958-42ef-a934-776d8321dd10"/>
+				<reportElement mode="Opaque" x="0" y="0" width="389" height="20" backcolor="#FFFFFF" uuid="93700dfd-b958-42ef-a934-776d8321dd10"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1655,6 +1655,26 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 					<font size="8"/>
 				</textElement>
 				<text><![CDATA[REUBICACION]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="394" y="3" width="13" height="13" uuid="a5bb2396-1dd4-4888-bf97-e93cd62e9021"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="410" y="4" width="61" height="12" uuid="85420819-d83d-42db-b49c-ec7cbff06293"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[LUMINARIA]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="475" y="3" width="13" height="13" uuid="008698a0-1b9f-48cf-88d5-ff032cb0f222"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="491" y="4" width="61" height="12" uuid="6c5e01ea-2f96-47e6-aae7-5ac7b1769333"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[CONTROL]]></text>
 			</staticText>
 		</band>
 	</pageHeader>

@@ -11,8 +11,8 @@
       </el-container>
       <el-container>
           <el-header>
-            <el-button type="primary" icon="el-icon-plus" circle @click="nuevo" title="Crear Nueva Luminaria"></el-button>
-            <el-button type="success" icon="el-icon-refresh" circle @click="actualizar" title="Refrescar Lista de Luminarias"></el-button>
+            <el-button type="primary" icon="el-icon-plus" circle @click="nuevo" title="Crear Nuevo Control"></el-button>
+            <el-button type="success" icon="el-icon-refresh" circle @click="actualizar" title="Refrescar Lista de Controles"></el-button>
           </el-header>
           <el-main>
           <el-table
@@ -67,12 +67,12 @@
               circle
               type="warning"
               @click="handleEdit(scope.$index, scope.row)"
-              title="Modificar Luminaria"><i class="el-icon-edit"></i></el-button>
+              title="Modificar Control"><i class="el-icon-edit"></i></el-button>
             <el-button
               size="mini"
               circle
               type="danger"
-              title="Borrar Luminaria"
+              title="Borrar Control"
               @click="handleDelete(scope.$index, scope.row)"><i class="el-icon-delete"></i></el-button>
           </template>
         </el-table-column>
@@ -225,7 +225,7 @@ export default {
       }
     },
     handleEdit(index, row) {
-      this.$router.push({ path: '/control/gestion/editartags/' + row.aap_id })
+      this.$router.push({ path: '/control/gestion/editar/' + row.aap_id })
       console.log(index, row)
     },
     handleDelete(index, row) {

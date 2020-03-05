@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte" pageWidth="612" pageHeight="792" whenNoDataType="NoDataSection" columnWidth="587" leftMargin="10" rightMargin="15" topMargin="14" bottomMargin="15" isSummaryNewPage="true" isFloatColumnFooter="true" whenResourceMissingType="Error" uuid="f8caebe0-c17f-4691-ac5f-60e5854f08eb">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="siap"/>
@@ -977,7 +977,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="0" y="123" width="289" height="108" uuid="8402c162-5365-4b97-99e9-ca61fab208af"/>
+				<reportElement x="0" y="123" width="289" height="92" uuid="8402c162-5365-4b97-99e9-ca61fab208af"/>
 				<box>
 					<pen lineWidth="1.0" lineStyle="Dotted"/>
 					<topPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
@@ -1242,6 +1242,32 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				</textElement>
 				<text><![CDATA[FOTOCELDA]]></text>
 			</staticText>
+			<rectangle>
+				<reportElement x="5" y="218" width="15" height="11" uuid="a0fb1514-ec19-4a5b-b437-1da7bd6027c9"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="26" y="218" width="100" height="12" uuid="3d7ec673-9831-4de8-af1a-0f049a6cf714"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[LUMINARIA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="152" y="218" width="100" height="12" uuid="2bbe98e8-377b-4d02-affd-77f5bab05998"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[CONTROL]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="131" y="217" width="15" height="11" uuid="a939d45d-f4df-442a-beb7-045c06d13afe"/>
+			</rectangle>
+			<line>
+				<reportElement x="0" y="231" width="290" height="1" uuid="2ffb6d73-baba-48ab-91e6-5e09caf0a2e7"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
 		</band>
 	</pageHeader>
 	<columnHeader>

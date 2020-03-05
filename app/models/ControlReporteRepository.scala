@@ -2837,13 +2837,12 @@ class ControlReporteRepository @Inject()(
                 )
                 .executeUpdate() > 0
             }
-            /* Para el Caso de Control no es necesario verificar elemento
             if ((eventoActualizado || eventoInsertado) && (estado != 9)) {
               // validar elemento y actualizar aap_elemento
               elemento.tiel_id match {
                 case Some(1) =>
                   SQL(
-                    """UPDATE siap.aap_elemento SET aap_bombillo = {aap_bombillo}, reti_id = {reti_id} , repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                    """UPDATE siap.control_elemento SET aap_bombillo = {aap_bombillo}, reti_id = {reti_id} , repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_bombillo -> e.even_codigo_instalado,
                       'aap_id -> e.aap_id,
@@ -2853,7 +2852,7 @@ class ControlReporteRepository @Inject()(
                     )
                     .executeUpdate()
                   val updated: Boolean = SQL(
-                    """UPDATE siap.aap_elemento_historia SET aap_bombillo_retirado = {aap_bombillo_retirado}, aap_bombillo_instalado = {aap_bombillo_instalado}
+                    """UPDATE siap.control_elemento_historia SET aap_bombillo_retirado = {aap_bombillo_retirado}, aap_bombillo_instalado = {aap_bombillo_instalado}
                                                  WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
                   ).on(
                       'aap_bombillo_retirado -> e.even_codigo_retirado,
@@ -2866,7 +2865,7 @@ class ControlReporteRepository @Inject()(
                     )
                     .executeUpdate() > 0
                   if (!updated) {
-                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                    SQL("""INSERT INTO siap.control_elemento_historia (
                                                     aap_id,
                                                     aael_fecha,
                                                     aap_bombillo_retirado,
@@ -2922,7 +2921,7 @@ class ControlReporteRepository @Inject()(
                   }
                 case Some(2) =>
                   SQL(
-                    """UPDATE siap.aap_elemento SET aap_balasto = {aap_balasto}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                    """UPDATE siap.control_elemento SET aap_balasto = {aap_balasto}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_balasto -> e.even_codigo_instalado,
                       'aap_id -> e.aap_id,
@@ -2932,7 +2931,7 @@ class ControlReporteRepository @Inject()(
                     )
                     .executeUpdate()
                   val updated: Boolean = SQL(
-                    """UPDATE siap.aap_elemento_historia SET aap_balasto_retirado = {aap_balasto_retirado}, aap_balasto_instalado = {aap_balasto_instalado}
+                    """UPDATE siap.control_elemento_historia SET aap_balasto_retirado = {aap_balasto_retirado}, aap_balasto_instalado = {aap_balasto_instalado}
                                                  WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
                   ).on(
                       'aap_balasto_retirado -> e.even_codigo_retirado,
@@ -2945,7 +2944,7 @@ class ControlReporteRepository @Inject()(
                     )
                     .executeUpdate() > 0
                   if (!updated) {
-                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                    SQL("""INSERT INTO siap.control_elemento_historia (
                                                     aap_id,
                                                     aael_fecha,
                                                     aap_bombillo_retirado,
@@ -3001,7 +3000,7 @@ class ControlReporteRepository @Inject()(
                   }
                 case Some(3) =>
                   SQL(
-                    """UPDATE siap.aap_elemento SET aap_arrancador = {aap_arrancador}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                    """UPDATE siap.control_elemento SET aap_arrancador = {aap_arrancador}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_arrancador -> e.even_codigo_instalado,
                       'aap_id -> e.aap_id,
@@ -3011,7 +3010,7 @@ class ControlReporteRepository @Inject()(
                     )
                     .executeUpdate()
                   val updated: Boolean = SQL(
-                    """UPDATE siap.aap_elemento_historia SET aap_arrancador_retirado = {aap_arrancador_retirado}, aap_arrancador_instalado = {aap_arrancador_instalado}
+                    """UPDATE siap.control_elemento_historia SET aap_arrancador_retirado = {aap_arrancador_retirado}, aap_arrancador_instalado = {aap_arrancador_instalado}
                                                  WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
                   ).on(
                       'aap_arrancador_retirado -> e.even_codigo_retirado,
@@ -3024,7 +3023,7 @@ class ControlReporteRepository @Inject()(
                     )
                     .executeUpdate() > 0
                   if (!updated) {
-                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                    SQL("""INSERT INTO siap.control_elemento_historia (
                                                     aap_id,
                                                     aael_fecha,
                                                     aap_bombillo_retirado,
@@ -3080,7 +3079,7 @@ class ControlReporteRepository @Inject()(
                   }
                 case Some(4) =>
                   SQL(
-                    """UPDATE siap.aap_elemento SET aap_condensador = {aap_condensador}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                    """UPDATE siap.control_elemento SET aap_condensador = {aap_condensador}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_condensador -> e.even_codigo_instalado,
                       'aap_id -> e.aap_id,
@@ -3090,7 +3089,7 @@ class ControlReporteRepository @Inject()(
                     )
                     .executeUpdate()
                   val updated: Boolean = SQL(
-                    """UPDATE siap.aap_elemento_historia SET aap_condensador_retirado = {aap_condensador_retirado}, aap_condensador_instalado = {aap_condensador_instalado}
+                    """UPDATE siap.control_elemento_historia SET aap_condensador_retirado = {aap_condensador_retirado}, aap_condensador_instalado = {aap_condensador_instalado}
                                                  WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
                   ).on(
                       'aap_condensador_retirado -> e.even_codigo_retirado,
@@ -3103,7 +3102,7 @@ class ControlReporteRepository @Inject()(
                     )
                     .executeUpdate() > 0
                   if (!updated) {
-                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                    SQL("""INSERT INTO siap.control_elemento_historia (
                                                     aap_id,
                                                     aael_fecha,
                                                     aap_bombillo_retirado,
@@ -3159,7 +3158,7 @@ class ControlReporteRepository @Inject()(
                   }
                 case Some(5) =>
                   SQL(
-                    """UPDATE siap.aap_elemento SET aap_fotocelda = {aap_fotocelda}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                    """UPDATE siap.control_elemento SET aap_fotocelda = {aap_fotocelda}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_fotocelda -> e.even_codigo_instalado,
                       'aap_id -> e.aap_id,
@@ -3169,7 +3168,7 @@ class ControlReporteRepository @Inject()(
                     )
                     .executeUpdate()
                   val updated: Boolean = SQL(
-                    """UPDATE siap.aap_elemento_historia SET aap_fotocelda_retirado = {aap_fotocelda_retirado}, aap_fotocelda_instalado = {aap_fotocelda_instalado}
+                    """UPDATE siap.control_elemento_historia SET aap_fotocelda_retirado = {aap_fotocelda_retirado}, aap_fotocelda_instalado = {aap_fotocelda_instalado}
                                                  WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
                   ).on(
                       'aap_fotocelda_retirado -> e.even_codigo_retirado,
@@ -3182,7 +3181,7 @@ class ControlReporteRepository @Inject()(
                     )
                     .executeUpdate() > 0
                   if (!updated) {
-                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                    SQL("""INSERT INTO siap.control_elemento_historia (
                                                     aap_id,
                                                     aael_fecha,
                                                     aap_bombillo_retirado,
@@ -3239,7 +3238,6 @@ class ControlReporteRepository @Inject()(
                 case _ => None
               }
             }
-            */
           }
         }
       }
@@ -3523,6 +3521,9 @@ class ControlReporteRepository @Inject()(
             }
 
             // Fin Direccion Dato Adicional
+            // Actualizar Información de Luminaria
+            // No Aplica a Control
+            /*
             d.dato match {
               case Some(dato) =>
                 dato.aatc_id match {
@@ -3697,6 +3698,10 @@ class ControlReporteRepository @Inject()(
                 }
               case None => false
             }
+            */
+            // Actualización Dato Adicional a Luminaria
+            // No Aplica en Control
+            /*
             d.dato_adicional match {
               case Some(dato_adicional) =>
                 dato_adicional.aacu_id match {
@@ -3816,10 +3821,11 @@ class ControlReporteRepository @Inject()(
 
               case None => false
             }
+            */
             // actualizar direccion de la luminaria y datos adicionales
-            if (reporte.reti_id.get == 2 || reporte.reti_id.get == 3) {
+            if (reporte.reti_id.get == 1 || reporte.reti_id.get == 2 || reporte.reti_id.get == 3) {
               val res = SQL(
-                """UPDATE siap.aap SET aap_direccion = {aap_direccion}, barr_id = {barr_id} WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
+                """UPDATE siap.control SET aap_direccion = {aap_direccion}, barr_id = {barr_id} WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
               ).on(
                   'aap_direccion -> d.even_direccion,
                   'barr_id -> d.barr_id,
@@ -3830,18 +3836,11 @@ class ControlReporteRepository @Inject()(
             }
             reporte.reti_id match {
               case Some(8) =>
-                SQL(
-                  """UPDATE siap.aap SET aaco_id = 3 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
-                ).on(
-                    'aap_id -> d.aap_id,
-                    'empr_id -> reporte.empr_id
-                  )
-                  .executeUpdate()
                 println("tipo retiro: " + d.tire_id)
                 d.tire_id match {
                   case Some(3) =>
                     SQL(
-                      """UPDATE siap.aap SET esta_id = 9 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
+                      """UPDATE siap.control SET esta_id = 9 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
                     ).on(
                         'aap_id -> d.aap_id,
                         'empr_id -> reporte.empr_id
@@ -3849,7 +3848,7 @@ class ControlReporteRepository @Inject()(
                       .executeUpdate()
                   case _ =>
                     SQL(
-                      """UPDATE siap.aap SET esta_id = 2 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
+                      """UPDATE siap.control SET esta_id = 2 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
                     ).on(
                         'aap_id -> d.aap_id,
                         'empr_id -> reporte.empr_id
@@ -3915,7 +3914,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_fecharecepcion",
               'audi_valorantiguo -> reporte_ant.get.repo_fecharecepcion,
@@ -3932,7 +3931,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_direccion",
               'audi_valorantiguo -> reporte_ant.get.repo_direccion,
@@ -3949,7 +3948,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_nombre",
               'audi_valorantiguo -> reporte_ant.get.repo_nombre,
@@ -3966,7 +3965,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_telefono",
               'audi_valorantiguo -> reporte_ant.get.repo_telefono,
@@ -3983,7 +3982,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_fechasolucion",
               'audi_valorantiguo -> reporte_ant.get.repo_fechasolucion,
@@ -4000,7 +3999,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_horainicio",
               'audi_valorantiguo -> reporte_ant.get.repo_horainicio,
@@ -4017,7 +4016,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_horafin",
               'audi_valorantiguo -> reporte_ant.get.repo_horafin,
@@ -4034,7 +4033,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_reportetecnico",
               'audi_valorantiguo -> reporte_ant.get.repo_reportetecnico,
@@ -4051,7 +4050,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.rees_id,
               'audi_campo -> "rees_id",
               'audi_valorantiguo -> reporte_ant.get.rees_id,
@@ -4068,7 +4067,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "orig_id",
               'audi_valorantiguo -> reporte_ant.get.orig_id,
@@ -4085,7 +4084,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "barr_id",
               'audi_valorantiguo -> reporte_ant.get.barr_id,
@@ -4102,7 +4101,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "empr_id",
               'audi_valorantiguo -> reporte_ant.get.empr_id,
@@ -4119,7 +4118,7 @@ class ControlReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
+              'audi_tabla -> "control_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "usua_id",
               'audi_valorantiguo -> reporte_ant.get.usua_id,
@@ -4156,7 +4155,7 @@ class ControlReporteRepository @Inject()(
           'audi_fecha -> fecha,
           'audi_hora -> hora,
           'usua_id -> usua_id,
-          'audi_tabla -> "reporte",
+          'audi_tabla -> "control_reporte",
           'audi_uid -> repo_id,
           'audi_campo -> "",
           'audi_valorantiguo -> "",
@@ -4211,7 +4210,7 @@ class ControlReporteRepository @Inject()(
                   elemento.tiel_id match {
                     case Some(1) =>
                       SQL(
-                        """UPDATE siap.aap_elemento SET aap_bombillo = {aap_bombillo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                        """UPDATE siap.control_elemento SET aap_bombillo = {aap_bombillo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                       ).on(
                           'aap_bombillo -> e.even_codigo_instalado,
                           'aap_id -> e.aap_id,
@@ -4219,7 +4218,7 @@ class ControlReporteRepository @Inject()(
                         )
                         .executeUpdate()
                       val updated: Boolean = SQL(
-                        """UPDATE siap.aap_elemento_historia SET aap_bombillo_retirado = {aap_bombillo_retirado}, aap_bombillo_instalado = {aap_bombillo_instalado}
+                        """UPDATE siap.control_elemento_historia SET aap_bombillo_retirado = {aap_bombillo_retirado}, aap_bombillo_instalado = {aap_bombillo_instalado}
                                                  WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
                       ).on(
                           'aap_bombillo_retirado -> e.even_codigo_retirado,
@@ -4232,7 +4231,7 @@ class ControlReporteRepository @Inject()(
                         )
                         .executeUpdate() > 0
                       if (!updated) {
-                        SQL("""INSERT INTO siap.aap_elemento_historia (
+                        SQL("""INSERT INTO siap.control_elemento_historia (
                                                     aap_id,
                                                     aael_fecha,
                                                     aap_bombillo_retirado,
@@ -4288,7 +4287,7 @@ class ControlReporteRepository @Inject()(
                       }
                     case Some(2) =>
                       SQL(
-                        """UPDATE siap.aap_elemento SET aap_balasto = {aap_balasto} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                        """UPDATE siap.control_elemento SET aap_balasto = {aap_balasto} where aap_id = {aap_id} and empr_id = {empr_id}"""
                       ).on(
                           'aap_balasto -> e.even_codigo_instalado,
                           'aap_id -> e.aap_id,
@@ -4296,7 +4295,7 @@ class ControlReporteRepository @Inject()(
                         )
                         .executeUpdate()
                       val updated: Boolean = SQL(
-                        """UPDATE siap.aap_elemento_historia SET aap_balasto_retirado = {aap_balasto_retirado}, aap_balasto_instalado = {aap_balasto_instalado}
+                        """UPDATE siap.control_elemento_historia SET aap_balasto_retirado = {aap_balasto_retirado}, aap_balasto_instalado = {aap_balasto_instalado}
                                                  WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
                       ).on(
                           'aap_balasto_retirado -> e.even_codigo_retirado,
@@ -4310,7 +4309,7 @@ class ControlReporteRepository @Inject()(
                         .executeUpdate() > 0
                       if (!updated) {
                         SQL(
-                          """INSERT INTO siap.aap_elemento_historia (
+                          """INSERT INTO siap.control_elemento_historia (
                                                     aap_id,
                                                     aael_fecha,
                                                     aap_bombillo_retirado,
@@ -4366,7 +4365,7 @@ class ControlReporteRepository @Inject()(
                       }
                     case Some(3) =>
                       SQL(
-                        """UPDATE siap.aap_elemento SET aap_arrancador = {aap_arrancador} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                        """UPDATE siap.control_elemento SET aap_arrancador = {aap_arrancador} where aap_id = {aap_id} and empr_id = {empr_id}"""
                       ).on(
                           'aap_arrancador -> e.even_codigo_instalado,
                           'aap_id -> e.aap_id,
@@ -4374,7 +4373,7 @@ class ControlReporteRepository @Inject()(
                         )
                         .executeUpdate()
                       val updated: Boolean = SQL(
-                        """UPDATE siap.aap_elemento_historia SET aap_arrancador_retirado = {aap_arrancador_retirado}, aap_arrancador_instalado = {aap_arrancador_instalado}
+                        """UPDATE siap.control_elemento_historia SET aap_arrancador_retirado = {aap_arrancador_retirado}, aap_arrancador_instalado = {aap_arrancador_instalado}
                                                  WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
                       ).on(
                           'aap_arrancador_retirado -> e.even_codigo_retirado,
@@ -4388,7 +4387,7 @@ class ControlReporteRepository @Inject()(
                         .executeUpdate() > 0
                       if (!updated) {
                         SQL(
-                          """INSERT INTO siap.aap_elemento_historia (
+                          """INSERT INTO siap.control_elemento_historia (
                                                     aap_id,
                                                     aael_fecha,
                                                     aap_bombillo_retirado,
@@ -4444,7 +4443,7 @@ class ControlReporteRepository @Inject()(
                       }
                     case Some(4) =>
                       SQL(
-                        """UPDATE siap.aap_elemento SET aap_condensador = {aap_condensador} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                        """UPDATE siap.control_elemento SET aap_condensador = {aap_condensador} where aap_id = {aap_id} and empr_id = {empr_id}"""
                       ).on(
                           'aap_condensador -> e.even_codigo_instalado,
                           'aap_id -> e.aap_id,
@@ -4452,7 +4451,7 @@ class ControlReporteRepository @Inject()(
                         )
                         .executeUpdate()
                       val updated: Boolean = SQL(
-                        """UPDATE siap.aap_elemento_historia SET aap_condensador_retirado = {aap_condensador_retirado}, aap_condensador_instalado = {aap_condensador_instalado}
+                        """UPDATE siap.control_elemento_historia SET aap_condensador_retirado = {aap_condensador_retirado}, aap_condensador_instalado = {aap_condensador_instalado}
                                                  WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
                       ).on(
                           'aap_condensador_retirado -> e.even_codigo_retirado,
@@ -4466,7 +4465,7 @@ class ControlReporteRepository @Inject()(
                         .executeUpdate() > 0
                       if (!updated) {
                         SQL(
-                          """INSERT INTO siap.aap_elemento_historia (
+                          """INSERT INTO siap.control_elemento_historia (
                                                     aap_id,
                                                     aael_fecha,
                                                     aap_bombillo_retirado,
@@ -4522,7 +4521,7 @@ class ControlReporteRepository @Inject()(
                       }
                     case Some(5) => {
                       SQL(
-                        """UPDATE siap.aap_elemento SET aap_fotocelda = {aap_fotocelda} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                        """UPDATE siap.control_elemento SET aap_fotocelda = {aap_fotocelda} where aap_id = {aap_id} and empr_id = {empr_id}"""
                       ).on(
                           'aap_fotocelda -> e.even_codigo_instalado,
                           'aap_id -> e.aap_id,
@@ -4530,7 +4529,7 @@ class ControlReporteRepository @Inject()(
                         )
                         .executeUpdate()
                       val updated: Boolean = SQL(
-                        """UPDATE siap.aap_elemento_historia SET aap_fotocelda_retirado = {aap_fotocelda_retirado}, aap_fotocelda_instalado = {aap_fotocelda_instalado}
+                        """UPDATE siap.control_elemento_historia SET aap_fotocelda_retirado = {aap_fotocelda_retirado}, aap_fotocelda_instalado = {aap_fotocelda_instalado}
                                                  WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
                       ).on(
                           'aap_fotocelda_retirado -> e.even_codigo_retirado,
@@ -4544,7 +4543,7 @@ class ControlReporteRepository @Inject()(
                         .executeUpdate() > 0
                       if (!updated) {
                         SQL(
-                          """INSERT INTO siap.aap_elemento_historia (
+                          """INSERT INTO siap.control_elemento_historia (
                                                     aap_id,
                                                     aael_fecha,
                                                     aap_bombillo_retirado,
@@ -4646,17 +4645,17 @@ class ControlReporteRepository @Inject()(
     db.withConnection { implicit connection =>
       empresaService.buscarPorId(empr_id).map { empresa =>
         try {
-          var compiledFile = REPORT_DEFINITION_PATH + "siap_reporte.jasper";
+          var compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte.jasper";
           reporte match {
             case Some(r) =>
               if (reporte.get.reti_id.get == 2 || reporte.get.reti_id.get == 6) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_expansion.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte_expansion.jasper"
               } else if (reporte.get.reti_id.get == 8) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_retiro.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte_retiro.jasper"
               } else if (reporte.get.reti_id.get == 3) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_reubicacion.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte_reubicacion.jasper"
               } else if (reporte.get.reti_id.get == 9) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_cambio_medida.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte_cambio_medida.jasper"
               }
             case None => None
           }

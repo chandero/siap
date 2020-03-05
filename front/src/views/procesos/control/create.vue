@@ -97,15 +97,17 @@
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
-                            <el-form-item prop="repo_codigo" :label="$t('reporte.code')">
+                            <el-form-item prop="repo_codigo" :label="$t('control.reporte.code')">
                                 <el-input ref="code" type="number" v-model="reporte.adicional.repo_codigo" @input="reporte.adicional.repo_codigo = $event.toUpperCase()" @blur="buscarAap()"></el-input>
                             </el-form-item>                            
                         </el-col>
+                        <!--
                         <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
                             <el-form-item prop="repo_apoyo" :label="$t('reporte.apoyo')">
                                 <el-input ref="apoyo" v-model="reporte.adicional.repo_apoyo" @input="reporte.adicional.repo_apoyo = $event.toUpperCase()" @blur="buscarAapApoyo()"></el-input>
                             </el-form-item>                            
                         </el-col>
+                        -->
                     </el-row>
                     <el-row :gutter="4">
                         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
@@ -114,7 +116,7 @@
                             </el-form-item>                            
                         </el-col>
                         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                            <el-form-item prop="repo_direccion" :label="$t('reporte.address')">
+                            <el-form-item prop="repo_direccion" :label="$t('control.reporte.address')">
                              <el-input ref="direccion" v-model="reporte.repo_direccion" @input="reporte.repo_direccion = $event.toUpperCase()" @keyup.enter.native="changeFocus('barrio')">
                              </el-input>
                             </el-form-item>

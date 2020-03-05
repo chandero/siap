@@ -2,7 +2,6 @@
 <!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte" pageWidth="612" pageHeight="792" whenNoDataType="NoDataSection" columnWidth="587" leftMargin="10" rightMargin="15" topMargin="0" bottomMargin="15" isSummaryNewPage="true" isFloatColumnFooter="true" whenResourceMissingType="Error" uuid="f8caebe0-c17f-4691-ac5f-60e5854f08eb">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="siap"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="520"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="467"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -14,6 +13,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="mm"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Siap_Adapter"/>
 	<subDataset name="Dataset1" uuid="dbc9354d-619c-4173-8573-a3f7cee7dbff">
 		<queryString>
 			<![CDATA[]]>
@@ -24,16 +24,17 @@
 	<parameter name="CONCESION" class="java.lang.String"/>
 	<parameter name="REPO_ID" class="java.lang.Long"/>
 	<queryString language="SQL">
-		<![CDATA[SELECT r.*, ra.*, rt.*, e.*, l.*, a.*, o.*, b.*, i.*, b2.* FROM siap.reporte r
-LEFT JOIN siap.reporte_adicional ra on r.repo_id = ra.repo_id
+		<![CDATA[SELECT DISTINCT r.*, ra.*, rt.*, a.*, e.*, o.*, b.*, i.*, b2.* FROM siap.control_reporte r 
+LEFT JOIN siap.control_reporte_adicional ra on r.repo_id = ra.repo_id
 LEFT JOIN siap.reporte_tipo rt on r.reti_id = rt.reti_id
-LEFT JOIN siap.reporte_evento e on r.repo_id = e.repo_id
-LEFT JOIN siap.elemento l on e.elem_id = l.elem_id
+LEFT JOIN siap.control_reporte_direccion d on d.repo_id = r.repo_id
+LEFT JOIN siap.control_reporte_evento e on e.repo_id = r.repo_id
 LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
 LEFT JOIN siap.origen o on r.orig_id = o.orig_id
 LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
-LEFT JOIN siap.aap i on cast(nullif(ra.repo_codigo,'') as integer)  = i.aap_id
+LEFT JOIN siap.control i on cast(nullif(ra.repo_codigo,'') as integer)  = i.aap_id
 LEFT JOIN siap.barrio b2 on i.barr_id = b2.barr_id
+LEFT JOIN siap.urbanizadora u on u.urba_id = ra.urba_id
 WHERE r.repo_id = $P{REPO_ID}]]>
 	</queryString>
 	<field name="repo_id" class="java.lang.Integer">
@@ -168,19 +169,31 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="COLUMN_44" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
+	<field name="COLUMN_45" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="acti_id"/>
+	</field>
+	<field name="acti_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="acti_descripcion"/>
+	</field>
+	<field name="acti_estado" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="acti_estado"/>
+	</field>
+	<field name="COLUMN_48" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
+	</field>
 	<field name="aap_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="aap_id"/>
 	</field>
-	<field name="COLUMN_46" class="java.lang.Integer">
+	<field name="COLUMN_50" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="repo_id"/>
 	</field>
 	<field name="elem_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="elem_id"/>
 	</field>
-	<field name="COLUMN_48" class="java.lang.Integer">
+	<field name="COLUMN_52" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
-	<field name="COLUMN_49" class="java.lang.Integer">
+	<field name="COLUMN_53" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
 	</field>
 	<field name="even_estado" class="java.lang.Integer">
@@ -204,46 +217,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="even_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="even_id"/>
 	</field>
-	<field name="COLUMN_57" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="elem_id"/>
-	</field>
-	<field name="elem_descripcion" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="elem_descripcion"/>
-	</field>
-	<field name="elem_codigo" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="elem_codigo"/>
-	</field>
-	<field name="elem_ucap" class="java.lang.Boolean">
-		<property name="com.jaspersoft.studio.field.label" value="elem_ucap"/>
-	</field>
-	<field name="tiel_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="tiel_id"/>
-	</field>
-	<field name="COLUMN_62" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
-	</field>
-	<field name="COLUMN_63" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
-	</field>
-	<field name="elem_estado" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="elem_estado"/>
-	</field>
-	<field name="ucap_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="ucap_id"/>
-	</field>
-	<field name="COLUMN_66" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="acti_id"/>
-	</field>
-	<field name="acti_descripcion" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="acti_descripcion"/>
-	</field>
-	<field name="acti_estado" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="acti_estado"/>
-	</field>
-	<field name="COLUMN_69" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
-	</field>
-	<field name="COLUMN_70" class="java.lang.Integer">
+	<field name="COLUMN_61" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="orig_id"/>
 	</field>
 	<field name="orig_descripcion" class="java.lang.String">
@@ -252,10 +226,10 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="orig_estado" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="orig_estado"/>
 	</field>
-	<field name="COLUMN_73" class="java.lang.Integer">
+	<field name="COLUMN_64" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
-	<field name="COLUMN_74" class="java.lang.Integer">
+	<field name="COLUMN_65" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="barr_id"/>
 	</field>
 	<field name="barr_descripcion" class="java.lang.String">
@@ -267,10 +241,10 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="muni_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="muni_id"/>
 	</field>
-	<field name="COLUMN_78" class="java.lang.Integer">
+	<field name="COLUMN_69" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="tiba_id"/>
 	</field>
-	<field name="COLUMN_79" class="java.lang.Integer">
+	<field name="COLUMN_70" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
 	<field name="barr_estado" class="java.lang.Integer">
@@ -279,23 +253,20 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="depa_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="depa_id"/>
 	</field>
-	<field name="COLUMN_82" class="java.lang.Integer">
+	<field name="COLUMN_73" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="aap_id"/>
 	</field>
-	<field name="aap_apoyo" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="aap_apoyo"/>
+	<field name="COLUMN_74" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
 	</field>
-	<field name="aap_descripcion" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="aap_descripcion"/>
+	<field name="COLUMN_75" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
 	<field name="aap_direccion" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="aap_direccion"/>
 	</field>
-	<field name="COLUMN_86" class="java.lang.Integer">
+	<field name="COLUMN_77" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="barr_id"/>
-	</field>
-	<field name="COLUMN_87" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
 	</field>
 	<field name="esta_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="esta_id"/>
@@ -303,64 +274,28 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<field name="aap_fechacreacion" class="java.sql.Date">
 		<property name="com.jaspersoft.studio.field.label" value="aap_fechacreacion"/>
 	</field>
-	<field name="COLUMN_90" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
-	</field>
-	<field name="aaus_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="aaus_id"/>
-	</field>
-	<field name="aap_modernizada" class="java.lang.Boolean">
-		<property name="com.jaspersoft.studio.field.label" value="aap_modernizada"/>
-	</field>
-	<field name="aatc_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="aatc_id"/>
-	</field>
-	<field name="aap_medidor" class="java.lang.Boolean">
-		<property name="com.jaspersoft.studio.field.label" value="aap_medidor"/>
-	</field>
-	<field name="aap_fechatoma" class="java.sql.Date">
-		<property name="com.jaspersoft.studio.field.label" value="aap_fechatoma"/>
-	</field>
-	<field name="aaco_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="aaco_id"/>
-	</field>
-	<field name="aama_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="aama_id"/>
-	</field>
-	<field name="aamo_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="aamo_id"/>
-	</field>
-	<field name="aacu_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="aacu_id"/>
-	</field>
-	<field name="aap_lat" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="aap_lat"/>
-	</field>
-	<field name="aap_lng" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="aap_lng"/>
-	</field>
-	<field name="COLUMN_102" class="java.lang.Integer">
+	<field name="COLUMN_80" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="barr_id"/>
 	</field>
-	<field name="COLUMN_103" class="java.lang.String">
+	<field name="COLUMN_81" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="barr_descripcion"/>
 	</field>
-	<field name="COLUMN_104" class="java.lang.String">
+	<field name="COLUMN_82" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="barr_codigo"/>
 	</field>
-	<field name="COLUMN_105" class="java.lang.Integer">
+	<field name="COLUMN_83" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="muni_id"/>
 	</field>
-	<field name="COLUMN_106" class="java.lang.Integer">
+	<field name="COLUMN_84" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="tiba_id"/>
 	</field>
-	<field name="COLUMN_107" class="java.lang.Integer">
+	<field name="COLUMN_85" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 	</field>
-	<field name="COLUMN_108" class="java.lang.Integer">
+	<field name="COLUMN_86" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="barr_estado"/>
 	</field>
-	<field name="COLUMN_109" class="java.lang.Integer">
+	<field name="COLUMN_87" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="depa_id"/>
 	</field>
 	<group name="repo_id">
@@ -423,23 +358,8 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 	<group name="even_fecha">
 		<groupExpression><![CDATA[$F{even_fecha}]]></groupExpression>
 	</group>
-	<group name="elem_descripcion">
-		<groupExpression><![CDATA[$F{elem_descripcion}]]></groupExpression>
-	</group>
-	<group name="elem_codigo">
-		<groupExpression><![CDATA[$F{elem_codigo}]]></groupExpression>
-	</group>
-	<group name="elem_ucap">
-		<groupExpression><![CDATA[$F{elem_ucap}]]></groupExpression>
-	</group>
-	<group name="tiel_id">
-		<groupExpression><![CDATA[$F{tiel_id}]]></groupExpression>
-	</group>
-	<group name="elem_estado">
-		<groupExpression><![CDATA[$F{elem_estado}]]></groupExpression>
-	</group>
 	<pageHeader>
-		<band height="725" splitType="Stretch">
+		<band height="722" splitType="Stretch">
 			<textField isBlankWhenNull="true">
 				<reportElement mode="Opaque" x="389" y="20" width="198" height="23" uuid="15a0dce4-5622-4566-8277-29889ce1cc77"/>
 				<box>
@@ -527,7 +447,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<textElement>
 					<font size="7" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[ DIRECCIÓN REUBICACION:]]></text>
+				<text><![CDATA[ DIRECCIÓN EXPANSION:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="0" y="94" width="50" height="13" backcolor="#FFFFFF" uuid="4b21c76b-4fbe-49f8-90f6-a51cac4fc089"/>
@@ -636,7 +556,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<text><![CDATA[HORA TERMINACION]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2" y="189" width="102" height="13" backcolor="#FFFFFF" uuid="79efb154-19dd-4eca-8ddf-cab10ca387c3">
+				<reportElement mode="Opaque" x="3" y="175" width="50" height="13" backcolor="#FFFFFF" uuid="79efb154-19dd-4eca-8ddf-cab10ca387c3">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -648,7 +568,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[DIRECCION ANTERIOR:]]></text>
+				<text><![CDATA[DIRECCION:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="292" y="79" width="45" height="13" backcolor="#FFFFFF" uuid="9cd5f22e-b4d3-4a59-abec-6d74e586b0ee"/>
@@ -840,7 +760,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="1" y="148" width="587" height="14" uuid="a0bdd8a7-5da8-4530-9a8f-eb1b5323eadf"/>
+				<reportElement mode="Opaque" x="1" y="148" width="586" height="14" uuid="a0bdd8a7-5da8-4530-9a8f-eb1b5323eadf"/>
 				<box>
 					<pen lineWidth="1.0" lineStyle="Dotted"/>
 					<topPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
@@ -848,11 +768,11 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 					<bottomPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center"/>
-				<text><![CDATA[INFORMACIÓN DE LA LUMINARIA]]></text>
+				<textElement textAlignment="Left"/>
+				<text><![CDATA[ INFORMACIÓN DE LA LUMINARIA]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="162" width="40" height="13" uuid="e0815777-cdc8-4592-b236-4cd56b5bbdf6">
+				<reportElement x="180" y="149" width="40" height="13" uuid="e0815777-cdc8-4592-b236-4cd56b5bbdf6">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -867,7 +787,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<text><![CDATA[ CÓDIGO:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="120" y="162" width="50" height="13" uuid="da4ec419-56f9-47f3-84e3-5fc08616ce38">
+				<reportElement x="291" y="149" width="50" height="13" uuid="da4ec419-56f9-47f3-84e3-5fc08616ce38">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -939,38 +859,38 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<textFieldExpression><![CDATA[$F{barr_descripcion}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="2" y="205" width="116" height="13" uuid="cbdbd265-42fe-4df0-a33a-233f231221c2">
+				<reportElement x="3" y="188" width="76" height="13" uuid="cbdbd265-42fe-4df0-a33a-233f231221c2">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement>
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[BARRIO/VEREDA ANTERIOR]]></text>
+				<text><![CDATA[BARRIO/VEREDA:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="260" y="162" width="60" height="13" uuid="238e16d9-7dc1-4937-bdbb-421d6a0b183e">
+				<reportElement x="3" y="162" width="60" height="13" uuid="238e16d9-7dc1-4937-bdbb-421d6a0b183e">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement>
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[TECNOLOGIA]]></text>
+				<text><![CDATA[TECNOLOGIA:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="380" y="162" width="50" height="13" uuid="70980dcb-04fd-4a4a-8e63-8703092b43f0">
+				<reportElement x="123" y="162" width="50" height="13" uuid="70980dcb-04fd-4a4a-8e63-8703092b43f0">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement>
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[POTENCIA]]></text>
+				<text><![CDATA[POTENCIA:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="471" y="162" width="54" height="12" uuid="aba328ac-a4bd-4ae3-a346-b0ebedcfc51d"/>
+				<reportElement x="214" y="162" width="62" height="12" uuid="aba328ac-a4bd-4ae3-a346-b0ebedcfc51d"/>
 				<textElement>
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[TIPO MEDIDA]]></text>
+				<text><![CDATA[TIPO MEDIDA:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Transparent" x="258" y="234" width="36" height="13" backcolor="#FFFFFF" uuid="94275d11-c9b1-4ba4-89e2-462068d6d2b7"/>
@@ -1072,15 +992,6 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
-			<staticText>
-				<reportElement x="381" y="456" width="50" height="13" uuid="ee727853-1738-4c1c-9cae-f417503ed171">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<textElement>
-					<font size="8" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[POTENCIA]]></text>
-			</staticText>
 			<line>
 				<reportElement x="3" y="602" width="586" height="1" uuid="a8a16756-ead4-4bb6-b6d5-64f0f9471468"/>
 				<graphicElement>
@@ -1097,13 +1008,6 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				</textElement>
 				<text><![CDATA[MATERIAL UTILIZADO]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="471" y="456" width="68" height="12" uuid="272c7359-d7a1-4455-8f68-fc345a5612d2"/>
-				<textElement>
-					<font size="8" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[TIPO MEDIDA]]></text>
-			</staticText>
 			<line>
 				<reportElement x="2" y="562" width="586" height="1" uuid="e165b4f8-2fe9-4b13-9a43-401fa15d3f24"/>
 				<graphicElement>
@@ -1116,69 +1020,18 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
-			<staticText>
-				<reportElement x="1" y="456" width="40" height="13" uuid="7b36827f-a6d6-4fbc-961f-6ce6445c15d3">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font size="8" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[ CÓDIGO:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="121" y="456" width="50" height="13" uuid="dff21a20-5c34-427a-8e3f-4b6fc0de6677">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font size="8" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[APOYO:]]></text>
-			</staticText>
 			<line>
 				<reportElement x="3" y="622" width="586" height="1" uuid="5035e716-fde2-47f1-99bd-7ccf0d6d1cec"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
-			<staticText>
-				<reportElement mode="Opaque" x="2" y="442" width="587" height="14" uuid="6d087b1b-45b3-4591-8112-7fb22f97219f"/>
-				<box>
-					<pen lineWidth="1.0" lineStyle="Dotted"/>
-					<topPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center"/>
-				<text><![CDATA[INFORMACIÓN DE LA LUMINARIA]]></text>
-			</staticText>
 			<line>
 				<reportElement x="3" y="662" width="586" height="1" uuid="290ecb8b-585b-4d22-b6d7-687325dea361"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
-			<staticText>
-				<reportElement x="261" y="456" width="60" height="13" uuid="97f6378a-f5e2-4f99-8802-0812858a0901">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<textElement>
-					<font size="8" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[TECNOLOGIA]]></text>
-			</staticText>
 			<line>
 				<reportElement x="1" y="408" width="586" height="1" uuid="ed65b675-37c1-4d47-b356-bfde7059275e"/>
 				<graphicElement>
@@ -1204,18 +1057,18 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="4" y="176" width="31" height="14" uuid="46fb1f60-3b34-4812-ac7c-b17d41e7021f"/>
+				<reportElement x="348" y="162" width="33" height="12" uuid="46fb1f60-3b34-4812-ac7c-b17d41e7021f"/>
 				<textElement>
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[MARCA]]></text>
+				<text><![CDATA[MARCA:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="119" y="176" width="40" height="14" uuid="d4d902ba-e638-454b-bc26-d0fa86f68b9a"/>
+				<reportElement x="449" y="162" width="22" height="12" uuid="d4d902ba-e638-454b-bc26-d0fa86f68b9a"/>
 				<textElement>
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[TIPO]]></text>
+				<text><![CDATA[TIPO:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="1" y="132" width="119" height="15" uuid="aabe1015-5224-4f30-9122-76b400673220"/>
@@ -1229,9 +1082,9 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<textElement>
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[ DESCRIPCION REUBICACION:]]></text>
+				<text><![CDATA[ DESCRIPCION EXPANSIÓN:]]></text>
 			</staticText>
-			<textField isBlankWhenNull="true">
+			<textField>
 				<reportElement x="120" y="132" width="468" height="15" uuid="669b7e5d-dde1-4bb1-a6c7-099527a5f98e"/>
 				<box>
 					<pen lineWidth="1.0" lineStyle="Dotted"/>
@@ -1270,7 +1123,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement x="588" y="162" width="1" height="268" uuid="c233dedb-9199-43fa-b7e7-b6b8c1d39bf8"/>
+				<reportElement x="587" y="147" width="1" height="283" uuid="c233dedb-9199-43fa-b7e7-b6b8c1d39bf8"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
@@ -1294,7 +1147,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement x="589" y="455" width="1" height="267" uuid="a809bcad-dba0-472c-a274-7601e6b650a0"/>
+				<reportElement x="589" y="444" width="1" height="277" uuid="a809bcad-dba0-472c-a274-7601e6b650a0"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
@@ -1337,7 +1190,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<text><![CDATA[CODIGO]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="491" y="220" width="97" height="13" backcolor="#FFFFFF" uuid="833047e6-9fe9-4225-84ea-51a7b6093d74"/>
+				<reportElement mode="Opaque" x="491" y="220" width="95" height="13" backcolor="#FFFFFF" uuid="833047e6-9fe9-4225-84ea-51a7b6093d74"/>
 				<box>
 					<pen lineWidth="1.0" lineStyle="Dotted"/>
 					<rightPen lineWidth="0.0"/>
@@ -1377,13 +1230,6 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
-			<staticText>
-				<reportElement x="4" y="468" width="31" height="14" uuid="ebb1daba-7a16-440e-a82b-900289feaf49"/>
-				<textElement>
-					<font size="8" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[MARCA]]></text>
-			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="199" y="515" width="95" height="13" backcolor="#FFFFFF" uuid="01c95d77-16bb-40d1-8dd4-44ed453589e2"/>
 				<box>
@@ -1505,39 +1351,18 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="381" y="469" width="31" height="12" uuid="d7bc6b74-86cc-4349-abbf-dbf55b371079"/>
+				<reportElement x="230" y="188" width="70" height="12" uuid="f46d0e05-d2cb-4109-b716-e80f7048aff5"/>
 				<textElement>
-					<font size="8" isItalic="true"/>
+					<font size="7" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[POSTE]]></text>
+				<text><![CDATA[POSTE ALTURA:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="378" y="175" width="31" height="12" uuid="f46d0e05-d2cb-4109-b716-e80f7048aff5"/>
+				<reportElement x="276" y="175" width="40" height="12" uuid="d22bfec5-4327-45b6-a504-8a56e251e31f"/>
 				<textElement>
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[POSTE]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="261" y="176" width="40" height="14" uuid="d22bfec5-4327-45b6-a504-8a56e251e31f"/>
-				<textElement>
-					<font size="8" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[MODELO]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="120" y="468" width="40" height="14" uuid="24f2d34c-9549-4a83-95f9-39b90db2066d"/>
-				<textElement>
-					<font size="8" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[TIPO]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="261" y="468" width="40" height="14" uuid="e621b510-e574-4b69-a7b6-40037a164ef4"/>
-				<textElement>
-					<font size="8" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[MODELO]]></text>
+				<text><![CDATA[MODELO:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="0" y="43" width="58" height="22" uuid="47b906ab-c073-4ecc-864f-951f73c717e2"/>
@@ -1566,6 +1391,71 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
+			<staticText>
+				<reportElement x="5" y="500" width="40" height="10" uuid="f24b92dc-e9c7-4879-b82a-1611adc120bd"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[BOMBILLO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="94" y="500" width="40" height="10" uuid="15863c8d-b2a3-4c2b-b315-949a81337eaf"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[BALASTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="194" y="500" width="60" height="10" uuid="dd15845d-2e4a-4dbf-b5f5-130e697d13da"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[ARRANCADOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="317" y="501" width="60" height="10" uuid="a22cbcf2-3102-4a9c-b01d-435001891b93"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[CONDENSADOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="449" y="501" width="60" height="10" uuid="399ebd10-06b1-465d-9ab5-bfddd8556aa6"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[FOTOCELDA]]></text>
+			</staticText>
 			<line>
 				<reportElement x="3" y="203" width="586" height="1" uuid="1d9ed868-d932-4663-9f1e-db26f32d68aa"/>
 				<graphicElement>
@@ -1573,7 +1463,151 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement mode="Opaque" x="281" y="190" width="102" height="13" backcolor="#FFFFFF" uuid="cfe807af-389e-436f-be91-5053c648caad">
+				<reportElement x="425" y="206" width="46" height="10" uuid="21b251bb-5b0a-4487-9f2a-e96b6aae9fab"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="7" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[FOTOCELDA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="190" y="206" width="60" height="10" uuid="2a2e1ee3-d336-4b49-b78e-4ba6257d2c47"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="7" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[ARRANCADOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="5" y="206" width="40" height="10" uuid="80ba0ed1-739c-4f24-a572-99474b4adf57"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="7" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[BOMBILLO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="94" y="206" width="40" height="10" uuid="3ed9232e-0d0f-4c35-b23e-0f1e5950c43c"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="7" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[BALASTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="206" width="60" height="10" uuid="b143abbf-4bd2-46e1-b31e-d529be5d7b1e"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="7" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[CONDENSADOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="330" y="188" width="80" height="12" uuid="7e5ffdc6-852c-4d25-b192-8e3d2b808089"/>
+				<textElement>
+					<font size="7" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[POSTE PROPIETARIO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="410" y="149" width="22" height="12" uuid="7b5b66b2-8c0d-4704-86df-05eb187b3265"/>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[USO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="370" y="175" width="40" height="12" uuid="359c3a5a-bfa1-434f-9a9e-8860ef44945e"/>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[BRAZO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="440" y="174" width="50" height="12" uuid="9a0b7603-bdca-4713-b80f-ce04e667ada8"/>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[COLLARIN:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="457" width="60" height="13" uuid="ccb674aa-992e-4641-b75b-1acf5e02aeff">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[TECNOLOGIA:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="2" y="443" width="586" height="14" uuid="8ba9d98c-7495-4f2e-b07b-6d4597631193"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<topPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left"/>
+				<text><![CDATA[ INFORMACIÓN DE LA LUMINARIA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="483" width="76" height="13" uuid="bfba5017-2088-4708-bd98-c2f55e9f6dd7">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[BARRIO/VEREDA:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="349" y="457" width="33" height="12" uuid="6b4d3ee1-fda3-42bc-8668-e17a1b0891eb"/>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[MARCA:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="450" y="457" width="22" height="12" uuid="baf17555-1cb4-41c4-aff6-2340efc74854"/>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[TIPO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="215" y="457" width="62" height="12" uuid="7d44876a-bf6c-4008-be59-e644ddc09cd1"/>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[TIPO MEDIDA:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="181" y="444" width="40" height="13" uuid="9f4e45ea-8d0b-45cd-ba69-d61722974be7">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -1585,19 +1619,55 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[DIRECCION NUEVA:]]></text>
+				<text><![CDATA[ CÓDIGO:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="281" y="206" width="116" height="13" uuid="cc6634e5-8dcf-4482-bf05-4ce742a69464">
+				<reportElement x="471" y="470" width="50" height="12" uuid="21d6cb50-ca39-468b-a114-e1df8b196987"/>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[COLLARIN:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="124" y="457" width="50" height="13" uuid="753ff7a2-90e7-45e8-afd6-9e2baaa15eed">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement>
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[BARRIO/VEREDA NUEVA]]></text>
+				<text><![CDATA[POTENCIA:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="4" y="483" width="102" height="13" backcolor="#FFFFFF" uuid="5f929aae-b702-49f6-8072-6465c61d8e01">
+				<reportElement x="231" y="483" width="70" height="12" uuid="6c70eae1-c5ce-4293-8213-cf2bbeb8faf3"/>
+				<textElement>
+					<font size="7" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[POSTE ALTURA:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="292" y="444" width="50" height="13" uuid="29e644a1-6e68-49a9-993c-5bbe0a95db89">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[APOYO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="277" y="470" width="40" height="12" uuid="4df7e328-1b1f-4a37-8af1-9f3c9f11c912"/>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[MODELO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="4" y="470" width="50" height="13" backcolor="#FFFFFF" uuid="21c3ff71-1470-4f8b-b456-ba4a5370bb17">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -1609,60 +1679,83 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[DIRECCION ANTERIOR:]]></text>
+				<text><![CDATA[DIRECCION:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="4" y="501" width="116" height="13" uuid="0986efea-269a-40b2-90d4-a90cd618806b">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
+				<reportElement x="411" y="444" width="22" height="12" uuid="cb770045-d5fc-49c8-9ec8-9af585c9d6c8"/>
 				<textElement>
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[BARRIO/VEREDA ANTERIOR]]></text>
+				<text><![CDATA[USO:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="282" y="484" width="102" height="13" backcolor="#FFFFFF" uuid="10b6e92b-c4f4-4f08-95d4-b9854cecd519">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
+				<reportElement x="330" y="483" width="80" height="12" uuid="84238813-5340-4190-a89b-f25d40e25305"/>
+				<textElement>
+					<font size="7" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[POSTE PROPIETARIO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="371" y="470" width="40" height="12" uuid="0e61e1fe-e582-4d93-bfa8-5fa52bcb9c44"/>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[BRAZO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="487" y="149" width="48" height="12" uuid="74e33101-9342-4be4-856b-b6e2f80784af"/>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[MEDIDOR:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="450" y="188" width="85" height="12" uuid="1faf6d6b-f39f-4f57-8c38-161b044f177a"/>
+				<textElement>
+					<font size="7" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[TRANSFORMADOR:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="485" y="443" width="48" height="12" uuid="50e59434-8a55-4083-adde-de852c5f4c27"/>
+				<textElement>
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[MEDIDOR:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="448" y="482" width="85" height="12" uuid="b4ca5b2a-d672-444b-983d-b86f72b043bf"/>
+				<textElement>
+					<font size="7" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[TRANSFORMADOR:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="425" y="43" width="98" height="22" uuid="84ebba5e-a727-4683-82da-5ea41f1f6ebc"/>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[DIRECCION NUEVA:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="282" y="501" width="116" height="13" uuid="0288491e-c8ec-4168-917c-5020b577bb84">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<textElement>
-					<font size="8" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[BARRIO/VEREDA NUEVA]]></text>
+				<text><![CDATA[MUNICIPIO OT]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="394" y="3" width="13" height="13" uuid="de3a4a64-09c9-46d6-a6b8-f911306e73c7"/>
+				<reportElement x="393" y="5" width="11" height="11" uuid="f0d08b51-169b-4b46-91ed-a055dff0706b"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="491" y="4" width="61" height="12" uuid="9ba82429-51b6-41a3-bd5e-481e69ae6d8f"/>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<text><![CDATA[CONTROL]]></text>
-			</staticText>
-			<rectangle>
-				<reportElement x="475" y="3" width="13" height="13" uuid="a22dc346-39cd-45ce-81f9-7d52f14fa16d"/>
-			</rectangle>
-			<staticText>
-				<reportElement x="410" y="4" width="61" height="12" uuid="cef82a99-5866-4d80-86b5-8ef7467de23a"/>
+				<reportElement x="409" y="5" width="63" height="12" uuid="8ec809fa-d246-47ad-9022-691bb74e7b1f"/>
 				<textElement>
 					<font size="9"/>
 				</textElement>
 				<text><![CDATA[LUMINARIA]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="479" y="5" width="11" height="11" uuid="5bb37547-6832-4deb-ac00-8d8d84e0ec6d"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="495" y="5" width="63" height="12" uuid="45e68845-05d6-4940-a02d-24d5b310c11c"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[CONTROL]]></text>
 			</staticText>
 		</band>
 	</pageHeader>
@@ -1695,7 +1788,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 			<subreport isUsingCache="false">
 				<reportElement mode="Transparent" x="0" y="0" width="588" height="762" isPrintInFirstWholeBand="true" uuid="f8bdb65b-479a-4e88-8d96-96fa9b5f083c"/>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["siap_reporte_reubicacion_2.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["siap_reporte_expansion_2.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
 	</summary>

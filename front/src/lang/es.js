@@ -247,6 +247,10 @@ export default {
       neighborhoodtype: 'Sector',
       address: 'Dirección del Control',
       codes: 'Códigos'
+    },
+    reporte: {
+      code: 'Código del Control',
+      address: 'Dirección del Control'
     }
   },
   recovery: {

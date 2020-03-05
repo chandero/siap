@@ -7,7 +7,6 @@
   </el-header>
   <el-main>
   <el-form :label-position="labelPosition">
-  <!--
   <el-row :gutter="4">
     <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
       <el-form-item :label="$t('informe.initialDate')">
@@ -20,7 +19,6 @@
       </el-form-item>
     </el-col> 
   </el-row>
-  -->
   <el-row>
     <el-col :span="24">
       <el-button type="primary" @click="obtenerDatos()">{{ $t('informe.process')}}</el-button>

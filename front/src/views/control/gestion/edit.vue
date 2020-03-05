@@ -566,7 +566,7 @@
       </el-form>
     </el-main>
      <el-footer>
-      <el-button ref="submit" :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="aplicar">Guardar Luminaria</el-button>
+      <el-button ref="submit" :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="aplicar">Guardar Control</el-button>
      </el-footer>
     </el-container>
 </template>
