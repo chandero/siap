@@ -1,7 +1,7 @@
 <template>
     <el-container>
         <el-header>
-            <span>Nuevo Código de Autorización para Crear Luminaria</span>
+            <span>Nuevo Código de Autorización para Crear Luminaria / Control</span>
         </el-header>
         <el-main>
             <el-row :gutter="4">
