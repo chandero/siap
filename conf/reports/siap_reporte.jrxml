@@ -458,7 +458,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<textFieldExpression><![CDATA[$F{repo_consecutivo}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement mode="Opaque" x="0" y="0" width="587" height="20" backcolor="#FFFFFF" uuid="93700dfd-b958-42ef-a934-776d8321dd10"/>
+				<reportElement mode="Opaque" x="0" y="0" width="389" height="20" backcolor="#FFFFFF" uuid="93700dfd-b958-42ef-a934-776d8321dd10"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -977,7 +977,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="0" y="123" width="289" height="92" uuid="8402c162-5365-4b97-99e9-ca61fab208af"/>
+				<reportElement x="0" y="123" width="289" height="108" uuid="8402c162-5365-4b97-99e9-ca61fab208af"/>
 				<box>
 					<pen lineWidth="1.0" lineStyle="Dotted"/>
 					<topPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
@@ -1243,31 +1243,25 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<text><![CDATA[FOTOCELDA]]></text>
 			</staticText>
 			<rectangle>
-				<reportElement x="5" y="218" width="15" height="11" uuid="a0fb1514-ec19-4a5b-b437-1da7bd6027c9"/>
+				<reportElement x="393" y="5" width="11" height="11" uuid="a7a671e8-f9b8-4f25-8ac8-c1cdbf8001d5"/>
 			</rectangle>
 			<staticText>
-				<reportElement x="26" y="218" width="100" height="12" uuid="3d7ec673-9831-4de8-af1a-0f049a6cf714"/>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<text><![CDATA[LUMINARIA]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="152" y="218" width="100" height="12" uuid="2bbe98e8-377b-4d02-affd-77f5bab05998"/>
+				<reportElement x="495" y="5" width="63" height="12" uuid="5ee9bcf6-52fe-4265-84ef-31b6a2ef6ad9"/>
 				<textElement>
 					<font size="9"/>
 				</textElement>
 				<text><![CDATA[CONTROL]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="409" y="5" width="63" height="12" uuid="f02cdcf5-e77b-444f-9371-6258c67ef2f2"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[LUMINARIA]]></text>
+			</staticText>
 			<rectangle>
-				<reportElement x="131" y="217" width="15" height="11" uuid="a939d45d-f4df-442a-beb7-045c06d13afe"/>
+				<reportElement x="479" y="5" width="11" height="11" uuid="5afd3171-04c6-4cc2-8939-68bc77be37bd"/>
 			</rectangle>
-			<line>
-				<reportElement x="0" y="231" width="290" height="1" uuid="2ffb6d73-baba-48ab-91e6-5e09caf0a2e7"/>
-				<graphicElement>
-					<pen lineStyle="Dotted"/>
-				</graphicElement>
-			</line>
 		</band>
 	</pageHeader>
 	<columnHeader>
