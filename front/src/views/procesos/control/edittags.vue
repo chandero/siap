@@ -275,11 +275,13 @@
                                   </div>
                                 </el-form-item>
                             </el-col>
+                            <!--
                             <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="5" :md="5" :lg="5" :xl="5">
                               <el-form-item prop="aap_fechatoma" :label="$t('reporte.aap_fechatoma')">
                                 <el-date-picker :disabled="reporte.direcciones[didx].even_estado > 7 || reporte.reti_id !== 3" ref="aap_fechatoma" v-model="reporte.direcciones[didx].aap_fechatoma" name="aap_fechatoma" />
                               </el-form-item>
-                            </el-col> 
+                            </el-col>
+                            --> 
                           </el-row>
                           <el-row>                       
                             <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="16" :md="16" :lg="16" :xl="16">

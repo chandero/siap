@@ -2723,7 +2723,7 @@ class ControlReporteRepository @Inject()(
         for (d <- direcciones) {
           if (d.aap_id != None) {
             // var aap_elemento: AapElemento = new AapElemento(d.aap_id, None, None, None, None, None, None, reporte.reti_id, reporte.repo_consecutivo.map(_.toInt))
-            var aap: Control = new Control(d.aap_id, reporte.empr_id, reporte.usua_id, None, None, Some(1), Some(hora.toDateTime))
+            var aap: Control = new Control(d.aap_id, reporte.empr_id, reporte.usua_id, None, None, Some(1), Some(hora.toDateTime), None)
             // var aap_adicional: AapAdicional = new AapAdicional(d.aap_id, None, None, None, None, None, None, None, None, None)
             val aapOption =
               aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get)

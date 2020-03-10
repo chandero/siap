@@ -251,6 +251,9 @@ export default {
     reporte: {
       code: 'Código del Control',
       address: 'Dirección del Control'
+    },
+    historia: {
+      title: 'Historia de Control'
     }
   },
   recovery: {

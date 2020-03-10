@@ -67,7 +67,7 @@ class ControlController @Inject()(mService: ControlRepository, cc: ControllerCom
       val empr_id = Utility.extraerEmpresa(request)
       val hora: LocalDateTime =
         new LocalDateTime(Calendar.getInstance().getTimeInMillis())      
-      val mnuevo = new Control(m.aap_id,empr_id, usua_id, m.aap_direccion, m.barr_id, m.esta_id, Some(hora.toDateTime))
+      val mnuevo = new Control(m.aap_id,empr_id, usua_id, m.aap_direccion, m.barr_id, m.esta_id, Some(hora.toDateTime), None)
       mService.crear(mnuevo).map { result =>
         if (result > 0){
           Created(Json.toJson("true"))
@@ -82,7 +82,7 @@ class ControlController @Inject()(mService: ControlRepository, cc: ControllerCom
       var m = json.as[Control]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
-      val mnuevo = new Control(m.aap_id, empr_id, usua_id, m.aap_direccion, m.barr_id, m.esta_id, m.aap_fechacreacion)
+      val mnuevo = new Control(m.aap_id, empr_id, usua_id, m.aap_direccion, m.barr_id, m.esta_id, m.aap_fechacreacion, None)
       if (mService.actualizar(mnuevo)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {

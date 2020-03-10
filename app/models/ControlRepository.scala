@@ -16,6 +16,7 @@ import anorm.JodaParameterMetaData._
 
 import scala.util.{ Failure, Success }
 import scala.concurrent.{ Await, Future }
+import scala.collection.mutable.ListBuffer
 
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
@@ -28,7 +29,8 @@ case class Control(aap_id: Option[Long],
                    aap_direccion: Option[String], 
                    barr_id: Option[Long], 
                    esta_id: Option[Int],
-                   aap_fechacreacion: Option[DateTime])
+                   aap_fechacreacion: Option[DateTime],
+                   historia: Option[List[AapHistoria]])
 
 case class InformeC(aap_id: Option[Int],
                     aap_direccion: Option[String], 
@@ -47,7 +49,8 @@ object Control {
             "aap_direccion" -> m.aap_direccion,
             "barr_id" -> m.barr_id,
             "esta_id" -> m.esta_id,
-            "aap_fechacreacion" -> m.aap_fechacreacion
+            "aap_fechacreacion" -> m.aap_fechacreacion,
+            "historia" -> m.historia
         )
     }
 
@@ -58,7 +61,8 @@ object Control {
         (__ \ "aap_direccion").readNullable[String] and
         (__ \ "barr_id").readNullable[Long] and
         (__ \ "esta_id").readNullable[Int] and
-        (__ \ "aap_fechacreacion").readNullable[DateTime]
+        (__ \ "aap_fechacreacion").readNullable[DateTime] and
+        (__ \ "historia").readNullable[List[AapHistoria]]        
     )(Control.apply _)
 
     val _set = {
@@ -81,7 +85,8 @@ object Control {
                aap_direccion,
                barr_id,
                esta_id,
-               aap_fechacreacion)
+               aap_fechacreacion,
+               None)
       }
   }    
 }
@@ -183,7 +188,7 @@ class ControlRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
     */
     def todos(empr_id: Long, page_size: Long, current_page: Long, orderby: String, filter: String): Future[Iterable[Control]] = Future[Iterable[Control]] {
         db.withConnection { implicit connection =>
-
+        var lista_result = new ListBuffer[Control]
         var query = """SELECT * FROM siap.control a WHERE a.esta_id <> 9 and a.empr_id = {empr_id}"""
         
         if (!filter.isEmpty){
@@ -199,12 +204,23 @@ class ControlRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
         query = query + """
                         LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)"""
 
-        SQL(query).
+        var lista = SQL(query).
             on(
               'page_size -> page_size,
               'current_page -> current_page,
               'empr_id -> empr_id
             ).as(Control._set *)
+
+            for ( e <- lista ) {
+                        val h = SQL("SELECT * FROM siap.control_elemento_historia WHERE aap_id = {aap_id} and empr_id = {empr_id} ORDER BY aael_fecha DESC").
+                        on(
+                            'aap_id -> e.aap_id,
+                            'empr_id -> empr_id
+                        ).as(AapHistoria.aapelementohistoriaSet *)
+                        val aaph = e.copy(historia = Some(h))
+                        lista_result += aaph
+            } 
+            lista_result.toList            
         }        
     }
 
@@ -215,11 +231,23 @@ class ControlRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
     */
     def controles(empr_id: Long): Future[Iterable[Control]] = Future[Iterable[Control]] {
         db.withConnection { implicit connection =>
-            SQL("SELECT * FROM siap.control WHERE esta_id <> 9 and empr_id = {empr_id} ORDER BY aap_id").
+            var lista_result = new ListBuffer[Control]
+            var lista = SQL("SELECT * FROM siap.control WHERE esta_id <> 9 and empr_id = {empr_id} ORDER BY aap_id").
             on(
               'empr_id -> empr_id
             ).
             as(Control._set *)
+            for ( e <- lista ) {
+
+                        val h = SQL("SELECT * FROM siap.control_elemento_historia WHERE aap_id = {aap_id} and empr_id = {empr_id} ORDER BY aael_fecha DESC").
+                        on(
+                            'aap_id -> e.aap_id,
+                            'empr_id -> empr_id
+                        ).as(AapHistoria.aapelementohistoriaSet *)
+                        val aaph = e.copy(historia = Some(h))
+                        lista_result += aaph
+            } 
+            lista_result.toList
         }        
     }    
 
