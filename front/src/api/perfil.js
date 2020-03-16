@@ -10,3 +10,23 @@ export function getPerfiles(page_size, current_page) {
     method: 'get'
   })
 }
+
+export function getPerfil(id) {
+  const data = {
+    id
+  }
+  return request({
+    url: '/perf/gbi/' + data.id,
+    method: 'get'
+  })
+}
+
+export function getUsuarioPerfil(id) {
+  const data = {
+    id
+  }
+  return request({
+    url: '/perf/gbui/' + data.id,
+    method: 'get'
+  })
+}

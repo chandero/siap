@@ -69,9 +69,18 @@ class UsuarioController @Inject()(
     }
   }
 
-  def buscarporid(usua_id: Long) = authenticatedUserAction.async {
+  def buscarporid(usua_id: Long) = authenticatedUserAction.async { implicit request =>
     val usuario = usuarioService.buscarPorId(usua_id).get
-    Future.successful(Ok(Json.toJson(usuario)))
+    val empr_id = Utility.extraerEmpresa(request)
+    val perfil = perfilService.buscarPorUsuaId(usuario.usua_id.get, empr_id.get).get
+    val user = new UsuarioDto(usuario.usua_id,
+                                      usuario.usua_email,
+                                      Some(""),
+                                      usuario.usua_nombre,
+                                      usuario.usua_apellido,
+                                      Some(""),
+                                      perfil.perf_id.get)
+    Future.successful(Ok(Json.toJson(user)))
   }
 
   def userinfo(): Action[AnyContent] = Action.async {
@@ -80,6 +89,9 @@ class UsuarioController @Inject()(
       var session = JwtSession.deserialize(token.get)
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
+      if (usua_id == None || empr_id == None) {
+        Future.successful(Forbidden("Amigo, no estas registrado"))
+      } else {
       val uep = perfilService.buscarPorUsuarioEmpresa(usua_id.get, empr_id.get)
       val usuario = usuarioService.buscarPorId(usua_id.get)
       usuario match {
@@ -112,6 +124,7 @@ class UsuarioController @Inject()(
               }
             }
           }
+        }
       }
 
   def guardarUsuario() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
@@ -121,6 +134,20 @@ class UsuarioController @Inject()(
     val usuariodto = json.as[UsuarioDto]
     usuarioService.crear(usuariodto.usua_email, usuariodto.usua_clave.get, usuariodto.usua_nombre, usuariodto.usua_apellido, true, (new DateTime(Instant.now.getEpochSecond)).toString(), usua_id.get, empr_id.get, usuariodto.perf_id).map { result =>
         if (result > 0){
+          Created(Json.toJson("true"))
+        } else {
+          NotAcceptable(Json.toJson("true"))
+        }
+      }
+  }
+
+    def actualizarUsuario() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+    val json = request.body.asJson.get
+    val usua_id = Utility.extraerUsuario(request)
+    val empr_id = Utility.extraerEmpresa(request)
+    val usuariodto = json.as[UsuarioDto]
+    usuarioService.actualizar(usuariodto.usua_id.get, usuariodto.usua_email, usuariodto.usua_clave.get, usuariodto.usua_nombre, usuariodto.usua_apellido, true, (new DateTime(Instant.now.getEpochSecond)).toString(), usua_id.get, empr_id.get, usuariodto.perf_id).map { result =>
+        if (result){
           Created(Json.toJson("true"))
         } else {
           NotAcceptable(Json.toJson("true"))

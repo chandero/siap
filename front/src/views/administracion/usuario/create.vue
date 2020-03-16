@@ -3,26 +3,47 @@
      <div slot="header" class="clearfix">
       <span>{{ $t('route.usuariocreate') }}</span>
      </div>
-     <span>{{ $t('usuario.lastname')}}</span>
-     <el-input name="apellido" v-model="usuario.usua_apellido" @input="usuario.usua_apellido = $event.toUpperCase()" v-validate="'required'"></el-input>
-     <span>{{ errors.first('apellido') }}</span>
-     <p/>
-     <span>{{ $t('usuario.name')}}</span>
-     <el-input name="nombre" v-model="usuario.usua_nombre" @input="usuario.usua_nombre = $event.toUpperCase()" v-validate="'required'"></el-input>
-     <span>{{ $t('usuario.email')}}</span>
-     <el-input name="email" v-model="usuario.usua_email" v-validate="'required|email'" @input="usuario.usua_email = $event.toLowerCase()"></el-input>
-     <span>{{ errors.first('email') }}</span>
-     <p/>
-     <span>{{ $t('usuario.password')}}</span>
-     <div><el-input name="clave" v-model="usuario.usua_clave" v-validate="'required'" :type="passwordFieldType"></el-input><el-button size="mini" type="primary" icon="el-icon-view" @click="cambiarVisibilidad"></el-button><el-button size="mini" type="primary" icon="el-icon-refresh" @click="generate"></el-button></div>
-     <span>{{ errors.first('clave') }}</span>
-     <p/>
-     <span>{{ $t('perfil.title')}}</span>
-     <el-select v-model="usuario.perf_id" name="perfil" :placeholder="$t('perfil.select')">
-        <el-option v-for="perfil in perfiles" :key="perfil.perf_id" :label="perfil.perf_descripcion" :value="perfil.perf_id" >
-        </el-option>       
-     </el-select>
-     <p/>
+     <el-form :model="usuario" :rules="rules" :label-position="labelPosition" ref="usuarioForm">
+     <el-form-item :label="$t('usuario.lastname')">
+       <el-row>
+         <el-col>
+            <el-input name="apellido" ref="apellido" v-model="usuario.usua_apellido" @input="usuario.usua_apellido = $event.toUpperCase()"></el-input>
+         </el-col>
+       </el-row>
+     </el-form-item>
+     <el-form-item :label="$t('usuario.name')">
+       <el-row>
+         <el-col>
+          <el-input name="nombre" ref="nombre" v-model="usuario.usua_nombre" @input="usuario.usua_nombre = $event.toUpperCase()"></el-input>
+         </el-col>
+       </el-row>
+     </el-form-item>
+     <el-form-item :label="$t('usuario.email')">
+       <el-row>
+         <el-col>
+           <el-input name="email" v-model="usuario.usua_email" @input="usuario.usua_email = $event.toLowerCase()"></el-input>
+         </el-col>
+       </el-row>
+      </el-form-item>
+     <span>{{ }}</span>
+      <el-form-item :label="$t('usuario.password')">
+        <el-row>
+          <el-col>
+          <el-input name="clave" v-model="usuario.usua_clave" :type="passwordFieldType"></el-input><el-button size="mini" type="primary" icon="el-icon-view" @click="cambiarVisibilidad"></el-button><el-button size="mini" type="primary" icon="el-icon-refresh" @click="generate"></el-button>
+          </el-col>
+        </el-row>
+      </el-form-item>
+     <el-form-item :label="$t('perfil.title')"> 
+       <el-row>
+         <el-col>
+           <el-select v-model="usuario.perf_id" name="perfil" :placeholder="$t('perfil.select')">
+            <el-option v-for="perfil in perfiles" :key="perfil.perf_id" :label="perfil.perf_descripcion" :value="perfil.perf_id" >
+            </el-option>       
+           </el-select>
+         </el-col>
+       </el-row>
+     </el-form-item>
+     </el-form>
      <el-button :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="aplicar"></el-button>
     </el-card>
 </template>
@@ -46,7 +67,20 @@ export default {
       loading: false,
       page_size: 10,
       current_page: 1,
-      passwordFieldType: 'password'
+      passwordFieldType: 'password',
+      labelPosition: 'top',
+      rules: {
+        apellido: [
+          { required: true, message: 'Ingrese el Apellido del Usuario', trigger: 'blur' }
+        ],
+        nombre: [
+          { required: true, message: 'Ingrese el Nombre del Usuario', trigger: 'blur' }
+        ],
+        email: [
+          { required: true, message: 'Ingrese una dirección de correo válida', trigger: 'blur' },
+          { type: 'email', message: 'Ingrese una dirección de correo válida', trigger: ['blur', 'change'] }
+        ]
+      }
     }
   },
   methods: {

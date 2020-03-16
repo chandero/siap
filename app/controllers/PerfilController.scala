@@ -24,4 +24,16 @@ class PerfilController  @Inject()(perfilService: PerfilRepository, cc: Controlle
        Ok(Json.obj("perfiles" -> usuarios, "total" -> total))
      }
   }
+
+  def buscarPorId(perf_id: Long) = authenticatedUserAction.async {
+    val perfil = perfilService.buscarPorId(perf_id).get
+    Future.successful(Ok(Json.toJson(perfil)))
+  }
+
+  def buscarPorUsuaId(usua_id: Long) = authenticatedUserAction.async { implicit request =>
+    val empr_id = Utility.extraerEmpresa(request)
+    val perfil = perfilService.buscarPorUsuaId(usua_id, empr_id.get).get
+    Future.successful(Ok(Json.toJson(perfil)))
+  }  
+
 }

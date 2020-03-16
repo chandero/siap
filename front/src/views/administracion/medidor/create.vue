@@ -6,16 +6,13 @@
      <el-main>
        <el-form>
         <span>{{ $t('gestion.medidor.numero')}}</span>
-        <el-input name="numero" v-model="medidor.medi_numero" v-validate="'required'" @blur="updateNumber()"></el-input>
-        <span>{{ errors.first('descripcion') }}</span>
+        <el-input name="numero" v-model="medidor.medi_numero" @blur="updateNumber()"></el-input>
         <p/>
         <span>{{ $t('gestion.medidor.direccion')}}</span>
-        <el-input name="direccion" v-model="medidor.medi_direccion" v-validate="'required'"></el-input>
-        <span>{{ errors.first('direccion') }}</span>
+        <el-input name="direccion" v-model="medidor.medi_direccion" ></el-input>
         <p/> 
         <span>{{ $t('gestion.medidor.acta')}}</span>
-        <el-input name="acta" v-model="medidor.medi_acta" v-validate="'required'"></el-input>
-        <span>{{ errors.first('direccion') }}</span>
+        <el-input name="acta" v-model="medidor.medi_acta" ></el-input>
         <p/>             
         <span>{{ $t('gestion.medidor.tipo.title')}}</span>
         <el-select v-model="medidor.amet_id" filterable clearable allow-create name="tipo" :placeholder="$t('gestion.medidor.tipo.select')" @change="updateType()">

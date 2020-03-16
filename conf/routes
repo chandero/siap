@@ -22,6 +22,7 @@ GET     /api/usua/get/:p/:c             controllers.UsuarioController.todos(p: L
 GET     /api/usua/get/cuad              controllers.UsuarioController.paraCuadrilla()
 GET     /api/usua/del/:id               controllers.UsuarioController.borrarUsuario(id: Long)
 POST    /api/usua/save                  controllers.UsuarioController.guardarUsuario
+POST    /api/usua/upd                   controllers.UsuarioController.actualizarUsuario
 # Empresa
 GET     /api/empr/get/:p/:c             controllers.EmpresaController.todos(p:Long, c:Long)
 GET     /api/empr/:id                   controllers.EmpresaController.buscarPorId(id: Long)
@@ -49,6 +50,8 @@ GET     /api/tipobarr/get               controllers.BarrioController.obtenertipo
 GET     /api/depa/get                   controllers.DepartamentoController.todos()
 
 GET     /api/perf/get/:p/:c             controllers.PerfilController.todos(p:Long, c:Long)
+GET     /api/perf/gbi/:i                controllers.PerfilController.buscarPorId(i:Long)
+GET     /api/perf/gbui/:i                controllers.PerfilController.buscarPorUsuaId(i:Long)
 
 # Unidad
 GET     /api/unid/get/:p/:c             controllers.UnidadController.todos(p:Long, c:Long)

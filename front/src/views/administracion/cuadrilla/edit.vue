@@ -4,8 +4,7 @@
       <span>{{ $t('route.cuadrillaedit') }}</span>
      </div>
      <span>{{ $t('cuadrilla.description')}}</span>
-     <el-input name="descripcion" v-model="cuadrilla.cuad_descripcion" v-validate="'required'"></el-input>
-     <span>{{ errors.first('descripcion') }}</span>
+     <el-input name="descripcion" v-model="cuadrilla.cuad_descripcion"></el-input>
      <p/>
      <el-transfer 
        style="text-align: left; display: inline-block"

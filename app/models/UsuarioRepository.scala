@@ -284,97 +284,103 @@ class UsuarioRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
         }
     }(ec)
 
-    def actualizar(usuario: Usuario, usua_id: Long) : Future[Boolean] = {
+    def actualizar(usua_id: Long, usua_email: String, usua_clave: String, usua_nombre: String, usua_apellido: String, usua_activo: Boolean, usua_ultimasesion: String, usuario_id: Long, empr_id: Long, perf_id: Long) : Future[Boolean] = {
         //val usuario_ant: Future[Option[Usuario]] = 
-        val usuario_ant : Option[Usuario] = buscarPorId(usuario.usua_id.get)
+        val usuario_ant : Option[Usuario] = buscarPorId(usua_id)
         db.withConnection { implicit connection => 
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())
-            val count: Long = SQL("UPDATE siap.usuario SET usua_clave = public.crypt({usua_clave}, public.gen_salt('bf')), usua_nombre = {usua_nombre}, usua_apellido = {usua_apellido}, usua_activo = {usua_activo}, usua_ultimasesion = {usua_ultimasesion} WHERE usua_id = {usua_id}").
-            on(
-                'usua_id -> usuario.usua_id,
-                'usua_clave -> usuario.usua_clave, 
-                'usua_nombre -> usuario.usua_nombre, 
-                'usua_apellido -> usuario.usua_apellido, 
-                'usua_activo -> usuario.usua_activo, 
-                'usua_ultimasesion -> usuario.usua_ultimasesion                
-            ).executeUpdate()
+            var count:Long = 0
+            if (!usua_clave.isEmpty()) {
+              count = SQL("UPDATE siap.usuario SET usua_clave = public.crypt({usua_clave}, public.gen_salt('bf')), usua_nombre = {usua_nombre}, usua_apellido = {usua_apellido}, usua_activo = {usua_activo} WHERE usua_id = {usua_id}").
+              on(
+                'usua_id -> usua_id,
+                'usua_clave -> usua_clave, 
+                'usua_nombre -> usua_nombre, 
+                'usua_apellido -> usua_apellido, 
+                'usua_activo -> usua_activo
+              ).executeUpdate()
+            } else {
+              count = SQL("UPDATE siap.usuario SET usua_nombre = {usua_nombre}, usua_apellido = {usua_apellido}, usua_activo = {usua_activo} WHERE usua_id = {usua_id}").
+              on(
+                'usua_id -> usua_id,
+                'usua_nombre -> usua_nombre, 
+                'usua_apellido -> usua_apellido, 
+                'usua_activo -> usua_activo
+              ).executeUpdate()
+            }
+
+            if (count > 0) {
+               SQL("""UPDATE siap.usuario_empresa_perfil SET perf_id = {perf_id}
+                    WHERE usua_id = {usua_id} and empr_id = {empr_id}""").
+                    on(
+                        'perf_id -> perf_id,
+                        'usua_id -> usua_id,
+                        'empr_id -> empr_id
+                    ).executeUpdate
+            }
             
             if (usuario_ant != None){
-                if (usuario_ant.get.usua_email != usuario.usua_email){
+                if (usuario_ant.get.usua_email != usua_email){
                 SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento, audi_alias) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento}, {audi_alias})").
                 on(
                     'audi_fecha -> fecha,
                     'audi_hora -> hora,
-                    'usua_id -> usuario.usua_id,
+                    'usua_id -> usuario_id,
                     'audi_tabla -> "usuario", 
-                    'audi_uid -> usuario.usua_id,
+                    'audi_uid -> usua_id,
                     'audi_campo -> "usua_email", 
                     'audi_valorantiguo -> usuario_ant.get.usua_email,
-                    'audi_valornuevo -> usuario.usua_email,
+                    'audi_valornuevo -> usua_email,
                     'audi_evento -> "A").
                     executeInsert()                    
                 }
 
-                if (usuario_ant.get.usua_nombre != usuario.usua_nombre){
+                if (usuario_ant.get.usua_nombre != usua_nombre){
                 SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento, audi_alias) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento}, {audi_alias})").
                 on(
                     'audi_fecha -> fecha,
                     'audi_hora -> hora,
-                    'usua_id -> usuario.usua_id,
+                    'usua_id -> usuario_id,
                     'audi_tabla -> "usuario", 
-                    'audi_uid -> usuario.usua_id,
+                    'audi_uid -> usua_id,
                     'audi_campo -> "usua_nombre", 
                     'audi_valorantiguo -> usuario_ant.get.usua_nombre,
-                    'audi_valornuevo -> usuario.usua_nombre,
+                    'audi_valornuevo -> usua_nombre,
                     'audi_evento -> "A").
                     executeInsert()                    
                 } 
 
-                if (usuario_ant.get.usua_apellido != usuario.usua_apellido){
+                if (usuario_ant.get.usua_apellido != usua_apellido){
                 SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento, audi_alias) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento}, {audi_alias})").
                 on(
                     'audi_fecha -> fecha,
                     'audi_hora -> hora,
-                    'usua_id -> usuario.usua_id,
+                    'usua_id -> usuario_id,
                     'audi_tabla -> "usuario", 
-                    'audi_uid -> usuario.usua_id,
+                    'audi_uid -> usua_id,
                     'audi_campo -> "usua_apellido", 
                     'audi_valorantiguo -> usuario_ant.get.usua_apellido,
-                    'audi_valornuevo -> usuario.usua_apellido,
+                    'audi_valornuevo -> usua_apellido,
                     'audi_evento -> "A").
                     executeInsert()                    
                 }
 
-                if (usuario_ant.get.usua_activo != usuario.usua_activo){
+                if (usuario_ant.get.usua_activo != usua_activo){
                 SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento, audi_alias) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento}, {audi_alias})").
                 on(
                     'audi_fecha -> fecha,
                     'audi_hora -> hora,
-                    'usua_id -> usuario.usua_id,
+                    'usua_id -> usuario_id,
                     'audi_tabla -> "usuario",
-                    'audi_uid -> usuario.usua_id,
+                    'audi_uid -> usua_id,
                     'audi_campo -> "usua_activo",
                     'audi_valorantiguo -> usuario_ant.get.usua_activo,
-                    'audi_valornuevo -> usuario.usua_activo,
+                    'audi_valornuevo -> usua_activo,
                     'audi_evento -> "A").
                     executeInsert()
                 }
 
-                if (usuario_ant.get.usua_ultimasesion != usuario.usua_ultimasesion){
-                SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento, audi_alias) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento}, {audi_alias})").
-                on(
-                    'audi_fecha -> fecha,
-                    'audi_hora -> hora,
-                    'usua_id -> usuario.usua_id,
-                    'audi_tabla -> "usuario",
-                    'audi_uid -> usuario.usua_id,
-                    'audi_campo -> "usua_ultimasesion",
-                    'audi_valorantiguo -> usuario_ant.get.usua_ultimasesion,
-                    'audi_valornuevo -> usuario.usua_ultimasesion,
-                    'audi_evento -> "A").
-                    executeInsert()
-                }                                               
             }
 
             Future.successful(count > 0)

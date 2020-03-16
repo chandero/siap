@@ -6,12 +6,10 @@
      <el-main>
        <el-form>
         <span>{{ $t('gestion.transformador.numero')}}</span>
-        <el-input name="numero" v-model="transformador.tran_numero" v-validate="'required'"></el-input>
-        <span>{{ errors.first('descripcion') }}</span>
+        <el-input name="numero" v-model="transformador.tran_numero" ></el-input>
         <p/>
         <span>{{ $t('gestion.transformador.direccion')}}</span>
-        <el-input name="direccion" v-model="transformador.tran_direccion" v-validate="'required'"></el-input>
-        <span>{{ errors.first('direccion') }}</span>
+        <el-input name="direccion" v-model="transformador.tran_direccion" ></el-input>
         <p/>     
         <span>{{ $t('gestion.transformador.barr_descripcion')}}</span>
         <el-select  style="width:100%;" filterable clearable ref="barrio" v-model="transformador.barr_id" name="barrio" :placeholder="$t('barrio.select')">

@@ -112,6 +112,23 @@ class PerfilRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCon
     }
 
     /**
+    * Recuperar un Perfil dado su usua_id
+    * @param usua_id: Long
+    */
+    def buscarPorUsuaId(usua_id: Long, empr_id: Long) : Option[Perfil] = {
+        db.withConnection { implicit connection => 
+            SQL("""SELECT p.* FROM siap.usuario_empresa_perfil e
+            INNER JOIN siap.usuario u ON u.usua_id = e.usua_id
+			INNER JOIN siap.perfil p ON p.perf_id = e.perf_id
+            WHERE u.usua_id = {usua_id} and e.empr_id = {empr_id}""").
+            on(
+                'usua_id -> usua_id,
+                'empr_id -> empr_id
+            ).as(simple.singleOpt)
+        }        
+    }    
+
+    /**
     * Recuperar Perfil dado su perf_descripcion
     * @param perf_descripcion: String
     * @param empr_id: Long

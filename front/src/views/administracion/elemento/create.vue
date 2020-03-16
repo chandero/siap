@@ -6,16 +6,13 @@
      <el-main>
        <el-form>
      <span>{{ $t('elemento.description')}}</span>
-     <el-input name="descripcion" v-model="elemento.elem_descripcion" v-validate="'required'"></el-input>
-     <span>{{ errors.first('descripcion') }}</span>
+     <el-input name="descripcion" v-model="elemento.elem_descripcion"></el-input>
      <p/>
      <span>{{ $t('elemento.code')}}</span>
-     <el-input name="codigo" v-model="elemento.elem_codigo" v-validate="'required'"></el-input>
-     <span>{{ errors.first('codigo') }}</span>
+     <el-input name="codigo" v-model="elemento.elem_codigo"></el-input>
      <p/>     
      <span>{{ $t('elemento.ucap')}}</span>
-     <el-checkbox name="ucap" v-model="elemento.elem_ucap" v-validate="'required'"></el-checkbox>
-     <span>{{ errors.first('ucap') }}</span>
+     <el-checkbox name="ucap" v-model="elemento.elem_ucap"></el-checkbox>
      <p/>
      <span v-if="elemento.elem_ucap">{{ $t('elemento.ucaptipo')}}</span>
      <el-select v-if="elemento.elem_ucap" v-model="elemento.ucap_id" name="tipo" :placeholder="$t('tipoelemento.select')">
@@ -29,6 +26,7 @@
         </el-option>       
      </el-select>
      <p/>
+     <!--
      <el-form>
             <el-row :gutter="4">
               <el-col :xs="24" :sm="24" :md="10" :lg="10" :xl="10">
@@ -95,6 +93,7 @@
               </el-col>
             </el-row>
      </el-form>
+     -->
      <el-button :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="aplicar"></el-button>
        </el-form>
      </el-main>
