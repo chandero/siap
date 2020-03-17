@@ -153,7 +153,7 @@ export function imprimirFormatoRTE(soli_id, empr_id) {
     empr_id
   }
   const token = '43f44388-5cd1-4657-9f7e-ea4e014e9333'
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + ':9091/api' + '/soli/frte/' + data.soli_id + '/' + data.empr_id + '/' + token
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/soli/frte/' + data.soli_id + '/' + data.empr_id + '/' + token
   window.open(url, '_blank', 'location=no, menubar=no')
 }
 
@@ -165,7 +165,7 @@ export function imprimirRespuestaSolicitud(soli_id, empr_id, firma, editable) {
     editable
   }
   const token = '43f44388-5cd1-4657-9f7e-ea4e014e9333'
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + ':9091/api' + '/soli/frs/' + data.soli_id + '/' + data.empr_id + '/' + data.firma + '/' + data.editable + '/' + token
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/soli/frs/' + data.soli_id + '/' + data.empr_id + '/' + data.firma + '/' + data.editable + '/' + token
   if (data.editable) {
     window.open(url, '_self', 'location=no, menubar=no')
   } else {

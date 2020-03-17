@@ -4,8 +4,7 @@
       <span>{{ $t('route.urbacreate') }}</span>
      </div>
      <span>{{ $t('urbanizadora.description')}}</span>
-     <el-input name="descripcion" v-model="urba.urba_descripcion" v-validate="'required'"></el-input>
-     <span>{{ errors.first('descripcion') }}</span>
+     <el-input name="descripcion" v-model="urba.urba_descripcion"></el-input>
      <p/>
      <el-button :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="aplicar"></el-button>
     </el-card>
