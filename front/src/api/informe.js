@@ -6,7 +6,7 @@ export function informe_siap_calculo_carga_xls(periodo, anho, empr_id) {
     anho,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/scc/' + data.periodo + '/' + data.anho + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/scc/' + data.periodo + '/' + data.anho + '/' + data.empr_id
   window.open(url, '_self', 'location=no, menubar=no')
 }
 
@@ -182,7 +182,7 @@ export function informe_siap_inventario_xls(fecha_corte, empr_id) {
     fecha_corte,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/sigx/' + data.fecha_corte + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sigx/' + data.fecha_corte + '/' + data.empr_id
   window.open(url, '_self', 'location=no, menubar=no')
 }
 
@@ -193,7 +193,7 @@ export function informe_siap_inventario_filtro_xls(fecha_corte, orderby, filter,
     filter,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/sifx/' + data.fecha_corte + '/' + data.orderby + '/' + data.filter + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sifx/' + data.fecha_corte + '/' + data.orderby + '/' + data.filter + '/' + data.empr_id
   window.open(encodeURI(url), '_self', 'location=no, menubar=no')
 }
 
@@ -204,7 +204,7 @@ export function informe_siap_resumen_material(fecha_inicial, fecha_final, usua_i
     usua_id,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/srm/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.usua_id + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/srm/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.usua_id + '/' + data.empr_id
   window.open(url, '_blank', 'location=no, menubar=no')
 }
 
@@ -214,7 +214,7 @@ export function informe_siap_reporte_por_uso_xls(fecha_toma, usua_id, empr_id) {
     usua_id,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/srpu/' + data.fecha_toma + '/' + data.usua_id + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/srpu/' + data.fecha_toma + '/' + data.usua_id + '/' + data.empr_id
   window.open(url, '_self', 'location=no, menubar=no')
 }
 
@@ -225,7 +225,7 @@ export function informe_siap_resumen_material_reporte(fecha_inicial, fecha_final
     usua_id,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/srmr/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.usua_id + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/srmr/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.usua_id + '/' + data.empr_id
   window.open(url, '_blank', 'location=no, menubar=no')
 }
 
@@ -236,7 +236,7 @@ export function informe_siap_detallado_material(fecha_inicial, fecha_final, usua
     usua_id,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/sdm/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.usua_id + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sdm/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.usua_id + '/' + data.empr_id
   window.open(url, '_blank', 'location=no, menubar=no')
 }
 
@@ -247,7 +247,7 @@ export function informe_siap_disponibilidad_xls(fecha_inicial, fecha_final, wt, 
     wt,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/sdx/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.wt + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sdx/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.wt + '/' + data.empr_id
   window.open(url, '_self', 'location=no, menubar=no')
 }
 
@@ -257,7 +257,7 @@ export function informe_siap_eficiencia_xls(fecha_inicial, fecha_final, empr_id)
     fecha_final,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/sde/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sde/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id
   window.open(url, '_self', 'location=no, menubar=no')
 }
 
@@ -267,7 +267,7 @@ export function informe_siap_ucap_xls(fecha_inicial, fecha_final, empr_id) {
     fecha_final,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/sucx/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sucx/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id
   window.open(url, '_self', 'location=no, menubar=no')
 }
 
@@ -279,7 +279,7 @@ export function informe_siap_graficos_reporte(fecha_inicial, fecha_final, usua_i
     empr_id,
     num_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/sgr/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.usua_id + '/' + data.empr_id + '/' + data.num_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sgr/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.usua_id + '/' + data.empr_id + '/' + data.num_id
   window.open(url, '_blank', 'location=no, menubar=no')
 }
 
@@ -293,13 +293,13 @@ export function informe_siap_reporte_consolidado_xls(fecha_inicial, fecha_final)
     method: 'get'
   })
 }
-// window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api'
+// window.location.protocol + '//' + window.location.host.split('/')[0] + '/api'
 export function informe_siap_medidor_xls(empr_id) {
   const data = {
     empr_id
   }
   const token = '43f44388-5cd1-4657-9f7e-ea4e014e9333'
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/smx/' + data.empr_id + '/' + token
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/smx/' + data.empr_id + '/' + token
   window.open(url, '_self', 'location=no, menubar=no')
 }
 
@@ -308,7 +308,7 @@ export function informe_siap_transformador_xls(empr_id) {
     empr_id
   }
   const token = '43f44388-5cd1-4657-9f7e-ea4e014e9333'
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/stx/' + data.empr_id + '/' + token
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/stx/' + data.empr_id + '/' + token
   window.open(url, '_self', 'location=no, menubar=no')
 }
 
@@ -337,6 +337,6 @@ export function informe_siap_muot_xls(fecha_inicial, fecha_final, empr_id) {
     empr_id
   }
   const token = '43f44388-5cd1-4657-9f7e-ea4e014e9333'
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/info/simox/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id + '/' + token
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/simox/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id + '/' + token
   window.open(url, '_self', 'location=no, menubar=no')
 }

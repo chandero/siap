@@ -359,8 +359,8 @@ export default {
       page_size: 10,
       current_page: 1,
       total: 0,
-      order: '',
-      filter: ''
+      order: 'aap_id asc',
+      filter: 'aap_id > 0'
     }
   },
   components: {

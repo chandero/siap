@@ -474,7 +474,7 @@ export default {
     getReportes() {
     },
     changeTab(data) {
-      const mes = data.name.split(':')[0]
+      const mes = data.name
       const anho = data.name.split(':')[1]
       const index = data.name.split(':')[2]
       this.getData(anho, mes, index, data.name)

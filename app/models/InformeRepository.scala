@@ -2310,8 +2310,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
         SQL("""SELECT
 	                  COUNT(*)
                     FROM siap.aap a
-                    LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id
-                    LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id
+                    LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id and d.empr_id = a.empr_id
+                    LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id and e.empr_id = a.empr_id
                     LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
                     LEFT JOIN siap.tipobarrio tb on tb.tiba_id = b.tiba_id
                     LEFT JOIN siap.aap_uso us on us.aaus_id = a.aaus_id	

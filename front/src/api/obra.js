@@ -121,7 +121,7 @@ export function printObra(obra_id, empr_id) {
     obra_id,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/obra/prn/obra/' + data.obra_id + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/obra/prn/obra/' + data.obra_id + '/' + data.empr_id
   window.open(url, '_blank', 'location=no, menubar=no')
 }
 
@@ -132,7 +132,7 @@ export function printObraRelacion(fecha_inicial, fecha_final, empr_id, usua_id) 
     empr_id,
     usua_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/obra/prn/rela/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id + '/' + usua_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/obra/prn/rela/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id + '/' + usua_id
   window.open(url, '_blank', 'location=no, menubar=no')
 }
 
@@ -141,6 +141,6 @@ export function printObraBlanco(reti_id, empr_id) {
     reti_id,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/obra/prn/form/' + data.reti_id + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/obra/prn/form/' + data.reti_id + '/' + data.empr_id
   window.open(url, '_blank', 'location=no, menubar=no')
 }

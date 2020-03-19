@@ -3,7 +3,7 @@ import axios from 'axios'
 
 // create an axios
 const service = axios.create({
-  baseURL: window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api', // api的base_url
+  baseURL: window.location.protocol + '//' + window.location.host.split('/')[0] + '/api', // api的base_url
   timeout: 30000, // request timeout
   headers: {
     'Content-Type': 'application/json'
