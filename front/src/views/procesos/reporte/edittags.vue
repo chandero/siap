@@ -179,7 +179,7 @@
                         <el-col :span="8">
                             <el-form-item prop="repo_fechasolucion" :label="$t('reporte.solutiondate')" :read-only="reporte.rees_id == 3">
                                 <el-date-picker :disabled="reporte.rees_id == 3" v-model="reporte.repo_fechasolucion"
-                                 :picker-options="datePickerOptions"
+                                 :picker-options="datePickerOptions" @change="validarAntiguedadFecha"
                                 ></el-date-picker>
                             </el-form-item>
                         </el-col>
@@ -1197,6 +1197,18 @@ export default {
       const result2 = (date.getTime() <= new Date().getTime())
       const result = result1 && result2
       return !result
+    },
+    validarAntiguedadFecha() {
+      const hoy = new Date()
+      const mes_actual = hoy.getMonth()
+      const mes_solucion = this.reporte.repo_fechasolucion.getMonth()
+      if (mes_actual > mes_solucion) {
+        if ((hoy - this.reporte.repo_fechasolucion) > 7) {
+          this.$alert('Fecha de Reporte y de Solución de un periodo anterior', 'Atención', {
+            confirmButtonText: 'Aceptar'
+          })
+        }
+      }
     },
     autosave() {
       /*

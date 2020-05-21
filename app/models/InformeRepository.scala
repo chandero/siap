@@ -3824,9 +3824,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
                            and a.aap_id <> 9999999
                UNION ALL
                select distinct 
-                            r.repo_fecharecepcion::text, r.repo_fechasolucion::text, r.repo_consecutivo, v.aap_id, d.aap_potencia, case when b.tiba_id = 2 then 'X' else Null end as vereda,
+                            r.repo_fecharecepcion::text, r.repo_fechasolucion::text, r.repo_consecutivo, v.aap_id, 0 as aap_potencia, case when b.tiba_id = 2 then 'X' else Null end as vereda,
                            (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion AND r.repo_fechasolucion) AS festivos
-                           from siap.reporte r
+                           from siap.control_reporte r
                            inner join siap.control_reporte_evento v on v.repo_id = r.repo_id
                            inner join siap.control a on a.aap_id = v.aap_id
                            left join siap.barrio b on b.barr_id = a.barr_id
@@ -7746,6 +7746,694 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     .on(
                       'empr_id -> empr_id,
                       'tran_id -> m._1
+                    )
+                    .as(Siap_inventario.Siap_inventario_set *)
+                val rows = aapSet.map {
+                  i =>
+                    com.norbitltd.spoiwo.model
+                      .Row()
+                      .withCellValues(
+                        i.aap_id match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_apoyo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.esta_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_direccion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.barr_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.tiba_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aaus_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_modernizada match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_modernizada_anho match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aatc_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_medidor match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aaco_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aama_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aamo_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.tipo_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_poste_altura match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_poste_propietario match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_brazo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_collarin match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_potencia match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_tecnologia match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_rte match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_bombillo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_balasto match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_arrancador match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_condensador match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_fotocelda match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.medi_codigo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.medi_numero match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aacu_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.tran_codigo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.tran_numero match {
+                          case Some(value) => value
+                          case None        => ""
+                        }
+                      )
+                }
+                headerRow :: rows.toList
+              }
+            )
+            _listSheet += sheet
+          }
+          println("Escribiendo en el Stream")
+          var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+          Workbook().addSheets(_listSheet).writeToOutputStream(os)
+          println("Stream Listo")
+          os.toByteArray
+        case None =>
+          var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+          os.toByteArray
+      }
+    }
+  }
+
+  def siap_poste_xls(empr_id: scala.Long): Array[Byte] = {
+    import Height._
+    db.withConnection { implicit connection =>
+      val empresa = empresaService.buscarPorId(empr_id)
+      empresa match {
+        case Some(empresa) =>
+          val format = new SimpleDateFormat("yyyy-MM-dd HH:mm")
+          var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+          var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
+          var _listMerged = new ListBuffer[CellRange]()
+          var mergedColumns = {
+            _listMerged += CellRange((0, 0), (0, 3))
+            _listMerged += CellRange((1, 1), (0, 3))
+            _listMerged += CellRange((2, 2), (0, 3))
+            _listMerged.toList
+          }
+          val _mParser = int("aap_id") ~ str("numero") ~ str(
+            "aap_direccion"
+          ) ~ str("barr_descripcion") ~ int("cantidad") map {
+            case a ~ b ~ c ~ d ~ e => (a, b, c, d, e)
+          }
+          val resultSet = SQL(
+            """SELECT m.aap_id, cast(m.aap_id as varchar(10)) as numero , m.aap_direccion, b.barr_descripcion, COUNT(a.*) AS cantidad FROM siap.poste m
+                                 LEFT JOIN siap.aap_poste am ON am.aap_id = m.aap_id AND am.empr_id = m.empr_id
+                                 LEFT JOIN siap.aap a ON a.aap_id = am.laap_id and a.empr_id = am.empr_id
+                                 LEFT JOIN siap.barrio b ON b.barr_id = m.barr_id
+                                 WHERE m.empr_id = {empr_id}
+                                 GROUP BY m.aap_id, m.aap_id, m.aap_direccion, b.barr_descripcion """
+          ).on(
+              'empr_id -> empr_id
+            )
+            .as(_mParser.*)
+          val sheet1 = Sheet(
+            name = "Postes",
+            rows = {
+              val title1Row = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(empresa.empr_descripcion)
+              val title2Row = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("INFORME DE POSTES")
+              val title3Row = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(
+                  "GENERADO EL " + format
+                    .format(Calendar.getInstance().getTime())
+                )
+              val headerRow = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Número", "Dirección", "Barrio", "Cantidad")
+              var j = 2
+              val rows = resultSet.map {
+                med =>
+                  j += 1
+                  val link = new HyperLinkUrl(med._2, "#T" + med._2)
+                  com.norbitltd.spoiwo.model.Row(
+                    HyperLinkUrlCell(
+                      link,
+                      Some(0),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      med._3,
+                      Some(1),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      med._4,
+                      Some(2),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    NumericCell(
+                      med._5,
+                      Some(3),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("#0"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    )
+                  )
+              }
+              title1Row :: title2Row :: title3Row :: headerRow :: rows.toList
+            },
+            mergedRegions = mergedColumns
+          )
+          var _listSheet = new ListBuffer[Sheet]()
+          _listSheet += sheet1
+          resultSet.map { m =>
+            val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+            val sheet = Sheet(
+              name = "P" + m._2,
+              rows = {
+                val headerRow = com.norbitltd.spoiwo.model
+                  .Row()
+                  .withCellValues(
+                    "Código",
+                    "Apoyo",
+                    "Estado",
+                    "Dirección",
+                    "Barrio",
+                    "Sector",
+                    "Uso",
+                    "Modernizada",
+                    "Año Modernizada",
+                    "Tipo Luminaria",
+                    "Medidor",
+                    "Tipo Medida",
+                    "Marca",
+                    "Modelo",
+                    "Cuenta Alumbrado",
+                    "Poste",
+                    "Poste Altura",
+                    "Poste Propietario",
+                    "Brazo",
+                    "Collarin",
+                    "Potencia",
+                    "Tecnologia",
+                    "Reporte Técnico",
+                    "Bombillo",
+                    "Balasto",
+                    "Arrancador",
+                    "Condensador",
+                    "Fotocelda",
+                    "Medidor Código",
+                    "Medidor Número",
+                    "Cuenta Alumbrado",
+                    "Transformador Código",
+                    "Transformador Número"
+                  )
+                val aapSet =
+                  SQL("""SELECT
+                  a.aap_id,
+                  a.aap_apoyo,
+                  s.esta_descripcion,
+                  a.aap_direccion,
+                  b.barr_descripcion,
+                  tb.tiba_descripcion,
+                  us.aaus_descripcion,
+                  a.aap_modernizada,
+                  d.aap_modernizada_anho,
+                  tc.aatc_descripcion,
+                  a.aap_medidor,
+                  co.aaco_descripcion,
+                  ma.aama_descripcion,
+                  mo.aamo_descripcion,
+                  tp.tipo_descripcion,
+                  d.aap_poste_altura,
+                  d.aap_brazo,
+                  d.aap_collarin,
+                  d.aap_potencia,
+                  d.aap_tecnologia,
+                  d.aap_rte,
+                  d.aap_poste_propietario,
+                  e.aap_bombillo,
+                  e.aap_balasto,
+                  e.aap_arrancador,
+                  e.aap_condensador,
+                  e.aap_fotocelda,
+                  to_char(m.medi_id, '0000') as medi_codigo,
+                  m.medi_numero,
+                  (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
+                  to_char(t.tran_id, '0000') as tran_codigo,
+                  t.tran_numero
+                 FROM siap.aap a
+                 LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
+                 LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
+                 LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id AND e.empr_id = a.empr_id
+                 LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
+                 LEFT JOIN siap.tipobarrio tb on tb.tiba_id = b.tiba_id
+                 LEFT JOIN siap.aap_uso us on us.aaus_id = a.aaus_id	
+                 LEFT JOIN siap.aap_tipo_carcasa tc on tc.aatc_id = a.aatc_id
+                 LEFT JOIN siap.aap_conexion co on co.aaco_id = a.aaco_id
+                 LEFT JOIN siap.aap_marca ma on ma.aama_id = a.aama_id
+                 LEFT JOIN siap.aap_modelo mo on mo.aamo_id = a.aamo_id
+                 LEFT JOIN siap.aap_cuentaap cu on cu.aacu_id = a.aacu_id
+                 LEFT JOIN siap.tipo_poste tp on tp.tipo_id = d.tipo_id
+                 LEFT JOIN siap.aap_medidor am ON am.aap_id = a.aap_id AND am.empr_id = a.empr_id
+                 LEFT JOIN siap.medidor m ON m.medi_id = am.medi_id and m.empr_id = am.empr_id
+                 LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id
+                 LEFT JOIN siap.aap_transformador at ON at.aap_id = a.aap_id and at.empr_id = a.empr_id
+                 LEFT JOIN siap.transformador t ON t.tran_id = at.tran_id and t.empr_id = at.empr_id
+                 LEFT JOIN siap.aap_poste ap ON ap.laap_id = a.aap_id and ap.empr_id = a.empr_id
+                 LEFT JOIN siap.poste p ON p.aap_id = ap.aap_id and p.empr_id = ap.empr_id
+                 WHERE a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999 and p.aap_id = {aap_id}
+                                ORDER BY a.aap_id ASC
+                                """)
+                    .on(
+                      'empr_id -> empr_id,
+                      'aap_id -> m._1
+                    )
+                    .as(Siap_inventario.Siap_inventario_set *)
+                val rows = aapSet.map {
+                  i =>
+                    com.norbitltd.spoiwo.model
+                      .Row()
+                      .withCellValues(
+                        i.aap_id match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_apoyo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.esta_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_direccion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.barr_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.tiba_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aaus_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_modernizada match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_modernizada_anho match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aatc_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_medidor match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aaco_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aama_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aamo_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.tipo_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_poste_altura match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_poste_propietario match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_brazo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_collarin match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_potencia match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_tecnologia match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_rte match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_bombillo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_balasto match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_arrancador match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_condensador match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_fotocelda match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.medi_codigo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.medi_numero match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aacu_descripcion match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.tran_codigo match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.tran_numero match {
+                          case Some(value) => value
+                          case None        => ""
+                        }
+                      )
+                }
+                headerRow :: rows.toList
+              }
+            )
+            _listSheet += sheet
+          }
+          println("Escribiendo en el Stream")
+          var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+          Workbook().addSheets(_listSheet).writeToOutputStream(os)
+          println("Stream Listo")
+          os.toByteArray
+        case None =>
+          var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+          os.toByteArray
+      }
+    }
+  }
+
+  def siap_redes_xls(empr_id: scala.Long): Array[Byte] = {
+    import Height._
+    db.withConnection { implicit connection =>
+      val empresa = empresaService.buscarPorId(empr_id)
+      empresa match {
+        case Some(empresa) =>
+          val format = new SimpleDateFormat("yyyy-MM-dd HH:mm")
+          var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+          var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
+          var _listMerged = new ListBuffer[CellRange]()
+          var mergedColumns = {
+            _listMerged += CellRange((0, 0), (0, 3))
+            _listMerged += CellRange((1, 1), (0, 3))
+            _listMerged += CellRange((2, 2), (0, 3))
+            _listMerged.toList
+          }
+          val _mParser = int("aap_id") ~ str("numero") ~ str(
+            "aap_direccion"
+          ) ~ str("barr_descripcion") ~ int("cantidad") map {
+            case a ~ b ~ c ~ d ~ e => (a, b, c, d, e)
+          }
+          val resultSet = SQL(
+            """SELECT m.aap_id, cast(m.aap_id as varchar(50)) as numero, m.aap_direccion, b.barr_descripcion, COUNT(a.*) AS cantidad FROM siap.redes m
+                                 LEFT JOIN siap.aap_redes am ON am.aap_id = m.aap_id AND am.empr_id = m.empr_id
+                                 LEFT JOIN siap.aap a ON a.aap_id = am.laap_id and a.empr_id = am.empr_id
+                                 LEFT JOIN siap.barrio b ON b.barr_id = m.barr_id
+                                 WHERE m.empr_id = {empr_id}
+                                 GROUP BY m.aap_id, m.aap_id, m.aap_direccion, b.barr_descripcion """
+          ).on(
+              'empr_id -> empr_id
+            )
+            .as(_mParser.*)
+          val sheet1 = Sheet(
+            name = "Redes",
+            rows = {
+              val title1Row = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(empresa.empr_descripcion)
+              val title2Row = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("INFORME DE REDES")
+              val title3Row = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(
+                  "GENERADO EL " + format
+                    .format(Calendar.getInstance().getTime())
+                )
+              val headerRow = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Número", "Dirección", "Barrio", "Cantidad")
+              var j = 2
+              val rows = resultSet.map {
+                med =>
+                  j += 1
+                  val link = new HyperLinkUrl(med._2, "#T" + med._2)
+                  com.norbitltd.spoiwo.model.Row(
+                    HyperLinkUrlCell(
+                      link,
+                      Some(0),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      med._3,
+                      Some(1),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      med._4,
+                      Some(2),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    NumericCell(
+                      med._5,
+                      Some(3),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("#0"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    )
+                  )
+              }
+              title1Row :: title2Row :: title3Row :: headerRow :: rows.toList
+            },
+            mergedRegions = mergedColumns
+          )
+          var _listSheet = new ListBuffer[Sheet]()
+          _listSheet += sheet1
+          resultSet.map { m =>
+            val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+            val sheet = Sheet(
+              name = "T" + m._2,
+              rows = {
+                val headerRow = com.norbitltd.spoiwo.model
+                  .Row()
+                  .withCellValues(
+                    "Código",
+                    "Apoyo",
+                    "Estado",
+                    "Dirección",
+                    "Barrio",
+                    "Sector",
+                    "Uso",
+                    "Modernizada",
+                    "Año Modernizada",
+                    "Tipo Luminaria",
+                    "Medidor",
+                    "Tipo Medida",
+                    "Marca",
+                    "Modelo",
+                    "Cuenta Alumbrado",
+                    "Poste",
+                    "Poste Altura",
+                    "Poste Propietario",
+                    "Brazo",
+                    "Collarin",
+                    "Potencia",
+                    "Tecnologia",
+                    "Reporte Técnico",
+                    "Bombillo",
+                    "Balasto",
+                    "Arrancador",
+                    "Condensador",
+                    "Fotocelda",
+                    "Medidor Código",
+                    "Medidor Número",
+                    "Cuenta Alumbrado",
+                    "Transformador Código",
+                    "Transformador Número"
+                  )
+                val aapSet =
+                  SQL("""SELECT
+                  a.aap_id,
+                  a.aap_apoyo,
+                  s.esta_descripcion,
+                  a.aap_direccion,
+                  b.barr_descripcion,
+                  tb.tiba_descripcion,
+                  us.aaus_descripcion,
+                  a.aap_modernizada,
+                  d.aap_modernizada_anho,
+                  tc.aatc_descripcion,
+                  a.aap_medidor,
+                  co.aaco_descripcion,
+                  ma.aama_descripcion,
+                  mo.aamo_descripcion,
+                  tp.tipo_descripcion,
+                  d.aap_poste_altura,
+                  d.aap_brazo,
+                  d.aap_collarin,
+                  d.aap_potencia,
+                  d.aap_tecnologia,
+                  d.aap_rte,
+                  d.aap_poste_propietario,
+                  e.aap_bombillo,
+                  e.aap_balasto,
+                  e.aap_arrancador,
+                  e.aap_condensador,
+                  e.aap_fotocelda,
+                  to_char(m.medi_id, '0000') as medi_codigo,
+                  m.medi_numero,
+                  (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
+                  to_char(t.tran_id, '0000') as tran_codigo,
+                  t.tran_numero
+                 FROM siap.aap a
+                 LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
+                 LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
+                 LEFT JOIN siap.aap_elemento e on e.aap_id = a.aap_id AND e.empr_id = a.empr_id
+                 LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
+                 LEFT JOIN siap.tipobarrio tb on tb.tiba_id = b.tiba_id
+                 LEFT JOIN siap.aap_uso us on us.aaus_id = a.aaus_id	
+                 LEFT JOIN siap.aap_tipo_carcasa tc on tc.aatc_id = a.aatc_id
+                 LEFT JOIN siap.aap_conexion co on co.aaco_id = a.aaco_id
+                 LEFT JOIN siap.aap_marca ma on ma.aama_id = a.aama_id
+                 LEFT JOIN siap.aap_modelo mo on mo.aamo_id = a.aamo_id
+                 LEFT JOIN siap.aap_cuentaap cu on cu.aacu_id = a.aacu_id
+                 LEFT JOIN siap.tipo_poste tp on tp.tipo_id = d.tipo_id
+                 LEFT JOIN siap.aap_medidor am ON am.aap_id = a.aap_id AND am.empr_id = a.empr_id
+                 LEFT JOIN siap.medidor m ON m.medi_id = am.medi_id and m.empr_id = am.empr_id
+                 LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id
+                 LEFT JOIN siap.aap_transformador at ON at.aap_id = a.aap_id and at.empr_id = a.empr_id
+                 LEFT JOIN siap.transformador t ON t.tran_id = at.tran_id and t.empr_id = at.empr_id
+                 LEFT JOIN siap.aap_redes ar ON at.laap_id = a.aap_id and ar.empr_id = a.empr_id
+                 LEFT JOIN siap.redes r ON r.aap_id = ar.aap_id and r.empr_id = ar.empr_id
+                 WHERE a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999 and r.aap_id = {aap_id}
+                                ORDER BY a.aap_id ASC
+                                """)
+                    .on(
+                      'empr_id -> empr_id,
+                      'aap_id -> m._1
                     )
                     .as(Siap_inventario.Siap_inventario_set *)
                 val rows = aapSet.map {

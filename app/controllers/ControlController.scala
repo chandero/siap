@@ -53,6 +53,24 @@ class ControlController @Inject()(mService: ControlRepository, cc: ControllerCom
       }
     }
 
+  def todosEliminados() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+    val json = request.body.asJson.get
+    val page_size = ( json \ "page_size").as[Long]
+    val current_page = ( json \ "current_page").as[Long]
+    val orderby = ( json \ "orderby").as[String]
+    val filter = ( json \ "filter").as[QueryDto]
+    val filtro_a = Utility.procesarFiltrado(filter)
+    var filtro = filtro_a.replace("\"", "'")
+    if (filtro == "()") {
+      filtro = ""
+    }
+    val empr_id = Utility.extraerEmpresa(request)
+    val total = mService.cuentaEliminados(empr_id.get, filtro)
+    mService.todosEliminados(empr_id.get, page_size, current_page, orderby, filtro).map { aaps =>
+      Ok(Json.obj("aaps" -> aaps, "total" -> total))
+    }
+  }   
+    
     def controles() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
         val empr_id = Utility.extraerEmpresa(request)
         mService.controles(empr_id.get).map { result =>

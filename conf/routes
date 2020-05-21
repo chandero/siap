@@ -256,16 +256,54 @@ GET     /api/tran/ism/:e                controllers.TransformadorController.info
 
 # Control
 POST    /api/cont/get                  controllers.ControlController.todos
-GET     /api/cont/all                   controllers.ControlController.controles
-GET     /api/cont/next                  controllers.ControlController.buscarSiguienteACrear()
-GET     /api/cont/:id                   controllers.ControlController.buscarPorId(id: Long)
-GET     /api/cont/del/:id               controllers.ControlController.borrar(id: Long)
-POST    /api/cont/save                  controllers.ControlController.guardar
-POST    /api/cont/upd                   controllers.ControlController.actualizar
-GET     /api/cont/vali/:id              controllers.ControlController.buscarParaVerificar(id: Long)
-GET     /api/cont/edit/:id              controllers.ControlController.buscarParaEditar(id: Long)
+POST    /api/cont/gte                  controllers.ControlController.todosEliminados
+GET     /api/cont/all                  controllers.ControlController.controles
+GET     /api/cont/next                 controllers.ControlController.buscarSiguienteACrear()
+GET     /api/cont/:id                  controllers.ControlController.buscarPorId(id: Long)
+GET     /api/cont/del/:id              controllers.ControlController.borrar(id: Long)
+POST    /api/cont/save                 controllers.ControlController.guardar
+POST    /api/cont/upd                  controllers.ControlController.actualizar
+GET     /api/cont/vali/:id             controllers.ControlController.buscarParaVerificar(id: Long)
+GET     /api/cont/edit/:id             controllers.ControlController.buscarParaEditar(id: Long)
+
+# Canalizacion
+POST    /api/cana/get                  controllers.CanalizacionController.todos
+POST    /api/cana/gte                  controllers.CanalizacionController.todosEliminados
+GET     /api/cana/all                  controllers.CanalizacionController.canalizaciones
+GET     /api/cana/next                 controllers.CanalizacionController.buscarSiguienteACrear()
+GET     /api/cana/:id                  controllers.CanalizacionController.buscarPorId(id: Long)
+GET     /api/cana/del/:id              controllers.CanalizacionController.borrar(id: Long)
+POST    /api/cana/save                 controllers.CanalizacionController.guardar
+POST    /api/cana/upd                  controllers.CanalizacionController.actualizar
+GET     /api/cana/vali/:id             controllers.CanalizacionController.buscarParaVerificar(id: Long)
+GET     /api/cana/edit/:id             controllers.CanalizacionController.buscarParaEditar(id: Long)
 
 
+# Poste
+POST    /api/poste/get                   controllers.PosteController.todos
+POST    /api/poste/gte                   controllers.PosteController.todosEliminados
+GET     /api/poste/all                   controllers.PosteController.postes
+GET     /api/poste/next                  controllers.PosteController.buscarSiguienteACrear()
+GET     /api/poste/:id                   controllers.PosteController.buscarPorId(id: Long)
+GET     /api/poste/del/:id               controllers.PosteController.borrar(id: Long)
+POST    /api/poste/save                  controllers.PosteController.guardar
+POST    /api/poste/upd                   controllers.PosteController.actualizar
+GET     /api/poste/vali/:id              controllers.PosteController.buscarParaVerificar(id: Long)
+GET     /api/poste/edit/:id              controllers.PosteController.buscarParaEditar(id: Long)
+GET     /api/poste/ism/:e                controllers.PosteController.informe_siap_poste(e: Long)
+
+# Redes
+POST    /api/redes/get                   controllers.RedesController.todos
+POST    /api/redes/gte                   controllers.RedesController.todosEliminados
+GET     /api/redes/all                   controllers.RedesController.redes
+GET     /api/redes/next                  controllers.RedesController.buscarSiguienteACrear()
+GET     /api/redes/:id                   controllers.RedesController.buscarPorId(id: Long)
+GET     /api/redes/del/:id               controllers.RedesController.borrar(id: Long)
+POST    /api/redes/save                  controllers.RedesController.guardar
+POST    /api/redes/upd                   controllers.RedesController.actualizar
+GET     /api/redes/vali/:id              controllers.RedesController.buscarParaVerificar(id: Long)
+GET     /api/redes/edit/:id              controllers.RedesController.buscarParaEditar(id: Long)
+GET     /api/redes/ism/:e                controllers.RedesController.informe_siap_redes(e: Long)
 
 # Aap Medidor Marca
 GET     /api/amem/get/:p/:c             controllers.AapMedidorMarcaController.todos(p:Long, c:Long)
@@ -342,6 +380,95 @@ POST    /api/core/grw                        controllers.ControlReporteControlle
 GET     /api/core/gbtc/:c/:e/:t              controllers.ControlReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
 GET     /api/core/conv/:id                   controllers.ControlReporteController.convertir(id: Long)
 
+# CanalizacionReporte
+POST    /api/cnre/get                        controllers.CanalizacionReporteController.todos
+GET     /api/cnre/updh                       controllers.CanalizacionReporteController.actualizarHistoria()
+GET     /api/cnre/all                        controllers.CanalizacionReporteController.reportes
+GET     /api/cnre/:id                        controllers.CanalizacionReporteController.buscarPorId(id: Long)
+GET     /api/cnre/del/:id                    controllers.CanalizacionReporteController.borrarReporte(id: Long)
+POST    /api/cnre/save                       controllers.CanalizacionReporteController.guardarReporte
+POST    /api/cnre/upd                        controllers.CanalizacionReporteController.actualizarReporte
+GET     /api/cnre/st/get                     controllers.CanalizacionReporteController.estados
+GET     /api/cnre/tp/get                     controllers.CanalizacionReporteController.tipos
+GET     /api/cnre/prn/repo/:id/:em           controllers.CanalizacionReporteController.imprimirReporte(id: Long, em: Long)
+GET     /api/cnre/prn/rela/:fi/:ff/:e/:u/:t  controllers.CanalizacionReporteController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long, t:String)
+GET     /api/cnre/prn/form/:i/:e             controllers.CanalizacionReporteController.imprimirFormato(i:Long, e:Long)
+GET     /api/cnre/rang/:y/:m                 controllers.CanalizacionReporteController.buscarPorRango(y: Int, m: Int)
+GET     /api/cnre/gbtc/:t/:n                 controllers.CanalizacionReporteController.buscarPorConsecutivo(t: Long, n:Int)
+GET     /api/cnre/vali/:e/:c                 controllers.CanalizacionReporteController.validarCodigo(e: Long, c: String)
+GET     /api/cnre/venc/get                   controllers.CanalizacionReporteController.siap_reporte_vencido
+GET     /api/cnre/vadi/:t/:n                 controllers.CanalizacionReporteController.validarReporteDiligenciado(t: Long, n: Int)
+POST    /api/cnre/grw                        controllers.CanalizacionReporteController.guardarReporteWeb 
+GET     /api/cnre/gbtc/:c/:e/:t              controllers.CanalizacionReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
+GET     /api/cnre/conv/:id                   controllers.CanalizacionReporteController.convertir(id: Long)
+
+
+# PosteReporte
+POST    /api/pore/get                        controllers.PosteReporteController.todos
+GET     /api/pore/updh                       controllers.PosteReporteController.actualizarHistoria()
+GET     /api/pore/all                        controllers.PosteReporteController.reportes
+GET     /api/pore/:id                        controllers.PosteReporteController.buscarPorId(id: Long)
+GET     /api/pore/del/:id                    controllers.PosteReporteController.borrarReporte(id: Long)
+POST    /api/pore/save                       controllers.PosteReporteController.guardarReporte
+POST    /api/pore/upd                        controllers.PosteReporteController.actualizarReporte
+GET     /api/pore/st/get                     controllers.PosteReporteController.estados
+GET     /api/pore/tp/get                     controllers.PosteReporteController.tipos
+GET     /api/pore/prn/repo/:id/:em           controllers.PosteReporteController.imprimirReporte(id: Long, em: Long)
+GET     /api/pore/prn/rela/:fi/:ff/:e/:u/:t  controllers.PosteReporteController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long, t:String)
+GET     /api/pore/prn/form/:i/:e             controllers.PosteReporteController.imprimirFormato(i:Long, e:Long)
+GET     /api/pore/rang/:y/:m                 controllers.PosteReporteController.buscarPorRango(y: Int, m: Int)
+GET     /api/pore/gbtc/:t/:n                 controllers.PosteReporteController.buscarPorConsecutivo(t: Long, n:Int)
+GET     /api/pore/vali/:e/:c                 controllers.PosteReporteController.validarCodigo(e: Long, c: String)
+GET     /api/pore/venc/get                   controllers.PosteReporteController.siap_reporte_vencido
+GET     /api/pore/vadi/:t/:n                 controllers.PosteReporteController.validarReporteDiligenciado(t: Long, n: Int)
+POST    /api/pore/grw                        controllers.PosteReporteController.guardarReporteWeb 
+GET     /api/pore/gbtc/:c/:e/:t              controllers.PosteReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
+GET     /api/pore/conv/:id                   controllers.PosteReporteController.convertir(id: Long)
+
+# RedesReporte
+POST    /api/rere/get                        controllers.RedesReporteController.todos
+GET     /api/rere/updh                       controllers.RedesReporteController.actualizarHistoria()
+GET     /api/rere/all                        controllers.RedesReporteController.reportes
+GET     /api/rere/:id                        controllers.RedesReporteController.buscarPorId(id: Long)
+GET     /api/rere/del/:id                    controllers.RedesReporteController.borrarReporte(id: Long)
+POST    /api/rere/save                       controllers.RedesReporteController.guardarReporte
+POST    /api/rere/upd                        controllers.RedesReporteController.actualizarReporte
+GET     /api/rere/st/get                     controllers.RedesReporteController.estados
+GET     /api/rere/tp/get                     controllers.RedesReporteController.tipos
+GET     /api/rere/prn/repo/:id/:em           controllers.RedesReporteController.imprimirReporte(id: Long, em: Long)
+GET     /api/rere/prn/rela/:fi/:ff/:e/:u/:t  controllers.RedesReporteController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long, t:String)
+GET     /api/rere/prn/form/:i/:e             controllers.RedesReporteController.imprimirFormato(i:Long, e:Long)
+GET     /api/rere/rang/:y/:m                 controllers.RedesReporteController.buscarPorRango(y: Int, m: Int)
+GET     /api/rere/gbtc/:t/:n                 controllers.RedesReporteController.buscarPorConsecutivo(t: Long, n:Int)
+GET     /api/rere/vali/:e/:c                 controllers.RedesReporteController.validarCodigo(e: Long, c: String)
+GET     /api/rere/venc/get                   controllers.RedesReporteController.siap_reporte_vencido
+GET     /api/rere/vadi/:t/:n                 controllers.RedesReporteController.validarReporteDiligenciado(t: Long, n: Int)
+POST    /api/rere/grw                        controllers.RedesReporteController.guardarReporteWeb 
+GET     /api/rere/gbtc/:c/:e/:t              controllers.RedesReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
+GET     /api/rere/conv/:id                   controllers.RedesReporteController.convertir(id: Long)
+
+# Transformador Reporte
+POST    /api/trre/get                        controllers.TransformadorReporteController.todos
+GET     /api/trre/updh                       controllers.TransformadorReporteController.actualizarHistoria()
+GET     /api/trre/all                        controllers.TransformadorReporteController.reportes
+GET     /api/trre/:id                        controllers.TransformadorReporteController.buscarPorId(id: Long)
+GET     /api/trre/del/:id                    controllers.TransformadorReporteController.borrarReporte(id: Long)
+POST    /api/trre/save                       controllers.TransformadorReporteController.guardarReporte
+POST    /api/trre/upd                        controllers.TransformadorReporteController.actualizarReporte
+GET     /api/trre/st/get                     controllers.TransformadorReporteController.estados
+GET     /api/trre/tp/get                     controllers.TransformadorReporteController.tipos
+GET     /api/trre/prn/repo/:id/:em           controllers.TransformadorReporteController.imprimirReporte(id: Long, em: Long)
+GET     /api/trre/prn/rela/:fi/:ff/:e/:u/:t  controllers.TransformadorReporteController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long, t:String)
+GET     /api/trre/prn/form/:i/:e             controllers.TransformadorReporteController.imprimirFormato(i:Long, e:Long)
+GET     /api/trre/rang/:y/:m                 controllers.TransformadorReporteController.buscarPorRango(y: Int, m: Int)
+GET     /api/trre/gbtc/:t/:n                 controllers.TransformadorReporteController.buscarPorConsecutivo(t: Long, n:Int)
+GET     /api/trre/vali/:e/:c                 controllers.TransformadorReporteController.validarCodigo(e: Long, c: String)
+GET     /api/trre/venc/get                   controllers.TransformadorReporteController.siap_reporte_vencido
+GET     /api/trre/vadi/:t/:n                 controllers.TransformadorReporteController.validarReporteDiligenciado(t: Long, n: Int)
+POST    /api/trre/grw                        controllers.TransformadorReporteController.guardarReporteWeb 
+GET     /api/trre/gbtc/:c/:e/:t              controllers.TransformadorReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
+GET     /api/trre/conv/:id                   controllers.TransformadorReporteController.convertir(id: Long)
+
 
 # Obra
 POST    /api/obra/get                    controllers.ObraController.todos
@@ -398,6 +525,8 @@ GET     /api/info/sdrr/:fi/:ff                  controllers.InformeController.si
 GET     /api/info/sifx/:fc/:o/:f/:e             controllers.InformeController.siap_inventario_filtro_xls(fc: Long, o: String, f:String, e: Long)
 GET     /api/info/smx/:e/:t                     controllers.InformeController.siap_medidor_xls(e: Long, t:String)
 GET     /api/info/stx/:e/:t                     controllers.InformeController.siap_transformador_xls(e: Long, t:String)
+GET     /api/info/spx/:e/:t                     controllers.InformeController.siap_poste_xls(e: Long, t:String)
+GET     /api/info/srx/:e/:t                     controllers.InformeController.siap_redes_xls(e: Long, t:String)
 GET     /api/info/sucx/:fi/:ff/:e               controllers.InformeController.siap_ucap_xls(fi: Long, ff: Long, e: Long)
 GET     /api/info/sisx/:fi/:ff                  controllers.InformeController.siap_informe_solicitud_xls(fi: Long, ff: Long)
 GET     /api/info/sisvx                         controllers.InformeController.siap_informe_solicitud_x_vencer_xls
@@ -436,6 +565,18 @@ GET     /api/graf/sgrvere                        controllers.GraficaController.s
 # Código Autorización
 GET     /api/coau/code/:t                        controllers.CodigoautorizacionController.codigo(t: Int)
 GET     /api/coau/vaco/:t/:c                     controllers.CodigoautorizacionController.validar(t:Int, c: String)
+
+# Mano Obra
+POST     /api/maob/get                           controllers.ManoObraController.todos
+GET     /api/maob/all                            controllers.ManoObraController.manoobras
+GET     /api/maob/:id                            controllers.ManoObraController.buscarPorId(id: Long)
+GET     /api/maob/del/:id                        controllers.ManoObraController.borrar(id: Long)
+POST    /api/maob/save                           controllers.ManoObraController.guardar
+POST    /api/maob/upd                            controllers.ManoObraController.actualizar
+GET     /api/maob/bdesc/:q                       controllers.ManoObraController.buscarPorDescripcion(q: String)
+
+
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 

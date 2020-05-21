@@ -57,7 +57,7 @@ export default {
     controlgestion: 'Control Activos',
     controlgestioncreate: 'Crear Nuevo Control',
     controlgestionedit: 'Modificar Control',
-    controleliminada: 'Control Eliminadas',
+    controleliminada: 'Control En Baja',
     controlconsultaporcodigo: 'Control por Código Material',
     controlhistoria: 'Historia Control',
     controlgeoposicionamiento: 'Geoposicionamiento',
@@ -66,6 +66,45 @@ export default {
     controlreporteedit: 'Reporte Control/ Modificar Información Reporte',
     controlreporteedittags: 'Reporte Control / Modificar Información Reporte',
     controlreportereparar: 'Reporte Control / Reparar Datos Según Reportes',
+    canalizacion: 'Inventario Canalización',
+    canalizaciongestion: 'Canalización Activos',
+    canalizaciongestioncreate: 'Crear Nueva Canalización',
+    canalizaciongestionedit: 'Modificar Canalización',
+    canalizacioneliminada: 'Canalización En Baja',
+    canalizacionconsultaporcodigo: 'Canalización por Código Material',
+    canalizacionhistoria: 'Historia Canalización',
+    canalizaciongeoposicionamiento: 'Geoposicionamiento',
+    canalizacionreporte: 'Reporte Canalización',
+    canalizacionreportecreate: 'Reporte Canalización / Nuevo Reporte',
+    canalizacionreporteedit: 'Reporte Canalización/ Modificar Información Reporte',
+    canalizacionreporteedittags: 'Reporte Canalización / Modificar Información Reporte',
+    canalizacionreportereparar: 'Reporte Canalización / Reparar Datos Según Reportes',
+    poste: 'Inventario Postes',
+    postegestion: 'Postes Activos',
+    postegestioncreate: 'Crear Nuevo Poste',
+    postegestionedit: 'Modificar Poste',
+    posteeliminada: 'Postes En Baja',
+    posteconsultaporcodigo: 'Poste por Código Material',
+    postehistoria: 'Historia Postes',
+    postegeoposicionamiento: 'Geoposicionamiento',
+    postereporte: 'Reporte Postes',
+    postereportecreate: 'Reporte Postes / Nuevo Reporte',
+    postereporteedit: 'Reporte Postes/ Modificar Información Reporte',
+    postereporteedittags: 'Reporte Postes / Modificar Información Reporte',
+    postereportereparar: 'Reporte Postes / Reparar Datos Según Reportes',
+    redes: 'Inventario Redes',
+    redesgestion: 'Redes Activos',
+    redesgestioncreate: 'Crear Nuevo Redes',
+    redesgestionedit: 'Modificar Redes',
+    redeseliminada: 'Redes En Baja',
+    redesconsultaporcodigo: 'Poste por Código Material',
+    redeshistoria: 'Historia Redes',
+    redesgeoposicionamiento: 'Geoposicionamiento',
+    redesreporte: 'Reporte Redes',
+    redesreportecreate: 'Reporte Redes / Nuevo Reporte',
+    redesreporteedit: 'Reporte Redes/ Modificar Información Reporte',
+    redesreporteedittags: 'Reporte Redes / Modificar Información Reporte',
+    redesreportereparar: 'Reporte Redes / Reparar Datos Según Reportes',
     /*
     transformador: 'Inventario Transformador',
     transformadorgestion: 'Transformador Activos',
@@ -75,12 +114,13 @@ export default {
     transformadorconsultaporcodigo: 'Transformador por Código Material',
     transformadorhistoria: 'Historia Transformador',
     transformadorgeoposicionamiento: 'Geoposicionamiento',
+    */
     transformadorreporte: 'Reporte Transformador',
     transformadorreportecreate: 'Reporte Transformador / Nuevo Reporte',
     transformadorreporteedit: 'Reporte Transformador/ Modificar Información Reporte',
     transformadorreporteedittags: 'Reporte Transformador / Modificar Información Reporte',
     transformadorreportereparar: 'Reporte Transformador / Reparar Datos Según Reportes',
-
+    /*
     medidor: 'Inventario Medidor',
     medidorgestion: 'Medidor Activos',
     medidorgestioncreate: 'Crear Nuevo Medidor',
@@ -103,7 +143,7 @@ export default {
     subreporte: 'SubReporte',
     subreportecreate: 'SubReporte / Nuevo SubReporte',
     subreporteedit: 'SubReporte / Modificar Información SubReporte',
-    reporterelacion: 'Reportes Luminaria Pendientes',
+    reporterelacion: 'Relación Reportes Pendientes',
     controlreporterelacion: 'Reportes Control Pendientes',
     reporteformato: 'Impresión Formato en Blanco',
     ordentrabajo: 'Orden de Trabajo',
@@ -147,6 +187,8 @@ export default {
     rcalculocarga: 'Informe Cálculo de Carga',
     rmedidores: 'Informe de Medidores',
     rtransformadores: 'Informe de Transformadores',
+    rpostes: 'Informe de Postes',
+    rredes: 'Informe de Redes',
     rucap: 'Informe Unidades Constructivas',
     rmuot: 'Informe Municipio Obra',
     inventario: 'Inventario Luminaria',
@@ -167,6 +209,9 @@ export default {
     elemento: 'Material',
     elementocreate: 'Material / Nuevo Material',
     elementoedit: 'Material / Editar Material',
+    manoobra: 'Mano de Obra',
+    manoobracreate: 'Mano de Obra / Nuevo',
+    manoobraedit: 'Mano de Obra / Editar',
     cuadrilla: 'Cuadrilla',
     cuadrillacreate: 'Cuadrilla / Nueva Cuadrilla',
     cuadrillaedit: 'Cuadrilla / Editar Cuadrilla',
@@ -277,12 +322,92 @@ export default {
       address: 'Dirección del Control',
       codes: 'Códigos'
     },
+    eliminada: {
+      tabletitle: 'Control En Baja'
+    },
     reporte: {
       code: 'Código del Control',
       address: 'Dirección del Control'
     },
     historia: {
       title: 'Historia de Control'
+    }
+  },
+  canalizacion: {
+    gestion: {
+      tabletitle: 'Canalización Activos',
+      code: 'Código de la Canalización',
+      neighborhood: 'Barrio',
+      neighborhoodtype: 'Sector',
+      address: 'Dirección de la Canalización',
+      codes: 'Códigos'
+    },
+    eliminada: {
+      tabletitle: 'Canalización En Baja'
+    },
+    reporte: {
+      code: 'Código de la Canalización',
+      address: 'Dirección de la Canalización'
+    },
+    historia: {
+      title: 'Historia de Canalización'
+    }
+  },
+  poste: {
+    gestion: {
+      tabletitle: 'Poste Activos',
+      code: 'Código del Poste',
+      neighborhood: 'Barrio',
+      neighborhoodtype: 'Sector',
+      address: 'Dirección del Poste',
+      codes: 'Códigos'
+    },
+    eliminada: {
+      tabletitle: 'Poste En Baja'
+    },
+    reporte: {
+      code: 'Código del Poste',
+      address: 'Dirección del Poste'
+    },
+    historia: {
+      title: 'Historia del Poste'
+    }
+  },
+  redes: {
+    gestion: {
+      tabletitle: 'Redes Activas',
+      code: 'Código de la Red',
+      neighborhood: 'Barrio',
+      neighborhoodtype: 'Sector',
+      address: 'Dirección de la Red',
+      codes: 'Códigos'
+    },
+    eliminada: {
+      tabletitle: 'Redes En Baja'
+    },
+    reporte: {
+      code: 'Código de la Red',
+      address: 'Dirección de la Red'
+    },
+    historia: {
+      title: 'Historia de la Red'
+    }
+  },
+  transformador: {
+    gestion: {
+      tabletitle: 'Transformador Activos',
+      code: 'Código del Transformador',
+      neighborhood: 'Barrio',
+      neighborhoodtype: 'Sector',
+      address: 'Dirección del Transformador',
+      codes: 'Códigos'
+    },
+    reporte: {
+      code: 'Código del Transformador',
+      address: 'Dirección del Transformador'
+    },
+    historia: {
+      title: 'Historia del Transformador'
     }
   },
   recovery: {
@@ -349,6 +474,21 @@ export default {
     instalado: 'Instalado',
     reporte: 'Reporte No.',
     reporte_tipo: 'Tipo Reporte'
+  },
+  manoobra: {
+    tabletitle: 'Mano de Obra',
+    select: 'Seleccione la Mano de Obra',
+    submit: 'Seleccionar',
+    maob_descripcion: 'Descripción',
+    maob_tipo: 'Tipo',
+    mopr_precio: 'Precio',
+    success: 'Éxito',
+    created: 'Nueva Mano de Obra Creada',
+    error: 'Error',
+    notcreated: 'No se pudo crear la Mano de Obra, error =>',
+    updated: 'Mano de Obra actualizada con exito!',
+    notupdated: 'Mano de Obra no fue actualizada, error =>',
+    confirmationmsg: 'Se procederá a borrar la Mano de Obra seleccionada, continuar?'
   },
   historia: {
     title: 'Historial de Luminarias',
@@ -533,6 +673,10 @@ export default {
   operativo: {
     reporttitle: 'Reportes de Luminarias',
     controltitle: 'Reportes de Controles',
+    canalizaciontitle: 'Reportes de Canalización',
+    postetitle: 'Reportes de Postes',
+    redestitle: 'Reportes de Redes',
+    transformadortitle: 'Reportes de Transformadores',
     workordertitle: 'Orden de Trabajo',
     obratitle: 'Obras',
     vencidotitle: 'Reportes Fuera de Fecha'
@@ -795,7 +939,17 @@ export default {
       select: 'Seleccione el Tipo de Poste',
       size: 'Altura Poste',
       own: 'Propietario Poste',
-      selectown: 'Seleccione el Propietario'
+      selectown: 'Seleccione el Propietario',
+      numero: 'Código',
+      direccion: 'Dirección del Poste',
+      barr_descripcion: 'Barrio',
+      cantidad: 'Cantidad Luminarias'
+    },
+    redes: {
+      numero: 'Código',
+      direccion: 'Dirección de la Red',
+      barr_descripcion: 'Barrio',
+      cantidad: 'Cantidad Luminarias'
     },
     connection: {
       select: 'Seleccione el Tipo de Medida',
@@ -958,6 +1112,8 @@ export default {
     sisx: 'Informe de Solicitudes',
     sisvx: 'Informe Solicitud por Vencer',
     simox: 'Informe Municipio Orden de Trabajo',
+    srx: 'Informe Redes',
+    spx: 'Informe Postes',
     initialDate: 'Fecha Inicial',
     endDate: 'Fecha Final',
     dueDate: 'Fecha de Corte',

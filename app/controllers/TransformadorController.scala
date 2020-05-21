@@ -19,7 +19,8 @@ import utilities._
 class TransformadorController @Inject()(mService: TransformadorRepository, cc: ControllerComponents, authenticatedUserAction: AuthenticatedUserAction)(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
     def buscarPorId(tran_id: Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
-      val m = mService.buscarPorId(tran_id)
+      val empr_id = Utility.extraerEmpresa(request)
+      val m = mService.buscarPorId(tran_id, empr_id.get)
       m match {
         case None => {
             Future.successful(NotFound(Json.toJson("false")))

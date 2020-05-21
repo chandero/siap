@@ -267,49 +267,49 @@ export default {
           type: 'text',
           id: 'a.aap_apoyo',
           label: this.$i18n.t('gestion.support'),
-          operators: ['=', '<>', '<', '<=', '>', '>=']
+          operators: ['=']
         },
         {
           type: 'select',
           id: 'b.barr_id',
           label: this.$i18n.t('gestion.neighborhood'),
           choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
+          operators: ['=']
         },
         {
           type: 'select',
           id: 't.tiba_id',
           label: this.$i18n.t('gestion.neighborhoodtype'),
           choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
+          operators: ['=']
         },
         {
           type: 'select',
           id: 'a.aaco_id',
           label: this.$i18n.t('gestion.connection.title'),
           choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
+          operators: ['=']
         },
         {
           type: 'select',
           id: 'a.aaus_id',
           label: this.$i18n.t('gestion.use'),
           choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
+          operators: ['=']
         },
         {
           type: 'select',
           id: 'a.aatc_id',
           label: this.$i18n.t('gestion.cover'),
           choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
+          operators: ['=']
         },
         {
           type: 'select',
           id: 'ad.aap_tecnologia',
           label: this.$i18n.t('gestion.tecnology.title'),
           choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
+          operators: ['=']
         },
         {
           type: 'select',
@@ -323,7 +323,7 @@ export default {
           id: 'a.aamo_id',
           label: this.$i18n.t('gestion.model'),
           choices: [],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
+          operators: ['=']
         },
         {
           type: 'select',
@@ -334,7 +334,7 @@ export default {
             { label: 'Retirada', value: 2 },
             { label: 'En Baja', value: 9 }
           ],
-          operators: ['=', '<>', '<', '<=', '>', '>=']
+          operators: ['=']
         }
       ],
       qlabels: {

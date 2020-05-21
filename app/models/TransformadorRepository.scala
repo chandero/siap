@@ -128,11 +128,12 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
     * Recuperar un Transformador dado su tran_id
     * @param tran_id: Long
     */
-    def buscarPorId(tran_id: Long) : Option[Transformador] = {
+    def buscarPorId(tran_id: Long, empr_id: Long) : Option[Transformador] = {
         db.withConnection { implicit connection =>
-            SQL("SELECT * FROM siap.transformador WHERE tran_id = {tran_id}").
+            SQL("SELECT * FROM siap.transformador WHERE tran_id = {tran_id} and empr_id = {empr_id}").
             on(
-                'tran_id -> tran_id
+                'tran_id -> tran_id,
+                'empr_id -> empr_id
             ).
             as(Transformador._set.singleOpt)
         }
@@ -237,7 +238,7 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
     * @param Transformador: Transformador
     */
     def actualizar(transformador: Transformador) : Boolean = {
-        val transformador_ant: Option[Transformador] = buscarPorId(transformador.tran_id.get)
+        val transformador_ant: Option[Transformador] = buscarPorId(transformador.tran_id.get, transformador.empr_id.get)
         db.withConnection { implicit connection =>
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())

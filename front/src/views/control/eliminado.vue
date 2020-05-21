@@ -5,14 +5,13 @@
         <el-header class="gestion_header">{{ $t('control.eliminada.tabletitle') }}
         </el-header>
         <el-main>  
-          <vue-query-builder v-model="qbquery" :rules="qrules" :labels="qlabels" :styled="qstyled" :maxDepth="3"></vue-query-builder>
+          <query-builder :labels="qlabels" :rules="qrules" :styled="qstyled" :maxDepth="3" v-model="qbquery"></query-builder>
           <el-button type="warning" icon="el-icon-search" circle @click="actualizar" title="Actualizar Aplicando el Filtro"></el-button>
         </el-main>        
       </el-container>
       <el-container>
           <el-header>
-            <el-button type="primary" icon="el-icon-plus" circle @click="nuevo" title="Crear Nueva Luminaria"></el-button>
-            <el-button type="success" icon="el-icon-refresh" circle @click="actualizar" title="Refrescar Lista de Luminarias"></el-button>
+            <el-button type="success" icon="el-icon-refresh" circle @click="actualizar" title="Refrescar Lista de Controles"></el-button>
           </el-header>
           <el-main>
           <el-table
@@ -23,70 +22,9 @@
         max-height="600"
         border
         @sort-change="handleSort"
-        @filter-change="handleFilter">
-        <el-table-column type="expand">
-          <template slot-scope="props">
-                <el-table 
-                  :data="Array(props.row.aap_elemento)"
-                  stripe
-                  style="width:100%"
-                 >
-                  <el-table-column
-                    :label="$t('elemento.fecha')"
-                    width="110"
-                  >
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.aael_fecha | moment('YYYY/MM/DD') }}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column
-                    :label="$t('elemento.reporte')"
-                    width="110"
-                  >
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.repo_consecutivo }}</span>
-                    </template>
-                  </el-table-column>                  
-                  <el-table-column
-                    :label="$t('elemento.bombillo')"
-                    width="100">
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.aap_bombillo }}</span>
-                    </template>
-                  </el-table-column>             
-                  <el-table-column
-                    :label="$t('elemento.balasto')"
-                    width="100">
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.aap_balasto }}</span>
-                    </template>
-                  </el-table-column>             
-                  <el-table-column
-                    :label="$t('elemento.arrancador')"
-                    width="100">
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.aap_arrancador }}</span>
-                    </template>
-                  </el-table-column>  
-                  <el-table-column
-                    :label="$t('elemento.condensador')"
-                    width="100">
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.aap_condensador }}</span>
-                    </template>
-                  </el-table-column>             
-                  <el-table-column
-                    :label="$t('elemento.fotocelda')"
-                    width="100">
-                    <template slot-scope="scope">
-                      <span style="margin-left: 10px">{{ scope.row.aap_fotocelda }}</span>
-                    </template>
-                  </el-table-column>             
-              </el-table> 
-          </template>
-        </el-table-column>        
+        @filter-change="handleFilter"> 
         <el-table-column
-          :label="$t('gestion.code')"
+          :label="$t('control.gestion.code')"
           width="150"
           sortable="custom"
           prop="aap_id"
@@ -97,31 +35,7 @@
           </template>
         </el-table-column>
         <el-table-column
-          :label="$t('gestion.support')"
-          width="150"
-          sortable="custom"
-          prop="aap_apoyo"   
-          resizable       
-           >
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row.aap_apoyo }}</span>
-          </template>
-        </el-table-column>
-        <!--
-        <el-table-column
-          :label="$t('gestion.description')"
-          width="200"
-          sortable="custom"
-          prop="aap_descripcion"  
-          resizable        
-           >
-          <template slot-scope="scope">
-            <span >{{ scope.row.aap_descripcion }}</span>
-          </template>
-        </el-table-column>
-        -->
-        <el-table-column
-          :label="$t('gestion.address')"
+          :label="$t('control.gestion.address')"
           min-width="250"
           sortable="custom"
           prop="aap_direccion" 
@@ -132,7 +46,7 @@
           </template>
         </el-table-column>   
         <el-table-column
-          :label="$t('gestion.neighborhood')"
+          :label="$t('control.gestion.neighborhood')"
           min-width="250"
           sortable="custom"
           prop="barr_id"
@@ -143,51 +57,22 @@
           </template>
         </el-table-column>   
         <el-table-column
-          :label="$t('gestion.neighborhoodtype')"
-          width="200"
-          sortable="custom"
-          prop="tiba_id">
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ sector(scope.row.tiba_id) }}</span>
-          </template>
-        </el-table-column>                     
-        <el-table-column :label="$t('gestion.georeference')">
-        <el-table-column
-          :label="$t('gestion.lat')"
-          width="120">
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row.aap_lat }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('gestion.lng')"
-          width="120">
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row.aap_lng }}</span>
-          </template>
-        </el-table-column>
-        </el-table-column>
-        <el-table-column 
-          :label="$t('gestion.connection.title')"
-          width="120"
-          prop="aaco_id"
-          resizable
-          >
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ aap_conexion(scope.row.aaco_id) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
           fixed="right"
           :label="$t('table.accion')"
-          width="60">
+          width="93">
           <template slot-scope="scope">
             <el-button
               size="mini"
               circle
-              type="success"
-              title="Recuperar Luminaria"
-              @click="handleRecover(scope.$index, scope.row)"><i class="el-icon-refresh-left"></i></el-button>              
+              type="warning"
+              @click="handleEdit(scope.$index, scope.row)"
+              title="Modificar Control"><i class="el-icon-edit"></i></el-button>
+            <el-button
+              size="mini"
+              circle
+              type="danger"
+              title="Borrar Control"
+              @click="handleDelete(scope.$index, scope.row)"><i class="el-icon-delete"></i></el-button>
           </template>
         </el-table-column>
       </el-table> 
@@ -198,11 +83,13 @@
         layout="sizes, prev, pager, next, total"
         :total="total">
       </el-pagination>
+      <!--      
       <el-row>
       <el-col :span="24">
         <img :title="$t('xls')" @click="exportarXls()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
       </el-col>
-  </el-row>
+      </el-row>
+      -->
     </el-main>
    </el-container>
   </el-main>
@@ -224,9 +111,6 @@ import { getAapModelos } from '@/api/aap_modelo'
 import { informe_siap_inventario_filtro_xls } from '@/api/informe'
 
 export default {
-  components: {
-    VueQueryBuilder
-  },
   data() {
     return {
       tableData: [],
@@ -255,64 +139,23 @@ export default {
       qrules: [
         {
           type: 'custom',
-          default: 0,
           id: 'a.aap_id',
-          label: this.$i18n.t('gestion.code'),
-          operators: ['=', '<>', '<', '<=', '>', '>=']
-        },
-        {
-          type: 'text',
-          id: 'a.aap_apoyo',
-          label: this.$i18n.t('gestion.support'),
+          label: this.$i18n.t('control.gestion.code'),
           operators: ['=', '<>', '<', '<=', '>', '>=']
         },
         {
           type: 'select',
           id: 'b.barr_id',
-          label: this.$i18n.t('gestion.neighborhood'),
-          choices: []
+          label: this.$i18n.t('control.gestion.neighborhood'),
+          choices: [],
+          operators: ['=', '<>', '<', '<=', '>', '>=']
         },
         {
           type: 'select',
           id: 't.tiba_id',
-          label: this.$i18n.t('gestion.neighborhoodtype'),
-          choices: []
-        },
-        {
-          type: 'select',
-          id: 'a.aaco_id',
-          label: this.$i18n.t('gestion.connection.title'),
-          choices: []
-        },
-        {
-          type: 'select',
-          id: 'a.aaus_id',
-          label: this.$i18n.t('gestion.use'),
-          choices: []
-        },
-        {
-          type: 'select',
-          id: 'a.aatc_id',
-          label: this.$i18n.t('gestion.cover'),
-          choices: []
-        },
-        {
-          type: 'select',
-          id: 'ad.aap_tecnologia',
-          label: this.$i18n.t('gestion.tecnology.title'),
-          choices: []
-        },
-        {
-          type: 'select',
-          id: 'ad.aap_potencia',
-          label: this.$i18n.t('gestion.power.title'),
-          choices: []
-        },
-        {
-          type: 'select',
-          id: 'a.aamo_id',
-          label: this.$i18n.t('gestion.model'),
-          choices: []
+          label: this.$i18n.t('control.gestion.neighborhoodtype'),
+          choices: [],
+          operators: ['=', '<>', '<', '<=', '>', '>=']
         },
         {
           type: 'select',
@@ -320,15 +163,24 @@ export default {
           label: 'Estado Actual',
           choices: [
             { label: 'Activa', value: 1 },
-            { label: 'Suspendida', value: 2 },
-            { label: 'Eliminada', value: 9 }
-          ]
+            { label: 'Retirada', value: 2 },
+            { label: 'En Baja', value: 9 }
+          ],
+          operators: ['=', '<>', '<', '<=', '>', '>=']
         }
       ],
       qlabels: {
         matchType: this.$i18n.t('qb.matchType'),
-        matchTypeAll: this.$i18n.t('qb.matchTypeAll'),
-        matchTypeAny: this.$i18n.t('qb.matchTypeAny'),
+        matchTypes: [
+          {
+            id: 'all',
+            label: this.$i18n.t('qb.matchTypeAll')
+          },
+          {
+            id: 'any',
+            label: this.$i18n.t('qb.matchTypeAny')
+          }
+        ],
         addRule: this.$i18n.t('qb.addRule'),
         removeRule: this.$i18n.t('qb.removeRule'),
         addGroup: this.$i18n.t('qb.addGroup'),
@@ -342,6 +194,9 @@ export default {
       order: '',
       filter: ''
     }
+  },
+  components: {
+    'query-builder': VueQueryBuilder
   },
   computed: {
     ...mapGetters([

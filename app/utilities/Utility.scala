@@ -99,7 +99,7 @@ class Utility {
       query.logicalOperator match {
         case Some("all") => "and"
         case Some("any") => "or"
-        case None => ""
+        case _ => ""
       }
       query.children match {
         case Some(children) => {
@@ -111,7 +111,18 @@ class Utility {
                 }
                 case "query-builder-rule" => {
                   val rule = child.query.as[RuleDto]
-                  resultString = resultString + rule.rule + " " + rule.operator + " " + rule.value + " "
+                  var value = Json.prettyPrint(rule.value)
+                  println("value: " + value)
+                  value = value.replace("\"","")
+                  println("value: " + value)                  
+                  rule.operator match {
+                    case "igual a" => resultString = resultString + rule.rule + " = " + rule.value + " "
+                    case "no igual a" => resultString = resultString + rule.rule + " <> " + rule.value + " "                    
+                    case "contiene a" => resultString = resultString + rule.rule + " like '%" + value + "%'"
+                    case "comienza con" => resultString = resultString + rule.rule + " like '" + value + "%'"
+                    case "termina con" => resultString = resultString + rule.rule + " like '%" + value + "'"
+                    case _ => resultString = resultString + rule.rule + " " + rule.operator + " " + rule.value + " "
+                  }
                 }
               }
               resultString = resultString + " " + logicalOperator + " "

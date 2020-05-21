@@ -79,3 +79,61 @@ export function informe_siap_transformador(empr_id) {
     method: 'get'
   })
 }
+
+export function validar(tipo, codigo) {
+  const data = {
+    tipo,
+    codigo
+  }
+  return request({
+    url: '/coau/vaco/' + data.tipo + '/' + data.codigo,
+    method: 'get'
+  })
+}
+
+export function getAapValidar(aap_id) {
+  const data = {
+    aap_id
+  }
+  return request({
+    url: '/tran/vali/' + data.aap_id,
+    method: 'get'
+  })
+}
+
+export function buscarSiguiente() {
+  return request({
+    url: '/tran/next',
+    method: 'get'
+  })
+}
+
+export function getAapEdit(aap_id) {
+  const data = {
+    aap_id
+  }
+  return request({
+    url: '/tran/edit/' + data.aap_id,
+    method: 'get'
+  })
+}
+
+export function getAap(aap_id) {
+  const data = {
+    aap_id
+  }
+  return request({
+    url: '/tran/' + data.aap_id,
+    method: 'get'
+  })
+}
+
+export function getAapApoyo(aap_apoyo) {
+  const data = {
+    aap_apoyo
+  }
+  return request({
+    url: '/tran/apoyo/' + data.aap_apoyo,
+    method: 'get'
+  })
+}

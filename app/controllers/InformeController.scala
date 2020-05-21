@@ -290,6 +290,32 @@ class InformeController @Inject()(
       Forbidden("Dude, you’re not logged in.")
    }
   }
+
+  def siap_poste_xls(empr_id: scala.Long, token: String) = Action {
+   if (config.get[String]("play.http.secret.key") == token) {
+      val os = informeService.siap_poste_xls(empr_id)
+      val fi = new DateTime()
+      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+      val filename = "Informe_Postes_" + fmt.print(fi) + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Ok(os).as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").withHeaders("Content-Disposition" -> attach )
+   } else {
+      Forbidden("Dude, you’re not logged in.")
+   }
+  }
+  
+  def siap_redes_xls(empr_id: scala.Long, token: String) = Action {
+   if (config.get[String]("play.http.secret.key") == token) {
+      val os = informeService.siap_redes_xls(empr_id)
+      val fi = new DateTime()
+      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+      val filename = "Informe_Redes_" + fmt.print(fi) + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Ok(os).as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").withHeaders("Content-Disposition" -> attach )
+   } else {
+      Forbidden("Dude, you’re not logged in.")
+   }
+  }  
   
   def siap_informe_solicitud_xls(fecha_inicial: Long, fecha_final: Long) = authenticatedUserAction.async {
    implicit request: Request[AnyContent] =>

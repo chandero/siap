@@ -104,7 +104,6 @@ export const asyncRouterMap = [
         meta: { title: 'reporteedittags', roles: ['super', 'admin', 'auxiliar'] }
       },
       { path: 'reporte/crear', component: _import('procesos/reporte/create'), name: 'reportecreate', hidden: true, meta: { title: 'reportecreate', roles: ['super', 'admin', 'auxiliar'] }},
-      { path: 'reporte/relacion', component: _import('procesos/reporte/relacion'), name: 'reporterelacion', meta: { title: 'reporterelacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'reporte'] }},
       { path: 'control', component: _import('procesos/control2'), name: 'controlreporte', meta: { title: 'controlreporte', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
       {
         path: 'control/editar/:id',
@@ -129,7 +128,103 @@ export const asyncRouterMap = [
         meta: { title: 'controlreporteedittags', roles: ['super', 'admin', 'auxiliar'] }
       },
       { path: 'control/crear', component: _import('procesos/control/create'), name: 'controlreportecreate', hidden: true, meta: { title: 'controlreportecreate', roles: ['super', 'admin', 'auxiliar'] }},
-      { path: 'control/relacion', component: _import('procesos/control/relacion'), name: 'controlreporterelacion', meta: { title: 'controlreporterelacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'reporte'] }},
+      { path: 'canalizacion', component: _import('procesos/canalizacion2'), name: 'canalizacionreporte', meta: { title: 'canalizacionreporte', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      {
+        path: 'canalizacion/editar/:id',
+        components: {
+          default: _import('procesos/canalizacion/edit'),
+          aap_create: Aap
+        },
+        name: 'canalizacionreporteedit',
+        hidden: true,
+        redirect: false,
+        meta: { title: 'canalizacionreporteedit', roles: ['super', 'admin', 'auxiliar'] }
+      },
+      {
+        path: 'canalizacion/editartags/:id',
+        components: {
+          default: _import('procesos/canalizacion/edittags'),
+          aap_create: Aap
+        },
+        name: 'canalizacionreporteedittags',
+        hidden: true,
+        redirect: false,
+        meta: { title: 'canalizacionreporteedittags', roles: ['super', 'admin', 'auxiliar'] }
+      },
+      { path: 'canalizacion/crear', component: _import('procesos/canalizacion/create'), name: 'canalizacionreportecreate', hidden: true, meta: { title: 'canalizacionreportecreate', roles: ['super', 'admin', 'auxiliar'] }},
+      { path: 'poste', component: _import('procesos/poste2'), name: 'postereporte', meta: { title: 'postereporte', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      {
+        path: 'poste/editar/:id',
+        components: {
+          default: _import('procesos/poste/edit'),
+          aap_create: Aap
+        },
+        name: 'postereporteedit',
+        hidden: true,
+        redirect: false,
+        meta: { title: 'postereporteedit', roles: ['super', 'admin', 'auxiliar'] }
+      },
+      {
+        path: 'poste/editartags/:id',
+        components: {
+          default: _import('procesos/poste/edittags'),
+          aap_create: Aap
+        },
+        name: 'postereporteedittags',
+        hidden: true,
+        redirect: false,
+        meta: { title: 'postereporteedittags', roles: ['super', 'admin', 'auxiliar'] }
+      },
+      { path: 'poste/crear', component: _import('procesos/poste/create'), name: 'postereportecreate', hidden: true, meta: { title: 'postereportecreate', roles: ['super', 'admin', 'auxiliar'] }},
+      { path: 'redes', component: _import('procesos/redes2'), name: 'redesreporte', meta: { title: 'redesreporte', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      {
+        path: 'redes/editar/:id',
+        components: {
+          default: _import('procesos/redes/edit'),
+          aap_create: Aap
+        },
+        name: 'redesreporteedit',
+        hidden: true,
+        redirect: false,
+        meta: { title: 'redesreporteedit', roles: ['super', 'admin', 'auxiliar'] }
+      },
+      {
+        path: 'redes/editartags/:id',
+        components: {
+          default: _import('procesos/redes/edittags'),
+          aap_create: Aap
+        },
+        name: 'redesreporteedittags',
+        hidden: true,
+        redirect: false,
+        meta: { title: 'redesreporteedittags', roles: ['super', 'admin', 'auxiliar'] }
+      },
+      { path: 'redes/crear', component: _import('procesos/redes/create'), name: 'redesreportecreate', hidden: true, meta: { title: 'redesreportecreate', roles: ['super', 'admin', 'auxiliar'] }},
+      { path: 'transformador', component: _import('procesos/transformador2'), name: 'transformadorreporte', meta: { title: 'transformadorreporte', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      {
+        path: 'transformador/editar/:id',
+        components: {
+          default: _import('procesos/transformador/edit'),
+          aap_create: Aap
+        },
+        name: 'transformadorreporteedit',
+        hidden: true,
+        redirect: false,
+        meta: { title: 'transformadorreporteedit', roles: ['super', 'admin', 'auxiliar'] }
+      },
+      {
+        path: 'transformador/editartags/:id',
+        components: {
+          default: _import('procesos/transformador/edittags'),
+          aap_create: Aap
+        },
+        name: 'transformadorreporteedittags',
+        hidden: true,
+        redirect: false,
+        meta: { title: 'transformadorreporteedittags', roles: ['super', 'admin', 'auxiliar'] }
+      },
+      { path: 'transformador/crear', component: _import('procesos/transformador/create'), name: 'transformadorreportecreate', hidden: true, meta: { title: 'transformadorreportecreate', roles: ['super', 'admin', 'auxiliar'] }},
+      { path: 'reporte/relacion', component: _import('procesos/reporte/relacion'), name: 'reporterelacion', meta: { title: 'reporterelacion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'reporte'] }},
       { path: 'obra', component: _import('procesos/obra2'), name: 'obra', meta: { title: 'obra', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
       {
         path: 'obra/editar/:id',
@@ -227,6 +322,8 @@ export const asyncRouterMap = [
       { path: 'rgraficos', component: _import('informe/rgraficos'), name: 'rgraficos', meta: { title: 'rgraficos', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'reporte'] }},
       { path: 'rmedidores', component: _import('informe/rmedidores'), name: 'rmedidores', meta: { title: 'rmedidores', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'reporte'] }},
       { path: 'rtransformadores', component: _import('informe/rtransformadores'), name: 'rtransformadores', meta: { title: 'rtransformadores', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'reporte'] }},
+      { path: 'rpostes', component: _import('informe/rpostes'), name: 'rpostes', meta: { title: 'rpostes', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'reporte'] }},
+      { path: 'rredes', component: _import('informe/rredes'), name: 'rredes', meta: { title: 'rredes', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia', 'supervisor', 'reporte'] }},
       { path: 'rucap', component: _import('informe/rucap'), name: 'rucap', meta: { title: 'rucap', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor', 'reporte'] }},
       { path: 'rmuot', component: _import('informe/rmuot'), name: 'rmuot', meta: { title: 'rmuot', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor', 'auxiliar', 'reporte'] }}
     ]
@@ -268,9 +365,72 @@ export const asyncRouterMap = [
       { path: 'eliminada', component: _import('control/eliminado'), name: 'controleliminada', meta: { title: 'controleliminada', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
       { path: 'gestion/editar/:id', component: _import('control/gestion/edit'), name: 'controlgestionedit', hidden: true, redirect: false, meta: { title: 'controlgestionedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
       { path: 'gestion/crear', component: _import('control/gestion/create'), name: 'controlgestioncreate', hidden: true, meta: { title: 'controlgestioncreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
-      { path: 'consultaporcodigo', component: _import('control/consultaporcodigo'), name: 'controlconsultaporcodigo', meta: { title: 'controlconsultaporcodigo', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
-      { path: 'historia', component: _import('control/historia'), name: 'controlhistoria', meta: { title: 'controlhistoria', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
-      { path: 'geoposicion', component: _import('control/geoposicion'), name: 'controlgeoposicion', meta: { title: 'controlgeoposicionamiento', roles: ['super', 'admin', 'ingeniero', 'gerencia'] }}
+      { path: 'consultaporcodigo', component: _import('control/consultaporcodigo'), name: 'controlconsultaporcodigo', hidden: true, meta: { title: 'controlconsultaporcodigo', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'historia', component: _import('control/historia'), name: 'controlhistoria', hidden: true, meta: { title: 'controlhistoria', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'geoposicion', component: _import('control/geoposicion'), name: 'controlgeoposicion', hidden: true, meta: { title: 'controlgeoposicionamiento', roles: ['super', 'admin', 'ingeniero', 'gerencia'] }}
+    ]
+  },
+  {
+    path: '/canalizacion',
+    component: Layout,
+    redirect: 'noredirect',
+    name: 'canalizacion',
+    single: false,
+    meta: {
+      title: 'canalizacion',
+      icon: 'form',
+      roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia']
+    },
+    children: [
+      { path: 'gestion', component: _import('canalizacion/gestion'), name: 'canalizaciongestion', meta: { title: 'canalizaciongestion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'eliminada', component: _import('canalizacion/eliminado'), name: 'canalizacioneliminada', meta: { title: 'canalizacioneliminada', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'gestion/editar/:id', component: _import('canalizacion/gestion/edit'), name: 'canalizaciongestionedit', hidden: true, redirect: false, meta: { title: 'canalizaciongestionedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'gestion/crear', component: _import('canalizacion/gestion/create'), name: 'canalizaciongestioncreate', hidden: true, meta: { title: 'canalizaciongestioncreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'consultaporcodigo', component: _import('canalizacion/consultaporcodigo'), name: 'canalizacionconsultaporcodigo', hidden: true, meta: { title: 'canalizacionconsultaporcodigo', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'historia', component: _import('canalizacion/historia'), name: 'canalizacionhistoria', hidden: true, meta: { title: 'canalizacionhistoria', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'geoposicion', component: _import('canalizacion/geoposicion'), name: 'canalizaciongeoposicion', hidden: true, meta: { title: 'canalizaciongeoposicionamiento', roles: ['super', 'admin', 'ingeniero', 'gerencia'] }}
+    ]
+  },
+  {
+    path: '/poste',
+    component: Layout,
+    redirect: 'noredirect',
+    name: 'poste',
+    single: false,
+    meta: {
+      title: 'poste',
+      icon: 'form',
+      roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia']
+    },
+    children: [
+      { path: 'gestion', component: _import('poste/gestion'), name: 'postegestion', meta: { title: 'postegestion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'eliminada', component: _import('poste/eliminado'), name: 'posteeliminada', meta: { title: 'posteeliminada', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'gestion/editar/:id', component: _import('poste/gestion/edit'), name: 'postegestionedit', hidden: true, redirect: false, meta: { title: 'postegestionedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'gestion/crear', component: _import('poste/gestion/create'), name: 'postegestioncreate', hidden: true, meta: { title: 'postegestioncreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'consultaporcodigo', component: _import('poste/consultaporcodigo'), name: 'posteconsultaporcodigo', hidden: true, meta: { title: 'posteconsultaporcodigo', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'historia', component: _import('poste/historia'), name: 'postehistoria', hidden: true, meta: { title: 'postehistoria', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'geoposicion', component: _import('poste/geoposicion'), name: 'postegeoposicion', hidden: true, meta: { title: 'postegeoposicionamiento', roles: ['super', 'admin', 'ingeniero', 'gerencia'] }}
+    ]
+  },
+  {
+    path: '/redes',
+    component: Layout,
+    redirect: 'noredirect',
+    name: 'redes',
+    single: false,
+    meta: {
+      title: 'redes',
+      icon: 'form',
+      roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia']
+    },
+    children: [
+      { path: 'gestion', component: _import('redes/gestion'), name: 'redesgestion', meta: { title: 'redesgestion', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'eliminada', component: _import('redes/eliminado'), name: 'redeseliminada', meta: { title: 'redeseliminada', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'gestion/editar/:id', component: _import('redes/gestion/edit'), name: 'redesgestionedit', hidden: true, redirect: false, meta: { title: 'redesgestionedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'gestion/crear', component: _import('redes/gestion/create'), name: 'redesgestioncreate', hidden: true, meta: { title: 'redesgestioncreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'consultaporcodigo', component: _import('redes/consultaporcodigo'), name: 'redesconsultaporcodigo', hidden: true, meta: { title: 'redesconsultaporcodigo', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'historia', component: _import('redes/historia'), name: 'redeshistoria', hidden: true, meta: { title: 'redeshistoria', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'gerencia'] }},
+      { path: 'geoposicion', component: _import('redes/geoposicion'), name: 'redesegeoposicion', hidden: true, meta: { title: 'redesgeoposicionamiento', roles: ['super', 'admin', 'ingeniero', 'gerencia'] }}
     ]
   },
   {
@@ -334,6 +494,9 @@ export const asyncRouterMap = [
       { path: 'elemento', component: _import('administracion/elemento'), name: 'elemento', meta: { title: 'elemento', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
       { path: 'elemento/editar/:id', component: _import('administracion/elemento/edit'), name: 'elementoedit', hidden: true, redirect: false, meta: { title: 'elementoedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
       { path: 'elemento/crear', component: _import('administracion/elemento/create'), name: 'elementocreate', hidden: true, meta: { title: 'elementocreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] }},
+      { path: 'manoobra', component: _import('administracion/manoobra'), name: 'manoobra', meta: { title: 'manoobra', roles: ['super', 'admin', 'almacen'] }},
+      { path: 'manoobra/editar/:id', component: _import('administracion/manoobra/edit'), name: 'manoobraedit', hidden: true, redirect: false, meta: { title: 'manoobraedit', roles: ['super', 'admin', 'almacen'] }},
+      { path: 'manoobra/crear', component: _import('administracion/manoobra/create'), name: 'manoobracreate', hidden: true, meta: { title: 'manoobracreate', roles: ['super', 'admin', 'almacen'] }},
       { path: 'cuadrilla', component: _import('administracion/cuadrilla'), name: 'cuadrilla', meta: { title: 'cuadrilla', roles: ['super', 'admin', 'ingeniero'] }},
       { path: 'cuadrilla/editar/:id', component: _import('administracion/cuadrilla/edit'), name: 'cuadrillaedit', hidden: true, redirect: false, meta: { title: 'cuadrillaedit', roles: ['super', 'admin', 'ingeniero'] }},
       { path: 'cuadrilla/crear', component: _import('administracion/cuadrilla/create'), name: 'cuadrillacreate', hidden: true, meta: { title: 'cuadrillacreate', roles: ['super', 'admin', 'ingeniero'] }},

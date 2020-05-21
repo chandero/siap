@@ -33,8 +33,8 @@ import { printReporteRelacion } from '@/api/reporte'
 export default {
   data() {
     return {
-      fecha_inicial: new Date(),
-      fecha_final: new Date(),
+      fecha_inicial: null,
+      fecha_final: null,
       labelPosition: 'top'
     }
   },
@@ -48,6 +48,14 @@ export default {
     imprimir(tipo) {
       printReporteRelacion(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.empresa.empr_id, this.usuario.usua_id, tipo)
     }
+  },
+  beforeMount() {
+    this.fecha_inicial = new Date()
+    this.fecha_inicial.setHours(0)
+    this.fecha_inicial.setMinutes(0)
+    this.fecha_inicial.setSeconds(0)
+    this.fecha_inicial.setMilliseconds(0)
+    this.fecha_final = this.fecha_inicial
   }
 }
 </script>

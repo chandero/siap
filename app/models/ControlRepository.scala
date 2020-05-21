@@ -224,6 +224,74 @@ class ControlRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
         }        
     }
 
+    // De Baja
+   /**
+   * Recuperar total de registros
+   * @return total
+   */
+   def cuentaEliminados(empr_id: Long, filter: String): Long =  {
+     db.withConnection{ implicit connection =>
+
+      var query = """SELECT COUNT(*) AS c FROM siap.control a WHERE a.esta_id = 9 and a.empr_id = {empr_id}"""
+         
+      if (!filter.isEmpty){
+          println("Filtro: " + filter)
+          query = query + " and " + filter
+      }        
+
+       val result = SQL(query)
+       .on(
+         'empr_id -> empr_id
+       )
+       .as(SqlParser.scalar[Long].single)
+       result
+     }
+   }
+    /**
+    * Recuperar todos los Control activos
+    * @param page_size: Long
+    * @param current_page: Long
+    * @param empr_id: Long
+    */
+    def todosEliminados(empr_id: Long, page_size: Long, current_page: Long, orderby: String, filter: String): Future[Iterable[Control]] = Future[Iterable[Control]] {
+        db.withConnection { implicit connection =>
+        var lista_result = new ListBuffer[Control]
+        var query = """SELECT * FROM siap.control a WHERE a.esta_id = 9 and a.empr_id = {empr_id}"""
+        
+        if (!filter.isEmpty){
+          println("Filtro: " + filter)
+          query = query + " and " + filter
+        }     
+
+        if (!orderby.isEmpty) {
+            query = query + s" ORDER BY $orderby"
+        } else {
+            query = query + s" ORDER BY a.empr_id, a.aap_id"
+        }
+        query = query + """
+                        LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)"""
+
+        var lista = SQL(query).
+            on(
+              'page_size -> page_size,
+              'current_page -> current_page,
+              'empr_id -> empr_id
+            ).as(Control._set *)
+
+            for ( e <- lista ) {
+                        val h = SQL("SELECT * FROM siap.control_elemento_historia WHERE aap_id = {aap_id} and empr_id = {empr_id} ORDER BY aael_fecha DESC").
+                        on(
+                            'aap_id -> e.aap_id,
+                            'empr_id -> empr_id
+                        ).as(AapHistoria.aapelementohistoriaSet *)
+                        val aaph = e.copy(historia = Some(h))
+                        lista_result += aaph
+            } 
+            lista_result.toList            
+        }        
+    }
+    // Fin de Baja
+
     /**
     * Recuperar todos los TipoControl activos
     * @param page_size: Long

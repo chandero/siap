@@ -92,16 +92,6 @@ export function deleteReporte(repo_id) {
   })
 }
 
-export function convertirReporte(repo_id) {
-  const data = {
-    repo_id
-  }
-  return request({
-    url: '/core/conv/' + data.repo_id,
-    method: 'get'
-  })
-}
-
 export function validarCodigo(elem_id, codigo) {
   const data = {
     elem_id,
@@ -131,16 +121,27 @@ export function actualizarHistoria() {
   })
 }
 
+export function convertirReporte(repo_id, reti_id) {
+  const data = {
+    repo_id,
+    reti_id
+  }
+  return request({
+    url: '/core/conv/' + data.repo_id + '/' + reti_id,
+    method: 'get'
+  })
+}
+
 export function getEstados() {
   return request({
-    url: '/core/st/get',
+    url: '/repo/st/get',
     method: 'get'
   })
 }
 
 export function getTipos() {
   return request({
-    url: '/core/tp/get',
+    url: '/repo/tp/get',
     method: 'get'
   })
 }
@@ -150,7 +151,7 @@ export function printReporte(repo_id, empr_id) {
     repo_id,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + ':9091/api' + '/core/prn/repo/' + data.repo_id + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/core/prn/repo/' + data.repo_id + '/' + data.empr_id
   window.open(url, '_blank', 'location=no, menubar=no')
 }
 
@@ -168,7 +169,7 @@ export function printReporteRelacion(fecha_inicial, fecha_final, empr_id, usua_i
   } else {
     target = '_self'
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + ':9091/api' + '/core/prn/rela/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id + '/' + usua_id + '/' + tipo
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/core/prn/rela/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id + '/' + usua_id + '/' + tipo
   window.open(url, target, 'location=no, menubar=no')
 }
 
@@ -177,6 +178,6 @@ export function printReporteBlanco(reti_id, empr_id) {
     reti_id,
     empr_id
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + ':9091/api' + '/core/prn/form/' + data.reti_id + '/' + data.empr_id
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/core/prn/form/' + data.reti_id + '/' + data.empr_id
   window.open(url, '_blank', 'location=no, menubar=no')
 }

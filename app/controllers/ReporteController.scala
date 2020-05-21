@@ -151,20 +151,27 @@ class ReporteController @Inject()(
     implicit request: Request[AnyContent] =>
       implicit val dateTimeJsReader = JodaReads.jodaDateReads("yyyy-MM-dd HH:mm:ss")
       val json = request.body.asJson.get
+      val repoweb =json.as[ReporteWebDto]
       println("Json: " + json)
       val secret = config.get[String]("play.http.secret.key")
-      val token = (json \ "token").as[String]
+      val token = repoweb.token match {
+        case Some(t) => t
+        case None => "error"
+      }
       if (secret == token) {
-        val repo_direccion = (json \ "repo_direccion").as[String]
-        val barr_id = (json \ "barr_id").as[Long]
-        val repo_nombre = (json \ "repo_nombre").as[String]
-        val repo_telefono = (json \ "repo_telefono").as[String]
-        val repo_email = (json \ "repo_email").as[String]
-        val repo_descripcion = (json \ "repo_descripcion").as[String]
-        val repo_fecharecepcion = (json \ "repo_fecharecepcion").as[DateTime]
+        val repo_direccion = repoweb.repo_direccion
+        val barr_id = repoweb.barr_id
+        val repo_nombre = repoweb.repo_nombre
+        val repo_telefono = repoweb.repo_telefono
+        val repo_email = repoweb.repo_email
+        val repo_descripcion = repoweb.repo_descripcion
+        val repo_fecharecepcion = repoweb.repo_fecharecepcion match {
+          case Some(d) => DateTime.parse(d, DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"))
+          case None => DateTime.now
+        }
         var repo_fechadigitacion = new DateTime()
-        val acti_id = (json \ "acti_id").as[Long]
-        val empr_id = (json \ "empr_id").as[Long]
+        val acti_id = repoweb.acti_id
+        val empr_id = repoweb.empr_id
         var ra = new ReporteAdicional(None,
                                       None,
                                       None,                             
@@ -174,8 +181,8 @@ class ReporteController @Inject()(
                                       None,
                                       None,
                                       None,
-                                      Some(repo_email),
-                                      Some(acti_id),
+                                      repo_email,
+                                      acti_id,
                                       None,
                                       None,
                                       None,
@@ -190,18 +197,18 @@ class ReporteController @Inject()(
                               Some(1),
                               None,
                               Some(repo_fecharecepcion),
-                              Some(repo_direccion),
-                              Some(repo_nombre),
-                              Some(repo_telefono),
+                              repo_direccion,
+                              repo_nombre,
+                              repo_telefono,
                               None,
                               None,
                               None,
                               None,
-                              Some(repo_descripcion),
+                              repo_descripcion,
                               Some(1),
                               Some(9),
-                              Some(barr_id),
-                              Some(empr_id),
+                              barr_id,
+                              empr_id,
                               None,
                               Some(usua_id),
                               Some(ra),
