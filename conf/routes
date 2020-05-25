@@ -173,7 +173,7 @@ POST    /api/time/save                  controllers.TipoMedidorController.guarda
 POST    /api/time/upd                   controllers.TipoMedidorController.actualizarTipoMedidor
 
 # Elemento
-GET     /api/elem/get/:f/:p/:c          controllers.ElementoController.todos(f: String, p:Long, c:Long)
+POST    /api/elem/get                   controllers.ElementoController.todos
 GET     /api/elem/all                   controllers.ElementoController.elementos
 GET     /api/elem/:id                   controllers.ElementoController.buscarPorId(id: Long)
 GET     /api/elem/del/:id               controllers.ElementoController.borrarElemento(id: Long)
@@ -181,6 +181,7 @@ POST    /api/elem/save                  controllers.ElementoController.guardarEl
 POST    /api/elem/upd                   controllers.ElementoController.actualizarElemento
 GET     /api/elem/bdesc/:q              controllers.ElementoController.buscarPorDescripcion(q: String)
 GET     /api/elem/bcode/:c              controllers.ElementoController.buscarPorCodigo(c: String)
+POST    /api/elem/upa                   controllers.ElementoController.actualizarPrecio 
 # Cuadrilla
 GET     /api/cuad/get/:p/:c             controllers.CuadrillaController.todos(p:Long, c:Long)
 GET     /api/cuad/:id                   controllers.CuadrillaController.buscarPorId(id:Long)
@@ -567,14 +568,14 @@ GET     /api/coau/code/:t                        controllers.CodigoautorizacionC
 GET     /api/coau/vaco/:t/:c                     controllers.CodigoautorizacionController.validar(t:Int, c: String)
 
 # Mano Obra
-POST     /api/maob/get                           controllers.ManoObraController.todos
+POST    /api/maob/get                            controllers.ManoObraController.todos
 GET     /api/maob/all                            controllers.ManoObraController.manoobras
 GET     /api/maob/:id                            controllers.ManoObraController.buscarPorId(id: Long)
 GET     /api/maob/del/:id                        controllers.ManoObraController.borrar(id: Long)
 POST    /api/maob/save                           controllers.ManoObraController.guardar
 POST    /api/maob/upd                            controllers.ManoObraController.actualizar
 GET     /api/maob/bdesc/:q                       controllers.ManoObraController.buscarPorDescripcion(q: String)
-
+POST    /api/maob/upa                            controllers.ManoObraController.actualizarPrecio 
 
 
 # Map static resources from the /public folder to the /assets URL path

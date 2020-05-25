@@ -1,14 +1,16 @@
 import request from '@/utils/request'
 
-export function getTodos(filtro, page_size, current_page) {
+export function getTodos(page_size, current_page, orderby, filter) {
   const data = {
-    filtro,
     page_size,
-    current_page
+    current_page,
+    orderby,
+    filter
   }
   return request({
-    url: '/elem/get/' + data.filtro + '/' + data.page_size + '/' + data.current_page,
-    method: 'get'
+    url: '/elem/get',
+    method: 'post',
+    data: data
   })
 }
 
@@ -78,5 +80,18 @@ export function deleteElemento(elem_id) {
   return request({
     url: '/elem/del/' + data.elem_id,
     method: 'get'
+  })
+}
+
+export function updatePriceElemento(elem_id, elpr_anho, elpr_precio) {
+  const data = {
+    elem_id,
+    elpr_anho,
+    elpr_precio
+  }
+  return request({
+    url: '/elem/upa',
+    method: 'post',
+    data: data
   })
 }

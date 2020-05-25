@@ -473,7 +473,10 @@ export default {
     retirado: 'Retirado',
     instalado: 'Instalado',
     reporte: 'Reporte No.',
-    reporte_tipo: 'Tipo Reporte'
+    reporte_tipo: 'Tipo Reporte',
+    elpr_precio: 'Precio',
+    elem_descripcion: 'Descripción',
+    elem_codigo: 'Código'
   },
   manoobra: {
     tabletitle: 'Mano de Obra',

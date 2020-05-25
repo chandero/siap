@@ -13,6 +13,7 @@ import pdi.jwt.JwtSession
 import utilities._
 
 import dto.ResultDto
+import dto.QueryDto
 
 @Singleton
 class ElementoController @Inject()(
@@ -21,18 +22,21 @@ class ElementoController @Inject()(
     authenticatedUserAction: AuthenticatedUserAction)(
     implicit ec: ExecutionContext)
     extends AbstractController(cc) {
-  def todos(filter: String, page_size: Long, current_page: Long): Action[AnyContent] =
+  def todos(): Action[AnyContent] =
     authenticatedUserAction.async { implicit request: Request[AnyContent] => 
-      val empr_id = Utility.extraerEmpresa(request)
-      val filtro = filter.split(":")
-      var filtrado = ""
-      if (filtro.length > 1) {
-        filtrado = filtro(1)
-      } else {
-        filtrado = ""
+      val json = request.body.asJson.get
+      val page_size = ( json \ "page_size").as[Long]
+      val current_page = ( json \ "current_page").as[Long]
+      val orderby = ( json \ "orderby").as[String]
+      val filter = ( json \ "filter").as[QueryDto]
+      val filtro_a = Utility.procesarFiltrado(filter)
+      var filtro = filtro_a.replace("\"", "'")
+      if (filtro == "()") {
+        filtro = ""
       }
-      val total = elementoService.cuenta(filtrado, empr_id.get)
-      elementoService.todos(filtrado, page_size, current_page, empr_id.get).map { elementos =>
+      val empr_id = Utility.extraerEmpresa(request)    
+      val total = elementoService.cuenta(empr_id.get, filtro)
+      elementoService.todos(empr_id.get, page_size, current_page, orderby, filtro).map { elementos =>
         Ok(Json.obj("elementos" -> elementos, "total" -> total))
       }
     }
@@ -94,7 +98,8 @@ class ElementoController @Inject()(
                                    empr_id,
                                    usua_id,
                                    elemento.ucap_id,
-                                   elemento.caracteristicas)
+                                   elemento.caracteristicas,
+                                   elemento.precio)
       elementoService.crear(elementonuevo).map { result =>
         if (result > 0) {
           Created(Json.toJson("true"))
@@ -119,7 +124,8 @@ class ElementoController @Inject()(
         elemento.empr_id,
         usua_id,
         elemento.ucap_id,
-        elemento.caracteristicas
+        elemento.caracteristicas,
+        elemento.precio
       )
       if (elementoService.actualizar(elementonuevo)) {
         Future.successful(Ok(Json.toJson("true")))
@@ -137,4 +143,18 @@ class ElementoController @Inject()(
         Future.successful(ServiceUnavailable(Json.toJson("false")))
       }
   }
+
+  def actualizarPrecio = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val json = request.body.asJson.get
+      val elem_id = (json \ "elem_id").as[Long]
+      val elpr_anho = (json \ "elpr_anho").as[Int]
+      val elpr_precio = (json \ "elpr_precio").as[BigDecimal]
+      val usua_id = Utility.extraerUsuario(request)
+      if (elementoService.actualizarPrecio(elem_id, elpr_anho, elpr_precio, usua_id.get)) {
+        Future.successful(Ok(Json.toJson("true")))
+      } else {
+        Future.successful(ServiceUnavailable(Json.toJson("false")))
+      }
+  }  
 }

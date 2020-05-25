@@ -63,12 +63,25 @@ export function updateManoObra(manoobra) {
   })
 }
 
-export function deleteManoObra(elem_id) {
+export function deleteManoObra(maob_id) {
   const data = {
-    elem_id
+    maob_id
   }
   return request({
-    url: '/maob/del/' + data.elem_id,
+    url: '/maob/del/' + data.maob_id,
     method: 'get'
+  })
+}
+
+export function updatePriceManoObra(maob_id, mopr_anho, mopr_precio) {
+  const data = {
+    maob_id,
+    mopr_anho,
+    mopr_precio
+  }
+  return request({
+    url: '/maob/upa',
+    method: 'post',
+    data: data
   })
 }

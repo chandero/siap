@@ -27,52 +27,14 @@ case class ManoObra(maob_id: Option[Long],
                     maob_descripcion: Option[String],
                     maob_estado: Option[Int],
                     empr_id: Option[Long],
-                    usua_id: Option[Long]
+                    usua_id: Option[Long],
+                    precio: Option[ManoObra_Precio]
                 )
 
 case class ManoObra_Precio(maob_id: Option[Long],
                            mopr_anho: Option[Int],
                            mopr_precio: Option[BigDecimal],
                            mopr_unidad: Option[String])
-
-object ManoObra {
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val wWrites = new Writes[ManoObra] {
-    def writes(e: ManoObra) = Json.obj(
-      "maob_id" -> e.maob_id,
-      "maob_tipo" -> e.maob_tipo,
-      "maob_descripcion" -> e.maob_descripcion,
-      "maob_estado" -> e.maob_estado,
-      "empr_id" -> e.empr_id,
-      "usua_id" -> e.usua_id
-    )
-  }
-
-  implicit val rReads: Reads[ManoObra] = (
-      (__ \ "maob_id").readNullable[Long] and
-      (__ \ "maob_tipo").readNullable[Int] and
-      (__ \ "maob_descripcion").readNullable[String] and
-      (__ \ "maob_estado").readNullable[Int] and
-      (__ \ "empr_id").readNullable[Long] and
-      (__ \ "usua_id").readNullable[Long]
-  )(ManoObra.apply _)
-
-  val _set = {
-      get[Option[Long]]("maob_id") ~
-      get[Option[Int]]("maob_tipo") ~
-      get[Option[String]]("maob_descripcion") ~
-      get[Option[Int]]("maob_estado") ~
-      get[Option[Long]]("empr_id") ~
-      get[Option[Long]]("usua_id") map {
-      case maob_id ~ maob_tipo ~ maob_descripcion ~ maob_estado ~ empr_id ~ usua_id =>
-        ManoObra(maob_id, maob_tipo, maob_descripcion, maob_estado, empr_id, usua_id)
-      }       
-  }
-}
 
 object ManoObra_Precio {
   implicit val yourJodaDateReads =
@@ -108,8 +70,49 @@ object ManoObra_Precio {
                  mopr_unidad)
       }  
     }
+}                           
 
+object ManoObra {
+  implicit val yourJodaDateReads =
+    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  implicit val yourJodaDateWrites =
+    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
+
+  implicit val wWrites = new Writes[ManoObra] {
+    def writes(e: ManoObra) = Json.obj(
+      "maob_id" -> e.maob_id,
+      "maob_tipo" -> e.maob_tipo,
+      "maob_descripcion" -> e.maob_descripcion,
+      "empr_id" -> e.empr_id,
+      "usua_id" -> e.usua_id,
+      "precio" -> e.precio
+    )
+  }
+
+  implicit val rReads: Reads[ManoObra] = (
+      (__ \ "maob_id").readNullable[Long] and
+      (__ \ "maob_tipo").readNullable[Int] and
+      (__ \ "maob_descripcion").readNullable[String] and
+      (__ \ "maob_estado").readNullable[Int] and
+      (__ \ "empr_id").readNullable[Long] and
+      (__ \ "usua_id").readNullable[Long] and
+      (__ \ "precio").readNullable[ManoObra_Precio]
+  )(ManoObra.apply _)
+
+  val _set = {
+      get[Option[Long]]("maob_id") ~
+      get[Option[Int]]("maob_tipo") ~
+      get[Option[String]]("maob_descripcion") ~
+      get[Option[Int]]("maob_estado") ~
+      get[Option[Long]]("empr_id") ~
+      get[Option[Long]]("usua_id") map {
+      case maob_id ~ maob_tipo ~ maob_descripcion ~ maob_estado ~ empr_id ~ usua_id =>
+        ManoObra(maob_id, maob_tipo, maob_descripcion, maob_estado, empr_id, usua_id, None)
+      }       
+  }
 }
+
+
 
 class ManoObraRepository @Inject()(dbapi: DBApi)(
     implicit ec: DatabaseExecutionContext) {
@@ -123,12 +126,30 @@ class ManoObraRepository @Inject()(dbapi: DBApi)(
         )
         .as(ManoObra._set.singleOpt)
     }
-    e
+    val anho = new DateTime().getYear() 
+    var mo = e match {
+      case Some(mo) =>  var mp = db.withConnection { implicit connection =>
+                              
+                              SQL("SELECT * FROM siap.manoobra_precio mp WHERE mp.mopr_anho = {anho} and mp.maob_id = {maob_id}").
+                              on(
+                                'anho -> anho,
+                                'maob_id -> id
+                              ).as(ManoObra_Precio._set.singleOpt)
+                        }
+                        var nmp = mp match {
+                          case None => new ManoObra_Precio(None, Some(anho), None, None)
+                          case Some(mp) => mp
+                        }
+                        Some(mo.copy(precio=Some(nmp)))
+      case None => None
+    }    
+    mo
   }
 
   def buscarPorDescripcion(maob_descripcion: String,
                            empr_id: Long): Future[Iterable[ManoObra]] =
     Future[Iterable[ManoObra]] {
+      var _list = new ListBuffer[ManoObra]
       db.withConnection { implicit connection =>
         var lista_result = new ListBuffer[ManoObra]
         val lista:List[ManoObra] = SQL("SELECT * FROM siap.manoobra WHERE maob_descripcion LIKE {maob_descripcion} and empr_id = {empr_id} and maob_estado <> 9")
@@ -137,22 +158,38 @@ class ManoObraRepository @Inject()(dbapi: DBApi)(
             'empr_id -> empr_id
           )
           .as(ManoObra._set *)
-        lista  
+        val anho = new DateTime().getYear() 
+        lista.foreach { mo => 
+            var mp = db.withConnection { implicit connection =>
+                              val anho = new DateTime().getYear() 
+                              SQL("SELECT * FROM siap.manoobra_precio mp WHERE mp.mopr_anho = {anho} and mp.maob_id = {maob_id}").
+                              on(
+                                'anho -> anho,
+                                'maob_id -> mo.maob_id
+                              ).as(ManoObra_Precio._set.singleOpt)
+                        }
+            var nmp = mp match {
+                case None => new ManoObra_Precio(None, Some(anho), None, None)
+                case Some(mp) => mp
+            }
+            var nmo = mo.copy(precio=Some(nmp))
+            _list += nmo
+        }
+        _list.toList  
       }
-    }
+  }
 
     
   def cuenta(empr_id: Long, filter: String): Long =  {
+
     db.withConnection{ implicit connection =>
       var query: String = "SELECT COUNT(*) AS c FROM siap.manoobra m WHERE m.empr_id = {empr_id} and m.maob_estado <> 9"      
       if (!filter.isEmpty){
-          println("Filtro: " + filter)
           query = query + " and " + filter
-      }      
+      }
       val result = SQL(query).
       on(
-        'empr_id -> empr_id,
-        'maob_descripcion -> (filter + "%")
+        'empr_id -> empr_id
       ).as(SqlParser.scalar[Long].single)
       result
     }
@@ -160,6 +197,7 @@ class ManoObraRepository @Inject()(dbapi: DBApi)(
 
   def todos(empr_id: Long, page_size: Long, current_page: Long, orderby: String, filter: String): Future[Iterable[ManoObra]] =
     Future[Iterable[ManoObra]] {
+      var _list = new ListBuffer[ManoObra]
       db.withConnection { implicit connection =>
         var query: String = "SELECT * FROM siap.manoobra m WHERE m.empr_id = {empr_id} and m.maob_estado <> 9"
         if (!filter.isEmpty) {
@@ -172,8 +210,8 @@ class ManoObraRepository @Inject()(dbapi: DBApi)(
         }
         query = query + """
                 LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)"""  
-        println("query: " + query)         
-        SQL(query)
+       
+        var lista = SQL(query)
           .on(
             'empr_id -> empr_id,
             'page_size -> page_size,
@@ -181,6 +219,24 @@ class ManoObraRepository @Inject()(dbapi: DBApi)(
             'maob_descripcion -> (filter + "%")
           )
           .as(ManoObra._set *)
+        val anho = new DateTime().getYear() 
+        lista.foreach { mo => 
+            var mp = db.withConnection { implicit connection =>
+                              val anho = new DateTime().getYear() 
+                              SQL("SELECT * FROM siap.manoobra_precio mp WHERE mp.mopr_anho = {anho} and mp.maob_id = {maob_id}").
+                              on(
+                                'anho -> anho,
+                                'maob_id -> mo.maob_id
+                              ).as(ManoObra_Precio._set.singleOpt)
+                        }
+            var nmp = mp match {
+                case None => new ManoObra_Precio(None, Some(anho), None, None)
+                case Some(mp) => mp
+            }
+            var nmo = mo.copy(precio=Some(nmp))
+            _list += nmo
+        }
+        _list.toList  
       }
     }
 
@@ -370,5 +426,50 @@ class ManoObraRepository @Inject()(dbapi: DBApi)(
 
       count > 0        
      }  
+   }
+
+   def actualizarPrecio(maob_id: Long, mopr_anho: Int, mopr_precio: BigDecimal, usua_id: Long): Boolean = {
+      db.withConnection { implicit connection => 
+      val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
+      val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())        
+      var seActualizo: Boolean = false
+      var seInserto: Boolean = false
+
+      seActualizo =
+        SQL("UPDATE siap.manoobra_precio SET mopr_precio = {mopr_precio} WHERE maob_id = {maob_id} and mopr_anho = {mopr_anho}").
+        on(
+            'maob_id -> maob_id,
+            'mopr_anho -> mopr_anho,
+            'mopr_precio -> mopr_precio
+        ).executeUpdate() > 0
+      
+      if (!seActualizo) {
+        seInserto = SQL("""INSERT INTO siap.manoobra_precio VALUES ({maob_id}, {mopr_anho}, {mopr_precio}, {mopr_unidad})""").
+        on(
+            'maob_id -> maob_id,
+            'mopr_anho -> mopr_anho,
+            'mopr_precio -> mopr_precio,
+            'mopr_unidad -> "COP"
+        ).executeUpdate() > 0  
+      }
+
+      if (seActualizo || seInserto) {
+        SQL(
+          "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})")
+          .on(
+            'audi_fecha -> fecha,
+            'audi_hora -> hora,
+            'usua_id -> usua_id,
+            'audi_tabla -> "manoobra_precio",
+            'audi_uid -> maob_id,
+            'audi_campo -> "",
+            'audi_valorantiguo -> "",
+            'audi_valornuevo -> mopr_precio.toString(),
+            'audi_evento -> "A"
+          )
+          .executeInsert()
+      }
+      seActualizo || seInserto        
+     }
    }
 }

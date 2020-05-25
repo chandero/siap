@@ -90,3 +90,7 @@
      }
    }
  }
+
+ .el-table--striped .el-table__body tr.el-table__row--striped td {
+  background-color: rgba(241, 202, 71, 0.5) !important;
+ }

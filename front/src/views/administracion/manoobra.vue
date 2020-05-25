@@ -6,16 +6,17 @@
           <el-button type="warning" icon="el-icon-search" circle @click="actualizar" title="Actualizar Aplicando el Filtro"></el-button>
         <el-container>
           <el-header>
-            <el-button size="mini" type="primary" icon="el-icon-circle-plus" circle @click="nuevo" ></el-button>
+            <el-button size="mini" type="primary" icon="el-icon-plus" circle @click="nuevo" ></el-button>
             <el-button size="mini" type="success" icon="el-icon-refresh" circle @click="actualizar"></el-button>
           </el-header>
           <el-main>
           <el-table
-        :data="tableData"
-        width="100%" height="500">
+            :data="tableData"
+            stripe
+            width="100%" height="500">
         <el-table-column
           :label="$t('manoobra.maob_tipo')"
-          width="150"
+          width="130"
           prop="maob_tipo"
            >
           <template slot-scope="scope">
@@ -24,24 +25,63 @@
         </el-table-column>        
         <el-table-column
           :label="$t('manoobra.maob_descripcion')"
-          width="450"
+          width="500"
           prop="maob_descripcion"
            >
           <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row.maob_descripcion }}</span>
+            <span style="margin-left: 10px" :title="scope.row.maob_descripcion">{{ scope.row.maob_descripcion | fm_truncate(60) }}</span>
           </template>
         </el-table-column>
         <el-table-column
+          :label="$t('manoobra.mopr_precio')"
+          width="120"
+          prop="precio.mopr_precio"
+          align="right"
+           >
+          <template slot-scope="scope">
+            <template v-if="scope.row.edit">
+              <el-input v-model="scope.row.precio.mopr_precio" class="edit-input" size="small" />
+              <el-button
+                class="cancel-btn"
+                size="mini"
+                icon="el-icon-close"
+                type="warning"
+                circle
+                @click="cancelEdit(scope.row)"
+              />
+            </template>
+            <span v-else>{{ scope.row.precio.mopr_precio | toThousandslsFilter }}</span>
+            <el-button
+              v-if="scope.row.edit"
+              circle
+              size="mini"
+              icon="el-icon-check"
+              @click="confirmEdit(scope.row)"
+            />
+            <el-button
+              v-else
+              circle
+              size="mini"
+              icon="el-icon-edit"
+              style="border-style: hidden;"
+              @click="scope.row.edit=!scope.row.edit"
+            />            
+          </template>
+        </el-table-column>        
+        <el-table-column
           fixed="right"
           align="right"
-          width="200"
+          width="90"
           >
           <template slot-scope="scope">
             <el-button
               size="mini"
+              circle
+              type="primary"
               @click="handleEdit(scope.$index, scope.row)"><i class="el-icon-edit"></i></el-button>
             <el-button
               size="mini"
+              circle
               type="danger"
               @click="handleDelete(scope.$index, scope.row)"><i class="el-icon-delete"></i></el-button>
           </template>
@@ -63,7 +103,7 @@
 <script>
 import VueQueryBuilder from 'vue-query-builder'
 import { getTodos } from '@/api/manoobra'
-import { deleteManoObra } from '@/api/manoobra'
+import { deleteManoObra, updatePriceManoObra } from '@/api/manoobra'
 
 export default {
   components: {
@@ -132,7 +172,7 @@ export default {
         cancelButtonText: this.$i18n.t('general.cancel'),
         type: 'warning'
       }).then(() => {
-        deleteManoObra(row.elem_id).then(response => {
+        deleteManoObra(row.maob_id).then(response => {
           this.$message({
             type: 'success',
             message: this.$i18n.t('general.deletesuccessful')
@@ -166,11 +206,6 @@ export default {
     nuevo() {
       this.$router.push({ path: '/administracion/manoobra/crear' })
     },
-    buscar(query) {
-      this.filter = 'f:' + query.toUpperCase()
-      this.current_page = 1
-      this.getManoobras()
-    },
     getManoObras() {
       if (this.qbquery_ant !== this.qbquery) {
         this.current_page = 1
@@ -179,7 +214,11 @@ export default {
       getTodos(this.page_size, this.current_page, this.order, this.qbquery)
         .then(response => {
           this.total = response.data.total
-          this.tableData = response.data.manoobras
+          this.tableData = response.data.manoobras.map(v => {
+            this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
+            this.$set(v, 'precioOriginal', v.precio.mopr_precio)
+            return v
+          })
         }).catch(() => {})
     },
     getTipoManoObraDescripcion(id) {
@@ -190,6 +229,38 @@ export default {
           return 'SIN DEFINIR'
         }
       } else { return 'SIN DEFINIR 2' }
+    },
+    cancelEdit(row) {
+      row.precio.mopr_precio = row.precioOriginal
+      row.edit = false
+      this.$message({
+        message: 'El precio se restauró a su valor original',
+        type: 'warning'
+      })
+    },
+    confirmEdit(row) {
+      row.edit = false
+      updatePriceManoObra(row.maob_id, row.precio.mopr_anho, row.precio.mopr_precio).then(response => {
+        if (response.data === 'true') {
+          row.precioOriginal = row.precio.mopr_precio
+          this.$message({
+            message: 'El precio ha sido modificado',
+            type: 'success'
+          })
+        } else {
+          row.precio.mopr_precio = row.precioOriginal
+          this.$message({
+            message: 'El precio se restauró a su valor original',
+            type: 'warning'
+          })
+        }
+      }).catch(() => {
+        row.precio.mopr_precio = row.precioOriginal
+        this.$message({
+          message: 'El precio se restauró a su valor original',
+          type: 'warning'
+        })
+      })
     }
   },
   mounted() {

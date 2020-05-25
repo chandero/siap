@@ -81,7 +81,8 @@ class ManoObraController @Inject()(
                                    mo.maob_descripcion,
                                    mo.maob_estado,
                                    empr_id,
-                                   usua_id)
+                                   usua_id,
+                                   mo.precio)
       moService.crear(monuevo).map { result =>
         if (result > 0) {
           Created(Json.toJson("true"))
@@ -102,7 +103,8 @@ class ManoObraController @Inject()(
                                    mo.maob_descripcion,
                                    mo.maob_estado,
                                    empr_id,
-                                   usua_id)
+                                   usua_id,
+                                   mo.precio)
       if (moService.actualizar(monuevo)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
@@ -114,6 +116,20 @@ class ManoObraController @Inject()(
     implicit request: Request[AnyContent] =>
       val usua_id = Utility.extraerUsuario(request)
       if (moService.borrar(id, usua_id.get)) {
+        Future.successful(Ok(Json.toJson("true")))
+      } else {
+        Future.successful(ServiceUnavailable(Json.toJson("false")))
+      }
+  }
+
+  def actualizarPrecio = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val json = request.body.asJson.get
+      val maob_id = (json \ "maob_id").as[Long]
+      val mopr_anho = (json \ "mopr_anho").as[Int]
+      val mopr_precio = (json \ "mopr_precio").as[BigDecimal]
+      val usua_id = Utility.extraerUsuario(request)
+      if (moService.actualizarPrecio(maob_id, mopr_anho, mopr_precio, usua_id.get)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
         Future.successful(ServiceUnavailable(Json.toJson("false")))

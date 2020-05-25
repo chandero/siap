@@ -6,16 +6,13 @@
      <el-main>
        <el-form>
      <span>{{ $t('elemento.description')}}</span>
-     <el-input name="descripcion" v-model="elemento.elem_descripcion" v-validate="'required'"></el-input>
-     <span>{{ errors.first('descripcion') }}</span>
+     <el-input name="descripcion" v-model="elemento.elem_descripcion"></el-input>
      <p/>
      <span>{{ $t('elemento.code')}}</span>
-     <el-input name="codigo" v-model="elemento.elem_codigo" v-validate="'required'"></el-input>
-     <span>{{ errors.first('codigo') }}</span>
+     <el-input name="codigo" v-model="elemento.elem_codigo"></el-input>
      <p/>     
      <span>{{ $t('elemento.ucap')}}</span>
-     <el-checkbox name="ucap" v-model="elemento.elem_ucap" v-validate="'required'"></el-checkbox>
-     <span>{{ errors.first('ucap') }}</span>
+     <el-checkbox name="ucap" v-model="elemento.elem_ucap"></el-checkbox>
      <p/>     
      <span>{{ $t('elemento.type')}}</span>
      <el-select v-model="elemento.tiel_id" name="tipo" :placeholder="$t('tipoelemento.select')">
@@ -141,7 +138,7 @@ export default {
       })
     },
     validate() {
-      if (this.elemento.elem_descripcion && this.elemento.elem_codigo && this.elemento.elem_ucap & this.elemento.tiel_id > 0) {
+      if (this.elemento.elem_descripcion && this.elemento.elem_codigo && this.elemento.tiel_id) {
         return true
       } else {
         return false
