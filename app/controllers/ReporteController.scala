@@ -335,14 +335,14 @@ class ReporteController @Inject()(
      Ok(os).as("application/pdf")
   }
    
-  def imprimirRelacion(fecha_inicial: Long, fecha_final: Long, empr_id: Long, usua_id: Long, tipo: String) = Action {
-     val os = reporteService.imprimirRelacion(fecha_inicial, fecha_final, empr_id, usua_id, tipo)
+  def imprimirRelacion(fecha_inicial: Long, fecha_final: Long, empr_id: Long, usua_id: Long, formato: String, tipo: String) = Action {
+     val os = reporteService.imprimirRelacion(fecha_inicial, fecha_final, empr_id, usua_id, formato, tipo)
      val fi = new DateTime(fecha_inicial)
      val ff = new DateTime(fecha_final)
      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
      val filename = "OyMPendientes_Entre" + fmt.print(fi) + "_y_" + fmt.print(ff) + ".xlsx"
      val attach = "attachment; filename=" + filename
-     tipo match {
+     formato match {
        case "pdf" => Ok(os).as("application/pdf")
        case "xls" => Ok(os).as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").withHeaders("Content-Disposition" -> attach )
      }

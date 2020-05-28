@@ -18,6 +18,7 @@ const getters = {
   errorLogs: state => state.errorLog.logs,
   months: state => state.app.months,
   secret: state => state.app.secret,
-  baseurl: state => state.app.baseurl
+  baseurl: state => state.app.baseurl,
+  tipo_inventario: state => state.app.tipo_inventario
 }
 export default getters

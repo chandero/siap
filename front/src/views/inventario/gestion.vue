@@ -359,7 +359,7 @@ export default {
       page_size: 10,
       current_page: 1,
       total: 0,
-      order: '',
+      order: 'a.aap_id',
       filter: ''
     }
   },

@@ -154,12 +154,13 @@ export function printReporte(repo_id, empr_id) {
   window.open(url, '_blank', 'location=no, menubar=no')
 }
 
-export function printReporteRelacion(fecha_inicial, fecha_final, empr_id, usua_id, tipo) {
+export function printReporteRelacion(fecha_inicial, fecha_final, empr_id, usua_id, formato, tipo) {
   const data = {
     fecha_inicial,
     fecha_final,
     empr_id,
     usua_id,
+    formato,
     tipo
   }
   var target
@@ -168,7 +169,7 @@ export function printReporteRelacion(fecha_inicial, fecha_final, empr_id, usua_i
   } else {
     target = '_self'
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/repo/prn/rela/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id + '/' + usua_id + '/' + tipo
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0].split(':')[0] + '/api' + '/repo/prn/rela/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id + '/' + usua_id + '/' + formato + '/' + tipo
   window.open(url, target, 'location=no, menubar=no')
 }
 

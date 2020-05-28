@@ -4722,6 +4722,7 @@ class ReporteRepository @Inject()(
       fecha_final: Long,
       empr_id: scala.Long,
       usua_id: scala.Long,
+      formato: String,
       tipo: String
   ): Array[Byte] = {
     val empresa = empresaService.buscarPorId(empr_id).get
@@ -4743,7 +4744,16 @@ class ReporteRepository @Inject()(
 
       val format = new SimpleDateFormat("yyyy-MM-dd")
       var os = Array[Byte]()
-      val compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_relacion.jasper";
+      val compiledFile = REPORT_DEFINITION_PATH + (tipo match {
+        case "1" => "siap_reporte_relacion.jasper"
+        case "2" => "siap_reporte_relacion_control.jasper"
+        case "3" => "siap_reporte_relacion_canalizacion.jasper"
+        case "4" => "siap_reporte_relacion_postes.jasper"
+        case "5" => "siap_reporte_relacion_redes.jasper"
+        case "6" => "siap_reporte_relacion_transformador.jasper"
+        case "7" => "siap_reporte_relacion_medidor.jasper"
+      })
+     
       val reportParams = new HashMap[String, java.lang.Object]()
       reportParams.put(
         "FECHA_INICIAL",
@@ -4759,7 +4769,7 @@ class ReporteRepository @Inject()(
         usuario.usua_nombre + " " + usuario.usua_apellido
       )
       reportParams.put("EMPR_ID", new java.lang.Long(empr_id.longValue()))
-      tipo match {
+      formato match {
         case "pdf" =>
           os = JasperRunManager.runReportToPdf(
             compiledFile,
@@ -4821,7 +4831,16 @@ class ReporteRepository @Inject()(
                     horizontalAlignment = HA.Center
                   )
                 )
-                .withCellValues("OPERACION Y MANTENIMIENTO PENDIENTE")
+                .withCellValues("OPERACION Y MANTENIMIENTO PENDIENTE - " + (tipo match {
+                  case "1" => "LUMINARIA"
+                  case "2" => "CONTROL"
+                  case "3" => "CANALIZACION"
+                  case "4" => "POSTES"
+                  case "5" => "REDES"
+                  case "6" => "TRANSFORMADOR"
+                  case "7" => "MEDIDOR"
+                 })
+                )
               val headerRow = com.norbitltd.spoiwo.model
                 .Row(style = CellStyle(font = Font(bold = true)))
                 .withCellValues(
@@ -4837,8 +4856,8 @@ class ReporteRepository @Inject()(
                   "Cuadrilla"
                 )
               var j = 2
-              val resultSet =
-                SQL(""" select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.reporte r 
+              var query = tipo match {
+                case "1" => """ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.reporte r 
                         left join siap.reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
@@ -4847,10 +4866,9 @@ class ReporteRepository @Inject()(
                         left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id}
-                        union all
-                        select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
-                        from siap.control_reporte r 
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} ) r"""
+              
+                case "2" => """ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.control_reporte r 
                         left join siap.control_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
@@ -4859,10 +4877,9 @@ class ReporteRepository @Inject()(
                         left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id}
-                        union all
-                        select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
-                        from siap.canalizacion_reporte r 
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} ) r"""
+              
+                case "3" => """ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.canalizacion_reporte r 
                         left join siap.canalizacion_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
@@ -4871,10 +4888,9 @@ class ReporteRepository @Inject()(
                         left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id}
-                        union all
-                        select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
-                        from siap.poste_reporte r 
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} ) r"""
+
+                case "4" => """ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.poste_reporte r 
                         left join siap.poste_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
@@ -4883,10 +4899,9 @@ class ReporteRepository @Inject()(
                         left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id}
-                        union all
-                        select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
-                        from siap.redes_reporte r 
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} ) r"""
+ 
+                case "5" => """ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.redes_reporte r 
                         left join siap.redes_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
@@ -4895,10 +4910,9 @@ class ReporteRepository @Inject()(
                         left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id}
-                        union all
-                        select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
-                        from siap.transformador_reporte r 
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} ) r"""
+ 
+                case "6" => """ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.transformador_reporte r 
                         left join siap.transformador_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
@@ -4907,10 +4921,9 @@ class ReporteRepository @Inject()(
                         left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id}
-                        union all
-                        select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
-                        from siap.medidor_reporte r 
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} ) r"""
+ 
+                case "7" => """ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.medidor_reporte r 
                         left join siap.medidor_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
@@ -4919,9 +4932,11 @@ class ReporteRepository @Inject()(
                         left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id}
-                        ) r
-                    """)
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} ) r"""
+                         
+              }
+              val resultSet =
+                SQL(query)
                   .on(
                     'fecha_inicial -> new DateTime(fi.getTimeInMillis),
                     'fecha_final -> new DateTime(ff.getTimeInMillis),

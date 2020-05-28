@@ -6,6 +6,14 @@
         <el-main>
             <el-form ref="relacionForm" :label-position="labelPosition">
                 <el-row :gutter="4">
+                  <el-col :span="24">
+                    <el-select autofocus :title="$t('reporte.tipo.select')" style="width: 80%" ref="tipo" v-model="tipo" name="tipo" :placeholder="$t('reporte.tipo.select')">
+                      <el-option v-for="t in tipo_inventario" :key="t.id" :label="t.descripcion.toUpperCase()" :value="t.id" >
+                      </el-option>   
+                    </el-select>
+                  </el-col>
+                </el-row>
+                <el-row :gutter="4">
                     <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                         <el-form-item :label="$t('informe.initialDate')">
                             <el-date-picker v-model="fecha_inicial" format="yyyy/MM/dd"></el-date-picker>
@@ -33,6 +41,7 @@ import { printReporteRelacion } from '@/api/reporte'
 export default {
   data() {
     return {
+      tipo: 1,
       fecha_inicial: null,
       fecha_final: null,
       labelPosition: 'top'
@@ -41,12 +50,13 @@ export default {
   computed: {
     ...mapGetters([
       'empresa',
-      'usuario'
+      'usuario',
+      'tipo_inventario'
     ])
   },
   methods: {
-    imprimir(tipo) {
-      printReporteRelacion(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.empresa.empr_id, this.usuario.usua_id, tipo)
+    imprimir(formato) {
+      printReporteRelacion(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.empresa.empr_id, this.usuario.usua_id, formato, this.tipo)
     }
   },
   beforeMount() {

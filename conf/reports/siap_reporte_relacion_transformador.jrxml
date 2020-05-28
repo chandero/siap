@@ -10,15 +10,15 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Siap_Adapter"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="siap"/>
 	<parameter name="FECHA_INICIAL" class="java.sql.Timestamp"/>
 	<parameter name="FECHA_FINAL" class="java.sql.Timestamp"/>
 	<parameter name="EMPRESA" class="java.lang.String"/>
 	<parameter name="USUARIO" class="java.lang.String"/>
 	<parameter name="EMPR_ID" class="java.lang.Long"/>
 	<queryString language="SQL">
-		<![CDATA[select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.reporte r 
-left join siap.reporte_adicional a on r.repo_id = a.repo_id
+		<![CDATA[select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.transformador_reporte r 
+left join siap.transformador_reporte_adicional a on r.repo_id = a.repo_id
 left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
 left join siap.actividad t on a.acti_id = t.acti_id
 left join siap.barrio b on r.barr_id = b.barr_id
@@ -220,7 +220,7 @@ order by r.reti_id, r.repo_id]]>
 						<rightPen lineWidth="0.0"/>
 					</box>
 					<textElement textAlignment="Center"/>
-					<textFieldExpression><![CDATA[CONCATENATE($F{reti_descripcion}, " PENDIENTES", " - " , "LUMINARIA")]]></textFieldExpression>
+					<textFieldExpression><![CDATA[CONCATENATE($F{reti_descripcion}, " PENDIENTES"," - ", "TRANSFORMADOR")]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement x="0" y="32" width="50" height="16" uuid="30aeb481-2a9f-44fd-9113-62c5e7eba641"/>

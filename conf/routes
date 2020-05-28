@@ -348,7 +348,7 @@ POST    /api/repo/upd                        controllers.ReporteController.actua
 GET     /api/repo/st/get                     controllers.ReporteController.estados
 GET     /api/repo/tp/get                     controllers.ReporteController.tipos
 GET     /api/repo/prn/repo/:id/:em           controllers.ReporteController.imprimirReporte(id: Long, em: Long)
-GET     /api/repo/prn/rela/:fi/:ff/:e/:u/:t  controllers.ReporteController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long, t:String)
+GET     /api/repo/prn/rela/:fi/:ff/:e/:u/:f/:t  controllers.ReporteController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long, f:String, t:String)
 GET     /api/repo/prn/form/:i/:e             controllers.ReporteController.imprimirFormato(i:Long, e:Long)
 GET     /api/repo/rang/:y/:m                 controllers.ReporteController.buscarPorRango(y: Int, m: Int)
 GET     /api/repo/gbtc/:t/:n                 controllers.ReporteController.buscarPorConsecutivo(t: Long, n:Int)
