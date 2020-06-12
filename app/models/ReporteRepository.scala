@@ -2720,7 +2720,7 @@ class ReporteRepository @Inject()(
         for (d <- direcciones) {
           if (d.aap_id != None) {
             var aap_elemento: AapElemento = new AapElemento(d.aap_id, None, None, None, None, None, None, reporte.reti_id, reporte.repo_consecutivo.map(_.toInt))
-            var aap: Aap = new Aap(d.aap_id, None, None, None, None, None, None, None, reporte.empr_id.get, reporte.repo_fechasolucion, d.aap_fechatoma, None, None, None, None, None, None, None, None, reporte.usua_id.get, Some(aap_elemento), None)
+            var aap: Aap = new Aap(d.aap_id, None, None, None, None, None, None, None, reporte.empr_id.get, reporte.repo_fechasolucion, reporte.repo_fechasolucion, None, None, None, None, None, None, None, None, reporte.usua_id.get, Some(aap_elemento), None)
             var aap_adicional: AapAdicional = new AapAdicional(d.aap_id, None, None, None, None, None, None, None, None, None)
             val aapOption =
               aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get)

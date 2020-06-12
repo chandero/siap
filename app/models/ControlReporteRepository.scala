@@ -3251,7 +3251,11 @@ class ControlReporteRepository @Inject()(
             var datoInsertado: Boolean = false
             var datoadicionalInsertado: Boolean = false
             var datoadicionalActualizado: Boolean = false
-            val aap = aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get).get
+            var aap = new Control(d.aap_id, reporte.empr_id, None, None, None, None, None, None)
+            aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get) match {
+              case Some(a) => aap = a
+              case None => aapService.crear(aap)
+            }
 
             var estado = 0
             d.even_estado match {
