@@ -25,6 +25,7 @@ import scala.collection.JavaConversions._
 
 import play.api._
 import play.api.Configuration._
+import com.typesafe.config.ConfigFactory
 
 import views._
 
@@ -43,7 +44,7 @@ trait Mailloy {
   
   var notifications = new ThreadLocal[MailloyContext]
   
-  val conf = play.api.Play.current.configuration
+  val conf = Configuration(ConfigFactory.load("application.conf"))
   val smtpHost = conf.get[String]("smtp.host")
   val smtpPort = conf.get[Int]("smtp.port")
   val smtpSsl  = conf.get[Boolean]("smtp.ssl")

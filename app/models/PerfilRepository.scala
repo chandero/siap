@@ -131,14 +131,15 @@ class PerfilRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCon
     * @param empr_id: Long
     * @return Perfil
      */
-     def buscarPorUsuarioEmpresa(usua_id: Long, empr_id: Long): Option[Usuario_Empresa_Perfil] = {
-         db.withConnection { implicit connection => 
-            SQL("SELECT uep.usua_id, uep.empr_id, uep.perf_id, p.perf_abreviatura FROM siap.usuario_empresa_perfil uep LEFT JOIN siap.perfil p ON uep.perf_id = p.perf_id WHERE uep.usua_id = {usua_id} and uep.empr_id = {empr_id}").
+     def buscarPorUsuarioEmpresa(usua_id: Long, empr_id: Long): List[String] = {
+         val _listB = db.withConnection { implicit connection => 
+            SQL("SELECT p.perf_abreviatura FROM siap.usuario_empresa_perfil uep LEFT JOIN siap.perfil p ON uep.perf_id = p.perf_id WHERE uep.usua_id = {usua_id} and uep.empr_id = {empr_id}").
             on(
                 'usua_id -> usua_id,
                 'empr_id -> empr_id
-            ).as(ueperfilparser.singleOpt)
+            ).as(SqlParser.scalar[String] *)
          }
+         _listB
      }
 
   def cuenta(): Long =  {

@@ -7,6 +7,7 @@ import play.api.libs.json.JodaReads
 import play.api.libs.json.JodaWrites
 import play.api.libs.functional.syntax._
 
+import scala.util.Try
 
 import pdi.jwt.JwtSession
 
@@ -51,45 +52,28 @@ class Utility {
     }
 
     def extraerUsuario(request: Request[AnyContent]): Option[Long] = {
-      val token = request.headers.get("Authorization")
-      token match {
+      val session = request.session
+      val usuaId = session.get("usua_id")
+      usuaId match {
         case None => {
-         return None
+          None
         }
-        case Some(token) => {
-          val session = JwtSession.deserialize(token)
-          val usuaId = session.get("usua_id")
-          usuaId match {
-            case None => {
-              None
-            }
-            case Some(usuaId) => {
-              Option(usuaId.as[Long])
-            }
-          }
+        case Some(usuaId) => {
+          Some(usuaId.toLong)
         }
       }
     }
 
     def extraerEmpresa(request: Request[AnyContent]): Option[Long] = {
-      val token = request.headers.get("Authorization")
-      token match {
+      val session = request.session
+      val emprId = session.get("empr_id")
+      emprId match {
         case None => {
-         return None
-        }
-        case Some(token) => {
-          val session = JwtSession.deserialize(token)
-          val emprId = session.get("empr_id")
-          emprId match {
-            case None => {
-              None
-            }
-            case Some(emprId) => {
-              println("Empresa Id:" + emprId)
-              Option(emprId.as[Long])
-            }
+            None
           }
-        }
+        case Some(emprId) => {
+            Some(emprId.toLong)
+          }
       }
     }
 

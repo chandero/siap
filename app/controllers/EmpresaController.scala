@@ -54,14 +54,19 @@ class EmpresaController @Inject()(
           Future.successful(Forbidden("Dude, you’re not logged in."))
         }
         case Some(token) => {
-          val session = JwtSession.deserialize(token)
+          println("token:" + token)
+          val session = request.session
+          // val session = JwtSession.deserialize(token)
+          println("session: " + session.toString)
           val usuaId = session.get("usua_id")
+          println("usua_id:" + usuaId)          
           usuaId match {
             case None => {
               Future.successful(Ok)
             }
             case Some(usuaId) => {
-              empresaService.buscarPorUsuario(usuaId.as[Long]).map { empresas =>
+              println("usua_id:" + usuaId)
+              empresaService.buscarPorUsuario(usuaId.toLong).map { empresas =>
                 Ok(Json.toJson(empresas))
               }
             }
@@ -73,34 +78,40 @@ class EmpresaController @Inject()(
   def seleccionarEmpresa(empr_id: Long) =
     authenticatedUserAction.async { implicit request: Request[AnyContent] =>
     val token = request.headers.get("Authorization")
-    var session = JwtSession.deserialize(token.get)
-    session = session + ("empr_id", empr_id)
+    var session = request.session
+    // var session = JwtSession.deserialize(token.get)
+    // session = session + ("empr_id", empr_id)
+    session = session + ("empr_id" -> empr_id.toString())
     val empresa = empresaService.buscarPorId(empr_id)
-    val empresaToken  = session.serialize
+    val empresaToken  = session.toString()
     val usua_id = Utility.extraerUsuario(request)
     val uep = perfilService.buscarPorUsuarioEmpresa(usua_id.get, empr_id)
+    var newsession = request.session
+    newsession = newsession + ("usua_id" -> usua_id.get.toString())
+    newsession = newsession + ("empr_id" -> empr_id.toString())
     val company = new EmpresaDto(empresa.get.empr_id,
                                  empresa.get.empr_descripcion,
                                  empresaToken, 
-                                 uep.get.perf_abreviatura.get, 
+                                 uep,
                                  empresa.get.muni_descripcion.get, 
                                  empresa.get.depa_descripcion.get, 
                                  Some(empresa.get.empr_sigla))
-    Future.successful(Ok(Json.toJson(company)))    
+    Future.successful(Ok(Json.toJson(company)).withSession(newsession))    
     }
 
   def empresainfo() =
     authenticatedUserAction.async { implicit request: Request[AnyContent] =>
     val token = request.headers.get("Authorization")
-    var session = JwtSession.deserialize(token.get)
+    var session = request.session
+    // var session = JwtSession.deserialize(token.get)
     var usua_id = Utility.extraerUsuario(request)
     var empr_id = Utility.extraerEmpresa(request)
     val empresa = empresaService.buscarPorId(empr_id.get)
-    val empresaToken  = session.serialize
+    val empresaToken  = session.toString()
     val uep = perfilService.buscarPorUsuarioEmpresa(usua_id.get, empr_id.get)
     val company = new EmpresaDto(empresa.get.empr_id,
                                  empresa.get.empr_descripcion,
-                                 empresaToken, uep.get.perf_abreviatura.get, empresa.get.muni_descripcion.get, empresa.get.depa_descripcion.get, Some(empresa.get.empr_sigla))
+                                 empresaToken, uep, empresa.get.muni_descripcion.get, empresa.get.depa_descripcion.get, Some(empresa.get.empr_sigla))
     Future.successful(Ok(Json.toJson(company)))    
     }    
 

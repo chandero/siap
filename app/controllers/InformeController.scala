@@ -216,6 +216,34 @@ class InformeController @Inject()(
       Future.successful(Ok(os).as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").withHeaders("Content-Disposition" -> attach ))
   } 
   
+  def siap_control_xls(fecha_corte: scala.Long, empr_id: Long) = Action { 
+      val os = informeService.siap_control_xls(fecha_corte, empr_id)
+      val dt = new DateTime(fecha_corte)
+      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+      val filename = "Inventario_Control_" + fmt.print(dt) + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Ok(os).as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").withHeaders("Content-Disposition" -> attach )
+  }  
+
+  def siap_control_filtro_xls(fecha_corte: Long, orderby: String, filtrado: String, empr_id: Long) = Action.async { implicit request: Request[AnyContent] =>
+      val dt = new DateTime(fecha_corte)
+      val order = (Base64.getDecoder().decode(orderby).map(_.toChar)).mkString
+      println("orderby: " + order)
+      val filters = (Base64.getDecoder().decode(filtrado).map(_.toChar)).mkString
+      println("filtro: " + filters)
+      val filter = Json.parse(filters).as[QueryDto]
+      val filtro_a = Utility.procesarFiltrado(filter)
+      var filtro = filtro_a.replace("\"", "'")
+      if (filtro == "()") {
+         filtro = ""
+      }
+      val os = informeService.siap_control_filtro_xls(fecha_corte, empr_id, order, filtro)
+      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+      val filename = "Inventario_Control_Filtrado_" + fmt.print(dt) + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Future.successful(Ok(os).as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").withHeaders("Content-Disposition" -> attach ))
+  } 
+
   def siap_material_repetido_xls(fecha_inicial: scala.Long, fecha_final: scala.Long, tiel_id: scala.Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
       informeService.siap_material_repetido_xls(fecha_inicial, fecha_final, tiel_id, empr_id.get).map {

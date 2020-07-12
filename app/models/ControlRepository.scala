@@ -165,7 +165,10 @@ class ControlRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
    def cuenta(empr_id: Long, filter: String): Long =  {
      db.withConnection{ implicit connection =>
 
-      var query = """SELECT COUNT(*) AS c FROM siap.control a WHERE a.esta_id <> 9 and a.empr_id = {empr_id}"""
+      var query = """SELECT COUNT(*) AS c FROM siap.control a 
+                     LEFT JOIN siap.barrio b ON b.barr_id = a.barr_id
+                     LEFT JOIN siap.tipobarrio t ON t.tiba_id = b.tiba_id
+                     WHERE a.esta_id <> 9 and a.empr_id = {empr_id}"""
          
       if (!filter.isEmpty){
           println("Filtro: " + filter)
@@ -189,7 +192,10 @@ class ControlRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
     def todos(empr_id: Long, page_size: Long, current_page: Long, orderby: String, filter: String): Future[Iterable[Control]] = Future[Iterable[Control]] {
         db.withConnection { implicit connection =>
         var lista_result = new ListBuffer[Control]
-        var query = """SELECT * FROM siap.control a WHERE a.esta_id <> 9 and a.empr_id = {empr_id}"""
+        var query = """SELECT * FROM siap.control a 
+                        LEFT JOIN siap.barrio b ON b.barr_id = a.barr_id
+                        LEFT JOIN siap.tipobarrio t ON t.tiba_id = b.tiba_id
+                        WHERE a.esta_id <> 9 and a.empr_id = {empr_id}"""
         
         if (!filter.isEmpty){
           println("Filtro: " + filter)

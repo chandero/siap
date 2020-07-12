@@ -1742,12 +1742,12 @@ class CanalizacionReporteRepository @Inject()(
   def buscarPorId(repo_id: scala.Long): Option[Reporte] = {
     db.withConnection { implicit connection =>
       val r = SQL("""SELECT * FROM siap.canalizacion_reporte r
-                            INNER JOIN siap.canalizacion_reporte_tipo t on r.reti_id = t.reti_id
+                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
                             LEFT JOIN siap.canalizacion_reporte_adicional ra on r.repo_id = ra.repo_id
                             LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
                             LEFT JOIN siap.origen o on r.orig_id = o.orig_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
-                            INNER JOIN siap.canalizacion_reporte_estado e on r.rees_id = e.rees_id
+                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
                     WHERE r.repo_id = {repo_id}""")
         .on(
           'repo_id -> repo_id
@@ -2326,23 +2326,57 @@ class CanalizacionReporteRepository @Inject()(
           new LocalDateTime(Calendar.getInstance().getTimeInMillis())
         val consec = consecutivo(reporte.reti_id.get)
         if (consec > 0) {
+          println("canalizacion repo_fecharecepcion: " + reporte.repo_fecharecepcion)
+          println("canalizacion repo_direccion: " + reporte.repo_direccion)
+          println("canalizacion repo_nombre: " + reporte.repo_nombre)
+          println("canalizacion repo_telefono: " + reporte.repo_telefono)
+          println("canalizacion orig_id: " + reporte.orig_id)
+          println("canalizacion barr_id: " + reporte.barr_id)
+          println("canalizacion usua_id: " + reporte.usua_id)
+          println("canalizacion empr_id: " + reporte.empr_id)
+          println("canalizacion rees_id: " + reporte.rees_id)
+          println("canalizacion repo_descripcion: " + reporte.repo_descripcion)
+          println("canalizacion reti_id: " + reporte.reti_id)
+          println("canalizacion repo_consecutivo: " + consec)
+          println("canalizacion tiba_id: " + reporte.tiba_id)
           val id: scala.Long = SQL(
-            "INSERT INTO siap.canalizacion_reporte (repo_fecharecepcion, repo_direccion, repo_nombre, repo_telefono, repo_fechasolucion, repo_horainicio, repo_horafin, repo_reportetecnico, repo_descripcion, rees_id, orig_id, barr_id, empr_id, tiba_id, usua_id, reti_id, repo_consecutivo) VALUES ({repo_fecharecepcion}, {repo_direccion}, {repo_nombre}, {repo_telefono}, {repo_fechasolucion}, {repo_horainicio}, {repo_horafin}, {repo_reportetecnico}, {repo_descripcion}, {rees_id}, {orig_id}, {barr_id}, {empr_id}, {tiba_id}, {usua_id}, {reti_id}, {repo_consecutivo})"
+            """INSERT INTO siap.canalizacion_reporte (repo_fecharecepcion, 
+                                                      repo_direccion, 
+                                                      repo_nombre, 
+                                                      repo_telefono, 
+                                                      repo_descripcion, 
+                                                      rees_id, 
+                                                      orig_id, 
+                                                      barr_id, 
+                                                      empr_id, 
+                                                      tiba_id, 
+                                                      usua_id, 
+                                                      reti_id, 
+                                                      repo_consecutivo) VALUES (
+                                                        {repo_fecharecepcion}, 
+                                                        {repo_direccion}, 
+                                                        {repo_nombre}, 
+                                                        {repo_telefono}, 
+                                                        {repo_descripcion}, 
+                                                        {rees_id}, 
+                                                        {orig_id}, 
+                                                        {barr_id}, 
+                                                        {empr_id}, 
+                                                        {tiba_id}, 
+                                                        {usua_id}, 
+                                                        {reti_id}, 
+                                                        {repo_consecutivo})"""
           ).on(
               'repo_fecharecepcion -> reporte.repo_fecharecepcion,
               'repo_direccion -> reporte.repo_direccion,
               'repo_nombre -> reporte.repo_nombre,
               'repo_telefono -> reporte.repo_telefono,
-              'repo_fechasolucion -> reporte.repo_fechasolucion,
-              'repo_reportetecnico -> reporte.repo_reportetecnico,
               'orig_id -> reporte.orig_id,
               'barr_id -> reporte.barr_id,
               'usua_id -> reporte.usua_id,
               'empr_id -> reporte.empr_id,
               'rees_id -> reporte.rees_id,
               'repo_descripcion -> reporte.repo_descripcion,
-              'repo_horainicio -> reporte.repo_horainicio,
-              'repo_horafin -> reporte.repo_horafin,
               'reti_id -> reporte.reti_id,
               'repo_consecutivo -> consec,
               'tiba_id -> reporte.tiba_id
@@ -4645,17 +4679,17 @@ class CanalizacionReporteRepository @Inject()(
     db.withConnection { implicit connection =>
       empresaService.buscarPorId(empr_id).map { empresa =>
         try {
-          var compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte.jasper";
+          var compiledFile = REPORT_DEFINITION_PATH + "siap_canalizacion_reporte.jasper";
           reporte match {
             case Some(r) =>
               if (reporte.get.reti_id.get == 2 || reporte.get.reti_id.get == 6) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte_expansion.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_canalizacion_reporte_expansion.jasper"
               } else if (reporte.get.reti_id.get == 8) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte_retiro.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_canalizacion_reporte_retiro.jasper"
               } else if (reporte.get.reti_id.get == 3) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte_reubicacion.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_canalizacion_reporte_reubicacion.jasper"
               } else if (reporte.get.reti_id.get == 9) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte_cambio_medida.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_canalizacion_reporte_cambio_medida.jasper"
               }
             case None => None
           }

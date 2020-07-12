@@ -86,6 +86,15 @@ case class Siap_detallado_material(
     even_codigo_instalado: Option[String],
     even_cantidad_instalado: Option[Double]
 )
+
+case class Siap_control (
+    aap_id: Option[scala.Long],
+    esta_descripcion: Option[String],
+    aap_direccion: Option[String],
+    barr_descripcion: Option[String],
+    tiba_descripcion: Option[String]
+)
+
 case class Siap_inventario_a(
     aap_id: Option[scala.Long],
     aap_apoyo: Option[String],
@@ -291,6 +300,39 @@ object Siap_eficiencia {
     }
   }
 }
+
+object Siap_control {
+  implicit val siaWrites = new Writes[Siap_control] {
+    def writes(sia: Siap_control) = Json.obj(
+      "aap_id" -> sia.aap_id,
+      "esta_descripcion" -> sia.esta_descripcion,
+      "aap_direccion" -> sia.aap_direccion,
+      "barr_descripcion" -> sia.barr_descripcion,
+      "tiba_descripcion" -> sia.tiba_descripcion
+    )
+  }
+
+  val Siap_control_set = {
+      get[Option[scala.Long]]("aap_id") ~
+      get[Option[String]]("esta_descripcion") ~
+      get[Option[String]]("aap_direccion") ~
+      get[Option[String]]("barr_descripcion") ~
+      get[Option[String]]("tiba_descripcion") map {
+      case aap_id ~
+            esta_descripcion ~
+            aap_direccion ~
+            barr_descripcion ~
+            tiba_descripcion => new Siap_control(
+                                      aap_id,
+                                      esta_descripcion,
+                                      aap_direccion,
+                                      barr_descripcion,
+                                      tiba_descripcion
+                                    )
+      }
+    }
+}
+
 
 object Siap_inventario_a {
   implicit val siaWrites = new Writes[Siap_inventario_a] {
@@ -2695,6 +2737,79 @@ ORDER BY e.reti_id, e.elem_codigo""")
     }
   }
 
+  def siap_control_xls(fecha_corte: Long, empr_id: Long): Array[Byte] = {
+    db.withConnection { implicit connection =>
+      val dt = new DateTime(fecha_corte)
+      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+      val sheet = Sheet(
+        name = "Inventario" + fmt.print(dt),
+        rows = {
+          val headerRow = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "Código",
+              "Estado",
+              "Dirección",
+              "Barrio",
+              "Sector"
+            )
+          val resultSet =
+            SQL("""SELECT
+	                        a.aap_id,
+                          s.esta_descripcion,
+	                        a.aap_direccion,
+	                        b.barr_descripcion,
+	                        t.tiba_descripcion
+                    FROM siap.control a
+                    LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
+                    LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
+                    LEFT JOIN siap.tipobarrio t on t.tiba_id = b.tiba_id
+                    WHERE a.empr_id = {empr_id} and a.esta_id < 9
+                    ORDER BY a.aap_id ASC
+                    """)
+              .on(
+                'fecha_corte -> new DateTime(fecha_corte),
+                'empr_id -> empr_id
+              )
+              .as(Siap_control.Siap_control_set *)
+          val rows = resultSet.map {
+            i =>
+              com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(
+                  i.aap_id match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.esta_descripcion match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.aap_direccion match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.barr_descripcion match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.tiba_descripcion match {
+                    case Some(value) => value
+                    case None        => ""
+                  }
+                )
+          }
+          headerRow :: rows.toList
+        }
+      )
+      println("Escribiendo en el Stream")
+      var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+      Workbook(sheet).writeToOutputStream(os)
+      println("Stream Listo")
+      os.toByteArray
+    }
+  }
+
   def siap_inventario_web(
       fecha_corte: Long,
       empr_id: Long
@@ -2994,6 +3109,92 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     case None        => ""
                   },
                   i.tran_numero match {
+                    case Some(value) => value
+                    case None        => ""
+                  }
+                )
+          }
+          headerRow :: rows.toList
+        }
+      )
+      println("Escribiendo en el Stream")
+      var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+      Workbook(sheet).writeToOutputStream(os)
+      println("Stream Listo")
+      os.toByteArray
+    }
+  }
+
+  def siap_control_filtro_xls(
+      fecha_corte: Long,
+      empr_id: Long,
+      orderby: String,
+      filter: String
+  ): Array[Byte] = {
+    db.withConnection { implicit connection =>
+      val dt = new DateTime(fecha_corte)
+      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+      val sheet = Sheet(
+        name = "Control_" + fmt.print(dt),
+        rows = {
+          val headerRow = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "Código",
+              "Estado",
+              "Dirección",
+              "Barrio",
+              "Sector",
+            )
+          var query = """SELECT
+                          a.aap_id,
+                          s.esta_descripcion,
+                          a.aap_direccion,
+                          b.barr_descripcion,
+                          t.tiba_descripcion
+                        FROM siap.control a
+                        LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
+                        LEFT JOIN siap.barrio b on b.barr_id = a.barr_id
+                        LEFT JOIN siap.tipobarrio t on t.tiba_id = b.tiba_id
+                        WHERE a.empr_id = {empr_id} and a.esta_id < 9
+                      """
+          println("filtro a aplicar:" + filter)
+          if (!filter.isEmpty) {
+            query = query + " and " + filter
+          }
+          println("orderby a aplicar: " + orderby)
+          if (!orderby.isEmpty) {
+            query = query + s" ORDER BY $orderby"
+          }  
+          val resultSet =
+            SQL(query)
+              .on(
+                'fecha_corte -> new DateTime(fecha_corte),
+                'empr_id -> empr_id
+              )
+              .as(Siap_control.Siap_control_set *)
+          val rows = resultSet.map {
+            i =>
+              com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(
+                  i.aap_id match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.esta_descripcion match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.aap_direccion match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.barr_descripcion match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.tiba_descripcion match {
                     case Some(value) => value
                     case None        => ""
                   }
@@ -9103,7 +9304,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 header0Row :: header1Row :: rows.toList
             }
         )
-        //_listSheet += sheet
+        _listSheet += sheet
       }
       // 
       println("Escribiendo en el Stream")

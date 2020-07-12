@@ -88,8 +88,9 @@ class ReporteController @Inject()(
 
   def buscarPorConsecutivo(reti_id: Long, repo_consecutivo: Int) = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
+      println("por consecutivo")
       val empr_id = Utility.extraerEmpresa(request)
-      val reporte = reporteService.buscarPorConsecutivoConsulta(reti_id, repo_consecutivo, empr_id.get)
+      val reporte = reporteService.buscarPorConsecutivo(reti_id, repo_consecutivo, empr_id.get)
       reporte match {
         case None => {
           Future.successful(NotFound(Json.toJson("false")))
@@ -108,6 +109,13 @@ class ReporteController @Inject()(
       }
   }
 
+  def buscarPorAap(aap_id: Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      reporteService.reportesporaap(aap_id, empr_id.get).map { reportes =>
+        Ok(Json.toJson(reportes))
+      }
+  }
 
   def guardarReporte() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
@@ -230,6 +238,7 @@ class ReporteController @Inject()(
 
   def buscarPorConsecutivoWeb(repo_consecutivo: Int, empr_id: Long, token: String) = Action.async {
     implicit request: Request[AnyContent] =>
+     println("por consecutivo web")
      val secret = config.get[String]("play.http.secret.key")
      if (secret == token) {
       val reporte = reporteService.buscarPorConsecutivoWeb(repo_consecutivo, empr_id)
@@ -307,10 +316,12 @@ class ReporteController @Inject()(
   def actualizarHistoria() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
     val empr_id = Utility.extraerEmpresa(request)
-    if (reporteService.actualizarHistoria(empr_id.get)) {
-      Future.successful(Ok(Json.toJson("true"))) 
-    } else {
-      Future.successful(ServiceUnavailable(Json.toJson("false")))
+    reporteService.actualizarHistoria(empr_id.get).map { respuesta => 
+      if (respuesta) {
+        Ok(Json.toJson("true"))
+      } else {
+        ServiceUnavailable(Json.toJson("false"))
+      }
     }
   }
 

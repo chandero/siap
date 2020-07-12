@@ -214,7 +214,7 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
   def buscarPorId(elem_id: Long): Option[Elemento] = {
     db.withConnection { implicit connection =>
       var elemen: Option[Elemento] = SQL(
-        "SELECT * FROM siap.elemento WHERE elem_id = {elem_id} and elem_estado <> 9"
+        "SELECT * FROM siap.elemento WHERE elem_id = {elem_id}"
       ).on(
           'elem_id -> elem_id
         )

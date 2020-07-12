@@ -2,6 +2,8 @@ package controllers
 
 import javax.inject.Inject
 import java.time.Instant
+import java.util.UUID.randomUUID
+
 import org.joda.time.DateTime
 import models._
 import dto._
@@ -45,20 +47,21 @@ class UsuarioController @Inject()(
       usuarioService.autenticar(usua_email, usua_clave).flatMap { esValido =>
         if (esValido) {
           usuarioService.buscarPorEmail(usua_email).flatMap { usuario =>
-            var session = JwtSession()
-            session = session + ("usua_id", usuario.get.usua_id.get)
-            val token = session.serialize
+            //var session = JwtSession()
+            var session = request.session
+            session = session + ("usua_id" -> usuario.get.usua_id.get.toString())
+            val token = session.toString()
             val user = new UsuarioDto(usuario.get.usua_id,
                                       usuario.get.usua_email,
                                       Some(""),
                                       usuario.get.usua_nombre,
                                       usuario.get.usua_apellido,
-                                      Some(token),
+                                      Some(randomUUID.toString()),
                                       0)
-            Future(Ok(Json.toJson(user)))
+            Future(Ok(Json.toJson(user)).withSession(request.session + ("usua_id" -> usuario.get.usua_id.get.toString())))
           }
         } else {
-          Future(Unauthorized("Usuario o Contresaña Incorrecto!"))
+          Future(Unauthorized("Usuario o Contresaña Incorrecto!").withNewSession)
         }
       }
     }
@@ -76,8 +79,6 @@ class UsuarioController @Inject()(
 
   def userinfo(): Action[AnyContent] = Action.async {
     implicit request: Request[AnyContent] =>
-      val token = request.headers.get("Authorization")
-      var session = JwtSession.deserialize(token.get)
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
       val uep = perfilService.buscarPorUsuarioEmpresa(usua_id.get, empr_id.get)
@@ -93,10 +94,10 @@ class UsuarioController @Inject()(
                   Future.successful(Forbidden("Amigo, no estas registrado"))
                 }
                 case Some(empresa) => {
-                  var newsession = JwtSession()
-                  newsession = newsession + ("usua_id", usuario.usua_id.get)
-                  newsession = newsession + ("empr_id", empresa.empr_id.get)
-                  var newtoken = newsession.serialize
+                  var newsession = request.session
+                  newsession = newsession + ("usua_id" -> usuario.usua_id.get.toString())
+                  newsession = newsession + ("empr_id" -> empresa.empr_id.get.toString())
+                  var newtoken = newsession.toString
                   var userinfo = new UserInfoDto(
                     usuario.usua_id.get,
                     usuario.usua_email,
@@ -104,10 +105,10 @@ class UsuarioController @Inject()(
                     usuario.usua_apellido,
                     empresa.empr_id.get,
                     empresa.empr_descripcion,
-                    newtoken,
-                    uep.get.perf_abreviatura.get
+                    "",
+                    uep
                   )
-                  Future.successful(Ok(Json.toJson(userinfo)))
+                  Future.successful(Ok(Json.toJson(userinfo)).withSession(newsession))
                 }
               }
             }
@@ -162,5 +163,9 @@ class UsuarioController @Inject()(
     } else {
       NotFound
     }
+  }
+
+  def logout() = authenticatedUserAction.async { implicit request => 
+    Future.successful(Ok("logout").withNewSession)
   }
 }

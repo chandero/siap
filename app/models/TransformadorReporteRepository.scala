@@ -4645,17 +4645,17 @@ class TransformadorReporteRepository @Inject()(
     db.withConnection { implicit connection =>
       empresaService.buscarPorId(empr_id).map { empresa =>
         try {
-          var compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte.jasper";
+          var compiledFile = REPORT_DEFINITION_PATH + "siap_transformador_reporte.jasper";
           reporte match {
             case Some(r) =>
               if (reporte.get.reti_id.get == 2 || reporte.get.reti_id.get == 6) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte_expansion.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_transformador_reporte_expansion.jasper"
               } else if (reporte.get.reti_id.get == 8) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte_retiro.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_transformador_reporte_retiro.jasper"
               } else if (reporte.get.reti_id.get == 3) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte_reubicacion.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_transformador_reporte_reubicacion.jasper"
               } else if (reporte.get.reti_id.get == 9) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_control_reporte_cambio_medida.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_transformador_reporte_cambio_medida.jasper"
               }
             case None => None
           }

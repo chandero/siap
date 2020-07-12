@@ -22,6 +22,7 @@ GET     /api/usua/get/:p/:c             controllers.UsuarioController.todos(p: L
 GET     /api/usua/get/cuad              controllers.UsuarioController.paraCuadrilla()
 GET     /api/usua/del/:id               controllers.UsuarioController.borrarUsuario(id: Long)
 POST    /api/usua/save                  controllers.UsuarioController.guardarUsuario
+POST     /api/login/logout              controllers.UsuarioController.logout
 # Empresa
 GET     /api/empr/get/:p/:c             controllers.EmpresaController.todos(p:Long, c:Long)
 GET     /api/empr/:id                   controllers.EmpresaController.buscarPorId(id: Long)
@@ -356,8 +357,9 @@ GET     /api/repo/vali/:e/:c                 controllers.ReporteController.valid
 GET     /api/repo/venc/get                   controllers.ReporteController.siap_reporte_vencido
 GET     /api/repo/vadi/:t/:n                 controllers.ReporteController.validarReporteDiligenciado(t: Long, n: Int)
 POST    /api/repo/grw                        controllers.ReporteController.guardarReporteWeb 
-GET     /api/repo/gbtc/:c/:e/:t              controllers.ReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
+GET     /api/repo/gbtcw/:c/:e/:t              controllers.ReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
 GET     /api/repo/conv/:id                   controllers.ReporteController.convertir(id: Long)
+GET     /api/repo/gbaap/:id                  controllers.ReporteController.buscarPorAap(id: Long)
 
 # ControlReporte
 POST    /api/core/get                        controllers.ControlReporteController.todos
@@ -517,6 +519,7 @@ GET     /api/info/sdwx/:fi/:ff                  controllers.InformeController.si
 GET     /api/info/sdtx/:fi/:ff                  controllers.InformeController.siap_detallado_retiro_xls(fi: Long, ff: Long)
 GET     /api/info/sig/:fc/:ps/:cp               controllers.InformeController.siap_inventario(fc: Long, ps: Long, cp: Long)
 GET     /api/info/sigx/:fc/:e                   controllers.InformeController.siap_inventario_xls(fc: Long, e: Long)
+GET     /api/info/scgx/:fc/:e                   controllers.InformeController.siap_control_xls(fc: Long, e: Long)
 GET     /api/info/sdx/:fi/:ff/:wt/:e            controllers.InformeController.siap_disponibilidad_xls(fi: Long, ff: Long, wt:Double, e: Long)
 GET     /api/info/sde/:fi/:ff/:e                controllers.InformeController.siap_eficiencia_xls(fi: Long, ff: Long, e: Long)
 GET     /api/info/sgr/:fi/:ff/:uid/:eid/:num    controllers.InformeController.siap_graficos_reporte(fi: Long, ff: Long, uid: Long, eid: Long, num: Int)
@@ -524,6 +527,7 @@ GET     /api/info/svpb/:fi/:ff                  controllers.InformeController.si
 GET     /api/info/scc/:fi/:ff/:e                controllers.InformeController.siap_calculo_carga_xls(fi: Long, ff: Long, e: Long)
 GET     /api/info/sdrr/:fi/:ff                  controllers.InformeController.siap_detallado_retiro_reubicacion_xls(fi:Long, ff:Long)
 GET     /api/info/sifx/:fc/:o/:f/:e             controllers.InformeController.siap_inventario_filtro_xls(fc: Long, o: String, f:String, e: Long)
+GET     /api/info/scfx/:fc/:o/:f/:e             controllers.InformeController.siap_control_filtro_xls(fc: Long, o: String, f:String, e: Long)
 GET     /api/info/smx/:e/:t                     controllers.InformeController.siap_medidor_xls(e: Long, t:String)
 GET     /api/info/stx/:e/:t                     controllers.InformeController.siap_transformador_xls(e: Long, t:String)
 GET     /api/info/spx/:e/:t                     controllers.InformeController.siap_poste_xls(e: Long, t:String)
