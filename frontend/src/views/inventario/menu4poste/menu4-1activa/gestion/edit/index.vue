@@ -795,8 +795,7 @@ export default {
           this.poste.aap_id +
           ' ' +
           this.poste.aap_direccion,
-        type: 'success',
-        onClose: this.limpiarAndBack()
+        type: 'success'
       })
     },
     error (e) {

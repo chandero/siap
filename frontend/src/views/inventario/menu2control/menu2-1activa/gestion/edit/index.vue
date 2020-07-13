@@ -740,8 +740,7 @@ export default {
           this.control.aap_id +
           ' ' +
           this.control.aap_direccion,
-        type: 'success',
-        onClose: this.limpiarAndBack()
+        type: 'success'
       })
     },
     error (e) {

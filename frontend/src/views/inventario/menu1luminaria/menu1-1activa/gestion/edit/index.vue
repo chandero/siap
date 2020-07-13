@@ -593,8 +593,7 @@ export default {
           this.activo.aap.aap_id +
           ' ' +
           this.activo.aap.aap_direccion,
-        type: 'success',
-        onClose: this.limpiarAndBack()
+        type: 'success'
       })
     },
     error (e) {

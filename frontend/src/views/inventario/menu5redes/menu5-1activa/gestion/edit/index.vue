@@ -740,8 +740,7 @@ export default {
           this.redes.aap_id +
           ' ' +
           this.redes.aap_direccion,
-        type: 'success',
-        onClose: this.limpiarAndBack()
+        type: 'success'
       })
     },
     error (e) {

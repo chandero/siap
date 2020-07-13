@@ -394,7 +394,7 @@ export const asyncRouterMap = [
     meta: {
       title: 'autorizacion',
       icon: 'el-icon-unlock',
-      roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor']
+      roles: ['super', 'admin', 'gerencia', 'supervisor']
     },
     children: [
       { path: 'crearaap', component: _import('autorizacion/crearaap/index'), name: 'crearaap', meta: { title: 'crearaap', roles: ['super', 'admin', 'ingeniero', 'gerencia', 'supervisor'] } },
