@@ -92,6 +92,17 @@ export function updateReporte (reporte) {
   })
 }
 
+export function updateReporteParcial (reporte) {
+  const data = {
+    reporte
+  }
+  return request({
+    url: '/repo/pupd',
+    method: 'post',
+    data: data.reporte
+  })
+}
+
 export function deleteReporte (repo_id) {
   const data = {
     repo_id

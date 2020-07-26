@@ -2723,6 +2723,104 @@ class ReporteRepository @Inject()(
   }
 
   /**
+    * Actualizar Parcial Reporte
+    */
+  def actualizarParcial(reporte: Reporte): Future[Boolean] =
+    Future {
+      
+        val fecha: LocalDate =
+          new LocalDate(Calendar.getInstance().getTimeInMillis())
+        val hora: LocalDateTime =
+          new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+          var upd_repo = db.withConnection { implicit connection =>
+            var upd1 = SQL("""UPDATE siap.reporte SET 
+              repo_fecharecepcion = {repo_fecharecepcion}, 
+              repo_direccion = {repo_direccion}, 
+              repo_nombre = {repo_nombre}, 
+              repo_telefono = {repo_telefono},
+              repo_descripcion = {repo_descripcion}, 
+              rees_id = {rees_id}, 
+              orig_id = {orig_id}, 
+              barr_id = {barr_id}, 
+              empr_id = {empr_id},
+              usua_id = {usua_id} 
+              WHERE repo_id = {repo_id}"""
+          ).on(
+              'repo_fecharecepcion -> reporte.repo_fecharecepcion,
+              'repo_direccion -> reporte.repo_direccion,
+              'repo_nombre -> reporte.repo_nombre,
+              'repo_telefono -> reporte.repo_telefono,
+              'orig_id -> reporte.orig_id,
+              'barr_id -> reporte.barr_id,
+              'usua_id -> reporte.usua_id,
+              'empr_id -> reporte.empr_id,
+              'rees_id -> reporte.rees_id,
+              'repo_descripcion -> reporte.repo_descripcion,
+              'repo_id -> reporte.repo_id
+            )
+            .executeUpdate() > 0
+            var upd2 = reporte.adicional match {
+            case Some(adicional) => SQL("""UPDATE siap.reporte_adicional SET
+                    repo_tipo_expansion = {repo_tipo_expansion}, 
+                    repo_luminaria = {repo_luminaria},
+                    repo_redes = {repo_redes},
+                    repo_poste = {repo_poste},
+                    repo_email = {repo_email},
+                    acti_id = {acti_id},
+                    repo_codigo = {repo_codigo},
+                    repo_apoyo = {repo_apoyo},
+                    urba_id = {urba_id},
+                    muot_id = {muot_id},
+                    medi_id = {medi_id},
+                    tran_id = {tran_id},
+                    medi_acta = {medi_acta},
+                    aaco_id_anterior = {aaco_id_anterior},
+                    aaco_id_nuevo = {aaco_id_nuevo}
+                  WHERE repo_id = {repo_id}""")
+              .on(
+                'repo_tipo_expansion -> adicional.repo_tipo_expansion,
+                'repo_luminaria -> adicional.repo_luminaria,
+                'repo_redes -> adicional.repo_redes,
+                'repo_poste -> adicional.repo_poste,
+                'repo_email -> adicional.repo_email,
+                'acti_id -> adicional.acti_id,
+                'repo_codigo -> adicional.repo_codigo,
+                'repo_apoyo -> adicional.repo_apoyo,
+                'urba_id -> adicional.urba_id,
+                'muot_id -> adicional.muot_id,
+                'medi_id -> adicional.medi_id,
+                'tran_id -> adicional.tran_id,
+                'medi_acta -> adicional.medi_acta,
+                'aaco_id_anterior -> adicional.aaco_id_anterior,
+                'aaco_id_nuevo -> adicional.aaco_id_nuevo,
+                'repo_id -> adicional.repo_id
+              )
+              .executeUpdate() > 0
+
+              case None => true
+            }
+            var ins = SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "repo_id",
+              'audi_valorantiguo -> "",
+              'audi_valornuevo -> reporte.repo_id,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+
+            upd1 && upd2
+        }
+        upd_repo
+
+  }
+
+  /**
     * Actualizar Reporte
     * @param reporte: Reporte
     */

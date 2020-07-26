@@ -7,6 +7,7 @@ version := "1.1"
 
 packageSummary in Windows := "SIAP v1.1"
 packageDescription in Windows := "Inventario de Luminarias SIAP"
+maintainer := "aldacm2001@gmail.com"
 
 scalaVersion := "2.12.11"
 

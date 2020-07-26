@@ -292,6 +292,44 @@ class ReporteController @Inject()(
       }
   }
 
+  def actualizarReporteParcial() = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val json = request.body.asJson.get
+      var reporte = ( json \ "reporte").as[Reporte]
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)      
+      val reportenuevo = new Reporte(reporte.repo_id,
+                            reporte.reti_id,
+                            reporte.repo_consecutivo,
+                            reporte.repo_fecharecepcion,
+                            reporte.repo_direccion,
+                            reporte.repo_nombre,
+                            reporte.repo_telefono,
+                            reporte.repo_fechasolucion,
+                            reporte.repo_horainicio,
+                            reporte.repo_horafin,
+                            reporte.repo_reportetecnico,
+                            reporte.repo_descripcion,
+                            reporte.rees_id,
+                            reporte.orig_id,
+                            reporte.barr_id,
+                            empr_id,                            
+                            reporte.tiba_id,
+                            usua_id,
+                            reporte.adicional,
+                            reporte.meams,
+                            reporte.eventos,
+                            reporte.direcciones)
+      reporteService.actualizarParcial(reportenuevo).map { result =>
+        if (result) {
+          Ok(Json.toJson("true"))
+        } else {
+        NotAcceptable(Json.toJson("true"))
+        }
+      }
+  }
+
+
   def borrarReporte(id: Long) = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val usua_id = Utility.extraerUsuario(request)
