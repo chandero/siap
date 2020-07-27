@@ -41,7 +41,7 @@
                         </el-col>
                         <el-col :xs="24" :sm="24" :md="9" :lg="9" :xl="9">
                           <el-form-item prop="muot_id" :label="$t('obra.ot')">
-                            <el-input type="number" style="font-size: 30px;" v-model="obra.muot_id"></el-input>
+                            <el-input type="number" style="font-size: 30px;" v-model="obra.muot_id" @input="obra.muot_id = parseInt($event, 10)"></el-input>
                           </el-form-item>
                         </el-col>
                     </el-row>
