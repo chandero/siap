@@ -425,7 +425,7 @@ export default {
       this.filtro = this.freti_id + '|' + this.fconsec
     },
     nuevo () {
-      this.$router.push({ path: '/proceso/menu1reporte/menu1-2control/menu1-2-2crear' })
+      this.$router.push({ path: '/proceso/menu1reporte/menu1-2control/menu1-2-2create' })
     },
     estado (id) {
       if (id === undefined || id === null || id <= 0) {

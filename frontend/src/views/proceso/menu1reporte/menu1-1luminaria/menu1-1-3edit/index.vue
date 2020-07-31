@@ -823,7 +823,7 @@
                     <el-form-item prop="aap_id" label="Código Luminaria">
                       <div style="display: table;">
                         <el-input
-                          :disabled="reporte.direcciones[didx].even_estado === 2 || reporte.direcciones[didx].even_estado > 7"
+                          :disabled="reporte.direcciones[didx].even_estado === 3 || reporte.direcciones[didx].even_estado > 7"
                           autofocus
                           :ref="'aap_id_' + didx"
                           type="number"
