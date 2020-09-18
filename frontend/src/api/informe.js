@@ -361,6 +361,28 @@ export function informe_siap_solicitud_xls (fecha_inicial, fecha_final) {
   })
 }
 
+export function informe_siap_luminaria_por_reporte_xls (fecha_inicial, fecha_final) {
+  const data = {
+    fecha_inicial,
+    fecha_final
+  }
+  return request({
+    url: '/info/slprx/' + data.fecha_inicial + '/' + data.fecha_final,
+    method: 'get'
+  })
+}
+
+export function informe_siap_cambio_direccion_xls (fecha_inicial, fecha_final, formato) {
+  const data = {
+    fecha_inicial,
+    fecha_final,
+    formato
+  }
+  const token = '43f44388-5cd1-4657-9f7e-ea4e014e9333'
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sicdx/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.formato + '/' + token
+  window.open(url, '_self', 'location=no, menubar=no')
+}
+
 export function informe_siap_solicitud_x_vencer_xls () {
   return request({
     url: '/info/sisvx',

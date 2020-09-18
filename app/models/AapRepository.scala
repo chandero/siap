@@ -726,9 +726,10 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
         a match {
             case None => None
             case Some(a) => 
-                        val c =  SQL("SELECT * FROM siap.aap_elemento WHERE aap_id = {aap_id}").
+                        val c =  SQL("SELECT * FROM siap.aap_elemento WHERE aap_id = {aap_id} and empr_id = {empr_id}").
                         on(
-                            'aap_id -> a.aap_id
+                            'aap_id -> a.aap_id,
+                            'empr_id -> empr_id
                         ).as(AapElemento.aapelementoSet.singleOpt)
                         val aap = a.copy(aap_elemento = c)
                         val h = SQL("SELECT * FROM siap.aap_elemento_historia WHERE aap_id = {aap_id} ORDER BY aael_fecha DESC").

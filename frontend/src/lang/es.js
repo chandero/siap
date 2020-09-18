@@ -379,6 +379,8 @@ export default {
     'menu_informe_menu2detallado_menu2-10retirovsreubicacion': 'Retiro vs Reubicación',
     'menu_informe_menu2detallado_menu2-11porbarrio': 'Por Barrio',
     'menu_informe_menu2detallado_menu2-12repetido': 'Material Repetido',
+    'menu_informe_menu2detallado_menu2-13cambiodireccion': 'Cambio de Dirección',
+    'menu_informe_menu2detallado_menu2-14luminariareporte': 'Luminarias Por Reporte',
     menu_informe_menu3inventario: 'Inventario',
     'menu_informe_menu3inventario_menu3-1luminaria': 'Luminaria',
     'menu_informe_menu3inventario_menu3-2control': 'Control',
@@ -1227,6 +1229,8 @@ export default {
     simox: 'Informe Municipio Orden de Trabajo',
     srx: 'Informe Redes',
     spx: 'Informe Postes',
+    scdx: 'Informe Detallado de Cambios de Dirección Luminaria por Reporte',
+    slprx: 'Informe de Luminarias Atendidas Por Reporte',
     initialDate: 'Fecha Inicial',
     endDate: 'Fecha Final',
     dueDate: 'Fecha de Corte',
@@ -1335,7 +1339,10 @@ export default {
     medi_numero: 'Medidor Número',
     esta_descripcion: 'Estado',
     tran_codigo: 'Transformador Código',
-    tran_numero: 'Transformador Número'
+    tran_numero: 'Transformador Número',
+    cuad_descripcion: 'Cuadrilla',
+    repo_fechalimite: 'Fecha Limite',
+    luminarias: 'Luminarias'
   },
   grafica: {
     cantidad: 'Cantidad',

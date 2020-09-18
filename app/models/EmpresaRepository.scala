@@ -119,7 +119,7 @@ class EmpresaRepository @Inject()(dbapi: DBApi)(
     */
   def buscarPorId(empr_id: Long): Option[Empresa] = {
     db.withConnection { implicit connection =>
-      SQL("""SELECT * FROM siap.empresa e 
+      SQL("""SELECT DISTINCT * FROM siap.empresa e 
               INNER JOIN siap.municipio m ON e.muni_id = m.muni_id 
               INNER JOIN siap.departamento d ON m.depa_id = d.depa_id
               WHERE empr_id = {empr_id} and empr_estado <> 9""")
@@ -182,7 +182,7 @@ class EmpresaRepository @Inject()(dbapi: DBApi)(
   */
   def buscarPorUsuario(usua_id: Long): Future[Iterable[Empresa]] = Future[Iterable[Empresa]] {
     db.withConnection { implicit connection =>
-      SQL("""SELECT e.*, m.muni_descripcion, d.depa_descripcion FROM siap.usuario_empresa ue 
+      SQL("""SELECT DISTINCT e.*, m.muni_descripcion, d.depa_descripcion FROM siap.usuario_empresa ue 
              INNER JOIN siap.empresa e ON e.empr_id = ue.empr_id 
              INNER JOIN siap.municipio m ON e.muni_id = m.muni_id 
              INNER JOIN siap.departamento d ON m.depa_id = d.depa_id

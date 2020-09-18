@@ -61,6 +61,7 @@ import com.norbitltd.spoiwo.model.enums.{
 import org.apache.poi.common.usermodel.HyperlinkType
 // Utility
 import utilities.Utility
+import org.checkerframework.checker.units.qual.s
 
 case class Siap_resumen_material(
     elem_codigo: Option[String],
@@ -87,7 +88,7 @@ case class Siap_detallado_material(
     even_cantidad_instalado: Option[Double]
 )
 
-case class Siap_control (
+case class Siap_control(
     aap_id: Option[scala.Long],
     esta_descripcion: Option[String],
     aap_direccion: Option[String],
@@ -129,7 +130,7 @@ case class Siap_inventario_b(
     medi_numero: Option[String],
     aacu_descripcion: Option[String],
     tran_codigo: Option[String],
-    tran_numero: Option[String],
+    tran_numero: Option[String]
 )
 
 case class Inventario(
@@ -313,7 +314,7 @@ object Siap_control {
   }
 
   val Siap_control_set = {
-      get[Option[scala.Long]]("aap_id") ~
+    get[Option[scala.Long]]("aap_id") ~
       get[Option[String]]("esta_descripcion") ~
       get[Option[String]]("aap_direccion") ~
       get[Option[String]]("barr_descripcion") ~
@@ -322,17 +323,17 @@ object Siap_control {
             esta_descripcion ~
             aap_direccion ~
             barr_descripcion ~
-            tiba_descripcion => new Siap_control(
-                                      aap_id,
-                                      esta_descripcion,
-                                      aap_direccion,
-                                      barr_descripcion,
-                                      tiba_descripcion
-                                    )
-      }
+            tiba_descripcion =>
+        new Siap_control(
+          aap_id,
+          esta_descripcion,
+          aap_direccion,
+          barr_descripcion,
+          tiba_descripcion
+        )
     }
+  }
 }
-
 
 object Siap_inventario_a {
   implicit val siaWrites = new Writes[Siap_inventario_a] {
@@ -596,6 +597,17 @@ object Siap_material_repetido {
   }
 }
 
+case class Siap_luminaria_por_reporte(
+  repo_consecutivo: Option[Int],
+  repo_fecharecepcion: Option[DateTime],
+  repo_fechalimite: Option[DateTime], 
+  repo_fechasolucion: Option[DateTime], 
+  repo_direccion: Option[String],
+  barr_descripcion: Option[String],
+  cuad_descripcion: Option[String],
+  luminarias: Option[Int]
+)
+
 case class Siap_detallado_expansion(
     repo_fechasolucion: Option[DateTime],
     repo_fechadigitacion: Option[DateTime],
@@ -818,6 +830,53 @@ case class Siap_consolidado(
     repo_fechasolucion: Option[DateTime],
     repo_reportetecnico: Option[String]
 )
+
+object Siap_luminaria_por_reporte {
+  implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy/MM/dd")
+  implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy/MM/dd")
+  
+  implicit val scWrites = new Writes[Siap_luminaria_por_reporte] {
+    def writes(sc: Siap_luminaria_por_reporte) = Json.obj(
+      "repo_consecutivo" -> sc.repo_consecutivo,
+      "repo_fecharecepcion" -> sc.repo_fecharecepcion,
+      "repo_fechalimite" -> sc.repo_fechalimite,
+      "repo_fechasolucion" -> sc.repo_fechasolucion,
+      "repo_direccion" -> sc.repo_direccion,
+      "barr_descripcion" -> sc.barr_descripcion,
+      "cuad_descripcion" -> sc.cuad_descripcion,
+      "luminarias" -> sc.luminarias
+    )
+  }
+
+  val _set = {
+      get[Option[Int]]("repo_consecutivo") ~
+      get[Option[DateTime]]("repo_fecharecepcion") ~
+      get[Option[DateTime]]("repo_fechalimite") ~
+      get[Option[DateTime]]("repo_fechasolucion") ~            
+      get[Option[String]]("repo_direccion") ~
+      get[Option[String]]("barr_descripcion") ~
+      get[Option[String]]("cuad_descripcion") ~
+      get[Option[Int]]("luminarias") map {
+      case repo_consecutivo ~
+            repo_fecharecepcion ~
+            repo_fechalimite ~
+            repo_fechasolucion ~
+            repo_direccion ~
+            barr_descripcion ~
+            cuad_descripcion ~
+            luminarias => new Siap_luminaria_por_reporte(
+            repo_consecutivo,
+            repo_fecharecepcion,
+            repo_fechalimite,
+            repo_fechasolucion,
+            repo_direccion,
+            barr_descripcion,
+            cuad_descripcion,
+            luminarias
+        )
+    }
+  }
+}
 
 object Siap_consolidado {
   implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy/MM/dd")
@@ -2081,7 +2140,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
     * return sql response to excel export
     * resumen material municipio obra reporte
     */
-    def siap_informe_detallado_material_muob_xls(
+  def siap_informe_detallado_material_muob_xls(
       muob_consecutivo: Int,
       empr_id: scala.Long
   ): Future[Iterable[Siap_detallado_material]] =
@@ -2101,7 +2160,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
         ff.set(Calendar.SECOND, 59)
         ff.set(Calendar.MINUTE, 59)
         ff.set(Calendar.HOUR, 23)
-        */
+         */
         SQL("""SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
                           r.repo_consecutivo, 
                           r.repo_fechasolucion, 
@@ -2139,7 +2198,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
           .on(
             'muot_id -> muob_consecutivo,
             'empr_id -> empr_id
-          ).as(siap_detallado_material_set *)
+          )
+          .as(siap_detallado_material_set *)
       }
     }
 
@@ -2529,7 +2589,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
               "Medidor Número",
               "Cuenta Alumbrado",
               "Transformador Código",
-              "Transformador Número"              
+              "Transformador Número"
             )
           val resultSet =
             SQL("""SELECT
@@ -2723,7 +2783,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                   i.tran_numero match {
                     case Some(value) => value
                     case None        => ""
-                  }               
+                  }
                 )
           }
           headerRow :: rows.toList
@@ -2910,7 +2970,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               "Transformador Código",
               "Transformador Número"
             )
-          var query = """SELECT
+          var query =
+            """SELECT
                           a.aap_id,
                           a.aap_apoyo,
                           s.esta_descripcion,
@@ -2971,7 +3032,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
           println("orderby a aplicar: " + orderby)
           if (!orderby.isEmpty) {
             query = query + s" ORDER BY $orderby"
-          }  
+          }
           val resultSet =
             SQL(query)
               .on(
@@ -3144,7 +3205,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
               "Estado",
               "Dirección",
               "Barrio",
-              "Sector",
+              "Sector"
             )
           var query = """SELECT
                           a.aap_id,
@@ -3165,7 +3226,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
           println("orderby a aplicar: " + orderby)
           if (!orderby.isEmpty) {
             query = query + s" ORDER BY $orderby"
-          }  
+          }
           val resultSet =
             SQL(query)
               .on(
@@ -3382,11 +3443,11 @@ ORDER BY e.reti_id, e.elem_codigo""")
     * @param repo_id: scala.Long
     * @return OutputStream
     */
-    def siap_detallado_cambio_medida_xls(
+  def siap_detallado_cambio_medida_xls(
       fecha_inicial: scala.Long,
       fecha_final: scala.Long,
       empr_id: scala.Long
-    ): Future[Iterable[Siap_detallado_cambio_medida]] =
+  ): Future[Iterable[Siap_detallado_cambio_medida]] =
     Future[Iterable[Siap_detallado_cambio_medida]] {
       db.withConnection { implicit connection =>
         var fi = Calendar.getInstance()
@@ -3444,15 +3505,15 @@ ORDER BY e.reti_id, e.elem_codigo""")
             left join siap.aap_uso aua on aua.aaus_id = rdda.aaus_id_anterior
             left join siap.aap_uso au on au.aaus_id = rdda.aaus_id                    
             where r.reti_id = 9 and r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.empr_id = {empr_id} and r.rees_id = 3 and a.aap_id <> 9999999
-            order by r.repo_fechasolucion, a.aap_id""").on(
-                    'fecha_inicial -> fi.getTime(),
-                    'fecha_final -> ff.getTime(),
-                    'empr_id -> empr_id
-                    ).as(Siap_detallado_cambio_medida._set *)
+            order by r.repo_fechasolucion, a.aap_id""")
+          .on(
+            'fecha_inicial -> fi.getTime(),
+            'fecha_final -> ff.getTime(),
+            'empr_id -> empr_id
+          )
+          .as(Siap_detallado_cambio_medida._set *)
       }
     }
-
-
 
   /**
     *  imprimir
@@ -3881,7 +3942,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
         }
 
         val reubicaciones = SQL(
-                                  """select r.repo_fecharecepcion,
+          """select r.repo_fecharecepcion,
                                             r.repo_fechasolucion,
                                             ra.repo_fechadigitacion,
                                             rt.reti_descripcion,
@@ -3977,8 +4038,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
           )
           retiro match {
             case Some(r) => ret = r
-            case None    => val retiro_reubicacion = new Siap_retiro_reubicacion(Some(ret), Some(reubicacion))
-                            _listData += retiro_reubicacion
+            case None =>
+              val retiro_reubicacion =
+                new Siap_retiro_reubicacion(Some(ret), Some(reubicacion))
+              _listData += retiro_reubicacion
           }
 
         }
@@ -4095,7 +4158,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                       ),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
-                    NumericCell( 
+                    NumericCell(
                       i.repo_consecutivo.get,
                       Some(2),
                       style = Some(CellStyle(dataFormat = CellDataFormat("#0"))),
@@ -5304,105 +5367,123 @@ ORDER BY e.reti_id, e.elem_codigo""")
           var r = Random
           val rand = r.nextInt(500)
           val tablename = "tmp_" + rand
-          val _parseTemp = get[Int]("aap_id") ~ 
-                           get[Int]("esta_id") ~
-                           get[Int]("aaco_id") ~ 
-                           get[String]("aap_tecnologia") ~ 
-                           get[Int]("aap_potencia") map { case a ~ b ~ c ~ d ~ e => (a, b, c, d, e) }
+          val _parseTemp = get[Int]("aap_id") ~
+            get[Int]("esta_id") ~
+            get[Int]("aaco_id") ~
+            get[String]("aap_tecnologia") ~
+            get[Int]("aap_potencia") map {
+            case a ~ b ~ c ~ d ~ e => (a, b, c, d, e)
+          }
           println("Temp Table Name:" + tablename)
-          val _queryTemp = f"""CREATE TEMP TABLE $tablename%s AS (select a.aap_id, a.esta_id, a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia from siap.aap a
+          val _queryTemp =
+            f"""CREATE TEMP TABLE $tablename%s AS (select a.aap_id, a.esta_id, a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia from siap.aap a
           inner join siap.aap_adicional ad on ad.aap_id = a.aap_id and ad.empr_id = a.empr_id
           where a.aap_fechatoma < {fecha_inicial} and a.aap_id <> 9999999
           order by ad.aap_tecnologia desc, ad.aap_potencia, a.aap_id)"""
 
-          val _querySelTemp = f"SELECT * FROM $tablename%s a ORDER BY a.aap_tecnologia desc, a.aap_potencia, a.aap_id"
+          val _querySelTemp =
+            f"SELECT * FROM $tablename%s a ORDER BY a.aap_tecnologia desc, a.aap_potencia, a.aap_id"
 
-          val _queryUpdTemp = f"UPDATE $tablename%s SET aaco_id = {aaco_id}, aap_tecnologia = {aap_tecnologia}, aap_potencia = {aap_potencia}, esta_id = {esta_id} WHERE aap_id = {aap_id}"
+          val _queryUpdTemp =
+            f"UPDATE $tablename%s SET aaco_id = {aaco_id}, aap_tecnologia = {aap_tecnologia}, aap_potencia = {aap_potencia}, esta_id = {esta_id} WHERE aap_id = {aap_id}"
 
-          val _querySearchLastReport = """SELECT distinct on (aap_id) dd.aap_id, r.repo_id, r.repo_fechasolucion, d.tire_id, dd.aaco_id_anterior, dd.aaco_id, dd.aap_tecnologia_anterior, dd.aap_tecnologia, dd.aap_potencia_anterior, dd.aap_potencia FROM siap.reporte_direccion_dato dd
+          val _querySearchLastReport =
+            """SELECT distinct on (aap_id) dd.aap_id, r.repo_id, r.repo_fechasolucion, d.tire_id, dd.aaco_id_anterior, dd.aaco_id, dd.aap_tecnologia_anterior, dd.aap_tecnologia, dd.aap_potencia_anterior, dd.aap_potencia FROM siap.reporte_direccion_dato dd
                                           INNER JOIN siap.reporte_direccion d on d.aap_id = dd.aap_id and d.repo_id = dd.repo_id and d.even_id = dd.even_id
                                           INNER JOIN siap.reporte r ON r.repo_id = dd.repo_id
                                           WHERE r.repo_fechasolucion < {fecha_corte} and r.reti_id <> 1 and dd.aap_id  = {aap_id}
                                           ORDER BY dd.aap_id, r.repo_fechasolucion desc"""
-          
-          val _parseSearch = get[Int]("aap_id") ~ get[Int]("repo_id") ~ get[DateTime]("repo_fechasolucion") ~ get[Option[Int]]("tire_id") ~
-                             get[Option[Int]]("aaco_id_anterior") ~ get[Option[Int]]("aaco_id") ~ 
-                             get[Option[String]]("aap_tecnologia_anterior") ~ get[Option[String]]("aap_tecnologia") ~
-                             get[Option[Int]]("aap_potencia_anterior") ~ get[Option[Int]]("aap_potencia") map 
-                             { case a ~ b ~ c ~ d ~ e ~ f ~ g ~ h ~ i ~ j => (a, b, c, d, e, f, g, h, i, j) }
+
+          val _parseSearch = get[Int]("aap_id") ~ get[Int]("repo_id") ~ get[
+            DateTime
+          ]("repo_fechasolucion") ~ get[Option[Int]]("tire_id") ~
+            get[Option[Int]]("aaco_id_anterior") ~ get[Option[Int]]("aaco_id") ~
+            get[Option[String]]("aap_tecnologia_anterior") ~ get[Option[
+            String
+          ]]("aap_tecnologia") ~
+            get[Option[Int]]("aap_potencia_anterior") ~ get[Option[Int]](
+            "aap_potencia"
+          ) map {
+            case a ~ b ~ c ~ d ~ e ~ f ~ g ~ h ~ i ~ j =>
+              (a, b, c, d, e, f, g, h, i, j)
+          }
           // Analizamos la información por cada luminaria seleccionada
           val _rCreateTemp = SQL(_queryTemp)
             .on(
               'fecha_inicial -> fi
-            ).execute()
-          
+            )
+            .execute()
+
           val _rSel = SQL(_querySelTemp).as(_parseTemp.*)
-          _rSel.map {
-            aaps => 
-              val _r = SQL(_querySearchLastReport)
+          _rSel.map { aaps =>
+            val _r = SQL(_querySearchLastReport)
               .on(
                 'aap_id -> aaps._1,
                 'fecha_corte -> fi
-              ).as(_parseSearch.singleOpt)
-              _r match {
-                case Some(r) => // Actualizar la tabla con los valores existentes
-                     var conexion = aaps._3
-                     var tecnologia = aaps._4
-                     var potencia = aaps._5
-                     var estado = aaps._2
-                     r._4 match {
-                       case Some(3) => estado = 9
-                       case Some(1) => estado = 1
-                       case Some(2) => estado = 2
-                       case None => None 
-                     } 
-                     r._6 match {
-                       case Some(aaco_id) => conexion = aaco_id
-                       case None => None
-                     }
-                     r._8 match {
-                       case Some(aap_tecnologia) => tecnologia = aap_tecnologia
-                       case None => None
-                     }
-                     r._10 match {
-                       case Some(aap_potencia) => potencia = aap_potencia
-                       case None => None 
-                     }
+              )
+              .as(_parseSearch.singleOpt)
+            _r match {
+              case Some(r) => // Actualizar la tabla con los valores existentes
+                var conexion = aaps._3
+                var tecnologia = aaps._4
+                var potencia = aaps._5
+                var estado = aaps._2
+                r._4 match {
+                  case Some(3) => estado = 9
+                  case Some(1) => estado = 1
+                  case Some(2) => estado = 2
+                  case None    => None
+                }
+                r._6 match {
+                  case Some(aaco_id) => conexion = aaco_id
+                  case None          => None
+                }
+                r._8 match {
+                  case Some(aap_tecnologia) => tecnologia = aap_tecnologia
+                  case None                 => None
+                }
+                r._10 match {
+                  case Some(aap_potencia) => potencia = aap_potencia
+                  case None               => None
+                }
 
-                     SQL(_queryUpdTemp).on(
-                       'aaco_id -> conexion,
-                       'esta_id -> estado,
-                       'aap_tecnologia -> tecnologia,
-                       'aap_potencia -> potencia,
-                       'aap_id -> aaps._1
-                     )
+                SQL(_queryUpdTemp).on(
+                  'aaco_id -> conexion,
+                  'esta_id -> estado,
+                  'aap_tecnologia -> tecnologia,
+                  'aap_potencia -> potencia,
+                  'aap_id -> aaps._1
+                )
 
-                case None => None
-              }
+              case None => None
+            }
           }
 
           /*
-          * Reemplazamos la lectura de la tabla temporal con el calculo de estado
-          * de las luminarias, por la lectura de las tabla corte
-          */
-            /* val _rcargaInicial = SQL(
+           * Reemplazamos la lectura de la tabla temporal con el calculo de estado
+           * de las luminarias, por la lectura de las tabla corte
+           */
+          /* val _rcargaInicial = SQL(
                 f"""SELECT a.aaco_id, a.aacu_id, a.aap_tecnologia, a.aap_potencia, COUNT(a) AS cantidad FROM $tablename a
                 INNER JOIN siap.aap_adicional ad ON ad.aap_id = a.aap_id
-                LEFT JOIN siap.aap_potenciareal ap ON ap.aapr_tecnologia = ad.aap_tecnologia AND ap.aapr_potencia = ad.aap_potencia 
+                LEFT JOIN siap.aap_potenciareal ap ON ap.aapr_tecnologia = ad.aap_tecnologia AND ap.aapr_potencia = ad.aap_potencia
                 WHERE a.esta_id <> 9 AND a.aaco_id <> 3
-                GROUP BY a.aaco_id, a.aacu_id, a.aap_tecnologia, a.aap_potencia 
+                GROUP BY a.aaco_id, a.aacu_id, a.aap_tecnologia, a.aap_potencia
                 ORDER BY a.aaco_id, a.aacu_id, a.aap_tecnologia DESC, a.aap_potencia"""
               ).as(_cargaInicialParser.*)
-            */  
-          val _rcargaInicial = SQL("""SELECT a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia, count(a) as cantidad FROM siap.aap_corte_periodo a
+           */
+          val _rcargaInicial = SQL(
+            """SELECT a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia, count(a) as cantidad FROM siap.aap_corte_periodo a
           INNER JOIN siap.aap_adicional_corte_periodo ad ON ad.aap_id = a.aap_id and ad.empr_id = a.empr_id and ad.zanho = a.zanho and ad.zmes = a.zmes
           LEFT JOIN siap.aap_potenciareal apr ON apr.aapr_tecnologia = ad.aap_tecnologia AND apr.aapr_potencia = ad.aap_potencia
           WHERE a.esta_id <> 9 AND a.aaco_id <> 4 AND a.zanho = {zanho} AND a.zmes = {zmes} AND a.aap_id <> 9999999
           GROUP BY a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia
-          ORDER BY a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia""").on(
-            'zanho -> zanho_ant,
-            'zmes -> zmes_ant
-          ).as(_cargaInicialParser.*)
+          ORDER BY a.aaco_id, a.aacu_id, ad.aap_tecnologia, ad.aap_potencia"""
+          ).on(
+              'zanho -> zanho_ant,
+              'zmes -> zmes_ant
+            )
+            .as(_cargaInicialParser.*)
           // Eliminar anterior
           println("Eliminando Carga Anterior mismo Periodo")
           SQL(
@@ -5435,11 +5516,12 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 .executeUpdate()
           )
 
-          val _dataParser = int("aaco_id") ~ int("aacu_id") ~ str("aacu_descripcion") ~ 
-                            str("aap_tecnologia") ~ int("aap_potencia") ~ int("count") map {
+          val _dataParser = int("aaco_id") ~ int("aacu_id") ~ str(
+            "aacu_descripcion"
+          ) ~
+            str("aap_tecnologia") ~ int("aap_potencia") ~ int("count") map {
             case a ~ b ~ c ~ d ~ e ~ f => (a, b, c, d, e, f)
           }
-
 
           /*
           println("Actualizando Cantidades Anteriores")
@@ -5477,9 +5559,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
               )
               .executeUpdate()
           }
-          */
+           */
           println("Por Expansion")
-          var _listExpansionRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+          var _listExpansionRow =
+            new ListBuffer[com.norbitltd.spoiwo.model.Row]()
           val _qcargaPorExpansion =
             """
             SELECT o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
@@ -5510,7 +5593,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
           _rcargaPorExpansion.map { r =>
             _listExpansionRow += com.norbitltd.spoiwo.model.Row(
               StringCell(
-                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                r._1 match {
+                  case 1 => "AFORO"
+                  case 2 => "MEDIDOR"
+                },
                 Some(0),
                 style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -5518,9 +5604,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               StringCell(
                 r._3,
                 Some(1),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               StringCell(
                 r._4,
@@ -5531,22 +5616,19 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 r._5,
                 Some(3),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 0,
                 Some(4),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 r._6,
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
             )
@@ -5568,7 +5650,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
           }
 
           println("Por Reubicacion")
-          var _listReubicacionRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+          var _listReubicacionRow =
+            new ListBuffer[com.norbitltd.spoiwo.model.Row]()
           val _qcargaPorReubicacion =
             """
             SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
@@ -5599,7 +5682,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
           _rcargaPorReubicacion.map { r =>
             _listReubicacionRow += com.norbitltd.spoiwo.model.Row(
               StringCell(
-                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                r._1 match {
+                  case 1 => "AFORO"
+                  case 2 => "MEDIDOR"
+                },
                 Some(0),
                 style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -5607,9 +5693,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               StringCell(
                 r._3,
                 Some(1),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               StringCell(
                 r._4,
@@ -5620,22 +5705,19 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 r._5,
                 Some(3),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 0,
                 Some(4),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 r._6,
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
             )
@@ -5657,7 +5739,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
 
           println("Por Repotenciacion")
           // Instalada
-          var _listRepotenciacionRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()          
+          var _listRepotenciacionRow =
+            new ListBuffer[com.norbitltd.spoiwo.model.Row]()
           var _qcargaPorRepotenciacion =
             """
             SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
@@ -5688,7 +5771,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
           _rcargaPorRepotenciacion.map { r =>
             _listRepotenciacionRow += com.norbitltd.spoiwo.model.Row(
               StringCell(
-                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                r._1 match {
+                  case 1 => "AFORO"
+                  case 2 => "MEDIDOR"
+                },
                 Some(0),
                 style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -5696,9 +5782,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               StringCell(
                 r._3,
                 Some(1),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               StringCell(
                 r._4,
@@ -5709,25 +5794,22 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 r._5,
                 Some(3),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 0,
                 Some(4),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 r._6,
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-            )            
+            )
             val updated = SQL(sqlUpdate)
               .on(
                 'aaco_id -> r._1,
@@ -5743,7 +5825,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
               .executeUpdate()
           }
           // Retirada
-            _qcargaPorRepotenciacion =
+          _qcargaPorRepotenciacion =
             """
             SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
             (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id, ac.aacu_descripcion
@@ -5773,7 +5855,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
           _rcargaPorRepotenciacion.map { r =>
             _listRepotenciacionRow += com.norbitltd.spoiwo.model.Row(
               StringCell(
-                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                r._1 match {
+                  case 1 => "AFORO"
+                  case 2 => "MEDIDOR"
+                },
                 Some(0),
                 style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -5781,9 +5866,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               StringCell(
                 r._3,
                 Some(1),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               StringCell(
                 r._4,
@@ -5794,25 +5878,22 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 r._5,
                 Some(3),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 r._6,
                 Some(4),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 0,
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-            )              
+            )
             val updated = SQL(sqlUpdate)
               .on(
                 'aaco_id -> r._1,
@@ -5825,13 +5906,14 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 'zanho -> anho,
                 'zperiodo -> periodo
               )
-              .executeUpdate()  
-          }          
+              .executeUpdate()
+          }
 
           println("Por Actualizacion")
 
           // Ingresar
-          var _listActualizacionRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()   
+          var _listActualizacionRow =
+            new ListBuffer[com.norbitltd.spoiwo.model.Row]()
           var _qcargaPorActualizacion =
             """
             SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
@@ -5860,10 +5942,12 @@ ORDER BY e.reti_id, e.elem_codigo""")
             .as(_dataParser.*)
           _listActualizacionRow += _headerData
           _rcargaPorActualizacion.map { r =>
-
             _listActualizacionRow += com.norbitltd.spoiwo.model.Row(
               StringCell(
-                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                r._1 match {
+                  case 1 => "AFORO"
+                  case 2 => "MEDIDOR"
+                },
                 Some(0),
                 style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -5871,9 +5955,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               StringCell(
                 r._3,
                 Some(1),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               StringCell(
                 r._4,
@@ -5884,26 +5967,22 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 r._5,
                 Some(3),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 0,
                 Some(4),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 r._6,
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-            )              
-
+            )
 
             val updated = SQL(sqlUpdate)
               .on(
@@ -5920,7 +5999,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
               .executeUpdate()
           }
           // Retirar
-            _qcargaPorActualizacion =
+          _qcargaPorActualizacion =
             """
             SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
             (SELECT DISTINCT d.aap_id, dd.aap_potencia_anterior as aap_potencia, dd.aap_tecnologia_anterior as aap_tecnologia, co.aaco_id, ac.aacu_id, ac.aacu_descripcion 
@@ -5948,10 +6027,12 @@ ORDER BY e.reti_id, e.elem_codigo""")
             .as(_dataParser.*)
 
           _rcargaPorActualizacion.map { r =>
-
             _listActualizacionRow += com.norbitltd.spoiwo.model.Row(
               StringCell(
-                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                r._1 match {
+                  case 1 => "AFORO"
+                  case 2 => "MEDIDOR"
+                },
                 Some(0),
                 style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -5959,9 +6040,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               StringCell(
                 r._3,
                 Some(1),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               StringCell(
                 r._4,
@@ -5972,25 +6052,22 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 r._5,
                 Some(3),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 r._6,
                 Some(4),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 0,
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-            )              
+            )
 
             val updated = SQL(sqlUpdate)
               .on(
@@ -6004,13 +6081,14 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 'zanho -> anho,
                 'zperiodo -> periodo
               )
-              .executeUpdate()   
-          }      
+              .executeUpdate()
+          }
 
           println("Por Modernizacion")
-          
+
           // Instalada
-          var _listModernizacionRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()   
+          var _listModernizacionRow =
+            new ListBuffer[com.norbitltd.spoiwo.model.Row]()
           var _qcargaPorModernizacion =
             """
             SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
@@ -6039,10 +6117,12 @@ ORDER BY e.reti_id, e.elem_codigo""")
             .as(_dataParser.*)
           _listModernizacionRow += _headerData
           _rcargaPorModernizacion.map { r =>
-
             _listModernizacionRow += com.norbitltd.spoiwo.model.Row(
               StringCell(
-                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                r._1 match {
+                  case 1 => "AFORO"
+                  case 2 => "MEDIDOR"
+                },
                 Some(0),
                 style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -6050,9 +6130,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               StringCell(
                 r._3,
                 Some(1),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               StringCell(
                 r._4,
@@ -6063,25 +6142,22 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 r._5,
                 Some(3),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 0,
                 Some(4),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 r._6,
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-            )              
+            )
 
             val updated = SQL(sqlUpdate)
               .on(
@@ -6130,7 +6206,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
           _rcargaPorModernizacion.map { r =>
             _listModernizacionRow += com.norbitltd.spoiwo.model.Row(
               StringCell(
-                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                r._1 match {
+                  case 1 => "AFORO"
+                  case 2 => "MEDIDOR"
+                },
                 Some(0),
                 style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -6138,9 +6217,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               StringCell(
                 r._3,
                 Some(1),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               StringCell(
                 r._4,
@@ -6151,25 +6229,22 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 r._5,
                 Some(3),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 r._6,
                 Some(4),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 0,
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-            )            
+            )
             val updated = SQL(sqlUpdate)
               .on(
                 'aaco_id -> r._1,
@@ -6184,14 +6259,15 @@ ORDER BY e.reti_id, e.elem_codigo""")
               )
               .executeUpdate()
             println("Lineas Modernización Actualizadas: " + updated)
-          }     
+          }
 
           // Por Cambio de Medida
 
           println("Por Cambio de Medida")
-          
+
           // Instalada
-          var _listCambioMedidaRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()   
+          var _listCambioMedidaRow =
+            new ListBuffer[com.norbitltd.spoiwo.model.Row]()
           var _qcargaPorCambioMedida =
             """
             SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
@@ -6218,12 +6294,14 @@ ORDER BY e.reti_id, e.elem_codigo""")
               'empr_id -> empr_id
             )
             .as(_dataParser.*)
-            _listCambioMedidaRow += _headerData
-            _rcargaPorCambioMedida.map { r =>
-
-              _listCambioMedidaRow += com.norbitltd.spoiwo.model.Row(
+          _listCambioMedidaRow += _headerData
+          _rcargaPorCambioMedida.map { r =>
+            _listCambioMedidaRow += com.norbitltd.spoiwo.model.Row(
               StringCell(
-                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                r._1 match {
+                  case 1 => "AFORO"
+                  case 2 => "MEDIDOR"
+                },
                 Some(0),
                 style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -6231,9 +6309,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               StringCell(
                 r._3,
                 Some(1),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               StringCell(
                 r._4,
@@ -6244,25 +6321,22 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 r._5,
                 Some(3),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 0,
                 Some(4),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 r._6,
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-            )              
+            )
 
             val updated = SQL(sqlUpdate)
               .on(
@@ -6310,7 +6384,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
           _rcargaPorCambioMedida.map { r =>
             _listCambioMedidaRow += com.norbitltd.spoiwo.model.Row(
               StringCell(
-                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                r._1 match {
+                  case 1 => "AFORO"
+                  case 2 => "MEDIDOR"
+                },
                 Some(0),
                 style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -6318,9 +6395,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               StringCell(
                 r._3,
                 Some(1),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               StringCell(
                 r._4,
@@ -6331,25 +6407,22 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 r._5,
                 Some(3),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 r._6,
                 Some(4),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 0,
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-            )            
+            )
             val updated = SQL(sqlUpdate)
               .on(
                 'aaco_id -> r._1,
@@ -6363,12 +6436,13 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 'zperiodo -> periodo
               )
               .executeUpdate()
-          }     
+          }
 
           // Fin Por Cambio de Medida
 
           println("Por Reposicion")
-          var _listReposicionRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+          var _listReposicionRow =
+            new ListBuffer[com.norbitltd.spoiwo.model.Row]()
           val _qcargaPorReposicion =
             """
             SELECT o.aaco_id, o.aacu_id, o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
@@ -6399,7 +6473,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
           _rcargaPorReposicion.map { r =>
             _listReposicionRow += com.norbitltd.spoiwo.model.Row(
               StringCell(
-                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                r._1 match {
+                  case 1 => "AFORO"
+                  case 2 => "MEDIDOR"
+                },
                 Some(0),
                 style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -6407,9 +6484,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               StringCell(
                 r._3,
                 Some(1),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               StringCell(
                 r._4,
@@ -6420,25 +6496,22 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 r._5,
                 Some(3),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 0,
                 Some(4),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 r._6,
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-            )            
+            )
             val updated = SQL(sqlUpdate)
               .on(
                 'aaco_id -> r._1,
@@ -6456,7 +6529,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
           }
 
           println("Por Retiro")
-          var _listRetiroRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]() 
+          var _listRetiroRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
           val _qcargarPorRetiro =
             """
             SELECT o.aaco_id, o.aacu_id,  o.aacu_descripcion, o.aap_tecnologia, o.aap_potencia, count(o) from
@@ -6485,10 +6558,12 @@ ORDER BY e.reti_id, e.elem_codigo""")
             .as(_dataParser.*)
           _listRetiroRow += _headerData
           _rcargarPorRetiro.map { r =>
-
             _listRetiroRow += com.norbitltd.spoiwo.model.Row(
               StringCell(
-                r._1 match { case 1 => "AFORO" case 2 => "MEDIDOR" },
+                r._1 match {
+                  case 1 => "AFORO"
+                  case 2 => "MEDIDOR"
+                },
                 Some(0),
                 style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -6496,9 +6571,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
               StringCell(
                 r._3,
                 Some(1),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet                
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               StringCell(
                 r._4,
@@ -6509,25 +6583,22 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 r._5,
                 Some(3),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 r._6,
                 Some(4),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 0,
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-            )            
+            )
 
             val updated = SQL(sqlUpdate)
               .on(
@@ -7130,15 +7201,13 @@ ORDER BY e.reti_id, e.elem_codigo""")
               NumericCell(
                 aap._5.get.doubleValue(),
                 Some(5),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               NumericCell(
                 aap._6.get.doubleValue(),
                 Some(6),
-                style =
-                  Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               FormulaCell(
@@ -7335,49 +7404,50 @@ ORDER BY e.reti_id, e.elem_codigo""")
           )
           val sheetExpansion = Sheet(
             name = "Expansión",
-            rows = _listExpansionRow.toList,
+            rows = _listExpansionRow.toList
           )
           val sheetReubicacion = Sheet(
             name = "Reubicación",
-            rows = _listReubicacionRow.toList,
-          )     
+            rows = _listReubicacionRow.toList
+          )
           val sheetRepotenciacion = Sheet(
             name = "Repotenciación",
-            rows = _listRepotenciacionRow.toList,
-          ) 
+            rows = _listRepotenciacionRow.toList
+          )
           val sheetActualizacion = Sheet(
             name = "Actualización",
-            rows = _listActualizacionRow.toList,
-          )    
+            rows = _listActualizacionRow.toList
+          )
           var sheetModernizacion = Sheet(
             name = "Modernización",
-            rows = _listModernizacionRow.toList,
-          ) 
+            rows = _listModernizacionRow.toList
+          )
           var sheetRetiro = Sheet(
             name = "Retiro",
-            rows = _listRetiroRow.toList,
-          )   
+            rows = _listRetiroRow.toList
+          )
           var sheetReposicion = Sheet(
             name = "Reposición",
-            rows = _listReposicionRow.toList,
+            rows = _listReposicionRow.toList
           )
           var sheetCambioMedida = Sheet(
             name = "Cambio Medida",
-            rows = _listCambioMedidaRow.toList,
-          )                                                         
+            rows = _listCambioMedidaRow.toList
+          )
 
           println("Escribiendo en el Stream")
           var os: ByteArrayOutputStream = new ByteArrayOutputStream()
-          Workbook(sheet1, 
-                   sheetRetiro,
-                   sheetExpansion, 
-                   sheetReubicacion, 
-                   sheetReposicion,
-                   sheetRepotenciacion, 
-                   sheetActualizacion,
-                   sheetModernizacion,
-                   sheetCambioMedida
-                   ).writeToOutputStream(os)
+          Workbook(
+            sheet1,
+            sheetRetiro,
+            sheetExpansion,
+            sheetReubicacion,
+            sheetReposicion,
+            sheetRepotenciacion,
+            sheetActualizacion,
+            sheetModernizacion,
+            sheetCambioMedida
+          ).writeToOutputStream(os)
           println("Stream Listo")
           os.toByteArray
       }
@@ -7401,7 +7471,9 @@ ORDER BY e.reti_id, e.elem_codigo""")
             _listMerged += CellRange((2, 2), (0, 3))
             _listMerged.toList
           }
-          val _mParser = get[Option[Int]]("medi_id") ~ get[Option[String]]("medi_codigo") ~ get[Option[String]](
+          val _mParser = get[Option[Int]]("medi_id") ~ get[Option[String]](
+            "medi_codigo"
+          ) ~ get[Option[String]](
             "medi_numero"
           ) ~ get[Option[String]]("medi_direccion") ~ get[Option[String]](
             "aacu_descripcion"
@@ -7464,7 +7536,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                       Some(0),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
-                    ),                    
+                    ),
                     HyperLinkUrlCell(
                       link,
                       Some(1),
@@ -9116,109 +9188,128 @@ ORDER BY e.reti_id, e.elem_codigo""")
       empr_id: Long
   ): Array[Byte] = {
     val result = db.withConnection { implicit connection =>
-        val empresa = empresaService.buscarPorId(empr_id)
-        empresa match {
-          case Some(empresa) =>
-            val format = new SimpleDateFormat("yyyy-MM-dd HH:mm")
-            var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
-            var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
-            var _listMerged = new ListBuffer[CellRange]()
-            var mergedColumns = {
-              _listMerged += CellRange((0, 0), (0, 3))
-              _listMerged += CellRange((1, 1), (0, 3))
-              _listMerged += CellRange((2, 2), (0, 3))
-              _listMerged.toList
-            }
-  
-          var fi = Calendar.getInstance()
-      var ff = Calendar.getInstance()
-      fi.setTimeInMillis(fecha_inicial)
-      ff.setTimeInMillis(fecha_final)
-      fi.set(Calendar.MILLISECOND, 0)
-      fi.set(Calendar.SECOND, 0)
-      fi.set(Calendar.MINUTE, 0)
-      fi.set(Calendar.HOUR, 0)
+      val empresa = empresaService.buscarPorId(empr_id)
+      empresa match {
+        case Some(empresa) =>
+          val format = new SimpleDateFormat("yyyy-MM-dd HH:mm")
+          var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+          var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
+          var _listMerged = new ListBuffer[CellRange]()
+          var mergedColumns = {
+            _listMerged += CellRange((0, 0), (0, 3))
+            _listMerged += CellRange((1, 1), (0, 3))
+            _listMerged += CellRange((2, 2), (0, 3))
+            _listMerged.toList
+          }
 
-      ff.set(Calendar.MILLISECOND, 59)
-      ff.set(Calendar.SECOND, 59)
-      ff.set(Calendar.MINUTE, 59)
-      ff.set(Calendar.HOUR, 23)
-      val motParser = int("muot_id") ~ date("fecha") map { case a ~ b => (a, b) }
-      val muots = SQL(
-        """SELECT o.muot_id, MIN(o.obra_fecharecepcion) AS fecha FROM siap.obra o
+          var fi = Calendar.getInstance()
+          var ff = Calendar.getInstance()
+          fi.setTimeInMillis(fecha_inicial)
+          ff.setTimeInMillis(fecha_final)
+          fi.set(Calendar.MILLISECOND, 0)
+          fi.set(Calendar.SECOND, 0)
+          fi.set(Calendar.MINUTE, 0)
+          fi.set(Calendar.HOUR, 0)
+
+          ff.set(Calendar.MILLISECOND, 59)
+          ff.set(Calendar.SECOND, 59)
+          ff.set(Calendar.MINUTE, 59)
+          ff.set(Calendar.HOUR, 23)
+          val motParser = int("muot_id") ~ date("fecha") map {
+            case a ~ b => (a, b)
+          }
+          val muots = SQL(
+            """SELECT o.muot_id, MIN(o.obra_fecharecepcion) AS fecha FROM siap.obra o
             WHERE o.obra_fecharecepcion BETWEEN {fecha_inicial} AND {fecha_final} AND o.empr_id = {empr_id}
             AND o.rees_id = 3
             GROUP BY o.muot_id
             ORDER BY fecha"""
-      ).on(
-          'fecha_inicial -> fi.getTime(),
-          'fecha_final -> ff.getTime(),
-          'empr_id -> empr_id
-        )
-        .as(motParser *)
-
-      // Primera Hoja, relación de OTs
-      val sheet1 = Sheet(
-        name = "MUOTs",
-        rows = {
-          val title1Row = com.norbitltd.spoiwo.model
-            .Row()
-            .withCellValues(empresa.empr_descripcion)
-          val title2Row = com.norbitltd.spoiwo.model
-            .Row()
-            .withCellValues("INFORME DE ORDEN DE TRABAJO MUNICIPIO")
-          val title3Row = com.norbitltd.spoiwo.model
-            .Row()
-            .withCellValues(
-              "GENERADO EL " + format.format(Calendar.getInstance().getTime())
+          ).on(
+              'fecha_inicial -> fi.getTime(),
+              'fecha_final -> ff.getTime(),
+              'empr_id -> empr_id
             )
-          val headerRow = com.norbitltd.spoiwo.model
-            .Row()
-            .withCellValues("OT NUMERO", "FECHA")
-          var j = 2
-          val rows = muots.map {
-            ot =>
-              j += 1
-              val link = new HyperLinkUrl(ot._1.toString, "#OT" + ot._1)
-              com.norbitltd.spoiwo.model.Row(
-                HyperLinkUrlCell(
-                  link,
-                  Some(0),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                DateCell(
-                  ot._2,
-                  Some(1),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("YYYY-MM-DD"))),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                )
-              )
-          }
-          title1Row :: title2Row :: title3Row :: headerRow :: rows.toList
-        },
-        mergedRegions = mergedColumns
-      )
-      var _listSheet = new ListBuffer[Sheet]()
-      _listSheet += sheet1
-      val _rParser = str("tipo") ~ int("consecutivo") ~ date("fecharecepcion") ~ date("fechasolucion") ~ str("descripcion") ~ str("direccion") ~ str("barrio") map { case a ~ b ~ c ~ d ~ e ~ f ~ g => (a, b, c, d , e, f, g) }
+            .as(motParser *)
 
-      // Recorrer muots y buscar reportes
-
-      muots.map { ot =>
-        var j = 3
- 
-        val fmt = DateTimeFormat.forPattern("yyyy/MM/dd")
-        val fmdt = DateTimeFormat.forPattern("yyyy/MM/dd HH:mm:ss")
-        println("Creando Hoja")
-        val sheet = Sheet(
-            name = "OT" + ot._1,
+          // Primera Hoja, relación de OTs
+          val sheet1 = Sheet(
+            name = "MUOTs",
             rows = {
-                val header0Row = com.norbitltd.spoiwo.model.Row().withCellValues("REPORTES")
-                val header1Row = com.norbitltd.spoiwo.model
+              val title1Row = com.norbitltd.spoiwo.model
                 .Row()
-                .withCellValues("Tipo Reporte", "Consecutivo", "Fecha Recepción", "Fecha Solución", "Descripción", "Dirección", "Barrio")
-                val reportes = SQL("""SELECT * FROM (SELECT 'EXPANSION' as tipo,
+                .withCellValues(empresa.empr_descripcion)
+              val title2Row = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("INFORME DE ORDEN DE TRABAJO MUNICIPIO")
+              val title3Row = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(
+                  "GENERADO EL " + format
+                    .format(Calendar.getInstance().getTime())
+                )
+              val headerRow = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("OT NUMERO", "FECHA")
+              var j = 2
+              val rows = muots.map {
+                ot =>
+                  j += 1
+                  val link = new HyperLinkUrl(ot._1.toString, "#OT" + ot._1)
+                  com.norbitltd.spoiwo.model.Row(
+                    HyperLinkUrlCell(
+                      link,
+                      Some(0),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    DateCell(
+                      ot._2,
+                      Some(1),
+                      style = Some(
+                        CellStyle(dataFormat = CellDataFormat("YYYY-MM-DD"))
+                      ),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    )
+                  )
+              }
+              title1Row :: title2Row :: title3Row :: headerRow :: rows.toList
+            },
+            mergedRegions = mergedColumns
+          )
+          var _listSheet = new ListBuffer[Sheet]()
+          _listSheet += sheet1
+          val _rParser = str("tipo") ~ int("consecutivo") ~ date(
+            "fecharecepcion"
+          ) ~ date("fechasolucion") ~ str("descripcion") ~ str("direccion") ~ str(
+            "barrio"
+          ) map { case a ~ b ~ c ~ d ~ e ~ f ~ g => (a, b, c, d, e, f, g) }
+
+          // Recorrer muots y buscar reportes
+
+          muots.map { ot =>
+            var j = 3
+
+            val fmt = DateTimeFormat.forPattern("yyyy/MM/dd")
+            val fmdt = DateTimeFormat.forPattern("yyyy/MM/dd HH:mm:ss")
+            println("Creando Hoja")
+            val sheet = Sheet(
+              name = "OT" + ot._1,
+              rows = {
+                val header0Row =
+                  com.norbitltd.spoiwo.model.Row().withCellValues("REPORTES")
+                val header1Row = com.norbitltd.spoiwo.model
+                  .Row()
+                  .withCellValues(
+                    "Tipo Reporte",
+                    "Consecutivo",
+                    "Fecha Recepción",
+                    "Fecha Solución",
+                    "Descripción",
+                    "Dirección",
+                    "Barrio"
+                  )
+                val reportes =
+                  SQL("""SELECT * FROM (SELECT 'EXPANSION' as tipo,
                   r.repo_consecutivo as consecutivo, 
                   r.repo_fecharecepcion as fecharecepcion, 
                   r.repo_fechasolucion as fechasolucion, 
@@ -9242,11 +9333,14 @@ ORDER BY e.reti_id, e.elem_codigo""")
                   LEFT JOIN siap.barrio b on b.barr_id = r.barr_id
                   WHERE r.empr_id = {empr_id} and ra.muot_id = {muot_id}
                   ) o
-                  ORDER BY o.fecharecepcion""").on(
-                    'empr_id -> empr_id,
-                    'muot_id -> ot._1
-                    ).as(_rParser *)                
-                val rows = reportes.map { r =>
+                  ORDER BY o.fecharecepcion""")
+                    .on(
+                      'empr_id -> empr_id,
+                      'muot_id -> ot._1
+                    )
+                    .as(_rParser *)
+                val rows = reportes.map {
+                  r =>
                     println("Agregando reporte a la OT")
                     val row = com.norbitltd.spoiwo.model.Row(
                       StringCell(
@@ -9266,15 +9360,17 @@ ORDER BY e.reti_id, e.elem_codigo""")
                       DateCell(
                         r._3,
                         Some(2),
-                        style =
-                          Some(CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
                       DateCell(
                         r._4,
                         Some(3),
-                        style =
-                          Some(CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
                       StringCell(
@@ -9302,22 +9398,260 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     row
                 }
                 header0Row :: header1Row :: rows.toList
-            }
-        )
-        _listSheet += sheet
+              }
+            )
+            _listSheet += sheet
+          }
+          //
+          println("Escribiendo en el Stream")
+          var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+          Workbook().addSheets(_listSheet).writeToOutputStream(os)
+          println("Stream Listo")
+          os.toByteArray
+        case None =>
+          var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+          os.toByteArray
       }
-      // 
-      println("Escribiendo en el Stream")
-      var os: ByteArrayOutputStream = new ByteArrayOutputStream()
-      Workbook().addSheets(_listSheet).writeToOutputStream(os)
-      println("Stream Listo")
-      os.toByteArray
-    case None =>
-      var os: ByteArrayOutputStream = new ByteArrayOutputStream()
-      os.toByteArray
-    }
     }
     result
   }
+
+  /*
+
+   */
+  def siap_cambio_direccion_xls(
+      fecha_inicial: Long,
+      fecha_final: Long,
+      empr_id: Long,
+      usua_id: Long,
+      formato: String
+  ): Array[Byte] = {
+    val empresa = empresaService.buscarPorId(empr_id).get
+    val usuario = usuarioService.buscarPorId(usua_id).get
+    var fi = Calendar.getInstance()
+    var ff = Calendar.getInstance()
+    fi.setTimeInMillis(fecha_inicial)
+    ff.setTimeInMillis(fecha_final)
+    fi.set(Calendar.MILLISECOND, 0)
+    fi.set(Calendar.SECOND, 0)
+    fi.set(Calendar.MINUTE, 0)
+    fi.set(Calendar.HOUR, 0)
+
+    ff.set(Calendar.MILLISECOND, 59)
+    ff.set(Calendar.SECOND, 59)
+    ff.set(Calendar.MINUTE, 59)
+    ff.set(Calendar.HOUR, 23)
+    if (formato.equals("xls")) {
+      db.withConnection { implicit connection =>
+        val dti = new DateTime(fecha_inicial)
+        val dtf = new DateTime(fecha_final)
+        val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+        val sdf = new SimpleDateFormat("yyyy-MM-dd")
+        var _listMerged = new ListBuffer[CellRange]()
+        val sheet = Sheet(
+          name = "Cambio Direccion_" + fmt.print(dti) + "_" + fmt.print(dtf),
+          rows = {
+            val titleRow1 = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(empresa.empr_descripcion)
+            val titleRow2 = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Informe Detallado de Cambio de Dirección por Reporte")
+            val titleRow3 = com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "Desde:",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                fi.getTime(),
+                Some(1),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              StringCell(
+                "Hasta:",
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                ff.getTime(),
+                Some(3),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),   
+            )       
+            val headerRow = com.norbitltd.spoiwo.model
+              .Row()
+              .withCellValues(
+                "Recibido",
+                "Solución",
+                "Digitado",
+                "Tipo Reporte",
+                "Número",
+                "Código Luminaria",
+                "Anterior Dirección",
+                "Anterior Barrio",
+                "Nueva Dirección",
+                "Nuevo Barrio"
+              )
+            val _parser = date("repo_fecharecepcion") ~
+                          date("repo_fechasolucion") ~
+                          date("repo_fechadigitacion") ~
+                          str("reti_descripcion") ~
+                          int("repo_consecutivo") ~
+                          int("aap_id") ~
+                          str("even_direccion_anterior") ~
+                          str("barr_descripcion_anterior") ~
+                          str("even_direccion") ~
+                          str("barr_descripcion")  map {
+                            case a ~ b ~ c ~ d ~ e ~ f ~ g ~ h ~ i ~ j => (a, b, c, d, e, f, g, h, i, j)
+                          } 
+
+            var query =
+              """SELECT r.repo_fecharecepcion, 
+	                        r.repo_fechasolucion, 
+	                        ra.repo_fechadigitacion, 
+	                        rt.reti_descripcion, 
+	                        r.repo_consecutivo, 
+	                        rd.aap_id,
+	                        rd.even_direccion_anterior, 
+	                        b1.barr_descripcion as barr_descripcion_anterior,
+	                        rd.even_direccion,
+	                        b2.barr_descripcion as barr_descripcion
+                        FROM siap.reporte r
+                        LEFT JOIN siap.reporte_adicional ra ON ra.repo_id = r.repo_id
+                        LEFT JOIN siap.reporte_direccion rd ON rd.repo_id = r.repo_id
+                        LEFT JOIN siap.reporte_tipo rt ON rt.reti_id = r.reti_id
+                        LEFT JOIN siap.barrio b1 ON b1.barr_id = rd.barr_id_anterior
+                        LEFT JOIN siap.barrio b2 ON b2.barr_id = rd.barr_id
+                        WHERE (rd.even_direccion <> rd.even_direccion_anterior OR rd.barr_id <> rd.barr_id_anterior) AND rd.aap_id <> 9999999 AND r.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r.empr_id = {empr_id}
+                        ORDER BY r.repo_fechasolucion ASC, r.reti_id ASC, r.repo_consecutivo ASC
+                      """
+            val resultSet =
+              SQL(query)
+                .on(
+                  'fecha_inicial -> new DateTime(fi),
+                  'fecha_final -> new DateTime(ff),
+                  'empr_id -> empr_id
+                )
+                .as(_parser *)
+            val rows = resultSet.map {
+              i =>
+                com.norbitltd.spoiwo.model
+                  .Row()
+                  .withCellValues(
+                    sdf.format(i._1),
+                    sdf.format(i._2),
+                    sdf.format(i._3),
+                    i._4,
+                    i._5,
+                    i._6,
+                    i._7,
+                    i._8,
+                    i._9,
+                    i._10
+                  )
+            }
+            titleRow1 :: titleRow2 :: titleRow3 :: headerRow :: rows.toList
+          },
+          mergedRegions = {
+            _listMerged += CellRange((0, 0), (0, 5))
+            _listMerged += CellRange((1, 1), (0, 5))
+            _listMerged.toList
+           }
+        )
+        println("Escribiendo en el Stream")
+        var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+        Workbook(sheet).writeToOutputStream(os)
+        println("Stream Listo")
+        os.toByteArray
+      }
+    } else {
+      var os = Array[Byte]()
+      val compiledFile = REPORT_DEFINITION_PATH + "siap_cambio_direccion.jasper"
+      val reportParams = new HashMap[String, java.lang.Object]()
+      reportParams.put(
+        "FECHA_INICIAL",
+        new java.sql.Timestamp(fi.getTimeInMillis())
+      )
+      reportParams.put(
+        "FECHA_FINAL",
+        new java.sql.Timestamp(ff.getTimeInMillis())
+      )
+      reportParams.put("EMPR_ID", Long.valueOf(empresa.empr_id.get))
+      reportParams.put("EMPRESA", empresa.empr_descripcion)
+      reportParams.put(
+        "USUARIO",
+        usuario.usua_nombre + " " + usuario.usua_apellido
+      )
+      db.withConnection { implicit connection =>
+      os =
+        JasperRunManager.runReportToPdf(compiledFile, reportParams, connection)
+      }
+      os
+    }
+  }
+
+  /*
+select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.reporte r 
+                        left join siap.reporte_adicional a on r.repo_id = a.repo_id
+                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
+                        left join siap.actividad t on a.acti_id = t.acti_id
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} ) r
+  */
+  def siap_luminaria_por_reporte_xls(
+      fecha_inicial: scala.Long,
+      fecha_final: scala.Long,
+      empr_id: scala.Long
+  ): Future[Iterable[Siap_luminaria_por_reporte]] =
+    Future[Iterable[Siap_luminaria_por_reporte]] {
+      db.withConnection { implicit connection =>
+        var fi = Calendar.getInstance()
+        var ff = Calendar.getInstance()
+        fi.setTimeInMillis(fecha_inicial)
+        ff.setTimeInMillis(fecha_final)
+        fi.set(Calendar.MILLISECOND, 0)
+        fi.set(Calendar.SECOND, 0)
+        fi.set(Calendar.MINUTE, 0)
+        fi.set(Calendar.HOUR, 0)
+
+        ff.set(Calendar.MILLISECOND, 59)
+        ff.set(Calendar.SECOND, 59)
+        ff.set(Calendar.MINUTE, 59)
+        ff.set(Calendar.HOUR, 23)
+
+        SQL("""select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_fechalimite, CAST(CONCAT(r.repo_fechasolucion, ' ', r.repo_horainicio, ':00') AS TIMESTAMP) as repo_fechasolucion, r.repo_direccion, r.barr_descripcion, count(*) as luminarias, r.cuad_descripcion from (select r.*, ra.*, o.*, rt.*, rd.*, a.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as repo_fechalimite,  c.* from siap.reporte r 
+                        left join siap.reporte_adicional ra on ra.repo_id = r.repo_id
+                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
+				 		            left join siap.reporte_direccion rd on rd.repo_id = r.repo_id
+                        left join siap.actividad a on a.acti_id = ra.acti_id
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.reti_id = 1 and  r.rees_id = 3 and r.empr_id = {empr_id}) r
+                group by r.repo_consecutivo, r.repo_fecharecepcion, r.repo_fechalimite, r.repo_fechasolucion, r.repo_horainicio, r.repo_direccion, r.barr_descripcion,r.cuad_descripcion
+            """)
+          .on(
+            'fecha_inicial -> fi.getTime(),
+            'fecha_final -> ff.getTime(),
+            'empr_id -> empr_id
+          )
+          .as(Siap_luminaria_por_reporte._set *)
+      }
+    }
 
 }

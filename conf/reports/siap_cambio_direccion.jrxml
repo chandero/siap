@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.13.0.final using JasperReports Library version 6.13.0-46ada4d1be8f3c5985fd0b6146f3ed44caed6f05  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_cambio_direccion" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ac0cbb8f-602c-4363-a5d4-df69fae5ce22">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Postgresql SIAP"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="EMPRESA" class="java.lang.String"/>
+	<parameter name="FECHA_INICIAL" class="java.util.Date"/>
+	<parameter name="FECHA_FINAL" class="java.util.Date"/>
+	<parameter name="EMPR_ID" class="java.lang.Long"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT r.repo_fecharecepcion,
+	r.repo_fechasolucion,
+	ra.repo_fechadigitacion,
+	rt.reti_descripcion,
+	r.repo_consecutivo,
+	rd.aap_id,
+	rd.even_direccion_anterior,
+	b1.barr_descripcion AS barr_descripcion_anterior,
+	rd.even_direccion,
+	b2.barr_descripcion AS barr_descripcion
+FROM siap.reporte r
+	LEFT JOIN siap.reporte_adicional ra ON 
+	 ra.repo_id = r.repo_id 
+	LEFT JOIN siap.reporte_direccion rd ON 
+	 rd.repo_id = r.repo_id 
+	LEFT JOIN siap.reporte_tipo rt ON 
+	 rt.reti_id = r.reti_id 
+	LEFT JOIN siap.barrio b1 ON 
+	 b1.barr_id = rd.barr_id_anterior 
+	LEFT JOIN siap.barrio b2 ON 
+	 b2.barr_id = rd.barr_id 
+WHERE 
+	  ( 
+	 rd.even_direccion <> rd.even_direccion_anterior 
+	 OR rd.barr_id <> rd.barr_id_anterior) 
+	 AND rd.aap_id <> 9999999 
+	 AND r.repo_fechasolucion BETWEEN $P{FECHA_INICIAL} AND $P{FECHA_FINAL} 
+	 AND r.empr_id = $P{EMPR_ID} 
+ORDER BY r.repo_fechasolucion ASC,
+	r.reti_id ASC,
+	r.repo_consecutivo ASC]]>
+	</queryString>
+	<field name="repo_fecharecepcion" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="repo_fecharecepcion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="reporte"/>
+	</field>
+	<field name="repo_fechasolucion" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.label" value="repo_fechasolucion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="reporte"/>
+	</field>
+	<field name="repo_fechadigitacion" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="repo_fechadigitacion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_adicional"/>
+	</field>
+	<field name="reti_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="reti_descripcion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_tipo"/>
+	</field>
+	<field name="repo_consecutivo" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="repo_consecutivo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="reporte"/>
+	</field>
+	<field name="aap_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="aap_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_direccion"/>
+	</field>
+	<field name="even_direccion_anterior" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="even_direccion_anterior"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_direccion"/>
+	</field>
+	<field name="barr_descripcion_anterior" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="barr_descripcion_anterior"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
+	</field>
+	<field name="even_direccion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="even_direccion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_direccion"/>
+	</field>
+	<field name="barr_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="barr_descripcion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="47" splitType="Stretch">
+			<staticText>
+				<reportElement x="290" y="0" width="290" height="20" uuid="969f8bb2-8b20-45f0-b89c-44e584de53d2"/>
+				<text><![CDATA[DETALLADO CAMBIO DE DIRECCION]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="0" width="280" height="20" uuid="9243fbae-ee0b-478b-bca0-f7cbd7d20413"/>
+				<textFieldExpression><![CDATA[$P{EMPRESA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss">
+				<reportElement x="650" y="0" width="100" height="20" uuid="ffd7b9af-3c59-4a74-a5dc-4529f7968a34"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="24" width="40" height="22" uuid="d4d075a4-20ed-4ca3-9e2f-9467c2d19743"/>
+				<text><![CDATA[Desde:]]></text>
+			</staticText>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement x="50" y="24" width="100" height="22" uuid="99ba6534-7b7e-4e5b-82e1-dd61b71ea5b6"/>
+				<textFieldExpression><![CDATA[$P{FECHA_INICIAL}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="160" y="24" width="40" height="22" uuid="a5d267a0-58bf-447a-9340-3387eb242823"/>
+				<text><![CDATA[Hasta:]]></text>
+			</staticText>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement x="210" y="24" width="100" height="22" uuid="bc81b76e-fa85-45f0-8a25-1e0eff0ee0cb"/>
+				<textFieldExpression><![CDATA[$P{FECHA_FINAL}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="60" height="16" uuid="e6edb78e-40ae-407c-aab0-b135edbee309">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Recibido]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="61" y="0" width="60" height="16" uuid="dd8c618f-113d-4124-81f1-c3140d5415b2">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Solucion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="120" y="0" width="60" height="16" uuid="464fd2b7-daa3-4309-8730-92adcbb33735">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Digitado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="181" y="0" width="78" height="16" uuid="a727e73d-a1f0-40e1-8f08-9c97c9cf5ab5">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Tipo Reporte]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="260" y="0" width="30" height="16" uuid="4619c20f-8300-4019-bb15-21ac817c603a">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Nro.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="290" y="0" width="34" height="16" uuid="29fda827-2cf6-462b-aa39-08e5f08a8edb">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" markup="none">
+					<font size="7"/>
+					<paragraph lineSpacing="Single" lineSpacingSize="1.0"/>
+				</textElement>
+				<text><![CDATA[Codigo L.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="351" y="0" width="108" height="16" uuid="24a23865-d3a7-4a96-b0e6-af2e143ddbc0">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Anterior Direccion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="465" y="0" width="90" height="16" uuid="01c46b4d-4c05-4e46-8966-bdeb32a0c895">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Anterior Barrio]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="560" y="0" width="108" height="16" uuid="b1cc6fd3-3100-48b9-8409-5152552ed168">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Nueva Direccion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="672" y="0" width="90" height="16" uuid="1232b6a4-552c-4625-8af5-383b5ca91225">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Nuevo Barrio]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="17" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement x="0" y="0" width="60" height="16" uuid="7a234713-cc02-45ac-8cf4-2d4b457ef4aa">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{repo_fecharecepcion}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement x="60" y="0" width="60" height="16" uuid="f9fdaa7b-e9d8-43af-b86e-75ec597733b8">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{repo_fechasolucion}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement x="120" y="0" width="60" height="16" uuid="3674fa84-8793-43b3-85d9-6d47987942b7">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{repo_fechadigitacion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="180" y="0" width="78" height="16" uuid="791deb63-488a-4edf-a9ac-5aab47f65cd7">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{reti_descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="260" y="0" width="30" height="16" uuid="8720c04c-cb76-4297-9d1d-91c0d7b2e60d">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{repo_consecutivo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="290" y="0" width="34" height="16" uuid="092b7bc6-bfe9-43ae-b7e6-fa9bae61d21a">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{aap_id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="351" y="0" width="108" height="16" uuid="73539ee5-dac8-482c-ba45-fb37f5369d1f">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{even_direccion_anterior}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="465" y="0" width="90" height="16" uuid="a1592bb4-2a0a-4093-bce3-2c9f0d59fef8">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{barr_descripcion_anterior}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="560" y="0" width="108" height="16" uuid="7deda369-3bab-4806-a614-307b2c9ccbdc">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{even_direccion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="672" y="0" width="90" height="16" uuid="1224127a-ec09-46c7-bd65-78d4665c60aa">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{barr_descripcion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="17" splitType="Stretch">
+			<textField evaluationTime="Master">
+				<reportElement x="660" y="0" width="100" height="17" uuid="1844fa31-7f25-48ae-91b2-ffad2db7a0e9"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[CONCATENATE(TEXT($V{MASTER_CURRENT_PAGE},"00"),T(" de "),TEXT($V{MASTER_TOTAL_PAGES},"00"))]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

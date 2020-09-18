@@ -119,6 +119,18 @@ const informeRouter = {
           component: () => import('@/views/informe/menu2detallado/menu2-12repetido'),
           name: 'menu_informe_menu2detallado_menu2-12repetido',
           meta: { title: 'menu_informe_menu2detallado_menu2-12repetido', icon: 'el-icon-info', roles: ['super', 'auxiliar'] }
+        },
+        {
+          path: 'menu2-13cambiodireccion',
+          component: () => import('@/views/informe/menu2detallado/menu2-13cambiodireccion'),
+          name: 'menu_informe_menu2detallado_menu2-13cambiodireccion',
+          meta: { title: 'menu_informe_menu2detallado_menu2-13cambiodireccion', icon: 'el-icon-info', roles: ['super', 'auxiliar', 'admin', 'gerencia', 'ingeniero', 'supervisor'] }
+        },
+        {
+          path: 'menu2-14luminariareporte',
+          component: () => import('@/views/informe/menu2detallado/menu2-14luminariareporte'),
+          name: 'menu_informe_menu2detallado_menu2-14luminariareporte',
+          meta: { title: 'menu_informe_menu2detallado_menu2-14luminariareporte', icon: 'el-icon-info', roles: ['super', 'auxiliar', 'admin', 'gerencia', 'ingeniero', 'supervisor'] }
         }
       ]
     },
