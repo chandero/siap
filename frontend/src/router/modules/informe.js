@@ -38,6 +38,18 @@ const informeRouter = {
           component: () => import('@/views/informe/menu1consolidado/menu1-3reporte'),
           name: 'menu_informe_menu1consolidado_menu1-3reporte',
           meta: { title: 'menu_informe_menu1consolidado_menu1-3reporte', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
+        },
+        {
+          path: 'menu1-4cuadrilla',
+          component: () => import('@/views/informe/menu1consolidado/menu1-4cuadrilla'),
+          name: 'menu_informe_menu1consolidado_menu1-4cuadrilla',
+          meta: { title: 'menu_informe_menu1consolidado_menu1-4cuadrilla', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
+        },
+        {
+          path: 'menu1-5operaciones',
+          component: () => import('@/views/informe/menu1consolidado/menu1-5operaciones'),
+          name: 'menu_informe_menu1consolidado_menu1-5operaciones',
+          meta: { title: 'menu_informe_menu1consolidado_menu1-5operaciones', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
         }
       ]
     },
