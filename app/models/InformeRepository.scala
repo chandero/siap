@@ -608,6 +608,18 @@ case class Siap_luminaria_por_reporte(
   luminarias: Option[Int]
 )
 
+case class Siap_obra_cuadrilla(
+  obra_consecutivo: Option[Int],
+  muot_id: Option[Int],
+  obra_fecharecepcion: Option[DateTime],
+  obra_fechasolucion: Option[DateTime], 
+  obra_nombre: Option[String],
+  obra_direccion: Option[String],
+  barr_descripcion: Option[String],
+  ortr_consecutivo: Option[Int],
+  cuad_descripcion: Option[String]
+)
+
 case class Siap_detallado_expansion(
     repo_fechasolucion: Option[DateTime],
     repo_fechadigitacion: Option[DateTime],
@@ -851,12 +863,12 @@ object Siap_luminaria_por_reporte {
   val _set = {
       get[Option[Int]]("repo_consecutivo") ~
       get[Option[DateTime]]("repo_fecharecepcion") ~
-      get[Option[DateTime]]("repo_fechalimite") ~
-      get[Option[DateTime]]("repo_fechasolucion") ~            
+      get[Option[DateTime]]("repo_fechalimite") ~            
+      get[Option[DateTime]]("repo_fechasolucion") ~
       get[Option[String]]("repo_direccion") ~
       get[Option[String]]("barr_descripcion") ~
       get[Option[String]]("cuad_descripcion") ~
-      get[Option[Int]]("luminarias") map {
+      get[Option[Int]]("luminarias")  map {
       case repo_consecutivo ~
             repo_fecharecepcion ~
             repo_fechalimite ~
@@ -873,6 +885,57 @@ object Siap_luminaria_por_reporte {
             barr_descripcion,
             cuad_descripcion,
             luminarias
+        )
+    }
+  }
+}
+
+object Siap_obra_cuadrilla {
+  implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy/MM/dd")
+  implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy/MM/dd")
+  
+  implicit val scWrites = new Writes[Siap_obra_cuadrilla] {
+    def writes(sc: Siap_obra_cuadrilla) = Json.obj(
+      "obra_consecutivo" -> sc.obra_consecutivo,
+      "muot_id" -> sc.muot_id,
+      "obra_fecharecepcion" -> sc.obra_fecharecepcion,
+      "obra_fechasolucion" -> sc.obra_fechasolucion,
+      "obra_nombre" -> sc.obra_nombre,
+      "obra_direccion" -> sc.obra_direccion,
+      "barr_descripcion" -> sc.barr_descripcion,
+      "ortr_consecutivo" -> sc.ortr_consecutivo,
+      "cuad_descripcion" -> sc.cuad_descripcion
+    )
+  }
+
+  val _set = {
+      get[Option[Int]]("obra_consecutivo") ~
+      get[Option[Int]]("muot_id") ~
+      get[Option[DateTime]]("obra_fecharecepcion") ~
+      get[Option[DateTime]]("obra_fechasolucion") ~            
+      get[Option[String]]("obra_nombre") ~
+      get[Option[String]]("obra_direccion") ~
+      get[Option[String]]("barr_descripcion") ~
+      get[Option[Int]]("ortr_consecutivo") ~
+      get[Option[String]]("cuad_descripcion") map {
+      case obra_consecutivo ~
+            muot_id ~
+            obra_fecharecepcion ~
+            obra_fechasolucion ~
+            obra_nombre ~
+            obra_direccion ~
+            barr_descripcion ~
+            ortr_consecutivo ~
+            cuad_descripcion => new Siap_obra_cuadrilla(
+            obra_consecutivo,
+            muot_id,
+            obra_fecharecepcion,
+            obra_fechasolucion,
+            obra_nombre,
+            obra_direccion,
+            barr_descripcion,
+            ortr_consecutivo,
+            cuad_descripcion
         )
     }
   }
@@ -10454,5 +10517,43 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
       os
     }
   }
+
+  def siap_informe_obra_cuadrilla_xls(
+      fecha_inicial: scala.Long,
+      fecha_final: scala.Long,
+      empr_id: scala.Long
+  ): Future[Iterable[Siap_obra_cuadrilla]] =
+    Future[Iterable[Siap_obra_cuadrilla]] {
+      var _result = new ListBuffer[Siap_obra_cuadrilla]()
+      db.withConnection { implicit connection =>
+        var fi = Calendar.getInstance()
+        var ff = Calendar.getInstance()
+        fi.setTimeInMillis(fecha_inicial)
+        ff.setTimeInMillis(fecha_final)
+        fi.set(Calendar.MILLISECOND, 0)
+        fi.set(Calendar.SECOND, 0)
+        fi.set(Calendar.MINUTE, 0)
+        fi.set(Calendar.HOUR, 0)
+
+        ff.set(Calendar.MILLISECOND, 59)
+        ff.set(Calendar.SECOND, 59)
+        ff.set(Calendar.MINUTE, 59)
+        ff.set(Calendar.HOUR, 23)
+
+        var query = """SELECT o1.obra_consecutivo, o1.muot_id, o1.obra_fecharecepcion, o1.obra_fechasolucion, o1.obra_nombre, o1.obra_direccion, b1.barr_descripcion, ot.ortr_consecutivo, c1.cuad_descripcion FROM siap.obra o1
+               INNER JOIN siap.ordentrabajo_obra oto ON oto.obra_id = o1.obra_id
+               INNER JOIN siap.ordentrabajo ot ON ot.ortr_id = oto.ortr_id
+               INNER JOIN siap.cuadrilla c1 ON c1.cuad_id = ot.cuad_id
+               INNER JOIN siap.barrio b1 ON b1.barr_id = o1.barr_id
+               WHERE o1.obra_fecharecepcion BETWEEN '2020.07.01' AND '2020.07.31'"""
+        var _resultSet = SQL(query)
+               .on(
+                  'fecha_inicial -> new DateTime(fi),
+                  'fecha_final -> new DateTime(ff),
+                  'empr_id -> empr_id          
+                ).as(Siap_obra_cuadrilla._set *)
+      }
+      _result;
+    }  
 
 }
