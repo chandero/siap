@@ -10545,15 +10545,18 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                INNER JOIN siap.ordentrabajo ot ON ot.ortr_id = oto.ortr_id
                INNER JOIN siap.cuadrilla c1 ON c1.cuad_id = ot.cuad_id
                INNER JOIN siap.barrio b1 ON b1.barr_id = o1.barr_id
-               WHERE o1.obra_fecharecepcion BETWEEN '2020.07.01' AND '2020.07.31'"""
+               WHERE o1.obra_fecharecepcion BETWEEN {fecha_inicial} AND {fecha_final} AND o1.empr_id = {empr_id}"""
         var _resultSet = SQL(query)
                .on(
                   'fecha_inicial -> new DateTime(fi),
                   'fecha_final -> new DateTime(ff),
                   'empr_id -> empr_id          
                 ).as(Siap_obra_cuadrilla._set *)
+        _resultSet.map { r => 
+          _result += r;
+        }
       }
-      _result;
+      _result.toList;
     }  
 
 }

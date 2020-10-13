@@ -43,7 +43,7 @@
           resizable
            >
           <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row.ortr_fecha }}</span>
+            <span style="margin-left: 10px">{{ scope.row.ortr_fecha | moment('YYYY-MM-DD') }}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -88,9 +88,11 @@
           <template slot-scope="scope">
             <el-button
               size="mini"
+              circle
               @click="handleEdit(scope.$index, scope.row)"><i class="el-icon-edit"></i></el-button>
             <el-button
               size="mini"
+              circle
               type="success"
               :title="$t('print')"
               @click="handlePrint(scope.$index, scope.row)"><i class="el-icon-printer"></i></el-button>

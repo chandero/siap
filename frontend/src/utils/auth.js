@@ -9,7 +9,7 @@ export function getToken () {
 
 export function setToken (token) {
   localStorage.token = token
-  return Cookies.set(TokenKey, token)
+  return Cookies.set(TokenKey, token, { sameSite: 'strict' })
 }
 
 export function removeToken () {
@@ -22,7 +22,7 @@ export function getEmpresaToken () {
 }
 
 export function setEmpresaToken (token) {
-  return Cookies.set(EmpresaKey, token)
+  return Cookies.set(EmpresaKey, token, { sameSite: 'strict' })
 }
 
 export function removeEmpresaToken () {

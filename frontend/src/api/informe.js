@@ -383,6 +383,16 @@ export function informe_siap_por_cuadrilla_xls (fecha_inicial, fecha_final) {
   })
 }
 
+export function informe_siap_obra_cuadrilla_xls (fecha_inicial, fecha_final) {
+  const data = {
+    fecha_inicial,
+    fecha_final
+  }
+  return request({
+    url: '/info/siocx/' + data.fecha_inicial + '/' + data.fecha_final,
+    method: 'get'
+  })
+}
 export function informe_siap_cambio_direccion_xls (fecha_inicial, fecha_final, formato) {
   const data = {
     fecha_inicial,

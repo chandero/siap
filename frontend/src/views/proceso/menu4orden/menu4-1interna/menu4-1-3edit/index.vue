@@ -160,6 +160,105 @@
                            </el-col>
                          </el-row>
                 </el-collapse-item>
+                <el-collapse-item name="4" :title="$t('ordentrabajo.novedades')">
+                        <el-row :gutter="4" class="hidden-sm-and-down">
+                          <el-col :md="1" :lg="1" :xl="1">
+                            <span style="font-weight: bold;">No.</span>
+                          </el-col>
+                          <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+                            <span style="font-weight: bold;">Novedad</span>
+                          </el-col>
+                          <el-col :xs="24" :sm="24" :md="3" :lg="3" :xl="3">
+                            <span style="font-weight: bold;">Hora Inicio</span>
+                          </el-col>
+                          <el-col :xs="24" :sm="24" :md="3" :lg="3" :xl="3">
+                            <span style="font-weight: bold;">Hora Terminación</span>
+                          </el-col>
+                          <el-col :xs="24" :sm="24" :md="9" :lg="9" :xl="9">
+                            <span style="font-weight: bold;">Observación</span>
+                          </el-col>
+                        </el-row>
+                        <div v-for="(evento, id) in ordentrabajo.novedades" v-bind:key="id">
+                          <el-form :model="evento" ref="novedadform">
+                          <el-row :gutter="4">
+                            <el-col class="hidden-md-and-up" :xs="1" :sm="1">
+                              <span style="font-weight: bold;">No.</span>
+                            </el-col>
+                            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ evento.even_id }}</el-col>
+                            <el-col class="hidden-md-and-up" :xs="5" :sm="5">
+                              <span style="font-weight: bold;">Novedad</span>
+                            </el-col>
+                            <el-col :xs="13" :sm="13" :md="6" :lg="6" :xl="6">
+                                <el-form-item>
+                                  <el-select :disabled="evento.even_estado > 7" filterable clearable ref="type" v-model="evento.nove_id" name="nove" :placeholder="$t('ordentrabajo.novedad.select')"  style="width:95%;">
+                                    <el-option v-for="nove in novedades" :key="nove.nove_id" :label="nove.nove_descripcion" :value="nove.nove_id" >
+                                    </el-option>
+                                  </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col class="hidden-md-and-up" :xs="5" :sm="5">
+                              <span style="font-weight: bold;">Hora Inicio</span>
+                            </el-col>
+                            <el-col :xs="16" :sm="16" :md="3" :lg="3" :xl="3">
+                              <el-form-item
+                                prop="ortrno_horaini"
+                              >
+                                <el-time-select
+                                  :disabled="evento.even_estado > 7"
+                                  v-model="evento.ortrno_horaini"
+                                  style="width:90%"
+                                  :picker-options="{
+                                    start: '07:00',
+                                    step: '00:15',
+                                    end: '19:00',
+                                  }"
+                                />
+                            </el-form-item>
+                          </el-col>
+                          <el-col class="hidden-md-and-up" :xs="5" :sm="5">
+                            <span style="font-weight: bold;">Hora Terminacion</span>
+                          </el-col>
+                          <el-col :xs="16" :sm="16" :md="3" :lg="3" :xl="3">
+                              <el-form-item
+                              prop="ortrno_horafin"
+                              >
+                              <el-time-select
+                                :disabled="evento.even_estado > 7"
+                                v-model="evento.ortrno_horafin"
+                                style="width:90%"
+                                :picker-options="{
+                                  start: '07:00',
+                                  step: '00:15',
+                                  end: '23:45',
+                                  minTime: evento.ortrno_horaini
+                                }"
+                              />
+                            </el-form-item>
+                          </el-col>
+                            <el-col class="hidden-md-and-up" :xs="8" :sm="8">
+                              <span style="font-weight: bold;">Observaciön</span>
+                            </el-col>
+                            <el-col :xs="16" :sm="16" :md="9" :lg="9" :xl="9">
+                                <el-form-item>
+                                    <el-input :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.ortrno_observacion"></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
+                              <el-button v-if="evento.even_estado < 8" size="mini" type="danger" circle icon="el-icon-minus" title="Quitar Fila" @click="evento.even_estado === 1? evento.even_estado = 8 : evento.even_estado = 9"></el-button>
+                              <el-button v-if="evento.even_estado > 7" size="mini" type="success" circle icon="el-icon-success" title="Restaurar Fila" @click="evento.even_estado === 9? evento.even_estado = 2 : evento.even_estado = 1"></el-button>
+                            </el-col>
+                         </el-row>
+                         </el-form>
+                         <el-row class="hidden-md-and-up">
+                          <el-col style="border-bottom: 1px dotted #000;"></el-col>
+                         </el-row>
+                        </div>
+                         <el-row>
+                           <el-col :span="24">
+                             <el-button  style="display: table-cell;" type="info" size="mini" circle icon="el-icon-plus" title="Adicionar Nueva Fila" @click="onAddNovedad()" />
+                           </el-col>
+                         </el-row>
+                </el-collapse-item>
               </el-collapse>
           </el-form>
       </el-main>
@@ -175,12 +274,13 @@ import { getCuadrillas } from '@/api/cuadrilla'
 import { getOrden, updateOrden, printOrden } from '@/api/ordentrabajo'
 import { getReporte, getTipos, getReportePorConsecutivo } from '@/api/reporte'
 import { getObra, getObraPorConsecutivo } from '@/api/obra'
+import { getNovedades } from '@/api/novedad'
 
 export default {
   data () {
     return {
       labelPosition: 'top',
-      activePages: ['1', '2', '3'],
+      activePages: ['1', '2', '3', '4'],
       canSave: true,
       canPrint: false,
       ordentrabajo: {
@@ -194,7 +294,8 @@ export default {
         usua_id: 0,
         empr_id: 0,
         reportes: [],
-        obras: []
+        obras: [],
+        novedades: []
       },
       reporte: {
         repo_id: null,
@@ -227,11 +328,21 @@ export default {
         even_id: null,
         even_estado: null
       },
+      novedad: {
+        nove_id: null,
+        ortrno_horaini: null,
+        ortrno_horafin: null,
+        ortrno_observacion: null,
+        even_id: null,
+        even_estado: null
+      },
       tipos: [],
       tiposbarrio: [],
       cuadrillas: [],
+      novedades: [],
       reporte_siguiente_consecutivo: 0,
-      obra_siguiente_consecutivo: 0
+      obra_siguiente_consecutivo: 0,
+      novedad_siguiente_consecutivo: 0
     }
   },
   methods: {
@@ -280,6 +391,18 @@ export default {
         even_estado: 1
       }
       this.ordentrabajo.obras.push(obra)
+    },
+    onAddNovedad () {
+      this.novedad_siguiente_consecutivo = this.novedad_siguiente_consecutivo + 1
+      var novedad = {
+        nove_id: null,
+        ortrno_horaini: null,
+        ortrno_horafin: null,
+        ortrno_observacion: null,
+        even_id: this.novedad_siguiente_consecutivo,
+        even_estado: 1
+      }
+      this.ordentrabajo.novedades.push(novedad)
     },
     validateRepoEvento (evento, id) {
       if (evento !== undefined && evento !== null) {
@@ -399,7 +522,12 @@ export default {
         this.cuadrillas = response.data
         getTipos().then(response => {
           this.tipos = response.data
-          this.obtenerOrden()
+          getNovedades().then(response => {
+            this.novedades = response.data
+            this.obtenerOrden()
+          }).catch(error => {
+            console.log('getNovedades:' + error)
+          })
         }).catch(error => {
           console.log('getTipos:' + error)
         })

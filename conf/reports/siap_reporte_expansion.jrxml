@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.5.1  -->
+<!-- 2020-10-08T17:40:48 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte" pageWidth="612" pageHeight="792" whenNoDataType="NoDataSection" columnWidth="587" leftMargin="10" rightMargin="15" topMargin="0" bottomMargin="15" isSummaryNewPage="true" isFloatColumnFooter="true" whenResourceMissingType="Error" uuid="f8caebe0-c17f-4691-ac5f-60e5854f08eb">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="siap"/>
@@ -1404,7 +1405,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				<text><![CDATA[MODELO:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="43" width="58" height="22" uuid="47b906ab-c073-4ecc-864f-951f73c717e2"/>
+				<reportElement x="0" y="43" width="30" height="22" uuid="47b906ab-c073-4ecc-864f-951f73c717e2"/>
 				<textElement verticalAlignment="Middle">
 					<font size="8" isItalic="true"/>
 				</textElement>
@@ -1796,6 +1797,11 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 				</textElement>
 				<text><![CDATA[CONTROL]]></text>
 			</staticText>
+			<textField>
+				<reportElement x="39" y="43" width="40" height="22" uuid="78cb80ca-2109-4b80-9151-7ef114d58a25"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[IF($F{repo_tipo_expansion} == 1, "I", IF($F{repo_tipo_expansion} == 2, "II", IF($F{repo_tipo_expansion} == 3, "III", IF($F{repo_tipo_expansion} == 4, "IV", IF($F{repo_tipo_expansion} == 5,"URB.","")))))]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageHeader>
 	<pageFooter>

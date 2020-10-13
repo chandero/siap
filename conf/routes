@@ -157,6 +157,13 @@ GET     /api/tire/:id                   controllers.TipoRetiroController.buscarP
 GET     /api/tire/del/:id               controllers.TipoRetiroController.borrar(id: Long)
 POST    /api/tire/save                  controllers.TipoRetiroController.guardar
 POST    /api/tire/upd                   controllers.TipoRetiroController.actualizar
+# Novedad
+GET     /api/nove/get/:p/:c             controllers.NovedadController.todos(p:Long, c:Long)
+GET     /api/nove/all                   controllers.NovedadController.novedades
+GET     /api/nove/:id                   controllers.NovedadController.buscarPorId(id: Long)
+GET     /api/nove/del/:id               controllers.NovedadController.borrar(id: Long)
+POST    /api/nove/save                  controllers.NovedadController.guardar
+POST    /api/nove/upd                   controllers.NovedadController.actualizar
 # Accion
 GET     /api/acci/get/:p/:c             controllers.AccionController.todos(p:Long, c:Long)
 GET     /api/acci/all                   controllers.AccionController.acciones
@@ -494,6 +501,7 @@ POST    /api/ortr/get                   controllers.OrdenTrabajoController.todos
 GET     /api/ortr/all                   controllers.OrdenTrabajoController.ordenes
 GET     /api/ortr/:id                   controllers.OrdenTrabajoController.buscarPorId(id: Long)
 GET     /api/ortr/del/:id               controllers.OrdenTrabajoController.borrarOrden(id: Long)
+GET     /api/otar/:ot/:re               controllers.OrdenTrabajoController.agregarReporte(ot: Long, re: Long)
 POST    /api/ortr/save                  controllers.OrdenTrabajoController.guardarOrden
 POST    /api/ortr/upd                   controllers.OrdenTrabajoController.actualizarOrden
 GET     /api/ortr/st/get                controllers.OrdenTrabajoController.getEstados
@@ -541,6 +549,7 @@ GET     /api/info/isdmmx/:c                     controllers.InformeController.si
 GET     /api/info/sicdx/:fi/:ff/:ft/:t          controllers.InformeController.siap_cambio_direccion_xls(fi: Long, ff: Long, ft: String, t:String)
 GET     /api/info/slprx/:fi/:ff                 controllers.InformeController.siap_luminaria_por_reporte_xls(fi: Long, ff: Long)
 GET     /api/info/sipcx/:fi/:ff                 controllers.InformeController.siap_informe_por_cuadrilla_xls(fi: Long, ff: Long)
+GET     /api/info/siocx/:fi/:ff                controllers.InformeController.siap_informe_obra_cuadrilla_xls(fi: Long, ff: Long)
 GET     /api/info/sigox/:fi/:ff/:ft/:e/:t       controllers.InformeController.siap_informe_general_operaciones_xls(fi: Long, ff:Long, ft:String, e: Long, t:String)
 
 # Graficas

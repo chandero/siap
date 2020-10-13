@@ -383,6 +383,7 @@ export default {
     'menu_informe_menu2detallado_menu2-12repetido': 'Material Repetido',
     'menu_informe_menu2detallado_menu2-13cambiodireccion': 'Cambio de Dirección',
     'menu_informe_menu2detallado_menu2-14luminariareporte': 'Luminarias Por Reporte',
+    'menu_informe_menu2detallado_menu2-15obracuadrilla': 'Cuadrilla Obra',
     menu_informe_menu3inventario: 'Inventario',
     'menu_informe_menu3inventario_menu3-1luminaria': 'Luminaria',
     'menu_informe_menu3inventario_menu3-2control': 'Control',
@@ -922,11 +923,15 @@ export default {
     duetime: 'Fecha Límite',
     hour: 'Hora(s)',
     cuadrilla: 'Cuadrilla',
-    ot: 'Orden de Trabajo',
+    ot: 'ODT Interna',
+    otm: 'Municipio ODT',
     aaco_id_anterior: 'Tipo Medida Anterior',
     aaco_id_nuevo: 'Tipo Medida Nuevo',
     aap_fechatoma: 'Fecha Toma',
     reparar: 'Recuperar'
+  },
+  ortr: {
+    select: 'Seleccione la ODT'
   },
   obra: {
     tipo: {
@@ -1153,7 +1158,11 @@ export default {
     notupdated: 'Orden de trabajo no fue actualizada, error =>',
     confirmationmsg: 'Se procederá a borrar la Orden de trabajo seleccionada, continuar?',
     reports: 'Reportes',
-    obras: 'Obras'
+    obras: 'Obras',
+    novedades: 'Novedades',
+    novedad: {
+      select: 'Seleccione la Novedad'
+    }
   },
   use: {
     select: 'Seleccione Uso de la Luminaria'

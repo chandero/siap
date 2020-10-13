@@ -22,15 +22,15 @@ const app = {
   mutations: {
     TOGGLE_SIDEBAR: state => {
       if (state.sidebar.opened) {
-        Cookies.set('sidebarStatus', 1)
+        Cookies.set('sidebarStatus', 1, { sameSite: 'strict' })
       } else {
-        Cookies.set('sidebarStatus', 0)
+        Cookies.set('sidebarStatus', 0, { sameSite: 'strict' })
       }
       state.sidebar.opened = !state.sidebar.opened
     },
     SET_LANGUAGE: (state, language) => {
       state.language = language
-      Cookies.set('language', language)
+      Cookies.set('language', language, { sameSite: 'strict' })
     },
     SET_BASEURL: (state, url) => {
       state.baseurl = url

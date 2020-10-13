@@ -56,11 +56,18 @@
                   </el-form-item>
                 </template>
               </el-col>
-              <el-col :xs="24" :sm="24" :md="9" :lg="9" :xl="9">
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
                 <el-form-item prop="reti_id" :label="$t('reporte.type')">
                   <span style="font-size: 24px;">{{ reporte_tipo(reporte.reti_id) }}</span>
                 </el-form-item>
               </el-col>
+              <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+                <el-form-item prop="repo_consecutivo" :label="$t('reporte.number')">
+                  <span style="font-size: 30px;">{{ reporte.repo_consecutivo | fillZeros(6) }}</span>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
               <el-col v-if="reporte.reti_id===2" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
                 <el-form-item
                   prop="adicional.repo_tipo_expansion"
@@ -84,23 +91,6 @@
                       :value="te.tiex_id"
                     ></el-option>
                   </el-select>
-                </el-form-item>
-              </el-col>
-              <el-col
-                v-if="(reporte.reti_id===2 || reporte.reti_id===9)"
-                :xs="24"
-                :sm="24"
-                :md="5"
-                :lg="5"
-                :xl="5"
-              >
-                <el-form-item prop="muot_id" :label="$t('reporte.ot')">
-                  <el-input
-                    type="number"
-                    style="font-size: 30px;"
-                    v-model="reporte.adicional.muot_id"
-                    @input="reporte.adicional.muot_id = parseInt($event)"
-                  ></el-input>
                 </el-form-item>
               </el-col>
               <el-col
@@ -129,6 +119,23 @@
                       :value="u.urba_id"
                     ></el-option>
                   </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col
+                v-if="(reporte.reti_id===2 || reporte.reti_id===9)"
+                :xs="24"
+                :sm="24"
+                :md="3"
+                :lg="3"
+                :xl="3"
+              >
+                <el-form-item prop="muot_id" :label="$t('reporte.otm')">
+                  <el-input
+                    type="number"
+                    style="font-size: 30px;"
+                    v-model="reporte.adicional.muot_id"
+                    @input="reporte.adicional.muot_id = parseInt($event)"
+                  ></el-input>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -230,12 +237,8 @@
               </el-col>
             </el-row>
             <el-row :gutter="4">
-              <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
-                <el-form-item prop="repo_consecutivo" :label="$t('reporte.number')">
-                  <span style="font-size: 30px;">{{ reporte.repo_consecutivo | fillZeros(6) }}</span>
-                </el-form-item>
-              </el-col>
-              <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
                 <template v-if="orig_id_state">
                   <el-form-item prop="orig_id" :label="$t('reporte.origin')">
                     <el-select
@@ -278,7 +281,7 @@
                   </el-form-item>
                 </template>
               </el-col>
-              <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
                 <template v-if="repo_codigo_state">
                   <el-form-item prop="repo_codigo" :label="$t('reporte.code')">
                     <el-input
@@ -312,7 +315,7 @@
                   </el-form-item>
                 </template>
               </el-col>
-              <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
                 <template v-if="repo_apoyo_state">
                   <el-form-item prop="repo_apoyo" :label="$t('reporte.apoyo')">
                     <el-input
@@ -342,6 +345,49 @@
                       icon="el-icon-edit"
                       style="border-style: hidden;"
                       @click="repo_apoyo_state=!repo_apoyo_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+                <template v-if="ortr_id_state">
+                  <el-form-item prop="adicional.ortr_id" :label="$t('reporte.ot')" required>
+                    <el-select
+                      style="width:100%;"
+                      ref="ortr_id"
+                      v-model="reporte.adicional.ortr_id"
+                      name="ortr_id"
+                      :placeholder="$t('ortr.select')"
+                      @change="changeFocus('name')"
+                    >
+                      <el-option
+                        v-for="ot in ordenestrabajo"
+                        :key="ot.ortr_id"
+                        :label="ordentrabajo_label(ot.ortr_id)"
+                        :value="ot.ortr_id"
+                      ></el-option>
+                    </el-select>
+                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmOrdenTrabajo(); ortr_id_state = false" />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="reporte.adicional.ortr_id = ortr_id; ortr_id_state = false"
+                    />
+                  </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.ot')">
+                    <span style="400 13.3333px Arial;">{{ ordenes(reporte.adicional.ortr_id) }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="ortr_id_state=!ortr_id_state"
                     />
                   </el-form-item>
                 </template>
@@ -724,7 +770,7 @@
                     :picker-options="{
                                         start: '07:00',
                                         step: '00:15',
-                                        end: '19:00',
+                                        end: '23:45',
                                         minTime: reporte.repo_horainicio
                                    }"
                   ></el-time-select>
@@ -859,6 +905,37 @@
                       />
                     </el-form-item>
                   </el-col>
+              <el-col :span="8">
+                <el-form-item
+                  prop="even_horaini"
+                  :label="$t('reporte.timestart')"
+                >
+                  <el-time-select
+                    v-model="reporte.direcciones[didx].even_horaini"
+                    :picker-options="{
+                                        start: '07:00',
+                                        step: '00:15',
+                                        end: '19:00',
+                                   }"
+                  ></el-time-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item
+                  prop="even_horafin"
+                  :label="$t('reporte.timeend')"
+                >
+                  <el-time-select
+                    v-model="reporte.direcciones[didx].even_horafin"
+                    :picker-options="{
+                                        start: '07:00',
+                                        step: '00:15',
+                                        end: '23:45',
+                                        minTime: reporte.direcciones[didx].even_horaini
+                                   }"
+                  ></el-time-select>
+                </el-form-item>
+              </el-col>
                 </el-row>
                 <el-row>
                   <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
@@ -1594,6 +1671,7 @@ import { getTiposRetiro } from '@/api/tiporetiro'
 import { getUrbanizadoraTodas } from '@/api/urbanizadora'
 import { getMedidors } from '@/api/medidor'
 import { getTransformadors } from '@/api/transformador'
+import { getOrdenes, addReporteAOrden } from '@/api/ordentrabajo'
 // component
 
 // import { inspect } from 'util'
@@ -1668,6 +1746,7 @@ export default {
       acti_id_state: false,
       tiba_id_state: false,
       barr_id_state: false,
+      ortr_id_state: false,
       // variables a almacenar
       repo_fecharecepcion: null,
       repo_direccion: null,
@@ -1768,7 +1847,8 @@ export default {
           repo_apoyo: null,
           urba_id: null,
           muot_id: null,
-          autorizacion: null
+          autorizacion: null,
+          ortr_id: null
         }
       },
       evento: {
@@ -1794,6 +1874,8 @@ export default {
         even_direccion_anterior: null,
         barr_id_anterior: null,
         even_estado: null,
+        even_horaini: null,
+        even_horafin: null,
         even_esbaja: null,
         even_valido: {
           aap_id: true,
@@ -1919,6 +2001,13 @@ export default {
               trigger: 'change'
             }
           ],
+          ortr_id: [
+            {
+              required: true,
+              message: 'Debe Seleccionar el Orden de Trabajo',
+              trigger: 'change'
+            }
+          ],
           acti_id: [
             {
               required: true,
@@ -1948,6 +2037,20 @@ export default {
             required: true,
             message: 'Ingrese el código de la luminaria',
             trigger: 'blur'
+          }
+        ],
+        even_horaini: [
+          {
+            required: true,
+            message: 'Seleccione la Hora Inicial',
+            trigger: 'change'
+          }
+        ],
+        even_horafin: [
+          {
+            required: true,
+            message: 'Seleccione la Hora Final',
+            trigger: 'change'
           }
         ],
         even_direccion: [
@@ -2108,6 +2211,7 @@ export default {
       tiposbarrio: [],
       actividades: [],
       urbanizadoras: [],
+      ordenestrabajo: [],
       status: '',
       dialogonuevodanhovisible: false,
       actividad: {
@@ -2172,6 +2276,23 @@ export default {
     pending: { name: 'pending', time: 30000, autostart: false, repeat: true }
   },
   methods: {
+    confirmOrdenTrabajo () {
+      addReporteAOrden(this.reporte.adicional.ortr_id, this.reporte.repo_id).then(response => {
+        if (response.data === 'true') {
+          this.$message({
+            message: 'Orden de Trabajo Actualizada',
+            type: 'success'
+          })
+        } else {
+
+        }
+      }).catch((error) => {
+        this.$message({
+          message: 'Orden de Trabajo NO Actualizada, error:' + error,
+          type: 'warning'
+        })
+      })
+    },
     confirmEdit () {
       const data = {
         reporte: this.reporte
@@ -2197,6 +2318,30 @@ export default {
             type: 'warning'
           })
         })
+    },
+    ordenes (id) {
+      if (id === undefined || id === null) {
+        return ''
+      } else {
+        var orden = this.ordenestrabajo.find((o) => o.ortr_id === id)
+        if (orden) {
+          return orden.ortr_consecutivo + ' - ' + orden.cuad_descripcion
+        } else {
+          return ''
+        }
+      }
+    },
+    ordentrabajo_label (id) {
+      if (id === undefined || id === null) {
+        return ''
+      } else {
+        var orden = this.ordenestrabajo.find((o) => o.ortr_id === id)
+        if (orden) {
+          return orden.ortr_consecutivo + ' - ' + orden.cuad_descripcion
+        } else {
+          return ''
+        }
+      }
     },
     origen (id) {
       if (id === undefined || id === null) {
@@ -3507,6 +3652,9 @@ export default {
       this.acti_id = this.reporte.acti_id
       this.tiba_id = this.reporte.tiba_id
       this.barr_id = this.reporte.barr_id
+      if (this.reporte.adicional.ortr_id === null) {
+        this.ortr_id_state = true
+      }
     },
     validarConsecutivo () {
       // var consecutivo = 1
@@ -4050,7 +4198,15 @@ export default {
                                                                                                               ) => {
                                                                                                                 this.transformadores =
                                                                                                                   response.data
-                                                                                                                this.obtenerReporte()
+                                                                                                                getOrdenes().then(response => {
+                                                                                                                  this.ordenestrabajo = response.data
+                                                                                                                  this.obtenerReporte()
+                                                                                                                }).catch(error => {
+                                                                                                                  console.log(
+                                                                                                                    'Error Ordenes Trabajo: ' +
+                                                                                                                    error
+                                                                                                                  )
+                                                                                                                })
                                                                                                               }
                                                                                                             )
                                                                                                             .catch(

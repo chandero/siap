@@ -40,18 +40,21 @@ import org.joda.time.LocalDateTime
 
 case class OrdenEvento(even_id: Option[Int], even_estado: Option[Int], repo_id: Option[scala.Long], reti_id: Option[scala.Long], repo_consecutivo: Option[Int], repo_descripcion: Option[String])
 case class OrdenObra(even_id: Option[Int], even_estado: Option[Int], obra_id: Option[scala.Long], obra_consecutivo: Option[Int], obra_nombre: Option[String])
+case class OrdenNovedad(nove_id: Option[Int], ortrno_horaini: Option[String], ortrno_horafin: Option[String], ortrno_observacion: Option[String], even_id: Option[Int], even_estado: Option[Int])
 
 case class OrdenTrabajo(ortr_id: Option[scala.Long], 
-                       ortr_fecha: DateTime, 
-                       ortr_observacion: String, 
+                       ortr_fecha: Option[DateTime], 
+                       ortr_observacion: Option[String],
                        ortr_consecutivo: Option[Int], 
-                       otes_id: scala.Long, 
-                       cuad_id: scala.Long, 
+                       otes_id: Option[scala.Long],
+                       cuad_id: Option[scala.Long],
+                       cuad_descripcion: Option[String],
                        tiba_id: Option[scala.Long],
-                       empr_id: scala.Long, 
-                       usua_id: scala.Long, 
+                       empr_id: Option[scala.Long], 
+                       usua_id: Option[scala.Long], 
                        reportes: Option[List[OrdenEvento]],
-                       obras: Option[List[OrdenObra]])
+                       obras: Option[List[OrdenObra]],
+                       novedades: Option[List[OrdenNovedad]])
 
 object OrdenEvento {
     implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -122,6 +125,42 @@ object OrdenObra {
     }      
 }
 
+object OrdenNovedad {
+    implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")    
+
+    implicit val wWrites = new Writes[OrdenNovedad] {
+        def writes(ortr:OrdenNovedad) = Json.obj(
+            "nove_id" -> ortr.nove_id,
+            "ortrno_horaini" -> ortr.ortrno_horaini,
+            "ortrno_horafin" -> ortr.ortrno_horafin,
+            "ortrno_observacion" -> ortr.ortrno_observacion,
+            "even_id" -> ortr.even_id,
+            "even_estado" -> ortr.even_estado
+        )
+    }
+
+    implicit val ordenobraReads: Reads[OrdenNovedad] = (
+       (__ \ "nove_id").readNullable[Int] and
+         (__ \ "ortrno_horaini").readNullable[String] and
+         (__ \ "ortrno_horafin").readNullable[String] and
+         (__ \ "ortrno_observacion").readNullable[String] and
+         (__ \ "even_id").readNullable[Int] and
+         (__ \ "even_estado").readNullable[Int]
+
+    )(OrdenNovedad.apply _)
+
+    val set = {
+        get[Option[Int]]("nove_id") ~
+        get[Option[String]]("ortrno_horaini") ~
+        get[Option[String]]("ortrno_horafin") ~
+        get[Option[String]]("ortrno_observacion") ~
+        get[Option[Int]]("even_id") ~
+        get[Option[Int]]("even_estado") map {
+            case nove_id ~ ortrno_horaini ~ ortrno_horafin ~ ortrno_observacion ~ even_id ~ even_estado => OrdenNovedad(nove_id, ortrno_horaini, ortrno_horafin, ortrno_observacion, even_id, even_estado)
+        }
+    }      
+}
 
 object OrdenTrabajo {
     implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -135,42 +174,47 @@ object OrdenTrabajo {
             "ortr_consecutivo" -> ortr.ortr_consecutivo,
             "otes_id" -> ortr.otes_id,
             "cuad_id" -> ortr.cuad_id,
+            "cuad_descripcion" -> ortr.cuad_descripcion,
             "tiba_id" -> ortr.tiba_id,
             "empr_id" -> ortr.empr_id,
             "usua_id" -> ortr.usua_id,
             "reportes" -> ortr.reportes,
-            "obras" -> ortr.obras
+            "obras" -> ortr.obras,
+            "novedades" -> ortr.novedades
         )
     }
 
     implicit val ordentrabajoReads: Reads[OrdenTrabajo] = (
        (__ \ "ortr_id").readNullable[scala.Long] and
-         (__ \ "ortr_fecha").read[DateTime] and
-         (__ \ "ortr_observacion").read[String] and
+         (__ \ "ortr_fecha").readNullable[DateTime] and
+         (__ \ "ortr_observacion").readNullable[String] and
          (__ \ "ortr_consecutivo").readNullable[Int] and
-         (__ \ "otes_id").read[scala.Long] and
-         (__ \ "cuad_id").read[scala.Long] and
+         (__ \ "otes_id").readNullable[scala.Long] and
+         (__ \ "cuad_id").readNullable[scala.Long] and
+         (__ \ "cuad_descripcion").readNullable[String] and
          (__ \ "tiba_id").readNullable[scala.Long] and
-         (__ \ "empr_id").read[scala.Long] and
-         (__ \ "usua_id").read[scala.Long] and
+         (__ \ "empr_id").readNullable[scala.Long] and
+         (__ \ "usua_id").readNullable[scala.Long] and
          (__ \ "reportes").readNullable[List[OrdenEvento]] and
-         (__ \ "obras").readNullable[List[OrdenObra]]
+         (__ \ "obras").readNullable[List[OrdenObra]] and
+         (__ \ "novedades").readNullable[List[OrdenNovedad]]
     )(OrdenTrabajo.apply _)
 
     /**
     * Parsear un OrdenTrabajo desde un ResultSet
     */
     val simple = {
-        get[Option[scala.Long]]("ordentrabajo.ortr_id") ~
-        get[DateTime]("ordentrabajo.ortr_fecha") ~
-        get[String]("ordentrabajo.ortr_observacion") ~
-        get[Option[Int]]("ordentrabajo.ortr_consecutivo") ~
-        get[scala.Long]("ordentrabajo.otes_id") ~
-        get[scala.Long]("ordentrabajo.cuad_id") ~
+        get[Option[scala.Long]]("ortr_id") ~
+        get[Option[DateTime]]("ortr_fecha") ~
+        get[Option[String]]("ortr_observacion") ~
+        get[Option[Int]]("ortr_consecutivo") ~
+        get[Option[scala.Long]]("otes_id") ~
+        get[Option[scala.Long]]("cuad_id") ~
+        get[Option[String]]("cuad_descripcion") ~
         get[Option[scala.Long]]("ordentrabajo.tiba_id") ~
-        get[scala.Long]("ordentrabajo.empr_id") ~
-        get[scala.Long]("ordentrabajo.usua_id") map {
-            case ortr_id ~ ortr_fecha ~ ortr_observacion ~ ortr_consecutivo ~ otes_id ~ cuad_id ~ tiba_id ~ empr_id ~ usua_id => OrdenTrabajo(ortr_id, ortr_fecha, ortr_observacion, ortr_consecutivo, otes_id, cuad_id, tiba_id, empr_id, usua_id, None, None)
+        get[Option[scala.Long]]("ordentrabajo.empr_id") ~
+        get[Option[scala.Long]]("ordentrabajo.usua_id") map {
+            case ortr_id ~ ortr_fecha ~ ortr_observacion ~ ortr_consecutivo ~ otes_id ~ cuad_id ~ cuad_descripcion ~ tiba_id ~ empr_id ~ usua_id => OrdenTrabajo(ortr_id, ortr_fecha, ortr_observacion, ortr_consecutivo, otes_id, cuad_id, cuad_descripcion, tiba_id, empr_id, usua_id, None, None, None)
         }
     }    
 }
@@ -185,7 +229,9 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
     */
     def buscarPorId(ortr_id: scala.Long) : Option[OrdenTrabajo] = {
         db.withConnection { implicit connection => 
-            val o = SQL("SELECT * FROM siap.ordentrabajo WHERE ortr_id = {ortr_id}").
+            val o = SQL("""SELECT * FROM siap.ordentrabajo ot
+                           LEFT JOIN siap.cuadrilla c1 ON c1.cuad_id = ot.cuad_id 
+                           WHERE ortr_id = {ortr_id}""").
             on(
                 'ortr_id -> ortr_id
             ).as(OrdenTrabajo.simple.single)
@@ -200,8 +246,13 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
                            WHERE e.ortr_id = {ortr_id}""").
             on(
                 'ortr_id -> ortr_id
-            ).as(OrdenObra.set *)            
-            Some(o.copy(reportes = Some(e), obras = Some(b)))
+            ).as(OrdenObra.set *)  
+            val c = SQL("""SELECT n.nove_id, n.ortrno_horaini, n.ortrno_horafin, n.ortrno_observacion, n.even_id, n.even_estado FROM siap.ordentrabajo_novedad n 
+                           WHERE n.ortr_id = {ortr_id}""").
+            on(
+                'ortr_id -> ortr_id
+            ).as(OrdenNovedad.set *)
+            Some(o.copy(reportes = Some(e), obras = Some(b), novedades = Some(c)))
         }
     }
 
@@ -212,7 +263,9 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
     */
     def buscarPorConsecutivo(ortr_consecutivo: Int, empr_id: scala.Long) : Option[OrdenTrabajo] = {
         db.withConnection { implicit connection => 
-            SQL("SELECT * FROM siap.ordentrabajo WHERE ortr_consecutivo = {ortr_consecutivo} and empr_id = {empr_id}").
+            SQL("""SELECT * FROM siap.ordentrabajo ot
+                   LEFT JOIN siap.cuadrilla c1 ON c1.cuad_id = ot.cuad_id
+                   WHERE ortr_consecutivo = {ortr_consecutivo} and ot.empr_id = {empr_id}""").
             on(
                 'ortr_consecutivo -> ortr_consecutivo,
                 'empr_id -> empr_id
@@ -226,7 +279,9 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
     */
     def buscarUltimoPorEmpresa(empr_id: scala.Long) : Option[OrdenTrabajo] = {
         db.withConnection { implicit connection => 
-            SQL("SELECT * FROM siap.ordentrabajo WHERE empr_id = {empr_id} ORDER BY ortr_id DESC LIMIT 1 OFFSET 0").
+            SQL("""SELECT * FROM siap.ordentrabajo ot 
+              LEFT JOIN siap.cuadrilla c1 ON c1.cuad_id = ot.cuad_id
+              WHERE ot.empr_id = {empr_id} ORDER BY ot.ortr_id DESC LIMIT 1 OFFSET 0""").
             on(
                 'empr_id -> empr_id
             ).as(OrdenTrabajo.simple.singleOpt)
@@ -240,7 +295,7 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
   */
   def cuenta(empr_id: scala.Long): scala.Long =  {
     db.withConnection{ implicit connection =>
-      val result = SQL("SELECT COUNT(*) AS c FROM siap.ordentrabajo WHERE empr_id = {empr_id} and otes_id <> 99").
+      val result = SQL("SELECT COUNT(*) AS c FROM siap.ordentrabajo ot WHERE ot.empr_id = {empr_id} and ot.otes_id <> 99").
       on(
         'empr_id -> empr_id
       ).as(SqlParser.scalar[scala.Long].single)
@@ -259,7 +314,9 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
     Future[Iterable[OrdenTrabajo]] {
       db.withConnection { implicit connection =>
         var _list:ListBuffer[OrdenTrabajo] = new ListBuffer[OrdenTrabajo]()  
-            SQL("SELECT * FROM siap.ordentrabajo WHERE empr_id = {empr_id} AND otes_id <> 99 ORDER BY ortr_id DESC LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1) ").
+            SQL("""SELECT * FROM siap.ordentrabajo ot
+            LEFT JOIN siap.cuadrilla c1 ON c1.cuad_id = ot.cuad_id
+            WHERE ot.empr_id = {empr_id} AND ot.otes_id <> 99 ORDER BY ot.ortr_id DESC LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1) """).
             on(
                 'empr_id -> empr_id,
                 'page_size -> page_size,
@@ -275,7 +332,9 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
     */
     def ordenes(empr_id: scala.Long): Future[Iterable[OrdenTrabajo]] = Future[Iterable[OrdenTrabajo]] {
         db.withConnection { implicit connection => 
-            SQL("SELECT * FROM siap.ordentrabajo WHERE empr_id = {empr_id} AND otes_id <> 99 ORDER BY ortr_id DESC").
+            SQL("""SELECT * FROM siap.ordentrabajo ot
+                   LEFT JOIN siap.cuadrilla c1 ON c1.cuad_id = ot.cuad_id
+                   WHERE ot.empr_id = {empr_id} AND ot.otes_id <> 99 ORDER BY ot.ortr_id DESC""").
             on(
                 'empr_id -> empr_id
             ).as(OrdenTrabajo.simple *)
@@ -290,7 +349,7 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
         db.withConnection{ implicit connection =>
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDate = fecha
-            var consecutivo = SQL("""SELECT COUNT(*) FROM siap.ordentrabajo WHERE empr_id = {empr_id}""").
+            var consecutivo = SQL("""SELECT COUNT(*) FROM siap.ordentrabajo ot WHERE ot.empr_id = {empr_id}""").
             on(
                 'empr_id -> empr_id
             ).as(SqlParser.scalar[Int].single)
@@ -339,6 +398,26 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
                     }
                 }
             }
+
+            // Guardar Novedades
+            ortr.novedades.map { novedades => 
+                for(n <- novedades) {
+                    n.nove_id match {
+                       case Some(nove_id) =>
+                         SQL("""INSERT INTO siap.ordentrabajo_novedad (ortr_id, nove_id, ortrno_horaini, ortrno_horafin, ortrno_observacion, even_id, even_estado) VALUES ({ortr_id}, {nove_id}, {ortrno_horaini}, {ortrno_horafin}, {ortrno_observacion}, {even_id}, {even_estado})""").
+                         on(
+                             'ortr_id -> id,
+                             'nove_id -> n.nove_id,
+                             'ortrno_horaini -> n.ortrno_horaini,
+                             'ortrno_horafin -> n.ortrno_horafin,
+                             'ortrno_observacion -> n.ortrno_observacion,
+                             'even_id -> n.even_id,
+                             'even_estado -> n.even_estado
+                         ).executeInsert()
+                       case None => None
+                    }
+                }
+            }            
 
             SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
             on(
@@ -424,6 +503,38 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
                              'obra_id -> r.obra_id,
                              'even_id -> r.even_id,
                              'even_estado -> r.even_estado
+                           ).executeInsert()
+                         }
+                       case None => None
+                    }
+                }
+            }
+
+            // Guardar relacion de novedades
+            ortr.novedades.map { novedades => 
+                for(n <- novedades) {
+                    n.even_id match {
+                       case Some(even_id) =>
+                         val esactualizado:Boolean = SQL("""UPDATE siap.ordentrabajo_novedad SET nove_id = {nove_id}, ortrno_horaini = {ortrno_horaini}, ortrno_horafin = {ortrno_horafin}, ortrno_observacion = {ortrno_observacion}, even_estado = {even_estado} where ortr_id = {ortr_id} and even_id = {even_id}""").
+                         on(
+                             'ortr_id -> ortr.ortr_id,
+                             'even_id -> n.even_id,
+                             'nove_id -> n.nove_id,
+                             'ortrno_horaini -> n.ortrno_horaini,
+                             'ortrno_horafin -> n.ortrno_horafin,
+                             'ortrno_observacion -> n.ortrno_observacion,
+                             'even_estado -> n.even_estado
+                         ).executeUpdate() > 0
+                         if (!esactualizado) {
+                           SQL("""INSERT INTO siap.ordentrabajo_novedad (ortr_id, nove_id, ortrno_horaini, ortrno_horafin, ortrno_observacion, even_id, even_estado) VALUES ({ortr_id}, {nove_id}, {ortrno_horaini}, {ortrno_horafin}, {ortrno_observacion}, {even_id}, {even_estado})""").
+                           on(
+                             'ortr_id -> ortr.ortr_id,
+                             'even_id -> n.even_id,
+                             'nove_id -> n.nove_id,
+                             'ortrno_horaini -> n.ortrno_horaini,
+                             'ortrno_horafin -> n.ortrno_horafin,
+                             'ortrno_observacion -> n.ortrno_observacion,
+                             'even_estado -> n.even_estado
                            ).executeInsert()
                          }
                        case None => None
@@ -599,6 +710,36 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
         }
       }
       os
+    }
+
+    /*
+    * Agregar reporte
+    * */
+    def agregarReporte(ortr_id: Long, repo_id: Long) : Boolean = {
+        db.withConnection { implicit connection => 
+            var result:Boolean = SQL("""SELECT COUNT(*) AS total FROM siap.ordentrabajo_reporte WHERE ortr_id = {ortr_id} AND repo_id = {repo_id}""").
+                                    on(
+                                        'ortr_id -> ortr_id,
+                                        'repo_id -> repo_id
+                                    ).as(SqlParser.scalar[Int].single) > 0
+
+            if (!result) {
+                var even_id = SQL("""SELECT even_id FROM siap.ordentrabajo_reporte WHERE ortr_id = {ortr_id} ORDER BY even_id DESC LIMIT 1""").
+                on(
+                  'ortr_id -> ortr_id
+                ).as(SqlParser.scalar[Int].single)
+                even_id += 1
+                result = SQL("""INSERT INTO siap.ordentrabajo_reporte (ortr_id, repo_id, even_id, even_estado) VALUES ({ortr_id}, {repo_id}, {even_id}, {even_estado})""").
+                on(
+                    'ortr_id -> ortr_id,
+                    'repo_id -> repo_id,
+                    'even_id -> even_id,
+                    'even_estado -> 1
+                ).executeInsert().get > 0
+            }
+            result
+        }
+
     }
 
 }

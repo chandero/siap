@@ -657,6 +657,15 @@ class InformeController @Inject()(
       }
   }
 
+  def siap_informe_obra_cuadrilla_xls(fecha_inicial: Long, fecha_final: Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      var empr_id = Utility.extraerEmpresa(request)
+      informeService.siap_informe_obra_cuadrilla_xls(fecha_inicial: Long, fecha_final: Long, empr_id.get).map {
+        reportes =>
+          Ok(Json.toJson(reportes))
+      }
+  }
+
   def siap_informe_general_operaciones_xls(      
       fecha_inicial: Long,
       fecha_final: Long,

@@ -31,6 +31,17 @@ export function getOrden (ortr_id) {
   })
 }
 
+export function addReporteAOrden (ot, rp) {
+  const data = {
+    ot,
+    rp
+  }
+  return request({
+    url: '/otar/' + data.ot + '/' + data.rp,
+    method: 'get'
+  })
+}
+
 export function saveOrden (ordentrabajo) {
   const data = {
     ordentrabajo

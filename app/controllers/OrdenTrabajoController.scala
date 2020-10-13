@@ -81,11 +81,13 @@ class OrdenTrabajoController @Inject()(
                             orden.ortr_consecutivo,
                             orden.otes_id,
                             orden.cuad_id,
+                            orden.cuad_descripcion,
                             orden.tiba_id,
-                            empr_id.get,
-                            usua_id.get,
+                            empr_id,
+                            usua_id,
                             orden.reportes,
-                            orden.obras
+                            orden.obras,
+                            orden.novedades
                  )
       ordenService.crear(ordennuevo, empr_id.get, usua_id.get).map { id =>
         if (id > 0) {
@@ -101,18 +103,20 @@ class OrdenTrabajoController @Inject()(
       val json = request.body.asJson.get
       var orden = json.as[OrdenTrabajo]
       val usua_id = Utility.extraerUsuario(request)
-      val empr_id = Utility.extraerEmpresa(request)      
+      val empr_id = Utility.extraerEmpresa(request)     
       val ordennuevo = new OrdenTrabajo(orden.ortr_id,
                             orden.ortr_fecha,
                             orden.ortr_observacion,
                             orden.ortr_consecutivo,
                             orden.otes_id,
                             orden.cuad_id,
+                            orden.cuad_descripcion,
                             orden.tiba_id,
-                            empr_id.get,
-                            usua_id.get,
+                            empr_id,
+                            usua_id,
                             orden.reportes,
-                            orden.obras)
+                            orden.obras,
+                            orden.novedades)
       if (ordenService.actualizar(ordennuevo)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
@@ -133,5 +137,15 @@ class OrdenTrabajoController @Inject()(
   def imprimirOrden(id: Long, empr_id: Long) = Action {
      val os = ordenService.imprimir(id, empr_id)
      Ok(os).as("application/pdf")
+  }
+
+  def agregarReporte(ortr_id: Long, repo_id: Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val usua_id = Utility.extraerUsuario(request)
+      if (ordenService.agregarReporte(ortr_id, repo_id)) {
+        Future.successful(Ok(Json.toJson("true")))
+      } else {
+        Future.successful(ServiceUnavailable(Json.toJson("false")))
+      }
   }
 }
