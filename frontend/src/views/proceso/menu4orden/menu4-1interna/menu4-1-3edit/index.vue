@@ -522,7 +522,7 @@ export default {
         this.cuadrillas = response.data
         getTipos().then(response => {
           this.tipos = response.data
-          getNovedades().then(response => {
+          getNovedades(3).then(response => {
             this.novedades = response.data
             this.obtenerOrden()
           }).catch(error => {

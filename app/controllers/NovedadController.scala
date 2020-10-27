@@ -30,14 +30,14 @@ class NovedadController @Inject()(service: NovedadRepository, cc: ControllerComp
       }             
     }
 
-    def todos(p:Long, c:Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
-        service.todos(p, c).map { result =>
+    def todos(p:Long, c:Long, t:Int) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+        service.todos(p, c, t).map { result =>
            Ok(Json.toJson(result))
         }
     }
 
-    def novedades() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
-        service.novedades().map { result =>
+    def novedades(t: Int) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+        service.novedades(t).map { result =>
            Ok(Json.toJson(result))
         }
     }
@@ -47,7 +47,7 @@ class NovedadController @Inject()(service: NovedadRepository, cc: ControllerComp
       var novedad = json.as[Novedad]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
-      val nnuevo = new Novedad(Some(0),novedad.nove_descripcion,novedad.nove_estado, empr_id, usua_id)
+      val nnuevo = new Novedad(Some(0),novedad.nove_descripcion,novedad.nove_estado, novedad.nove_tipo, empr_id, usua_id)
       service.crear(nnuevo).map { result =>
         if (result > 0){
           Created(Json.toJson("true"))
@@ -62,7 +62,7 @@ class NovedadController @Inject()(service: NovedadRepository, cc: ControllerComp
       var novedad = json.as[Novedad]
       val usua_id = Utility.extraerUsuario(request)
       var empr_id = Utility.extraerEmpresa(request)
-      val nnuevo = new Novedad(novedad.nove_id,novedad.nove_descripcion, novedad.nove_estado, empr_id, usua_id)
+      val nnuevo = new Novedad(novedad.nove_id,novedad.nove_descripcion, novedad.nove_estado, novedad.nove_tipo, empr_id, usua_id)
       if (service.actualizar(nnuevo)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {

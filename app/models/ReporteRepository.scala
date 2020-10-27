@@ -59,6 +59,19 @@ import com.norbitltd.spoiwo.model.enums.{
 // Utility
 import utilities.Utility
 
+case class ReporteResult(reportes: Iterable[Reporte], total: scala.Long)
+case class ReporteRequest(coau_codigo: Option[String], coau_tipo: Option[Int], reporte: Reporte)
+
+case class ReporteNovedad(
+  repo_id: Option[scala.Long],
+  nove_id: Option[Int],
+  even_id: Option[Int],
+  even_estado: Option[Int],
+  reno_horaini: Option[String],
+  reno_horafin: Option[String],
+  reno_observacion: Option[String]
+)
+
 case class ReporteAdicional(
     repo_id: Option[scala.Long],
     repo_fechadigitacion: Option[DateTime],
@@ -146,6 +159,7 @@ case class ReporteDireccion(
 // ya tiene los 22 elementos
 case class Reporte(
     repo_id: Option[scala.Long],
+    tireuc_id: Option[scala.Long],
     reti_id: Option[scala.Long],
     repo_consecutivo: Option[scala.Long],
     repo_fecharecepcion: Option[DateTime],
@@ -157,6 +171,7 @@ case class Reporte(
     repo_horafin: Option[String],
     repo_reportetecnico: Option[String],
     repo_descripcion: Option[String],
+    repo_subrepoconsecutivo: Option[Int],
     rees_id: Option[scala.Long],
     orig_id: Option[scala.Long],
     barr_id: Option[scala.Long],
@@ -166,7 +181,8 @@ case class Reporte(
     adicional: Option[ReporteAdicional],
     meams: Option[List[scala.Long]],
     eventos: Option[List[Evento]],
-    direcciones: Option[List[ReporteDireccion]]
+    direcciones: Option[List[ReporteDireccion]],
+    novedades: Option[List[ReporteNovedad]]
 )
 
 case class Vencido(
@@ -348,6 +364,41 @@ object Pendiente {
           cuad_descripcion
         )
     }
+  }
+
+}
+
+object ReporteNovedad {
+  implicit val yourJodaDateReads =
+    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  implicit val yourJodaDateWrites =
+    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
+
+  val _set = {
+      get[Option[scala.Long]]("repo_id") ~
+      get[Option[Int]]("nove_id") ~
+      get[Option[Int]]("even_id") ~
+      get[Option[Int]]("even_estado") ~      
+      get[Option[String]]("reno_horaini") ~
+      get[Option[String]]("reno_horafin") ~
+      get[Option[String]]("reno_observacion") map {
+      case 
+        repo_id ~
+        nove_id ~
+        even_id ~
+        even_estado ~
+        reno_horaini ~
+        reno_horafin ~
+        reno_observacion => new ReporteNovedad(
+          repo_id,
+          nove_id,
+          even_id,
+          even_estado,
+          reno_horaini,
+          reno_horafin,
+          reno_observacion
+        )
+      }
   }
 
 }
@@ -790,61 +841,80 @@ object ReporteDireccion {
 
 object Reporte {
   implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
   implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
+    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 
-  implicit val reporteWrites = new Writes[Reporte] {
-    def writes(reporte: Reporte) = Json.obj(
-      "repo_id" -> reporte.repo_id,
-      "reti_id" -> reporte.reti_id,
-      "repo_consecutivo" -> reporte.repo_consecutivo,
-      "repo_fecharecepcion" -> reporte.repo_fecharecepcion,
-      "repo_direccion" -> reporte.repo_direccion,
-      "repo_nombre" -> reporte.repo_nombre,
-      "repo_telefono" -> reporte.repo_telefono,
-      "repo_fechasolucion" -> reporte.repo_fechasolucion,
-      "repo_horainicio" -> reporte.repo_horainicio,
-      "repo_horafin" -> reporte.repo_horafin,
-      "repo_reportetecnico" -> reporte.repo_reportetecnico,
-      "repo_descripcion" -> reporte.repo_descripcion,
-      "rees_id" -> reporte.rees_id,
-      "orig_id" -> reporte.orig_id,
-      "barr_id" -> reporte.barr_id,
-      "empr_id" -> reporte.empr_id,
-      "tiba_id" -> reporte.tiba_id,
-      "usua_id" -> reporte.usua_id,
-      "adicional" -> reporte.adicional,
-      "meams" -> reporte.meams,
-      "eventos" -> reporte.eventos,
-      "direcciones" -> reporte.direcciones
-    )
+  val _set = {
+      get[Option[scala.Long]]("repo_id") ~
+      get[Option[scala.Long]]("tireuc_id") ~
+      get[Option[scala.Long]]("reti_id") ~
+      get[Option[scala.Long]]("repo_consecutivo") ~
+      get[Option[DateTime]]("repo_fecharecepcion") ~
+      get[Option[String]]("repo_direccion") ~
+      get[Option[String]]("repo_nombre") ~
+      get[Option[String]]("repo_telefono") ~
+      get[Option[DateTime]]("repo_fechasolucion") ~
+      get[Option[String]]("repo_horainicio") ~
+      get[Option[String]]("repo_horafin") ~
+      get[Option[String]]("repo_reportetecnico") ~
+      get[Option[String]]("repo_descripcion") ~
+      get[Option[Int]]("repo_subrepoconsecutivo") ~
+      get[Option[scala.Long]]("rees_id") ~
+      get[Option[scala.Long]]("orig_id") ~
+      get[Option[scala.Long]]("barr_id") ~
+      get[Option[scala.Long]]("empr_id") ~
+      get[Option[scala.Long]]("tiba_id") ~
+      get[Option[scala.Long]]("usua_id") map {
+      case  repo_id ~
+            tireuc_id ~
+            reti_id ~
+            repo_consecutivo ~
+            repo_fecharecepcion ~
+            repo_direccion ~
+            repo_nombre ~
+            repo_telefono ~
+            repo_fechasolucion ~
+            repo_horainicio ~
+            repo_horafin ~
+            repo_reportetecnico ~
+            repo_descripcion ~
+            repo_subrepoconsecutivo ~
+            rees_id ~
+            orig_id ~
+            barr_id ~
+            empr_id ~
+            tiba_id ~
+            usua_id =>
+        Reporte(
+          repo_id,
+          tireuc_id,
+          reti_id,
+          repo_consecutivo,
+          repo_fecharecepcion,
+          repo_direccion,
+          repo_nombre,
+          repo_telefono,
+          repo_fechasolucion,
+          repo_horainicio,
+          repo_horafin,
+          repo_reportetecnico,
+          repo_descripcion,
+          repo_subrepoconsecutivo,
+          rees_id,
+          orig_id,
+          barr_id,
+          empr_id,
+          tiba_id,
+          usua_id,
+          None,
+          None,
+          None,
+          None,
+          None
+        )
+    }
   }
-
-  implicit val reporteReads: Reads[Reporte] = (
-    (__ \ "repo_id").readNullable[scala.Long] and
-      (__ \ "reti_id").readNullable[scala.Long] and
-      (__ \ "repo_consecutivo").readNullable[scala.Long] and
-      (__ \ "repo_fecharecepcion").readNullable[DateTime] and
-      (__ \ "repo_direccion").readNullable[String] and
-      (__ \ "repo_nombre").readNullable[String] and
-      (__ \ "repo_telefono").readNullable[String] and
-      (__ \ "repo_fechasolucion").readNullable[DateTime] and
-      (__ \ "repo_horainicio").readNullable[String] and
-      (__ \ "repo_horafin").readNullable[String] and
-      (__ \ "repo_reportetecnico").readNullable[String] and
-      (__ \ "repo_descripcion").readNullable[String] and
-      (__ \ "rees_id").readNullable[scala.Long] and
-      (__ \ "orig_id").readNullable[scala.Long] and
-      (__ \ "barr_id").readNullable[scala.Long] and
-      (__ \ "empr_id").readNullable[scala.Long] and
-      (__ \ "tiba_id").readNullable[scala.Long] and
-      (__ \ "usua_id").readNullable[scala.Long] and
-      (__ \ "adicional").readNullable[ReporteAdicional] and
-      (__ \ "meams").readNullable[List[scala.Long]] and
-      (__ \ "eventos").readNullable[List[Evento]] and
-      (__ \ "direcciones").readNullable[List[ReporteDireccion]]
-  )(Reporte.apply _)
 }
 
 object Vencido {
@@ -1196,73 +1266,6 @@ class ReporteRepository @Inject()(
   private val REPORT_DEFINITION_PATH = System.getProperty("user.dir") + "/conf/reports/"
 
   /**
-    * Parsear un Reporte desde un ResultSet
-    */
-  private val simple = {
-    get[Option[scala.Long]]("repo_id") ~
-      get[Option[scala.Long]]("reti_id") ~
-      get[Option[scala.Long]]("repo_consecutivo") ~
-      get[Option[DateTime]]("repo_fecharecepcion") ~
-      get[Option[String]]("repo_direccion") ~
-      get[Option[String]]("repo_nombre") ~
-      get[Option[String]]("repo_telefono") ~
-      get[Option[DateTime]]("repo_fechasolucion") ~
-      get[Option[String]]("repo_horainicio") ~
-      get[Option[String]]("repo_horafin") ~
-      get[Option[String]]("repo_reportetecnico") ~
-      get[Option[String]]("repo_descripcion") ~
-      get[Option[scala.Long]]("rees_id") ~
-      get[Option[scala.Long]]("orig_id") ~
-      get[Option[scala.Long]]("barr_id") ~
-      get[Option[scala.Long]]("empr_id") ~
-      get[Option[scala.Long]]("tiba_id") ~
-      get[Option[scala.Long]]("usua_id") map {
-      case repo_id ~
-            reti_id ~
-            repo_consecutivo ~
-            repo_fecharecepcion ~
-            repo_direccion ~
-            repo_nombre ~
-            repo_telefono ~
-            repo_fechasolucion ~
-            repo_horainicio ~
-            repo_horafin ~
-            repo_reportetecnico ~
-            repo_descripcion ~
-            rees_id ~
-            orig_id ~
-            barr_id ~
-            empr_id ~
-            tiba_id ~
-            usua_id =>
-        Reporte(
-          repo_id,
-          reti_id,
-          repo_consecutivo,
-          repo_fecharecepcion,
-          repo_direccion,
-          repo_nombre,
-          repo_telefono,
-          repo_fechasolucion,
-          repo_horainicio,
-          repo_horafin,
-          repo_reportetecnico,
-          repo_descripcion,
-          rees_id,
-          orig_id,
-          barr_id,
-          empr_id,
-          tiba_id,
-          usua_id,
-          null,
-          null,
-          null,
-          null
-        )
-    }
-  }
-
-  /**
     *  Validar Reporte Diligenciado
     *  @param reti_id
     *  @param repo_consecutivo
@@ -1457,7 +1460,7 @@ class ReporteRepository @Inject()(
             'page_size -> page_size,
             'current_page -> current_page
           )
-          .as(simple *)
+          .as(Reporte._set *)
         reps.map { r =>
           val adicional = SQL(
             """SELECT * FROM siap.reporte_adicional ra
@@ -1483,6 +1486,12 @@ class ReporteRepository @Inject()(
               'repo_id -> r.repo_id
             )
             .as(scalar[scala.Long].*)
+
+          val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
+          on(
+            'repo_id -> r.repo_id
+          ).as(ReporteNovedad._set *)
+
           val direcciones = SQL(
             """SELECT * FROM siap.reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
           ).on(
@@ -1564,6 +1573,7 @@ class ReporteRepository @Inject()(
           }
           val reporte = new Reporte(
             r.repo_id,
+            r.tireuc_id,
             r.reti_id,
             r.repo_consecutivo,
             r.repo_fecharecepcion,
@@ -1575,6 +1585,7 @@ class ReporteRepository @Inject()(
             r.repo_horafin,
             r.repo_reportetecnico,
             r.repo_descripcion,
+            r.repo_subrepoconsecutivo,
             r.rees_id,
             r.orig_id,
             r.barr_id,
@@ -1584,7 +1595,8 @@ class ReporteRepository @Inject()(
             adicional,
             Some(meams),
             Some(eventos),
-            Some(_listDireccion.toList)
+            Some(_listDireccion.toList),
+            Some(novedades)
           )
           _list += reporte
         }
@@ -1606,7 +1618,7 @@ class ReporteRepository @Inject()(
         ).on(
             'empr_id -> empr_id
           )
-          .as(simple *)
+          .as(Reporte._set *)
         reps.map { r =>
           val eventos = SQL(
             """SELECT * FROM siap.reporte_evento WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
@@ -1620,6 +1632,10 @@ class ReporteRepository @Inject()(
               'repo_id -> r.repo_id
             )
             .as(scalar[scala.Long].*)
+          val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
+          on(
+            'repo_id -> r.repo_id
+          ).as(ReporteNovedad._set *)            
           val adicional = SQL(
             """SELECT * FROM siap.reporte_adicional ra
                 LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id
@@ -1682,6 +1698,7 @@ class ReporteRepository @Inject()(
           }
           val reporte = new Reporte(
             r.repo_id,
+            r.tireuc_id,
             r.reti_id,
             r.repo_consecutivo,
             r.repo_fecharecepcion,
@@ -1693,6 +1710,7 @@ class ReporteRepository @Inject()(
             r.repo_horafin,
             r.repo_reportetecnico,
             r.repo_descripcion,
+            r.repo_subrepoconsecutivo,
             r.rees_id,
             r.orig_id,
             r.barr_id,
@@ -1702,7 +1720,8 @@ class ReporteRepository @Inject()(
             adicional,
             Some(meams),
             Some(eventos),
-            Some(_listDireccion.toList)
+            Some(_listDireccion.toList),
+            Some(novedades)
           )
           _list += reporte
         }
@@ -1729,7 +1748,7 @@ class ReporteRepository @Inject()(
             'aap_id -> aap_id,
             'empr_id -> empr_id
           )
-          .as(simple *)
+          .as(Reporte._set *)
         reps.map { r =>
           val eventos = SQL(
             """SELECT * FROM siap.reporte_evento WHERE repo_id = {repo_id} and even_estado < 8"""
@@ -1743,6 +1762,10 @@ class ReporteRepository @Inject()(
               'repo_id -> r.repo_id
             )
             .as(scalar[scala.Long].*)
+          val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
+          on(
+            'repo_id -> r.repo_id
+          ).as(ReporteNovedad._set *)            
           val adicional = SQL(
             """SELECT * FROM siap.reporte_adicional ra
                 LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id
@@ -1805,6 +1828,7 @@ class ReporteRepository @Inject()(
           }
           val reporte = new Reporte(
             r.repo_id,
+            r.tireuc_id,
             r.reti_id,
             r.repo_consecutivo,
             r.repo_fecharecepcion,
@@ -1816,6 +1840,7 @@ class ReporteRepository @Inject()(
             r.repo_horafin,
             r.repo_reportetecnico,
             r.repo_descripcion,
+            r.repo_subrepoconsecutivo,
             r.rees_id,
             r.orig_id,
             r.barr_id,
@@ -1825,7 +1850,8 @@ class ReporteRepository @Inject()(
             adicional,
             Some(meams),
             Some(eventos),
-            Some(_listDireccion.toList)
+            Some(_listDireccion.toList),
+            Some(novedades)
           )
           _list += reporte
         }
@@ -1901,7 +1927,7 @@ class ReporteRepository @Inject()(
         .on(
           'repo_id -> repo_id
         )
-        .as(simple.singleOpt)
+        .as(Reporte._set.singleOpt)
 
       val eventos = SQL(
         """SELECT * FROM siap.reporte_evento WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
@@ -1915,6 +1941,10 @@ class ReporteRepository @Inject()(
           'repo_id -> repo_id
         )
         .as(scalar[scala.Long].*)
+      val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
+          on(
+            'repo_id -> repo_id
+          ).as(ReporteNovedad._set *)        
       val adicional = SQL(
         """SELECT * FROM siap.reporte_adicional ra
                 LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id
@@ -2009,6 +2039,7 @@ class ReporteRepository @Inject()(
       r.map { r =>
         val reporte = new Reporte(
           r.repo_id,
+          r.tireuc_id,
           r.reti_id,
           r.repo_consecutivo,
           r.repo_fecharecepcion,
@@ -2020,6 +2051,7 @@ class ReporteRepository @Inject()(
           r.repo_horafin,
           r.repo_reportetecnico,
           r.repo_descripcion,
+          r.repo_subrepoconsecutivo,
           r.rees_id,
           r.orig_id,
           r.barr_id,
@@ -2029,7 +2061,8 @@ class ReporteRepository @Inject()(
           adicional,
           Some(meams),
           Some(eventos),
-          Some(_listDireccion.toList)
+          Some(_listDireccion.toList),
+          Some(novedades)
         )
         reporte
       }
@@ -2062,7 +2095,7 @@ class ReporteRepository @Inject()(
           'repo_consecutivo -> repo_consecutivo,
           'empr_id -> empr_id
         )
-        .as(simple.singleOpt)
+        .as(Reporte._set.singleOpt)
 
       r match {
         case Some(r) =>
@@ -2078,6 +2111,10 @@ class ReporteRepository @Inject()(
               'repo_id -> r.repo_id
             )
             .as(scalar[scala.Long].*)
+          val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
+          on(
+            'repo_id -> r.repo_id
+          ).as(ReporteNovedad._set *)            
           val adicional = SQL(
             """SELECT * FROM siap.reporte_adicional ra
                 LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id
@@ -2170,6 +2207,7 @@ class ReporteRepository @Inject()(
           }
           val reporte = new Reporte(
             r.repo_id,
+            r.tireuc_id,
             r.reti_id,
             r.repo_consecutivo,
             r.repo_fecharecepcion,
@@ -2181,6 +2219,7 @@ class ReporteRepository @Inject()(
             r.repo_horafin,
             r.repo_reportetecnico,
             r.repo_descripcion,
+            r.repo_subrepoconsecutivo,
             r.rees_id,
             r.orig_id,
             r.barr_id,
@@ -2190,7 +2229,8 @@ class ReporteRepository @Inject()(
             adicional,
             Some(meams),
             Some(eventos),
-            Some(_listDireccion.toList)
+            Some(_listDireccion.toList),
+            Some(novedades)
           )
           Some(reporte)
 
@@ -2225,7 +2265,7 @@ class ReporteRepository @Inject()(
           'repo_consecutivo -> repo_consecutivo,
           'empr_id -> empr_id
         )
-        .as(simple.singleOpt)
+        .as(Reporte._set.singleOpt)
 
       r match {
         case Some(r) =>
@@ -2273,6 +2313,7 @@ class ReporteRepository @Inject()(
   def buscarPorRango(
       anho: Int,
       mes: Int,
+      tireuc_id: Int,
       empr_id: scala.Long
   ): Future[Iterable[Reporte]] = Future[Iterable[Reporte]] {
     db.withConnection { implicit connection =>
@@ -2282,7 +2323,7 @@ class ReporteRepository @Inject()(
                                           FROM siap.reporte r 
                                           LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                                           WHERE r.empr_id = {empr_id} and r.repo_fecharecepcion between {fecha_inicial} and {fecha_final}
-                                          and r.rees_id < 9 ORDER BY r.rees_id, r.repo_fecharecepcion DESC """
+                                          and tireuc_id = {tireuc_id} and r.rees_id < 9 ORDER BY r.rees_id, r.repo_fecharecepcion DESC """
       /*
                     if (!filter.isEmpty) {
                         query = query + " and " + filter
@@ -2300,9 +2341,10 @@ class ReporteRepository @Inject()(
         .on(
           'empr_id -> empr_id,
           'fecha_inicial -> fechaini,
-          'fecha_final -> fechafin
+          'fecha_final -> fechafin,
+          'tireuc_id -> tireuc_id
         )
-        .as(simple *)
+        .as(Reporte._set *)
       reps.map { r =>
         val adicional = SQL(
           """SELECT * FROM siap.reporte_adicional ra
@@ -2327,6 +2369,10 @@ class ReporteRepository @Inject()(
             'repo_id -> r.repo_id
           )
           .as(scalar[scala.Long].*)
+        val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
+          on(
+            'repo_id -> r.repo_id
+          ).as(ReporteNovedad._set *)          
         val direcciones = SQL(
           """SELECT * FROM siap.reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
         ).on(
@@ -2356,6 +2402,7 @@ class ReporteRepository @Inject()(
         }
         val reporte = new Reporte(
           r.repo_id,
+          r.tireuc_id,
           r.reti_id,
           r.repo_consecutivo,
           r.repo_fecharecepcion,
@@ -2367,6 +2414,7 @@ class ReporteRepository @Inject()(
           r.repo_horafin,
           r.repo_reportetecnico,
           r.repo_descripcion,
+          r.repo_subrepoconsecutivo,
           r.rees_id,
           r.orig_id,
           r.barr_id,
@@ -2376,7 +2424,8 @@ class ReporteRepository @Inject()(
           adicional,
           None, //Some(meams),
           None, //Some(eventos),
-          None //Some(_listDireccion.toList)
+          None, //Some(_listDireccion.toList)
+          None
         )
         _list += reporte
       }
@@ -2403,7 +2452,7 @@ class ReporteRepository @Inject()(
           'fecha_final -> fecha_final,
           'empr_id -> empr_id
         )
-        .as(simple *)
+        .as(Reporte._set *)
     }
   }
 
@@ -2423,7 +2472,7 @@ class ReporteRepository @Inject()(
           'rees_id -> rees_id,
           'empr_id -> empr_id
         )
-        .as(simple *)
+        .as(Reporte._set *)
     }
   }
 
@@ -2443,7 +2492,7 @@ class ReporteRepository @Inject()(
           'acti_id -> acti_id,
           'empr_id -> empr_id
         )
-        .as(simple *)
+        .as(Reporte._set *)
     }
   }
 
@@ -2463,7 +2512,7 @@ class ReporteRepository @Inject()(
           'orig_id -> orig_id,
           'empr_id -> empr_id
         )
-        .as(simple *)
+        .as(Reporte._set *)
     }
   }
 
@@ -2479,7 +2528,7 @@ class ReporteRepository @Inject()(
   ): Future[Iterable[Reporte]] = Future[Iterable[Reporte]] {
     db.withConnection { implicit connection =>
       SQL("SELECT * FROM siap.reporte")
-        .as(simple *)
+        .as(Reporte._set *)
     }
   }
 
@@ -2619,7 +2668,7 @@ class ReporteRepository @Inject()(
       var _id: scala.Long = 0
       val reporte = SQL("SELECT * FROM siap.reporte WHERE repo_id = {repo_id}")
         .on('repo_id -> id)
-        .as(simple.single)
+        .as(Reporte._set.single)
       // Validar si previamente fue convertido
       val control = SQL(
         "SELECT * FROM siap.control_reporte WHERE repo_consecutivo = {repo_consecutivo} and reti_id = {reti_id}"
@@ -2627,7 +2676,7 @@ class ReporteRepository @Inject()(
           'repo_consecutivo -> reporte.repo_consecutivo,
           'reti_id -> reporte.reti_id
         )
-        .as(simple.singleOpt)
+        .as(Reporte._set.singleOpt)
       control match {
         case None =>
           val queryReporte =
@@ -2974,7 +3023,7 @@ class ReporteRepository @Inject()(
                                                                 {repo_codigo},
                                                                 {repo_apoyo},
                                                                 {urba_id},
-                                                                {muot_id}                                                            
+                                                                {muot_id}
                                                                )""")
             .on(
               'repo_fechadigitacion -> adicional.repo_fechadigitacion,

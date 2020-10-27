@@ -928,7 +928,8 @@ export default {
     aaco_id_anterior: 'Tipo Medida Anterior',
     aaco_id_nuevo: 'Tipo Medida Nuevo',
     aap_fechatoma: 'Fecha Toma',
-    reparar: 'Recuperar'
+    reparar: 'Recuperar',
+    novedades: 'Novedades'
   },
   ortr: {
     select: 'Seleccione la ODT'

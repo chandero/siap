@@ -213,6 +213,7 @@ import { getUrbanizadoraTodas } from '@/api/urbanizadora'
 import { getAapConexiones } from '@/api/aap_conexion'
 import { getMedidors } from '@/api/medidor'
 import { getTransformadors } from '@/api/transformador'
+import { getNovedades } from '@/api/novedad'
 
 export default {
   data () {
@@ -225,6 +226,7 @@ export default {
       confirmacionGuardar: false,
       nuevoReporte: false,
       inactivo: false,
+      tireuc_id: null,
       rules: {
         repo_fecharecepcion: [
           { required: true, message: 'Debe diligencia la Fecha de Recepción del Reporte', trigger: 'change' }
@@ -275,6 +277,7 @@ export default {
       },
       reporte: {
         reti_id: 1,
+        tireuc_id: this.tireuc_id,
         repo_id: null,
         repo_consecutivo: null,
         tiba_id: null,
@@ -288,6 +291,7 @@ export default {
         repo_horafin: null,
         repo_reportetecnico: null,
         repo_descripcion: null,
+        repo_subrepoconsecutivo: null,
         rees_id: 1,
         orig_id: 1,
         barr_id: null,
@@ -308,8 +312,10 @@ export default {
           urba_id: null,
           muot_id: null
         },
+        meams: [],
         eventos: [],
-        direcciones: []
+        direcciones: [],
+        novedades: []
       },
       direccion: {
         repo_id: null,
@@ -328,6 +334,7 @@ export default {
       conexiones: [],
       medidores: [],
       transformadores: [],
+      novedades: [],
       dialogonuevodanhovisible: false,
       actividad: {
         acti_id: null,
@@ -664,6 +671,14 @@ export default {
     }).catch(error => {
       console.log('getActividades :' + error)
     })
+    getNovedades(1).then(response => {
+      this.novedades = response.data
+    }).catch(error => {
+      console.log('getNovedades:' + error)
+    })
+  },
+  beforeMount () {
+    this.tireuc_id = this.$route.params.tireuc_id
   }
 }
 </script>

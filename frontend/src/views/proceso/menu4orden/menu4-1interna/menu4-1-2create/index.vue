@@ -517,7 +517,7 @@ export default {
       console.log('getTipos:' + error)
     })
     this.changeFocus('date')
-    getNovedades().then(response => {
+    getNovedades(3).then(response => {
       this.novedades = response.data
     }).catch(error => {
       console.log('getNovedades:' + error)

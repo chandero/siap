@@ -59,1117 +59,6 @@ import com.norbitltd.spoiwo.model.enums.{
 // Utility
 import utilities.Utility
 
-/*
-case class ReporteAdicional(
-    repo_id: Option[scala.Long],
-    repo_fechadigitacion: Option[DateTime],
-    repo_modificado: Option[DateTime],
-    repo_tipo_expansion: Option[Int],
-    repo_luminaria: Option[Boolean],
-    repo_redes: Option[Boolean],
-    repo_poste: Option[Boolean],
-    repo_subreporte: Option[Boolean],
-    repo_subid: Option[scala.Long],
-    repo_email: Option[String],
-    acti_id: Option[scala.Long],
-    repo_codigo: Option[String],
-    repo_apoyo: Option[String],
-    urba_id: Option[scala.Long],
-    muot_id: Option[scala.Long],
-    medi_id: Option[scala.Long],
-    tran_id: Option[scala.Long],
-    medi_acta: Option[String],
-    aaco_id_anterior: Option[scala.Long],
-    aaco_id_nuevo: Option[scala.Long]
-)
- 
-case class ReporteDireccionDato(
-    aatc_id: Option[scala.Long],
-    aatc_id_anterior: Option[scala.Long],
-    aama_id: Option[scala.Long],
-    aama_id_anterior: Option[scala.Long],
-    aamo_id: Option[scala.Long],
-    aamo_id_anterior: Option[scala.Long],
-    aaco_id: Option[scala.Long],
-    aaco_id_anterior: Option[scala.Long],
-    aap_potencia: Option[Int],
-    aap_potencia_anterior: Option[Int],
-    aap_tecnologia: Option[String],
-    aap_tecnologia_anterior: Option[String],
-    aap_brazo: Option[String],
-    aap_brazo_anterior: Option[String],
-    aap_collarin: Option[String],
-    aap_collarin_anterior: Option[String],
-    tipo_id: Option[scala.Long],
-    tipo_id_anterior: Option[scala.Long],
-    aap_poste_altura: Option[Double],
-    aap_poste_altura_anterior: Option[Double],
-    aap_poste_propietario: Option[String],
-    aap_poste_propietario_anterior: Option[String]
-)
-
-case class ReporteDireccionDatoAdicional(
-    aacu_id_anterior: Option[scala.Long],
-    aacu_id: Option[scala.Long],
-    aaus_id_anterior: Option[scala.Long],
-    aaus_id: Option[scala.Long],
-    medi_id_anterior: Option[scala.Long],
-    medi_id: Option[scala.Long],
-    tran_id_anterior: Option[scala.Long],
-    tran_id: Option[scala.Long],
-    aap_apoyo_anterior: Option[String],
-    aap_apoyo: Option[String],
-    aap_lat_anterior: Option[String],
-    aap_lat: Option[String],
-    aap_lng_anterior: Option[String],
-    aap_lng: Option[String]
-)
-
-case class ReporteDireccion(
-    repo_id: Option[scala.Long],
-    aap_id: Option[scala.Long],
-    even_direccion: Option[String],
-    barr_id: Option[scala.Long],
-    even_direccion_anterior: Option[String],
-    barr_id_anterior: Option[scala.Long],
-    even_id: Option[Int],
-    even_estado: Option[Int],
-    tire_id: Option[scala.Long],
-    coau_codigo: Option[String],
-    aap_fechatoma: Option[DateTime],
-    dato: Option[ReporteDireccionDato],
-    dato_adicional: Option[ReporteDireccionDatoAdicional]
-)
-
-// ya tiene los 22 elementos
-case class Reporte(
-    repo_id: Option[scala.Long],
-    reti_id: Option[scala.Long],
-    repo_consecutivo: Option[scala.Long],
-    repo_fecharecepcion: Option[DateTime],
-    repo_direccion: Option[String],
-    repo_nombre: Option[String],
-    repo_telefono: Option[String],
-    repo_fechasolucion: Option[DateTime],
-    repo_horainicio: Option[String],
-    repo_horafin: Option[String],
-    repo_reportetecnico: Option[String],
-    repo_descripcion: Option[String],
-    rees_id: Option[scala.Long],
-    orig_id: Option[scala.Long],
-    barr_id: Option[scala.Long],
-    empr_id: Option[scala.Long],
-    tiba_id: Option[scala.Long],
-    usua_id: Option[scala.Long],
-    adicional: Option[ReporteAdicional],
-    meams: Option[List[scala.Long]],
-    eventos: Option[List[Evento]],
-    direcciones: Option[List[ReporteDireccion]]
-)
-
-case class Vencido(
-    repo_id: Option[scala.Long],
-    reti_id: Option[scala.Long],
-    repo_consecutivo: Option[scala.Long],
-    repo_fecharecepcion: Option[DateTime],
-    fecha_limite: Option[DateTime],
-    horas: Option[Int],
-    repo_direccion: Option[String],
-    repo_nombre: Option[String],
-    repo_telefono: Option[String],
-    repo_descripcion: Option[String],
-    rees_id: Option[scala.Long],
-    orig_descripcion: Option[String],
-    barr_descripcion: Option[String],
-    cuad_descripcion: Option[String]
-)
-
-case class ReporteWeb(
-    repo_consecutivo: Option[scala.Long],
-    repo_fecharecepcion: Option[DateTime],
-    repo_fechadigitacion: Option[DateTime],
-    repo_direccion: Option[String],
-    barr_id: Option[scala.Long],
-    barr_descripcion: Option[String],
-    repo_nombre: Option[String],
-    repo_telefono: Option[String],
-    repo_email: Option[String],
-    repo_descripcion: Option[String],
-    rees_id: Option[scala.Long],
-    rees_descripcion: Option[String],
-    repo_reportetecnico: Option[String]
-)
-
-case class ReporteConsulta(
-    repo_id: Option[scala.Long],
-    reti_id: Option[scala.Long],
-    repo_consecutivo: Option[scala.Long],
-    repo_fecharecepcion: Option[DateTime],
-    repo_direccion: Option[String],
-    repo_nombre: Option[String],
-    repo_telefono: Option[String],
-    repo_reportetecnico: Option[String],
-    repo_descripcion: Option[String],
-    rees_id: Option[scala.Long],
-    orig_id: Option[scala.Long],
-    barr_id: Option[scala.Long],
-    empr_id: Option[scala.Long],
-    tiba_id: Option[scala.Long],
-    usua_id: Option[scala.Long],
-    adicional: Option[ReporteAdicional]
-)
-
-case class ReporteTipo(
-    reti_id: Option[scala.Long],
-    reti_descripcion: String,
-    reti_consecutivo: scala.Long,
-    reti_estado: Int,
-    usua_id: scala.Long
-)
-
-case class ReporteEstado(
-    rees_id: Option[scala.Long],
-    rees_descripcion: String,
-    rees_estado: Int,
-    usua_id: scala.Long
-)
-
-case class RepoElemento(
-    rere_id: Option[scala.Long],
-    rere_descripcion: Option[String],
-    rere_estado: Option[Int],
-    usua_id: Option[scala.Long]
-)
-
-case class RepoElemDanho(
-    reda_id: Option[scala.Long],
-    reda_descripcion: Option[String],
-    reda_estado: Option[Int],
-    usua_id: Option[Long]
-)
-
-case class ElementoHistoria(
-    aap_id: Option[scala.Long],
-    aael_fecha: Option[DateTime],
-    aap_bombillo_retirado: Option[String],
-    aap_bombillo_instalado: Option[String],
-    aap_balasto_retirado: Option[String],
-    aap_balasto_instalado: Option[String],
-    aap_arrancador_retirado: Option[String],
-    aap_arrancador_instalado: Option[String],
-    aap_condensador_retirado: Option[String],
-    aap_condensador_instalado: Option[String],
-    aap_fotocelda_retirado: Option[String],
-    aap_fotocelda_instalado: Option[String],
-    reti_id: Option[scala.Long],
-    repo_consecutivo: Option[scala.Long]
-)
-
-case class Pendiente(
-    repo_consecutivo: Option[Int],
-    repo_fecharecepcion: Option[DateTime],
-    fecha_limite: Option[DateTime],
-    repo_nombre: Option[String],
-    repo_telefono: Option[String],
-    repo_direccion: Option[String],
-    barr_descripcion: Option[String],
-    orig_descripcion: Option[String],
-    acti_descripcion: Option[String],
-    cuad_descripcion: Option[String]
-)
-object Pendiente {
-
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val pWrites = new Writes[Pendiente] {
-    def writes(p: Pendiente) = Json.obj(
-      "repo_consecutivo" -> p.repo_consecutivo,
-      "repo_fecharecepcion" -> p.repo_fecharecepcion,
-      "fecha_limite" -> p.fecha_limite,
-      "repo_nombre" -> p.repo_nombre,
-      "repo_telefono" -> p.repo_telefono,
-      "repo_direccion" -> p.repo_direccion,
-      "barr_descripcion" -> p.barr_descripcion,
-      "orig_descripcion" -> p.orig_descripcion,
-      "acti_descripcion" -> p.acti_descripcion,
-      "cuad_descripcion" -> p.cuad_descripcion
-    )
-  }
-
-  implicit val adicionalRead: Reads[Pendiente] = (
-    (__ \ "repo_consecutivo").readNullable[Int] and
-      (__ \ "repo_fecharecepcion").readNullable[DateTime] and
-      (__ \ "fecha_limite").readNullable[DateTime] and
-      (__ \ "repo_nombre").readNullable[String] and
-      (__ \ "repo_telefono").readNullable[String] and
-      (__ \ "repo_direccion").readNullable[String] and
-      (__ \ "barr_descripcion").readNullable[String] and
-      (__ \ "orig_descripcion").readNullable[String] and
-      (__ \ "acti_descripcion").readNullable[String] and
-      (__ \ "cuad_descripcion").readNullable[String]
-  )(Pendiente.apply _)
-
-  val _set = {
-    get[Option[Int]]("repo_consecutivo") ~
-      get[Option[DateTime]]("repo_fecharecepcion") ~
-      get[Option[DateTime]]("fecha_limite") ~
-      get[Option[String]]("repo_nombre") ~
-      get[Option[String]]("repo_telefono") ~
-      get[Option[String]]("repo_direccion") ~
-      get[Option[String]]("barr_descripcion") ~
-      get[Option[String]]("orig_descripcion") ~
-      get[Option[String]]("acti_descripcion") ~
-      get[Option[String]]("cuad_descripcion") map {
-      case repo_consecutivo ~
-            repo_fecharecepcion ~
-            fecha_limite ~
-            repo_nombre ~
-            repo_telefono ~
-            repo_direccion ~
-            barr_descripcion ~
-            orig_descripcion ~
-            acti_descripcion ~
-            cuad_descripcion =>
-        Pendiente(
-          repo_consecutivo,
-          repo_fecharecepcion,
-          fecha_limite,
-          repo_nombre,
-          repo_telefono,
-          repo_direccion,
-          barr_descripcion,
-          orig_descripcion,
-          acti_descripcion,
-          cuad_descripcion
-        )
-    }
-  }
-
-}
-
-object ReporteAdicional {
-
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val adicionalWrites = new Writes[ReporteAdicional] {
-    def writes(adicional: ReporteAdicional) = Json.obj(
-      "repo_id" -> adicional.repo_id,
-      "repo_fechadigitacion" -> adicional.repo_fechadigitacion,
-      "repo_modificado" -> adicional.repo_modificado,
-      "repo_tipo_expansion" -> adicional.repo_tipo_expansion,
-      "repo_luminaria" -> adicional.repo_luminaria,
-      "repo_redes" -> adicional.repo_redes,
-      "repo_poste" -> adicional.repo_poste,
-      "repo_subreporte" -> adicional.repo_subreporte,
-      "repo_subid" -> adicional.repo_subid,
-      "repo_email" -> adicional.repo_email,
-      "acti_id" -> adicional.acti_id,
-      "repo_codigo" -> adicional.repo_codigo,
-      "repo_apoyo" -> adicional.repo_apoyo,
-      "urba_id" -> adicional.urba_id,
-      "muot_id" -> adicional.muot_id,
-      "medi_id" -> adicional.medi_id,
-      "tran_id" -> adicional.tran_id,
-      "medi_acta" -> adicional.medi_acta,
-      "aaco_id_anterior" -> adicional.aaco_id_anterior,
-      "aaco_id_nuevo" -> adicional.aaco_id_nuevo
-    )
-  }
-
-  implicit val adicionalRead: Reads[ReporteAdicional] = (
-    (__ \ "repo_id").readNullable[scala.Long] and
-      (__ \ "repo_fechadigitacion").readNullable[DateTime] and
-      (__ \ "repo_modificado").readNullable[DateTime] and
-      (__ \ "repo_tipo_expansion").readNullable[Int] and
-      (__ \ "repo_luminaria").readNullable[Boolean] and
-      (__ \ "repo_redes").readNullable[Boolean] and
-      (__ \ "repo_poste").readNullable[Boolean] and
-      (__ \ "repo_subreporte").readNullable[Boolean] and
-      (__ \ "repo_subid").readNullable[scala.Long] and
-      (__ \ "repo_email").readNullable[String] and
-      (__ \ "acti_id").readNullable[scala.Long] and
-      (__ \ "repo_codigo").readNullable[String] and
-      (__ \ "repo_apoyo").readNullable[String] and
-      (__ \ "urba_id").readNullable[scala.Long] and
-      (__ \ "muot_id").readNullable[scala.Long] and
-      (__ \ "medi_id").readNullable[scala.Long] and
-      (__ \ "tran_id").readNullable[scala.Long] and
-      (__ \ "medi_acta").readNullable[String] and
-      (__ \ "aaco_id_anterior").readNullable[scala.Long] and
-      (__ \ "aaco_id_nuevo").readNullable[scala.Long]
-  )(ReporteAdicional.apply _)
-
-  val reporteAdicionalSet = {
-    get[Option[scala.Long]]("reporte_adicional.repo_id") ~
-      get[Option[DateTime]]("reporte_adicional.repo_fechadigitacion") ~
-      get[Option[DateTime]]("reporte_adicional.repo_modificado") ~
-      get[Option[Int]]("reporte_adicional.repo_tipo_expansion") ~
-      get[Option[Boolean]]("reporte_adicional.repo_luminaria") ~
-      get[Option[Boolean]]("reporte_adicional.repo_redes") ~
-      get[Option[Boolean]]("reporte_adicional.repo_poste") ~
-      get[Option[Boolean]]("reporte_adicional.repo_subreporte") ~
-      get[Option[scala.Long]]("reporte_adicional.repo_subid") ~
-      get[Option[String]]("reporte_adicional.repo_email") ~
-      get[Option[scala.Long]]("reporte_adicional.acti_id") ~
-      get[Option[String]]("reporte_adicional.repo_codigo") ~
-      get[Option[String]]("reporte_adicional.repo_apoyo") ~
-      get[Option[scala.Long]]("urba_id") ~
-      get[Option[scala.Long]]("muot_id") ~
-      get[Option[scala.Long]]("medi_id") ~
-      get[Option[scala.Long]]("tran_id") ~
-      get[Option[String]]("medi_acta") ~
-      get[Option[scala.Long]]("aaco_id_anterior") ~
-      get[Option[scala.Long]]("aaco_id_nuevo") map {
-      case repo_id ~
-            repo_fechadigitacion ~
-            repo_modificado ~
-            repo_tipo_expansion ~
-            repo_luminaria ~
-            repo_redes ~
-            repo_poste ~
-            repo_subreporte ~
-            repo_subid ~
-            repo_email ~
-            acti_id ~
-            repo_codigo ~
-            repo_apoyo ~
-            urba_id ~
-            muot_id ~
-            medi_id ~
-            tran_id ~
-            medi_acta ~
-            aaco_id_anterior ~
-            aaco_id_nuevo =>
-        ReporteAdicional(
-          repo_id,
-          repo_fechadigitacion,
-          repo_modificado,
-          repo_tipo_expansion,
-          repo_luminaria,
-          repo_redes,
-          repo_poste,
-          repo_subreporte,
-          repo_subid,
-          repo_email,
-          acti_id,
-          repo_codigo,
-          repo_apoyo,
-          urba_id,
-          muot_id,
-          medi_id,
-          tran_id,
-          medi_acta,
-          aaco_id_anterior,
-          aaco_id_nuevo
-        )
-    }
-  }
-
-}
-
-object ReporteDireccionDato {
-
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val datoWrites = new Writes[ReporteDireccionDato] {
-    def writes(dato: ReporteDireccionDato) = Json.obj(
-      "aatc_id" -> dato.aatc_id,
-      "aatc_id_anterior" -> dato.aatc_id_anterior,
-      "aama_id" -> dato.aama_id,
-      "aama_id_anterior" -> dato.aama_id_anterior,
-      "aamo_id" -> dato.aamo_id,
-      "aamo_id_anterior" -> dato.aamo_id_anterior,
-      "aaco_id" -> dato.aaco_id,
-      "aaco_id_anterior" -> dato.aaco_id_anterior,
-      "aap_potencia" -> dato.aap_potencia,
-      "aap_potencia_anterior" -> dato.aap_potencia_anterior,
-      "aap_tecnologia" -> dato.aap_tecnologia,
-      "aap_tecnologia_anterior" -> dato.aap_tecnologia_anterior,
-      "aap_brazo" -> dato.aap_brazo,
-      "aap_brazo_anterior" -> dato.aap_brazo_anterior,
-      "aap_collarin" -> dato.aap_collarin,
-      "aap_collarin_anterior" -> dato.aap_collarin_anterior,
-      "tipo_id" -> dato.tipo_id,
-      "tipo_id_anterior" -> dato.tipo_id_anterior,
-      "aap_poste_altura" -> dato.aap_poste_altura,
-      "aap_poste_altura_anterior" -> dato.aap_poste_altura_anterior,
-      "aap_poste_propietario" -> dato.aap_poste_propietario,
-      "aap_poste_propietario_anterior" -> dato.aap_poste_propietario_anterior
-    )
-  }
-
-  implicit val datoRead: Reads[ReporteDireccionDato] = (
-    (__ \ "aatc_id").readNullable[scala.Long] and
-      (__ \ "aatc_id_anterior").readNullable[scala.Long] and
-      (__ \ "aama_id").readNullable[scala.Long] and
-      (__ \ "aama_id_anterior").readNullable[scala.Long] and
-      (__ \ "aamo_id").readNullable[scala.Long] and
-      (__ \ "aamo_id_anterior").readNullable[scala.Long] and
-      (__ \ "aaco_id").readNullable[scala.Long] and
-      (__ \ "aaco_id_anterior").readNullable[scala.Long] and
-      (__ \ "aap_potencia").readNullable[Int] and
-      (__ \ "aap_potencia_anterior").readNullable[Int] and
-      (__ \ "aap_tecnologia").readNullable[String] and
-      (__ \ "aap_tecnologia_anterior").readNullable[String] and
-      (__ \ "aap_brazo").readNullable[String] and
-      (__ \ "aap_brazo_anterior").readNullable[String] and
-      (__ \ "aap_collarin").readNullable[String] and
-      (__ \ "aap_collarin_anterior").readNullable[String] and
-      (__ \ "tipo_id").readNullable[scala.Long] and
-      (__ \ "tipo_id_anterior").readNullable[scala.Long] and
-      (__ \ "aap_poste_altura").readNullable[Double] and
-      (__ \ "aap_poste_altura_anterior").readNullable[Double] and
-      (__ \ "aap_poste_propietario").readNullable[String] and
-      (__ \ "aap_poste_propietario_anterior").readNullable[String]
-  )(ReporteDireccionDato.apply _)
-
-  val reporteDireccionDatoSet = {
-    get[Option[scala.Long]]("reporte_direccion_dato.aatc_id") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aatc_id_anterior") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aama_id") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aama_id_anterior") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aamo_id") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aamo_id_anterior") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aaco_id") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.aaco_id_anterior") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.tipo_id") ~
-      get[Option[scala.Long]]("reporte_direccion_dato.tipo_id_anterior") ~
-      get[Option[Double]]("reporte_direccion_dato.aap_poste_altura") ~
-      get[Option[Double]]("reporte_direccion_dato.aap_poste_altura_anterior") ~
-      get[Option[String]]("reporte_direccion_dato.aap_poste_propietario") ~
-      get[Option[String]](
-        "reporte_direccion_dato.aap_poste_propietario_anterior"
-      ) ~
-      get[Option[Int]]("reporte_direccion_dato.aap_potencia") ~
-      get[Option[Int]]("reporte_direccion_dato.aap_potencia_anterior") ~
-      get[Option[String]]("reporte_direccion_dato.aap_tecnologia") ~
-      get[Option[String]]("reporte_direccion_dato.aap_tecnologia_anterior") ~
-      get[Option[String]]("reporte_direccion_dato.aap_brazo") ~
-      get[Option[String]]("reporte_direccion_dato.aap_brazo_anterior") ~
-      get[Option[String]]("reporte_direccion_dato.aap_collarin") ~
-      get[Option[String]]("reporte_direccion_dato.aap_collarin_anterior") map {
-      case aatc_id ~
-            aatc_id_anterior ~
-            aama_id ~
-            aama_id_anterior ~
-            aamo_id ~
-            aamo_id_anterior ~
-            aaco_id ~
-            aaco_id_anterior ~
-            tipo_id ~
-            tipo_id_anterior ~
-            aap_poste_altura ~
-            aap_poste_altura_anterior ~
-            aap_poste_propietario ~
-            aap_poste_propietario_anterior ~
-            aap_potencia ~
-            aap_potencia_anterior ~
-            aap_tecnologia ~
-            aap_tecnologia_anterior ~
-            aap_brazo ~
-            aap_brazo_anterior ~
-            aap_collarin ~
-            aap_collarin_anterior =>
-        ReporteDireccionDato(
-          aatc_id,
-          aatc_id_anterior,
-          aama_id,
-          aama_id_anterior,
-          aamo_id,
-          aamo_id_anterior,
-          aaco_id,
-          aaco_id_anterior,
-          aap_potencia,
-          aap_potencia_anterior,
-          aap_tecnologia,
-          aap_tecnologia_anterior,
-          aap_brazo,
-          aap_brazo_anterior,
-          aap_collarin,
-          aap_collarin_anterior,
-          tipo_id,
-          tipo_id_anterior,
-          aap_poste_altura,
-          aap_poste_altura_anterior,
-          aap_poste_propietario,
-          aap_poste_propietario_anterior
-        )
-    }
-  }
-
-}
-
-object ReporteDireccionDatoAdicional {
-
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val datoWrites = new Writes[ReporteDireccionDatoAdicional] {
-    def writes(dato: ReporteDireccionDatoAdicional) = Json.obj(
-      "aacu_id_anterior" -> dato.aacu_id_anterior,
-      "aacu_id" -> dato.aacu_id,
-      "aaus_id_anterior" -> dato.aaus_id_anterior,
-      "aaus_id" -> dato.aaus_id,
-      "medi_id_anterior" -> dato.medi_id_anterior,
-      "medi_id" -> dato.medi_id,
-      "tran_id_anterior" -> dato.tran_id_anterior,
-      "tran_id" -> dato.tran_id,
-      "aap_apoyo_anterior" -> dato.aap_apoyo_anterior,
-      "aap_apoyo" -> dato.aap_apoyo,
-      "aap_lat_anterior" -> dato.aap_lat_anterior,
-      "aap_lat" -> dato.aap_lat,
-      "aap_lng_anterior" -> dato.aap_lng_anterior,
-      "aap_lng" -> dato.aap_lng
-    )
-  }
-
-  implicit val datoRead: Reads[ReporteDireccionDatoAdicional] = (
-    (__ \ "aacu_id_anterior").readNullable[scala.Long] and
-      (__ \ "aacu_id").readNullable[scala.Long] and
-      (__ \ "aaus_id_anterior").readNullable[scala.Long] and
-      (__ \ "aaus_id").readNullable[scala.Long] and
-      (__ \ "medi_id_anterior").readNullable[scala.Long] and
-      (__ \ "medi_id").readNullable[scala.Long] and
-      (__ \ "tran_id_anterior").readNullable[scala.Long] and
-      (__ \ "tran_id").readNullable[scala.Long] and
-      (__ \ "aap_apoyo_anterior").readNullable[String] and
-      (__ \ "aap_apoyo").readNullable[String] and
-      (__ \ "aap_lat_anterior").readNullable[String] and
-      (__ \ "aap_lat").readNullable[String] and
-      (__ \ "aap_lng_anterior").readNullable[String] and
-      (__ \ "aap_lng").readNullable[String]
-  )(ReporteDireccionDatoAdicional.apply _)
-
-  val _set = {
-    get[Option[scala.Long]]("aacu_id_anterior") ~
-      get[Option[scala.Long]]("aacu_id") ~
-      get[Option[scala.Long]]("aaus_id_anterior") ~
-      get[Option[scala.Long]]("aaus_id") ~
-      get[Option[scala.Long]]("medi_id_anterior") ~
-      get[Option[scala.Long]]("medi_id") ~
-      get[Option[scala.Long]]("tran_id_anterior") ~
-      get[Option[scala.Long]]("tran_id") ~
-      get[Option[String]]("aap_apoyo_anterior") ~
-      get[Option[String]]("aap_apoyo") ~
-      get[Option[String]]("aap_lat_anterior") ~ 
-      get[Option[String]]("aap_lat") ~
-      get[Option[String]]("aap_lng_anterior") ~
-      get[Option[String]]("aap_lng") map {
-      case  aacu_id_anterior ~
-            aacu_id ~
-            aaus_id_anterior ~
-            aaus_id ~
-            medi_id_anterior ~
-            medi_id ~
-            tran_id_anterior ~
-            tran_id ~
-            aap_apoyo_anterior ~
-            aap_apoyo ~
-            aap_lat_anterior ~ 
-            aap_lat ~
-            aap_lng_anterior ~
-            aap_lng => ReporteDireccionDatoAdicional(
-              aacu_id_anterior,
-              aacu_id,
-              aaus_id_anterior,
-              aaus_id,
-              medi_id_anterior,
-              medi_id,
-              tran_id_anterior,
-              tran_id,
-              aap_apoyo_anterior,
-              aap_apoyo,
-              aap_lat_anterior,
-              aap_lat,
-              aap_lng_anterior,
-              aap_lng
-            )
-    }
-  }
-
-}
-
-object ReporteDireccion {
-
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val direccionWrites = new Writes[ReporteDireccion] {
-    def writes(direccion: ReporteDireccion) = Json.obj(
-      "repo_id" -> direccion.repo_id,
-      "aap_id" -> direccion.aap_id,
-      "even_direccion" -> direccion.even_direccion,
-      "barr_id" -> direccion.barr_id,
-      "even_direccion_anterior" -> direccion.even_direccion_anterior,
-      "barr_id_anterior" -> direccion.barr_id_anterior,
-      "even_id" -> direccion.even_id,
-      "even_estado" -> direccion.even_estado,
-      "tire_id" -> direccion.tire_id,
-      "coau_codigo" -> direccion.coau_codigo,
-      "aap_fechatoma" -> direccion.aap_fechatoma,
-      "dato" -> direccion.dato,
-      "dato_adicional" -> direccion.dato_adicional
-    )
-  }
-
-  implicit val direccionRead: Reads[ReporteDireccion] = (
-    (__ \ "repo_id").readNullable[scala.Long] and
-      (__ \ "aap_id").readNullable[scala.Long] and
-      (__ \ "even_direccion").readNullable[String] and
-      (__ \ "barr_id").readNullable[scala.Long] and
-      (__ \ "even_direccion_anterior").readNullable[String] and
-      (__ \ "barr_id_anterior").readNullable[scala.Long] and
-      (__ \ "even_id").readNullable[Int] and
-      (__ \ "even_estado").readNullable[Int] and
-      (__ \ "tire_id").readNullable[scala.Long] and
-      (__ \ "coau_codigo").readNullable[String] and
-      (__ \ "aap_fechatoma").readNullable[DateTime] and
-      (__ \ "dato").readNullable[ReporteDireccionDato] and
-      (__ \ "dato_adicional").readNullable[ReporteDireccionDatoAdicional]
-  )(ReporteDireccion.apply _)
-
-  val reporteDireccionSet = {
-    get[Option[scala.Long]]("reporte_direccion.repo_id") ~
-      get[Option[scala.Long]]("reporte_direccion.aap_id") ~
-      get[Option[String]]("reporte_direccion.even_direccion") ~
-      get[Option[scala.Long]]("reporte_direccion.barr_id") ~
-      get[Option[String]]("reporte_direccion.even_direccion_anterior") ~
-      get[Option[scala.Long]]("reporte_direccion.barr_id_anterior") ~
-      get[Option[Int]]("reporte_direccion.even_id") ~
-      get[Option[Int]]("reporte_direccion.even_estado") ~
-      get[Option[scala.Long]]("reporte_direccion.tire_id") ~
-      get[Option[String]]("reporte_direccion.coau_codigo") ~
-      get[Option[DateTime]]("reporte_direccion.aap_fechatoma") map {
-      case repo_id ~ aap_id ~ even_direccion ~ barr_id ~ even_direccion_anterior ~ barr_id_anterior ~ even_id ~ even_estado ~ tire_id ~ coau_codigo ~ aap_fechatoma =>
-        ReporteDireccion(
-          repo_id,
-          aap_id,
-          even_direccion,
-          barr_id,
-          even_direccion_anterior,
-          barr_id_anterior,
-          even_id,
-          even_estado,
-          tire_id,
-          coau_codigo,
-          aap_fechatoma,
-          null,
-          null
-        )
-    }
-  }
-
-}
-
-object Reporte {
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val reporteWrites = new Writes[Reporte] {
-    def writes(reporte: Reporte) = Json.obj(
-      "repo_id" -> reporte.repo_id,
-      "reti_id" -> reporte.reti_id,
-      "repo_consecutivo" -> reporte.repo_consecutivo,
-      "repo_fecharecepcion" -> reporte.repo_fecharecepcion,
-      "repo_direccion" -> reporte.repo_direccion,
-      "repo_nombre" -> reporte.repo_nombre,
-      "repo_telefono" -> reporte.repo_telefono,
-      "repo_fechasolucion" -> reporte.repo_fechasolucion,
-      "repo_horainicio" -> reporte.repo_horainicio,
-      "repo_horafin" -> reporte.repo_horafin,
-      "repo_reportetecnico" -> reporte.repo_reportetecnico,
-      "repo_descripcion" -> reporte.repo_descripcion,
-      "rees_id" -> reporte.rees_id,
-      "orig_id" -> reporte.orig_id,
-      "barr_id" -> reporte.barr_id,
-      "empr_id" -> reporte.empr_id,
-      "tiba_id" -> reporte.tiba_id,
-      "usua_id" -> reporte.usua_id,
-      "adicional" -> reporte.adicional,
-      "meams" -> reporte.meams,
-      "eventos" -> reporte.eventos,
-      "direcciones" -> reporte.direcciones
-    )
-  }
-
-  implicit val reporteReads: Reads[Reporte] = (
-    (__ \ "repo_id").readNullable[scala.Long] and
-      (__ \ "reti_id").readNullable[scala.Long] and
-      (__ \ "repo_consecutivo").readNullable[scala.Long] and
-      (__ \ "repo_fecharecepcion").readNullable[DateTime] and
-      (__ \ "repo_direccion").readNullable[String] and
-      (__ \ "repo_nombre").readNullable[String] and
-      (__ \ "repo_telefono").readNullable[String] and
-      (__ \ "repo_fechasolucion").readNullable[DateTime] and
-      (__ \ "repo_horainicio").readNullable[String] and
-      (__ \ "repo_horafin").readNullable[String] and
-      (__ \ "repo_reportetecnico").readNullable[String] and
-      (__ \ "repo_descripcion").readNullable[String] and
-      (__ \ "rees_id").readNullable[scala.Long] and
-      (__ \ "orig_id").readNullable[scala.Long] and
-      (__ \ "barr_id").readNullable[scala.Long] and
-      (__ \ "empr_id").readNullable[scala.Long] and
-      (__ \ "tiba_id").readNullable[scala.Long] and
-      (__ \ "usua_id").readNullable[scala.Long] and
-      (__ \ "adicional").readNullable[ReporteAdicional] and
-      (__ \ "meams").readNullable[List[scala.Long]] and
-      (__ \ "eventos").readNullable[List[Evento]] and
-      (__ \ "direcciones").readNullable[List[ReporteDireccion]]
-  )(Reporte.apply _)
-}
-
-object Vencido {
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val reporteWrites = new Writes[Vencido] {
-    def writes(reporte: Vencido) = Json.obj(
-      "repo_id" -> reporte.repo_id,
-      "reti_id" -> reporte.reti_id,
-      "repo_consecutivo" -> reporte.repo_consecutivo,
-      "repo_fecharecepcion" -> reporte.repo_fecharecepcion,
-      "fecha_limite" -> reporte.fecha_limite,
-      "horas" -> reporte.horas,
-      "repo_direccion" -> reporte.repo_direccion,
-      "repo_nombre" -> reporte.repo_nombre,
-      "repo_telefono" -> reporte.repo_telefono,
-      "repo_descripcion" -> reporte.repo_descripcion,
-      "rees_id" -> reporte.rees_id,
-      "orig_descripcion" -> reporte.orig_descripcion,
-      "barr_descripcion" -> reporte.barr_descripcion,
-      "cuad_descripcion" -> reporte.cuad_descripcion
-    )
-  }
-
-  implicit val reporteReads: Reads[Vencido] = (
-    (__ \ "repo_id").readNullable[scala.Long] and
-      (__ \ "reti_id").readNullable[scala.Long] and
-      (__ \ "repo_consecutivo").readNullable[scala.Long] and
-      (__ \ "repo_fecharecepcion").readNullable[DateTime] and
-      (__ \ "fecha_limite").readNullable[DateTime] and
-      (__ \ "horas").readNullable[scala.Int] and
-      (__ \ "repo_direccion").readNullable[String] and
-      (__ \ "repo_nombre").readNullable[String] and
-      (__ \ "repo_telefono").readNullable[String] and
-      (__ \ "repo_descripcion").readNullable[String] and
-      (__ \ "rees_id").readNullable[scala.Long] and
-      (__ \ "orig_descripcion").readNullable[String] and
-      (__ \ "barr_descripcion").readNullable[String] and
-      (__ \ "cuad_descripcion").readNullable[String]
-  )(Vencido.apply _)
-
-  val _set = {
-    get[Option[scala.Long]]("reporte.repo_id") ~
-      get[Option[scala.Long]]("reporte.reti_id") ~
-      get[Option[scala.Long]]("reporte.repo_consecutivo") ~
-      get[Option[DateTime]]("reporte.repo_fecharecepcion") ~
-      get[Option[DateTime]]("fecha_limite") ~
-      get[Option[Int]]("horas") ~
-      get[Option[String]]("reporte.repo_direccion") ~
-      get[Option[String]]("reporte.repo_nombre") ~
-      get[Option[String]]("reporte.repo_telefono") ~
-      get[Option[String]]("reporte.repo_descripcion") ~
-      get[Option[scala.Long]]("reporte.rees_id") ~
-      get[Option[String]]("orig_descripcion") ~
-      get[Option[String]]("barr_descripcion") ~
-      get[Option[String]]("cuad_descripcion") map {
-      case repo_id ~
-            reti_id ~
-            repo_consecutivo ~
-            repo_fecharecepcion ~
-            fecha_limite ~
-            horas ~
-            repo_direccion ~
-            repo_nombre ~
-            repo_telefono ~
-            repo_descripcion ~
-            rees_id ~
-            orig_descripcion ~
-            barr_descripcion ~
-            cuad_descripcion =>
-        Vencido(
-          repo_id,
-          reti_id,
-          repo_consecutivo,
-          repo_fecharecepcion,
-          fecha_limite,
-          horas,
-          repo_direccion,
-          repo_nombre,
-          repo_telefono,
-          repo_descripcion,
-          rees_id,
-          orig_descripcion,
-          barr_descripcion,
-          cuad_descripcion
-        )
-    }
-  }
-}
-
-/// AQUI
-object ReporteWeb {
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val reporteWrites = new Writes[ReporteWeb] {
-    def writes(reporte: ReporteWeb) = Json.obj(
-      "repo_consecutivo" -> reporte.repo_consecutivo,
-      "repo_fecharecepcion" -> reporte.repo_fecharecepcion,
-      "repo_fechadigitacion" -> reporte.repo_fechadigitacion,
-      "repo_direccion" -> reporte.repo_direccion,
-      "barr_id" -> reporte.barr_id,
-      "barr_descripcion" -> reporte.barr_descripcion,
-      "repo_nombre" -> reporte.repo_nombre,
-      "repo_telefono" -> reporte.repo_telefono,
-      "repo_email" -> reporte.repo_email,
-      "repo_descripcion" -> reporte.repo_descripcion,
-      "rees_id" -> reporte.rees_id,
-      "rees_descripcion" -> reporte.rees_descripcion,
-      "repo_reportetecnico" -> reporte.repo_reportetecnico
-    )
-  }
-
-  implicit val reporteReads: Reads[ReporteWeb] = (
-    (__ \ "repo_consecutivo").readNullable[scala.Long] and
-      (__ \ "repo_fecharecepcion").readNullable[DateTime] and
-      (__ \ "repo_fechadigitacion").readNullable[DateTime] and
-      (__ \ "repo_direccion").readNullable[String] and
-      (__ \ "barr_id").readNullable[scala.Long] and
-      (__ \ "barr_descripcion").readNullable[String] and
-      (__ \ "repo_nombre").readNullable[String] and
-      (__ \ "repo_telefono").readNullable[String] and
-      (__ \ "repo_email").readNullable[String] and
-      (__ \ "repo_descripcion").readNullable[String] and
-      (__ \ "rees_id").readNullable[scala.Long] and
-      (__ \ "rees_descripcion").readNullable[String] and
-      (__ \ "repo_reportetecnico").readNullable[String]
-  )(ReporteWeb.apply _)
-
-  val _set = {
-    get[Option[scala.Long]]("repo_consecutivo") ~
-      get[Option[DateTime]]("repo_fecharecepcion") ~
-      get[Option[DateTime]]("repo_fechadigitacion") ~
-      get[Option[String]]("repo_direccion") ~
-      get[Option[scala.Long]]("barr_id") ~
-      get[Option[String]]("barr_descripcion") ~
-      get[Option[String]]("repo_nombre") ~
-      get[Option[String]]("repo_telefono") ~
-      get[Option[String]]("repo_email") ~
-      get[Option[String]]("repo_descripcion") ~
-      get[Option[scala.Long]]("reporte.rees_id") ~
-      get[Option[String]]("rees_descripcion") ~
-      get[Option[String]]("repo_reportetecnico") map {
-      case repo_consecutivo ~
-            repo_fecharecepcion ~
-            repo_fechadigitacion ~
-            repo_direccion ~
-            barr_id ~
-            barr_descripcion ~
-            repo_nombre ~
-            repo_telefono ~
-            repo_email ~
-            repo_descripcion ~
-            rees_id ~
-            rees_descripcion ~
-            repo_reportetecnico =>
-        ReporteWeb(
-          repo_consecutivo,
-          repo_fecharecepcion,
-          repo_fechadigitacion,
-          repo_direccion,
-          barr_id,
-          barr_descripcion,
-          repo_nombre,
-          repo_telefono,
-          repo_email,
-          repo_descripcion,
-          rees_id,
-          rees_descripcion,
-          repo_reportetecnico
-        )
-    }
-  }
-}
-
-/// AQUI
-
-object ReporteConsulta {
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val rcWrites = new Writes[ReporteConsulta] {
-    def writes(reporte: ReporteConsulta) = Json.obj(
-      "repo_id" -> reporte.repo_id,
-      "reti_id" -> reporte.reti_id,
-      "repo_consecutivo" -> reporte.repo_consecutivo,
-      "repo_fecharecepcion" -> reporte.repo_fecharecepcion,
-      "repo_direccion" -> reporte.repo_direccion,
-      "repo_nombre" -> reporte.repo_nombre,
-      "repo_telefono" -> reporte.repo_telefono,
-      "repo_reportetecnico" -> reporte.repo_reportetecnico,
-      "repo_descripcion" -> reporte.repo_descripcion,
-      "rees_id" -> reporte.rees_id,
-      "orig_id" -> reporte.orig_id,
-      "barr_id" -> reporte.barr_id,
-      "empr_id" -> reporte.empr_id,
-      "tiba_id" -> reporte.tiba_id,
-      "usua_id" -> reporte.usua_id,
-      "adicional" -> reporte.adicional
-    )
-  }
-
-  implicit val rcReads: Reads[ReporteConsulta] = (
-    (__ \ "repo_id").readNullable[scala.Long] and
-      (__ \ "reti_id").readNullable[scala.Long] and
-      (__ \ "repo_consecutivo").readNullable[scala.Long] and
-      (__ \ "repo_fecharecepcion").readNullable[DateTime] and
-      (__ \ "repo_direccion").readNullable[String] and
-      (__ \ "repo_nombre").readNullable[String] and
-      (__ \ "repo_telefono").readNullable[String] and
-      (__ \ "repo_reportetecnico").readNullable[String] and
-      (__ \ "repo_descripcion").readNullable[String] and
-      (__ \ "rees_id").readNullable[scala.Long] and
-      (__ \ "orig_id").readNullable[scala.Long] and
-      (__ \ "barr_id").readNullable[scala.Long] and
-      (__ \ "empr_id").readNullable[scala.Long] and
-      (__ \ "tiba_id").readNullable[scala.Long] and
-      (__ \ "usua_id").readNullable[scala.Long] and
-      (__ \ "adicional").readNullable[ReporteAdicional]
-  )(ReporteConsulta.apply _)
-}
-
-object ReporteTipo {
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val tipoWrites = new Writes[ReporteTipo] {
-    def writes(tipo: ReporteTipo) = Json.obj(
-      "reti_id" -> tipo.reti_id,
-      "reti_descripcion" -> tipo.reti_descripcion,
-      "reti_consecutivo" -> tipo.reti_consecutivo,
-      "reti_estado" -> tipo.reti_estado,
-      "usua_id" -> tipo.usua_id
-    )
-  }
-
-  implicit val tipoRead: Reads[ReporteTipo] = (
-    (__ \ "reti_id").readNullable[scala.Long] and
-      (__ \ "reti_descripcion").read[String] and
-      (__ \ "reti_consecutivo").read[scala.Long] and
-      (__ \ "reti_estado").read[Int] and
-      (__ \ "usua_id").read[scala.Long]
-  )(ReporteTipo.apply _)
-
-  val repoTipoSet = {
-    get[Option[scala.Long]]("reporte_tipo.reti_id") ~
-      get[String]("reporte_tipo.reti_descripcion") ~
-      get[scala.Long]("reporte_tipo.reti_consecutivo") ~
-      get[Int]("reporte_tipo.reti_estado") ~
-      get[scala.Long]("reporte_tipo.usua_id") map {
-      case reti_id ~ reti_descripcion ~ reti_consecutivo ~ reti_estado ~ usua_id =>
-        ReporteTipo(
-          reti_id,
-          reti_descripcion,
-          reti_consecutivo,
-          reti_estado,
-          usua_id
-        )
-    }
-  }
-}
-
-object ReporteEstado {
-
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val estadoWrites = new Writes[ReporteEstado] {
-    def writes(estado: ReporteEstado) = Json.obj(
-      "rees_id" -> estado.rees_id,
-      "rees_descripcion" -> estado.rees_descripcion,
-      "rees_estado" -> estado.rees_estado,
-      "usua_id" -> estado.usua_id
-    )
-  }
-
-  implicit val estadoReads: Reads[ReporteEstado] = (
-    (__ \ "rees_id").readNullable[scala.Long] and
-      (__ \ "rees_descripcion").read[String] and
-      (__ \ "rees_estado").read[Int] and
-      (__ \ "usua_id").read[scala.Long]
-  )(ReporteEstado.apply _)
-
-  val oEstado = {
-    get[Option[scala.Long]]("reporte_estado.rees_id") ~
-      get[String]("reporte_estado.rees_descripcion") ~
-      get[Int]("reporte_estado.rees_estado") ~
-      get[scala.Long]("reporte_estado.usua_id") map {
-      case rees_id ~ rees_descripcion ~ rees_estado ~ usua_id =>
-        new ReporteEstado(rees_id, rees_descripcion, rees_estado, usua_id)
-    }
-  }
-
-}
-
-object RepoElemento {
-  implicit val yourJodaDateReads =
-    JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateWrites =
-    JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
-
-  implicit val repelemWrites = new Writes[RepoElemento] {
-    def writes(repelem: RepoElemento) = Json.obj(
-      "rere_id" -> repelem.rere_id,
-      "rere_descripcion" -> repelem.rere_descripcion,
-      "rere_estado" -> repelem.rere_estado,
-      "usua_id" -> repelem.usua_id
-    )
-  }
-
-  implicit val repelemReads: Reads[RepoElemento] = (
-    (__ \ "rere_id").readNullable[scala.Long] and
-      (__ \ "rere_descripcion").readNullable[String] and
-      (__ \ "rere_estado").readNullable[Int] and
-      (__ \ "usua_id").readNullable[scala.Long]
-  )(RepoElemento.apply _)
-
-  val repoElementoSet = {
-    get[Option[scala.Long]]("repoelemento.rere_id") ~
-      get[Option[String]]("repoelemento.rere_descripcion") ~
-      get[Option[Int]]("repoelemento.rere_estado") ~
-      get[Option[scala.Long]]("repoelemento.usua_id") map {
-      case rere_id ~ rere_descripcion ~ rere_estado ~ usua_id =>
-        new RepoElemento(rere_id, rere_descripcion, rere_estado, usua_id)
-    }
-  }
-}
-*/
 class ControlReporteRepository @Inject()(
     dbapi: DBApi,
     eventoService: EventoRepository,
@@ -1180,73 +69,6 @@ class ControlReporteRepository @Inject()(
 )(implicit ec: DatabaseExecutionContext) {
   private val db = dbapi.database("default")
   private val REPORT_DEFINITION_PATH = System.getProperty("user.dir") + "/conf/reports/"
-
-  /**
-    * Parsear un Reporte desde un ResultSet
-    */
-  private val simple = {
-    get[Option[scala.Long]]("repo_id") ~
-      get[Option[scala.Long]]("reti_id") ~
-      get[Option[scala.Long]]("repo_consecutivo") ~
-      get[Option[DateTime]]("repo_fecharecepcion") ~
-      get[Option[String]]("repo_direccion") ~
-      get[Option[String]]("repo_nombre") ~
-      get[Option[String]]("repo_telefono") ~
-      get[Option[DateTime]]("repo_fechasolucion") ~
-      get[Option[String]]("repo_horainicio") ~
-      get[Option[String]]("repo_horafin") ~
-      get[Option[String]]("repo_reportetecnico") ~
-      get[Option[String]]("repo_descripcion") ~
-      get[Option[scala.Long]]("rees_id") ~
-      get[Option[scala.Long]]("orig_id") ~
-      get[Option[scala.Long]]("barr_id") ~
-      get[Option[scala.Long]]("empr_id") ~
-      get[Option[scala.Long]]("tiba_id") ~
-      get[Option[scala.Long]]("usua_id") map {
-      case repo_id ~
-            reti_id ~
-            repo_consecutivo ~
-            repo_fecharecepcion ~
-            repo_direccion ~
-            repo_nombre ~
-            repo_telefono ~
-            repo_fechasolucion ~
-            repo_horainicio ~
-            repo_horafin ~
-            repo_reportetecnico ~
-            repo_descripcion ~
-            rees_id ~
-            orig_id ~
-            barr_id ~
-            empr_id ~            
-            tiba_id ~
-            usua_id =>
-        Reporte(
-          repo_id,
-          reti_id,
-          repo_consecutivo,
-          repo_fecharecepcion,
-          repo_direccion,
-          repo_nombre,
-          repo_telefono,
-          repo_fechasolucion,
-          repo_horainicio,
-          repo_horafin,
-          repo_reportetecnico,
-          repo_descripcion,
-          rees_id,
-          orig_id,
-          barr_id,
-          empr_id,
-          tiba_id,
-          usua_id,
-          null,
-          null,
-          null,
-          null
-        )
-    }
-  }
 
   /**
     *  Validar Reporte Diligenciado
@@ -1443,7 +265,7 @@ class ControlReporteRepository @Inject()(
             'page_size -> page_size,
             'current_page -> current_page
           )
-          .as(simple *)
+          .as(Reporte._set *)
         reps.map { r =>
           val adicional = SQL(
             """SELECT * FROM siap.control_reporte_adicional WHERE repo_id = {repo_id}"""
@@ -1463,6 +285,10 @@ class ControlReporteRepository @Inject()(
               'repo_id -> r.repo_id
             )
             .as(scalar[scala.Long].*)
+          val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
+          on(
+            'repo_id -> r.repo_id
+          ).as(ReporteNovedad._set *)
           val direcciones = SQL(
             """SELECT * FROM siap.control_reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
           ).on(
@@ -1544,6 +370,7 @@ class ControlReporteRepository @Inject()(
           }
           val reporte = new Reporte(
             r.repo_id,
+            r.tireuc_id,
             r.reti_id,
             r.repo_consecutivo,
             r.repo_fecharecepcion,
@@ -1555,6 +382,7 @@ class ControlReporteRepository @Inject()(
             r.repo_horafin,
             r.repo_reportetecnico,
             r.repo_descripcion,
+            r.repo_subrepoconsecutivo,
             r.rees_id,
             r.orig_id,
             r.barr_id,
@@ -1564,7 +392,8 @@ class ControlReporteRepository @Inject()(
             adicional,
             Some(meams),
             Some(eventos),
-            Some(_listDireccion.toList)
+            Some(_listDireccion.toList),
+            Some(novedades)
           )
           _list += reporte
         }
@@ -1585,7 +414,7 @@ class ControlReporteRepository @Inject()(
           .on(
             'empr_id -> empr_id
           )
-          .as(simple *)
+          .as(Reporte._set *)
         reps.map { r =>
           val eventos = SQL(
             """SELECT * FROM siap.control_reporte_evento WHERE repo_id = {repo_id} and even_estado < 8"""
@@ -1605,6 +434,10 @@ class ControlReporteRepository @Inject()(
               'repo_id -> r.repo_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
+          val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
+          on(
+            'repo_id -> r.repo_id
+          ).as(ReporteNovedad._set *)            
           val direcciones = SQL(
             """SELECT * FROM siap.control_reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
           ).on(
@@ -1656,6 +489,7 @@ class ControlReporteRepository @Inject()(
           }
           val reporte = new Reporte(
             r.repo_id,
+            r.tireuc_id,
             r.reti_id,
             r.repo_consecutivo,
             r.repo_fecharecepcion,
@@ -1667,6 +501,7 @@ class ControlReporteRepository @Inject()(
             r.repo_horafin,
             r.repo_reportetecnico,
             r.repo_descripcion,
+            r.repo_subrepoconsecutivo,
             r.rees_id,
             r.orig_id,
             r.barr_id,
@@ -1676,7 +511,8 @@ class ControlReporteRepository @Inject()(
             adicional,
             Some(meams),
             Some(eventos),
-            Some(_listDireccion.toList)
+            Some(_listDireccion.toList),
+            Some(novedades)
           )
           _list += reporte
         }
@@ -1752,7 +588,7 @@ class ControlReporteRepository @Inject()(
         .on(
           'repo_id -> repo_id
         )
-        .as(simple.singleOpt)
+        .as(Reporte._set.singleOpt)
 
       val eventos = SQL(
         """SELECT * FROM siap.control_reporte_evento WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
@@ -1772,6 +608,10 @@ class ControlReporteRepository @Inject()(
           'repo_id -> repo_id
         )
         .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
+      val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
+          on(
+            'repo_id -> repo_id
+          ).as(ReporteNovedad._set *)        
       val direcciones = SQL(
         """SELECT * FROM siap.control_reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
       ).on(
@@ -1853,30 +693,33 @@ class ControlReporteRepository @Inject()(
       }
       println("R: "+ r)
       r.map { r =>
-        val reporte = new Reporte(
-          r.repo_id,
-          r.reti_id,
-          r.repo_consecutivo,
-          r.repo_fecharecepcion,
-          r.repo_direccion,
-          r.repo_nombre,
-          r.repo_telefono,
-          r.repo_fechasolucion,
-          r.repo_horainicio,
-          r.repo_horafin,
-          r.repo_reportetecnico,
-          r.repo_descripcion,
-          r.rees_id,
-          r.orig_id,
-          r.barr_id,
-          r.empr_id,
-          r.tiba_id,
-          r.usua_id,
-          adicional,
-          Some(meams),
-          Some(eventos),
-          Some(_listDireccion.toList)
-        )
+          val reporte = new Reporte(
+            r.repo_id,
+            r.tireuc_id,
+            r.reti_id,
+            r.repo_consecutivo,
+            r.repo_fecharecepcion,
+            r.repo_direccion,
+            r.repo_nombre,
+            r.repo_telefono,
+            r.repo_fechasolucion,
+            r.repo_horainicio,
+            r.repo_horafin,
+            r.repo_reportetecnico,
+            r.repo_descripcion,
+            r.repo_subrepoconsecutivo,
+            r.rees_id,
+            r.orig_id,
+            r.barr_id,
+            r.empr_id,
+            r.tiba_id,
+            r.usua_id,
+            adicional,
+            Some(meams),
+            Some(eventos),
+            Some(_listDireccion.toList),
+            Some(novedades)
+          )
         reporte
       }
     }
@@ -1908,7 +751,7 @@ class ControlReporteRepository @Inject()(
           'repo_consecutivo -> repo_consecutivo,
           'empr_id -> empr_id
         )
-        .as(simple.singleOpt)
+        .as(Reporte._set.singleOpt)
 
       r match {
         case Some(r) =>
@@ -1936,6 +779,10 @@ class ControlReporteRepository @Inject()(
               'repo_id -> r.repo_id
             )
             .as(ReporteDireccion.reporteDireccionSet *)
+          val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
+          on(
+            'repo_id -> r.repo_id
+          ).as(ReporteNovedad._set *)            
           var _listDireccion = new ListBuffer[ReporteDireccion]()
           direcciones.map { d =>
             var dat = SQL(
@@ -2011,6 +858,7 @@ class ControlReporteRepository @Inject()(
           }
           val reporte = new Reporte(
             r.repo_id,
+            r.tireuc_id,
             r.reti_id,
             r.repo_consecutivo,
             r.repo_fecharecepcion,
@@ -2022,6 +870,7 @@ class ControlReporteRepository @Inject()(
             r.repo_horafin,
             r.repo_reportetecnico,
             r.repo_descripcion,
+            r.repo_subrepoconsecutivo,
             r.rees_id,
             r.orig_id,
             r.barr_id,
@@ -2031,7 +880,8 @@ class ControlReporteRepository @Inject()(
             adicional,
             Some(meams),
             Some(eventos),
-            Some(_listDireccion.toList)
+            Some(_listDireccion.toList),
+            Some(novedades)
           )
           Some(reporte)
 
@@ -2066,7 +916,7 @@ class ControlReporteRepository @Inject()(
           'repo_consecutivo -> repo_consecutivo,
           'empr_id -> empr_id
         )
-        .as(simple.singleOpt)
+        .as(Reporte._set.singleOpt)
 
       r match {
         case Some(r) =>
@@ -2138,7 +988,7 @@ class ControlReporteRepository @Inject()(
           'fecha_inicial -> fechaini,
           'fecha_final -> fechafin
         )
-        .as(simple *)
+        .as(Reporte._set *)
       reps.map { r =>
         val adicional = SQL(
           """SELECT * FROM siap.control_reporte_adicional WHERE repo_id = {repo_id}"""
@@ -2158,6 +1008,10 @@ class ControlReporteRepository @Inject()(
             'repo_id -> r.repo_id
           )
           .as(scalar[scala.Long].*)
+        val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
+          on(
+            'repo_id -> r.repo_id
+          ).as(ReporteNovedad._set *)
         val direcciones = SQL(
           """SELECT * FROM siap.control_reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
         ).on(
@@ -2185,30 +1039,33 @@ class ControlReporteRepository @Inject()(
           val direccion = d.copy(dato = dat, dato_adicional = adi)
           _listDireccion += direccion
         }
-        val reporte = new Reporte(
-          r.repo_id,
-          r.reti_id,
-          r.repo_consecutivo,
-          r.repo_fecharecepcion,
-          r.repo_direccion,
-          r.repo_nombre,
-          r.repo_telefono,
-          r.repo_fechasolucion,
-          r.repo_horainicio,
-          r.repo_horafin,
-          r.repo_reportetecnico,
-          r.repo_descripcion,
-          r.rees_id,
-          r.orig_id,
-          r.barr_id,
-          r.empr_id,
-          r.tiba_id,
-          r.usua_id,
-          adicional,
-          None, //Some(meams),
-          None, //Some(eventos),
-          None //Some(_listDireccion.toList)
-        )
+          val reporte = new Reporte(
+            r.repo_id,
+            r.tireuc_id,
+            r.reti_id,
+            r.repo_consecutivo,
+            r.repo_fecharecepcion,
+            r.repo_direccion,
+            r.repo_nombre,
+            r.repo_telefono,
+            r.repo_fechasolucion,
+            r.repo_horainicio,
+            r.repo_horafin,
+            r.repo_reportetecnico,
+            r.repo_descripcion,
+            r.repo_subrepoconsecutivo,
+            r.rees_id,
+            r.orig_id,
+            r.barr_id,
+            r.empr_id,
+            r.tiba_id,
+            r.usua_id,
+            adicional,
+            Some(meams),
+            Some(eventos),
+            Some(_listDireccion.toList),
+            Some(novedades)
+          )
         _list += reporte
       }
       _list
@@ -2234,7 +1091,7 @@ class ControlReporteRepository @Inject()(
           'fecha_final -> fecha_final,
           'empr_id -> empr_id
         )
-        .as(simple *)
+        .as(Reporte._set *)
     }
   }
 
@@ -2254,7 +1111,7 @@ class ControlReporteRepository @Inject()(
           'rees_id -> rees_id,
           'empr_id -> empr_id
         )
-        .as(simple *)
+        .as(Reporte._set *)
     }
   }
 
@@ -2274,7 +1131,7 @@ class ControlReporteRepository @Inject()(
           'acti_id -> acti_id,
           'empr_id -> empr_id
         )
-        .as(simple *)
+        .as(Reporte._set *)
     }
   }
 
@@ -2294,7 +1151,7 @@ class ControlReporteRepository @Inject()(
           'orig_id -> orig_id,
           'empr_id -> empr_id
         )
-        .as(simple *)
+        .as(Reporte._set *)
     }
   }
 
@@ -2310,7 +1167,7 @@ class ControlReporteRepository @Inject()(
   ): Future[Iterable[Reporte]] = Future[Iterable[Reporte]] {
     db.withConnection { implicit connection =>
       SQL("SELECT * FROM siap.control_reporte")
-        .as(simple *)
+        .as(Reporte._set *)
     }
   }
 
@@ -2449,13 +1306,13 @@ class ControlReporteRepository @Inject()(
     db.withConnection { implicit connection =>
 
       var _id : scala.Long = 0
-      val control = SQL("SELECT * FROM siap.control_reporte WHERE repo_id = {repo_id}").on('repo_id -> id).as(simple.single)
+      val control = SQL("SELECT * FROM siap.control_reporte WHERE repo_id = {repo_id}").on('repo_id -> id).as(Reporte._set.single)
       // Validar si previamente fue convertido
       val reporte: Option[Reporte] = SQL("SELECT * FROM siap.reporte WHERE repo_consecutivo = {repo_consecutivo} and reti_id = {reti_id}")
                     .on(
                       'repo_consecutivo -> control.repo_consecutivo,
                       'reti_id -> control.reti_id
-                    ).as(simple.singleOpt)
+                    ).as(Reporte._set.singleOpt)
       reporte match {
         case None =>
                 val queryReporte = """INSERT INTO siap.reporte (

@@ -9,6 +9,11 @@ import play.api.mvc._
 import play.api.libs.json._
 import play.api.Configuration
 
+import net.liftweb.json._
+import net.liftweb.json.Serialization.write
+import net.liftweb.json.Serialization.read
+import net.liftweb.json.parse
+
 import com.google.inject.Singleton
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,6 +37,7 @@ class CanalizacionReporteController @Inject()(
     authenticatedUserAction: AuthenticatedUserAction)(
     implicit ec: ExecutionContext)
     extends AbstractController(cc) {
+  implicit val formats = net.liftweb.json.DefaultFormats
   def todos(): Action[AnyContent] =
     authenticatedUserAction.async { implicit request: Request[AnyContent] => 
     val json = request.body.asJson.get
@@ -46,7 +52,7 @@ class CanalizacionReporteController @Inject()(
     val empr_id = Utility.extraerEmpresa(request)
     val total = reporteService.cuenta(empr_id.get)
     reporteService.todos(page_size, current_page, empr_id.get, orderby, filtro).map { reportes =>
-        Ok(Json.obj("reportes" -> reportes, "total" -> total))
+        Ok(write( new ReporteResult(reportes, total)))
       }
     }
 
@@ -54,7 +60,7 @@ class CanalizacionReporteController @Inject()(
     implicit request : Request[AnyContent] =>
     val empr_id = Utility.extraerEmpresa(request)
     reporteService.reportes(empr_id.get).map { reportes =>
-      Ok(Json.toJson(reportes))
+      Ok(write(reportes))
     }
   }
 
@@ -81,7 +87,7 @@ class CanalizacionReporteController @Inject()(
         }
         case Some(reporte) => {
           println("Reporte: " + reporte)
-          Future.successful(Ok(Json.toJson(reporte)))
+          Future.successful(Ok(write(reporte)))
         }
       }
   }
@@ -95,7 +101,7 @@ class CanalizacionReporteController @Inject()(
           Future.successful(NotFound(Json.toJson("false")))
         }
         case Some(reporte) => {
-          Future.successful(Ok(Json.toJson(reporte)))
+          Future.successful(Ok(write(reporte)))
         }
       }
   }
@@ -104,7 +110,7 @@ class CanalizacionReporteController @Inject()(
     implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
       reporteService.buscarPorRango(anho, mes, empr_id.get).map { reportes =>
-        Ok(Json.toJson(reportes))
+        Ok(write(reportes))
       }
   }
 
@@ -112,10 +118,11 @@ class CanalizacionReporteController @Inject()(
   def guardarReporte() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
-      var reporte = json.as[Reporte]
+      var reporte = net.liftweb.json.parse(json.toString).extract[Reporte]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
       val reportenuevo = new Reporte(null,
+                            reporte.tireuc_id,
                             reporte.reti_id,
                             reporte.repo_consecutivo,
                             reporte.repo_fecharecepcion,
@@ -127,6 +134,7 @@ class CanalizacionReporteController @Inject()(
                             reporte.repo_horafin,
                             reporte.repo_reportetecnico,
                             reporte.repo_descripcion,
+                            reporte.repo_subrepoconsecutivo,
                             reporte.rees_id,
                             reporte.orig_id,
                             reporte.barr_id,
@@ -136,7 +144,8 @@ class CanalizacionReporteController @Inject()(
                             reporte.adicional,
                             reporte.meams,
                             reporte.eventos,
-                            reporte.direcciones
+                            reporte.direcciones,
+                            reporte.novedades
                  )
       reporteService.crear(reportenuevo).map { case (id, consec) =>
         if (id > 0) {
@@ -188,6 +197,7 @@ class CanalizacionReporteController @Inject()(
                                       None)
         val usua_id = 1
         val reportenuevo = new Reporte(null,
+                              Some(3),
                               Some(1),
                               None,
                               Some(repo_fecharecepcion),
@@ -199,6 +209,7 @@ class CanalizacionReporteController @Inject()(
                               None,
                               None,
                               Some(repo_descripcion),
+                              None,
                               Some(1),
                               Some(9),
                               Some(barr_id),
@@ -206,6 +217,7 @@ class CanalizacionReporteController @Inject()(
                               None,
                               Some(usua_id),
                               Some(ra),
+                              None,
                               None,
                               None,
                               None
@@ -243,12 +255,14 @@ class CanalizacionReporteController @Inject()(
   def actualizarReporte() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
-      var reporte = ( json \ "reporte").as[Reporte]
+      var reporte = net.liftweb.json.parse(( json \ "reporte").toString).extract[Reporte]
+      //var reporte = ( json \ "reporte").as[Reporte]
       val coau_codigo = ( json \ "coau_codigo").as[String]
       val coau_tipo = (json \ "coau_tipo").as[Int]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)      
       val reportenuevo = new Reporte(reporte.repo_id,
+                            reporte.tireuc_id,
                             reporte.reti_id,
                             reporte.repo_consecutivo,
                             reporte.repo_fecharecepcion,
@@ -260,6 +274,7 @@ class CanalizacionReporteController @Inject()(
                             reporte.repo_horafin,
                             reporte.repo_reportetecnico,
                             reporte.repo_descripcion,
+                            reporte.repo_subrepoconsecutivo,
                             reporte.rees_id,
                             reporte.orig_id,
                             reporte.barr_id,
@@ -269,7 +284,8 @@ class CanalizacionReporteController @Inject()(
                             reporte.adicional,
                             reporte.meams,
                             reporte.eventos,
-                            reporte.direcciones)
+                            reporte.direcciones,
+                            reporte.novedades)
       if (reporteService.actualizar(reportenuevo, coau_tipo, coau_codigo)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
@@ -320,7 +336,7 @@ class CanalizacionReporteController @Inject()(
     implicit request : Request[AnyContent] =>
     val empr_id = Utility.extraerEmpresa(request)
     reporteService.siap_reporte_vencido(empr_id.get).map { reportes =>
-      Ok(Json.toJson(reportes))
+      Ok(write(reportes))
     }
   }
 

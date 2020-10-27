@@ -23,6 +23,7 @@ import org.joda.time.LocalDate
 case class Novedad(nove_id: Option[scala.Long], 
                   nove_descripcion: Option[String],
                   nove_estado: Option[Int],
+                  nove_tipo: Option[Int],
                   empr_id: Option[Long],
                   usua_id: Option[Long])
 
@@ -35,6 +36,7 @@ object Novedad {
            "nove_id" -> n.nove_id,
            "nove_descripcion" -> n.nove_descripcion,
            "nove_estado" -> n.nove_estado,
+           "nove_tipo" -> n.nove_tipo,
            "empr_id" -> n.empr_id,
            "usua_id" -> n.usua_id
         )
@@ -44,6 +46,7 @@ object Novedad {
         (__ \ "nove_id").readNullable[Long] and
         (__ \ "nove_descripcion").readNullable[String] and
         (__ \ "nove_estado").readNullable[Int] and
+        (__ \ "nove_tipo").readNullable[Int] and        
         (__ \ "empr_id").readNullable[Long] and
         (__ \ "usua_id").readNullable[Long]
     )(Novedad.apply _)
@@ -52,9 +55,10 @@ object Novedad {
         get[Option[Long]]("nove_id") ~
         get[Option[String]]("nove_descripcion") ~ 
         get[Option[Int]]("nove_estado") ~
+        get[Option[Int]]("nove_tipo") ~
         get[Option[Long]]("empr_id") ~
         get[Option[Long]]("usua_id") map {
-            case nove_id ~ nove_descripcion ~ nove_estado ~ empr_id ~ usua_id => Novedad(nove_id, nove_descripcion, nove_estado, empr_id, usua_id)
+            case nove_id ~ nove_descripcion ~ nove_estado ~ nove_tipo ~ empr_id ~ usua_id => Novedad(nove_id, nove_descripcion, nove_estado, nove_tipo, empr_id, usua_id)
         }
     }
 
@@ -95,9 +99,12 @@ class NovedadRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
     * @param current_page: Long
     * @return Future[Iterable[Novedad]]
     */
-    def todos(page_size: Long, current_page: Long) : Future[Iterable[Novedad]] = Future[Iterable[Novedad]] {
+    def todos(page_size: Long, current_page: Long, nove_tipo: Int) : Future[Iterable[Novedad]] = Future[Iterable[Novedad]] {
         db.withConnection { implicit connection => 
-            SQL("SELECT * FROM siap.novedad ORDER BY nove_descripcion").
+            SQL("SELECT * FROM siap.novedad WHERE nove_tipo = {nove_tipo} ORDER BY nove_descripcion").
+            on(
+                'nove_tipo -> nove_tipo
+            ).
             as(Novedad._set *)
         }
     }
@@ -106,9 +113,12 @@ class NovedadRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
     * Recuperar todos los novedad
     * @return Future[Iterable[Novedad]]
     */
-    def novedades() : Future[Iterable[Novedad]] = Future[Iterable[Novedad]] {
+    def novedades(nove_tipo: Int) : Future[Iterable[Novedad]] = Future[Iterable[Novedad]] {
         db.withConnection { implicit connection => 
-            SQL("SELECT * FROM siap.novedad ORDER BY nove_id").
+            SQL("SELECT * FROM siap.novedad WHERE nove_tipo = {nove_tipo} ORDER BY nove_id").
+            on(
+                'nove_tipo -> nove_tipo
+            ).
             as(Novedad._set *)
         }
     }
@@ -121,10 +131,11 @@ class NovedadRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
         db.withConnection { implicit connection => 
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDate = fecha
-            val id: Long = SQL("INSERT INTO siap.novedad (nove_descripcion, nove_estado, empr_id, usua_id) VALUES ({nove_descripcion}, {nove_estado}, {empr_id}, {usua_id})").
+            val id: Long = SQL("INSERT INTO siap.novedad (nove_descripcion, nove_estado, nove_tipo, empr_id, usua_id) VALUES ({nove_descripcion}, {nove_estado}, {empr_id}, {usua_id})").
             on(
                 'nove_descripcion -> novedad.nove_descripcion,
                 'nove_estado -> novedad.nove_estado,
+                'nove_tipo -> novedad.nove_tipo,
                 'empr_id -> novedad.empr_id,
                 'usua_id -> novedad.usua_id
             ).executeInsert().get
@@ -156,11 +167,12 @@ class NovedadRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
         db.withConnection { implicit connection => 
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDate = fecha
-            val result: Boolean = SQL("UPDATE siap.novedad SET nove_descripcion = {nove_descripcion}, nove_estado = {nove_estado}, usua_id = {usua_id} WHERE nove_id = {nove_id}").
+            val result: Boolean = SQL("UPDATE siap.novedad SET nove_descripcion = {nove_descripcion}, nove_estado = {nove_estado}, nove_tipo = {nove_tipo},usua_id = {usua_id} WHERE nove_id = {nove_id}").
             on(
                 'nove_id -> novedad.nove_id,
                 'nove_descripcion -> novedad.nove_descripcion,
                 'nove_estado -> novedad.nove_estado,
+                'nove_tipo -> novedad.nove_tipo,
                 'usua_id -> novedad.usua_id
             ).executeUpdate() > 0
  

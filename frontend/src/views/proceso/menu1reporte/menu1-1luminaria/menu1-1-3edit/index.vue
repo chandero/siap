@@ -725,6 +725,113 @@
               </el-col>
             </el-row>
           </el-collapse-item>
+          <el-collapse-item name="4" :title="$t('reporte.novedades').toUpperCase()">
+            <el-row :gutter="4" class="hidden-sm-and-down">
+              <el-col :md="1" :lg="1" :xl="1">
+                <span style="font-weight: bold;">No.</span>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+                <span style="font-weight: bold;">Novedad</span>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="3" :lg="3" :xl="3">
+                <span style="font-weight: bold;">Hora Inicio</span>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="3" :lg="3" :xl="3">
+                <span style="font-weight: bold;">Hora Terminación</span>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="9" :lg="9" :xl="9">
+                <span style="font-weight: bold;">Observación</span>
+              </el-col>
+            </el-row>
+            <div v-for="(evento, id) in reporte.novedades" v-bind:key="id">
+              <el-form :model="evento" ref="novedadform">
+                <el-row :gutter="4">
+                  <el-col class="hidden-md-and-up" :xs="1" :sm="1">
+                    <span style="font-weight: bold;">No.</span>
+                  </el-col>
+                  <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ evento.even_id }}</el-col>
+                    <el-col class="hidden-md-and-up" :xs="5" :sm="5">
+                      <span style="font-weight: bold;">Novedad</span>
+                    </el-col>
+                  <el-col :xs="13" :sm="13" :md="6" :lg="6" :xl="6">
+                    <el-form-item>
+                      <el-select :disabled="evento.even_estado > 7" filterable clearable ref="type" v-model="evento.nove_id" name="nove" :placeholder="$t('ordentrabajo.novedad.select')"  style="width:95%;">
+                        <el-option v-for="nove in novedades" :key="nove.nove_id" :label="nove.nove_descripcion" :value="nove.nove_id" >
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col class="hidden-md-and-up" :xs="5" :sm="5">
+                    <span style="font-weight: bold;">Hora Inicio</span>
+                  </el-col>
+                  <el-col :xs="16" :sm="16" :md="3" :lg="3" :xl="3">
+                    <el-form-item
+                      prop="reno_horaini"
+                    >
+                      <el-time-select
+                        :disabled="evento.even_estado > 7"
+                        v-model="evento.reno_horaini"
+                        style="width:90%"
+                        :picker-options="{
+                          start: '07:00',
+                          step: '00:15',
+                          end: '19:00',
+                        }"
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col class="hidden-md-and-up" :xs="5" :sm="5">
+                    <span style="font-weight: bold;">Hora Terminacion</span>
+                  </el-col>
+                  <el-col :xs="16" :sm="16" :md="3" :lg="3" :xl="3">
+                    <el-form-item
+                      prop="reno_horafin"
+                    >
+                      <el-time-select
+                        :disabled="evento.even_estado > 7"
+                        v-model="evento.reno_horafin"
+                        style="width:90%"
+                        :picker-options="{
+                          start: '07:00',
+                          step: '00:15',
+                          end: '23:45',
+                          minTime: evento.reno_horaini
+                      }"
+                    />
+                    </el-form-item>
+                  </el-col>
+                  <el-col class="hidden-md-and-up" :xs="8" :sm="8">
+                    <span style="font-weight: bold;">Observaciön</span>
+                  </el-col>
+                  <el-col :xs="16" :sm="16" :md="9" :lg="9" :xl="9">
+                    <el-form-item>
+                      <el-input :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.reno_observacion"></el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
+                    <el-button v-if="evento.even_estado < 8 || reporte.rees_id === 3" size="mini" type="danger" circle icon="el-icon-minus" title="Quitar Fila" @click="evento.even_estado === 1? evento.even_estado = 8 : evento.even_estado = 9"></el-button>
+                    <el-button v-if="evento.even_estado > 7 || reporte.rees_id === 3" size="mini" type="success" circle icon="el-icon-success" title="Restaurar Fila" @click="evento.even_estado === 9? evento.even_estado = 2 : evento.even_estado = 1"></el-button>
+                  </el-col>
+                </el-row>
+              </el-form>
+            <el-row class="hidden-md-and-up">
+              <el-col style="border-bottom: 1px dotted #000;"></el-col>
+            </el-row>
+          </div>
+          <el-row>
+            <el-col :span="24">
+              <el-button
+                :disabled="!reporte.direcciones[didx].aap_id || reporte.rees_id === 3"
+                style="display: table-cell;"
+                type="primary"
+                size="mini"
+                circle
+                icon="el-icon-plus"
+                title="Adicionar Nueva Fila"
+                @click="onAddNovedad()" />
+            </el-col>
+          </el-row>
+          </el-collapse-item>
           <el-collapse-item name="2" :title="$t('reporte.inform')">
             <el-row :gutter="4">
               <el-col :span="8">
@@ -1672,6 +1779,7 @@ import { getUrbanizadoraTodas } from '@/api/urbanizadora'
 import { getMedidors } from '@/api/medidor'
 import { getTransformadors } from '@/api/transformador'
 import { getOrdenes, addReporteAOrden } from '@/api/ordentrabajo'
+import { getNovedades } from '@/api/novedad'
 // component
 
 // import { inspect } from 'util'
@@ -1777,6 +1885,7 @@ export default {
       confirmacionGuardar: false,
       reporte_previo: {
         reti_id: null,
+        tireuc_id: null,
         repo_id: null,
         repo_consecutivo: 0,
         repo_numero: null,
@@ -1789,6 +1898,7 @@ export default {
         repo_horafin: null,
         repo_reportetecnico: null,
         repo_descripcion: null,
+        repo_subreporteconsecutivo: null,
         rees_id: 2,
         orig_id: null,
         barr_id: null,
@@ -1801,6 +1911,7 @@ export default {
       },
       evento_siguiente_consecutivo: 1,
       direccion_siguiente_consecutivo: 1,
+      novedad_siguiente_consecutivo: 0,
       autorizacion: '',
       addinputevent: 4,
       coau_tipo: 0,
@@ -2204,6 +2315,7 @@ export default {
       aap_usos: [],
       aap_cuentasap: [],
       tiposretiro: [],
+      novedades: [],
       checkAll: false,
       isIndeterminate: false,
       aap: { aap_id: null },
@@ -3268,6 +3380,18 @@ export default {
         duration: 5000
       })
     },
+    onAddNovedad () {
+      this.novedad_siguiente_consecutivo = this.novedad_siguiente_consecutivo + 1
+      var novedad = {
+        nove_id: null,
+        reno_horaini: null,
+        reno_horafin: null,
+        reno_observacion: null,
+        even_id: this.novedad_siguiente_consecutivo,
+        even_estado: 1
+      }
+      this.reporte.novedades.push(novedad)
+    },
     onAddEvent (cantidad = 0) {
       if (cantidad === 0) {
         cantidad = this.addinputevent
@@ -3706,6 +3830,12 @@ export default {
       }
       var even_length = 0
       var dire_length = 0
+      var nove_length = 0
+      this.reporte_previo.novedades.forEach((n) => {
+        if (n.even_id > nove_length) {
+          nove_length = n.even_id
+        }
+      })
       this.reporte_previo.eventos.forEach((e) => {
         if (e.even_id > even_length) {
           even_length = e.even_id
@@ -4017,6 +4147,7 @@ export default {
       })
       this.evento_siguiente_consecutivo = even_length + 1
       this.direccion_siguiente_consecutivo = dire_length + 1
+      this.novedad_siguiente_consecutivo = nove_length + 1
       this.minDate = this.reporte_previo.repo_fecharecepcion
       var temp = JSON.stringify(this.reporte_previo)
       this.reporte_previo = JSON.parse(temp)
@@ -4200,7 +4331,12 @@ export default {
                                                                                                                   response.data
                                                                                                                 getOrdenes().then(response => {
                                                                                                                   this.ordenestrabajo = response.data
-                                                                                                                  this.obtenerReporte()
+                                                                                                                  getNovedades(1).then(response => {
+                                                                                                                    this.novedades = response.data
+                                                                                                                    this.obtenerReporte()
+                                                                                                                  }).catch(error => {
+                                                                                                                    console.log('getNovedades:' + error)
+                                                                                                                  })
                                                                                                                 }).catch(error => {
                                                                                                                   console.log(
                                                                                                                     'Error Ordenes Trabajo: ' +

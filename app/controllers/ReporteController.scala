@@ -9,6 +9,11 @@ import play.api.mvc._
 import play.api.libs.json._
 import play.api.Configuration
 
+import net.liftweb.json._
+import net.liftweb.json.Serialization.write
+import net.liftweb.json.Serialization.read
+import net.liftweb.json.parse
+
 import com.google.inject.Singleton
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,7 +36,8 @@ class ReporteController @Inject()(
     config: Configuration,
     authenticatedUserAction: AuthenticatedUserAction)(
     implicit ec: ExecutionContext)
-    extends AbstractController(cc) {
+    extends AbstractController(cc) with ImplicitJsonFormats {
+  implicit val formats = Serialization.formats(NoTypeHints) ++ List(DateTimeSerializer)           
   def todos(): Action[AnyContent] =
     authenticatedUserAction.async { implicit request: Request[AnyContent] => 
     val json = request.body.asJson.get
@@ -46,15 +52,15 @@ class ReporteController @Inject()(
     val empr_id = Utility.extraerEmpresa(request)
     val total = reporteService.cuenta(empr_id.get)
     reporteService.todos(page_size, current_page, empr_id.get, orderby, filtro).map { reportes =>
-        Ok(Json.obj("reportes" -> reportes, "total" -> total))
-      }
+        Ok(write(new ReporteResult(reportes, total)))
     }
+  }
 
   def reportes(): Action[AnyContent] = authenticatedUserAction.async {
     implicit request : Request[AnyContent] =>
     val empr_id = Utility.extraerEmpresa(request)
     reporteService.reportes(empr_id.get).map { reportes =>
-      Ok(Json.toJson(reportes))
+      Ok(write(reportes))
     }
   }
 
@@ -80,8 +86,7 @@ class ReporteController @Inject()(
           Future.successful(NotFound(Json.toJson("false")))
         }
         case Some(reporte) => {
-          println("Reporte: " + reporte)
-          Future.successful(Ok(Json.toJson(reporte)))
+          Future.successful(Ok(write(reporte)))
         }
       }
   }
@@ -96,16 +101,16 @@ class ReporteController @Inject()(
           Future.successful(NotFound(Json.toJson("false")))
         }
         case Some(reporte) => {
-          Future.successful(Ok(Json.toJson(reporte)))
+          Future.successful(Ok(write(reporte)))
         }
       }
   }
 
-  def buscarPorRango(anho: Int, mes: Int) = authenticatedUserAction.async {
+  def buscarPorRango(anho: Int, mes: Int, tireuc_id: Int) = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
-      reporteService.buscarPorRango(anho, mes, empr_id.get).map { reportes =>
-        Ok(Json.toJson(reportes))
+      reporteService.buscarPorRango(anho, mes, tireuc_id, empr_id.get).map { reportes =>
+        Ok(write(reportes))
       }
   }
 
@@ -113,17 +118,18 @@ class ReporteController @Inject()(
     implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
       reporteService.reportesporaap(aap_id, empr_id.get).map { reportes =>
-        Ok(Json.toJson(reportes))
+        Ok(write(reportes))
       }
   }
 
   def guardarReporte() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
-      var reporte = json.as[Reporte]
+      var reporte = net.liftweb.json.parse(json.toString).extract[Reporte]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
       val reportenuevo = new Reporte(null,
+                            reporte.tireuc_id,
                             reporte.reti_id,
                             reporte.repo_consecutivo,
                             reporte.repo_fecharecepcion,
@@ -135,6 +141,7 @@ class ReporteController @Inject()(
                             reporte.repo_horafin,
                             reporte.repo_reportetecnico,
                             reporte.repo_descripcion,
+                            reporte.repo_subrepoconsecutivo,
                             reporte.rees_id,
                             reporte.orig_id,
                             reporte.barr_id,
@@ -144,7 +151,8 @@ class ReporteController @Inject()(
                             reporte.adicional,
                             reporte.meams,
                             reporte.eventos,
-                            reporte.direcciones
+                            reporte.direcciones,
+                            reporte.novedades
                  )
       reporteService.crear(reportenuevo).map { case (id, consec) =>
         if (id > 0) {
@@ -204,6 +212,7 @@ class ReporteController @Inject()(
         val usua_id = 1
         val reportenuevo = new Reporte(null,
                               Some(1),
+                              Some(1),
                               None,
                               Some(repo_fecharecepcion),
                               repo_direccion,
@@ -214,6 +223,7 @@ class ReporteController @Inject()(
                               None,
                               None,
                               repo_descripcion,
+                              None,
                               Some(1),
                               Some(9),
                               barr_id,
@@ -221,6 +231,7 @@ class ReporteController @Inject()(
                               None,
                               Some(usua_id),
                               Some(ra),
+                              None,
                               None,
                               None,
                               None
@@ -248,7 +259,7 @@ class ReporteController @Inject()(
           Future.successful(NotFound(Json.toJson("{}")))
         }
         case Some(reporte) => {
-          Future.successful(Ok(Json.toJson(reporte)))
+          Future.successful(Ok(write(reporte)))
         }
       }
      } else {
@@ -259,12 +270,21 @@ class ReporteController @Inject()(
   def actualizarReporte() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
-      var reporte = ( json \ "reporte").as[Reporte]
-      val coau_codigo = ( json \ "coau_codigo").as[String]
-      val coau_tipo = (json \ "coau_tipo").as[Int]
+      println("json: " + json)
+      var reporteRequest = net.liftweb.json.parse(json.toString).extract[ReporteRequest]
+      val coau_codigo = reporteRequest.coau_codigo match {
+        case Some(c) => c
+        case None => ""
+      }
+      val coau_tipo = reporteRequest.coau_tipo match {
+        case Some(c) => c
+        case None => 0
+      }
+      val reporte = reporteRequest.reporte
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)      
       val reportenuevo = new Reporte(reporte.repo_id,
+                            reporte.tireuc_id,
                             reporte.reti_id,
                             reporte.repo_consecutivo,
                             reporte.repo_fecharecepcion,
@@ -276,6 +296,7 @@ class ReporteController @Inject()(
                             reporte.repo_horafin,
                             reporte.repo_reportetecnico,
                             reporte.repo_descripcion,
+                            reporte.repo_subrepoconsecutivo,
                             reporte.rees_id,
                             reporte.orig_id,
                             reporte.barr_id,
@@ -285,7 +306,8 @@ class ReporteController @Inject()(
                             reporte.adicional,
                             reporte.meams,
                             reporte.eventos,
-                            reporte.direcciones)
+                            reporte.direcciones,
+                            reporte.novedades)
       if (reporteService.actualizar(reportenuevo, coau_tipo, coau_codigo)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
@@ -296,10 +318,11 @@ class ReporteController @Inject()(
   def actualizarReporteParcial() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
-      var reporte = ( json \ "reporte").as[Reporte]
+      var reporte = net.liftweb.json.parse(( json \ "reporte").toString).extract[Reporte]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)      
       val reportenuevo = new Reporte(reporte.repo_id,
+                            reporte.tireuc_id,
                             reporte.reti_id,
                             reporte.repo_consecutivo,
                             reporte.repo_fecharecepcion,
@@ -311,16 +334,18 @@ class ReporteController @Inject()(
                             reporte.repo_horafin,
                             reporte.repo_reportetecnico,
                             reporte.repo_descripcion,
+                            reporte.repo_subrepoconsecutivo,
                             reporte.rees_id,
                             reporte.orig_id,
                             reporte.barr_id,
-                            empr_id,                            
+                            empr_id,
                             reporte.tiba_id,
                             usua_id,
                             reporte.adicional,
                             reporte.meams,
                             reporte.eventos,
-                            reporte.direcciones)
+                            reporte.direcciones,
+                            reporte.novedades)
       reporteService.actualizarParcial(reportenuevo).map { result =>
         if (result) {
           Ok(Json.toJson("true"))
@@ -329,7 +354,6 @@ class ReporteController @Inject()(
         }
       }
   }
-
 
   def borrarReporte(id: Long) = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
@@ -376,7 +400,7 @@ class ReporteController @Inject()(
     implicit request : Request[AnyContent] =>
     val empr_id = Utility.extraerEmpresa(request)
     reporteService.siap_reporte_vencido(empr_id.get).map { reportes =>
-      Ok(Json.toJson(reportes))
+      Ok(write(reportes))
     }
   }
 

@@ -40,7 +40,10 @@ libraryDependencies ++= Seq(
   "net.sf.jasperreports" % "jasperreports-functions" % "6.13.0",
   "net.sf.jasperreports" % "jasperreports-chart-themes" % "6.13.0",
   "com.norbitltd" %% "spoiwo" % "1.7.0",
-  "org.mozilla" % "rhino" % "1.7R3"
+  "org.mozilla" % "rhino" % "1.7R3",
+  // JSON
+  "net.liftweb" %% "lift-json" % "3.4.1",
+  "net.liftweb" %% "lift-json-ext" % "3.4.1"
 )
 
 // Play framework hooks for development

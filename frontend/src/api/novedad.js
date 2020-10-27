@@ -1,19 +1,23 @@
 import request from '@/utils/request'
 
-export function getTodos (page_size, current_page) {
+export function getTodos (page_size, current_page, tipo) {
   const data = {
     page_size,
-    current_page
+    current_page,
+    tipo
   }
   return request({
-    url: '/nove/get/' + data.page_size + '/' + data.current_page,
+    url: '/nove/get/' + data.page_size + '/' + data.current_page + '/' + data.tipo,
     method: 'get'
   })
 }
 
-export function getNovedades () {
+export function getNovedades (tipo) {
+  const data = {
+    tipo
+  }
   return request({
-    url: '/nove/all',
+    url: '/nove/all/' + data.tipo,
     method: 'get'
   })
 }

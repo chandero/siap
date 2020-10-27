@@ -222,6 +222,7 @@ export default {
       loading: false,
       reporte: {
         reti_id: null,
+        tireuc_id: 1,
         repo_id: null,
         repo_consecutivo: null,
         repo_numero: null,
@@ -425,7 +426,7 @@ export default {
       this.filtro = this.freti_id + '|' + this.fconsec
     },
     nuevo () {
-      this.$router.push({ path: '/proceso/menu1reporte/menu1-1luminaria/menu1-1-2create' })
+      this.$router.push({ path: '/proceso/menu1reporte/menu1-1luminaria/menu1-1-2create/1' })
     },
     estado (id) {
       if (id === null) {
@@ -457,7 +458,7 @@ export default {
     },
     getData (anho, mes, index, name) {
       this.loading = true
-      getReportesRango(anho, mes).then(response => {
+      getReportesRango(anho, mes, 1).then(response => {
         console.log('Periodo: ' + name)
         this.tabsData[index].tableData = response.data
         this.loading = false
