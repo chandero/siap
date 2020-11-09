@@ -6,607 +6,1655 @@
             <span>{{ $t('route.controlreporteedit') }} - Estado Actual: {{ estado() }}</span>
           </el-col>
           <el-col :span="4">
-            <el-button align="right" type="primary" title="Convertir en Reporte de Luminaria" @click="showConvertirDlg=true">Convertir</el-button>
+            <el-button
+              align="right"
+              type="primary"
+              title="Convertir en Reporte de Luminaria"
+              @click="showConvertirDlg=true"
+              >Convertir</el-button>
           </el-col>
         </el-row>
       </el-header>
       <el-main>
-          <el-form ref="reporteForm" :model="reporte" :rules="rules" :label-position="labelPosition">
-              <el-collapse v-model="activePages" @change="handleActivePagesChange">
-                <el-collapse-item name="1" :title="$t('reporte.general')" style="font-weight: bold;">
-                    <el-row :gutter="4">
-                        <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
-                            <el-form-item prop="repo_fecharecepcion" :label="$t('reporte.receptiondate')">
-                                <span style="font-size: 24px;">{{ reporte.repo_fecharecepcion | moment('YYYY/MM/DD HH:MM')}}</span>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="24" :md="9" :lg="9" :xl="9">
-                            <el-form-item prop="reti_id" :label="$t('reporte.type')">
-                                <span style="font-size: 24px;">{{ reporte_tipo(reporte.reti_id) }}</span>
-                            </el-form-item>
-                        </el-col>
-                        <el-col v-if="reporte.reti_id===2" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
-                              <el-form-item prop="adicional.repo_tipo_expansion" :label="$t('reporte.tipo_expansion.title')">
-                                <el-select :disabled="reporte.rees_id == 3" clearable :title="$t('reporte.tipo_expansion.select')" style="width: 80%" ref="tipo" v-model="reporte.adicional.repo_tipo_expansion" name="tipo_expansion" :placeholder="$t('reporte.tipo_expansion.select')" @change="validarExpansion()">
-                                    <el-option v-for="te in tipos_expansion" :key="te.tiex_id" :label="te.tiex_descripcion" :value="te.tiex_id" >
-                                    </el-option>
-                                </el-select>
-                              </el-form-item>
-                        </el-col>
-                        <el-col v-if="(reporte.reti_id===2 || reporte.reti_id===9)" :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
-                          <el-form-item prop="muot_id" :label="$t('reporte.ot')">
-                            <el-input type="number" style="font-size: 30px;" v-model="reporte.adicional.muot_id" @input="reporte.adicional.muot_id = parseInt($event)"></el-input>
-                          </el-form-item>
-                        </el-col>
-                        <el-col v-if="reporte.adicional.repo_tipo_expansion === 5" :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
-                              <el-form-item :label="$t('reporte.urba.title')" prop="adicional.urba_id">
-                                <el-select :disabled="reporte.rees_id == 3 || reporte.direcciones.lenght" clearable :title="$t('reporte.urba.select')" style="width: 80%" ref="tipo" v-model="reporte.adicional.urba_id" name="urbanizadora" :placeholder="$t('reporte.urba.select')">
-                                    <el-option v-for="u in urbanizadoras" :key="u.urba_id" :label="u.urba_descripcion" :value="u.urba_id" >
-                                    </el-option>
-                                </el-select>
-                              </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row :gutter="4">
-                      <el-col v-if="reporte.reti_id === 9" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
-                        <el-form-item :label="$t('reporte.aaco_id_anterior')" prop="adicional.aaco_id_anterior">
-                          <el-select clearable filterable ref="aaco_id_anterior" v-model="reporte.adicional.aaco_id_anterior" name="aaco_id_anterior" :placeholder="$t('gestion.connection.select')" @change="cambiarMedidaAnterior()">
-                            <el-option v-for="conexion in conexiones" :key="conexion.aaco_id" :label="conexion.aaco_descripcion" :value="parseInt(conexion.aaco_id)">
-                            </el-option>
-                          </el-select>
+      <el-form ref="reporteForm" :model="reporte" :rules="rules" :label-position="labelPosition">
+        <el-collapse v-model="activePages" @change="handleActivePagesChange">
+          <el-collapse-item name="1" :title="$t('reporte.general')" style="font-weight: bold;">
+            <el-row :gutter="4">
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+                <template v-if="repo_fecharecepcion_state">
+                  <el-form-item prop="repo_fecharecepcion" :label="$t('reporte.receptiondate')">
+                    <el-date-picker
+                      type="datetime"
+                      ref="receptiondate"
+                      v-model="reporte.repo_fecharecepcion"
+                      width="85%"
+                    ></el-date-picker>
+                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); repo_fecharecepcion_state = false " />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="reporte.repo_fecharecepcion = repo_fecharecepcion; repo_fecharecepcion_state = false"
+                    />
+                  </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.receptiondate')">
+                    <span
+                      style="font-size: 24px;"
+                    >{{ reporte.repo_fecharecepcion | moment("YYYY/MM/DD HH:mm") }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="repo_fecharecepcion_state=!repo_fecharecepcion_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+                <el-form-item prop="reti_id" :label="$t('reporte.type')">
+                  <span style="font-size: 24px;">{{ reporte_tipo(reporte.reti_id) }}</span>
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+                <el-form-item prop="repo_consecutivo" :label="$t('reporte.number')">
+                  <span style="font-size: 30px;">{{ reporte.repo_consecutivo | fillZeros(6) }}</span>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col v-if="reporte.reti_id===2" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+                <el-form-item
+                  prop="adicional.repo_tipo_expansion"
+                  :label="$t('reporte.tipo_expansion.title')"
+                >
+                  <el-select
+                    :disabled="reporte.rees_id == 3"
+                    clearable
+                    :title="$t('reporte.tipo_expansion.select')"
+                    style="width: 80%"
+                    ref="tipo"
+                    v-model="reporte.adicional.repo_tipo_expansion"
+                    name="tipo_expansion"
+                    :placeholder="$t('reporte.tipo_expansion.select')"
+                    @change="validarExpansion()"
+                  >
+                    <el-option
+                      v-for="te in tipos_expansion"
+                      :key="te.tiex_id"
+                      :label="te.tiex_descripcion"
+                      :value="te.tiex_id"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col
+                v-if="reporte.adicional.repo_tipo_expansion === 5"
+                :xs="24"
+                :sm="24"
+                :md="5"
+                :lg="5"
+                :xl="5"
+              >
+                <el-form-item :label="$t('reporte.urba.title')" prop="adicional.urba_id">
+                  <el-select
+                    :disabled="reporte.rees_id == 3 || reporte.direcciones.lenght"
+                    clearable
+                    :title="$t('reporte.urba.select')"
+                    style="width: 80%"
+                    ref="tipo"
+                    v-model="reporte.adicional.urba_id"
+                    name="urbanizadora"
+                    :placeholder="$t('reporte.urba.select')"
+                  >
+                    <el-option
+                      v-for="u in urbanizadoras"
+                      :key="u.urba_id"
+                      :label="u.urba_descripcion"
+                      :value="u.urba_id"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col
+                v-if="(reporte.reti_id===2 || reporte.reti_id===9)"
+                :xs="24"
+                :sm="24"
+                :md="3"
+                :lg="3"
+                :xl="3"
+              >
+                <el-form-item prop="muot_id" :label="$t('reporte.otm')">
+                  <el-input
+                    type="number"
+                    style="font-size: 30px;"
+                    v-model="reporte.adicional.muot_id"
+                    @input="reporte.adicional.muot_id = parseInt($event)"
+                  ></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="4">
+              <el-col v-if="reporte.reti_id === 9" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+                <el-form-item
+                  :label="$t('reporte.aaco_id_anterior')"
+                  prop="adicional.aaco_id_anterior"
+                >
+                  <el-select
+                    clearable
+                    filterable
+                    ref="aaco_id_anterior"
+                    v-model="reporte.adicional.aaco_id_anterior"
+                    name="aaco_id_anterior"
+                    :placeholder="$t('gestion.connection.select')"
+                    @change="cambiarMedidaAnterior()"
+                  >
+                    <el-option
+                      v-for="conexion in conexiones"
+                      :key="conexion.aaco_id"
+                      :label="conexion.aaco_descripcion"
+                      :value="parseInt(conexion.aaco_id)"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col v-if="reporte.reti_id === 9" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+                <el-form-item :label="$t('reporte.aaco_id_nuevo')" prop="adicional.aaco_id_nuevo">
+                  <el-select
+                    clearable
+                    filterable
+                    ref="aaco_id_nuevo"
+                    v-model="reporte.adicional.aaco_id_nuevo"
+                    name="aaco_id_anterior"
+                    :placeholder="$t('gestion.connection.select')"
+                    @change="cambiarMedidaNuevo()"
+                  >
+                    <el-option
+                      v-for="conexion in conexiones"
+                      :key="conexion.aaco_id"
+                      :label="conexion.aaco_descripcion"
+                      :value="parseInt(conexion.aaco_id)"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col
+                v-if="reporte.reti_id === 9 & reporte.adicional.aaco_id_nuevo == 2"
+                :xs="24"
+                :sm="6"
+                :md="4"
+                :lg="4"
+                :xl="4"
+              >
+                <el-form-item prop="adicional.medi_id" :label="$t('gestion.medidor.title')">
+                  <el-select
+                    clearable
+                    filterable
+                    ref="medi_id"
+                    v-model="reporte.adicional.medi_id"
+                    name="medi_id"
+                    :placeholder="$t('gestion.medidor.select')"
+                  >
+                    <el-option
+                      v-for="m in medidores"
+                      :key="m.medi_id"
+                      :label="m.medi_id | fillZeros(4)"
+                      :value="m.medi_id"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col
+                v-if="reporte.reti_id === 9 & reporte.adicional.aaco_id_nuevo == 2"
+                :xs="24"
+                :sm="6"
+                :md="4"
+                :lg="4"
+                :xl="4"
+              >
+                <el-form-item prop="adicional.tran_id" :label="$t('gestion.transformador.title')">
+                  <el-select
+                    clearable
+                    filterable
+                    ref="transformador"
+                    v-model="reporte.adicional.tran_id"
+                    name="transformador"
+                    :placeholder="$t('gestion.transformador.select')"
+                  >
+                    <el-option
+                      v-for="t in transformadores"
+                      :key="t.tran_id"
+                      :label="t.tran_id | fillZeros(4)"
+                      :value="t.tran_id"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="4">
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+                <template v-if="orig_id_state">
+                  <el-form-item prop="orig_id" :label="$t('reporte.origin')">
+                    <el-select
+                      style="width:100%;"
+                      ref="origin"
+                      v-model="reporte.orig_id"
+                      name="origen"
+                      :placeholder="$t('origen.select')"
+                      @change="changeFocus('code')"
+                    >
+                      <el-option
+                        v-for="origen in origenes"
+                        :key="origen.orig_id"
+                        :label="origen.orig_descripcion"
+                        :value="origen.orig_id"
+                      ></el-option>
+                    </el-select>
+                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); orig_id_state = false" />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="reporte.orig_id = orig_id; orig_id_state = false"
+                    />
+                  </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.origin')">
+                    <span style="400 13.3333px Arial;">{{ origen(reporte.orig_id) }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="orig_id_state=!orig_id_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+                <template v-if="repo_codigo_state">
+                  <el-form-item prop="repo_codigo" :label="$t('reporte.code')">
+                    <el-input
+                      ref="code"
+                      v-model="reporte.adicional.repo_codigo"
+                      @input="reporte.adicional.repo_codigo = $event.toUpperCase()"
+                      @keyup.enter.native="changeFocus('apoyo')"
+                    ></el-input>
+                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); repo_codigo_state = false" />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="reporte.adicional.repo_codigo = repo_codigo; repo_codigo_state = false"
+                    />
+                  </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.code')">
+                    <span style="400 13.3333px Arial;">{{ reporte.adicional.repo_codigo }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="repo_codigo_state=!repo_codigo_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+                <template v-if="repo_apoyo_state">
+                  <el-form-item prop="repo_apoyo" :label="$t('reporte.apoyo')">
+                    <el-input
+                      ref="apoyo"
+                      v-model="reporte.adicional.repo_apoyo"
+                      @input="reporte.adicional.repo_apoyo = $event.toUpperCase()"
+                      @keyup.enter.native="changeFocus('nombre')"
+                    ></el-input>
+                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); repo_apoyo_state = false" />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="reporte.adicional.repo_apoyo = repo_apoyo; repo_apoyo_state = false"
+                    />
+                  </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.apoyo')">
+                    <span style="400 13.3333px Arial;">{{ reporte.adicional.repo_apoyo }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="repo_apoyo_state=!repo_apoyo_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+                <template v-if="ortr_id_state">
+                  <el-form-item prop="adicional.ortr_id" :label="$t('reporte.ot')" required>
+                    <el-select
+                      style="width:100%;"
+                      ref="ortr_id"
+                      v-model="reporte.adicional.ortr_id"
+                      name="ortr_id"
+                      :placeholder="$t('ortr.select')"
+                      @change="changeFocus('name')"
+                    >
+                      <el-option
+                        v-for="ot in ordenestrabajo"
+                        :key="ot.ortr_id"
+                        :label="ordentrabajo_label(ot.ortr_id)"
+                        :value="ot.ortr_id"
+                      ></el-option>
+                    </el-select>
+                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmOrdenTrabajo(); ortr_id_state = false" />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="reporte.adicional.ortr_id = ortr_id; ortr_id_state = false"
+                    />
+                  </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.ot')">
+                    <span style="400 13.3333px Arial;">{{ ordenes(reporte.adicional.ortr_id) }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="ortr_id_state=!ortr_id_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+            </el-row>
+            <el-row :gutter="4">
+              <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+                <template v-if="repo_nombre_state">
+                  <el-form-item prop="repo_nombre" :label="$t('reporte.name')">
+                    <el-input
+                      ref="nombre"
+                      v-model="reporte.repo_nombre"
+                      @input="reporte.repo_nombre = $event.toUpperCase()"
+                      @keyup.enter.native="changeFocus('direccion')"
+                    ></el-input>
+                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); repo_nombre_state = false" />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="reporte.repo_nombre = repo_nombre; repo_nombre_state = false"
+                    />
+                  </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.name')">
+                    <span style="400 13.3333px Arial;">{{ reporte.repo_nombre }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="repo_nombre_state=!repo_nombre_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+                <template v-if="repo_direccion_state">
+                  <el-form-item prop="repo_direccion" :label="$t('reporte.address')">
+                    <el-input
+                      ref="direccion"
+                      v-model="reporte.repo_direccion"
+                      @input="reporte.repo_direccion = $event.toUpperCase()"
+                      @keyup.enter.native="changeFocus('barrio')"
+                    ></el-input>
+                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); repo_direccion_state = false" />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="reporte.repo_direccion; repo_direccion_state = false"
+                    />
+                  </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.address')">
+                    <span style="400 13.3333px Arial;">{{ reporte.repo_direccion }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="repo_direccion_state=!repo_direccion_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+            </el-row>
+            <el-row :gutter="4">
+              <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+                <template v-if="barr_id_state">
+                  <el-form-item prop="barr_id" :label="$t('reporte.neighborhood')">
+                    <el-select
+                      style="width:100%;"
+                      filterable
+                      ref="barrio"
+                      v-model="reporte.barr_id"
+                      name="barrio"
+                      :placeholder="$t('barrio.select')"
+                      @change="changeFocus('tiba')"
+                    >
+                      <el-option
+                        v-for="barrio in barrios"
+                        :key="barrio.barr_id"
+                        :label="barrio.barr_descripcion"
+                        :value="barrio.barr_id"
+                      ></el-option>
+                    </el-select>
+                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); barr_id_state = false" />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="reporte.barr_id = barr_id; barr_id_state = false"
+                    />
+                  </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.neighborhood')">
+                    <span style="400 13.3333px Arial;">{{ barrio(reporte.barr_id) }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="barr_id_state=!barr_id_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
+                <template v-if="tiba_id_state">
+                  <el-form-item
+                    prop="tiba_id"
+                    :label="$t('reporte.sector')"
+                    :read-only="reporte.rees_id == 3"
+                  >
+                    <el-select
+                      style="width:100%;"
+                      filterable
+                      ref="tiba"
+                      v-model="reporte.tiba_id"
+                      name="tiba"
+                      :placeholder="$t('tipobarrio.select')"
+                      @change="changeFocus('telefono')"
+                    >
+                      <el-option
+                        v-for="tiba in tiposbarrio"
+                        :key="tiba.tiba_id"
+                        :label="tiba.tiba_descripcion"
+                        :value="tiba.tiba_id"
+                      ></el-option>
+                    </el-select>
+                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); tiba_id_state = false" />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="reporte.tiba_id = tiba_id; tiba_id_state = false"
+                    />
+                  </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.sector')">
+                    <span style="400 13.3333px Arial;">{{ sector(reporte.tiba_id) }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="tiba_id_state=!tiba_id_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="7" :lg="7" :xl="7">
+                <template v-if="repo_telefono_state">
+                  <el-form-item prop="repo_telefono" :label="$t('reporte.phone')">
+                    <el-input
+                      ref="telefono"
+                      v-model="reporte.repo_telefono"
+                      @keyup.enter.native="changeFocus('descripcion')"
+                    ></el-input>
+                  </el-form-item>
+                  <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); repo_telefono_state = false" />
+                  <el-button
+                    class="cancel-btn"
+                    size="mini"
+                    icon="el-icon-close"
+                    type="warning"
+                    circle
+                    @click="reporte.repo_telefono = repo_telefono; repo_telefono_state = false"
+                  />
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.phone')">
+                    <span style="400 13.3333px Arial;">{{ reporte.repo_telefono }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="repo_telefono_state=!repo_telefono_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+            </el-row>
+            <el-row :gutter="4">
+              <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+                <template v-if="acti_id_state">
+                  <el-form-item prop="adicional.acti_id" :label="$t('reporte.activity')">
+                    <el-select
+                      style="width:90%;"
+                      filterable
+                      ref="tiba"
+                      v-model="reporte.adicional.acti_id"
+                      name="actividad"
+                      :placeholder="$t('actividad.select')"
+                      @change="changeFocus('descripcion')"
+                    >
+                      <el-option
+                        v-for="acti in actividades"
+                        :key="acti.acti_id"
+                        :label="acti.acti_descripcion"
+                        :value="acti.acti_id"
+                      ></el-option>
+                    </el-select>
+                    <el-popover
+                      placement="top"
+                      width="300"
+                      trigger="click"
+                      v-model="dialogonuevodanhovisible"
+                    >
+                      <el-form ref="danho" :model="actividad">
+                        <el-form-item prop="acti_descripcion" label="Descripción del Daño">
+                          <el-input
+                            :disabled="reporte.rees_id == 3"
+                            autofocus
+                            v-model="actividad.acti_descripcion"
+                            @input="actividad.acti_descripcion = $event.toUpperCase()"
+                          ></el-input>
                         </el-form-item>
-                      </el-col>
-                      <el-col v-if="reporte.reti_id === 9" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
-                        <el-form-item :label="$t('reporte.aaco_id_nuevo')" prop="adicional.aaco_id_nuevo">
-                          <el-select clearable filterable ref="aaco_id_nuevo" v-model="reporte.adicional.aaco_id_nuevo" name="aaco_id_anterior" :placeholder="$t('gestion.connection.select')" @change="cambiarMedidaNuevo()">
-                            <el-option v-for="conexion in conexiones" :key="conexion.aaco_id" :label="conexion.aaco_descripcion" :value="parseInt(conexion.aaco_id)">
-                            </el-option>
-                          </el-select>
+                        <el-form-item>
+                          <el-button
+                            size="mini"
+                            type="primary"
+                            icon="el-icon-check"
+                            @click="guardarNuevoDanho()"
+                          ></el-button>
+                          <el-button
+                            size="mini"
+                            type="warning"
+                            icon="el-icon-close"
+                            @click="dialogonuevodanhovisible = false"
+                          ></el-button>
                         </el-form-item>
-                      </el-col>
-                      <el-col v-if="reporte.reti_id === 9 & reporte.adicional.aaco_id_nuevo == 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
-                        <el-form-item prop="adicional.medi_id" :label="$t('gestion.medidor.title')">
-                          <el-select clearable filterable ref="medi_id" v-model="reporte.adicional.medi_id" name="medi_id" :placeholder="$t('gestion.medidor.select')">
-                            <el-option v-for="m in medidores" :key="m.medi_id" :label="m.medi_id | fillZeros(4)" :value="m.medi_id">
-                            </el-option>
-                          </el-select>
-                        </el-form-item>
-                      </el-col>
-                      <el-col v-if="reporte.reti_id === 9 & reporte.adicional.aaco_id_nuevo == 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
-                        <el-form-item prop="adicional.tran_id" :label="$t('gestion.transformador.title')">
-                          <el-select clearable filterable ref="transformador" v-model="reporte.adicional.tran_id" name="transformador" :placeholder="$t('gestion.transformador.select')">
-                            <el-option v-for="t in transformadores" :key="t.tran_id" :label="t.tran_id | fillZeros(4)" :value="t.tran_id">
-                            </el-option>
-                          </el-select>
-                        </el-form-item>
-                      </el-col>
-                    </el-row>
-                    <el-row :gutter="4">
-                        <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
-                          <el-form-item prop="repo_consecutivo" :label="$t('reporte.number')">
-                            <span style="font-size: 30px;">{{ reporte.repo_consecutivo | fillZeros(6) }}</span>
-                          </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-                            <el-form-item prop="orig_id" :label="$t('reporte.origin')" :read-only="reporte.rees_id == 3">
-                                <el-select :disabled="reporte.rees_id == 3" style="width:100%;" ref="origin" v-model="reporte.orig_id" name="origen" :placeholder="$t('origen.select')"  @change="changeFocus('code')">
-                                    <el-option v-for="origen in origenes" :key="origen.orig_id" :label="origen.orig_descripcion" :value="origen.orig_id" :disabled="origen.orig_id != reporte.orig_id" >
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-                            <el-form-item prop="repo_codigo" :label="$t('control.reporte.code')">
-                                <el-input readonly ref="code" v-model="reporte.adicional.repo_codigo" @input="reporte.adicional.repo_codigo = $event.toUpperCase()" @keyup.enter.native="changeFocus('nombre')"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <!--
-                        <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-                            <el-form-item prop="repo_apoyo" :label="$t('reporte.apoyo')">
-                                <el-input readonly ref="apoyo" v-model="reporte.adicional.repo_apoyo" @input="reporte.adicional.repo_apoyo = $event.toUpperCase()" @keyup.enter.native="changeFocus('nombre')" ></el-input>
-                            </el-form-item>
-                        </el-col>
-                        -->
-                    </el-row>
-                    <el-row :gutter="4">
-                        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                            <el-form-item prop="repo_nombre" :label="$t('reporte.name')">
-                                <el-input readonly ref="nombre" v-model="reporte.repo_nombre" @input="reporte.repo_nombre = $event.toUpperCase()" @keyup.enter.native="changeFocus('direccion')"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                            <el-form-item prop="repo_direccion" :label="$t('control.reporte.address')">
-                             <el-input readonly ref="direccion" v-model="reporte.repo_direccion" @input="reporte.repo_direccion = $event.toUpperCase()" @keyup.enter.native="changeFocus('barrio')">
-                             </el-input>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row :gutter="4">
-                        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                            <el-form-item prop="barr_id" :label="$t('reporte.neighborhood')" :read-only="reporte.rees_id == 3">
-                             <el-select :disabled="reporte.rees_id == 3" style="width:100%;" filterable ref="barrio" v-model="reporte.barr_id" name="barrio" :placeholder="$t('barrio.select')"  @change="changeFocus('tiba')">
-                              <el-option v-for="barrio in barrios" :key="barrio.barr_id" :label="barrio.barr_descripcion" :value="barrio.barr_id">
-                              </el-option>
-                             </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
-                            <el-form-item prop="tiba_id" :label="$t('reporte.sector')" :read-only="reporte.rees_id == 3">
-                             <el-select :disabled="reporte.rees_id == 3" style="width:100%;" filterable ref="tiba" v-model="reporte.tiba_id" name="tiba" :placeholder="$t('tipobarrio.select')"  @change="changeFocus('telefono')">
-                              <el-option v-for="tiba in tiposbarrio" :key="tiba.tiba_id" :label="tiba.tiba_descripcion" :value="tiba.tiba_id">
-                              </el-option>
-                             </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="24" :md="7" :lg="7" :xl="7">
-                            <el-form-item prop="repo_telefono" :label="$t('reporte.phone')">
-                                <el-input readonly ref="telefono" v-model="reporte.repo_telefono" @keyup.enter.native="changeFocus('descripcion')"></el-input>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row :gutter="4">
-                        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                            <el-form-item prop="adicional.acti_id" :label="$t('reporte.activity')" :read-only="reporte.rees_id == 3">
-                             <el-select :disabled="reporte.rees_id == 3" style="width:90%;" filterable ref="tiba" v-model="reporte.adicional.acti_id" name="actividad" :placeholder="$t('actividad.select')"  @change="changeFocus('descripcion')">
-                              <el-option v-for="acti in actividades" :key="acti.acti_id" :label="acti.acti_descripcion" :value="acti.acti_id">
-                              </el-option>
-                             </el-select>
-                             <el-popover
-                              placement="top"
-                              width="300"
-                              trigger="click"
-                              v-model="dialogonuevodanhovisible">
-                                <el-form ref="danho" :model="actividad">
-                                  <el-form-item prop="acti_descripcion" label="Descripción del Daño">
-                                    <el-input :disabled="reporte.rees_id == 3" autofocus v-model="actividad.acti_descripcion" @input="actividad.acti_descripcion = $event.toUpperCase()"></el-input>
-                                  </el-form-item>
-                                  <el-form-item>
-                                    <el-button  size="mini" type="primary" icon="el-icon-check" @click="guardarNuevoDanho()"></el-button>
-                                    <el-button  size="mini" type="warning" icon="el-icon-close" @click="dialogonuevodanhovisible = false"></el-button>
-                                  </el-form-item>
-                                </el-form>
-                                <el-button disabled slot="reference" type="primary" size="mini" circle icon="el-icon-plus" title="Adicionar Nuevo Daño"/>
-                             </el-popover>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                            <el-form-item prop="repo_descripcion" :label="$t('reporte.description')">
-                                <el-input readonly ref="descripcion" v-model="reporte.repo_descripcion" type="textarea" :rows="2" @input="reporte.repo_descripcion = $event.toUpperCase()"  @keyup.enter.native="changeFocus('submit')"></el-input>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </el-collapse-item>
-                  <el-collapse-item name="2" :title="$t('reporte.inform')">
-                    <el-row :gutter="4">
-                        <el-col :span="8">
-                            <el-form-item prop="repo_fechasolucion" :label="$t('reporte.solutiondate')" :read-only="reporte.rees_id == 3">
-                                <el-date-picker :disabled="reporte.rees_id == 3" v-model="reporte.repo_fechasolucion"
-                                 :picker-options="datePickerOptions"
-                                ></el-date-picker>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="8">
-                            <el-form-item prop="repo_horainicio" :label="$t('reporte.timestart')" :read-only="reporte.rees_id == 3">
-                                <el-time-select :disabled="reporte.rees_id == 3" v-model="reporte.repo_horainicio"
-                                   :picker-options="{
+                      </el-form>
+                      <el-button
+                        disabled
+                        slot="reference"
+                        type="primary"
+                        size="mini"
+                        circle
+                        icon="el-icon-plus"
+                        title="Adicionar Nuevo Daño"
+                      />
+                    </el-popover>
+                    <el-button
+                      circle
+                      size="mini"
+                      icon="el-icon-check"
+                      type="success"
+                      @click="confirmEdit(); acti_id_state = false"
+                    />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="reporte.adicional.acti_id = acti_id; acti_id_state = false"
+                    />
+                  </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.activity')">
+                    <span style="400 13.3333px Arial;">{{ tipo_actividad(reporte.adicional.acti_id) }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="acti_id_state=!acti_id_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+                <template v-if="repo_descripcion_state">
+                <el-form-item prop="repo_descripcion" :label="$t('reporte.description')">
+                  <el-input
+                    ref="descripcion"
+                    v-model="reporte.repo_descripcion"
+                    type="textarea"
+                    :rows="2"
+                    @input="reporte.repo_descripcion = $event.toUpperCase()"
+                    @keyup.enter.native="changeFocus('submit')"
+                  ></el-input>
+                    <el-button
+                      circle
+                      size="mini"
+                      icon="el-icon-check"
+                      type="success"
+                      @click="confirmEdit(); repo_descripcion_state = false"
+                    />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="reporte.repo_descripcion = repo_descripcion; repo_descripcion_state = false"
+                    />
+                </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('reporte.description')">
+                    <span style="400 13.3333px Arial;">{{ reporte.repo_descripcion }}</span>
+                    <el-button
+                      v-if="reporte.rees_id === 1"
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="repo_descripcion_state=!repo_descripcion_state"
+                    />
+                  </el-form-item>
+                </template>
+              </el-col>
+            </el-row>
+          </el-collapse-item>
+          <el-collapse-item name="4" :title="$t('reporte.novedades').toUpperCase()">
+            <el-row :gutter="4" class="hidden-sm-and-down">
+              <el-col :md="1" :lg="1" :xl="1">
+                <span style="font-weight: bold;">No.</span>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+                <span style="font-weight: bold;">Novedad</span>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="3" :lg="3" :xl="3">
+                <span style="font-weight: bold;">Hora Inicio</span>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="3" :lg="3" :xl="3">
+                <span style="font-weight: bold;">Hora Terminación</span>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="9" :lg="9" :xl="9">
+                <span style="font-weight: bold;">Observación</span>
+              </el-col>
+            </el-row>
+            <div v-for="(evento, id) in reporte.novedades" v-bind:key="id">
+              <el-form :model="evento" ref="novedadform">
+                <el-row :gutter="4">
+                  <el-col class="hidden-md-and-up" :xs="1" :sm="1">
+                    <span style="font-weight: bold;">No.</span>
+                  </el-col>
+                  <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ evento.even_id }}</el-col>
+                    <el-col class="hidden-md-and-up" :xs="5" :sm="5">
+                      <span style="font-weight: bold;">Novedad</span>
+                    </el-col>
+                  <el-col :xs="13" :sm="13" :md="6" :lg="6" :xl="6">
+                    <el-form-item>
+                      <el-select :disabled="evento.even_estado > 7" filterable clearable ref="type" v-model="evento.nove_id" name="nove" :placeholder="$t('ordentrabajo.novedad.select')"  style="width:95%;">
+                        <el-option v-for="nove in novedades" :key="nove.nove_id" :label="nove.nove_descripcion" :value="nove.nove_id" >
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col class="hidden-md-and-up" :xs="5" :sm="5">
+                    <span style="font-weight: bold;">Hora Inicio</span>
+                  </el-col>
+                  <el-col :xs="16" :sm="16" :md="3" :lg="3" :xl="3">
+                    <el-form-item
+                      prop="reno_horaini"
+                    >
+                      <el-time-select
+                        :disabled="evento.even_estado > 7"
+                        v-model="evento.reno_horaini"
+                        style="width:90%"
+                        :picker-options="{
+                          start: '07:00',
+                          step: '00:15',
+                          end: '19:00',
+                        }"
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col class="hidden-md-and-up" :xs="5" :sm="5">
+                    <span style="font-weight: bold;">Hora Terminacion</span>
+                  </el-col>
+                  <el-col :xs="16" :sm="16" :md="3" :lg="3" :xl="3">
+                    <el-form-item
+                      prop="reno_horafin"
+                    >
+                      <el-time-select
+                        :disabled="evento.even_estado > 7"
+                        v-model="evento.reno_horafin"
+                        style="width:90%"
+                        :picker-options="{
+                          start: '07:00',
+                          step: '00:15',
+                          end: '23:45',
+                          minTime: evento.reno_horaini
+                      }"
+                    />
+                    </el-form-item>
+                  </el-col>
+                  <el-col class="hidden-md-and-up" :xs="8" :sm="8">
+                    <span style="font-weight: bold;">Observaciön</span>
+                  </el-col>
+                  <el-col :xs="16" :sm="16" :md="9" :lg="9" :xl="9">
+                    <el-form-item>
+                      <el-input :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.reno_observacion"></el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
+                    <el-button v-if="evento.even_estado < 8 || reporte.rees_id === 3" size="mini" type="danger" circle icon="el-icon-minus" title="Quitar Fila" @click="evento.even_estado === 1? evento.even_estado = 8 : evento.even_estado = 9"></el-button>
+                    <el-button v-if="evento.even_estado > 7 || reporte.rees_id === 3" size="mini" type="success" circle icon="el-icon-success" title="Restaurar Fila" @click="evento.even_estado === 9? evento.even_estado = 2 : evento.even_estado = 1"></el-button>
+                  </el-col>
+                </el-row>
+              </el-form>
+            <el-row class="hidden-md-and-up">
+              <el-col style="border-bottom: 1px dotted #000;"></el-col>
+            </el-row>
+          </div>
+          <el-row>
+            <el-col :span="24">
+              <el-button
+                :disabled="!reporte.direcciones[didx].aap_id || reporte.rees_id === 3"
+                style="display: table-cell;"
+                type="primary"
+                size="mini"
+                circle
+                icon="el-icon-plus"
+                title="Adicionar Nueva Fila"
+                @click="onAddNovedad()" />
+            </el-col>
+          </el-row>
+          </el-collapse-item>
+          <el-collapse-item name="2" :title="$t('reporte.inform')">
+            <el-row :gutter="4">
+              <el-col :span="8">
+                <el-form-item
+                  prop="repo_fechasolucion"
+                  :label="$t('reporte.solutiondate')"
+                  :read-only="reporte.rees_id == 3"
+                >
+                  <el-date-picker
+                    :disabled="reporte.rees_id == 3"
+                    v-model="reporte.repo_fechasolucion"
+                    :picker-options="datePickerOptions"
+                    @change="validarAntiguedadFecha"
+                  ></el-date-picker>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item
+                  prop="repo_horainicio"
+                  :label="$t('reporte.timestart')"
+                  :read-only="reporte.rees_id == 3"
+                >
+                  <el-time-select
+                    :disabled="reporte.rees_id == 3"
+                    v-model="reporte.repo_horainicio"
+                    :picker-options="{
                                         start: '07:00',
                                         step: '00:15',
                                         end: '19:00',
                                    }"
-                                >
-                                </el-time-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="8">
-                            <el-form-item prop="repo_horafin" :label="$t('reporte.timeend')" :read-only="reporte.rees_id == 3">
-                                <el-time-select :disabled="reporte.rees_id == 3" v-model="reporte.repo_horafin"
-                                   :picker-options="{
+                  ></el-time-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item
+                  prop="repo_horafin"
+                  :label="$t('reporte.timeend')"
+                  :read-only="reporte.rees_id == 3"
+                >
+                  <el-time-select
+                    :disabled="reporte.rees_id == 3"
+                    v-model="reporte.repo_horafin"
+                    :picker-options="{
                                         start: '07:00',
                                         step: '00:15',
-                                        end: '19:00',
+                                        end: '23:45',
                                         minTime: reporte.repo_horainicio
                                    }"
-                                >
-                                </el-time-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row :gutter="4">
-                        <el-col :span="24">
-                            <el-form-item prop="repo_reportetecnico" :label="$t('reporte.tecnicalreport')">
-                                <el-input :disabled="reporte.rees_id == 3" type="textarea" :rows="3" ref="tecnico" v-model="reporte.repo_reportetecnico" @input="reporte.repo_reportetecnico = $event.toUpperCase()" @keyup.enter.native="changeFocus('evento.aap_id')"></el-input>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row :gutter="4">
-                      <el-col :span="24">
-                        <el-form-item prop="meams" :label="$t('reporte.environment')">
-                          <el-checkbox :disabled="reporte.rees_id == 3" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">Marcar todos</el-checkbox>
-                          <div style="margin: 15px 0;"></div>
-                          <el-checkbox-group v-model="reporte.meams" @change="handleReporteMeamChange">
-                            <el-checkbox :disabled="reporte.rees_id == 3" border v-for="meam in medioambiente" :label="meam.meam_id" :key="meam.meam_id">{{ meam.meam_descripcion }}</el-checkbox>
-                          </el-checkbox-group>
-                        </el-form-item>
-                      </el-col>
-                    </el-row>
-                    </el-collapse-item>
-                    <el-collapse-item name="3" title="DATOS CONTROLES">
-                        <div>
-                          <el-row>
-                            <el-col :span="24">
-                              <el-tag
-                                v-for="tag in reporte.direcciones"
-                                :key="tag.idx"
-                                closable
-                                :type="tag.type"
-                                effect="dark"
-                                size="medium"
-                                @click="handleTag(tag.idx)"
-                                :title="'Información Control ' + tag.aap_id"
-                                style="cursor: pointer;"
-                              >
-                                L: {{tag.aap_id}}
-                              </el-tag>
-                              <el-input
-                                class="input-new-address"
-                                v-if="inputVisible01"
-                                v-model="inputValue01"
-                                ref="saveTagInputAddress01"
-                                size="mini"
-                                @keyup.enter.native="onAddAddress(inputValue01)"
-                                @blur="onAddAddress(inputValue01)"
-                              >
-                              </el-input>
-                              <el-button v-else-if="reporte.rees_id != 3" size="small" @click="showInputAddress01">+ Agregar Control</el-button>
-                            </el-col>
-                          </el-row>
-                          <el-form :disabled="reporte.rees_id == 3" :model="reporte.direcciones[didx]" :ref="'dirform_' + reporte.direcciones[didx].even_id" :name="'dirform_' + reporte.direcciones[didx].even_id" label-position="left" :rules="dirrules">
-                          <el-row :gutter="4">
-                            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
-                              <span style="font-weight: bold;">No.</span>
-                            </el-col>
-                            <el-col :xs="24" :sm="1" :md="1" :lg="1" :xl="1">{{ reporte.direcciones[didx].even_id }}</el-col>
-                            <el-col :xs="24" :sm="10" :md="10" :lg="10" :xl="10">
-                                <el-form-item prop="aap_id" label="Código Control">
-                                  <div style="display: table;">
-                                   <el-input :disabled="reporte.direcciones[didx].even_estado === 2 || reporte.direcciones[didx].even_estado > 7" autofocus :ref="'aap_id_' + didx" type="number" class="sinpadding" style="display: table-cell;" v-model="reporte.direcciones[didx].aap_id" @input="reporte.direcciones[didx].aap_id = parseInt($event,10)" @blur="validateAap(reporte.direcciones[didx], didx)">
-                                   </el-input>
-                                   <span :class="reporte.direcciones[didx].dato !== undefined && reporte.direcciones[didx].dato.aaco_id_anterior === 3 ? 'errorClass': 'activeClass'">{{ status }}</span>
-                                  </div>
-                                </el-form-item>
-                            </el-col>
-                            <!--
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="5" :md="5" :lg="5" :xl="5">
-                              <el-form-item prop="aap_fechatoma" :label="$t('reporte.aap_fechatoma')">
-                                <el-date-picker :disabled="reporte.direcciones[didx].even_estado > 7 || reporte.reti_id !== 3" ref="aap_fechatoma" v-model="reporte.direcciones[didx].aap_fechatoma" name="aap_fechatoma" />
-                              </el-form-item>
-                            </el-col>
-                            -->
-                          </el-row>
-                          <el-row>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
-                             <el-form-item prop="even_direccion" label="Nueva Dirección">
-                               <el-input :disabled="reporte.direcciones[didx].even_estado > 7" :name="'even_direccion_'+didx" v-model="reporte.direcciones[didx].even_direccion" @input="reporte.direcciones[didx].even_direccion = $event.toUpperCase()" ></el-input>
-                             </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                             <el-form-item prop="barr_id" label="Barrio/Vereda">
-                             <el-select :disabled="reporte.direcciones[didx].even_estado > 7" style="width:100%;" filterable clearable v-model="reporte.direcciones[didx].barr_id" name="barrio" :placeholder="$t('barrio.select')" >
-                              <el-option v-for="barrio in barrios" :key="barrio.barr_id" :label="barrio.barr_descripcion" :value="barrio.barr_id">
-                              </el-option>
-                             </el-select>
-                             </el-form-item>
-                            </el-col>
-                          </el-row>
-                          <!--
-                          <el-row>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                             <el-form-item prop="dato_adicional.aap_lat" label="Latitud">
-                               <el-input :disabled="reporte.direcciones[didx].even_estado > 7" :name="'aap_lat_'+didx" v-model="reporte.direcciones[didx].dato_adicional.aap_lat" />
-                             </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                             <el-form-item prop="dato_adicional.aap_lng" label="Longitud">
-                               <el-input :disabled="reporte.direcciones[didx].even_estado > 7" :name="'aap_lng_'+didx" v-model="reporte.direcciones[didx].dato_adicional.aap_lng" />
-                             </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-                             <el-form-item prop="dato.aatc_id" label="Tipo Luminaria">
-                             <el-select :disabled="reporte.direcciones[didx].even_estado > 7" style="width:100%;" filterable clearable v-model="reporte.direcciones[didx].dato.aatc_id" :name="'aatc_id_'+didx" :placeholder="$t('cover.select')" >
-                              <el-option v-for="carcasa in carcasas" :key="carcasa.aatc_id" :label="carcasa.aatc_descripcion" :value="parseInt(carcasa.aatc_id)">
-                              </el-option>
-                             </el-select>
-                             </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-                             <el-form-item prop="dato.aama_id" label="Marca">
-                             <el-select :disabled="reporte.direcciones[didx].even_estado > 7" style="width:100%;" filterable clearable v-model="reporte.direcciones[didx].dato.aama_id" name="marca" :placeholder="$t('brand.select')" >
-                              <el-option v-for="marca in marcas" :key="marca.aama_id" :label="marca.aama_descripcion" :value="marca.aama_id">
-                              </el-option>
-                             </el-select>
-                             </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-                             <el-form-item prop="dato.aamo_id" label="Modelo">
-                             <el-select :disabled="reporte.direcciones[didx].even_estado > 7" style="width:100%;" filterable clearable v-model="reporte.direcciones[didx].dato.aamo_id" name="modelo" :placeholder="$t('model.select')" >
-                              <el-option v-for="modelo in modelos" :key="modelo.aamo_id" :label="modelo.aamo_descripcion" :value="modelo.aamo_id">
-                              </el-option>
-                             </el-select>
-                             </el-form-item>
-                            </el-col>
-                          </el-row>
-                          -->
-                          <!--
-                          <el-row :gutter="4">
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
-                             <el-form-item prop="dato.aap_tecnologia" label="Tecnología">
-                             <el-select :disabled="reporte.direcciones[didx].even_estado > 7" style="width:100%;" filterable clearable v-model="reporte.direcciones[didx].dato.aap_tecnologia" name="tecnologia" :placeholder="$t('gestion.tecnology.select')" >
-                              <el-option v-for="tec in tecnologias" :key="tec" :label="tec" :value="tec">
-                              </el-option>
-                             </el-select>
-                             </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
-                              <el-form-item prop="dato.aap_potencia" :label="$t('gestion.power.title')">
-                                <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="power" v-model="reporte.direcciones[didx].dato.aap_potencia" name="potencia" :placeholder="$t('gestion.power.select')">
-                                  <el-option v-for="power in potencias" :key="power" :label="power" :value="parseFloat(power)" >
-                                  </el-option>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
-                              <el-form-item prop="dato.aaco_id" :label="$t('gestion.connection.title')">
-                                <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="conexion" v-model="reporte.direcciones[didx].dato.aaco_id" name="conexion" :placeholder="$t('gestion.connection.select')">
-                                  <el-option v-for="conexion in conexiones" :key="conexion.aaco_id" :label="conexion.aaco_descripcion" :value="parseInt(conexion.aaco_id)">
-                                  </el-option>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0 & reporte.direcciones[didx].dato.aaco_id === 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
-                              <el-form-item prop="dato_adicional.medi_id" :label="$t('gestion.medidor.title')">
-                                <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="medidor" v-model="reporte.direcciones[didx].dato_adicional.medi_id" name="medidor" :placeholder="$t('gestion.medidor.select')">
-                                  <el-option v-for="m in medidores" :key="m.medi_id" :label="m.medi_id | fillZeros(4)" :value="m.medi_id">
-                                  </el-option>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
-                              <el-form-item prop="dato_adicional.tran_id" :label="$t('gestion.transformador.title')">
-                                <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="transformador" v-model="reporte.direcciones[didx].dato_adicional.tran_id" name="transformador" :placeholder="$t('gestion.transformador.select')" :change="reporte.direcciones[didx].dato_adicional.tran_id == '' ? reporte.direcciones[didx].dato_adicional.tran_id=null: reporte.direcciones[didx].dato_adicional.tran_id=reporte.direcciones[didx].dato_adicional.tran_id">
-                                  <el-option v-for="t in transformadores" :key="t.tran_id" :label="t.tran_id | fillZeros(4)" :value="t.tran_id">
-                                  </el-option>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                          </el-row>
-                          -->
-                          <!--
-                          <el-row>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                              <el-form-item prop="dato.tipo_id" :label="$t('gestion.post.title')">
-                                <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="post" v-model="reporte.direcciones[didx].dato.tipo_id" name="post" :placeholder="$t('gestion.post.select')">
-                                  <el-option v-for="post in postes" :key="post.tipo_id" :label="post.tipo_descripcion" :value="post.tipo_id">
-                                  </el-option>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                              <el-form-item prop="dato.aap_poste_altura" :label="$t('gestion.post.size')">
-                                <el-input :disabled="reporte.direcciones[didx].even_estado > 7" ref="postsize" v-model="reporte.direcciones[didx].dato.aap_poste_altura" @input="reporte.direcciones[didx].dato.aap_poste_altura=parseInt($event)" name="postsize" />
-                              </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                              <el-form-item prop="dato.aap_poste_propietario" :label="$t('gestion.post.own')">
-                                <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="postowner" v-model="reporte.direcciones[didx].dato.aap_poste_propietario" name="postowner" :placeholder="$t('gestion.post.selectown')">
-                                  <el-option v-for="own in owns" :key="own" :label="own" :value="own" >
-                                  </el-option>
-                              </el-select>
-                              </el-form-item>
-                            </el-col>
-                          </el-row>
-                          -->
-                          <!--
-                          <el-row>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
-                              <el-form-item prop="dato.aap_brazo" :label="$t('gestion.arm')">
-                                <el-input :disabled="reporte.direcciones[didx].even_estado > 7" ref="arm" v-model="reporte.direcciones[didx].dato.aap_brazo" name="arm" />
-                              </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
-                              <el-form-item prop="dato.aap_collarin" :label="$t('gestion.collar')">
-                                <el-input :disabled="reporte.direcciones[didx].even_estado > 7" ref="collar" v-model="reporte.direcciones[didx].dato.aap_collarin" name="collar" />
-                              </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
-                              <el-form-item prop="dato_adicional.aaus_id" :label="$t('gestion.use')">
-                                <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="use" v-model="reporte.direcciones[didx].dato_adicional.aaus_id" name="use" :placeholder="$t('use.select')">
-                                  <el-option v-for="aapuso in aap_usos" :key="aapuso.aaus_id" :label="aapuso.aaus_descripcion" :value="aapuso.aaus_id" >
-                                  </el-option>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                            <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
-                              <el-form-item prop="dato_adicional.aacu_id" :label="$t('gestion.account')">
-                                <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="account" v-model="reporte.direcciones[didx].dato_adicional.aacu_id" name="account" :placeholder="$t('account.select')">
-                                  <el-option v-for="aapcuentaap in aap_cuentasap" :key="aapcuentaap.aacu_id" :label="aapcuentaap.aacu_descripcion" :value="aapcuentaap.aacu_id" >
-                                  </el-option>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                          </el-row>
-                          -->
-                          <el-row>
-                            <el-col v-if="reporte.reti_id == 8" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
-                              <el-form-item prop="tire_id" :label="$t('gestion.tiporetiro')">
-                                <el-select :disabled="reporte.direcciones[didx].even_estado > 7" clearable filterable ref="tiporetiro" v-model="reporte.direcciones[didx].tire_id" name="tiporetiro" :placeholder="$t('tiporetiro.select')">
-                                  <el-option v-for="tire in tiposretiro" :key="tire.tire_id" :label="tire.tire_descripcion" :value="tire.tire_id" >
-                                  </el-option>
-                                </el-select>
-                              </el-form-item>
-                            </el-col>
-                          </el-row>
-                          <el-row>
-                            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
-                              <el-button v-if="reporte.direcciones[didx].even_estado < 8" size="mini" type="danger" circle icon="el-icon-minus" title="Quitar Fila" @click="reporte.direcciones[didx].even_estado === 1? reporte.direcciones[didx].even_estado = 8: reporte.direcciones[didx].even_estado = 9"></el-button>
-                              <el-button v-if="reporte.direcciones[didx].even_estado > 7" size="mini" type="success" circle icon="el-icon-success" title="Restaurar Fila" @click="reporte.direcciones[didx].even_estado === 9? reporte.direcciones[didx].even_estado = 2 : reporte.direcciones[didx].even_estado = 1"></el-button>
-                            </el-col>
-                          </el-row>
-                          <!-- <el-row>
+                  ></el-time-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="4">
+              <el-col :span="24">
+                <el-form-item prop="repo_reportetecnico" :label="$t('reporte.tecnicalreport')">
+                  <el-input
+                    :disabled="reporte.rees_id == 3"
+                    type="textarea"
+                    :rows="3"
+                    ref="tecnico"
+                    v-model="reporte.repo_reportetecnico"
+                    @input="reporte.repo_reportetecnico = $event.toUpperCase()"
+                    @keyup.enter.native="changeFocus('evento.aap_id')"
+                  ></el-input>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="4">
+              <el-col :span="24">
+                <el-form-item prop="meams" :label="$t('reporte.environment')">
+                  <el-checkbox
+                    :disabled="reporte.rees_id == 3"
+                    :indeterminate="isIndeterminate"
+                    v-model="checkAll"
+                    @change="handleCheckAllChange"
+                  >Marcar todos</el-checkbox>
+                  <div style="margin: 15px 0;"></div>
+                  <el-checkbox-group v-model="reporte.meams" @change="handleReporteMeamChange">
+                    <el-checkbox
+                      :disabled="reporte.rees_id == 3"
+                      border
+                      v-for="meam in medioambiente"
+                      :label="meam.meam_id"
+                      :key="meam.meam_id"
+                    >{{ meam.meam_descripcion }}</el-checkbox>
+                  </el-checkbox-group>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-collapse-item>
+          <el-collapse-item name="3" title="DATOS LUMINARIAS">
+            <div>
+              <el-row>
+                <el-col :span="24">
+                  <el-tag
+                    v-for="tag in reporte.direcciones"
+                    :key="tag.idx"
+                    closable
+                    :type="tag.type"
+                    effect="dark"
+                    size="medium"
+                    @click="handleTag(tag.idx)"
+                    :title="'Información Luminaria ' + tag.aap_id"
+                    style="cursor: pointer;"
+                  >L: {{tag.aap_id}}</el-tag>
+                  <el-input
+                    class="input-new-address"
+                    v-if="inputVisible01"
+                    v-model="inputValue01"
+                    ref="saveTagInputAddress01"
+                    size="mini"
+                    @keyup.enter.native="onAddAddress(inputValue01)"
+                    @blur="onAddAddress(inputValue01)"
+                  ></el-input>
+                  <el-button
+                    v-else-if="reporte.rees_id != 3"
+                    size="small"
+                    @click="showInputAddress01"
+                  >+ Agregar Luminaria</el-button>
+                </el-col>
+              </el-row>
+              <el-form
+                :disabled="reporte.rees_id == 3"
+                :model="reporte.direcciones[didx]"
+                :ref="'dirform_' + reporte.direcciones[didx].even_id"
+                :name="'dirform_' + reporte.direcciones[didx].even_id"
+                label-position="left"
+                :rules="dirrules"
+              >
+                <el-row :gutter="4">
+                  <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
+                    <span style="font-weight: bold;">No.</span>
+                  </el-col>
+                  <el-col
+                    :xs="24"
+                    :sm="1"
+                    :md="1"
+                    :lg="1"
+                    :xl="1"
+                  >{{ reporte.direcciones[didx].even_id }}</el-col>
+                  <el-col :xs="24" :sm="10" :md="10" :lg="10" :xl="10">
+                    <el-form-item prop="aap_id" label="Código Luminaria">
+                      <div style="display: table;">
+                        <el-input
+                          :disabled="reporte.direcciones[didx].even_estado === 3 || reporte.direcciones[didx].even_estado > 7"
+                          autofocus
+                          :ref="'aap_id_' + didx"
+                          type="number"
+                          class="sinpadding"
+                          style="display: table-cell;"
+                          v-model="reporte.direcciones[didx].aap_id"
+                          @input="reporte.direcciones[didx].aap_id = parseInt($event,10)"
+                          @blur="validateAap(reporte.direcciones[didx], didx)"
+                        ></el-input>
+                        <span
+                          :class="reporte.direcciones[didx].dato !== undefined && reporte.direcciones[didx].dato.aaco_id_anterior === 3 ? 'errorClass': 'activeClass'"
+                        >{{ status }}</span>
+                      </div>
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="7" :md="7" :lg="7" :xl="7">
+                    <el-form-item prop="dato_adicional.aap_apoyo" :label="$t('reporte.apoyo')">
+                      <el-input
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        ref="aap_apoyo"
+                        v-model="reporte.direcciones[didx].dato_adicional.aap_apoyo"
+                        name="aap_apoyo"
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="5" :md="5" :lg="5" :xl="5">
+                    <el-form-item prop="aap_fechatoma" :label="$t('reporte.aap_fechatoma')">
+                      <el-date-picker
+                        :disabled="reporte.direcciones[didx].even_estado > 7 || reporte.reti_id !== 3"
+                        ref="aap_fechatoma"
+                        v-model="reporte.direcciones[didx].aap_fechatoma"
+                        name="aap_fechatoma"
+                      />
+                    </el-form-item>
+                  </el-col>
+              <el-col :span="8">
+                <el-form-item
+                  prop="even_horaini"
+                  :label="$t('reporte.timestart')"
+                >
+                  <el-time-select
+                    v-model="reporte.direcciones[didx].even_horaini"
+                    :picker-options="{
+                                        start: '07:00',
+                                        step: '00:15',
+                                        end: '19:00',
+                                   }"
+                  ></el-time-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item
+                  prop="even_horafin"
+                  :label="$t('reporte.timeend')"
+                >
+                  <el-time-select
+                    v-model="reporte.direcciones[didx].even_horafin"
+                    :picker-options="{
+                                        start: '07:00',
+                                        step: '00:15',
+                                        end: '23:45',
+                                        minTime: reporte.direcciones[didx].even_horaini
+                                   }"
+                  ></el-time-select>
+                </el-form-item>
+              </el-col>
+                </el-row>
+                <el-row>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
+                    <el-form-item prop="even_direccion" label="Nueva Dirección">
+                      <el-input
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        :name="'even_direccion_'+didx"
+                        v-model="reporte.direcciones[didx].even_direccion"
+                        @input="reporte.direcciones[didx].even_direccion = $event.toUpperCase()"
+                      ></el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                    <el-form-item prop="barr_id" label="Barrio/Vereda">
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        style="width:100%;"
+                        filterable
+                        clearable
+                        v-model="reporte.direcciones[didx].barr_id"
+                        name="barrio"
+                        :placeholder="$t('barrio.select')"
+                      >
+                        <el-option
+                          v-for="barrio in barrios"
+                          :key="barrio.barr_id"
+                          :label="barrio.barr_descripcion"
+                          :value="barrio.barr_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                    <el-form-item prop="dato_adicional.aap_lat" label="Latitud">
+                      <el-input
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        :name="'aap_lat_'+didx"
+                        v-model="reporte.direcciones[didx].dato_adicional.aap_lat"
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                    <el-form-item prop="dato_adicional.aap_lng" label="Longitud">
+                      <el-input
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        :name="'aap_lng_'+didx"
+                        v-model="reporte.direcciones[didx].dato_adicional.aap_lng"
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+                    <el-form-item prop="dato.aatc_id" label="Tipo Luminaria">
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        style="width:100%;"
+                        filterable
+                        clearable
+                        v-model="reporte.direcciones[didx].dato.aatc_id"
+                        :name="'aatc_id_'+didx"
+                        :placeholder="$t('cover.select')"
+                      >
+                        <el-option
+                          v-for="carcasa in carcasas"
+                          :key="carcasa.aatc_id"
+                          :label="carcasa.aatc_descripcion"
+                          :value="parseInt(carcasa.aatc_id)"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+                    <el-form-item prop="dato.aama_id" label="Marca">
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        style="width:100%;"
+                        filterable
+                        clearable
+                        v-model="reporte.direcciones[didx].dato.aama_id"
+                        name="marca"
+                        :placeholder="$t('brand.select')"
+                      >
+                        <el-option
+                          v-for="marca in marcas"
+                          :key="marca.aama_id"
+                          :label="marca.aama_descripcion"
+                          :value="marca.aama_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+                    <el-form-item prop="dato.aamo_id" label="Modelo">
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        style="width:100%;"
+                        filterable
+                        clearable
+                        v-model="reporte.direcciones[didx].dato.aamo_id"
+                        name="modelo"
+                        :placeholder="$t('model.select')"
+                      >
+                        <el-option
+                          v-for="modelo in modelos"
+                          :key="modelo.aamo_id"
+                          :label="modelo.aamo_descripcion"
+                          :value="modelo.aamo_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row :gutter="4">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+                    <el-form-item prop="dato.aap_tecnologia" label="Tecnología">
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        style="width:100%;"
+                        filterable
+                        clearable
+                        v-model="reporte.direcciones[didx].dato.aap_tecnologia"
+                        name="tecnologia"
+                        :placeholder="$t('gestion.tecnology.select')"
+                      >
+                        <el-option v-for="tec in tecnologias" :key="tec" :label="tec" :value="tec"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                    <el-form-item prop="dato.aap_potencia" :label="$t('gestion.power.title')">
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        clearable
+                        filterable
+                        ref="power"
+                        v-model="reporte.direcciones[didx].dato.aap_potencia"
+                        name="potencia"
+                        :placeholder="$t('gestion.power.select')"
+                      >
+                        <el-option
+                          v-for="power in potencias"
+                          :key="power"
+                          :label="power"
+                          :value="parseFloat(power)"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                    <el-form-item prop="dato.aaco_id" :label="$t('gestion.connection.title')">
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        clearable
+                        filterable
+                        ref="conexion"
+                        v-model="reporte.direcciones[didx].dato.aaco_id"
+                        name="conexion"
+                        :placeholder="$t('gestion.connection.select')"
+                      >
+                        <el-option
+                          v-for="conexion in conexiones"
+                          :key="conexion.aaco_id"
+                          :label="conexion.aaco_descripcion"
+                          :value="parseInt(conexion.aaco_id)"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col
+                    v-if="reporte.reti_id !== 0 & reporte.direcciones[didx].dato.aaco_id === 2"
+                    :xs="24"
+                    :sm="6"
+                    :md="4"
+                    :lg="4"
+                    :xl="4"
+                  >
+                    <el-form-item
+                      prop="dato_adicional.medi_id"
+                      :label="$t('gestion.medidor.title')"
+                    >
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        clearable
+                        filterable
+                        ref="medidor"
+                        v-model="reporte.direcciones[didx].dato_adicional.medi_id"
+                        name="medidor"
+                        :placeholder="$t('gestion.medidor.select')"
+                      >
+                        <el-option
+                          v-for="m in medidores"
+                          :key="m.medi_id"
+                          :label="m.medi_id | fillZeros(4)"
+                          :value="m.medi_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                    <el-form-item
+                      prop="dato_adicional.tran_id"
+                      :label="$t('gestion.transformador.title')"
+                    >
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        clearable
+                        filterable
+                        ref="transformador"
+                        v-model="reporte.direcciones[didx].dato_adicional.tran_id"
+                        name="transformador"
+                        :placeholder="$t('gestion.transformador.select')"
+                        :change="reporte.direcciones[didx].dato_adicional.tran_id == '' ? reporte.direcciones[didx].dato_adicional.tran_id=null: reporte.direcciones[didx].dato_adicional.tran_id=reporte.direcciones[didx].dato_adicional.tran_id"
+                      >
+                        <el-option
+                          v-for="t in transformadores"
+                          :key="t.tran_id"
+                          :label="t.tran_id | fillZeros(4)"
+                          :value="t.tran_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                    <el-form-item prop="dato.tipo_id" :label="$t('gestion.post.title')">
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        clearable
+                        filterable
+                        ref="post"
+                        v-model="reporte.direcciones[didx].dato.tipo_id"
+                        name="post"
+                        :placeholder="$t('gestion.post.select')"
+                      >
+                        <el-option
+                          v-for="post in postes"
+                          :key="post.tipo_id"
+                          :label="post.tipo_descripcion"
+                          :value="post.tipo_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                    <el-form-item prop="dato.aap_poste_altura" :label="$t('gestion.post.size')">
+                      <el-input
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        ref="postsize"
+                        v-model="reporte.direcciones[didx].dato.aap_poste_altura"
+                        @input="reporte.direcciones[didx].dato.aap_poste_altura=parseInt($event)"
+                        name="postsize"
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                    <el-form-item prop="dato.aap_poste_propietario" :label="$t('gestion.post.own')">
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        clearable
+                        filterable
+                        ref="postowner"
+                        v-model="reporte.direcciones[didx].dato.aap_poste_propietario"
+                        name="postowner"
+                        :placeholder="$t('gestion.post.selectown')"
+                      >
+                        <el-option v-for="own in owns" :key="own" :label="own" :value="own"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                    <el-form-item prop="dato.aap_brazo" :label="$t('gestion.arm')">
+                      <el-input
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        ref="arm"
+                        v-model="reporte.direcciones[didx].dato.aap_brazo"
+                        name="arm"
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                    <el-form-item prop="dato.aap_collarin" :label="$t('gestion.collar')">
+                      <el-input
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        ref="collar"
+                        v-model="reporte.direcciones[didx].dato.aap_collarin"
+                        name="collar"
+                      />
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                    <el-form-item prop="dato_adicional.aaus_id" :label="$t('gestion.use')">
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        clearable
+                        filterable
+                        ref="use"
+                        v-model="reporte.direcciones[didx].dato_adicional.aaus_id"
+                        name="use"
+                        :placeholder="$t('use.select')"
+                      >
+                        <el-option
+                          v-for="aapuso in aap_usos"
+                          :key="aapuso.aaus_id"
+                          :label="aapuso.aaus_descripcion"
+                          :value="aapuso.aaus_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                    <el-form-item prop="dato_adicional.aacu_id" :label="$t('gestion.account')">
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        clearable
+                        filterable
+                        ref="account"
+                        v-model="reporte.direcciones[didx].dato_adicional.aacu_id"
+                        name="account"
+                        :placeholder="$t('account.select')"
+                      >
+                        <el-option
+                          v-for="aapcuentaap in aap_cuentasap"
+                          :key="aapcuentaap.aacu_id"
+                          :label="aapcuentaap.aacu_descripcion"
+                          :value="aapcuentaap.aacu_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col v-if="reporte.reti_id == 8" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                    <el-form-item prop="tire_id" :label="$t('gestion.tiporetiro')">
+                      <el-select
+                        :disabled="reporte.direcciones[didx].even_estado > 7"
+                        clearable
+                        filterable
+                        ref="tiporetiro"
+                        v-model="reporte.direcciones[didx].tire_id"
+                        name="tiporetiro"
+                        :placeholder="$t('tiporetiro.select')"
+                      >
+                        <el-option
+                          v-for="tire in tiposretiro"
+                          :key="tire.tire_id"
+                          :label="tire.tire_descripcion"
+                          :value="tire.tire_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
+                    <el-button
+                      v-if="reporte.direcciones[didx].even_estado < 8"
+                      size="mini"
+                      type="danger"
+                      circle
+                      icon="el-icon-minus"
+                      title="Quitar Fila"
+                      @click="reporte.direcciones[didx].even_estado === 1? reporte.direcciones[didx].even_estado = 8: reporte.direcciones[didx].even_estado = 9"
+                    ></el-button>
+                    <el-button
+                      v-if="reporte.direcciones[didx].even_estado > 7"
+                      size="mini"
+                      type="success"
+                      circle
+                      icon="el-icon-success"
+                      title="Restaurar Fila"
+                      @click="reporte.direcciones[didx].even_estado === 9? reporte.direcciones[didx].even_estado = 2 : reporte.direcciones[didx].even_estado = 1"
+                    ></el-button>
+                  </el-col>
+                </el-row>
+                <!-- <el-row>
                           <el-col style="border-bottom: 1px dotted #000;"></el-col>
-                          </el-row> -->
-                         </el-form>
-                         <el-row class="hidden-md-and-up">
-                          <el-col style="border-bottom: 1px dotted #000;"></el-col>
-                         </el-row>
+                </el-row>-->
+              </el-form>
+              <el-row class="hidden-md-and-up">
+                <el-col style="border-bottom: 1px dotted #000;"></el-col>
+              </el-row>
+            </div>
+            <el-card :disabled="reporte.direcciones[didx].even_estado > 7">
+              <el-row>
+                <el-col :span="24">
+                  <el-tag
+                    v-for="tag in reporte.direcciones"
+                    :key="tag.idx"
+                    closable
+                    :type="tag.type"
+                    effect="dark"
+                    size="medium"
+                    @click="handleTag(tag.idx)"
+                    :title="'Material Luminaria ' + tag.aap_id"
+                    style="cursor: pointer;"
+                  >L: {{tag.aap_id}}</el-tag>
+                  <el-input
+                    class="input-new-address"
+                    v-if="inputVisible02"
+                    v-model="inputValue02"
+                    ref="saveTagInputAddress02"
+                    size="mini"
+                    @keyup.enter.native="onAddAddress(inputValue02)"
+                    @blur="onAddAddress(inputValue02)"
+                  ></el-input>
+                  <el-button
+                    v-else-if="reporte.rees_id != 3"
+                    size="small"
+                    @click="showInputAddress02"
+                  >+ Agregar Luminaria</el-button>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col :span="24">
+                  <span>MATERIAL LUMINARIA {{ reporte.direcciones[didx].aap_id }}</span>
+                </el-col>
+              </el-row>
+              <el-row :gutter="4" class="hidden-sm-and-down">
+                <el-col :md="1" :lg="1" :xl="1">
+                  <span style="font-weight: bold;">No.</span>
+                </el-col>
+                <el-col :md="3" :lg="3" :xl="3">
+                  <span style="font-weight: bold;">Código de la Luminaria</span>
+                </el-col>
+                <el-col :xs="24" :sm="24" :md="11" :lg="11" :xl="11">
+                  <span style="font-weight: bold;">Nombre del Material</span>
+                </el-col>
+                <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
+                  <span style="font-weight: bold;">Código Material Retirado</span>
+                </el-col>
+                <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
+                  <span style="font-weight: bold;">Cantidad Material Retirado</span>
+                </el-col>
+                <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
+                  <span style="font-weight: bold;">Código Material Instalado</span>
+                </el-col>
+                <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
+                  <span style="font-weight: bold;">Cantidad Material Instalado</span>
+                </el-col>
+              </el-row>
+              <div style="max-height: 600px; overflow: auto;">
+                <el-form
+                  :disabled="reporte.rees_id == 3"
+                  :model="evento"
+                  :ref="'matform_' + evento.even_id"
+                  :rules="matrules"
+                >
+                  <el-row
+                    :gutter="4"
+                    v-for="(evento, id) in reporte.direcciones[didx].materiales"
+                    v-bind:key="evento.even_id"
+                  >
+                    <el-col class="hidden-md-and-up" :xs="1" :sm="1">
+                      <span style="font-weight: bold;">No.</span>
+                    </el-col>
+                    <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ id + 1 }}</el-col>
+                    <el-col class="hidden-md-and-up" :xs="9" :sm="9">
+                      <span style="font-weight: bold;">Código de la Luminaria</span>
+                    </el-col>
+                    <el-col :xs="13" :sm="13" :md="3" :lg="3" :xl="3">
+                      <el-form-item prop="aap_id">
+                        <div style="display: table;">
+                          <el-input
+                            disabled
+                            class="sinpadding"
+                            style="display: table-cell;"
+                            type="number"
+                            v-model="evento.aap_id"
+                            @input="evento.aap_id = parseInt($event,10)"
+                          ></el-input>
                         </div>
-                        <el-card :disabled="reporte.direcciones[didx].even_estado > 7">
-                          <el-row>
-                            <el-col :span="24">
-                              <el-tag
-                                v-for="tag in reporte.direcciones"
-                                :key="tag.idx"
-                                closable
-                                :type="tag.type"
-                                effect="dark"
-                                size="medium"
-                                @click="handleTag(tag.idx)"
-                                :title="'Material Control ' + tag.aap_id"
-                                style="cursor: pointer;"
-                              >
-                                L: {{tag.aap_id}}
-                              </el-tag>
-                              <el-input
-                                class="input-new-address"
-                                v-if="inputVisible02"
-                                v-model="inputValue02"
-                                ref="saveTagInputAddress02"
-                                size="mini"
-                                @keyup.enter.native="onAddAddress(inputValue02)"
-                                @blur="onAddAddress(inputValue02)"
-                              >
-                              </el-input>
-                              <el-button v-else-if="reporte.rees_id != 3" size="small" @click="showInputAddress02">+ Agregar Control</el-button>
-                            </el-col>
-                          </el-row>
-                          <el-row>
-                           <el-col :span="24">
-                            <span>MATERIAL CONTROL {{ reporte.direcciones[didx].aap_id }}</span>
-                           </el-col>
-                          </el-row>
-                        <el-row :gutter="4" class="hidden-sm-and-down">
-                          <el-col :md="1" :lg="1" :xl="1">
-                            <span style="font-weight: bold;">No.</span>
-                          </el-col>
-                          <el-col :md="3" :lg="3" :xl="3">
-                            <span style="font-weight: bold;">Código del Control</span>
-                          </el-col>
-                          <el-col :xs="24" :sm="24" :md="11" :lg="11" :xl="11">
-                            <span style="font-weight: bold;">Nombre del Material</span>
-                          </el-col>
-                          <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
-                            <span style="font-weight: bold;">Código Material Retirado</span>
-                          </el-col>
-                          <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
-                            <span style="font-weight: bold;">Cantidad Material Retirado</span>
-                          </el-col>
-                          <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
-                            <span style="font-weight: bold;">Código Material Instalado</span>
-                          </el-col>
-                          <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
-                            <span style="font-weight: bold;">Cantidad Material Instalado</span>
-                          </el-col>
-                        </el-row>
-                        <div style="max-height: 600px; overflow: auto;">
-                          <el-form :disabled="reporte.rees_id == 3" :model="evento" :ref="'matform_' + evento.even_id" :rules="matrules">
-                          <el-row :gutter="4" v-for="(evento, id) in reporte.direcciones[didx].materiales" v-bind:key="evento.even_id">
-                            <el-col class="hidden-md-and-up" :xs="1" :sm="1">
-                              <span style="font-weight: bold;">No.</span>
-                            </el-col>
-                            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ id + 1 }}</el-col>
-                            <el-col class="hidden-md-and-up" :xs="9" :sm="9">
-                              <span style="font-weight: bold;">Código del Control</span>
-                            </el-col>
-                            <el-col :xs="13" :sm="13" :md="3" :lg="3" :xl="3">
-                                <el-form-item prop="aap_id">
-                                  <div style="display: table;">
-                                    <el-input disabled class="sinpadding" style="display: table-cell;" type="number" v-model="evento.aap_id" @input="evento.aap_id = parseInt($event,10)" >
-                                    </el-input>
-                                  </div>
-                                </el-form-item>
-                            </el-col>
-                            <el-col class="hidden-md-and-up" :xs="7" :sm="7">
-                              <span style="font-weight: bold;">Nombre del Material</span>
-                            </el-col>
-                            <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2">
-                                <el-form-item prop="elem_codigo">
-                                    <el-input :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.elem_codigo" @blur="buscarCodigoElemento(evento)"></el-input>
-                                </el-form-item>
-                              <!-- <span style="width: 100%;">{{ codigoElemento(evento.elem_id) }}</span> -->
-                            </el-col>
-                            <el-col :xs="15" :sm="15" :md="9" :lg="9" :xl="9">
-                             <el-form-item prop="elem_id">
-                                <el-select :disabled="evento.even_estado > 7" filterable :clearable="evento.even_estado === 1" v-model="evento.elem_id" :placeholder="$t('elemento.select')" style="width: 100%;" @change="codigoElemento(evento)"
-                                          remote :remote-method="remoteMethodElemento"
-                                          :loading="loadingElemento">
-                                    <el-option v-for="elemento in elementos" :key="elemento.elem_codigo" :label="elemento.elem_descripcion" :value="elemento.elem_id" >
-                                    </el-option>
-                                </el-select>
-                             </el-form-item>
-                            </el-col>
-                            <el-col class="hidden-md-and-up" :xs="8" :sm="8">
-                              <span style="font-weight: bold;">Código Material Retirado</span>
-                            </el-col>
-                            <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
-                                <el-form-item prop="even_codigo_retirado">
-                                    <el-input :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.even_codigo_retirado" @blur="validarCodigoElementoRetirado(evento.elem_id, evento.even_codigo_retirado)"></el-input>
-                                </el-form-item>
-                            </el-col>
-                            <el-col class="hidden-md-and-up" :xs="8" :sm="8">
-                              <span style="font-weight: bold;">Cantidad Material Retirado</span>
-                            </el-col>
-                            <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
-                                <el-form-item prop="even_cantidad_retirado">
-                                    <el-input :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.even_cantidad_retirado" @blur="evento.even_cantidad_retirado = parseFloat(evento.even_cantidad_retirado)"></el-input>
-                                </el-form-item>
-                            </el-col>
-                            <el-col class="hidden-md-and-up" :xs="8" :sm="8">
-                              <span style="font-weight: bold;">Código Material Instalado</span>
-                            </el-col>
-                            <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
-                                <el-form-item prop="even_codigo_instalado">
-                                    <el-input :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.even_codigo_instalado" @blur="validarCodigoElementoInstalado(evento.elem_id, evento.even_codigo_instalado)"></el-input>
-                                </el-form-item>
-                            </el-col>
-                            <el-col class="hidden-md-and-up" :xs="8" :sm="8">
-                              <span style="font-weight: bold;">Cantidad Material Instalado</span>
-                            </el-col>
-                            <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
-                                <el-form-item prop="even_cantidad_instalado">
-                                    <el-input :disabled="evento.even_estado === 9" class="sinpadding" v-model="evento.even_cantidad_instalado" @blur="evento.even_cantidad_instalado = parseFloat(evento.even_cantidad_instalado)" ></el-input>
-                                </el-form-item>
-                            </el-col>
-                            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
-                              <el-button v-if="evento.even_estado < 8" size="mini" type="danger" circle icon="el-icon-minus" title="Quitar Fila" @click="evento.even_estado === 1? evento.even_estado = 8 : evento.even_estado = 9"></el-button>
-                              <el-button v-if="evento.even_estado > 7" size="mini" type="success" circle icon="el-icon-success" title="Restaurar Fila" @click="evento.even_estado === 9? evento.even_estado = 2 : evento.even_estado = 1"></el-button>
-                            </el-col>
-                         </el-row>
-                         </el-form>
-                         <el-row class="hidden-md-and-up">
-                          <el-col style="border-bottom: 1px dotted #000;"></el-col>
-                         </el-row>
-                        </div>
-                         <el-row>
-                           <el-col :span="2">
-                            <el-input type="number" v-model="addinputevent"></el-input>
-                           </el-col>
-                           <el-col :span="22">
-                             <el-button :disabled="!reporte.direcciones[didx].aap_id || reporte.rees_id === 3" style="display: table-cell;" type="primary" size="mini" circle icon="el-icon-plus" title="Adicionar Nueva Fila" @click="onAddEvent()" />
-                           </el-col>
-                         </el-row>
-                         </el-card>
-                      </el-collapse-item>
-                    </el-collapse>
-          </el-form>
+                      </el-form-item>
+                    </el-col>
+                    <el-col class="hidden-md-and-up" :xs="7" :sm="7">
+                      <span style="font-weight: bold;">Nombre del Material</span>
+                    </el-col>
+                    <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2">
+                      <el-form-item prop="elem_codigo">
+                        <el-input
+                          :disabled="evento.even_estado > 7"
+                          class="sinpadding"
+                          v-model="evento.elem_codigo"
+                          @blur="buscarCodigoElemento(evento)"
+                        ></el-input>
+                      </el-form-item>
+                      <!-- <span style="width: 100%;">{{ codigoElemento(evento.elem_id) }}</span> -->
+                    </el-col>
+                    <el-col :xs="15" :sm="15" :md="9" :lg="9" :xl="9">
+                      <el-form-item prop="elem_id">
+                        <el-select
+                          :disabled="evento.even_estado > 7"
+                          filterable
+                          :clearable="evento.even_estado === 1"
+                          v-model="evento.elem_id"
+                          :placeholder="$t('elemento.select')"
+                          style="width: 100%;"
+                          @change="codigoElemento(evento)"
+                          remote
+                          :remote-method="remoteMethodElemento"
+                          :loading="loadingElemento"
+                        >
+                          <el-option
+                            v-for="elemento in elementos"
+                            :key="elemento.elem_codigo"
+                            :label="elemento.elem_descripcion"
+                            :value="elemento.elem_id"
+                          ></el-option>
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+                    <el-col class="hidden-md-and-up" :xs="8" :sm="8">
+                      <span style="font-weight: bold;">Código Material Retirado</span>
+                    </el-col>
+                    <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
+                      <el-form-item prop="even_codigo_retirado">
+                        <el-input
+                          :disabled="evento.even_estado > 7"
+                          class="sinpadding"
+                          v-model="evento.even_codigo_retirado"
+                          @blur="validarCodigoElementoRetirado(evento.elem_id, evento.even_codigo_retirado)"
+                        ></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col class="hidden-md-and-up" :xs="8" :sm="8">
+                      <span style="font-weight: bold;">Cantidad Material Retirado</span>
+                    </el-col>
+                    <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
+                      <el-form-item prop="even_cantidad_retirado">
+                        <el-input
+                          :disabled="evento.even_estado > 7"
+                          class="sinpadding"
+                          v-model="evento.even_cantidad_retirado"
+                          @blur="evento.even_cantidad_retirado = parseFloat(evento.even_cantidad_retirado)"
+                        ></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col class="hidden-md-and-up" :xs="8" :sm="8">
+                      <span style="font-weight: bold;">Código Material Instalado</span>
+                    </el-col>
+                    <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
+                      <el-form-item prop="even_codigo_instalado">
+                        <el-input
+                          :disabled="evento.even_estado > 7"
+                          class="sinpadding"
+                          v-model="evento.even_codigo_instalado"
+                          @blur="validarCodigoElementoInstalado(evento.elem_id, evento.even_codigo_instalado)"
+                        ></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col class="hidden-md-and-up" :xs="8" :sm="8">
+                      <span style="font-weight: bold;">Cantidad Material Instalado</span>
+                    </el-col>
+                    <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
+                      <el-form-item prop="even_cantidad_instalado">
+                        <el-input
+                          :disabled="evento.even_estado === 9"
+                          class="sinpadding"
+                          v-model="evento.even_cantidad_instalado"
+                          @blur="evento.even_cantidad_instalado = parseFloat(evento.even_cantidad_instalado)"
+                        ></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
+                      <el-button
+                        v-if="evento.even_estado < 8"
+                        size="mini"
+                        type="danger"
+                        circle
+                        icon="el-icon-minus"
+                        title="Quitar Fila"
+                        @click="evento.even_estado === 1? evento.even_estado = 8 : evento.even_estado = 9"
+                      ></el-button>
+                      <el-button
+                        v-if="evento.even_estado > 7"
+                        size="mini"
+                        type="success"
+                        circle
+                        icon="el-icon-success"
+                        title="Restaurar Fila"
+                        @click="evento.even_estado === 9? evento.even_estado = 2 : evento.even_estado = 1"
+                      ></el-button>
+                    </el-col>
+                  </el-row>
+                </el-form>
+                <el-row class="hidden-md-and-up">
+                  <el-col style="border-bottom: 1px dotted #000;"></el-col>
+                </el-row>
+              </div>
+              <el-row>
+                <el-col :span="2">
+                  <el-input type="number" v-model="addinputevent"></el-input>
+                </el-col>
+                <el-col :span="22">
+                  <el-button
+                    :disabled="!reporte.direcciones[didx].aap_id || reporte.rees_id === 3"
+                    style="display: table-cell;"
+                    type="primary"
+                    size="mini"
+                    circle
+                    icon="el-icon-plus"
+                    title="Adicionar Nueva Fila"
+                    @click="onAddEvent()"
+                  />
+                </el-col>
+              </el-row>
+            </el-card>
+          </el-collapse-item>
+        </el-collapse>
+      </el-form>
       </el-main>
      <el-footer>
       <el-button v-if="canSave" ref="submit" :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="confirmacionGuardar = !confirmacionGuardar">Guardar Reporte</el-button>
@@ -678,7 +1726,7 @@ import { getActividades } from '@/api/actividad'
 import { getOrigenes } from '@/api/origen'
 import { getBarriosEmpresa } from '@/api/barrio'
 import { getTiposBarrio } from '@/api/tipobarrio'
-import { getReporte, updateReporte, getTipos, getEstados, validarCodigo, validarReporteDiligenciado, convertirReporte } from '@/api/controlreporte'
+import { getReporte, updateReporte, getTipos, getEstados, validarCodigo, validarReporteDiligenciado, convertirReporte, updateReporteParcial } from '@/api/controlreporte'
 import { getAcciones } from '@/api/accion'
 import { getElementos, getElementoByDescripcion, getElementoByCode } from '@/api/elemento'
 import { getAapEdit, getAapValidar, validar, buscarSiguiente } from '@/api/control'
@@ -694,6 +1742,8 @@ import { getTiposRetiro } from '@/api/tiporetiro'
 import { getUrbanizadoraTodas } from '@/api/urbanizadora'
 import { getMedidors } from '@/api/medidor'
 import { getTransformadors } from '@/api/transformador'
+import { getOrdenes, addReporteAOrden } from '@/api/ordentrabajo'
+import { getNovedades } from '@/api/novedad'
 // component
 
 // import { inspect } from 'util'
@@ -772,6 +1822,7 @@ export default {
       confirmacionGuardar: false,
       reporte_previo: {
         reti_id: null,
+        tireuc_id: null,
         repo_id: null,
         repo_consecutivo: 0,
         repo_numero: null,
@@ -784,6 +1835,7 @@ export default {
         repo_horafin: null,
         repo_reportetecnico: null,
         repo_descripcion: null,
+        repo_subrepoconsecutivo: null,
         rees_id: 2,
         orig_id: null,
         barr_id: null,
@@ -796,6 +1848,7 @@ export default {
       },
       evento_siguiente_consecutivo: 1,
       direccion_siguiente_consecutivo: 1,
+      novedad_siguiente_consecutivo: 0,
       autorizacion: '',
       addinputevent: 4,
       coau_tipo: 0,
@@ -842,7 +1895,8 @@ export default {
           repo_apoyo: null,
           urba_id: null,
           muot_id: null,
-          autorizacion: null
+          autorizacion: null,
+          ortr_id: null
         }
       },
       evento: {
@@ -868,6 +1922,8 @@ export default {
         even_direccion_anterior: null,
         barr_id_anterior: null,
         even_estado: null,
+        even_horaini: null,
+        even_horafin: null,
         even_esbaja: null,
         even_valido: {
           aap_id: true,
@@ -975,6 +2031,20 @@ export default {
           { validator: validateAapEventoRule, trigger: 'blur' },
           { type: 'number', required: true, message: 'Ingrese el código de la luminaria', trigger: 'blur' }
         ],
+        even_horaini: [
+          {
+            required: true,
+            message: 'Seleccione la Hora Inicial',
+            trigger: 'change'
+          }
+        ],
+        even_horafin: [
+          {
+            required: true,
+            message: 'Seleccione la Hora Final',
+            trigger: 'change'
+          }
+        ],
         even_direccion: [
           { required: true, message: 'Ingrese la nueva dirección de la luminaria', trigger: 'blur' }
         ],
@@ -1058,6 +2128,7 @@ export default {
       aap_usos: [],
       aap_cuentasap: [],
       tiposretiro: [],
+      novedades: [],
       checkAll: false,
       isIndeterminate: false,
       aap: { aap_id: null },
@@ -1065,6 +2136,7 @@ export default {
       tiposbarrio: [],
       actividades: [],
       urbanizadoras: [],
+      ordenestrabajo: [],
       status: '',
       dialogonuevodanhovisible: false,
       actividad: {
@@ -1129,6 +2201,122 @@ export default {
     pending: { name: 'pending', time: 30000, autostart: false, repeat: true }
   },
   methods: {
+    confirmOrdenTrabajo () {
+      addReporteAOrden(this.reporte.adicional.ortr_id, this.reporte.repo_id).then(response => {
+        if (response.data === 'true') {
+          this.$message({
+            message: 'Orden de Trabajo Actualizada',
+            type: 'success'
+          })
+        } else {
+
+        }
+      }).catch((error) => {
+        this.$message({
+          message: 'Orden de Trabajo NO Actualizada, error:' + error,
+          type: 'warning'
+        })
+      })
+    },
+    confirmEdit () {
+      const data = {
+        reporte: this.reporte
+      }
+      updateReporteParcial(data)
+        .then((response) => {
+          this.repo_fecharecepcion = this.reporte.repo_fecharecepcion
+          this.repo_direccion = this.reporte.repo_direccion
+          this.repo_nombre = this.reporte.repo_nombre
+          this.repo_telefono = this.reporte.repo_telefono
+          this.repo_codigo = this.reporte.adicional.repo_codigo
+          this.repo_apoyo = this.reporte.adicional.repo_apoyo
+          this.repo_descripcion = this.reporte.repo_descripcion
+          this.orig_id = this.reporte.orig_id
+          this.acti_id = this.reporte.acti_id
+          this.tiba_id = this.reporte.tiba_id
+          this.barr_id = this.reporte.barr_id
+          this.$message({ message: 'Reporte Actualizado.', type: 'success' })
+        })
+        .catch((error) => {
+          this.$message({
+            message: 'Reporte NO se actualizó, error:' + error,
+            type: 'warning'
+          })
+        })
+    },
+    ordenes (id) {
+      if (id === undefined || id === null) {
+        return ''
+      } else {
+        var orden = this.ordenestrabajo.find((o) => o.ortr_id === id)
+        if (orden) {
+          return orden.ortr_consecutivo + ' - ' + orden.cuad_descripcion
+        } else {
+          return ''
+        }
+      }
+    },
+    ordentrabajo_label (id) {
+      if (id === undefined || id === null) {
+        return ''
+      } else {
+        var orden = this.ordenestrabajo.find((o) => o.ortr_id === id)
+        if (orden) {
+          return orden.ortr_consecutivo + ' - ' + orden.cuad_descripcion
+        } else {
+          return ''
+        }
+      }
+    },
+    origen (id) {
+      if (id === undefined || id === null) {
+        return ''
+      } else {
+        var origen = this.origenes.find((o) => o.orig_id === id)
+        if (origen) {
+          return origen.orig_descripcion
+        } else {
+          return ''
+        }
+      }
+    },
+    barrio (id) {
+      if (id === undefined || id === null) {
+        return ''
+      } else {
+        var barrio = this.barrios.find((o) => o.barr_id === id)
+        if (barrio) {
+          return barrio.barr_descripcion
+        } else {
+          return ''
+        }
+      }
+    },
+    sector (id) {
+      if (id === undefined || id === null) {
+        return ''
+      } else {
+        var tipobarrio = this.tiposbarrio.find((o) => o.tiba_id === id)
+        if (tipobarrio) {
+          return tipobarrio.tiba_descripcion
+        } else {
+          return ''
+        }
+      }
+    },
+    tipo_actividad (id) {
+      console.log('acti_id: ' + id)
+      if (id === undefined || id === null) {
+        return ''
+      } else {
+        var actividad = this.actividades.find((o) => o.acti_id === id)
+        if (actividad) {
+          return actividad.acti_descripcion
+        } else {
+          return ''
+        }
+      }
+    },
     estadoLuminaria () {
       console.log('existe: ' + this.existe)
       if (this.existe === undefined) {
@@ -1155,13 +2343,13 @@ export default {
     },
     showInputAddress01 () {
       this.inputVisible01 = true
-      this.$nextTick(_ => {
+      this.$nextTick((_) => {
         this.$refs.saveTagInputAddress01.focus()
       })
     },
     showInputAddress02 () {
       this.inputVisible02 = true
-      this.$nextTick(_ => {
+      this.$nextTick((_) => {
         this.$refs.saveTagInputAddress02.focus()
       })
     },
@@ -1193,6 +2381,22 @@ export default {
       const result2 = (date.getTime() <= new Date().getTime())
       const result = result1 && result2
       return !result
+    },
+    validarAntiguedadFecha () {
+      const hoy = new Date()
+      const mes_actual = hoy.getMonth()
+      const mes_solucion = this.reporte.repo_fechasolucion.getMonth()
+      if (mes_actual > mes_solucion) {
+        if (hoy - this.reporte.repo_fechasolucion > 7) {
+          this.$alert(
+            'Fecha de Reporte y de Solución de un periodo anterior',
+            'Atención',
+            {
+              confirmButtonText: 'Aceptar'
+            }
+          )
+        }
+      }
     },
     autosave () {
       /*
@@ -1329,7 +2533,7 @@ export default {
                   direccion.barr_id = activo.aap.barr_id
                   // validar si es reubicación y no es retirada
                   if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
-                    if (activo.aap.esta_id !== 2) {
+                    if (activo.aap.aaco_id !== 3) {
                       this.retiradoDialogVisible = true
                       direccion.even_valido.aap_id = false
                     } else {
@@ -1342,7 +2546,7 @@ export default {
                   }
                   // validar si es retiro y está ya retirada
                   if (this.reporte.reti_id === 8) {
-                    if (activo.aap.esta_id === 3) {
+                    if (activo.aap.aaco_id === 3) {
                       this.yaretiradoDialogVisible = true
                       direccion.even_valido.aap_id = false
                     } else {
@@ -1364,7 +2568,7 @@ export default {
                   if (this.reporte.reti_id === 8) {
                     direccion.dato.aaco_id = 3
                   }
-                  direccion.materiales.forEach(m => {
+                  direccion.materiales.forEach((m) => {
                     m.aap_id = direccion.aap_id
                   })
                   this.estadoLuminaria()
@@ -1390,7 +2594,7 @@ export default {
             }
           }).catch(error => {
             this.existe = false
-            direccion.materiales.forEach(m => {
+            direccion.materiales.forEach((m) => {
               m.aap_id = direccion.aap_id
             })
             if (this.reporte.reti_id === 2 && this.reporte.adicional.repo_tipo_expansion !== 4) {
@@ -1763,6 +2967,18 @@ export default {
         duration: 5000
       })
     },
+    onAddNovedad () {
+      this.novedad_siguiente_consecutivo = this.novedad_siguiente_consecutivo + 1
+      var novedad = {
+        nove_id: null,
+        reno_horaini: null,
+        reno_horafin: null,
+        reno_observacion: null,
+        even_id: this.novedad_siguiente_consecutivo,
+        even_estado: 1
+      }
+      this.reporte.novedades.push(novedad)
+    },
     onAddEvent (cantidad = 0) {
       if (cantidad === 0) {
         cantidad = this.addinputevent
@@ -2112,12 +3328,18 @@ export default {
       }
       var even_length = 0
       var dire_length = 0
-      this.reporte_previo.eventos.forEach(e => {
+      var nove_length = 0
+      this.reporte_previo.novedades.forEach((n) => {
+        if (n.even_id > nove_length) {
+          nove_length = n.even_id
+        }
+      })
+      this.reporte_previo.eventos.forEach((e) => {
         if (e.even_id > even_length) {
           even_length = e.even_id
         }
       })
-      this.reporte_previo.eventos.forEach(e => {
+      this.reporte_previo.eventos.forEach((e) => {
         if (e.even_id === undefined || e.even_id === null || e.even_id < 1) {
           console.log('renumerando valor de e.even_id a even_length + 1:' + even_length)
           e.even_id = even_length + 1
@@ -2400,6 +3622,7 @@ export default {
       })
       this.evento_siguiente_consecutivo = even_length + 1
       this.direccion_siguiente_consecutivo = dire_length + 1
+      this.novedad_siguiente_consecutivo = nove_length + 1
       this.minDate = this.reporte_previo.repo_fecharecepcion
       var temp = JSON.stringify(this.reporte_previo)
       this.reporte_previo = JSON.parse(temp)
@@ -2483,7 +3706,20 @@ export default {
                                                 this.medidores = response.data
                                                 getTransformadors().then(response => {
                                                   this.transformadores = response.data
-                                                  this.obtenerReporte()
+                                                  getOrdenes().then(response => {
+                                                    this.ordenestrabajo = response.data
+                                                    getNovedades(1).then(response => {
+                                                      this.novedades = response.data
+                                                      this.obtenerReporte()
+                                                    }).catch(error => {
+                                                      console.log('getNovedades:' + error)
+                                                    })
+                                                  }).catch(error => {
+                                                    console.log(
+                                                      'Error Ordenes Trabajo: ' +
+                                                        error
+                                                    )
+                                                  })
                                                 }).catch(error => {
                                                   console.log('Error Transformadores: ' + error)
                                                 })

@@ -429,7 +429,7 @@ export default {
       this.$router.push({ path: '/proceso/menu1reporte/menu1-1luminaria/menu1-1-2create/1' })
     },
     estado (id) {
-      if (id === null) {
+      if (id === undefined || id === null || id <= 0) {
         return ''
       } else {
         return this.estados.find(e => e.rees_id === id, { rees_descripcion: '' }).rees_descripcion

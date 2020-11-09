@@ -28,13 +28,14 @@ export function siap_reporte_vencido () {
   })
 }
 
-export function getReportesRango (anho, mes) {
+export function getReportesRango (anho, mes, tireuc_id) {
   const data = {
     anho,
-    mes
+    mes,
+    tireuc_id
   }
   return request({
-    url: '/core/rang/' + data.anho + '/' + data.mes,
+    url: '/core/rang/' + data.anho + '/' + data.mes + '/' + data.tireuc_id,
     method: 'get'
   })
 }
@@ -77,6 +78,17 @@ export function updateReporte (reporte) {
   }
   return request({
     url: '/core/upd',
+    method: 'post',
+    data: data.reporte
+  })
+}
+
+export function updateReporteParcial (reporte) {
+  const data = {
+    reporte
+  }
+  return request({
+    url: '/core/pupd',
     method: 'post',
     data: data.reporte
   })

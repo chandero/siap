@@ -237,7 +237,6 @@
               </el-col>
             </el-row>
             <el-row :gutter="4">
-
               <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
                 <template v-if="orig_id_state">
                   <el-form-item prop="orig_id" :label="$t('reporte.origin')">
@@ -1898,7 +1897,7 @@ export default {
         repo_horafin: null,
         repo_reportetecnico: null,
         repo_descripcion: null,
-        repo_subreporteconsecutivo: null,
+        repo_subrepoconsecutivo: null,
         rees_id: 2,
         orig_id: null,
         barr_id: null,

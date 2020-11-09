@@ -389,7 +389,7 @@ GET     /api/core/tp/get                     controllers.ControlReporteControlle
 GET     /api/core/prn/repo/:id/:em           controllers.ControlReporteController.imprimirReporte(id: Long, em: Long)
 GET     /api/core/prn/rela/:fi/:ff/:e/:u/:t  controllers.ControlReporteController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long, t:String)
 GET     /api/core/prn/form/:i/:e             controllers.ControlReporteController.imprimirFormato(i:Long, e:Long)
-GET     /api/core/rang/:y/:m                 controllers.ControlReporteController.buscarPorRango(y: Int, m: Int)
+GET     /api/core/rang/:y/:m/:t              controllers.ControlReporteController.buscarPorRango(y: Int, m: Int, t: Int)
 GET     /api/core/gbtc/:t/:n                 controllers.ControlReporteController.buscarPorConsecutivo(t: Long, n:Int)
 GET     /api/core/vali/:e/:c                 controllers.ControlReporteController.validarCodigo(e: Long, c: String)
 GET     /api/core/venc/get                   controllers.ControlReporteController.siap_reporte_vencido

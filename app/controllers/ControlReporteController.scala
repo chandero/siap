@@ -36,8 +36,8 @@ class ControlReporteController @Inject()(
     config: Configuration,
     authenticatedUserAction: AuthenticatedUserAction)(
     implicit ec: ExecutionContext)
-    extends AbstractController(cc) {
-  implicit val formats = net.liftweb.json.DefaultFormats
+    extends AbstractController(cc) with ImplicitJsonFormats {
+  implicit val formats = Serialization.formats(NoTypeHints) ++ List(DateTimeSerializer)           
   def todos(): Action[AnyContent] =
     authenticatedUserAction.async { implicit request: Request[AnyContent] => 
     val json = request.body.asJson.get
@@ -106,10 +106,10 @@ class ControlReporteController @Inject()(
       }
   }
 
-  def buscarPorRango(anho: Int, mes: Int) = authenticatedUserAction.async {
+  def buscarPorRango(anho: Int, mes: Int, tireuc_id: Int) = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
-      reporteService.buscarPorRango(anho, mes, empr_id.get).map { reportes =>
+      reporteService.buscarPorRango(anho, mes, tireuc_id, empr_id.get).map { reportes =>
         Ok(write(reportes))
       }
   }

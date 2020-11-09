@@ -66,7 +66,7 @@ const procesoRouter = {
               meta: { title: 'menu_proceso_menu1reporte_menu1-2control_menu1-2-1list', roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor'] }
             },
             {
-              path: 'menu1-2-2create',
+              path: 'menu1-2-2create/:tireuc_id',
               component: () => import('@/views/proceso/menu1reporte/menu1-2control/menu1-2-2create'),
               name: 'menu_proceso_menu1reporte_menu1-2control_menu1-2-2create',
               hidden: true,
