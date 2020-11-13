@@ -67,6 +67,7 @@ case class ReporteRequest(
 )
 
 case class ReporteNovedad(
+    tireuc_id : Option[scala.Long],
     repo_id: Option[scala.Long],
     nove_id: Option[Int],
     even_id: Option[Int],
@@ -175,7 +176,7 @@ case class Reporte(
     repo_horafin: Option[String],
     repo_reportetecnico: Option[String],
     repo_descripcion: Option[String],
-    repo_subrepoconsecutivo: Option[Int],
+    repo_subrepoconsecutivo: Option[String],
     rees_id: Option[scala.Long],
     orig_id: Option[scala.Long],
     barr_id: Option[scala.Long],
@@ -379,14 +380,16 @@ object ReporteNovedad {
     JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
 
   val _set = {
-    get[Option[scala.Long]]("repo_id") ~
+      get[Option[scala.Long]]("tireuc_id") ~
+      get[Option[scala.Long]]("repo_id") ~
       get[Option[Int]]("nove_id") ~
       get[Option[Int]]("even_id") ~
       get[Option[Int]]("even_estado") ~
       get[Option[String]]("reno_horaini") ~
       get[Option[String]]("reno_horafin") ~
       get[Option[String]]("reno_observacion") map {
-      case repo_id ~
+      case  tireuc_id ~
+            repo_id ~
             nove_id ~
             even_id ~
             even_estado ~
@@ -394,6 +397,7 @@ object ReporteNovedad {
             reno_horafin ~
             reno_observacion =>
         new ReporteNovedad(
+          tireuc_id,
           repo_id,
           nove_id,
           even_id,
@@ -863,7 +867,7 @@ object Reporte {
       get[Option[String]]("repo_horafin") ~
       get[Option[String]]("repo_reportetecnico") ~
       get[Option[String]]("repo_descripcion") ~
-      get[Option[Int]]("repo_subrepoconsecutivo") ~
+      get[Option[String]]("repo_subrepoconsecutivo") ~
       get[Option[scala.Long]]("rees_id") ~
       get[Option[scala.Long]]("orig_id") ~
       get[Option[scala.Long]]("barr_id") ~
@@ -1468,14 +1472,15 @@ class ReporteRepository @Inject()(
         reps.map { r =>
           val adicional = SQL(
             """SELECT * FROM siap.reporte_adicional ra
-                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id
+                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                 LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
                 WHERE ra.repo_id = {repo_id}
 				        ORDER BY ot.ortr_fecha DESC
 				        LIMIT 1                
                 """
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
           val eventos = SQL(
@@ -1492,9 +1497,10 @@ class ReporteRepository @Inject()(
             .as(scalar[scala.Long].*)
 
           val novedades = SQL(
-            """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}"""
+            """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id} and rn.tireuc_id = {tireuc_id}"""
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteNovedad._set *)
 
@@ -1639,20 +1645,22 @@ class ReporteRepository @Inject()(
             )
             .as(scalar[scala.Long].*)
           val novedades = SQL(
-            """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}"""
+            """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id} and rn.tireuc_id = {tireuc_id}"""
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteNovedad._set *)
           val adicional = SQL(
             """SELECT * FROM siap.reporte_adicional ra
-                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id
+                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                 LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
                 WHERE ra.repo_id = {repo_id}
 				        ORDER BY ot.ortr_fecha DESC
 				        LIMIT 1 """
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
           val direcciones = SQL(
@@ -1771,20 +1779,22 @@ class ReporteRepository @Inject()(
             )
             .as(scalar[scala.Long].*)
           val novedades = SQL(
-            """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}"""
+            """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id} and rn.tireuc_id = {tireuc_id}"""
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteNovedad._set *)
           val adicional = SQL(
             """SELECT * FROM siap.reporte_adicional ra
-                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id
+                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                 LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
                 WHERE ra.repo_id = {repo_id}
 				        ORDER BY ot.ortr_fecha DESC
 				        LIMIT 1 """
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
           val direcciones = SQL(
@@ -1954,16 +1964,17 @@ class ReporteRepository @Inject()(
             )
             .as(scalar[scala.Long].*)
           val novedades = SQL(
-            """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}"""
+            """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id} and rn.tireuc_id = {tireuc_id}"""
           ).on(
-              'repo_id -> repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteNovedad._set *)
           val adicional = SQL(
             """SELECT * FROM siap.reporte_adicional ra
-                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id
+                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                 LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
-                WHERE ra.repo_id = {repo_id} and otr.tireuc_id = {tireuc_id}
+                WHERE ra.repo_id = {repo_id} 
 				        ORDER BY ot.ortr_fecha DESC
 				        LIMIT 1 """
           ).on(
@@ -2077,6 +2088,7 @@ class ReporteRepository @Inject()(
           Some(_listDireccion.toList),
           Some(novedades)
         )
+        println("Reporte:  " + reporte)
         Some(reporte)
 
         case None => None
@@ -2127,20 +2139,22 @@ class ReporteRepository @Inject()(
             )
             .as(scalar[scala.Long].*)
           val novedades = SQL(
-            """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}"""
+            """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id} and rn.tireuc_id = {tireuc_id}"""
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteNovedad._set *)
           val adicional = SQL(
             """SELECT * FROM siap.reporte_adicional ra
-                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id
+                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                 LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
                 WHERE ra.repo_id = {repo_id}
 				        ORDER BY ot.ortr_fecha DESC
 				        LIMIT 1 """
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
           val direcciones = SQL(
@@ -2288,13 +2302,14 @@ class ReporteRepository @Inject()(
         case Some(r) =>
           val adicional = SQL(
             """SELECT * FROM siap.reporte_adicional ra
-                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id
+                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                 LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
                 WHERE ra.repo_id = {repo_id}
 				        ORDER BY ot.ortr_fecha DESC
 				        LIMIT 1 """
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
           val reporte = new ReporteConsulta(
@@ -2365,13 +2380,14 @@ class ReporteRepository @Inject()(
       reps.map { r =>
         val adicional = SQL(
           """SELECT * FROM siap.reporte_adicional ra
-                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id
+                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                 LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
                 WHERE ra.repo_id = {repo_id}
 				        ORDER BY ot.ortr_fecha DESC
 				        LIMIT 1 """
         ).on(
-            'repo_id -> r.repo_id
+            'repo_id -> r.repo_id,
+            'tireuc_id -> r.tireuc_id
           )
           .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
         val eventos = SQL(
@@ -2387,9 +2403,10 @@ class ReporteRepository @Inject()(
           )
           .as(scalar[scala.Long].*)
         val novedades = SQL(
-          """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}"""
-        ).on(
-            'repo_id -> r.repo_id
+            """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id} and rn.tireuc_id = {tireuc_id}"""
+          ).on(
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
           )
           .as(ReporteNovedad._set *)
         val direcciones = SQL(
@@ -2564,8 +2581,9 @@ class ReporteRepository @Inject()(
         val consec = consecutivo(reporte.reti_id.get)
         if (consec > 0) {
           val id: scala.Long = SQL(
-            "INSERT INTO siap.reporte (repo_fecharecepcion, repo_direccion, repo_nombre, repo_telefono, repo_fechasolucion, repo_horainicio, repo_horafin, repo_reportetecnico, repo_descripcion, rees_id, orig_id, barr_id, empr_id, tiba_id, usua_id, reti_id, repo_consecutivo) VALUES ({repo_fecharecepcion}, {repo_direccion}, {repo_nombre}, {repo_telefono}, {repo_fechasolucion}, {repo_horainicio}, {repo_horafin}, {repo_reportetecnico}, {repo_descripcion}, {rees_id}, {orig_id}, {barr_id}, {empr_id}, {tiba_id}, {usua_id}, {reti_id}, {repo_consecutivo})"
+            "INSERT INTO siap.reporte (tireuc_id, repo_fecharecepcion, repo_direccion, repo_nombre, repo_telefono, repo_fechasolucion, repo_horainicio, repo_horafin, repo_reportetecnico, repo_descripcion, rees_id, orig_id, barr_id, empr_id, tiba_id, usua_id, reti_id, repo_consecutivo) VALUES ({tireuc_id}, {repo_fecharecepcion}, {repo_direccion}, {repo_nombre}, {repo_telefono}, {repo_fechasolucion}, {repo_horainicio}, {repo_horafin}, {repo_reportetecnico}, {repo_descripcion}, {rees_id}, {orig_id}, {barr_id}, {empr_id}, {tiba_id}, {usua_id}, {reti_id}, {repo_consecutivo})"
           ).on(
+              'tireuc_id -> reporte.tireuc_id,
               'repo_fecharecepcion -> reporte.repo_fecharecepcion,
               'repo_direccion -> reporte.repo_direccion,
               'repo_nombre -> reporte.repo_nombre,
@@ -2700,6 +2718,7 @@ class ReporteRepository @Inject()(
         case None =>
           val queryReporte =
             """INSERT INTO siap.control_reporte (
+                      tireuc_id,
                       repo_fecharecepcion, 
                       repo_direccion, 
                       repo_nombre, 
@@ -2716,9 +2735,11 @@ class ReporteRepository @Inject()(
                       repo_horafin, 
                       reti_id, 
                       repo_consecutivo, 
+                      repo_subrepoconsecutivo,
                       tiba_id, 
                       barr_id_anterior) 
                       SELECT 
+                      tireuc_id,
                       repo_fecharecepcion, 
                       repo_direccion, 
                       repo_nombre, 
@@ -2735,6 +2756,7 @@ class ReporteRepository @Inject()(
                       repo_horafin, 
                       reti_id, 
                       repo_consecutivo, 
+                      repo_subrepoconsecutivo,
                       tiba_id, 
                       barr_id_anterior
                       FROM siap.reporte r 
@@ -2960,7 +2982,7 @@ class ReporteRepository @Inject()(
       var historia =
         scala.collection.mutable.Map[scala.Long, ElementoHistoria]()
       val result: Boolean = SQL(
-        "UPDATE siap.reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tiba_id = {tiba_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
+        "UPDATE siap.reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, repo_subrepoconsecutivo = {repo_subrepoconsecutivo}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tiba_id = {tiba_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
       ).on(
           'repo_id -> reporte.repo_id,
           'repo_direccion -> reporte.repo_direccion,
@@ -2971,6 +2993,7 @@ class ReporteRepository @Inject()(
           'repo_horafin -> reporte.repo_horafin,
           'repo_reportetecnico -> reporte.repo_reportetecnico,
           'repo_descripcion -> reporte.repo_descripcion,
+          'repo_subrepoconsecutivo -> reporte.repo_subrepoconsecutivo,
           'rees_id -> 3,
           'orig_id -> reporte.orig_id,
           'barr_id -> reporte.barr_id,
@@ -3063,6 +3086,62 @@ class ReporteRepository @Inject()(
               'repo_id -> reporte.repo_id
             )
             .executeInsert()
+        }
+      }
+      // Creación Actualizacion de Novedades
+      reporte.novedades.map { novedades =>
+        for (n <- novedades) {
+          val novedadActualizado = SQL("""UPDATE siap.reporte_novedad SET 
+                                           nove_id = {nove_id}, 
+                                           reno_horaini = {reno_horaini}, 
+                                           reno_horafin = {reno_horafin}, 
+                                           reno_observacion = {reno_observacion},
+                                           even_estado = {even_estado}
+                                          WHERE tireuc_id = {tireuc_id} AND repo_id = {repo_id} AND even_id = {even_id}""").
+                                    on(
+                                      'tireuc_id -> reporte.tireuc_id,
+                                      'repo_id -> reporte.repo_id,
+                                      'even_id -> n.even_id,
+                                      'nove_id -> n.nove_id,
+                                      'reno_horaini -> n.reno_horaini,
+                                      'reno_horafin -> n.reno_horafin,
+                                      'reno_observacion -> n.reno_observacion,
+                                      'even_estado -> n.even_estado
+                                    ).executeUpdate() > 0
+          if (!novedadActualizado) {
+            if (n.even_estado.get < 8) {
+              val novedadInsertado = SQL(""" INSERT INTO siap.reporte_novedad (
+                                             tireuc_id, 
+                                             repo_id, 
+                                             even_id, 
+                                             nove_id, 
+                                             reno_horaini, 
+                                             reno_horafin, 
+                                             reno_observacion, 
+                                             even_estado
+                                           ) VALUES (
+                                             {tireuc_id},
+                                             {repo_id},
+                                             {even_id},
+                                             {nove_id},
+                                             {reno_horaini},
+                                             {reno_horafin},
+                                             {reno_observacion},
+                                             {even_estado}
+                                           )
+                                    """).
+                                    on(
+                                      'tireuc_id -> reporte.tireuc_id,
+                                      'repo_id -> reporte.repo_id,
+                                      'even_id -> n.even_id,
+                                      'nove_id -> n.nove_id,
+                                      'reno_horaini -> n.reno_horaini,
+                                      'reno_horafin -> n.reno_horafin,
+                                      'reno_observacion -> n.reno_observacion,
+                                      'even_estado -> n.even_estado
+                                    ).executeUpdate() > 0
+            }
+          }
         }
       }
 

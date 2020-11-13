@@ -433,6 +433,8 @@ export default {
       if (!this.guardando) {
         this.guardando = true
         this.confirmacionGuardar = false
+        this.reporte.tireuc_id = this.tireuc_id
+        console.log('tireuc_id: ' + this.reporte.tireuc_id)
         this.$refs.reporte.validate((valid) => {
           if (valid) {
             saveReporte(this.reporte)
@@ -490,6 +492,7 @@ export default {
         repo_horafin: null,
         repo_reportetecnico: null,
         repo_descripcion: null,
+        repo_subrepoconsecutivo: null,
         rees_id: 1,
         orig_id: 1,
         barr_id: null,
@@ -515,8 +518,10 @@ export default {
           aaco_id_anterior: null,
           aaco_id_nuevo: null
         },
+        meams: [],
         eventos: [],
-        direcciones: []
+        direcciones: [],
+        novedades: []
       }
       this.direccion = {
         repo_id: null,
@@ -677,8 +682,8 @@ export default {
       console.log('getNovedades:' + error)
     })
   },
-  beforeMount () {
-    this.tireuc_id = this.$route.params.tireuc_id
+  mounted () {
+    this.tireuc_id = parseInt(this.$route.params.tireuc_id)
   }
 }
 </script>

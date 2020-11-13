@@ -381,7 +381,7 @@
                   <el-form-item :label="$t('reporte.ot')">
                     <span style="400 13.3333px Arial;">{{ ordenes(reporte.adicional.ortr_id) }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -417,7 +417,7 @@
                   <el-form-item :label="$t('reporte.name')">
                     <span style="400 13.3333px Arial;">{{ reporte.repo_nombre }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -451,7 +451,7 @@
                   <el-form-item :label="$t('reporte.address')">
                     <span style="400 13.3333px Arial;">{{ reporte.repo_direccion }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -497,7 +497,7 @@
                   <el-form-item :label="$t('reporte.neighborhood')">
                     <span style="400 13.3333px Arial;">{{ barrio(reporte.barr_id) }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -545,7 +545,7 @@
                   <el-form-item :label="$t('reporte.sector')">
                     <span style="400 13.3333px Arial;">{{ sector(reporte.tiba_id) }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -578,7 +578,7 @@
                   <el-form-item :label="$t('reporte.phone')">
                     <span style="400 13.3333px Arial;">{{ reporte.repo_telefono }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -670,7 +670,7 @@
                   <el-form-item :label="$t('reporte.activity')">
                     <span style="400 13.3333px Arial;">{{ tipo_actividad(reporte.adicional.acti_id) }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -712,7 +712,7 @@
                   <el-form-item :label="$t('reporte.description')">
                     <span style="400 13.3333px Arial;">{{ reporte.repo_descripcion }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -721,6 +721,31 @@
                     />
                   </el-form-item>
                 </template>
+              </el-col>
+            </el-row>
+          </el-collapse-item>
+          <el-collapse-item name="5" :title="$t('reporte.subreporte')" style="font-weight: bold;">
+            <el-row>
+              <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                <span>Agregar Subreporte</span>
+                <el-input :disabled="reporte.rees_id === 3"
+                  type="number"
+                  v-model="subreporte"
+                  size="mini"
+                  placeholder="Nuevo SubReporte"
+                  style="width: 10%"
+                />
+                <el-button :disabled="reporte.rees_id === 3" circle mini type="primary" icon="el-icon-plus" @click="addSubReporte()"/>
+                <el-row :gutter="4">
+                  <el-col v-for="item in reporte.subreportes" :key="item.csc" :span="2">
+                    <template>
+                      <span>{{ item.csc }}</span>
+                    </template>
+                    <template>
+                      <el-button :disabled="reporte.rees_id === 3" type="danger" icon="el-icon-delete" circle @click="delSubReporte(item.csc)"></el-button>
+                    </template>
+                  </el-col>
+                </el-row>
               </el-col>
             </el-row>
           </el-collapse-item>
@@ -820,7 +845,7 @@
           <el-row>
             <el-col :span="24">
               <el-button
-                :disabled="!reporte.direcciones[didx].aap_id || reporte.rees_id === 3"
+                :disabled="reporte.rees_id === 3"
                 style="display: table-cell;"
                 type="primary"
                 size="mini"
@@ -1866,13 +1891,15 @@ export default {
       acti_id: null,
       tiba_id: null,
       barr_id: null,
+      // subreporte
+      subreporte: null,
       // variables a almacenar
       invalid: false,
       labelPosition: 'top',
       loadingElemento: false,
       showAapModal: false,
       showConvertirDlg: false,
-      activePages: ['1', '2', '3', '4'],
+      activePages: ['1', '2', '3', '4', '5'],
       activePages2: ['2-1', '2-2'],
       nopopover: false,
       inputValue01: null,
@@ -1898,6 +1925,7 @@ export default {
         repo_reportetecnico: null,
         repo_descripcion: null,
         repo_subrepoconsecutivo: null,
+        subreporte: null,
         rees_id: 2,
         orig_id: null,
         barr_id: null,
@@ -1906,11 +1934,12 @@ export default {
         meams: [],
         eventos: [],
         direcciones: [],
-        adicional: []
+        adicional: [],
+        novedades: []
       },
       evento_siguiente_consecutivo: 1,
       direccion_siguiente_consecutivo: 1,
-      novedad_siguiente_consecutivo: 0,
+      novedad_siguiente_consecutivo: 1,
       autorizacion: '',
       addinputevent: 4,
       coau_tipo: 0,
@@ -2387,8 +2416,24 @@ export default {
     pending: { name: 'pending', time: 30000, autostart: false, repeat: true }
   },
   methods: {
+    addSubReporte () {
+      console.log('adicionando subreporte número: ' + this.subreporte)
+      if (this.subreporte !== undefined && this.subreporte !== null && this.subreporte > 0) {
+        this.reporte.subreportes.push({ csc: this.subreporte })
+      }
+      this.subreporte = null
+    },
+    delSubReporte (i) {
+      var item = this.reporte.subreportes.find(o => o.csc === i)
+      if (item) {
+        var idx = this.reporte.subreportes.indexOf(item)
+        if (idx > -1) {
+          this.reporte.subreportes.splice(idx, 1)
+        }
+      }
+    },
     confirmOrdenTrabajo () {
-      addReporteAOrden(this.reporte.adicional.ortr_id, this.reporte.repo_id).then(response => {
+      addReporteAOrden(this.reporte.adicional.ortr_id, this.reporte.repo_id, this.reporte.tireuc_id).then(response => {
         if (response.data === 'true') {
           this.$message({
             message: 'Orden de Trabajo Actualizada',
@@ -2491,7 +2536,6 @@ export default {
       }
     },
     tipo_actividad (id) {
-      console.log('acti_id: ' + id)
       if (id === undefined || id === null) {
         return ''
       } else {
@@ -2591,26 +2635,12 @@ export default {
       }
     },
     autosave () {
-      /*
-      var valido = true
-      valido = this.validatForm('reporteForm')
-      if (!valido) {
-        return false
+      if (this.reporte.rees_id !== 3) {
+        localStorage.setItem(
+          'currEditRepFecha',
+          JSON.stringify({ fecha: Date.now(), data: this.reporte })
+        )
       }
-      this.reporte.rees_id = 1
-      updateReporte(this.reporte)
-        .then(response => {
-          if (response.status === 200) {
-          }
-        })
-        .catch(error => {
-          this.error(error)
-        })
-      */
-      localStorage.setItem(
-        'currEditRepFecha',
-        JSON.stringify({ fecha: Date.now(), data: this.reporte })
-      )
     },
     pending () {
       /* const _ini = localStorage.getItem('currEditRepFechaIni')
@@ -3148,6 +3178,14 @@ export default {
       var valido = true
       this.confirmacionGuardar = false
       var validacion = true
+      // Mover subreportes a repo_subrepoconsecutivos
+      this.reporte.repo_subrepoconsecutivo = ''
+      this.reporte.subreportes.forEach((i) => {
+        this.reporte.repo_subrepoconsecutivo = this.reporte.repo_subrepoconsecutivo + i.csc + ','
+      })
+      console.log('subrepoconsecutivo: ' + this.reporte.repo_subrepoconsecutivo)
+      this.reporte.repo_subrepoconsecutivo = this.reporte.repo_subrepoconsecutivo.slice(0, -1)
+      console.log('final subrepoconsecutivo: ' + this.reporte.repo_subrepoconsecutivo)
       // Mover material a reporte.eventos
       // // var even_length = 1
       this.reporte.eventos = []
@@ -3607,6 +3645,18 @@ export default {
     obtenerReporte () {
       getReporte(this.$route.params.id).then((response) => {
         this.reporte_previo = response.data
+        if (this.reporte_previo.repo_subrepoconsecutivo === undefined) {
+          this.reporte_previo.repo_subrepoconsecutivo = null
+        }
+        if (this.reporte_previo.repo_subrepoconsecutivo === null) {
+          this.reporte_previo.subreportes = []
+        } else {
+          this.reporte_previo.subreportes = []
+          var subreportes = this.reporte_previo.repo_subrepoconsecutivo.split(',')
+          subreportes.forEach(i => {
+            this.reporte_previo.subreportes.push({ csc: i })
+          })
+        }
         if (this.reporte_previo.rees_id === 1) {
           validarReporteDiligenciado(
             this.reporte_previo.reti_id,
@@ -3615,7 +3665,7 @@ export default {
             .then((resp) => {
               if (resp.data[0] === true) {
                 this.invalid = false
-                this.inicioReporte()
+                this.inicioReporte(this.reporte_previo)
               } else {
                 this.$prompt(
                   'Por favor ingrese el código de autorización si lo tiene:',
@@ -3747,10 +3797,6 @@ export default {
       } else {
         this.conDirecciones = false
       }
-      localStorage.setItem(
-        'currEditRepFechaIni',
-        JSON.stringify({ fecha: Date.now(), data: this.reporte })
-      )
       this.cargarEventos()
       this.validarConsecutivo()
       this.reporte = this.reporte_previo
@@ -3759,6 +3805,12 @@ export default {
       this.validarTipo()
       this.pending()
       this.didx = 0
+      if (this.reporte_previo.rees_id !== 3) {
+        localStorage.setItem(
+          'currEditRepFecha',
+          JSON.stringify({ fecha: Date.now(), data: this.reporte })
+        )
+      }
       if (this.reporte.reti_id === 8) {
         this.conexiones.splice(0, 2)
       } else {
@@ -3963,10 +4015,6 @@ export default {
                 }
                 direccion.materiales.push(evento)
               })
-              console.log(
-                'agregando direccion vacio a reporte: ' +
-                  this.reporte_previo.repo_id
-              )
               this.reporte_previo.direcciones.push(direccion)
               this.idx++
               dire_length++
@@ -4146,7 +4194,7 @@ export default {
       })
       this.evento_siguiente_consecutivo = even_length + 1
       this.direccion_siguiente_consecutivo = dire_length + 1
-      this.novedad_siguiente_consecutivo = nove_length + 1
+      this.novedad_siguiente_consecutivo = nove_length
       this.minDate = this.reporte_previo.repo_fecharecepcion
       var temp = JSON.stringify(this.reporte_previo)
       this.reporte_previo = JSON.parse(temp)

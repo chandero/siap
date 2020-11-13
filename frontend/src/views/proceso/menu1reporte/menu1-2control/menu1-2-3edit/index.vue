@@ -9,7 +9,7 @@
             <el-button
               align="right"
               type="primary"
-              title="Convertir en Reporte de Luminaria"
+              title="Convertir en Reporte de Control"
               @click="showConvertirDlg=true"
               >Convertir</el-button>
           </el-col>
@@ -64,6 +64,11 @@
               <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
                 <el-form-item prop="repo_consecutivo" :label="$t('reporte.number')">
                   <span style="font-size: 30px;">{{ reporte.repo_consecutivo | fillZeros(6) }}</span>
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+                <el-form-item prop="repo_subrepoconsecutivo" :label="$t('reporte.subreporte')">
+                  <el-input :disabled="reporte.rees_id === 3" type="number" style="font-size: 30px;" v-model="reporte.repo_subrepoconsecutivo" @input="reporte.repo_subrepoconsecutivo = parseInt($event)"></el-input>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -282,7 +287,7 @@
               </el-col>
               <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
                 <template v-if="repo_codigo_state">
-                  <el-form-item prop="repo_codigo" :label="$t('reporte.code')">
+                  <el-form-item prop="repo_codigo" :label="$t('control.reporte.code')">
                     <el-input
                       ref="code"
                       v-model="reporte.adicional.repo_codigo"
@@ -301,7 +306,7 @@
                   </el-form-item>
                 </template>
                 <template v-else>
-                  <el-form-item :label="$t('reporte.code')">
+                  <el-form-item :label="$t('control.reporte.code')">
                     <span style="400 13.3333px Arial;">{{ reporte.adicional.repo_codigo }}</span>
                     <el-button
                       v-if="reporte.rees_id === 1"
@@ -315,7 +320,7 @@
                 </template>
               </el-col>
               <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
-                <template v-if="repo_apoyo_state">
+                <template v-if="repo_apoyo_state && reporte.tireuc_id != 2">
                   <el-form-item prop="repo_apoyo" :label="$t('reporte.apoyo')">
                     <el-input
                       ref="apoyo"
@@ -334,7 +339,7 @@
                     />
                   </el-form-item>
                 </template>
-                <template v-else>
+                <template v-else-if="reporte.tireuc_id != 2">
                   <el-form-item :label="$t('reporte.apoyo')">
                     <span style="400 13.3333px Arial;">{{ reporte.adicional.repo_apoyo }}</span>
                     <el-button
@@ -381,7 +386,7 @@
                   <el-form-item :label="$t('reporte.ot')">
                     <span style="400 13.3333px Arial;">{{ ordenes(reporte.adicional.ortr_id) }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -417,7 +422,7 @@
                   <el-form-item :label="$t('reporte.name')">
                     <span style="400 13.3333px Arial;">{{ reporte.repo_nombre }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -429,7 +434,7 @@
               </el-col>
               <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
                 <template v-if="repo_direccion_state">
-                  <el-form-item prop="repo_direccion" :label="$t('reporte.address')">
+                  <el-form-item prop="repo_direccion" :label="$t('control.reporte.address')">
                     <el-input
                       ref="direccion"
                       v-model="reporte.repo_direccion"
@@ -448,10 +453,10 @@
                   </el-form-item>
                 </template>
                 <template v-else>
-                  <el-form-item :label="$t('reporte.address')">
+                  <el-form-item :label="$t('control.reporte.address')">
                     <span style="400 13.3333px Arial;">{{ reporte.repo_direccion }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -497,7 +502,7 @@
                   <el-form-item :label="$t('reporte.neighborhood')">
                     <span style="400 13.3333px Arial;">{{ barrio(reporte.barr_id) }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -545,7 +550,7 @@
                   <el-form-item :label="$t('reporte.sector')">
                     <span style="400 13.3333px Arial;">{{ sector(reporte.tiba_id) }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -578,7 +583,7 @@
                   <el-form-item :label="$t('reporte.phone')">
                     <span style="400 13.3333px Arial;">{{ reporte.repo_telefono }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -670,7 +675,7 @@
                   <el-form-item :label="$t('reporte.activity')">
                     <span style="400 13.3333px Arial;">{{ tipo_actividad(reporte.adicional.acti_id) }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -712,7 +717,7 @@
                   <el-form-item :label="$t('reporte.description')">
                     <span style="400 13.3333px Arial;">{{ reporte.repo_descripcion }}</span>
                     <el-button
-                      v-if="reporte.rees_id === 1"
+                      v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
@@ -820,7 +825,7 @@
           <el-row>
             <el-col :span="24">
               <el-button
-                :disabled="!reporte.direcciones[didx].aap_id || reporte.rees_id === 3"
+                :disabled="reporte.rees_id === 3"
                 style="display: table-cell;"
                 type="primary"
                 size="mini"
@@ -921,7 +926,7 @@
               </el-col>
             </el-row>
           </el-collapse-item>
-          <el-collapse-item name="3" title="DATOS LUMINARIAS">
+          <el-collapse-item name="3" title="DATOS CONTROL">
             <div>
               <el-row>
                 <el-col :span="24">
@@ -933,7 +938,7 @@
                     effect="dark"
                     size="medium"
                     @click="handleTag(tag.idx)"
-                    :title="'Información Luminaria ' + tag.aap_id"
+                    :title="'Información Control ' + tag.aap_id"
                     style="cursor: pointer;"
                   >L: {{tag.aap_id}}</el-tag>
                   <el-input
@@ -949,7 +954,7 @@
                     v-else-if="reporte.rees_id != 3"
                     size="small"
                     @click="showInputAddress01"
-                  >+ Agregar Luminaria</el-button>
+                  >+ Agregar Control</el-button>
                 </el-col>
               </el-row>
               <el-form
@@ -972,7 +977,7 @@
                     :xl="1"
                   >{{ reporte.direcciones[didx].even_id }}</el-col>
                   <el-col :xs="24" :sm="10" :md="10" :lg="10" :xl="10">
-                    <el-form-item prop="aap_id" label="Código Luminaria">
+                    <el-form-item prop="aap_id" label="Código Control">
                       <div style="display: table;">
                         <el-input
                           :disabled="reporte.direcciones[didx].even_estado === 3 || reporte.direcciones[didx].even_estado > 7"
@@ -991,7 +996,7 @@
                       </div>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="7" :md="7" :lg="7" :xl="7">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="7" :md="7" :lg="7" :xl="7">
                     <el-form-item prop="dato_adicional.aap_apoyo" :label="$t('reporte.apoyo')">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1094,8 +1099,8 @@
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-                    <el-form-item prop="dato.aatc_id" label="Tipo Luminaria">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+                    <el-form-item prop="dato.aatc_id" label="Tipo Control">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         style="width:100%;"
@@ -1114,7 +1119,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
                     <el-form-item prop="dato.aama_id" label="Marca">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1134,7 +1139,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
                     <el-form-item prop="dato.aamo_id" label="Modelo">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1156,7 +1161,7 @@
                   </el-col>
                 </el-row>
                 <el-row :gutter="4">
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
                     <el-form-item prop="dato.aap_tecnologia" label="Tecnología">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1171,7 +1176,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                     <el-form-item prop="dato.aap_potencia" :label="$t('gestion.power.title')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1191,7 +1196,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                     <el-form-item prop="dato.aaco_id" :label="$t('gestion.connection.title')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1212,7 +1217,7 @@
                     </el-form-item>
                   </el-col>
                   <el-col
-                    v-if="reporte.reti_id !== 0 & reporte.direcciones[didx].dato.aaco_id === 2"
+                    v-if="reporte.reti_id !== 0 & reporte.direcciones[didx].dato.aaco_id === 2 && reporte.tireuc_id != 2"
                     :xs="24"
                     :sm="6"
                     :md="4"
@@ -1241,7 +1246,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                     <el-form-item
                       prop="dato_adicional.tran_id"
                       :label="$t('gestion.transformador.title')"
@@ -1267,7 +1272,7 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                     <el-form-item prop="dato.tipo_id" :label="$t('gestion.post.title')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1287,7 +1292,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                     <el-form-item prop="dato.aap_poste_altura" :label="$t('gestion.post.size')">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1298,7 +1303,7 @@
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                     <el-form-item prop="dato.aap_poste_propietario" :label="$t('gestion.post.own')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1315,7 +1320,7 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                     <el-form-item prop="dato.aap_brazo" :label="$t('gestion.arm')">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1325,7 +1330,7 @@
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                     <el-form-item prop="dato.aap_collarin" :label="$t('gestion.collar')">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1335,7 +1340,7 @@
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                     <el-form-item prop="dato_adicional.aaus_id" :label="$t('gestion.use')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1355,7 +1360,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                     <el-form-item prop="dato_adicional.aacu_id" :label="$t('gestion.account')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1377,7 +1382,7 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col v-if="reporte.reti_id == 8" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                  <el-col v-if="reporte.reti_id == 8 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                     <el-form-item prop="tire_id" :label="$t('gestion.tiporetiro')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1439,7 +1444,7 @@
                     effect="dark"
                     size="medium"
                     @click="handleTag(tag.idx)"
-                    :title="'Material Luminaria ' + tag.aap_id"
+                    :title="'Material Control ' + tag.aap_id"
                     style="cursor: pointer;"
                   >L: {{tag.aap_id}}</el-tag>
                   <el-input
@@ -1455,12 +1460,12 @@
                     v-else-if="reporte.rees_id != 3"
                     size="small"
                     @click="showInputAddress02"
-                  >+ Agregar Luminaria</el-button>
+                  >+ Agregar Control</el-button>
                 </el-col>
               </el-row>
               <el-row>
                 <el-col :span="24">
-                  <span>MATERIAL LUMINARIA {{ reporte.direcciones[didx].aap_id }}</span>
+                  <span>MATERIAL CONTROL {{ reporte.direcciones[didx].aap_id }}</span>
                 </el-col>
               </el-row>
               <el-row :gutter="4" class="hidden-sm-and-down">
@@ -1468,7 +1473,7 @@
                   <span style="font-weight: bold;">No.</span>
                 </el-col>
                 <el-col :md="3" :lg="3" :xl="3">
-                  <span style="font-weight: bold;">Código de la Luminaria</span>
+                  <span style="font-weight: bold;">Código de la Control</span>
                 </el-col>
                 <el-col :xs="24" :sm="24" :md="11" :lg="11" :xl="11">
                   <span style="font-weight: bold;">Nombre del Material</span>
@@ -1503,7 +1508,7 @@
                     </el-col>
                     <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ id + 1 }}</el-col>
                     <el-col class="hidden-md-and-up" :xs="9" :sm="9">
-                      <span style="font-weight: bold;">Código de la Luminaria</span>
+                      <span style="font-weight: bold;">Código de la Control</span>
                     </el-col>
                     <el-col :xs="13" :sm="13" :md="3" :lg="3" :xl="3">
                       <el-form-item prop="aap_id">
@@ -1709,11 +1714,11 @@
      </span>
 </el-dialog>
      <el-dialog
-      title="Convertir Reporte de Control a Reporte de Luminaria"
+      title="Convertir Reporte de Control a Reporte de Control"
       :visible.sync="showConvertirDlg"
       width="50%"
      >
-      <span>Se convertirá el reporte en reporte de Luminaria, continuar ?</span>
+      <span>Se convertirá el reporte en reporte de Control, continuar ?</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="showConvertirDlg = false">No</el-button>
         <el-button type="primary" @click="convertirReporte()">Si</el-button>
@@ -1726,9 +1731,22 @@ import { getActividades } from '@/api/actividad'
 import { getOrigenes } from '@/api/origen'
 import { getBarriosEmpresa } from '@/api/barrio'
 import { getTiposBarrio } from '@/api/tipobarrio'
-import { getReporte, updateReporte, getTipos, getEstados, validarCodigo, validarReporteDiligenciado, convertirReporte, updateReporteParcial } from '@/api/controlreporte'
+import {
+  getReporte,
+  updateReporte,
+  getTipos,
+  getEstados,
+  validarCodigo,
+  validarReporteDiligenciado,
+  convertirReporte,
+  updateReporteParcial
+} from '@/api/controlreporte'
 import { getAcciones } from '@/api/accion'
-import { getElementos, getElementoByDescripcion, getElementoByCode } from '@/api/elemento'
+import {
+  getElementos,
+  getElementoByDescripcion,
+  getElementoByCode
+} from '@/api/elemento'
 import { getAapEdit, getAapValidar, validar, buscarSiguiente } from '@/api/control'
 import { getMedioambiente } from '@/api/medioambiente'
 import { getAapTiposCarcasa } from '@/api/aap_tipo_carcasa'
@@ -1753,51 +1771,53 @@ export default {
     var validateAapEventoRule = (rule, value, callback) => {
       if (value) {
         this.aap.aap_id = value
-        getAapValidar(value).then(response => {
-          var result = response.data
-          if (result === 404) {
-            this.existe = false
-            if (this.reporte.reti_id !== 2) {
-              callback(new Error('No Existe'))
-            } else {
-              callback()
-            }
-          } else if (result === 401) {
-            this.existe = false
-            callback(new Error('Dada de Baja'))
-          } else if (result === 200) {
-            if (this.reporte.reti_id === 3) {
-              callback(new Error('No Retirada'))
-            } else if (this.reporte.reti_id === 2) {
-              this.existe = true
-              if (this.reporte.adicional.repo_tipo_expansion !== 4) {
-                callback(new Error('Ya Existe'))
+        getAapValidar(value)
+          .then((response) => {
+            var result = response.data
+            if (result === 404) {
+              this.existe = false
+              if (this.reporte.reti_id !== 2) {
+                callback(new Error('No Existe'))
               } else {
                 callback()
               }
-            } else {
-              this.existe = true
-              callback()
-            }
-          } else if (result === 204) {
-            if (this.reporte.reti_id === 1 || this.reporte.reti_id === 8) {
-              callback(new Error('Retirada'))
-            } else if (this.reporte.reti_id === 2) {
-              this.existe = true
-              if (this.reporte.adicional.repo_tipo_expansion === 3) {
-                callback(new Error('Ya Existe'))
+            } else if (result === 401) {
+              this.existe = false
+              callback(new Error('Dada de Baja'))
+            } else if (result === 200) {
+              if (this.reporte.reti_id === 3) {
+                callback(new Error('No Retirada'))
+              } else if (this.reporte.reti_id === 2) {
+                this.existe = true
+                if (this.reporte.adicional.repo_tipo_expansion !== 4) {
+                  callback(new Error('Ya Existe'))
+                } else {
+                  callback()
+                }
               } else {
+                this.existe = true
                 callback()
               }
-            } else {
-              this.existe = true
-              callback()
+            } else if (result === 204) {
+              if (this.reporte.reti_id === 1 || this.reporte.reti_id === 8) {
+                callback(new Error('Retirada'))
+              } else if (this.reporte.reti_id === 2) {
+                this.existe = true
+                if (this.reporte.adicional.repo_tipo_expansion === 3) {
+                  callback(new Error('Ya Existe'))
+                } else {
+                  callback()
+                }
+              } else {
+                this.existe = true
+                callback()
+              }
             }
-          }
-        }).catch(() => {
-          this.existe = false
-          callback(new Error('Error consultando código'))
-        })
+          })
+          .catch(() => {
+            this.existe = false
+            callback(new Error('Error consultando código'))
+          })
       } else {
         console.log('En Validator sin aap_id')
         this.existe = false
@@ -1805,6 +1825,31 @@ export default {
       }
     }
     return {
+      repo_fecharecepcion_state: false,
+      repo_direccion_state: false,
+      repo_nombre_state: false,
+      repo_telefono_state: false,
+      repo_codigo_state: false,
+      repo_apoyo_state: false,
+      repo_descripcion_state: false,
+      orig_id_state: false,
+      acti_id_state: false,
+      tiba_id_state: false,
+      barr_id_state: false,
+      ortr_id_state: false,
+      // variables a almacenar
+      repo_fecharecepcion: null,
+      repo_direccion: null,
+      repo_nombre: null,
+      repo_telefono: null,
+      repo_codigo: null,
+      repo_apoyo: null,
+      repo_descripcion: null,
+      orig_id: null,
+      acti_id: null,
+      tiba_id: null,
+      barr_id: null,
+      // variables a almacenar
       invalid: false,
       labelPosition: 'top',
       loadingElemento: false,
@@ -1984,52 +2029,108 @@ export default {
       },
       rules: {
         orig_id: [
-          { required: true, message: 'Debe Seleccionar el Origen del Reporte', trigger: 'change' }
+          {
+            required: true,
+            message: 'Debe Seleccionar el Origen del Reporte',
+            trigger: 'change'
+          }
         ],
         repo_nombre: [
-          { required: true, message: 'Debe Digitar el Nombre de quién reporta el daño o actividad', trigger: 'blur' }
+          {
+            required: true,
+            message:
+              'Debe Digitar el Nombre de quién reporta el daño o actividad',
+            trigger: 'blur'
+          }
         ],
         repo_direccion: [
-          { required: true, message: 'Debe Digitar la dirección del daño o actividad', trigger: 'blur' }
+          {
+            required: true,
+            message: 'Debe Digitar la dirección del daño o actividad',
+            trigger: 'blur'
+          }
         ],
         repo_telefono: [
-          { required: true, message: 'Debe Digitar el Teléfono de quién reporta el daño o actividad', trigger: 'blur' }
+          {
+            required: true,
+            message:
+              'Debe Digitar el Teléfono de quién reporta el daño o actividad',
+            trigger: 'blur'
+          }
         ],
         barr_id: [
-          { required: true, message: 'Debe Seleccionar el Barrio del Daño o Actividad', trigger: 'change' }
+          {
+            required: true,
+            message: 'Debe Seleccionar el Barrio del Daño o Actividad',
+            trigger: 'change'
+          }
         ],
         tiba_id: [
-          { required: true, message: 'Debe Seleccionar el Tipo de Sector del Daño o Actividad', trigger: 'blur' }
+          {
+            required: true,
+            message: 'Debe Seleccionar el Tipo de Sector del Daño o Actividad',
+            trigger: 'blur'
+          }
         ],
         adicional: {
           repo_tipo_expansion: [
-            { required: false, message: 'Debe Seleccionar el Tipo de Expansión', trigger: 'change' }
+            {
+              required: false,
+              message: 'Debe Seleccionar el Tipo de Expansión',
+              trigger: 'change'
+            }
           ],
           muot_id: [
-            { required: true, message: 'Debe digitar el número de Orden de Trabajo', trigger: 'blur' }
+            {
+              required: false,
+              message: 'Debe digitar el número de Orden de Trabajo',
+              trigger: 'blur'
+            }
           ],
           urba_id: [
-            { required: false, message: 'Debe Seleccionar la Urbanizadora', trigger: 'change' }
+            {
+              required: false,
+              message: 'Debe Seleccionar la Urbanizadora',
+              trigger: 'change'
+            }
+          ],
+          ortr_id: [
+            {
+              required: true,
+              message: 'Debe Seleccionar el Orden de Trabajo',
+              trigger: 'change'
+            }
           ],
           acti_id: [
-            { required: true, message: 'Debe Seleccionar el Tipo de Daño', trigger: 'change' }
+            {
+              required: true,
+              message: 'Debe Seleccionar el Tipo de Daño',
+              trigger: 'change'
+            }
           ]
         }
       },
       danhorules: {
         acti_descripcion: [
-          { required: true, message: 'Debe Diligenciar la Descripción del nuevo Daño', trigger: 'blur' }
+          {
+            required: true,
+            message: 'Debe Diligenciar la Descripción del nuevo Daño',
+            trigger: 'blur'
+          }
         ]
       },
       matrules: {
-        aap_id: [
-          { validator: validateAapEventoRule, trigger: 'blur' }
-        ]
+        aap_id: [{ validator: validateAapEventoRule, trigger: 'blur' }]
       },
       dirrules: {
         aap_id: [
           { validator: validateAapEventoRule, trigger: 'blur' },
-          { type: 'number', required: true, message: 'Ingrese el código de la luminaria', trigger: 'blur' }
+          {
+            type: 'number',
+            required: true,
+            message: 'Ingrese el código de la luminaria',
+            trigger: 'blur'
+          }
         ],
         even_horaini: [
           {
@@ -2046,58 +2147,126 @@ export default {
           }
         ],
         even_direccion: [
-          { required: true, message: 'Ingrese la nueva dirección de la luminaria', trigger: 'blur' }
+          {
+            required: true,
+            message: 'Ingrese la nueva dirección de la luminaria',
+            trigger: 'blur'
+          }
         ],
         barr_id: [
-          { required: true, message: 'Seleccione el barrio de la luminaria', trigger: 'change' }
+          {
+            required: true,
+            message: 'Seleccione el barrio de la luminaria',
+            trigger: 'change'
+          }
         ],
         'dato.aatc_id': [
-          { required: true, message: 'Seleccione el tipo de luminaria', trigger: 'change' }
+          {
+            required: false,
+            message: 'Seleccione el tipo de luminaria',
+            trigger: 'change'
+          }
         ],
         'dato.aama_id': [
-          { required: true, message: 'Seleccione la marca de la luminaria', trigger: 'change' }
+          {
+            required: false,
+            message: 'Seleccione la marca de la luminaria',
+            trigger: 'change'
+          }
         ],
         'dato.aamo_id': [
-          { required: true, message: 'Seleccione el modelo de la luminaria', trigger: 'change' }
+          {
+            required: false,
+            message: 'Seleccione el modelo de la luminaria',
+            trigger: 'change'
+          }
         ],
         'dato.aap_tecnologia': [
-          { required: true, message: 'Seleccione la tecnología de la luminaria', trigger: 'change' }
+          {
+            required: false,
+            message: 'Seleccione la tecnología de la luminaria',
+            trigger: 'change'
+          }
         ],
         'dato.aap_potencia': [
-          { required: true, message: 'Seleccione la potencia de la luminaria', trigger: 'change' }
+          {
+            required: false,
+            message: 'Seleccione la potencia de la luminaria',
+            trigger: 'change'
+          }
         ],
         'dato.aaco_id': [
-          { required: true, message: 'Seleccione el tipo de medida de la luminaria', trigger: 'change' }
+          {
+            required: false,
+            message: 'Seleccione el tipo de medida de la luminaria',
+            trigger: 'change'
+          }
         ],
         'dato.tipo_id': [
-          { required: true, message: 'Seleccione el tipo de poste de la luminaria', trigger: 'change' }
+          {
+            required: false,
+            message: 'Seleccione el tipo de poste de la luminaria',
+            trigger: 'change'
+          }
         ],
         'dato.aap_poste_altura': [
-          { required: true, message: 'Digite la altura del poste de la luminaria', trigger: 'blur' }
+          {
+            required: false,
+            message: 'Digite la altura del poste de la luminaria',
+            trigger: 'blur'
+          }
         ],
         'dato.aap_poste_propietario': [
-          { required: true, message: 'Seleccione el propietario del poste de la luminaria', trigger: 'change' }
+          {
+            required: false,
+            message: 'Seleccione el propietario del poste de la luminaria',
+            trigger: 'change'
+          }
         ],
         'dato.aap_brazo': [
-          { required: true, message: 'Digite el tipo de brazo de la luminaria', trigger: 'blur' }
+          {
+            required: false,
+            message: 'Digite el tipo de brazo de la luminaria',
+            trigger: 'blur'
+          }
         ],
         'dato.aap_collarin': [
-          { required: true, message: 'Digite el tipo de collarin de la luminaria', trigger: 'blur' }
+          {
+            required: false,
+            message: 'Digite el tipo de collarin de la luminaria',
+            trigger: 'blur'
+          }
         ],
         tire_id: [
-          { required: true, message: 'Seleccione el Motivo de Retiro', trigger: 'change' }
+          {
+            required: true,
+            message: 'Seleccione el Motivo de Retiro',
+            trigger: 'change'
+          }
         ],
         'dato_adicional.aaus_id': [
-          { required: true, message: 'Seleccione el Uso', trigger: 'change' }
+          { required: false, message: 'Seleccione el Uso', trigger: 'change' }
         ],
         'dato_adicional.aacu_id': [
-          { required: true, message: 'Seleccione la Cuenta de Alumbrado', trigger: 'change' }
+          {
+            required: false,
+            message: 'Seleccione la Cuenta de Alumbrado',
+            trigger: 'change'
+          }
         ],
         'dato_adicional.medi_id': [
-          { required: false, message: 'Seleccione el Medidor', trigger: 'change' }
+          {
+            required: false,
+            message: 'Seleccione el Medidor',
+            trigger: 'change'
+          }
         ],
         'dato_adicional.tran_id': [
-          { required: false, message: 'Seleccione el Transformador', trigger: 'change' }
+          {
+            required: false,
+            message: 'Seleccione el Transformador',
+            trigger: 'change'
+          }
         ]
       },
       timeOptions: {
@@ -2202,7 +2371,7 @@ export default {
   },
   methods: {
     confirmOrdenTrabajo () {
-      addReporteAOrden(this.reporte.adicional.ortr_id, this.reporte.repo_id).then(response => {
+      addReporteAOrden(this.reporte.adicional.ortr_id, this.reporte.repo_id, this.reporte.tireuc_id).then(response => {
         if (response.data === 'true') {
           this.$message({
             message: 'Orden de Trabajo Actualizada',
@@ -2317,20 +2486,22 @@ export default {
         }
       }
     },
-    estadoLuminaria () {
+    estadoControl () {
       console.log('existe: ' + this.existe)
       if (this.existe === undefined) {
         this.status = ''
       } else if (this.existe === false) {
         this.status = 'NUEVA'
-      } else if (this.reporte.direcciones[this.didx].dato.aaco_id_anterior === 3) {
+      } else if (
+        this.reporte.direcciones[this.didx].dato.aaco_id_anterior === 3
+      ) {
         this.status = 'RETIRADA'
       } else {
         this.status = 'ACTIVA'
       }
     },
     handleTag (idx) {
-      this.reporte.direcciones.forEach(d => {
+      this.reporte.direcciones.forEach((d) => {
         if (d.idx === idx) {
           d.type = 'success'
           this.didx = idx - 1
@@ -2376,9 +2547,13 @@ export default {
     },
     validarFecha (date) {
       const repo_fecha = new Date(this.reporte.repo_fecharecepcion)
-      const recepcion = new Date(repo_fecha.getFullYear(), repo_fecha.getMonth(), repo_fecha.getDate())
-      const result1 = (date.getTime() >= new Date(recepcion).getTime())
-      const result2 = (date.getTime() <= new Date().getTime())
+      const recepcion = new Date(
+        repo_fecha.getFullYear(),
+        repo_fecha.getMonth(),
+        repo_fecha.getDate()
+      )
+      const result1 = date.getTime() >= new Date(recepcion).getTime()
+      const result2 = date.getTime() <= new Date().getTime()
       const result = result1 && result2
       return !result
     },
@@ -2415,11 +2590,16 @@ export default {
           this.error(error)
         })
       */
-      localStorage.setItem('currEditControlRepFecha', JSON.stringify({ fecha: Date.now(), data: this.reporte }))
+      if (this.reporte.rees_id !== 3) {
+        localStorage.setItem(
+          'currEditConRepFecha',
+          JSON.stringify({ fecha: Date.now(), data: this.reporte })
+        )
+      }
     },
     pending () {
-      /* const _ini = localStorage.getItem('currEditRepFechaIni')
-      const _curr = localStorage.getItem('currEditRepFecha')
+      /* const _ini = localStorage.getItem('currEditConRepFechaIni')
+      const _curr = localStorage.getItem('currEditConRepFecha')
       if (!this.$equals(_ini, _curr)) {
         this.open7()
       } */
@@ -2427,8 +2607,7 @@ export default {
     changeFocus (next) {
       this.$refs[next].focus()
     },
-    handleActivePagesChange (val) {
-    },
+    handleActivePagesChange (val) {},
     handleDelete (index, row) {
       this.reporte.eventos.splice(index, 1)
       this.$refs['evento.aap_id'].focus()
@@ -2440,11 +2619,17 @@ export default {
     handleReporteMeamChange (value) {
       const meamCount = value.length
       this.checkAll = meamCount === this.medioambiente_keys.length
-      this.isIndeterminate = meamCount > 0 && meamCount < this.medioambiente_keys.length
+      this.isIndeterminate =
+        meamCount > 0 && meamCount < this.medioambiente_keys.length
     },
     validate () {
       var valido = true
-      if (this.reporte.repo_fechasolucion && this.reporte.repo_horainicio && this.reporte.repo_horafin && (this.reporte.rees_id === 1 || this.reporte.rees_id === 2)) {
+      if (
+        this.reporte.repo_fechasolucion &&
+        this.reporte.repo_horainicio &&
+        this.reporte.repo_horafin &&
+        (this.reporte.rees_id === 1 || this.reporte.rees_id === 2)
+      ) {
         valido = true
         return valido
       } else {
@@ -2453,11 +2638,13 @@ export default {
     },
     convertirReporte () {
       this.showConvertirDlg = false
-      convertirReporte(this.reporte.repo_id).then(response => {
+      convertirReporte(this.reporte.repo_id).then((response) => {
         if (response.status === 200) {
-          this.$router.push({ path: '/procesos/reporte/editartags/' + response.data })
+          this.$router.push({
+            path: '/procesos/control/editartags/' + response.data
+          })
         } else {
-          this.$alert('No se pudo convertir el reporte de control', 'Convertir Reporte de Control', {
+          this.$alert('No se pudo convertir el reporte', 'Convertir Reporte', {
             confirmButtonText: 'Aceptar'
           })
         }
@@ -2468,7 +2655,10 @@ export default {
         this.aap.aap_id = direccion.aap_id
         for (var i = 0; i < this.reporte.direcciones.length; i++) {
           var d = this.reporte.direcciones[i]
-          if (d.aap_id === direccion.aap_id && d.even_id !== direccion.even_id) {
+          if (
+            d.aap_id === direccion.aap_id &&
+            d.even_id !== direccion.even_id
+          ) {
             const msg = 'Código de luminaria ya está incluido en el reporte'
             this.alerta(msg)
             direccion.aap_id = null
@@ -2514,108 +2704,257 @@ export default {
           direccion.dato.aap_poste_propietario = null
           direccion.dato.aap_poste_propietario_anterior = null
           // Fin Limpiar Datos Direccion
-          getAapEdit(direccion.aap_id).then(response => {
-            const control = response.data
-            const activo = { aap: control }
-            if (activo.aap === null || activo.aap.aap_id < 1 || activo.aap.esta_id === 9) {
-              this.existe = false
-              if (this.reporte.reti_id === 2 && this.reporte.adicional.repo_tipo_expansion !== 4) {
-                console.log('Ingrese a llamar validar siguiente consecutivo')
-                this.validarSiguienteConsecutivo(direccion)
-              }
-            } else {
-              this.existe = true
-              if (this.reporte.reti_id !== 2) {
-                if (direccion.even_estado === 1) {
-                  direccion.even_direccion_anterior = activo.aap.aap_direccion
-                  direccion.barr_id_anterior = activo.aap.barr_id
-                  direccion.even_direccion = activo.aap.aap_direccion
-                  direccion.barr_id = activo.aap.barr_id
-                  // validar si es reubicación y no es retirada
-                  if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
-                    if (activo.aap.aaco_id !== 3) {
-                      this.retiradoDialogVisible = true
-                      direccion.even_valido.aap_id = false
-                    } else {
-                      this.retiradoDialogVisible = false
-                      direccion.even_valido.aap_id = true
-                      direccion.dato.aaco_id = null
-                    }
-                  } else {
-                    this.retiradoDialogVisible = false
-                  }
-                  // validar si es retiro y está ya retirada
-                  if (this.reporte.reti_id === 8) {
-                    if (activo.aap.aaco_id === 3) {
-                      this.yaretiradoDialogVisible = true
-                      direccion.even_valido.aap_id = false
-                    } else {
-                      this.yaretiradoDialogVisible = false
-                      direccion.even_valido.aap_id = true
-                    }
-                  }
-                  if (this.reporte.reti_id === 9) {
-                    console.log('Cambiando tipo de medida a : ' + this.reporte.adicional.aaco_id_nuevo)
-                    direccion.dato.aaco_id = this.reporte.adicional.aaco_id_nuevo
-                    if (this.reporte.adicional.aaco_id_nuevo === 2) {
-                      direccion.dato_adicional.medi_id = this.reporte.adicional.medi_id
-                      direccion.dato_adicional.tran_id = this.reporte.adicional.tran_id
-                    } else {
-                      direccion.dato_adicional.medi_id = null
-                      direccion.dato_adicional.tran_id = null
-                    }
-                  }
-                  if (this.reporte.reti_id === 8) {
-                    direccion.dato.aaco_id = 3
-                  }
-                  direccion.materiales.forEach((m) => {
-                    m.aap_id = direccion.aap_id
-                  })
-                  this.estadoLuminaria()
-                } else {
-                  this.estadoLuminaria()
-                  console.log('No se puede cambiar la info')
+          getAapEdit(direccion.aap_id)
+            .then((response) => {
+              const activo = response.data
+              if (
+                activo.aap === null ||
+                activo.aap.aap_id < 1 ||
+                activo.aap.esta_id === 9
+              ) {
+                this.existe = false
+                if (
+                  this.reporte.reti_id === 2 &&
+                  this.reporte.adicional.repo_tipo_expansion !== 4
+                ) {
+                  console.log('Ingrese a llamar validar siguiente consecutivo')
+                  this.validarSiguienteConsecutivo(direccion)
                 }
               } else {
                 this.existe = true
-                // Cargar datos de la luminaria
-                if (direccion.even_estado === 1) {
-                  direccion.even_direccion_anterior = activo.aap.aap_direccion
-                  direccion.barr_id_anterior = activo.aap.barr_id
-                  direccion.even_direccion = activo.aap.aap_direccion
-                  direccion.barr_id = activo.aap.barr_id
-                  direccion.materiales.forEach(m => {
-                    m.aap_id = direccion.aap_id
-                  })
+                if (this.reporte.reti_id !== 2) {
+                  if (direccion.even_estado === 1) {
+                    direccion.even_direccion_anterior =
+                      activo.aap.aap_direccion
+                    direccion.barr_id_anterior = activo.aap.barr_id
+                    direccion.dato.aatc_id_anterior = activo.aap.aatc_id
+                    direccion.dato.aama_id_anterior = activo.aap.aama_id
+                    direccion.dato.aamo_id_anterior = activo.aap.aamo_id
+                    direccion.dato.aaco_id_anterior = activo.aap.aaco_id
+                    direccion.dato.aap_potencia_anterior =
+                      activo.aap_adicional.aap_potencia
+                    direccion.dato.aap_tecnologia_anterior =
+                      activo.aap_adicional.aap_tecnologia
+                    direccion.dato_adicional.aacu_id_anterior =
+                      activo.aap.aacu_id
+                    direccion.dato_adicional.aaus_id_anterior =
+                      activo.aap.aaus_id
+                    direccion.dato_adicional.aap_apoyo_anterior =
+                      activo.aap.aap_apoyo
+                    direccion.dato_adicional.aap_lat_anterior =
+                      activo.aap.aap_lat
+                    direccion.dato_adicional.aap_lng_anterior =
+                      activo.aap.aap_lng
+                    direccion.even_direccion = activo.aap.aap_direccion
+                    direccion.barr_id = activo.aap.barr_id
+                    direccion.dato.aatc_id = activo.aap.aatc_id
+                    direccion.dato.aama_id = activo.aap.aama_id
+                    direccion.dato.aamo_id = activo.aap.aamo_id
+                    direccion.dato.aaco_id = activo.aap.aaco_id
+                    direccion.dato.aap_potencia =
+                      activo.aap_adicional.aap_potencia
+                    direccion.dato.aap_tecnologia =
+                      activo.aap_adicional.aap_tecnologia
+                    direccion.dato_adicional.aacu_id = activo.aap.aacu_id
+                    direccion.dato_adicional.aaus_id = activo.aap.aaus_id
+                    direccion.dato_adicional.aap_apoyo = activo.aap.aap_apoyo
+                    direccion.dato_adicional.aap_lat = activo.aap.aap_lat
+                    direccion.dato_adicional.aap_lng = activo.aap.aap_lng
+                    if (
+                      activo.aap_adicional.aap_brazo !== null &&
+                      activo.aap_adicional.aap_brazo !== undefined
+                    ) {
+                      direccion.dato.aap_brazo_anterior = activo.aap_adicional.aap_brazo.toString()
+                      direccion.dato.aap_brazo = activo.aap_adicional.aap_brazo.toString()
+                    } else {
+                      direccion.dato.aap_brazo_anterior = ''
+                      direccion.dato.aap_brazo = ''
+                    }
+                    direccion.dato.aap_collarin_anterior =
+                      activo.aap_adicional.aap_collarin
+                    direccion.dato.tipo_id_anterior =
+                      activo.aap_adicional.tipo_id
+                    direccion.dato.aap_poste_altura_anterior =
+                      activo.aap_adicional.aap_poste_altura
+                    direccion.dato.aap_collarin =
+                      activo.aap_adicional.aap_collarin
+                    direccion.dato.tipo_id = activo.aap_adicional.tipo_id
+                    direccion.dato.aap_poste_altura =
+                      activo.aap_adicional.aap_poste_altura
+                    if (
+                      activo.aap_adicional.aap_poste_propietario !== null &&
+                      activo.aap_adicional.aap_poste_propietario !== undefined
+                    ) {
+                      direccion.dato.aap_poste_propietario_anterior =
+                        activo.aap_adicional.aap_poste_propietario
+                      direccion.dato.aap_poste_propietario =
+                        activo.aap_adicional.aap_poste_propietario
+                    } else {
+                      direccion.dato.aap_poste_propietario = null
+                      direccion.dato.aap_poste_propietario_anterior = null
+                    }
+                    // validar si es reubicación y no es retirada
+                    if (
+                      this.reporte.reti_id === 3 ||
+                      this.reporte.reti_id === 7
+                    ) {
+                      if (activo.aap.aaco_id !== 3) {
+                        this.retiradoDialogVisible = true
+                        direccion.even_valido.aap_id = false
+                      } else {
+                        this.retiradoDialogVisible = false
+                        direccion.even_valido.aap_id = true
+                        direccion.dato.aaco_id = null
+                      }
+                    } else {
+                      this.retiradoDialogVisible = false
+                    }
+                    // validar si es retiro y está ya retirada
+                    if (this.reporte.reti_id === 8) {
+                      if (activo.aap.aaco_id === 3) {
+                        this.yaretiradoDialogVisible = true
+                        direccion.even_valido.aap_id = false
+                      } else {
+                        this.yaretiradoDialogVisible = false
+                        direccion.even_valido.aap_id = true
+                      }
+                    }
+                    if (this.reporte.reti_id === 9) {
+                      console.log(
+                        'Cambiando tipo de medida a : ' +
+                          this.reporte.adicional.aaco_id_nuevo
+                      )
+                      direccion.dato.aaco_id = this.reporte.adicional.aaco_id_nuevo
+                      if (this.reporte.adicional.aaco_id_nuevo === 2) {
+                        direccion.dato_adicional.medi_id = this.reporte.adicional.medi_id
+                        direccion.dato_adicional.tran_id = this.reporte.adicional.tran_id
+                      } else {
+                        direccion.dato_adicional.medi_id = null
+                        direccion.dato_adicional.tran_id = null
+                      }
+                    }
+                    if (this.reporte.reti_id === 8) {
+                      direccion.dato.aaco_id = 3
+                    }
+                    direccion.materiales.forEach((m) => {
+                      m.aap_id = direccion.aap_id
+                    })
+                    this.estadoControl()
+                  } else {
+                    this.estadoControl()
+                    console.log('No se puede cambiar la info')
+                  }
+                } else {
+                  this.existe = true
+                  // Cargar datos de la luminaria
+                  if (direccion.even_estado === 1) {
+                    direccion.even_direccion_anterior =
+                      activo.aap.aap_direccion
+                    direccion.barr_id_anterior = activo.aap.barr_id
+                    direccion.dato.aatc_id_anterior = activo.aap.aatc_id
+                    direccion.dato.aama_id_anterior = activo.aap.aama_id
+                    direccion.dato.aamo_id_anterior = activo.aap.aamo_id
+                    direccion.dato.aaco_id_anterior = activo.aap.aaco_id
+                    direccion.dato.aap_potencia_anterior =
+                      activo.aap_adicional.aap_potencia
+                    direccion.dato.aap_tecnologia_anterior =
+                      activo.aap_adicional.aap_tecnologia
+                    direccion.dato_adicional.aacu_id_anterior =
+                      activo.aap.aacu_id
+                    direccion.dato_adicional.aaus_id_anterior =
+                      activo.aap.aaus_id
+                    direccion.dato_adicional.aap_apoyo_anterior =
+                      activo.aap.aap_apoyo
+                    direccion.dato_adicional.aap_lat_anterior =
+                      activo.aap.aap_lat
+                    direccion.dato_adicional.aap_lng_anterior =
+                      activo.aap.aap_lng
+                    direccion.even_direccion = activo.aap.aap_direccion
+                    direccion.barr_id = activo.aap.barr_id
+                    direccion.dato.aatc_id = activo.aap.aatc_id
+                    direccion.dato.aama_id = activo.aap.aama_id
+                    direccion.dato.aamo_id = activo.aap.aamo_id
+                    direccion.dato.aaco_id = activo.aap.aaco_id
+                    direccion.dato.aap_potencia =
+                      activo.aap_adicional.aap_potencia
+                    direccion.dato.aap_tecnologia =
+                      activo.aap_adicional.aap_tecnologia
+                    direccion.dato_adicional.aacu_id = activo.aap.aacu_id
+                    direccion.dato_adicional.aaus_id = activo.aap.aaus_id
+                    direccion.dato_adicional.aap_apoyo = activo.aap.aap_apoyo
+                    direccion.dato_adicional.aap_lat = activo.aap.aap_lat
+                    direccion.dato_adicional.aap_lng = activo.aap.aap_lng
+                    if (
+                      activo.aap_adicional.aap_brazo !== null &&
+                      activo.aap_adicional.aap_brazo !== undefined
+                    ) {
+                      direccion.dato.aap_brazo_anterior = activo.aap_adicional.aap_brazo.toString()
+                      direccion.dato.aap_brazo = activo.aap_adicional.aap_brazo.toString()
+                    } else {
+                      direccion.dato.aap_brazo_anterior = ''
+                      direccion.dato.aap_brazo = ''
+                    }
+                    direccion.dato.aap_collarin_anterior =
+                      activo.aap_adicional.aap_collarin
+                    direccion.dato.tipo_id_anterior =
+                      activo.aap_adicional.tipo_id
+                    direccion.dato.aap_poste_altura_anterior =
+                      activo.aap_adicional.aap_poste_altura
+                    direccion.dato.aap_collarin =
+                      activo.aap_adicional.aap_collarin
+                    direccion.dato.tipo_id = activo.aap_adicional.tipo_id
+                    direccion.dato.aap_poste_altura =
+                      activo.aap_adicional.aap_poste_altura
+                    if (
+                      activo.aap_adicional.aap_poste_propietario !== null &&
+                      activo.aap_adicional.aap_poste_propietario !== undefined
+                    ) {
+                      direccion.dato.aap_poste_propietario_anterior =
+                        activo.aap_adicional.aap_poste_propietario
+                      direccion.dato.aap_poste_propietario =
+                        activo.aap_adicional.aap_poste_propietario
+                    } else {
+                      direccion.dato.aap_poste_propietario = null
+                      direccion.dato.aap_poste_propietario_anterior = null
+                    }
+                    direccion.materiales.forEach((m) => {
+                      m.aap_id = direccion.aap_id
+                    })
+                  }
+                  // Fin Cargar datos de la luminaria
+                  this.estadoControl()
                 }
-                // Fin Cargar datos de la luminaria
-                this.estadoLuminaria()
               }
-            }
-          }).catch(error => {
-            this.existe = false
-            direccion.materiales.forEach((m) => {
-              m.aap_id = direccion.aap_id
             })
-            if (this.reporte.reti_id === 2 && this.reporte.adicional.repo_tipo_expansion !== 4) {
-              console.log('Ingrese a llamar validar siguiente consecutivo')
-              this.validarSiguienteConsecutivo(direccion)
-            }
-            this.estadoLuminaria()
-            console.log('Estoy en Error: ' + error)
-            // this.centerDialogVisible = true
-          })
+            .catch((error) => {
+              this.existe = false
+              direccion.materiales.forEach((m) => {
+                m.aap_id = direccion.aap_id
+              })
+              if (
+                this.reporte.reti_id === 2 &&
+                this.reporte.adicional.repo_tipo_expansion !== 4
+              ) {
+                console.log('Ingrese a llamar validar siguiente consecutivo')
+                this.validarSiguienteConsecutivo(direccion)
+              }
+              this.estadoControl()
+              console.log('Estoy en Error: ' + error)
+              // this.centerDialogVisible = true
+            })
         }
       }
     },
     validarSiguienteConsecutivo (direccion) {
       console.log('Estoy en validar siguiente consecutivo')
-      buscarSiguiente().then(response => {
+      buscarSiguiente().then((response) => {
         var siguiente_consecutivo = response.data
-        this.reporte.direcciones.forEach(d => {
+        this.reporte.direcciones.forEach((d) => {
           console.log('validando direccion por crear: ' + d.aap_id)
           if (d.aap_id >= siguiente_consecutivo) {
-            console.log('aap_id por crear mayor que siguiente consecutivo: ' + d.aap_id)
+            console.log(
+              'aap_id por crear mayor que siguiente consecutivo: ' + d.aap_id
+            )
             if (d.aap_id !== direccion.aap_id) {
               console.log('validando aap_id: ' + d.aap_id)
               siguiente_consecutivo = d.aap_id + 1
@@ -2634,7 +2973,7 @@ export default {
           )
             .then(({ value }) => {
               validar(1, value)
-                .then(response => {
+                .then((response) => {
                   if (response.data === true) {
                     this.invalid = false
                     direccion.coau_codigo = value
@@ -2655,14 +2994,12 @@ export default {
                     this.invalid = true
                   }
                 })
-                .catch(error => {
+                .catch((error) => {
                   direccion.aap_id = null
                   this.$message({
                     type: 'error',
                     message:
-                      'Se presentó error al válidar el código (' +
-                      error +
-                      ')',
+                      'Se presentó error al válidar el código (' + error + ')',
                     duration: 5000
                   })
                   this.invalid = true
@@ -2670,7 +3007,7 @@ export default {
             })
             .catch(() => {
               direccion.aap_id = null
-              direccion.materiales.forEach(m => {
+              direccion.materiales.forEach((m) => {
                 m.aap_id = null
               })
               this.$message({
@@ -2686,49 +3023,70 @@ export default {
     validateAapEvento (aap_id, id) {
       if (aap_id) {
         this.aap.aap_id = aap_id
-        getAapValidar(aap_id).then(response => {
-          var result = response.data
-          if (result === 'false') {
+        getAapValidar(aap_id)
+          .then((response) => {
+            var result = response.data
+            if (result === 'false') {
+              this.existe = false
+              this.centerDialogVisible = true
+            }
+          })
+          .catch(() => {
             this.existe = false
             this.centerDialogVisible = true
-          }
-        }).catch(() => {
-          this.existe = false
-          this.centerDialogVisible = true
-        })
+          })
       }
     },
     codigoElemento (evento) {
-      if (evento.elem_id === '' || evento.elem_id === null || evento.elem_id === undefined) {
+      if (
+        evento.elem_id === '' ||
+        evento.elem_id === null ||
+        evento.elem_id === undefined
+      ) {
         return '-'
       } else {
         this.completarMaterial()
-        evento.elem_codigo = this.elementos_list.find(o => o.elem_id === evento.elem_id, { elem_codigo: '-' }).elem_codigo
+        evento.elem_codigo = this.elementos_list.find(
+          (o) => o.elem_id === evento.elem_id,
+          { elem_codigo: '-' }
+        ).elem_codigo
       }
     },
     buscarCodigoElemento (evento) {
-      if (evento.elem_codigo !== undefined && evento.elem_codigo !== null && evento.elem_codigo !== '') {
-        const elemento = this.elementos.find(e => parseInt(e.elem_codigo) === parseInt(evento.elem_codigo))
+      if (
+        evento.elem_codigo !== undefined &&
+        evento.elem_codigo !== null &&
+        evento.elem_codigo !== ''
+      ) {
+        const elemento = this.elementos.find(
+          (e) => parseInt(e.elem_codigo) === parseInt(evento.elem_codigo)
+        )
         if (!elemento) {
-          getElementoByCode(evento.elem_codigo).then(response => {
-            if (response.status === 200) {
-              this.elementos = []
-              var elemento = response.data
-              this.elementos.unshift(elemento)
-            } else {
+          getElementoByCode(evento.elem_codigo)
+            .then((response) => {
+              if (response.status === 200) {
+                this.elementos = []
+                var elemento = response.data
+                this.elementos.unshift(elemento)
+              } else {
+                this.$notify({
+                  title: 'Atención',
+                  message:
+                    'No se encontró Material con ese código: (' +
+                    response.status +
+                    ')',
+                  type: 'warning'
+                })
+              }
+            })
+            .catch((error) => {
               this.$notify({
                 title: 'Atención',
-                message: 'No se encontró Material con ese código: (' + response.status + ')',
+                message:
+                  'No se encontró Material con ese código: (' + error + ')',
                 type: 'warning'
               })
-            }
-          }).catch((error) => {
-            this.$notify({
-              title: 'Atención',
-              message: 'No se encontró Material con ese código: (' + error + ')',
-              type: 'warning'
             })
-          })
         } else {
           this.elementos = []
           this.elementos.unshift(elemento)
@@ -2737,7 +3095,7 @@ export default {
     },
     validarCodigoElementoRetirado (elem_id, codigo) {
       if (elem_id !== null && elem_id > 0 && codigo !== null && codigo !== '') {
-        validarCodigo(elem_id, codigo).then(response => {
+        validarCodigo(elem_id, codigo).then((response) => {
           const resultado = response.data
           if (resultado === '10') {
             const msg = 'Código de material ya fue retirado'
@@ -2751,7 +3109,7 @@ export default {
     },
     validarCodigoElementoInstalado (elem_id, codigo) {
       if (elem_id !== null && elem_id > 0 && codigo !== null && codigo !== '') {
-        validarCodigo(elem_id, codigo).then(response => {
+        validarCodigo(elem_id, codigo).then((response) => {
           const resultado = response.data
           if (resultado === '10') {
             const msg = 'Código de material ya fue retirado'
@@ -2778,22 +3136,47 @@ export default {
       // Mover material a reporte.eventos
       // // var even_length = 1
       this.reporte.eventos = []
-      this.reporte.direcciones.forEach(d => {
-        d.materiales.forEach(m => {
+      this.reporte.direcciones.forEach((d) => {
+        d.materiales.forEach((m) => {
           // // m.even_id = even_length
-          if (m.aap_id !== undefined && m.aap_id !== null && m.elem_id !== undefined && m.elem_id !== null) {
+          if (
+            m.aap_id !== undefined &&
+            m.aap_id !== null &&
+            m.elem_id !== undefined &&
+            m.elem_id !== null
+          ) {
             this.reporte.eventos.push(m)
           }
           // // even_length++
         })
       })
       // Validar cada direccion dato por todos sus valores requeridos
-      const dirForm = 'dirform_' + (this.reporte.direcciones[this.didx].even_id)
+      const dirForm = 'dirform_' + this.reporte.direcciones[this.didx].even_id
       this.$refs[dirForm].validate()
-      this.reporte.direcciones.forEach(d => {
-        if (d.aap_id !== null && this.reporte.reti_id !== 0 && d.even_estado < 8) {
+      this.reporte.direcciones.forEach((d) => {
+        if (
+          d.aap_id !== null &&
+          this.reporte.reti_id !== 0 &&
+          d.even_estado < 8
+        ) {
           // Validar Información
-          // Validar estado del control y tipo de reporte
+          const dt = d.dato
+          if (
+            dt.aatc_id === null ||
+            dt.aama_id === null ||
+            dt.aamo_id === null ||
+            dt.aaco_id === null ||
+            dt.aap_potencia === null ||
+            dt.aap_tecnologia === null ||
+            dt.aap_brazo === null ||
+            dt.aap_collarin === null ||
+            dt.tipo_id === null ||
+            dt.aap_poste_altura === null ||
+            dt.aap_poste_propietario === null
+          ) {
+            validacion = false
+          }
+          // Validar estado de la luminaria y tipo de reporte
           var aap_no_en_retiro = []
           var aap_no_nueva = []
           if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
@@ -2807,12 +3190,15 @@ export default {
             }
           }
 
-          if (this.reporte.reti_id === 2 && this.reporte.adicional.repo_tipo_expansion === 3) {
+          if (
+            this.reporte.reti_id === 2 &&
+            this.reporte.adicional.repo_tipo_expansion === 3
+          ) {
             if (d.esnueva === false) {
               aap_no_nueva.push(d.aap)
               this.$notify.error({
                 title: 'Control Ya Existe',
-                message: 'Verifique el código de la luminaria: ' + d.aap_id,
+                message: 'Verifique el código del control: ' + d.aap_id,
                 offset: 0
               })
             }
@@ -2822,16 +3208,18 @@ export default {
             validacion = false
           }
           // validar luminaria ya retirada
+          /*
           if (this.reporte.reti_id === 8) {
-            if (d.esta_id === 3) {
+            if (dt.aaco_id_anterior === 3) {
               validacion = false
               this.$notify.error({
                 title: 'Control Ya Está Retirada',
-                message: 'Verifique el control: ' + d.aap_id,
+                message: 'Verifique la luminaria: ' + d.aap_id,
                 offset: 0
               })
             }
           }
+          */
         }
       })
       //
@@ -2851,7 +3239,9 @@ export default {
           console.log('validación: ' + validacion)
         }
         */
-        valido = validacion && await this.validatForm('reporteForm')
+        // valido = validacion && (await this.validatForm('reporteForm'))
+        console.log('validacion: ' + validacion)
+        valido = (await this.validatForm('reporteForm'))
         if (!valido) {
           this.$notify.info({
             title: 'Atención',
@@ -2878,20 +3268,28 @@ export default {
           }
         }
         this.reporte.rees_id = 3
-        const data = { reporte: this.reporte, coau_tipo: this.coau_tipo, coau_codigo: this.autorizacion }
-        updateReporte(data).then(response => {
-          if (response.status === 200) {
-            localStorage.removeItem('currEditControlRepFechaIni')
-            localStorage.removeItem('currEditControlRepFecha')
-            this.success()
-          } else {
+        const data = {
+          reporte: this.reporte,
+          coau_tipo: this.coau_tipo,
+          coau_codigo: this.autorizacion
+        }
+        updateReporte(data)
+          .then((response) => {
+            if (response.status === 200) {
+              localStorage.removeItem('currEditConRepFechaIni')
+              localStorage.removeItem('currEditConRepFecha')
+              this.success()
+            } else {
+              this.reporte.rees_id = 2
+              this.error(
+                'Se presentó un inconveniente al guardar los cambios, por favor reintente'
+              )
+            }
+          })
+          .catch((error) => {
             this.reporte.rees_id = 2
-            this.error('Se presentó un inconveniente al guardar los cambios, por favor reintente')
-          }
-        }).catch(error => {
-          this.reporte.rees_id = 2
-          this.error(error)
-        })
+            this.error(error)
+          })
       }
       start()
     },
@@ -2906,7 +3304,10 @@ export default {
         if (form.includes('dirform')) {
           const name = form.split('_')
           const index = name[1] - 1
-          if (this.reporte.direcciones[index].even_estado <= 8 && this.reporte.direcciones[index].aap_id > 0) {
+          if (
+            this.reporte.direcciones[index].even_estado <= 8 &&
+            this.reporte.direcciones[index].aap_id > 0
+          ) {
             var valido = new Promise((resolve, reject) => {
               this.$refs[form][0].validate((valid) => {
                 console.log(form + ' validation :' + valid)
@@ -2918,7 +3319,10 @@ export default {
         } else if (form.includes('matform')) {
           const name = form.split('_')
           const index = name[1] - 1
-          if (this.reporte.eventos[index].even_estado <= 8 && this.reporte.eventos[index].aap_id > 0) {
+          if (
+            this.reporte.eventos[index].even_estado <= 8 &&
+            this.reporte.eventos[index].aap_id > 0
+          ) {
             valido = new Promise((resolve, reject) => {
               this.$refs[form][0].validate((valid) => {
                 console.log(form + ' validation :' + valid)
@@ -2939,15 +3343,12 @@ export default {
       }
       return true
     },
-    imprimir () {
-    },
+    imprimir () {},
     success () {
       this.$notify({
         title: this.$i18n.t('reporte.success'),
         message:
-          this.$i18n.t('reporte.updated') +
-          ' ' +
-          this.reporte.repo_consecutivo,
+          this.$i18n.t('reporte.updated') + ' ' + this.reporte.repo_consecutivo,
         type: 'success'
       })
       this.$timer.stop('autosave')
@@ -2988,8 +3389,8 @@ export default {
           even_fecha: null,
           even_codigo_instalado: null,
           even_codigo_retirado: null,
-          even_cantidad_instalado: 1.00,
-          even_cantidad_retirado: 1.00,
+          even_cantidad_instalado: 1.0,
+          even_cantidad_retirado: 1.0,
           even_estado: 1,
           aap_id: this.reporte.direcciones[this.didx].aap_id,
           repo_id: this.reporte.repo_id,
@@ -3007,7 +3408,8 @@ export default {
           }
         }
         this.reporte.direcciones[this.didx].materiales.push(evento)
-        this.evento_siguiente_consecutivo = this.evento_siguiente_consecutivo + 1
+        this.evento_siguiente_consecutivo =
+          this.evento_siguiente_consecutivo + 1
       }
     },
     onAddAddress (l) {
@@ -3087,10 +3489,11 @@ export default {
           idx: this.idx
         }
         this.reporte.direcciones.push(direccion)
-        this.validateAap(direccion, (direccion.even_id - 1))
+        this.validateAap(direccion, direccion.even_id - 1)
         this.handleTag(direccion.idx)
         this.onAddEvent(10)
-        this.direccion_siguiente_consecutivo = this.direccion_siguiente_consecutivo + 1
+        this.direccion_siguiente_consecutivo =
+          this.direccion_siguiente_consecutivo + 1
         this.idx++
       }
       this.inputVisible01 = false
@@ -3105,7 +3508,10 @@ export default {
       if (elem_id === null) {
         return ''
       } else {
-        const elemento = this.elementos_list.find(o => o.elem_id === elem_id, { elem_descripcion: null })
+        const elemento = this.elementos_list.find(
+          (o) => o.elem_id === elem_id,
+          { elem_descripcion: null }
+        )
         return elemento.elem_descripcion
       }
     },
@@ -3116,7 +3522,9 @@ export default {
       if (reti_id === null) {
         return ''
       } else {
-        return this.tipos.find(o => o.reti_id === reti_id, { reti_descripcion: 'INDEFINIDO' }).reti_descripcion
+        return this.tipos.find((o) => o.reti_id === reti_id, {
+          reti_descripcion: 'INDEFINIDO'
+        }).reti_descripcion
       }
     },
     estado () {
@@ -3126,7 +3534,9 @@ export default {
           return ''
         } else {
           if (this.estados && this.estados.length > 0) {
-            return this.estados.find(o => o.rees_id === rees_id, { rees_descripcion: 'INDEFINIDO' }).rees_descripcion
+            return this.estados.find((o) => o.rees_id === rees_id, {
+              rees_descripcion: 'INDEFINIDO'
+            }).rees_descripcion
           } else {
             return 'INDEFINIDO'
           }
@@ -3137,93 +3547,134 @@ export default {
       if (acci_id === null) {
         return ''
       } else {
-        return this.acciones.find(o => o.acci_id === acci_id, { acci_descripcion: null }).acci_descripcion
+        return this.acciones.find((o) => o.acci_id === acci_id, {
+          acci_descripcion: null
+        }).acci_descripcion
       }
     },
     abrirReporte () {
-      this.$prompt('Por favor ingrese el código de autorización si lo tiene:', 'Confirmación', {
-        confirmButtonText: 'Confirmar',
-        cancelButtonText: 'Cancelar'
-      }).then(({ value }) => {
-        validar(3, value).then(response => {
-          if (response.data === true) {
-            this.autorizacion = value
-            this.coau_tipo = 3
+      this.$prompt(
+        'Por favor ingrese el código de autorización si lo tiene:',
+        'Confirmación',
+        {
+          confirmButtonText: 'Confirmar',
+          cancelButtonText: 'Cancelar'
+        }
+      ).then(({ value }) => {
+        validar(3, value)
+          .then((response) => {
+            if (response.data === true) {
+              this.autorizacion = value
+              this.coau_tipo = 3
+              this.$message({
+                type: 'success',
+                message: 'El código es válido, puede continuar',
+                duration: 5000
+              })
+              this.reporte.rees_id = 2
+              this.$timer.start('autosave')
+              this.$timer.start('pending')
+            } else {
+              this.$alert(
+                'El código ingresado no es válido, por favor confirmelo',
+                'Error',
+                {
+                  confirmButtonText: 'Cerrar'
+                }
+              )
+            }
+          })
+          .catch((error) => {
             this.$message({
-              type: 'success',
-              message: 'El código es válido, puede continuar',
+              type: 'error',
+              message: 'Se presentó error al válidar el código (' + error + ')',
               duration: 5000
             })
-            this.reporte.rees_id = 2
-            this.$timer.start('autosave')
-            this.$timer.start('pending')
-          } else {
-            this.$alert('El código ingresado no es válido, por favor confirmelo', 'Error', {
-              confirmButtonText: 'Cerrar'
-            })
-          }
-        }).catch(error => {
-          this.$message({
-            type: 'error',
-            message: 'Se presentó error al válidar el código (' + error + ')',
-            duration: 5000
           })
-        })
       })
     },
     obtenerReporte () {
-      getReporte(this.$route.params.id).then(response => {
+      getReporte(this.$route.params.id).then((response) => {
         this.reporte_previo = response.data
         if (this.reporte_previo.rees_id === 1) {
-          validarReporteDiligenciado(this.reporte_previo.reti_id, this.reporte_previo.repo_consecutivo).then(resp => {
-            if (resp.data[0] === true) {
-              this.invalid = false
-              this.inicioReporte()
-            } else {
-              this.$prompt('Por favor ingrese el código de autorización si lo tiene:', 'Primero debe diligenciar el(los) reporte(s) Tipo ' + this.reporte_tipo(this.reporte_previo.reti_id) + ' No(s).' + resp.data[1], 'Atención', {
-                confirmButtonText: 'Confirmar',
-                cancelButtonText: 'Cancelar'
-              }).then(({ value }) => {
-                validar(2, value).then(response => {
-                  if (response.data === true) {
-                    this.invalid = false
-                    this.coau_tipo = 2
-                    this.autorizacion = value
+          validarReporteDiligenciado(
+            this.reporte_previo.reti_id,
+            this.reporte_previo.repo_consecutivo
+          )
+            .then((resp) => {
+              if (resp.data[0] === true) {
+                this.invalid = false
+                this.inicioReporte()
+              } else {
+                this.$prompt(
+                  'Por favor ingrese el código de autorización si lo tiene:',
+                  'Primero debe diligenciar el(los) reporte(s) Tipo ' +
+                    this.reporte_tipo(this.reporte_previo.reti_id) +
+                    ' No(s).' +
+                    resp.data[1],
+                  'Atención',
+                  {
+                    confirmButtonText: 'Confirmar',
+                    cancelButtonText: 'Cancelar'
+                  }
+                )
+                  .then(({ value }) => {
+                    validar(2, value)
+                      .then((response) => {
+                        if (response.data === true) {
+                          this.invalid = false
+                          this.coau_tipo = 2
+                          this.autorizacion = value
+                          this.$message({
+                            type: 'success',
+                            message: 'El código es válido, puede continuar',
+                            duration: 5000
+                          })
+                          this.inicioReporte()
+                        } else {
+                          this.$alert(
+                            'El código ingresado no es válido, por favor confirmelo',
+                            'Error',
+                            {
+                              confirmButtonText: 'Cerrar'
+                            }
+                          )
+                          this.invalid = true
+                        }
+                      })
+                      .catch((error) => {
+                        this.$message({
+                          type: 'error',
+                          message:
+                            'Se presentó error al válidar el código (' +
+                            error +
+                            ')',
+                          duration: 5000
+                        })
+                        this.invalid = true
+                      })
+                  })
+                  .catch(() => {
                     this.$message({
-                      type: 'success',
-                      message: 'El código es válido, puede continuar',
+                      type: 'info',
+                      message: 'Cancelado',
                       duration: 5000
                     })
-                    this.inicioReporte()
-                  } else {
-                    this.$alert('El código ingresado no es válido, por favor confirmelo', 'Error', {
-                      confirmButtonText: 'Cerrar'
-                    })
                     this.invalid = true
-                  }
-                }).catch(error => {
-                  this.$message({
-                    type: 'error',
-                    message: 'Se presentó error al válidar el código (' + error + ')',
-                    duration: 5000
                   })
-                  this.invalid = true
-                })
-              }).catch(() => {
-                this.$message({
-                  type: 'info',
-                  message: 'Cancelado',
-                  duration: 5000
-                })
-                this.invalid = true
-              })
-            }
-          }).catch(error => {
-            this.invalid = true
-            this.$alert('No se pudo validar el estado del reporte anterior. Error: ' + error, 'Error', {
-              confirmButtonText: 'Cerrar'
+              }
             })
-          })
+            .catch((error) => {
+              this.invalid = true
+              this.$alert(
+                'No se pudo validar el estado del reporte anterior. Error: ' +
+                  error,
+                'Error',
+                {
+                  confirmButtonText: 'Cerrar'
+                }
+              )
+            })
         } else {
           this.inicioReporte(this.reporte_previo)
         }
@@ -3250,7 +3701,7 @@ export default {
         this.reporte_previo.adicional.repo_modificado = new Date()
         this.reporte_previo.adicional.repo_fechadigitacion = new Date()
       }
-      this.reporte_previo.direcciones.forEach(d => {
+      this.reporte_previo.direcciones.forEach((d) => {
         d.even_valido = {
           aap_id: true,
           aap_direccion: true,
@@ -3272,12 +3723,25 @@ export default {
         d.codigoautorizacion = null
         d.aap_fechatoma = null
       })
-      if (this.reporte_previo.reti_id === 2 || this.reporte_previo.reti_id === 3 || this.reporte_previo.reti_id === 4 || this.reporte_previo.reti_id === 5 || this.reporte_previo.reti_id === 6 || this.reporte_previo.reti_id === 7 || this.reporte_previo.reti_id === 8) {
+      if (
+        this.reporte_previo.reti_id === 2 ||
+        this.reporte_previo.reti_id === 3 ||
+        this.reporte_previo.reti_id === 4 ||
+        this.reporte_previo.reti_id === 5 ||
+        this.reporte_previo.reti_id === 6 ||
+        this.reporte_previo.reti_id === 7 ||
+        this.reporte_previo.reti_id === 8
+      ) {
         this.conDirecciones = true
       } else {
         this.conDirecciones = false
       }
-      localStorage.setItem('currEditControlRepFechaIni', JSON.stringify({ fecha: Date.now(), data: this.reporte }))
+      if (this.reporte_previo.rees_id !== 3) {
+        localStorage.setItem(
+          'currEditConRepFechaIni',
+          JSON.stringify({ fecha: Date.now(), data: this.reporte })
+        )
+      }
       this.cargarEventos()
       this.validarConsecutivo()
       this.reporte = this.reporte_previo
@@ -3291,13 +3755,39 @@ export default {
       } else {
         this.conexiones.splice(2, 1)
       }
+      this.repo_fecharecepcion = this.reporte.repo_fecharecepcion
+      this.repo_direccion = this.reporte.repo_direccion
+      this.repo_nombre = this.reporte.repo_nombre
+      this.repo_telefono = this.reporte.repo_telefono
+      this.repo_codigo = this.reporte.adicional.repo_codigo
+      this.repo_apoyo = this.reporte.adicional.repo_apoyo
+      this.repo_descripcion = this.reporte.repo_descripcion
+      this.orig_id = this.reporte.orig_id
+      this.acti_id = this.reporte.acti_id
+      this.tiba_id = this.reporte.tiba_id
+      this.barr_id = this.reporte.barr_id
+      if (this.reporte.adicional.ortr_id === null) {
+        this.ortr_id_state = true
+      }
     },
     validarConsecutivo () {
       // var consecutivo = 1
       for (var i = 0; i < this.reporte_previo.eventos.length; i++) {
-        if (this.reporte_previo.eventos[i].elem_id !== undefined && this.reporte_previo.eventos[i].elem_id > 0) {
-          if (this.elementos.find(e => e.elem_id === this.reporte_previo.eventos[i].elem_id) === undefined) {
-            this.elementos.push({ elem_id: this.reporte_previo.eventos[i].elem_id, elem_descripcion: this.elemento(this.reporte_previo.eventos[i].elem_id) })
+        if (
+          this.reporte_previo.eventos[i].elem_id !== undefined &&
+          this.reporte_previo.eventos[i].elem_id > 0
+        ) {
+          if (
+            this.elementos.find(
+              (e) => e.elem_id === this.reporte_previo.eventos[i].elem_id
+            ) === undefined
+          ) {
+            this.elementos.push({
+              elem_id: this.reporte_previo.eventos[i].elem_id,
+              elem_descripcion: this.elemento(
+                this.reporte_previo.eventos[i].elem_id
+              )
+            })
           }
         }
         // consecutivo++
@@ -3305,21 +3795,23 @@ export default {
     },
     cargarEventos () {
       // validar si existe un reporte previo
-      var stringReporteAnterior = localStorage.getItem('currEditControlRepFecha')
-      if (stringReporteAnterior !== undefined &&
-          stringReporteAnterior !== null &&
-          stringReporteAnterior !== '') {
+      var stringReporteAnterior = localStorage.getItem('currEditConRepFecha')
+      if (
+        stringReporteAnterior !== undefined &&
+        stringReporteAnterior !== null &&
+        stringReporteAnterior !== ''
+      ) {
         const fecha = JSON.parse(stringReporteAnterior).fecha
         const diferencia = (Date.now() - fecha) / 1000
         if (diferencia < 43200) {
-          var currEditRepFecha = JSON.parse(stringReporteAnterior).data
-          if (currEditRepFecha.repo_id === this.reporte_previo.repo_id) {
-            this.reporte_previo = currEditRepFecha
+          var currEditConRepFecha = JSON.parse(stringReporteAnterior).data
+          if (currEditConRepFecha.repo_id === this.reporte_previo.repo_id) {
+            this.reporte_previo = currEditConRepFecha
             this.reporte_previo.adicional.repo_fechadigitacion = new Date()
             this.reporte_previo.adicional.repo_modificado = new Date()
             this.reporte_previo.eventos = []
-            this.reporte_previo.direcciones.forEach(d => {
-              d.materiales.forEach(m => {
+            this.reporte_previo.direcciones.forEach((d) => {
+              d.materiales.forEach((m) => {
                 this.reporte_previo.eventos.push(m)
               })
             })
@@ -3341,7 +3833,9 @@ export default {
       })
       this.reporte_previo.eventos.forEach((e) => {
         if (e.even_id === undefined || e.even_id === null || e.even_id < 1) {
-          console.log('renumerando valor de e.even_id a even_length + 1:' + even_length)
+          console.log(
+            'renumerando valor de e.even_id a even_length + 1:' + even_length
+          )
           e.even_id = even_length + 1
           even_length = even_length + 1
         }
@@ -3350,7 +3844,7 @@ export default {
         this.idx = 1
         if (this.reporte_previo.eventos.length > 0) {
           var aap_id = ''
-          this.reporte_previo.eventos.forEach(e => {
+          this.reporte_previo.eventos.forEach((e) => {
             if (e.aap_id !== aap_id) {
               var direccion = {
                 repo_id: this.reporte_previo.repo_id,
@@ -3426,12 +3920,20 @@ export default {
               }
 
               // materiales: this.reporte_previo.eventos.filter(m => m.aap_id === e.aap_id)
-              var eventos = this.reporte_previo.eventos.filter(m => m.aap_id === e.aap_id)
-              eventos.forEach(e => {
+              var eventos = this.reporte_previo.eventos.filter(
+                (m) => m.aap_id === e.aap_id
+              )
+              eventos.forEach((e) => {
                 var evento = {
                   even_fecha: e.even_fecha,
-                  even_codigo_instalado: (e.even_codigo_instalado === undefined ? null : e.even_codigo_instalado),
-                  even_codigo_retirado: (e.even_codigo_retirado === undefined ? null : e.even_codigo_retirado),
+                  even_codigo_instalado:
+                    e.even_codigo_instalado === undefined
+                      ? null
+                      : e.even_codigo_instalado,
+                  even_codigo_retirado:
+                    e.even_codigo_retirado === undefined
+                      ? null
+                      : e.even_codigo_retirado,
                   even_cantidad_instalado: e.even_cantidad_instalado,
                   even_cantidad_retirado: e.even_cantidad_retirado,
                   even_estado: e.even_estado,
@@ -3452,7 +3954,10 @@ export default {
                 }
                 direccion.materiales.push(evento)
               })
-              console.log('agregando direccion vacio a reporte: ' + this.reporte_previo.repo_id)
+              console.log(
+                'agregando direccion vacio a reporte: ' +
+                  this.reporte_previo.repo_id
+              )
               this.reporte_previo.direcciones.push(direccion)
               this.idx++
               dire_length++
@@ -3541,7 +4046,7 @@ export default {
         }
       }
       this.idx = 1
-      this.reporte_previo.direcciones.forEach(d => {
+      this.reporte_previo.direcciones.forEach((d) => {
         if (d.even_id > dire_length) {
           dire_length = d.even_id
         }
@@ -3550,13 +4055,23 @@ export default {
           d.materiales = []
         }
         if (d.materiales.length === 0) {
-          console.log('Se adiciona materiales a direccion desde los eventos: ' + d.aap_id)
-          var eventos = this.reporte_previo.eventos.filter(e => e.aap_id === d.aap_id)
-          eventos.forEach(e => {
+          console.log(
+            'Se adiciona materiales a direccion desde los eventos: ' + d.aap_id
+          )
+          var eventos = this.reporte_previo.eventos.filter(
+            (e) => e.aap_id === d.aap_id
+          )
+          eventos.forEach((e) => {
             var evento = {
               even_fecha: e.even_fecha,
-              even_codigo_instalado: (e.even_codigo_instalado === undefined ? null : e.even_codigo_instalado),
-              even_codigo_retirado: (e.even_codigo_retirado === undefined ? null : e.even_codigo_retirado),
+              even_codigo_instalado:
+                e.even_codigo_instalado === undefined
+                  ? null
+                  : e.even_codigo_instalado,
+              even_codigo_retirado:
+                e.even_codigo_retirado === undefined
+                  ? null
+                  : e.even_codigo_retirado,
               even_cantidad_instalado: e.even_cantidad_instalado,
               even_cantidad_retirado: e.even_cantidad_retirado,
               even_estado: e.even_estado,
@@ -3580,7 +4095,7 @@ export default {
         d.idx = this.idx
         this.idx++
       })
-      this.reporte_previo.direcciones.forEach(d => {
+      this.reporte_previo.direcciones.forEach((d) => {
         if (d.even_id === 1) {
           d.type = 'success'
         } else {
@@ -3596,8 +4111,8 @@ export default {
               even_fecha: null,
               even_codigo_instalado: null,
               even_codigo_retirado: null,
-              even_cantidad_instalado: 1.00,
-              even_cantidad_retirado: 1.00,
+              even_cantidad_instalado: 1.0,
+              even_cantidad_retirado: 1.0,
               even_estado: 1,
               aap_id: d.aap_id,
               repo_id: this.reporte_previo.repo_id,
@@ -3622,14 +4137,14 @@ export default {
       })
       this.evento_siguiente_consecutivo = even_length + 1
       this.direccion_siguiente_consecutivo = dire_length + 1
-      this.novedad_siguiente_consecutivo = nove_length + 1
+      this.novedad_siguiente_consecutivo = nove_length
       this.minDate = this.reporte_previo.repo_fecharecepcion
       var temp = JSON.stringify(this.reporte_previo)
       this.reporte_previo = JSON.parse(temp)
     },
     remoteMethodElemento (query) {
       if (query !== '') {
-        getElementoByDescripcion(query).then(response => {
+        getElementoByDescripcion(query).then((response) => {
           this.elementos = response.data
           // this.completarMaterial()
         })
@@ -3640,10 +4155,29 @@ export default {
     completarMaterial () {
       for (var j = 0; j < this.reporte.direcciones.length; j++) {
         if (this.reporte.direcciones[j].materiales !== undefined) {
-          for (var i = 0; i < this.reporte.direcciones[j].materiales.length; i++) {
-            if (this.reporte.direcciones[j].materiales[i] !== undefined && this.reporte.direcciones[j].materiales[i].elem_id !== undefined && this.reporte.direcciones[j].materiales[i].elem_id > 0) {
-              if (this.elementos.find(e => e.elem_id === this.reporte.direcciones[j].materiales[i].elem_id) === undefined) {
-                this.elementos.push({ elem_id: this.reporte.direcciones[j].materiales[i].elem_id, elem_descripcion: this.elemento(this.reporte.direcciones[j].materiales[i].elem_id) })
+          for (
+            var i = 0;
+            i < this.reporte.direcciones[j].materiales.length;
+            i++
+          ) {
+            if (
+              this.reporte.direcciones[j].materiales[i] !== undefined &&
+              this.reporte.direcciones[j].materiales[i].elem_id !== undefined &&
+              this.reporte.direcciones[j].materiales[i].elem_id > 0
+            ) {
+              if (
+                this.elementos.find(
+                  (e) =>
+                    e.elem_id ===
+                    this.reporte.direcciones[j].materiales[i].elem_id
+                ) === undefined
+              ) {
+                this.elementos.push({
+                  elem_id: this.reporte.direcciones[j].materiales[i].elem_id,
+                  elem_descripcion: this.elemento(
+                    this.reporte.direcciones[j].materiales[i].elem_id
+                  )
+                })
               }
             }
           }
@@ -3652,141 +4186,315 @@ export default {
     }
   },
   beforeMount () {
-    getOrigenes().then(response => {
-      this.origenes = response.data
-      getBarriosEmpresa().then(response => {
-        this.barrios = response.data
-        this.barrios_lista = response.data
-        getActividades().then(response => {
-          this.actividades = response.data
-          getAcciones().then(response => {
-            this.acciones = response.data
-            getMedioambiente().then(response => {
-              this.medioambiente = response.data
-              this.medioambiente.forEach((o) => {
-                this.medioambiente_keys.push(o.meam_id)
-              })
-              getEstados().then(response => {
-                this.estados = response.data
-                getTipos().then(response => {
-                  this.tipos = response.data
-                  this.tipos_lista = response.data
-                  getTiposBarrio().then(response => {
-                    this.tiposbarrio = response.data
-                    getElementos().then(response => {
-                      this.elementos_list = response.data
-                      getAapTiposCarcasa().then(response => {
-                        this.carcasas = response.data
-                        getAapMarcas().then(response => {
-                          this.marcas = response.data
-                          getAapModelos().then(response => {
-                            this.modelos = response.data
-                            getCaracteristica(7).then(response => {
-                              this.tecnologias = response.data.cara_valores.split(',')
-                              getCaracteristica(5).then(response => {
-                                this.potencias = response.data.cara_valores.split(',')
-                                getCaracteristica(8).then(response => {
-                                  const poste = response.data.cara_valores.split(',')
-                                  for (var i = 0; i < poste.length; i++) {
-                                    this.postes.push({ tipo_id: (i + 1), tipo_descripcion: poste[i] })
-                                  }
-                                  getCaracteristica(9).then(response => {
-                                    this.owns = response.data.cara_valores.split(',')
-                                    getAapConexiones().then(response => {
-                                      this.conexiones = response.data
-                                      getAapUsos().then(response => {
-                                        this.aap_usos = response.data
-                                        getAapCuentasAp().then(response => {
-                                          this.aap_cuentasap = response.data
-                                          getTiposRetiro().then(response => {
-                                            this.tiposretiro = response.data
-                                            getUrbanizadoraTodas().then(response => {
-                                              this.urbanizadoras = response.data
-                                              getMedidors().then(response => {
-                                                this.medidores = response.data
-                                                getTransformadors().then(response => {
-                                                  this.transformadores = response.data
-                                                  getOrdenes().then(response => {
-                                                    this.ordenestrabajo = response.data
-                                                    getNovedades(1).then(response => {
-                                                      this.novedades = response.data
-                                                      this.obtenerReporte()
-                                                    }).catch(error => {
-                                                      console.log('getNovedades:' + error)
-                                                    })
-                                                  }).catch(error => {
+    getOrigenes()
+      .then((response) => {
+        this.origenes = response.data
+        getBarriosEmpresa()
+          .then((response) => {
+            this.barrios = response.data
+            this.barrios_lista = response.data
+            getActividades()
+              .then((response) => {
+                this.actividades = response.data
+                getAcciones()
+                  .then((response) => {
+                    this.acciones = response.data
+                    getMedioambiente()
+                      .then((response) => {
+                        this.medioambiente = response.data
+                        this.medioambiente.forEach((o) => {
+                          this.medioambiente_keys.push(o.meam_id)
+                        })
+                        getEstados()
+                          .then((response) => {
+                            this.estados = response.data
+                            getTipos()
+                              .then((response) => {
+                                this.tipos = response.data
+                                this.tipos_lista = response.data
+                                getTiposBarrio()
+                                  .then((response) => {
+                                    this.tiposbarrio = response.data
+                                    getElementos()
+                                      .then((response) => {
+                                        this.elementos_list = response.data
+                                        getAapTiposCarcasa()
+                                          .then((response) => {
+                                            this.carcasas = response.data
+                                            getAapMarcas()
+                                              .then((response) => {
+                                                this.marcas = response.data
+                                                getAapModelos()
+                                                  .then((response) => {
+                                                    this.modelos =
+                                                      response.data
+                                                    getCaracteristica(7)
+                                                      .then((response) => {
+                                                        this.tecnologias = response.data.cara_valores.split(
+                                                          ','
+                                                        )
+                                                        getCaracteristica(5)
+                                                          .then((response) => {
+                                                            this.potencias = response.data.cara_valores.split(
+                                                              ','
+                                                            )
+                                                            getCaracteristica(8)
+                                                              .then(
+                                                                (response) => {
+                                                                  const poste = response.data.cara_valores.split(
+                                                                    ','
+                                                                  )
+                                                                  for (
+                                                                    var i = 0;
+                                                                    i <
+                                                                    poste.length;
+                                                                    i++
+                                                                  ) {
+                                                                    this.postes.push(
+                                                                      {
+                                                                        tipo_id:
+                                                                          i + 1,
+                                                                        tipo_descripcion:
+                                                                          poste[
+                                                                            i
+                                                                          ]
+                                                                      }
+                                                                    )
+                                                                  }
+                                                                  getCaracteristica(
+                                                                    9
+                                                                  )
+                                                                    .then(
+                                                                      (
+                                                                        response
+                                                                      ) => {
+                                                                        this.owns = response.data.cara_valores.split(
+                                                                          ','
+                                                                        )
+                                                                        getAapConexiones()
+                                                                          .then(
+                                                                            (
+                                                                              response
+                                                                            ) => {
+                                                                              this.conexiones =
+                                                                                response.data
+                                                                              getAapUsos()
+                                                                                .then(
+                                                                                  (
+                                                                                    response
+                                                                                  ) => {
+                                                                                    this.aap_usos =
+                                                                                      response.data
+                                                                                    getAapCuentasAp()
+                                                                                      .then(
+                                                                                        (
+                                                                                          response
+                                                                                        ) => {
+                                                                                          this.aap_cuentasap =
+                                                                                            response.data
+                                                                                          getTiposRetiro()
+                                                                                            .then(
+                                                                                              (
+                                                                                                response
+                                                                                              ) => {
+                                                                                                this.tiposretiro =
+                                                                                                  response.data
+                                                                                                getUrbanizadoraTodas().then(
+                                                                                                  (
+                                                                                                    response
+                                                                                                  ) => {
+                                                                                                    this.urbanizadoras =
+                                                                                                      response.data
+                                                                                                    getMedidors()
+                                                                                                      .then(
+                                                                                                        (
+                                                                                                          response
+                                                                                                        ) => {
+                                                                                                          this.medidores =
+                                                                                                            response.data
+                                                                                                          getTransformadors()
+                                                                                                            .then(
+                                                                                                              (
+                                                                                                                response
+                                                                                                              ) => {
+                                                                                                                this.transformadores =
+                                                                                                                  response.data
+                                                                                                                getOrdenes().then(response => {
+                                                                                                                  this.ordenestrabajo = response.data
+                                                                                                                  getNovedades(1).then(response => {
+                                                                                                                    this.novedades = response.data
+                                                                                                                    this.obtenerReporte()
+                                                                                                                  }).catch(error => {
+                                                                                                                    console.log('getNovedades:' + error)
+                                                                                                                  })
+                                                                                                                }).catch(error => {
+                                                                                                                  console.log(
+                                                                                                                    'Error Ordenes Trabajo: ' +
+                                                                                                                    error
+                                                                                                                  )
+                                                                                                                })
+                                                                                                              }
+                                                                                                            )
+                                                                                                            .catch(
+                                                                                                              (
+                                                                                                                error
+                                                                                                              ) => {
+                                                                                                                console.log(
+                                                                                                                  'Error Transformadores: ' +
+                                                                                                                    error
+                                                                                                                )
+                                                                                                              }
+                                                                                                            )
+                                                                                                        }
+                                                                                                      )
+                                                                                                      .catch(
+                                                                                                        (
+                                                                                                          error
+                                                                                                        ) => {
+                                                                                                          console.log(
+                                                                                                            'Error Medidores' +
+                                                                                                              error
+                                                                                                          )
+                                                                                                        }
+                                                                                                      )
+                                                                                                  }
+                                                                                                )
+                                                                                              }
+                                                                                            )
+                                                                                            .catch(
+                                                                                              (
+                                                                                                error
+                                                                                              ) => {
+                                                                                                console.log(
+                                                                                                  'get Tipos Retiro: ' +
+                                                                                                    error
+                                                                                                )
+                                                                                              }
+                                                                                            )
+                                                                                        }
+                                                                                      )
+                                                                                      .catch(
+                                                                                        (
+                                                                                          error
+                                                                                        ) => {
+                                                                                          console.log(
+                                                                                            error
+                                                                                          )
+                                                                                        }
+                                                                                      )
+                                                                                  }
+                                                                                )
+                                                                                .catch(
+                                                                                  (
+                                                                                    error
+                                                                                  ) => {
+                                                                                    console.log(
+                                                                                      error
+                                                                                    )
+                                                                                  }
+                                                                                )
+                                                                            }
+                                                                          )
+                                                                          .catch(
+                                                                            (
+                                                                              error
+                                                                            ) => {
+                                                                              console.log(
+                                                                                'getConexiones :' +
+                                                                                  error
+                                                                              )
+                                                                            }
+                                                                          )
+                                                                      }
+                                                                    )
+                                                                    .catch(
+                                                                      (
+                                                                        error
+                                                                      ) => {
+                                                                        console.log(
+                                                                          'Caracteristica 9: ' +
+                                                                            error
+                                                                        )
+                                                                      }
+                                                                    )
+                                                                }
+                                                              )
+                                                              .catch(
+                                                                (error) => {
+                                                                  console.log(
+                                                                    'Caracteristica 8: ' +
+                                                                      error
+                                                                  )
+                                                                }
+                                                              )
+                                                          })
+                                                          .catch((error) => {
+                                                            console.log(
+                                                              'Caracteristica 5: ' +
+                                                                error
+                                                            )
+                                                          })
+                                                      })
+                                                      .catch((error) => {
+                                                        console.log(
+                                                          'getCaracteristica 7: ' +
+                                                            error
+                                                        )
+                                                      })
+                                                  })
+                                                  .catch((error) => {
                                                     console.log(
-                                                      'Error Ordenes Trabajo: ' +
-                                                        error
+                                                      'getModelos: ' + error
                                                     )
                                                   })
-                                                }).catch(error => {
-                                                  console.log('Error Transformadores: ' + error)
-                                                })
-                                              }).catch(error => {
-                                                console.log('Error Medidores' + error)
                                               })
-                                            })
-                                          }).catch(error => {
-                                            console.log('get Tipos Retiro: ' + error)
+                                              .catch((error) => {
+                                                console.log(
+                                                  'getMarcas: ' + error
+                                                )
+                                              })
                                           })
-                                        }).catch(error => {
-                                          console.log(error)
-                                        })
-                                      }).catch(error => {
-                                        console.log(error)
+                                          .catch((error) => {
+                                            console.log(
+                                              'getCarcasas: ' + error
+                                            )
+                                          })
                                       })
-                                    }).catch(error => {
-                                      console.log('getConexiones :' + error)
-                                    })
-                                  }).catch(error => {
-                                    console.log('Caracteristica 9: ' + error)
+                                      .catch((error) => {
+                                        console.log('getElementos: ' + error)
+                                      })
                                   })
-                                }).catch(error => {
-                                  console.log('Caracteristica 8: ' + error)
-                                })
-                              }).catch(error => {
-                                console.log('Caracteristica 5: ' + error)
+                                  .catch((error) => {
+                                    console.log('getTiposBarrio: ' + error)
+                                  })
                               })
-                            }).catch(error => {
-                              console.log('getCaracteristica 7: ' + error)
-                            })
-                          }).catch(error => {
-                            console.log('getModelos: ' + error)
+                              .catch((error) => {
+                                console.log('getTipos: ' + error)
+                              })
                           })
-                        }).catch(error => {
-                          console.log('getMarcas: ' + error)
-                        })
-                      }).catch(error => {
-                        console.log('getCarcasas: ' + error)
+                          .catch((error) => {
+                            console.log('getEstados: ' + error)
+                          })
                       })
-                    }).catch(error => {
-                      console.log('getElementos: ' + error)
-                    })
-                  }).catch(error => {
-                    console.log('getTiposBarrio: ' + error)
+                      .catch((error) => {
+                        console.log('getMedioambiente: ' + error)
+                      })
                   })
-                }).catch(error => {
-                  console.log('getTipos: ' + error)
-                })
-              }).catch(error => {
-                console.log('getEstados: ' + error)
+                  .catch((error) => {
+                    console.log('getAcciones: ' + error)
+                  })
               })
-            }).catch(error => {
-              console.log('getMedioambiente: ' + error)
-            })
-          }).catch(error => {
-            console.log('getAcciones: ' + error)
+              .catch((error) => {
+                console.log('Actividades: ' + error)
+              })
           })
-        }).catch(error => {
-          console.log('Actividades: ' + error)
-        })
-      }).catch(error => {
-        console.log(error)
+          .catch((error) => {
+            console.log(error)
+          })
       })
-    }).catch(error => {
-      console.log('Origenes: ' + error)
-    })
+      .catch((error) => {
+        console.log('Origenes: ' + error)
+      })
   }
 }
 </script>

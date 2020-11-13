@@ -139,10 +139,10 @@ class OrdenTrabajoController @Inject()(
      Ok(os).as("application/pdf")
   }
 
-  def agregarReporte(ortr_id: Long, repo_id: Long) = authenticatedUserAction.async {
+  def agregarReporte(ortr_id: Long, repo_id: Long, tireuc_id: Int) = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val usua_id = Utility.extraerUsuario(request)
-      if (ordenService.agregarReporte(ortr_id, repo_id)) {
+      if (ordenService.agregarReporte(ortr_id, repo_id, tireuc_id)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
         Future.successful(ServiceUnavailable(Json.toJson("false")))

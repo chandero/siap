@@ -31,13 +31,14 @@ export function getOrden (ortr_id) {
   })
 }
 
-export function addReporteAOrden (ot, rp) {
+export function addReporteAOrden (ot, rp, tu) {
   const data = {
     ot,
-    rp
+    rp,
+    tu
   }
   return request({
-    url: '/otar/' + data.ot + '/' + data.rp,
+    url: '/otar/' + data.ot + '/' + data.rp + '/' + data.tu,
     method: 'get'
   })
 }

@@ -881,6 +881,7 @@ export default {
       title: 'Urbanizadora',
       select: 'Seleccione la Urbanizadora'
     },
+    subreporte: 'SUBREPORTES',
     formato: 'Impresión de Formato en Blanco',
     code: 'Código Luminaria',
     email: 'Correo electrónico de quién reporta',

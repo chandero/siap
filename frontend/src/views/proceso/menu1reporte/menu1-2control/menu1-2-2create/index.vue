@@ -307,12 +307,19 @@ export default {
           repo_luminaria: null,
           repo_redes: null,
           repo_poste: null,
+          repo_subreporte: null,
+          repo_subid: null,
           repo_email: null,
           acti_id: null,
           repo_codigo: null,
           repo_apoyo: null,
           urba_id: null,
-          muot_id: null
+          muot_id: null,
+          aaco_id_anterior: null,
+          aaco_id_nuevo: null,
+          medi_id: null,
+          tran_id: null,
+          medi_acta: null
         },
         meams: [],
         eventos: [],
@@ -435,6 +442,7 @@ export default {
       if (!this.guardando) {
         this.guardando = true
         this.confirmacionGuardar = false
+        this.reporte.tireuc_id = this.tireuc_id
         this.$refs.reporte.validate((valid) => {
           if (valid) {
             saveReporte(this.reporte)
@@ -479,6 +487,7 @@ export default {
       this.nuevoReporte = false
       this.reporte = {
         reti_id: 1,
+        tireuc_id: this.tireuc_id,
         repo_id: null,
         repo_consecutivo: null,
         tiba_id: null,
@@ -492,6 +501,7 @@ export default {
         repo_horafin: null,
         repo_reportetecnico: null,
         repo_descripcion: null,
+        repo_subrepoconsecutivo: null,
         rees_id: 1,
         orig_id: 1,
         barr_id: null,
@@ -505,20 +515,24 @@ export default {
           repo_luminaria: null,
           repo_redes: null,
           repo_poste: null,
+          repo_subreporte: null,
+          repo_subid: null,
           repo_email: null,
           acti_id: null,
           repo_codigo: null,
           repo_apoyo: null,
           urba_id: null,
           muot_id: null,
+          aaco_id_anterior: null,
+          aaco_id_nuevo: null,
           medi_id: null,
           tran_id: null,
-          medi_acta: null,
-          aaco_id_anterior: null,
-          aaco_id_nuevo: null
+          medi_acta: null
         },
+        meams: [],
         eventos: [],
-        direcciones: []
+        direcciones: [],
+        novedades: []
       }
       this.direccion = {
         repo_id: null,
@@ -679,8 +693,8 @@ export default {
       console.log('getNovedades:' + error)
     })
   },
-  beforeMount () {
-    this.tireuc_id = this.$route.params.tireuc_id
+  mounted () {
+    this.tireuc_id = parseInt(this.$route.params.tireuc_id)
   }
 }
 </script>

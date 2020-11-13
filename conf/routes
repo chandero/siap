@@ -508,7 +508,7 @@ POST    /api/ortr/get                   controllers.OrdenTrabajoController.todos
 GET     /api/ortr/all                   controllers.OrdenTrabajoController.ordenes
 GET     /api/ortr/:id                   controllers.OrdenTrabajoController.buscarPorId(id: Long)
 GET     /api/ortr/del/:id               controllers.OrdenTrabajoController.borrarOrden(id: Long)
-GET     /api/otar/:ot/:re               controllers.OrdenTrabajoController.agregarReporte(ot: Long, re: Long)
+GET     /api/otar/:ot/:re/:tu           controllers.OrdenTrabajoController.agregarReporte(ot: Long, re: Long, tu: Int)
 POST    /api/ortr/save                  controllers.OrdenTrabajoController.guardarOrden
 POST    /api/ortr/upd                   controllers.OrdenTrabajoController.actualizarOrden
 GET     /api/ortr/st/get                controllers.OrdenTrabajoController.getEstados
