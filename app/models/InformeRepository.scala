@@ -9864,6 +9864,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                        }
 
         _listResult.map { o =>
+          var _reportes = 0
           var _urbano = 0
           var _rural = 0
           var _operaciones = 0
@@ -9925,7 +9926,32 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
             case None => 0
           }
           
-          _result += o.copy(ortr_dia = Some(_dia.toString()), urbano = Some(_urbano), rural = Some(_rural), operaciones = Some(_operaciones))
+          val _parse03 = int("cuad_id") ~
+                         int("ortr_id") ~
+                         int("reportes") map {
+                            case a ~ b ~ c => (a, b, c)
+                       }
+
+          var _list03 = SQL("""SELECT c.cuad_id, ot.ortr_id, SUM(1 + CASE 
+									WHEN (array_length(string_to_array(r.repo_subrepoconsecutivo, ','),1) IS NULL ) THEN 0 
+									ELSE array_length(string_to_array(r.repo_subrepoconsecutivo, ','),1) 
+								  END) as reportes FROM siap.cuadrilla c 
+                               INNER JOIN siap.ordentrabajo ot ON ot.cuad_id = c.cuad_id
+                               INNER JOIN siap.ordentrabajo_reporte otr ON otr.ortr_id = ot.ortr_id
+                               INNER JOIN siap.reporte r ON r.repo_id = otr.repo_id
+                               WHERE ot.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and ot.empr_id = {empr_id} and ot.ortr_id = {ortr_id}
+                               GROUP BY c.cuad_id, ot.ortr_id""").on(
+                                'fecha_inicial -> fi.getTime(),
+                                'fecha_final -> ff.getTime(),
+                                'empr_id -> empr_id,
+                                'ortr_id -> o.ortr_id                                 
+                               ).as(_parse03.singleOpt)
+          _reportes = _list03 match {
+            case Some(o) => o._3
+            case None => 0
+          }
+
+          _result += o.copy(ortr_dia = Some(_dia.toString()), reportes = Some(_reportes), urbano = Some(_urbano), rural = Some(_rural), operaciones = Some(_operaciones))
         }
         _result.toList
       }
@@ -10025,18 +10051,25 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                           } 
 
             var query =
-              """(SELECT rt.reti_descripcion, count(r1.*) as reportes, r2.operaciones FROM siap.reporte r1
+              """(SELECT rt.reti_descripcion, r2.operaciones, r3.reportes FROM siap.reporte r1
                  INNER JOIN siap.reporte_tipo rt ON rt.reti_id = r1.reti_id
                  INNER JOIN LATERAL (SELECT rt.reti_id, count(rd.*) AS operaciones FROM siap.reporte r2
 							                       INNER JOIN siap.reporte_tipo rt ON rt.reti_id = r2.reti_id
 				   			                     INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id
 				   			                     WHERE r2.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r2.empr_id = {empr_id}
-				                             GROUP BY rt.reti_id) AS r2 ON r2.reti_id = r1.reti_id
+                                     GROUP BY rt.reti_id) AS r2 ON r2.reti_id = r1.reti_id
+                 INNER JOIN LATERAL (SELECT rt.reti_id, sum(1 + CASE 
+																     WHEN (array_length(string_to_array(r3.repo_subrepoconsecutivo, ','),1) IS NULL ) THEN 0 
+																     ELSE array_length(string_to_array(r3.repo_subrepoconsecutivo, ','),1) 
+								  								   END) AS reportes FROM siap.reporte r3
+							                       				INNER JOIN siap.reporte_tipo rt ON rt.reti_id = r3.reti_id
+				   			                     				WHERE r3.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r3.empr_id = {empr_id}
+				                             GROUP BY rt.reti_id) AS r3 ON r3.reti_id = r1.reti_id                     
                  WHERE r1.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r1.empr_id = {empr_id}
-                 GROUP BY rt.reti_id, rt.reti_descripcion, r2.operaciones
+                 GROUP BY rt.reti_id, rt.reti_descripcion, r2.operaciones, r3.reportes
                  ORDER BY rt.reti_id)
                  UNION ALL
-                (SELECT 'OBRA' AS reti_descripcion, COUNT(*) AS reportes, 0 as operaciones FROM siap.obra o1
+                (SELECT 'OBRA' AS reti_descripcion, 0 as operaciones, COUNT(*) AS reportes  FROM siap.obra o1
                  WHERE o1.obra_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND o1.empr_id = {empr_id})
                  """
             val resultSet =
@@ -10163,18 +10196,25 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                           } 
 
             var query =
-              """(SELECT rt.orig_descripcion, count(r1.*) as reportes, r2.operaciones FROM siap.reporte r1
+              """(SELECT rt.orig_descripcion, r2.operaciones, r3.reportes FROM siap.reporte r1
                  INNER JOIN siap.origen rt ON rt.orig_id = r1.orig_id
                  INNER JOIN LATERAL (SELECT rt.orig_id, count(rd.*) AS operaciones FROM siap.reporte r2
 							                       INNER JOIN siap.origen rt ON rt.orig_id = r2.orig_id
 				   			                     INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id
 				   			                     WHERE r2.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r2.empr_id = {empr_id}
-				                             GROUP BY rt.orig_id) AS r2 ON r2.orig_id = r1.orig_id
+                                     GROUP BY rt.orig_id) AS r2 ON r2.orig_id = r1.orig_id
+                 INNER JOIN LATERAL (SELECT rt.orig_id, sum(1 + CASE 
+																     WHEN (array_length(string_to_array(r3.repo_subrepoconsecutivo, ','),1) IS NULL ) THEN 0 
+																     ELSE array_length(string_to_array(r3.repo_subrepoconsecutivo, ','),1) 
+								  								   END) AS reportes FROM siap.reporte r3
+							                       				INNER JOIN siap.origen rt ON rt.orig_id = r3.orig_id
+				   			                     				WHERE r3.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r3.empr_id = {empr_id}
+				                             GROUP BY rt.orig_id) AS r3 ON r3.orig_id = r1.orig_id
                  WHERE r1.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r1.empr_id = {empr_id}
-                 GROUP BY rt.orig_id, rt.orig_descripcion, r2.operaciones
+                 GROUP BY rt.orig_id, rt.orig_descripcion, r2.operaciones, r3.reportes
                  ORDER BY rt.orig_id)
                  UNION ALL
-                 (SELECT 'ORDEN TRABAJO' AS orig_descripcion, COUNT(*) AS reportes, 0 as operaciones FROM siap.obra o1
+                 (SELECT 'ORDEN TRABAJO' AS orig_descripcion, 0 as operaciones, COUNT(*) AS reportes FROM siap.obra o1
                   WHERE o1.obra_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND o1.empr_id = {empr_id})"""
             val resultSet =
               SQL(query)
@@ -10300,13 +10340,14 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                           } 
 
             var query =
-              """SELECT c.cuad_descripcion, COUNT(rd.*) AS operaciones FROM siap.reporte r1
-                 INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r1.repo_id
-                 INNER JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = r1.repo_id
-                 INNER JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
-                 INNER JOIN siap.cuadrilla c ON c.cuad_id = ot.cuad_id
-                 WHERE r1.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r1.empr_id = {empr_id}
-                 GROUP BY c.cuad_id"""
+              """SELECT o.cuad_descripcion, COUNT(*) AS operaciones FROM (SELECT DISTINCT c.cuad_descripcion, r1.repo_id, rd.aap_id FROM siap.reporte r1
+                  INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r1.repo_id
+                   INNER JOIN siap.ordentrabajo_reporte otr ON 
+				 		        otr.ortr_id = (SELECT otr2.ortr_id FROM siap.ordentrabajo_reporte otr2 WHERE otr2.repo_id = r1.repo_id ORDER BY otr2.ortr_id DESC limit 1)
+                  INNER JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+                  INNER JOIN siap.cuadrilla c ON c.cuad_id = ot.cuad_id
+                  WHERE r1.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r1.empr_id = {empr_id}) o
+                  GROUP BY o.cuad_descripcion"""
             val resultSet =
               SQL(query)
                 .on(

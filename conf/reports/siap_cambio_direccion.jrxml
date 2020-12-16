@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.13.0.final using JasperReports Library version 6.13.0-46ada4d1be8f3c5985fd0b6146f3ed44caed6f05  -->
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.5.1  -->
+<!-- 2020-11-17T07:58:26 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_cambio_direccion" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ac0cbb8f-602c-4363-a5d4-df69fae5ce22">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Postgresql SIAP"/>
@@ -50,42 +51,55 @@ ORDER BY r.repo_fechasolucion ASC,
 	r.repo_consecutivo ASC]]>
 	</queryString>
 	<field name="repo_fecharecepcion" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="repo_fecharecepcion"/>
 		<property name="com.jaspersoft.studio.field.label" value="repo_fecharecepcion"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte"/>
+		<fieldDescription><![CDATA[fecha de recepción del reporte]]></fieldDescription>
 	</field>
 	<field name="repo_fechasolucion" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="repo_fechasolucion"/>
 		<property name="com.jaspersoft.studio.field.label" value="repo_fechasolucion"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte"/>
+		<fieldDescription><![CDATA[fecha de la solución del reporte]]></fieldDescription>
 	</field>
 	<field name="repo_fechadigitacion" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="repo_fechadigitacion"/>
 		<property name="com.jaspersoft.studio.field.label" value="repo_fechadigitacion"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_adicional"/>
 	</field>
 	<field name="reti_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="reti_descripcion"/>
 		<property name="com.jaspersoft.studio.field.label" value="reti_descripcion"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_tipo"/>
 	</field>
 	<field name="repo_consecutivo" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="repo_consecutivo"/>
 		<property name="com.jaspersoft.studio.field.label" value="repo_consecutivo"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte"/>
+		<fieldDescription><![CDATA[consecutivo del reporte según el tipo]]></fieldDescription>
 	</field>
 	<field name="aap_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="aap_id"/>
 		<property name="com.jaspersoft.studio.field.label" value="aap_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_direccion"/>
 	</field>
 	<field name="even_direccion_anterior" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="even_direccion_anterior"/>
 		<property name="com.jaspersoft.studio.field.label" value="even_direccion_anterior"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_direccion"/>
 	</field>
 	<field name="barr_descripcion_anterior" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="barr_descripcion_anterior"/>
 		<property name="com.jaspersoft.studio.field.label" value="barr_descripcion_anterior"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
 	</field>
 	<field name="even_direccion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="even_direccion"/>
 		<property name="com.jaspersoft.studio.field.label" value="even_direccion"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_direccion"/>
 	</field>
 	<field name="barr_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="barr_descripcion"/>
 		<property name="com.jaspersoft.studio.field.label" value="barr_descripcion"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
 	</field>

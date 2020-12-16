@@ -375,6 +375,8 @@ POST    /api/repo/grw                        controllers.ReporteController.guard
 GET     /api/repo/gbtcw/:c/:e/:t              controllers.ReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
 GET     /api/repo/conv/:id                   controllers.ReporteController.convertir(id: Long)
 GET     /api/repo/gbaap/:id                  controllers.ReporteController.buscarPorAap(id: Long)
+GET     /api/repo/rsino/:fi/:ff              controllers.ReporteController.reporteSinOrdenTrabajo(fi: Long, ff: Long)
+
 
 # ControlReporte
 POST    /api/core/get                        controllers.ControlReporteController.todos
@@ -556,7 +558,7 @@ GET     /api/info/isdmmx/:c                     controllers.InformeController.si
 GET     /api/info/sicdx/:fi/:ff/:ft/:t          controllers.InformeController.siap_cambio_direccion_xls(fi: Long, ff: Long, ft: String, t:String)
 GET     /api/info/slprx/:fi/:ff                 controllers.InformeController.siap_luminaria_por_reporte_xls(fi: Long, ff: Long)
 GET     /api/info/sipcx/:fi/:ff                 controllers.InformeController.siap_informe_por_cuadrilla_xls(fi: Long, ff: Long)
-GET     /api/info/siocx/:fi/:ff                controllers.InformeController.siap_informe_obra_cuadrilla_xls(fi: Long, ff: Long)
+GET     /api/info/siocx/:fi/:ff                 controllers.InformeController.siap_informe_obra_cuadrilla_xls(fi: Long, ff: Long)
 GET     /api/info/sigox/:fi/:ff/:ft/:e/:t       controllers.InformeController.siap_informe_general_operaciones_xls(fi: Long, ff:Long, ft:String, e: Long, t:String)
 
 # Graficas

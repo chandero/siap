@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.5.1  -->
-<!-- 2020-11-12T15:49:18 -->
+<!-- 2020-11-17T07:56:05 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte" pageWidth="612" pageHeight="792" whenNoDataType="NoDataSection" columnWidth="587" leftMargin="10" rightMargin="15" topMargin="0" bottomMargin="15" isSummaryNewPage="true" isFloatColumnFooter="true" whenResourceMissingType="Error" uuid="f8caebe0-c17f-4691-ac5f-60e5854f08eb">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="520"/>
@@ -25,16 +25,12 @@
 	<parameter name="CONCESION" class="java.lang.String"/>
 	<parameter name="REPO_ID" class="java.lang.Long"/>
 	<queryString language="SQL">
-		<![CDATA[SELECT r.*, ra.*, rt.*, e.*, l.*, a.*, o.*, b.*, i.*, b2.* FROM siap.reporte r
+		<![CDATA[SELECT r.*, ra.*, rt.*, a.*, o.*, b.* FROM siap.reporte r
 LEFT JOIN siap.reporte_adicional ra on r.repo_id = ra.repo_id
 LEFT JOIN siap.reporte_tipo rt on r.reti_id = rt.reti_id
-LEFT JOIN siap.reporte_evento e on r.repo_id = e.repo_id
-LEFT JOIN siap.elemento l on e.elem_id = l.elem_id
 LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
 LEFT JOIN siap.origen o on r.orig_id = o.orig_id
 LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
-LEFT JOIN siap.aap i on cast(nullif(ra.repo_codigo,'') as integer)  = i.aap_id
-LEFT JOIN siap.barrio b2 on i.barr_id = b2.barr_id
 WHERE r.repo_id = $P{REPO_ID}]]>
 	</queryString>
 	<field name="repo_id" class="java.lang.Integer">
@@ -155,7 +151,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 		<property name="com.jaspersoft.studio.field.label" value="tireuc_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte"/>
 	</field>
-	<field name="repo_subrepoconsecutivo" class="java.lang.Integer">
+	<field name="repo_subrepoconsecutivo" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="repo_subrepoconsecutivo"/>
 		<property name="com.jaspersoft.studio.field.label" value="repo_subrepoconsecutivo"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte"/>
@@ -290,115 +286,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_tipo"/>
 	</field>
-	<field name="aap_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="aap_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="aap_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_evento"/>
-	</field>
-	<field name="COLUMN_48" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="repo_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="repo_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_evento"/>
-	</field>
-	<field name="elem_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="elem_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="elem_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_evento"/>
-	</field>
-	<field name="COLUMN_50" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="usua_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_evento"/>
-	</field>
-	<field name="COLUMN_51" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="empr_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_evento"/>
-	</field>
-	<field name="even_estado" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="even_estado"/>
-		<property name="com.jaspersoft.studio.field.label" value="even_estado"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_evento"/>
-		<fieldDescription><![CDATA[Estado = 9 Eliminar]]></fieldDescription>
-	</field>
-	<field name="even_fecha" class="java.sql.Timestamp">
-		<property name="com.jaspersoft.studio.field.name" value="even_fecha"/>
-		<property name="com.jaspersoft.studio.field.label" value="even_fecha"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_evento"/>
-		<fieldDescription><![CDATA[Fecha y Hora del Evento]]></fieldDescription>
-	</field>
-	<field name="even_codigo_instalado" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="even_codigo_instalado"/>
-		<property name="com.jaspersoft.studio.field.label" value="even_codigo_instalado"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_evento"/>
-	</field>
-	<field name="even_cantidad_instalado" class="java.lang.Double">
-		<property name="com.jaspersoft.studio.field.name" value="even_cantidad_instalado"/>
-		<property name="com.jaspersoft.studio.field.label" value="even_cantidad_instalado"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_evento"/>
-	</field>
-	<field name="even_codigo_retirado" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="even_codigo_retirado"/>
-		<property name="com.jaspersoft.studio.field.label" value="even_codigo_retirado"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_evento"/>
-	</field>
-	<field name="even_cantidad_retirado" class="java.lang.Double">
-		<property name="com.jaspersoft.studio.field.name" value="even_cantidad_retirado"/>
-		<property name="com.jaspersoft.studio.field.label" value="even_cantidad_retirado"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_evento"/>
-	</field>
-	<field name="even_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="even_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="even_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_evento"/>
-	</field>
-	<field name="COLUMN_59" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="elem_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="elem_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="elemento"/>
-	</field>
-	<field name="elem_descripcion" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="elem_descripcion"/>
-		<property name="com.jaspersoft.studio.field.label" value="elem_descripcion"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="elemento"/>
-	</field>
-	<field name="elem_codigo" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="elem_codigo"/>
-		<property name="com.jaspersoft.studio.field.label" value="elem_codigo"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="elemento"/>
-	</field>
-	<field name="elem_ucap" class="java.lang.Boolean">
-		<property name="com.jaspersoft.studio.field.name" value="elem_ucap"/>
-		<property name="com.jaspersoft.studio.field.label" value="elem_ucap"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="elemento"/>
-	</field>
-	<field name="tiel_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="tiel_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="tiel_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="elemento"/>
-	</field>
-	<field name="COLUMN_64" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="usua_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="elemento"/>
-	</field>
-	<field name="COLUMN_65" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="empr_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="elemento"/>
-	</field>
-	<field name="elem_estado" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="elem_estado"/>
-		<property name="com.jaspersoft.studio.field.label" value="elem_estado"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="elemento"/>
-		<fieldDescription><![CDATA[Estado = 9 es eliminado]]></fieldDescription>
-	</field>
-	<field name="ucap_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="ucap_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="ucap_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="elemento"/>
-	</field>
-	<field name="COLUMN_68" class="java.lang.Integer">
+	<field name="COLUMN_47" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="acti_id"/>
 		<property name="com.jaspersoft.studio.field.label" value="acti_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="actividad"/>
@@ -414,12 +302,12 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 		<property name="com.jaspersoft.studio.field.label" value="acti_estado"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="actividad"/>
 	</field>
-	<field name="COLUMN_71" class="java.lang.Integer">
+	<field name="COLUMN_50" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="usua_id"/>
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="actividad"/>
 	</field>
-	<field name="COLUMN_72" class="java.lang.Integer">
+	<field name="COLUMN_51" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="orig_id"/>
 		<property name="com.jaspersoft.studio.field.label" value="orig_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="origen"/>
@@ -436,12 +324,12 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 		<property name="com.jaspersoft.studio.field.tree.path" value="origen"/>
 		<fieldDescription><![CDATA[Estado = 9 Eliminado]]></fieldDescription>
 	</field>
-	<field name="COLUMN_75" class="java.lang.Integer">
+	<field name="COLUMN_54" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="usua_id"/>
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="origen"/>
 	</field>
-	<field name="COLUMN_76" class="java.lang.Integer">
+	<field name="COLUMN_55" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="barr_id"/>
 		<property name="com.jaspersoft.studio.field.label" value="barr_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
@@ -461,12 +349,12 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 		<property name="com.jaspersoft.studio.field.label" value="muni_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
 	</field>
-	<field name="COLUMN_80" class="java.lang.Integer">
+	<field name="COLUMN_59" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="tiba_id"/>
 		<property name="com.jaspersoft.studio.field.label" value="tiba_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
 	</field>
-	<field name="COLUMN_81" class="java.lang.Integer">
+	<field name="COLUMN_60" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="usua_id"/>
 		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
@@ -477,156 +365,6 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
 	</field>
 	<field name="depa_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="depa_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="depa_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
-	</field>
-	<field name="COLUMN_84" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="aap_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="aap_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-	</field>
-	<field name="aap_apoyo" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="aap_apoyo"/>
-		<property name="com.jaspersoft.studio.field.label" value="aap_apoyo"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-	</field>
-	<field name="aap_descripcion" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="aap_descripcion"/>
-		<property name="com.jaspersoft.studio.field.label" value="aap_descripcion"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-	</field>
-	<field name="aap_direccion" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="aap_direccion"/>
-		<property name="com.jaspersoft.studio.field.label" value="aap_direccion"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-	</field>
-	<field name="COLUMN_88" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="barr_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="barr_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-	</field>
-	<field name="COLUMN_89" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="empr_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-	</field>
-	<field name="esta_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="esta_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="esta_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-	</field>
-	<field name="aap_fechacreacion" class="java.sql.Date">
-		<property name="com.jaspersoft.studio.field.name" value="aap_fechacreacion"/>
-		<property name="com.jaspersoft.studio.field.label" value="aap_fechacreacion"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-	</field>
-	<field name="COLUMN_92" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="usua_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-	</field>
-	<field name="aaus_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="aaus_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="aaus_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-	</field>
-	<field name="aap_modernizada" class="java.lang.Boolean">
-		<property name="com.jaspersoft.studio.field.name" value="aap_modernizada"/>
-		<property name="com.jaspersoft.studio.field.label" value="aap_modernizada"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-		<fieldDescription><![CDATA[si la luminaria fue modernizada]]></fieldDescription>
-	</field>
-	<field name="aatc_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="aatc_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="aatc_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-		<fieldDescription><![CDATA[tipo de la carcaza de la luminaria]]></fieldDescription>
-	</field>
-	<field name="aap_medidor" class="java.lang.Boolean">
-		<property name="com.jaspersoft.studio.field.name" value="aap_medidor"/>
-		<property name="com.jaspersoft.studio.field.label" value="aap_medidor"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-		<fieldDescription><![CDATA[Si la luminaría está o no bajo medidor]]></fieldDescription>
-	</field>
-	<field name="aap_fechatoma" class="java.sql.Date">
-		<property name="com.jaspersoft.studio.field.name" value="aap_fechatoma"/>
-		<property name="com.jaspersoft.studio.field.label" value="aap_fechatoma"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-		<fieldDescription><![CDATA[fecha de asignación de la luminaria]]></fieldDescription>
-	</field>
-	<field name="aaco_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="aaco_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="aaco_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-		<fieldDescription><![CDATA[tipo de conexión: aforo, medidor, retirado]]></fieldDescription>
-	</field>
-	<field name="aama_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="aama_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="aama_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-		<fieldDescription><![CDATA[Marca de la Luminaria]]></fieldDescription>
-	</field>
-	<field name="aamo_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="aamo_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="aamo_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-		<fieldDescription><![CDATA[Modelo de la Luminaria]]></fieldDescription>
-	</field>
-	<field name="aacu_id" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="aacu_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="aacu_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-		<fieldDescription><![CDATA[Cuenta Alumbrado Público]]></fieldDescription>
-	</field>
-	<field name="aap_lat" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="aap_lat"/>
-		<property name="com.jaspersoft.studio.field.label" value="aap_lat"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-		<fieldDescription><![CDATA[latitud]]></fieldDescription>
-	</field>
-	<field name="aap_lng" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="aap_lng"/>
-		<property name="com.jaspersoft.studio.field.label" value="aap_lng"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="aap"/>
-		<fieldDescription><![CDATA[longitud]]></fieldDescription>
-	</field>
-	<field name="COLUMN_104" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="barr_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="barr_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
-	</field>
-	<field name="COLUMN_105" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="barr_descripcion"/>
-		<property name="com.jaspersoft.studio.field.label" value="barr_descripcion"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
-	</field>
-	<field name="COLUMN_106" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="barr_codigo"/>
-		<property name="com.jaspersoft.studio.field.label" value="barr_codigo"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
-	</field>
-	<field name="COLUMN_107" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="muni_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="muni_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
-	</field>
-	<field name="COLUMN_108" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="tiba_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="tiba_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
-	</field>
-	<field name="COLUMN_109" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="usua_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
-	</field>
-	<field name="COLUMN_110" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="barr_estado"/>
-		<property name="com.jaspersoft.studio.field.label" value="barr_estado"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>
-	</field>
-	<field name="COLUMN_111" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="depa_id"/>
 		<property name="com.jaspersoft.studio.field.label" value="depa_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="barrio"/>

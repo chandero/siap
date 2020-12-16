@@ -434,4 +434,12 @@ class ReporteController @Inject()(
     val valido = reporteService.validarReporteDiligenciado(reti_id, repo_consecutivo, empr_id.get)
     Future.successful(Ok(Json.toJson(valido)))
   }
+
+  def reporteSinOrdenTrabajo(fecha_inicial: Long, fecha_final: Long) = authenticatedUserAction.async {
+    implicit request : Request[AnyContent] =>
+    val empr_id = Utility.extraerEmpresa(request)
+    reporteService.reporteSinOrdenTrabajo(fecha_inicial, fecha_final, empr_id.get).map { datos =>
+      Ok(write(datos))
+    }
+  }
 }

@@ -4399,7 +4399,7 @@ class ReporteRepository @Inject()(
               case None => false
             }
             // actualizar direccion de la luminaria y datos adicionales
-            if (reporte.reti_id.get == 2 || reporte.reti_id.get == 3) {
+            if (reporte.reti_id.get == 1 || reporte.reti_id.get == 2 || reporte.reti_id.get == 3) {
               val res = SQL(
                 """UPDATE siap.aap SET aap_direccion = {aap_direccion}, barr_id = {barr_id} WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
               ).on(
@@ -5880,5 +5880,58 @@ class ReporteRepository @Inject()(
       }
     }
   }
+
+  def reporteSinOrdenTrabajo(
+      fecha_inicial: Long,
+      fecha_final: Long,
+      empr_id: scala.Long
+  ): Future[List[(Option[String], Option[Int], Option[DateTime], Option[DateTime], Option[Int], Option[Int])]] = Future {
+      var fi = Calendar.getInstance()
+      var ff = Calendar.getInstance()
+      fi.setTimeInMillis(fecha_inicial)
+      ff.setTimeInMillis(fecha_final)
+      fi.set(Calendar.MILLISECOND, 0)
+      fi.set(Calendar.SECOND, 0)
+      fi.set(Calendar.MINUTE, 0)
+      fi.set(Calendar.HOUR, 0)
+
+      ff.set(Calendar.MILLISECOND, 999)
+      ff.set(Calendar.SECOND, 59)
+      ff.set(Calendar.MINUTE, 59)
+      ff.set(Calendar.HOUR, 23)
+      val _parser = get[Option[String]]("reti_descripcion") ~
+                    get[Option[Int]]("repo_consecutivo") ~
+                    get[Option[DateTime]]("repo_fecharecepcion") ~
+                    get[Option[DateTime]]("repo_fechasolucion") ~
+                    get[Option[Int]]("ortr_consecutivo") ~
+                    get[Option[Int]]("operaciones") map { 
+                      case a1 ~
+                           b1 ~
+                           c1 ~
+                           d1 ~
+                           e1 ~
+                           f1 => (a1, b1, c1, d1, e1, f1)
+                    }
+      db.withConnection { implicit connection =>
+        SQL("""SELECT rt1.reti_descripcion, r1.repo_consecutivo, r1.repo_fecharecepcion, r1.repo_fechasolucion, 
+                      ot1.ortr_consecutivo, 
+                      (SELECT COUNT(*) 
+                        FROM siap.reporte_direccion rd1 
+                        WHERE rd1.repo_id = r1.repo_id) AS operaciones
+                FROM siap.reporte r1
+                INNER JOIN siap.reporte_tipo rt1 ON rt1.reti_id = r1.reti_id
+                LEFT JOIN siap.ordentrabajo_reporte otr1 ON otr1.repo_id = r1.repo_id
+                LEFT JOIN siap.ordentrabajo ot1 ON ot1.ortr_id = otr1.ortr_id
+               WHERE r1.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final}
+                     AND ot1.ortr_id IS null AND r1.empr_id = {empr_id}
+               ORDER BY ot1.ortr_consecutivo DESC, r1.reti_id, r1.repo_consecutivo""")
+          .on(
+            'fecha_inicial -> new DateTime(fi.getTimeInMillis),
+            'fecha_final -> new DateTime(ff.getTimeInMillis),
+            'empr_id -> empr_id
+          ).as(_parser.*)
+      }
+  }
+
 
 }

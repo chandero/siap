@@ -384,6 +384,7 @@ export default {
     'menu_informe_menu2detallado_menu2-13cambiodireccion': 'Cambio de Dirección',
     'menu_informe_menu2detallado_menu2-14luminariareporte': 'Luminarias Por Reporte',
     'menu_informe_menu2detallado_menu2-15obracuadrilla': 'Cuadrilla Obra',
+    'menu_informe_menu2detallado_menu2-16reportesinot': 'Reporte Sin O.T',
     menu_informe_menu3inventario: 'Inventario',
     'menu_informe_menu3inventario_menu3-1luminaria': 'Luminaria',
     'menu_informe_menu3inventario_menu3-2control': 'Control',
@@ -1246,6 +1247,8 @@ export default {
     slprx: 'Informe de Luminarias Atendidas Por Reporte',
     sipcx: 'Informe Consolidado por Cuadrilla',
     sigox: 'Informe General de Operaciones',
+    soprx: 'Informe Cuadrilla Obra',
+    srsot: 'Informe Reporte Sin Orden de Trabajo',
     initialDate: 'Fecha Inicial',
     endDate: 'Fecha Final',
     dueDate: 'Fecha de Corte',
@@ -1363,12 +1366,15 @@ export default {
     urbano: 'Urbano',
     rural: 'Rural',
     ortr_id: 'Orden No.',
+    ortr_consecutivo: 'No. Orden Trabajo',
     ortr_fecha: 'Fecha',
     cuad_responsable: 'Responsable',
     cuad_vehiculo: 'Vehículo',
     ortr_tipo: 'Tipo(Mto/Exp)',
     ortr_dia: 'Día Semana',
-    obras: 'Obras'
+    obras: 'Obras',
+    obra_consecutivo: 'Nro. Obra',
+    obra_fecharecepcion: 'Fecha Obra'
   },
   grafica: {
     cantidad: 'Cantidad',

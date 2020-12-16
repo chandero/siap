@@ -146,6 +146,17 @@ export function validarReporteDiligenciado (reti_id, repo_consecutivo) {
   })
 }
 
+export function reporteSinOt (fecha_inicial, fecha_final) {
+  const data = {
+    fecha_inicial,
+    fecha_final
+  }
+  return request({
+    url: '/repo/rsino/' + data.fecha_inicial + '/' + data.fecha_final,
+    method: 'get'
+  })
+}
+
 export function actualizarHistoria () {
   return request({
     url: '/repo/updh',

@@ -149,6 +149,12 @@ const informeRouter = {
           component: () => import('@/views/informe/menu2detallado/menu2-15obracuadrilla'),
           name: 'menu_informe_menu2detallado_menu2-15obracuadrilla',
           meta: { title: 'menu_informe_menu2detallado_menu2-15obracuadrilla', icon: 'el-icon-info', roles: ['super', 'auxiliar', 'admin', 'gerencia', 'ingeniero', 'supervisor'] }
+        },
+        {
+          path: 'menu2-16reportesinot',
+          component: () => import('@/views/informe/menu2detallado/menu2-16reportesinot'),
+          name: 'menu_informe_menu2detallado_menu2-16reportesinot',
+          meta: { title: 'menu_informe_menu2detallado_menu2-16reportesinot', icon: 'el-icon-info', roles: ['super', 'auxiliar', 'admin', 'gerencia', 'ingeniero', 'supervisor'] }
         }
       ]
     },

@@ -3183,9 +3183,7 @@ export default {
       this.reporte.subreportes.forEach((i) => {
         this.reporte.repo_subrepoconsecutivo = this.reporte.repo_subrepoconsecutivo + i.csc + ','
       })
-      console.log('subrepoconsecutivo: ' + this.reporte.repo_subrepoconsecutivo)
       this.reporte.repo_subrepoconsecutivo = this.reporte.repo_subrepoconsecutivo.slice(0, -1)
-      console.log('final subrepoconsecutivo: ' + this.reporte.repo_subrepoconsecutivo)
       // Mover material a reporte.eventos
       // // var even_length = 1
       this.reporte.eventos = []

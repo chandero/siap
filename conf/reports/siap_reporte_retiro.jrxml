@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.5.1  -->
-<!-- 2020-11-11T14:56:10 -->
+<!-- 2020-11-17T07:56:51 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte" pageWidth="612" pageHeight="792" whenNoDataType="NoDataSection" columnWidth="587" leftMargin="10" rightMargin="15" topMargin="0" bottomMargin="15" isSummaryNewPage="true" isFloatColumnFooter="true" whenResourceMissingType="Error" uuid="f8caebe0-c17f-4691-ac5f-60e5854f08eb">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="520"/>
@@ -155,7 +155,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 		<property name="com.jaspersoft.studio.field.label" value="tireuc_id"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte"/>
 	</field>
-	<field name="repo_subrepoconsecutivo" class="java.lang.Integer">
+	<field name="repo_subrepoconsecutivo" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="repo_subrepoconsecutivo"/>
 		<property name="com.jaspersoft.studio.field.label" value="repo_subrepoconsecutivo"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte"/>
