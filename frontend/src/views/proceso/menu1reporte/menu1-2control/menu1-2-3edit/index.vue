@@ -1,21 +1,21 @@
 <template>
   <el-container>
-      <el-header>
-        <el-row>
-          <el-col :span="20">
-            <span>{{ $t('route.controlreporteedit') }} - Estado Actual: {{ estado() }}</span>
-          </el-col>
-          <el-col :span="4">
-            <el-button
-              align="right"
-              type="primary"
-              title="Convertir en Reporte de Control"
-              @click="showConvertirDlg=true"
-              >Convertir</el-button>
-          </el-col>
-        </el-row>
-      </el-header>
-      <el-main>
+    <el-header>
+      <el-row>
+        <el-col :span="20">
+          <span>{{ $t('route.controlreporteedit') }} - Estado Actual: {{ estado() }}</span>
+        </el-col>
+        <el-col :span="4">
+          <el-button
+            align="right"
+            type="primary"
+            title="Convertir en Reporte de Luminaria"
+            @click="showConvertirDlg=true"
+          >Convertir</el-button>
+        </el-col>
+      </el-row>
+    </el-header>
+    <el-main>
       <el-form ref="reporteForm" :model="reporte" :rules="rules" :label-position="labelPosition">
         <el-collapse v-model="activePages" @change="handleActivePagesChange">
           <el-collapse-item name="1" :title="$t('reporte.general')" style="font-weight: bold;">
@@ -64,11 +64,6 @@
               <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
                 <el-form-item prop="repo_consecutivo" :label="$t('reporte.number')">
                   <span style="font-size: 30px;">{{ reporte.repo_consecutivo | fillZeros(6) }}</span>
-                </el-form-item>
-              </el-col>
-              <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
-                <el-form-item prop="repo_subrepoconsecutivo" :label="$t('reporte.subreporte')">
-                  <el-input :disabled="reporte.rees_id === 3" type="number" style="font-size: 30px;" v-model="reporte.repo_subrepoconsecutivo" @input="reporte.repo_subrepoconsecutivo = parseInt($event)"></el-input>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -287,7 +282,7 @@
               </el-col>
               <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
                 <template v-if="repo_codigo_state">
-                  <el-form-item prop="repo_codigo" :label="$t('control.reporte.code')">
+                  <el-form-item prop="repo_codigo" :label="$t('reporte.code')">
                     <el-input
                       ref="code"
                       v-model="reporte.adicional.repo_codigo"
@@ -306,7 +301,7 @@
                   </el-form-item>
                 </template>
                 <template v-else>
-                  <el-form-item :label="$t('control.reporte.code')">
+                  <el-form-item :label="$t('reporte.code')">
                     <span style="400 13.3333px Arial;">{{ reporte.adicional.repo_codigo }}</span>
                     <el-button
                       v-if="reporte.rees_id === 1"
@@ -320,7 +315,7 @@
                 </template>
               </el-col>
               <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
-                <template v-if="repo_apoyo_state && reporte.tireuc_id != 2">
+                <template v-if="repo_apoyo_state">
                   <el-form-item prop="repo_apoyo" :label="$t('reporte.apoyo')">
                     <el-input
                       ref="apoyo"
@@ -339,7 +334,7 @@
                     />
                   </el-form-item>
                 </template>
-                <template v-else-if="reporte.tireuc_id != 2">
+                <template v-else>
                   <el-form-item :label="$t('reporte.apoyo')">
                     <span style="400 13.3333px Arial;">{{ reporte.adicional.repo_apoyo }}</span>
                     <el-button
@@ -434,7 +429,7 @@
               </el-col>
               <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
                 <template v-if="repo_direccion_state">
-                  <el-form-item prop="repo_direccion" :label="$t('control.reporte.address')">
+                  <el-form-item prop="repo_direccion" :label="$t('reporte.address')">
                     <el-input
                       ref="direccion"
                       v-model="reporte.repo_direccion"
@@ -453,7 +448,7 @@
                   </el-form-item>
                 </template>
                 <template v-else>
-                  <el-form-item :label="$t('control.reporte.address')">
+                  <el-form-item :label="$t('reporte.address')">
                     <span style="400 13.3333px Arial;">{{ reporte.repo_direccion }}</span>
                     <el-button
                       v-if="reporte.rees_id !== 3"
@@ -729,6 +724,31 @@
               </el-col>
             </el-row>
           </el-collapse-item>
+          <el-collapse-item name="5" :title="$t('reporte.subreporte')" style="font-weight: bold;">
+            <el-row>
+              <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                <span>Agregar Subreporte</span>
+                <el-input :disabled="reporte.rees_id === 3"
+                  type="number"
+                  v-model="subreporte"
+                  size="mini"
+                  placeholder="Nuevo SubReporte"
+                  style="width: 10%"
+                />
+                <el-button :disabled="reporte.rees_id === 3" circle mini type="primary" icon="el-icon-plus" @click="addSubReporte()"/>
+                <el-row :gutter="4">
+                  <el-col v-for="item in reporte.subreportes" :key="item.csc" :span="2">
+                    <template>
+                      <span>{{ item.csc }}</span>
+                    </template>
+                    <template>
+                      <el-button :disabled="reporte.rees_id === 3" type="danger" icon="el-icon-delete" circle @click="delSubReporte(item.csc)"></el-button>
+                    </template>
+                  </el-col>
+                </el-row>
+              </el-col>
+            </el-row>
+          </el-collapse-item>
           <el-collapse-item name="4" :title="$t('reporte.novedades').toUpperCase()">
             <el-row :gutter="4" class="hidden-sm-and-down">
               <el-col :md="1" :lg="1" :xl="1">
@@ -926,7 +946,7 @@
               </el-col>
             </el-row>
           </el-collapse-item>
-          <el-collapse-item name="3" title="DATOS CONTROL">
+          <el-collapse-item name="3" title="DATOS LUMINARIAS">
             <div>
               <el-row>
                 <el-col :span="24">
@@ -938,7 +958,7 @@
                     effect="dark"
                     size="medium"
                     @click="handleTag(tag.idx)"
-                    :title="'Información Control ' + tag.aap_id"
+                    :title="'Información Luminaria ' + tag.aap_id"
                     style="cursor: pointer;"
                   >L: {{tag.aap_id}}</el-tag>
                   <el-input
@@ -954,7 +974,7 @@
                     v-else-if="reporte.rees_id != 3"
                     size="small"
                     @click="showInputAddress01"
-                  >+ Agregar Control</el-button>
+                  >+ Agregar Luminaria</el-button>
                 </el-col>
               </el-row>
               <el-form
@@ -977,7 +997,7 @@
                     :xl="1"
                   >{{ reporte.direcciones[didx].even_id }}</el-col>
                   <el-col :xs="24" :sm="10" :md="10" :lg="10" :xl="10">
-                    <el-form-item prop="aap_id" label="Código Control">
+                    <el-form-item prop="aap_id" label="Código Luminaria">
                       <div style="display: table;">
                         <el-input
                           :disabled="reporte.direcciones[didx].even_estado === 3 || reporte.direcciones[didx].even_estado > 7"
@@ -996,7 +1016,7 @@
                       </div>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="7" :md="7" :lg="7" :xl="7">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="7" :md="7" :lg="7" :xl="7">
                     <el-form-item prop="dato_adicional.aap_apoyo" :label="$t('reporte.apoyo')">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1099,8 +1119,8 @@
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-                    <el-form-item prop="dato.aatc_id" label="Tipo Control">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+                    <el-form-item prop="dato.aatc_id" label="Tipo Luminaria">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         style="width:100%;"
@@ -1119,7 +1139,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
                     <el-form-item prop="dato.aama_id" label="Marca">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1139,7 +1159,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
                     <el-form-item prop="dato.aamo_id" label="Modelo">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1161,7 +1181,7 @@
                   </el-col>
                 </el-row>
                 <el-row :gutter="4">
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
                     <el-form-item prop="dato.aap_tecnologia" label="Tecnología">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1176,7 +1196,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                     <el-form-item prop="dato.aap_potencia" :label="$t('gestion.power.title')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1196,7 +1216,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                     <el-form-item prop="dato.aaco_id" :label="$t('gestion.connection.title')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1217,7 +1237,7 @@
                     </el-form-item>
                   </el-col>
                   <el-col
-                    v-if="reporte.reti_id !== 0 & reporte.direcciones[didx].dato.aaco_id === 2 && reporte.tireuc_id != 2"
+                    v-if="reporte.reti_id !== 0 & reporte.direcciones[didx].dato.aaco_id === 2"
                     :xs="24"
                     :sm="6"
                     :md="4"
@@ -1246,7 +1266,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                     <el-form-item
                       prop="dato_adicional.tran_id"
                       :label="$t('gestion.transformador.title')"
@@ -1272,7 +1292,7 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                     <el-form-item prop="dato.tipo_id" :label="$t('gestion.post.title')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1292,7 +1312,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                     <el-form-item prop="dato.aap_poste_altura" :label="$t('gestion.post.size')">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1303,7 +1323,7 @@
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
                     <el-form-item prop="dato.aap_poste_propietario" :label="$t('gestion.post.own')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1320,7 +1340,7 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                     <el-form-item prop="dato.aap_brazo" :label="$t('gestion.arm')">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1330,7 +1350,7 @@
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                     <el-form-item prop="dato.aap_collarin" :label="$t('gestion.collar')">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1340,7 +1360,7 @@
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                     <el-form-item prop="dato_adicional.aaus_id" :label="$t('gestion.use')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1360,7 +1380,7 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
                     <el-form-item prop="dato_adicional.aacu_id" :label="$t('gestion.account')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1382,7 +1402,7 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col v-if="reporte.reti_id == 8 && reporte.tireuc_id != 2" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                  <el-col v-if="reporte.reti_id == 8" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
                     <el-form-item prop="tire_id" :label="$t('gestion.tiporetiro')">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1444,7 +1464,7 @@
                     effect="dark"
                     size="medium"
                     @click="handleTag(tag.idx)"
-                    :title="'Material Control ' + tag.aap_id"
+                    :title="'Material Luminaria ' + tag.aap_id"
                     style="cursor: pointer;"
                   >L: {{tag.aap_id}}</el-tag>
                   <el-input
@@ -1460,12 +1480,12 @@
                     v-else-if="reporte.rees_id != 3"
                     size="small"
                     @click="showInputAddress02"
-                  >+ Agregar Control</el-button>
+                  >+ Agregar Luminaria</el-button>
                 </el-col>
               </el-row>
               <el-row>
                 <el-col :span="24">
-                  <span>MATERIAL CONTROL {{ reporte.direcciones[didx].aap_id }}</span>
+                  <span>MATERIAL LUMINARIA {{ reporte.direcciones[didx].aap_id }}</span>
                 </el-col>
               </el-row>
               <el-row :gutter="4" class="hidden-sm-and-down">
@@ -1473,7 +1493,7 @@
                   <span style="font-weight: bold;">No.</span>
                 </el-col>
                 <el-col :md="3" :lg="3" :xl="3">
-                  <span style="font-weight: bold;">Código de la Control</span>
+                  <span style="font-weight: bold;">Código de la Luminaria</span>
                 </el-col>
                 <el-col :xs="24" :sm="24" :md="11" :lg="11" :xl="11">
                   <span style="font-weight: bold;">Nombre del Material</span>
@@ -1508,7 +1528,7 @@
                     </el-col>
                     <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ id + 1 }}</el-col>
                     <el-col class="hidden-md-and-up" :xs="9" :sm="9">
-                      <span style="font-weight: bold;">Código de la Control</span>
+                      <span style="font-weight: bold;">Código de la Luminaria</span>
                     </el-col>
                     <el-col :xs="13" :sm="13" :md="3" :lg="3" :xl="3">
                       <el-form-item prop="aap_id">
@@ -1660,64 +1680,86 @@
           </el-collapse-item>
         </el-collapse>
       </el-form>
-      </el-main>
-     <el-footer>
-      <el-button v-if="canSave" ref="submit" :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="confirmacionGuardar = !confirmacionGuardar">Guardar Reporte</el-button>
-      <el-button v-if="canPrint" ref="print" size="medium" type="success" icon="el-icon-printer" @click="imprimir">Imprimir</el-button>
-      <el-button v-if="reporte.rees_id === 3" ref="abrir" size="medium" type="success" icon="el-icon-edit-outline" @click="abrirReporte()">Abrir Reporte</el-button>
-     </el-footer>
-     <el-dialog
-      title="Atención"
-      :visible.sync="centerDialogVisible"
-      center>
-      <span style="font-size: 20px;">El Código del Control <b>{{ aap.aap_id }}</b>, No Existe, Por Favor Verifique.</span>
+    </el-main>
+    <el-footer>
+      <el-button
+        v-if="canSave"
+        ref="submit"
+        :disabled="!validate()"
+        size="medium"
+        type="primary"
+        icon="el-icon-check"
+        @click="confirmacionGuardar = !confirmacionGuardar"
+      >Guardar Reporte</el-button>
+      <el-button
+        v-if="canPrint"
+        ref="print"
+        size="medium"
+        type="success"
+        icon="el-icon-printer"
+        @click="imprimir"
+      >Imprimir</el-button>
+      <el-button
+        v-if="reporte.rees_id === 3"
+        ref="abrir"
+        size="medium"
+        type="success"
+        icon="el-icon-edit-outline"
+        @click="abrirReporte()"
+      >Abrir Reporte</el-button>
+    </el-footer>
+    <el-dialog title="Atención" :visible.sync="centerDialogVisible" center>
+      <span style="font-size: 20px;">
+        El Código de Luminaria
+        <b>{{ aap.aap_id }}</b>, No Existe, Por Favor Verifique.
+      </span>
       <span slot="footer" class="dialog-footer">
-        <el-button v-if="reporte.reti_id === 2" type="primary" @click="centerDialogVisible = false; showAapModal=!showAapModal">Crear Nuevo Código</el-button>
+        <el-button
+          v-if="reporte.reti_id === 2"
+          type="primary"
+          @click="centerDialogVisible = false; showAapModal=!showAapModal"
+        >Crear Nuevo Código</el-button>
         <el-button type="primary" @click="centerDialogVisible = false">Cerrar</el-button>
       </span>
-     </el-dialog>
-      <el-dialog title="Confirmación" :visible.sync="confirmacionGuardar">
-          <span style="font-size:20px;">Seguro de Guardar las Modificaciones al Reporte?</span>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="confirmacionGuardar = false">No</el-button>
-            <el-button type="primary" @click="aplicar">Sí</el-button>
-          </span>
-      </el-dialog>
-     <el-dialog
-      title="Atención"
-      :visible.sync="retiradoDialogVisible"
-      center>
-      <span style="font-size: 20px;">El Código del Control <b>{{ aap.aap_id }}</b>, No Esta en Estado RETIRADO, Por Favor Verifique.</span>
+    </el-dialog>
+    <el-dialog title="Confirmación" :visible.sync="confirmacionGuardar">
+      <span style="font-size:20px;">Seguro de Guardar las Modificaciones al Reporte?</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="confirmacionGuardar = false">No</el-button>
+        <el-button type="primary" @click="aplicar">Sí</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="Atención" :visible.sync="retiradoDialogVisible" center>
+      <span style="font-size: 20px;">
+        El Código de Luminaria
+        <b>{{ aap.aap_id }}</b>, No Esta en Estado RETIRADO, Por Favor Verifique.
+      </span>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="retiradoDialogVisible = false">Cerrar</el-button>
       </span>
-     </el-dialog>
-     <el-dialog
-      title="Atención"
-      :visible.sync="yaretiradoDialogVisible"
-      center>
-      <span style="font-size: 20px;">El Código del Control <b>{{ aap.aap_id }}</b>, Se encuentra en Estado RETIRADO, Por Favor Verifique.</span>
+    </el-dialog>
+    <el-dialog title="Atención" :visible.sync="yaretiradoDialogVisible" center>
+      <span style="font-size: 20px;">
+        El Código de Luminaria
+        <b>{{ aap.aap_id }}</b>, Se encuentra en Estado RETIRADO, Por Favor Verifique.
+      </span>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="yaretiradoDialogVisible = false">Cerrar</el-button>
       </span>
-     </el-dialog>
-     <el-dialog
-      title="Recuperar Información"
-      :visible.sync="recoveryVisible"
-      width="30%"
-     >
-     <span>Existe información de Recuperación para el Reporte {{ reporte_previo.repo_consecutivo }}</span>
-     <span>Desea recuperarla ?</span>
-     <span slot="footer" class="dialog-footer">
-      <el-button @click="dialogVisible = false">No</el-button>
-      <el-button type="primary" @click="recuperarReporte()">Si</el-button>
-     </span>
-</el-dialog>
-     <el-dialog
-      title="Convertir Reporte de Control a Reporte de Control"
+    </el-dialog>
+    <el-dialog title="Recuperar Información" :visible.sync="recoveryVisible" width="30%">
+      <span>Existe información de Recuperación para el Reporte {{ reporte_previo.repo_consecutivo }}</span>
+      <span>Desea recuperarla ?</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">No</el-button>
+        <el-button type="primary" @click="recuperarReporte()">Si</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog
+      title="Convertir Reporte de Luminaria a Reporte de Control"
       :visible.sync="showConvertirDlg"
       width="50%"
-     >
+    >
       <span>Se convertirá el reporte en reporte de Control, continuar ?</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="showConvertirDlg = false">No</el-button>
@@ -1747,7 +1789,7 @@ import {
   getElementoByDescripcion,
   getElementoByCode
 } from '@/api/elemento'
-import { getAapEdit, getAapValidar, validar, buscarSiguiente } from '@/api/control'
+import { getAapEdit, getAapValidar, validar, buscarSiguiente } from '@/api/aap'
 import { getMedioambiente } from '@/api/medioambiente'
 import { getAapTiposCarcasa } from '@/api/aap_tipo_carcasa'
 import { getAapMarcas } from '@/api/aap_marca'
@@ -1849,13 +1891,15 @@ export default {
       acti_id: null,
       tiba_id: null,
       barr_id: null,
+      // subreporte
+      subreporte: null,
       // variables a almacenar
       invalid: false,
       labelPosition: 'top',
       loadingElemento: false,
       showAapModal: false,
       showConvertirDlg: false,
-      activePages: ['1', '2', '3', '4'],
+      activePages: ['1', '2', '3', '4', '5'],
       activePages2: ['2-1', '2-2'],
       nopopover: false,
       inputValue01: null,
@@ -1881,6 +1925,7 @@ export default {
         repo_reportetecnico: null,
         repo_descripcion: null,
         repo_subrepoconsecutivo: null,
+        subreporte: null,
         rees_id: 2,
         orig_id: null,
         barr_id: null,
@@ -1889,11 +1934,12 @@ export default {
         meams: [],
         eventos: [],
         direcciones: [],
-        adicional: []
+        adicional: [],
+        novedades: []
       },
       evento_siguiente_consecutivo: 1,
       direccion_siguiente_consecutivo: 1,
-      novedad_siguiente_consecutivo: 0,
+      novedad_siguiente_consecutivo: 1,
       autorizacion: '',
       addinputevent: 4,
       coau_tipo: 0,
@@ -2082,7 +2128,7 @@ export default {
           ],
           muot_id: [
             {
-              required: false,
+              required: true,
               message: 'Debe digitar el número de Orden de Trabajo',
               trigger: 'blur'
             }
@@ -2162,77 +2208,77 @@ export default {
         ],
         'dato.aatc_id': [
           {
-            required: false,
+            required: true,
             message: 'Seleccione el tipo de luminaria',
             trigger: 'change'
           }
         ],
         'dato.aama_id': [
           {
-            required: false,
+            required: true,
             message: 'Seleccione la marca de la luminaria',
             trigger: 'change'
           }
         ],
         'dato.aamo_id': [
           {
-            required: false,
+            required: true,
             message: 'Seleccione el modelo de la luminaria',
             trigger: 'change'
           }
         ],
         'dato.aap_tecnologia': [
           {
-            required: false,
+            required: true,
             message: 'Seleccione la tecnología de la luminaria',
             trigger: 'change'
           }
         ],
         'dato.aap_potencia': [
           {
-            required: false,
+            required: true,
             message: 'Seleccione la potencia de la luminaria',
             trigger: 'change'
           }
         ],
         'dato.aaco_id': [
           {
-            required: false,
+            required: true,
             message: 'Seleccione el tipo de medida de la luminaria',
             trigger: 'change'
           }
         ],
         'dato.tipo_id': [
           {
-            required: false,
+            required: true,
             message: 'Seleccione el tipo de poste de la luminaria',
             trigger: 'change'
           }
         ],
         'dato.aap_poste_altura': [
           {
-            required: false,
+            required: true,
             message: 'Digite la altura del poste de la luminaria',
             trigger: 'blur'
           }
         ],
         'dato.aap_poste_propietario': [
           {
-            required: false,
+            required: true,
             message: 'Seleccione el propietario del poste de la luminaria',
             trigger: 'change'
           }
         ],
         'dato.aap_brazo': [
           {
-            required: false,
+            required: true,
             message: 'Digite el tipo de brazo de la luminaria',
             trigger: 'blur'
           }
         ],
         'dato.aap_collarin': [
           {
-            required: false,
+            required: true,
             message: 'Digite el tipo de collarin de la luminaria',
             trigger: 'blur'
           }
@@ -2245,11 +2291,11 @@ export default {
           }
         ],
         'dato_adicional.aaus_id': [
-          { required: false, message: 'Seleccione el Uso', trigger: 'change' }
+          { required: true, message: 'Seleccione el Uso', trigger: 'change' }
         ],
         'dato_adicional.aacu_id': [
           {
-            required: false,
+            required: true,
             message: 'Seleccione la Cuenta de Alumbrado',
             trigger: 'change'
           }
@@ -2370,6 +2416,22 @@ export default {
     pending: { name: 'pending', time: 30000, autostart: false, repeat: true }
   },
   methods: {
+    addSubReporte () {
+      console.log('adicionando subreporte número: ' + this.subreporte)
+      if (this.subreporte !== undefined && this.subreporte !== null && this.subreporte > 0) {
+        this.reporte.subreportes.push({ csc: this.subreporte })
+      }
+      this.subreporte = null
+    },
+    delSubReporte (i) {
+      var item = this.reporte.subreportes.find(o => o.csc === i)
+      if (item) {
+        var idx = this.reporte.subreportes.indexOf(item)
+        if (idx > -1) {
+          this.reporte.subreportes.splice(idx, 1)
+        }
+      }
+    },
     confirmOrdenTrabajo () {
       addReporteAOrden(this.reporte.adicional.ortr_id, this.reporte.repo_id, this.reporte.tireuc_id).then(response => {
         if (response.data === 'true') {
@@ -2474,7 +2536,6 @@ export default {
       }
     },
     tipo_actividad (id) {
-      console.log('acti_id: ' + id)
       if (id === undefined || id === null) {
         return ''
       } else {
@@ -2486,7 +2547,7 @@ export default {
         }
       }
     },
-    estadoControl () {
+    estadoLuminaria () {
       console.log('existe: ' + this.existe)
       if (this.existe === undefined) {
         this.status = ''
@@ -2574,32 +2635,16 @@ export default {
       }
     },
     autosave () {
-      /*
-      var valido = true
-      valido = this.validatForm('reporteForm')
-      if (!valido) {
-        return false
-      }
-      this.reporte.rees_id = 1
-      updateReporte(this.reporte)
-        .then(response => {
-          if (response.status === 200) {
-          }
-        })
-        .catch(error => {
-          this.error(error)
-        })
-      */
       if (this.reporte.rees_id !== 3) {
         localStorage.setItem(
-          'currEditConRepFecha',
+          'currEditRepFecha',
           JSON.stringify({ fecha: Date.now(), data: this.reporte })
         )
       }
     },
     pending () {
-      /* const _ini = localStorage.getItem('currEditConRepFechaIni')
-      const _curr = localStorage.getItem('currEditConRepFecha')
+      /* const _ini = localStorage.getItem('currEditRepFechaIni')
+      const _curr = localStorage.getItem('currEditRepFecha')
       if (!this.$equals(_ini, _curr)) {
         this.open7()
       } */
@@ -2839,9 +2884,9 @@ export default {
                     direccion.materiales.forEach((m) => {
                       m.aap_id = direccion.aap_id
                     })
-                    this.estadoControl()
+                    this.estadoLuminaria()
                   } else {
-                    this.estadoControl()
+                    this.estadoLuminaria()
                     console.log('No se puede cambiar la info')
                   }
                 } else {
@@ -2922,7 +2967,7 @@ export default {
                     })
                   }
                   // Fin Cargar datos de la luminaria
-                  this.estadoControl()
+                  this.estadoLuminaria()
                 }
               }
             })
@@ -2938,7 +2983,7 @@ export default {
                 console.log('Ingrese a llamar validar siguiente consecutivo')
                 this.validarSiguienteConsecutivo(direccion)
               }
-              this.estadoControl()
+              this.estadoLuminaria()
               console.log('Estoy en Error: ' + error)
               // this.centerDialogVisible = true
             })
@@ -3133,6 +3178,12 @@ export default {
       var valido = true
       this.confirmacionGuardar = false
       var validacion = true
+      // Mover subreportes a repo_subrepoconsecutivos
+      this.reporte.repo_subrepoconsecutivo = ''
+      this.reporte.subreportes.forEach((i) => {
+        this.reporte.repo_subrepoconsecutivo = this.reporte.repo_subrepoconsecutivo + i.csc + ','
+      })
+      this.reporte.repo_subrepoconsecutivo = this.reporte.repo_subrepoconsecutivo.slice(0, -1)
       // Mover material a reporte.eventos
       // // var even_length = 1
       this.reporte.eventos = []
@@ -3180,11 +3231,11 @@ export default {
           var aap_no_en_retiro = []
           var aap_no_nueva = []
           if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
-            if (d.esta_id !== 3) {
+            if (dt.aaco_id_anterior !== 3) {
               aap_no_en_retiro.push(d.aap_id)
               this.$notify.error({
-                title: 'Control No Retirado',
-                message: 'Verifique el control: ' + d.aap_id,
+                title: 'Luminaria No Retirada',
+                message: 'Verifique la luminaria: ' + d.aap_id,
                 offset: 0
               })
             }
@@ -3197,8 +3248,8 @@ export default {
             if (d.esnueva === false) {
               aap_no_nueva.push(d.aap)
               this.$notify.error({
-                title: 'Control Ya Existe',
-                message: 'Verifique el código del control: ' + d.aap_id,
+                title: 'Luminaria Ya Existe',
+                message: 'Verifique el código de la luminaria: ' + d.aap_id,
                 offset: 0
               })
             }
@@ -3208,18 +3259,16 @@ export default {
             validacion = false
           }
           // validar luminaria ya retirada
-          /*
           if (this.reporte.reti_id === 8) {
             if (dt.aaco_id_anterior === 3) {
               validacion = false
               this.$notify.error({
-                title: 'Control Ya Está Retirada',
+                title: 'Luminaria Ya Está Retirada',
                 message: 'Verifique la luminaria: ' + d.aap_id,
                 offset: 0
               })
             }
           }
-          */
         }
       })
       //
@@ -3239,9 +3288,7 @@ export default {
           console.log('validación: ' + validacion)
         }
         */
-        // valido = validacion && (await this.validatForm('reporteForm'))
-        console.log('validacion: ' + validacion)
-        valido = (await this.validatForm('reporteForm'))
+        valido = validacion && (await this.validatForm('reporteForm'))
         if (!valido) {
           this.$notify.info({
             title: 'Atención',
@@ -3276,8 +3323,8 @@ export default {
         updateReporte(data)
           .then((response) => {
             if (response.status === 200) {
-              localStorage.removeItem('currEditConRepFechaIni')
-              localStorage.removeItem('currEditConRepFecha')
+              localStorage.removeItem('currEditRepFechaIni')
+              localStorage.removeItem('currEditRepFecha')
               this.success()
             } else {
               this.reporte.rees_id = 2
@@ -3596,6 +3643,18 @@ export default {
     obtenerReporte () {
       getReporte(this.$route.params.id).then((response) => {
         this.reporte_previo = response.data
+        if (this.reporte_previo.repo_subrepoconsecutivo === undefined) {
+          this.reporte_previo.repo_subrepoconsecutivo = null
+        }
+        if (this.reporte_previo.repo_subrepoconsecutivo === null) {
+          this.reporte_previo.subreportes = []
+        } else {
+          this.reporte_previo.subreportes = []
+          var subreportes = this.reporte_previo.repo_subrepoconsecutivo.split(',')
+          subreportes.forEach(i => {
+            this.reporte_previo.subreportes.push({ csc: i })
+          })
+        }
         if (this.reporte_previo.rees_id === 1) {
           validarReporteDiligenciado(
             this.reporte_previo.reti_id,
@@ -3604,7 +3663,7 @@ export default {
             .then((resp) => {
               if (resp.data[0] === true) {
                 this.invalid = false
-                this.inicioReporte()
+                this.inicioReporte(this.reporte_previo)
               } else {
                 this.$prompt(
                   'Por favor ingrese el código de autorización si lo tiene:',
@@ -3736,12 +3795,6 @@ export default {
       } else {
         this.conDirecciones = false
       }
-      if (this.reporte_previo.rees_id !== 3) {
-        localStorage.setItem(
-          'currEditConRepFechaIni',
-          JSON.stringify({ fecha: Date.now(), data: this.reporte })
-        )
-      }
       this.cargarEventos()
       this.validarConsecutivo()
       this.reporte = this.reporte_previo
@@ -3750,6 +3803,12 @@ export default {
       this.validarTipo()
       this.pending()
       this.didx = 0
+      if (this.reporte_previo.rees_id !== 3) {
+        localStorage.setItem(
+          'currEditRepFecha',
+          JSON.stringify({ fecha: Date.now(), data: this.reporte })
+        )
+      }
       if (this.reporte.reti_id === 8) {
         this.conexiones.splice(0, 2)
       } else {
@@ -3795,7 +3854,7 @@ export default {
     },
     cargarEventos () {
       // validar si existe un reporte previo
-      var stringReporteAnterior = localStorage.getItem('currEditConRepFecha')
+      var stringReporteAnterior = localStorage.getItem('currEditRepFecha')
       if (
         stringReporteAnterior !== undefined &&
         stringReporteAnterior !== null &&
@@ -3804,9 +3863,9 @@ export default {
         const fecha = JSON.parse(stringReporteAnterior).fecha
         const diferencia = (Date.now() - fecha) / 1000
         if (diferencia < 43200) {
-          var currEditConRepFecha = JSON.parse(stringReporteAnterior).data
-          if (currEditConRepFecha.repo_id === this.reporte_previo.repo_id) {
-            this.reporte_previo = currEditConRepFecha
+          var currEditRepFecha = JSON.parse(stringReporteAnterior).data
+          if (currEditRepFecha.repo_id === this.reporte_previo.repo_id) {
+            this.reporte_previo = currEditRepFecha
             this.reporte_previo.adicional.repo_fechadigitacion = new Date()
             this.reporte_previo.adicional.repo_modificado = new Date()
             this.reporte_previo.eventos = []
@@ -3954,10 +4013,6 @@ export default {
                 }
                 direccion.materiales.push(evento)
               })
-              console.log(
-                'agregando direccion vacio a reporte: ' +
-                  this.reporte_previo.repo_id
-              )
               this.reporte_previo.direcciones.push(direccion)
               this.idx++
               dire_length++
@@ -4512,7 +4567,7 @@ div.el-input input {
   vertical-align: bottom;
 }
 
-.activeClass{
+.activeClass {
   background-color: green;
   color: whitesmoke;
 }
