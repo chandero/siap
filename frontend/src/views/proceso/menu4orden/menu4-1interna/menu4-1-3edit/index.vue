@@ -377,7 +377,8 @@ export default {
         reti_id: null,
         reti_descripcion: null,
         repo_consecutivo: null,
-        repo_descripcion: null
+        repo_descripcion: null,
+        tireuc_id: 1
       }
       this.ordentrabajo.reportes.push(evento)
     },

@@ -38,7 +38,7 @@ import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 
-case class OrdenEvento(even_id: Option[Int], even_estado: Option[Int], repo_id: Option[scala.Long], reti_id: Option[scala.Long], repo_consecutivo: Option[Int], repo_descripcion: Option[String])
+case class OrdenEvento(even_id: Option[Int], even_estado: Option[Int], repo_id: Option[scala.Long], reti_id: Option[scala.Long], repo_consecutivo: Option[Int], repo_descripcion: Option[String], tireuc_id: Option[scala.Long])
 case class OrdenObra(even_id: Option[Int], even_estado: Option[Int], obra_id: Option[scala.Long], obra_consecutivo: Option[Int], obra_nombre: Option[String])
 case class OrdenNovedad(nove_id: Option[Int], ortrno_horaini: Option[String], ortrno_horafin: Option[String], ortrno_observacion: Option[String], even_id: Option[Int], even_estado: Option[Int])
 
@@ -68,6 +68,7 @@ object OrdenEvento {
             "reti_id" -> ortr.reti_id,
             "repo_consecutivo" -> ortr.repo_consecutivo,
             "repo_descripcion" -> ortr.repo_descripcion,
+            "tireuc_id" -> ortr.tireuc_id            
         )
     }
 
@@ -77,7 +78,8 @@ object OrdenEvento {
          (__ \ "repo_id").readNullable[scala.Long] and
          (__ \ "reti_id").readNullable[scala.Long] and
          (__ \ "repo_consecutivo").readNullable[Int] and
-         (__ \ "repo_descripcion").readNullable[String]
+         (__ \ "repo_descripcion").readNullable[String] and 
+         (__ \ "tireuc_id").readNullable[scala.Long]
     )(OrdenEvento.apply _)
 
     val set = {
@@ -86,8 +88,9 @@ object OrdenEvento {
         get[Option[scala.Long]]("repo_id") ~
         get[Option[scala.Long]]("reti_id") ~
         get[Option[Int]]("repo_consecutivo") ~
-        get[Option[String]]("repo_descripcion") map {
-            case even_id ~ even_estado ~ repo_id ~ reti_id ~ repo_consecutivo ~ repo_descripcion => OrdenEvento(even_id,even_estado,repo_id,reti_id,repo_consecutivo,repo_descripcion)
+        get[Option[String]]("repo_descripcion") ~
+        get[Option[scala.Long]]("tireuc_id") map {
+            case even_id ~ even_estado ~ repo_id ~ reti_id ~ repo_consecutivo ~ repo_descripcion ~ tireuc_id=> OrdenEvento(even_id,even_estado,repo_id,reti_id,repo_consecutivo,repo_descripcion, tireuc_id)
         }
     }      
 }
@@ -235,7 +238,7 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
             on(
                 'ortr_id -> ortr_id
             ).as(OrdenTrabajo.simple.single)
-            val e = SQL("""SELECT e.even_id, e.even_estado, e.repo_id, r.reti_id, r.repo_consecutivo, r.repo_descripcion FROM siap.ordentrabajo_reporte e 
+            val e = SQL("""SELECT e.even_id, e.even_estado, e.repo_id, r.reti_id, r.repo_consecutivo, r.repo_descripcion, e.tireuc_id FROM siap.ordentrabajo_reporte e 
                            LEFT JOIN siap.reporte r ON r.repo_id = e.repo_id
                            WHERE e.ortr_id = {ortr_id}""").
             on(
@@ -370,12 +373,13 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
                 for(r <- reportes) {
                     r.repo_consecutivo match {
                        case Some(consec) =>
-                         SQL("""INSERT INTO siap.ordentrabajo_reporte (ortr_id, repo_id, even_id, even_estado) VALUES ({ortr_id}, {repo_id}, {even_id}, {even_estado})""").
+                         SQL("""INSERT INTO siap.ordentrabajo_reporte (ortr_id, repo_id, even_id, even_estado, tireuc_id) VALUES ({ortr_id}, {repo_id}, {even_id}, {even_estado}, {tireuc_id})""").
                          on(
                              'ortr_id -> id,
                              'repo_id -> r.repo_id,
                              'even_id -> r.even_id,
-                             'even_estado -> r.even_estado
+                             'even_estado -> r.even_estado,
+                             'tireuc_id -> r.tireuc_id
                          ).executeInsert()
                        case None => None
                     }
@@ -463,20 +467,22 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
                 for(r <- reportes) {
                     r.repo_consecutivo match {
                        case Some(consec) =>
-                         val esactualizado:Boolean = SQL("""UPDATE siap.ordentrabajo_reporte SET repo_id = {repo_id}, even_estado = {even_estado} where ortr_id = {ortr_id} and even_id = {even_id}""").
+                         val esactualizado:Boolean = SQL("""UPDATE siap.ordentrabajo_reporte SET repo_id = {repo_id}, even_estado = {even_estado}, tireuc_id = {tireuc_id} where ortr_id = {ortr_id} and even_id = {even_id}""").
                          on(
                              'ortr_id -> ortr.ortr_id,
                              'even_id -> r.even_id,
                              'repo_id -> r.repo_id,
-                             'even_estado -> r.even_estado
+                             'even_estado -> r.even_estado,
+                             'tireuc_id -> r.tireuc_id
                          ).executeUpdate() > 0
                          if (!esactualizado) {
-                           SQL("""INSERT INTO siap.ordentrabajo_reporte (ortr_id, repo_id, even_id, even_estado) VALUES ({ortr_id}, {repo_id}, {even_id}, {even_estado})""").
+                           SQL("""INSERT INTO siap.ordentrabajo_reporte (ortr_id, repo_id, even_id, even_estado, tireuc_id) VALUES ({ortr_id}, {repo_id}, {even_id}, {even_estado}, {tireuc_id})""").
                            on(
                              'ortr_id -> ortr.ortr_id,
                              'repo_id -> r.repo_id,
                              'even_id -> r.even_id,
-                             'even_estado -> r.even_estado
+                             'even_estado -> r.even_estado,
+                             'tireuc_id -> r.tireuc_id
                            ).executeInsert()
                          }
                        case None => None

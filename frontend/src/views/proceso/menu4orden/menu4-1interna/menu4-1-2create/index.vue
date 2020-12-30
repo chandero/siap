@@ -362,7 +362,8 @@ export default {
         repo_consecutivo: null,
         acti_id: null,
         acti_descripcion: null,
-        repo_descripcion: null
+        repo_descripcion: null,
+        tireuc_id: 1
       }
       this.ordentrabajo.reportes.push(reporte)
     },
