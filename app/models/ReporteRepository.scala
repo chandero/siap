@@ -2739,7 +2739,7 @@ class ReporteRepository @Inject()(
                       tiba_id, 
                       barr_id_anterior) 
                       SELECT 
-                      tireuc_id,
+                      2,
                       repo_fecharecepcion, 
                       repo_direccion, 
                       repo_nombre, 
@@ -2763,27 +2763,31 @@ class ReporteRepository @Inject()(
                       WHERE r.repo_consecutivo = {repo_consecutivo} and r.reti_id = {reti_id}"""
           val queryAdicional =
             """SELECT
-                               repo_id,
-                               repo_fechadigitacion,
-                               repo_tipo_expansion,
-                               repo_luminaria,
-                               repo_redes,
-                               repo_poste,
-                               repo_modificado,
-                               repo_subreporte,
-                               acti_id,
-                               repo_subid,
-                               repo_email,
-                               repo_codigo,
-                               repo_apoyo,
-                               urba_id,
-                               muot_id,
-                               aaco_id_anterior,
-                               aaco_id_nuevo,
-                               medi_id,
-                               tran_id,
-                               medi_acta
-                              FROM siap.reporte_adicional a WHERE a.repo_id = {repo_id}
+                               ra.repo_id,
+                               ra.repo_fechadigitacion,
+                               ra.repo_tipo_expansion,
+                               ra.repo_luminaria,
+                               ra.repo_redes,
+                               ra.repo_poste,
+                               ra.repo_modificado,
+                               ra.repo_subreporte,
+                               ra.acti_id,
+                               ra.repo_subid,
+                               ra.repo_email,
+                               ra.repo_codigo,
+                               ra.repo_apoyo,
+                               ra.urba_id,
+                               ra.muot_id,
+                               ra.aaco_id_anterior,
+                               ra.aaco_id_nuevo,
+                               ra.medi_id,
+                               ra.tran_id,
+                               ra.medi_acta,
+                               ot.ortr_id
+                              FROM siap.reporte_adicional ra 
+                              LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+                              LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+                              WHERE a.repo_id = {repo_id}
                               """
 
           _id = SQL(queryReporte)
