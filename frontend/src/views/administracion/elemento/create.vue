@@ -9,7 +9,7 @@
      <el-input name="descripcion" v-model="elemento.elem_descripcion"></el-input>
      <p/>
      <span>{{ $t('elemento.code')}}</span>
-     <el-input name="codigo" v-model="elemento.elem_codigo"></el-input>
+     <el-input name="codigo" v-model="elemento.elem_codigo" @blur="validarCodigo()"></el-input>
      <p/>
      <span>{{ $t('elemento.ucap')}}</span>
      <el-checkbox name="ucap" v-model="elemento.elem_ucap" ></el-checkbox>
@@ -98,7 +98,7 @@
     </el-container>
 </template>
 <script>
-import { saveElemento } from '@/api/elemento'
+import { getElementoByCode, saveElemento } from '@/api/elemento'
 import { getTiposElemento } from '@/api/tipoelemento'
 import { getCaracteristicas } from '@/api/caracteristica'
 import { getUcapsTodas } from '@/api/ucap'
@@ -135,10 +135,25 @@ export default {
       loading: false,
       page_size: 10,
       current_page: 1,
-      total: 0
+      total: 0,
+      noexiste: false
     }
   },
   methods: {
+    validarCodigo () {
+      getElementoByCode(this.elemento.elem_codigo).then(response => {
+        this.elemento = response.data
+        this.$notify({
+          title: 'Material código ' + this.elemento.elem_codigo + ' ya existe',
+          message: this.elemento.elem_descripcion,
+          type: 'warning'
+        })
+        this.noexiste = false
+        this.limpiar()
+      }).catch(() => {
+        this.noexiste = true
+      })
+    },
     aplicar () {
       saveElemento(this.elemento).then(response => {
         if (response.status === 201) {
@@ -149,7 +164,7 @@ export default {
       })
     },
     validate () {
-      if (this.elemento.elem_descripcion && this.elemento.elem_codigo && this.elemento.tiel_id > 0) {
+      if (this.noexiste && this.elemento.elem_descripcion && this.elemento.elem_codigo && this.elemento.tiel_id > 0) {
         return true
       } else {
         return false
