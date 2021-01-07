@@ -4403,7 +4403,8 @@ class ReporteRepository @Inject()(
               case None => false
             }
             // actualizar direccion de la luminaria y datos adicionales
-            if (reporte.reti_id.get == 1 || reporte.reti_id.get == 2 || reporte.reti_id.get == 3) {
+            // Actualizar direccion sin importar el tipo de reporte
+            // if (reporte.reti_id.get == 1 || reporte.reti_id.get == 2 || reporte.reti_id.get == 3) {
               val res = SQL(
                 """UPDATE siap.aap SET aap_direccion = {aap_direccion}, barr_id = {barr_id} WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
               ).on(
@@ -4413,7 +4414,7 @@ class ReporteRepository @Inject()(
                   'empr_id -> reporte.empr_id
                 )
                 .executeUpdate() > 0
-            }
+            // }
             reporte.reti_id match {
               case Some(8) =>
                 SQL(
