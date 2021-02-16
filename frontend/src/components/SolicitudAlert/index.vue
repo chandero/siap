@@ -22,7 +22,7 @@ export default {
   },
   methods: {
     listaSolicitud () {
-      this.$router.push({ path: '/solicitud/porvencer' })
+      this.$router.push({ path: '/solicitud/menu4porvencer' })
     }
   },
   beforeMount () {

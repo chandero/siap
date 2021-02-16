@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     listaReporte (reti_id) {
-      this.$router.push({ path: '/procesos/vencido' })
+      this.$router.push({ path: '/proceso/menu2pendiente' })
     }
   },
   beforeMount () {
