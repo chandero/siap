@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.5.1  -->
+<!-- 2021-02-15T17:58:04 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_relacion" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="781" leftMargin="56" rightMargin="5" topMargin="5" bottomMargin="5" uuid="05a69750-b169-4a0d-b037-910a744e89b1">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -17,17 +18,18 @@
 	<parameter name="USUARIO" class="java.lang.String"/>
 	<parameter name="EMPR_ID" class="java.lang.Long"/>
 	<queryString language="SQL">
-		<![CDATA[select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.control_reporte r 
-left join siap.control_reporte_adicional a on r.repo_id = a.repo_id
-left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
-left join siap.actividad t on a.acti_id = t.acti_id
-left join siap.barrio b on r.barr_id = b.barr_id
-left join siap.origen o on r.orig_id = o.orig_id
-left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
-left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
-left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id = 1 and r.empr_id = $P{EMPR_ID}
-order by r.reti_id, r.repo_id]]>
+		<![CDATA[select r.* from (select DISTINCT ON (r.repo_consecutivo) r.*, rt.reti_descripcion, t.*, b.barr_descripcion, o.orig_descripcion,  ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.control_reporte r 
+                        left join siap.control_reporte_adicional a on r.repo_id = a.repo_id
+                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
+                        left join siap.actividad t on a.acti_id = t.acti_id
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id = 1 and r.empr_id = $P{EMPR_ID} 
+                        order by r.repo_consecutivo, ot.ortr_fecha DESC) r
+ order by  r.reti_id, r.repo_id]]>
 	</queryString>
 	<field name="repo_id" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="repo_id"/>

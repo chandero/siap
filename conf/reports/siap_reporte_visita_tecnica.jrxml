@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.5.1  -->
+<!-- 2021-02-15T10:42:37 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_visita_tecnica" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1e392dc1-e644-4b8e-a8f8-0552f5262720">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Siap_Adapter"/>
@@ -99,8 +100,8 @@ WHERE s.soli_id = $P{SOLI_ID}]]>
 				<textFieldExpression><![CDATA[$P{EMPR_SIGLA}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="42" width="150" height="14" uuid="30eb0e81-8c6a-4288-a4f6-62dac7efff4e"/>
-				<text><![CDATA[CONSECUTIVO DE ATENCIÓN:]]></text>
+				<reportElement x="0" y="54" width="170" height="14" uuid="30eb0e81-8c6a-4288-a4f6-62dac7efff4e"/>
+				<text><![CDATA[CONSECUTIVO DE ATENCIÓN No.:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="310" y="72" width="90" height="14" uuid="c383d0ed-b5b3-4e38-a8d7-3d164ae46cc4"/>
@@ -244,11 +245,22 @@ WHERE s.soli_id = $P{SOLI_ID}]]>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="150" y="38" width="60" height="19" uuid="e64193ec-5d91-4c99-a149-7c61dfab874a"/>
+				<reportElement x="175" y="50" width="60" height="19" uuid="e64193ec-5d91-4c99-a149-7c61dfab874a"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[TEXT($F{soli_consecutivo},"000000")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="35" width="140" height="16" uuid="ff3eb9c5-b451-4a0b-97de-d2495f6e6116"/>
+				<text><![CDATA[SOLICITUD RADICADO No.:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="144" y="32" width="60" height="19" uuid="6905df40-d462-40fb-863b-2acdb583783a"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{soli_radicado}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>

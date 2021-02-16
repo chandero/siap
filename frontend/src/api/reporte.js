@@ -200,7 +200,7 @@ export function printReporteRelacion (fecha_inicial, fecha_final, empr_id, usua_
   if (data.tipo === 'pdf') {
     target = '_blank'
   } else {
-    target = '_self'
+    target = '_blank'
   }
   const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/repo/prn/rela/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.empr_id + '/' + usua_id + '/' + formato + '/' + tipo
   window.open(url, target, 'location=no, menubar=no')
