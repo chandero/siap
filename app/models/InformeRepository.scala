@@ -10055,7 +10055,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                  INNER JOIN siap.reporte_tipo rt ON rt.reti_id = r1.reti_id
                  INNER JOIN LATERAL (SELECT rt.reti_id, count(rd.*) AS operaciones FROM siap.reporte r2
 							                       INNER JOIN siap.reporte_tipo rt ON rt.reti_id = r2.reti_id
-				   			                     INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id
+				   			                     INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id AND rd.even_estado < 8
 				   			                     WHERE r2.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r2.empr_id = {empr_id}
                                      GROUP BY rt.reti_id) AS r2 ON r2.reti_id = r1.reti_id
                  INNER JOIN LATERAL (SELECT rt.reti_id, sum(1 + CASE 
@@ -10200,7 +10200,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                  INNER JOIN siap.origen rt ON rt.orig_id = r1.orig_id
                  INNER JOIN LATERAL (SELECT rt.orig_id, count(rd.*) AS operaciones FROM siap.reporte r2
 							                       INNER JOIN siap.origen rt ON rt.orig_id = r2.orig_id
-				   			                     INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id
+				   			                     INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id AND rd.even_estado < 8
 				   			                     WHERE r2.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r2.empr_id = {empr_id}
                                      GROUP BY rt.orig_id) AS r2 ON r2.orig_id = r1.orig_id
                  INNER JOIN LATERAL (SELECT rt.orig_id, sum(1 + CASE 
@@ -10334,19 +10334,19 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                 "Operaciones"
               )
             _listRow03 += headerRow
-            val _parser01 = str("cuad_descripcion") ~
+            val _parser01 = get[Option[String]]("cuad_descripcion") ~
                           int("operaciones") map {
                             case a ~ b => (a, b)
                           } 
 
             var query =
-              """SELECT o.cuad_descripcion, COUNT(*) AS operaciones FROM (SELECT DISTINCT c.cuad_descripcion, r1.repo_id, rd.aap_id FROM siap.reporte r1
-                  INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r1.repo_id
-                   INNER JOIN siap.ordentrabajo_reporte otr ON 
-				 		        otr.ortr_id = (SELECT otr2.ortr_id FROM siap.ordentrabajo_reporte otr2 WHERE otr2.repo_id = r1.repo_id ORDER BY otr2.ortr_id DESC limit 1)
-                  INNER JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
-                  INNER JOIN siap.cuadrilla c ON c.cuad_id = ot.cuad_id
-                  WHERE r1.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r1.empr_id = {empr_id}) o
+              """SELECT o.cuad_descripcion, COUNT(*) AS operaciones FROM (SELECT DISTINCT ON (rd.aap_id, r1.repo_id) c.cuad_descripcion, r1.repo_id, rd.aap_id, ot.ortr_fecha FROM siap.reporte r1
+                  INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r1.repo_id AND rd.even_estado < 8
+                  LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = r1.repo_id
+                  LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+                  LEFT JOIN siap.cuadrilla c ON c.cuad_id = ot.cuad_id
+                  WHERE r1.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r1.empr_id = {empr_id}
+				          ORDER BY rd.aap_id, r1.repo_id DESC) o
                   GROUP BY o.cuad_descripcion"""
             val resultSet =
               SQL(query)
@@ -10368,7 +10368,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  i._1,
+                  i._1 match { case Some(i) => i case None => "Sin Asignar Orden de Trabajo"},
                   Some(1),
                           style = Some(
                             CellStyle(dataFormat = CellDataFormat("@"))
@@ -10463,7 +10463,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
 
             var query =
               """SELECT ad1.aap_tecnologia, ad1.aap_potencia, COUNT(ad1.*) as cantidad FROM siap.reporte r1
-                 INNER JOIN siap.reporte_direccion rd1 ON rd1.repo_id = r1.repo_id
+                 INNER JOIN siap.reporte_direccion rd1 ON rd1.repo_id = r1.repo_id AND rd1.even_estado < 8
                  INNER JOIN siap.aap a1 ON a1.aap_id = rd1.aap_id
                  INNER JOIN siap.aap_adicional ad1 ON ad1.aap_id = a1.aap_id
                  WHERE r1.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r1.empr_id = {empr_id}
