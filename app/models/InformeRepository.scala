@@ -62,6 +62,7 @@ import org.apache.poi.common.usermodel.HyperlinkType
 // Utility
 import utilities.Utility
 import org.checkerframework.checker.units.qual.s
+import org.apache.poi.ss.usermodel.CellType
 
 case class Siap_resumen_material(
     elem_codigo: Option[String],
@@ -10055,7 +10056,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                  INNER JOIN siap.reporte_tipo rt ON rt.reti_id = r1.reti_id
                  INNER JOIN LATERAL (SELECT rt.reti_id, count(rd.*) AS operaciones FROM siap.reporte r2
 							                       INNER JOIN siap.reporte_tipo rt ON rt.reti_id = r2.reti_id
-				   			                     INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id AND rd.even_estado < 8
+				   			                     LEFT JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id AND rd.even_estado < 8
 				   			                     WHERE r2.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r2.empr_id = {empr_id}
                                      GROUP BY rt.reti_id) AS r2 ON r2.reti_id = r1.reti_id
                  INNER JOIN LATERAL (SELECT rt.reti_id, sum(1 + CASE 
@@ -10200,7 +10201,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                  INNER JOIN siap.origen rt ON rt.orig_id = r1.orig_id
                  INNER JOIN LATERAL (SELECT rt.orig_id, count(rd.*) AS operaciones FROM siap.reporte r2
 							                       INNER JOIN siap.origen rt ON rt.orig_id = r2.orig_id
-				   			                     INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id AND rd.even_estado < 8
+				   			                     LEFT JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id AND rd.even_estado < 8
 				   			                     WHERE r2.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final} AND r2.empr_id = {empr_id}
                                      GROUP BY rt.orig_id) AS r2 ON r2.orig_id = r1.orig_id
                  INNER JOIN LATERAL (SELECT rt.orig_id, sum(1 + CASE 
@@ -10600,4 +10601,189 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
       _result.toList;
     }  
 
+  def siap_informe_general_estadistica_xls(
+      fecha_inicial: Long,
+      fecha_final: Long,
+      formato: String,
+      empr_id: Long,
+  ): Array[Byte] = {
+    val empresa = empresaService.buscarPorId(empr_id).get
+    //val usuario = usuarioService.buscarPorId(usua_id).get
+    var fi = Calendar.getInstance()
+    var ff = Calendar.getInstance()
+    fi.setTimeInMillis(fecha_inicial)
+    ff.setTimeInMillis(fecha_final)
+    fi.set(Calendar.DATE, 1)
+    fi.set(Calendar.MILLISECOND, 0)
+    fi.set(Calendar.SECOND, 0)
+    fi.set(Calendar.MINUTE, 0)
+    fi.set(Calendar.HOUR, 0)
+
+    ff.set(Calendar.DATE, ff.getActualMaximum(Calendar.DATE))
+    ff.set(Calendar.MILLISECOND, 59)
+    ff.set(Calendar.SECOND, 59)
+    ff.set(Calendar.MINUTE, 59)
+    ff.set(Calendar.HOUR, 23)
+
+    var periodos = Utility.mesesEntreFechas(fecha_inicial, fecha_final)
+    periodos += 1
+    if (formato.equals("xls")) {
+      db.withConnection { implicit connection =>
+        val dti = new DateTime(fecha_inicial)
+        val dtf = new DateTime(fecha_final)
+        val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+        val sdf = new SimpleDateFormat("yyyy-MM-dd")
+        val fecha_ini = sdf.format(fi.getTime())
+        val fecha_fin = sdf.format(ff.getTime())
+        var _listMerged01 = new ListBuffer[CellRange]()
+        var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged02 = new ListBuffer[CellRange]()
+        var _listRow02 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged03 = new ListBuffer[CellRange]()
+        var _listRow03 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged04 = new ListBuffer[CellRange]()
+        var _listRow04 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        val sheet01 = Sheet(
+          name = "Por Tipo Reporte_" + fmt.print(dti) + "_" + fmt.print(dtf),
+          rows = {
+            val titleRow1 = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(empresa.empr_descripcion)
+            _listRow01 += titleRow1                
+            val titleRow2 = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Reportes Por Tipo")
+            _listRow01 += titleRow2
+            val titleRow3 = com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "Desde:",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                fi.getTime(),
+                Some(1),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              StringCell(
+                "Hasta:",
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                ff.getTime(),
+                Some(3),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),   
+            )     
+            _listRow01 += titleRow3  
+            val headerRow = com.norbitltd.spoiwo.model.Row(
+               StringCell(
+                "Item",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               ),
+               StringCell(
+                "Descripción",
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            )
+            var fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            var x = 0
+            for ( x <- 1 to periodos) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              println("Etiqueta:" + etiqueta)
+              val cell = StringCell(etiqueta,
+                Some((1+x)),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              headerRow.addCell(cell)
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+
+            _listRow04 += headerRow
+            var i = 0
+            val _parser01: RowParser[scala.collection.mutable.Map[String, Any]] = SqlParser.folder(scala.collection.mutable.Map.empty[String, Any]) { (map, value, meta) => Right(map + (meta.column.qualified -> value)) }
+
+            var query =
+              s"""SELECT * FROM public.crosstab(
+                  (${"'"} SELECT to_char(rt1.reti_id, ${"'"}${"'"}00${"'"}${"'"}) AS reti_id, rt1.reti_descripcion, CONCAT(EXTRACT(YEAR FROM r2.repo_fechasolucion),to_char(EXTRACT(MONTH FROM r2.repo_fechasolucion), ${"'"}${"'"}00${"'"}${"'"})) AS periodo, count(rd.*) AS luminarias FROM siap.reporte_tipo rt1
+                    LEFT JOIN siap.reporte r2 ON r2.reti_id = rt1.reti_id AND r2.repo_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND r2.empr_id = $empr_id
+                    LEFT JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id AND rd.even_estado < 8
+                    GROUP BY rt1.reti_id, CONCAT(EXTRACT(YEAR FROM r2.repo_fechasolucion),to_char(EXTRACT(MONTH FROM r2.repo_fechasolucion), ${"'"}${"'"}00${"'"}${"'"}))
+                    ORDER BY rt1.reti_id ASC ${"'"})::TEXT,
+					        (${"'"} SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo ${"'"})::TEXT
+                 )
+                 AS (
+                  reti_id TEXT,
+	                reti_descripcion TEXT, """
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            i = 0
+            for (i <- 1 to periodos ) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              query += etiqueta + " INTEGER"
+              if (i != periodos) {
+                query += ", \n"
+              }
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            query += ")"            
+            println("query:" + query)
+            val resultSet =
+              SQL(query)
+                .on(
+                  'fecha_inicial -> new DateTime(fi),
+                  'fecha_final -> new DateTime(ff),
+                  'empr_id -> empr_id
+                )
+                .as(_parser01 *)
+            var _csc = 0;
+            val rows = resultSet.map { i =>
+              _csc += 1
+            }
+            val totalRow = com.norbitltd.spoiwo.model.Row(
+                FormulaCell(
+                  "SUM(D5:D" + (_csc + 4) + ")",
+                  Some(3),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+            )
+            
+            _listRow04 += totalRow
+
+            _listRow04.toList
+          },
+          mergedRegions = {
+            _listMerged04 += CellRange((0, 0), (0, 5))
+            _listMerged04 += CellRange((1, 1), (0, 5))
+            _listMerged04.toList
+           }
+        )        
+      
+        println("Escribiendo en el Stream")
+        var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+        Workbook(sheet01).writeToOutputStream(os)
+        println("Stream Listo")
+        os.toByteArray  
+      }
+    } else {
+      var os = Array[Byte]()
+      os
+    }
+  }
 }

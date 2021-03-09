@@ -686,4 +686,26 @@ class InformeController @Inject()(
       Forbidden("Dude, you’re not logged in.")
     }
   }
+
+  def siap_informe_general_estadistica_xls(      
+      fecha_inicial: Long,
+      fecha_final: Long,
+      formato: String,
+      empr_id: Long,
+      token: String
+  ) = Action {
+    if (config.get[String]("play.http.secret.key") == token) {
+      val os = informeService.siap_informe_general_estadistica_xls(fecha_inicial, fecha_final, formato, empr_id)
+      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+      val filename = "Informe_General_Estadistico" + fmt.print(fecha_inicial) + "_a_" + fmt
+        .print(fecha_final) + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Ok(os)
+        .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        .withHeaders("Content-Disposition" -> attach)
+    } else {
+      Forbidden("Dude, you’re not logged in.")
+    }
+  }
+
 }

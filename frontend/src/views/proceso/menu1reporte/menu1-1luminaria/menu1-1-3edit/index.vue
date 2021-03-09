@@ -3178,6 +3178,15 @@ export default {
       var valido = true
       this.confirmacionGuardar = false
       var validacion = true
+      // Validar si el reporte tiene la orden de trabajo asignada
+      if (this.reporte.adicional.ortr_id === undefined || this.reporte.adicional.ortr_id === null || this.reporte.adicional.ortr_id < 1) {
+        this.$notify.warning({
+          title: 'Atención',
+          message: 'Reporte ' + this.reporte.repo_consecutivo + ' No Asignado a Orden de Trabajo, Por favor verifique la información',
+          offset: 100
+        })
+        return false
+      }
       // Mover subreportes a repo_subrepoconsecutivos
       this.reporte.repo_subrepoconsecutivo = ''
       this.reporte.subreportes.forEach((i) => {

@@ -14,6 +14,10 @@ import pdi.jwt.JwtSession
 import org.joda.time.DateTime
 
 import dto._
+import org.joda.time.LocalDate
+import java.util.Date
+import org.joda.time.format.DateTimeFormatter
+import org.joda.time.Period
 
 class Utility {
     private val meses = List[String]("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre")
@@ -132,7 +136,15 @@ class Utility {
         sb.append(chars(randomNum))
       }
       sb.toString
-    }    
+    }
+
+    def mesesEntreFechas(startDate: Long, endDate: Long): Int = {
+
+      val from = new LocalDate(startDate)
+      val to = new LocalDate(endDate)
+      val p = new Period(from, to)
+      (p.getYears() * 12) + p.getMonths()
+    }
 }
 
 object Utility extends Utility

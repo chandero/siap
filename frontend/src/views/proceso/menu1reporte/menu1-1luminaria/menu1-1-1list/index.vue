@@ -46,6 +46,15 @@
             </el-row>
           </el-header>
           <el-main>
+            <el-row>
+              <el-col>
+                <el-button type="primary" circle icon="el-icon-top" title="Subir Mes" @click="handleUp"/>
+              </el-col>
+            </el-row>
+          <el-row>
+            <el-col>
+              <el-container>
+                <el-main style="height:500px; max-height: 500px;">
           <el-tabs v-model="activeTab" :tab-position="tabPosition" type="border-card" class="tabs" @tab-click="changeTab" strecth>
             <el-tab-pane
               v-for="(tab, index) in tabsData"
@@ -56,7 +65,7 @@
             >
               <el-table
                 v-loading="loading"
-                :data="tab.tableData.filter(data => filtrar(data))"
+                :data="tableData.filter(data => filtrar(data))"
                 stripe
                 :default-sort = "{prop: 'repo_consecutivo', order: 'descending'}"
                 style="width: 100%"
@@ -202,7 +211,16 @@
               </el-table>
             </el-tab-pane>
           </el-tabs>
-    </el-main>
+              </el-main>
+              </el-container>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col>
+              <el-button type="primary" circle icon="el-icon-bottom" title="Bajar Mes" @click="handleDown"/>
+            </el-col>
+          </el-row>
+         </el-main>
    </el-container>
   </el-main>
  </el-container>
@@ -303,6 +321,8 @@ export default {
       qstyled: true,
       order: '',
       truncSize: 32,
+      anho_inicial: null,
+      mes_inicial: null,
       sfilter: {
         logicalOperator: 'AND',
         children: [
@@ -348,6 +368,54 @@ export default {
     ])
   },
   methods: {
+    handleUp () {
+      this.mes_inicial += 1
+      if (this.mes_inicial > 12) {
+        this.mes_inicial = 1
+        this.anho_inicial += 1
+      }
+      this.createTabs()
+      var data = { name: this.tabsData[0].tabPeriodo }
+      this.changeTab(data)
+      this.activeTab = this.tabsData[0].tabPeriodo
+    },
+    handleDown () {
+      this.mes_inicial -= 1
+      if (this.mes_inicial < 1) {
+        this.mes_inicial = 12
+        this.anho_inicial -= 1
+      }
+      this.createTabs()
+      var data = { name: this.tabsData[11].tabPeriodo }
+      this.changeTab(data)
+      this.activeTab = this.tabsData[11].tabPeriodo
+    },
+    createTabs () {
+      var year = this.anho_inicial
+      var month = this.mes_inicial
+      this.anho = year
+      this.mes = month
+      this.tabsData = []
+      console.log('Mes Inicial : ' + month)
+      for (var i = 12; i >= 1; i--) {
+        var data = {
+          tabName: this.$i18n.t('months.m' + month) + year,
+          tabRange: {
+            anho: year,
+            mes: month
+          },
+          tabPeriodo: month + ':' + year + ':' + (12 - i),
+          tableData: []
+        }
+        this.tabsData.push(data)
+        // this.getData(data.tabRange.anho, data.tabRange.mes, data)
+        month--
+        if (month < 1) {
+          month = 12
+          year--
+        }
+      }
+    },
     handlePrint (index, row) {
       printReporte(row.repo_id, this.empresa.empr_id)
     },
@@ -460,7 +528,7 @@ export default {
       this.loading = true
       getReportesRango(anho, mes, 1).then(response => {
         console.log('Periodo: ' + name)
-        this.tabsData[index].tableData = response.data
+        this.tableData = response.data
         this.loading = false
         // data.tableData = response.data
       }).catch(() => {
@@ -504,29 +572,9 @@ export default {
     this.qrules[2].choices = this.qbarrios
     this.qrules[3].choices = this.qestados
     const date = new Date()
-    var year = date.getFullYear()
-    var month = date.getMonth() + 1
-    this.anho = year
-    this.mes = month
-    console.log('Mes Inicial : ' + month)
-    for (var i = 12; i >= 1; i--) {
-      var data = {
-        tabName: this.$i18n.t('months.m' + month) + year,
-        tabRange: {
-          anho: year,
-          mes: month
-        },
-        tabPeriodo: month + ':' + year + ':' + (12 - i),
-        tableData: []
-      }
-      this.tabsData.push(data)
-      // this.getData(data.tabRange.anho, data.tabRange.mes, data)
-      month--
-      if (month < 1) {
-        month = 12
-        year--
-      }
-    }
+    this.anho_inicial = date.getFullYear()
+    this.mes_inicial = date.getMonth() + 1
+    this.createTabs()
   },
   mounted () {
     const start = async () => {
