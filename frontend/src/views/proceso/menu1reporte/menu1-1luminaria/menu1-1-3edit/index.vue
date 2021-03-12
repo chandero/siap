@@ -2686,7 +2686,7 @@ export default {
       convertirReporte(this.reporte.repo_id).then((response) => {
         if (response.status === 200) {
           this.$router.push({
-            path: '/procesos/menu1-2control/menu-1-2-3edit/' + response.data
+            path: '/proceso/menu1reporte/menu1-2control/menu1-2-3edit/' + response.data
           })
         } else {
           this.$alert('No se pudo convertir el reporte', 'Convertir Reporte', {

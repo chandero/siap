@@ -58,6 +58,7 @@ import com.norbitltd.spoiwo.model.enums.{
   CellHorizontalAlignment => HA,
   CellVerticalAlignment => VA
 }
+import Height._
 import org.apache.poi.common.usermodel.HyperlinkType
 // Utility
 import utilities.Utility
@@ -9995,7 +9996,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
         var _listRow04 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
 
         val sheet01 = Sheet(
-          name = "Por Tipo Reporte_" + fmt.print(dti) + "_" + fmt.print(dtf),
+          name = "Por Tipo Reporte",
           rows = {
             val titleRow1 = com.norbitltd.spoiwo.model
                 .Row()
@@ -10140,7 +10141,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
           }
         )
         val sheet02 = Sheet(
-          name = "Por Origen Reporte_" + fmt.print(dti) + "_" + fmt.print(dtf),
+          name = "Por Origen",
           rows = {
             val titleRow1 = com.norbitltd.spoiwo.model
                 .Row()
@@ -10286,7 +10287,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
           
         )
         val sheet03 = Sheet(
-          name = "Operaciones Por Cuadrilla_" + fmt.print(dti) + "_" + fmt.print(dtf),
+          name = "Por Cuadrilla",
           rows = {
             val titleRow1 = com.norbitltd.spoiwo.model
                 .Row()
@@ -10406,7 +10407,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
         )
 
         val sheet04 = Sheet(
-          name = "Luminarias Intervenidas_" + fmt.print(dti) + "_" + fmt.print(dtf),
+          name = "Luminarias Intervenidas",
           rows = {
             val titleRow1 = com.norbitltd.spoiwo.model
                 .Row()
@@ -10619,18 +10620,35 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
     fi.set(Calendar.MINUTE, 0)
     fi.set(Calendar.HOUR, 0)
 
-    ff.set(Calendar.DATE, ff.getActualMaximum(Calendar.DATE))
-    ff.set(Calendar.MILLISECOND, 59)
-    ff.set(Calendar.SECOND, 59)
-    ff.set(Calendar.MINUTE, 59)
-    ff.set(Calendar.HOUR, 23)
+    // ff.set(Calendar.MILLISECOND, 0)
+    // ff.set(Calendar.SECOND, 58)
+    // ff.set(Calendar.MINUTE, 59)
+    // ff.set(Calendar.HOUR, 23)
+    ff.set(Calendar.DATE, ff.getActualMaximum(Calendar.DATE))    
 
     var periodos = Utility.mesesEntreFechas(fecha_inicial, fecha_final)
     periodos += 1
-    if (formato.equals("xls")) {
+
+    val sheet01 = siap_informe_general_estadistica_tipo_reporte_xls (fi, ff, empr_id, periodos)
+    val sheet02 = siap_informe_general_estadistica_origen_xls (fi, ff, empr_id, periodos)
+    val sheet03 = siap_informe_general_estadistica_cuadrilla_xls (fi, ff, empr_id, periodos)
+    val sheet04 = siap_informe_general_estadistica_luminaria_xls (fi, ff, empr_id, periodos)
+    var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+    Workbook(sheet01, sheet02, sheet03, sheet04).writeToOutputStream(os)
+    println("Stream Listo")
+    os.toByteArray  
+  }
+
+  def siap_informe_general_estadistica_tipo_reporte_xls(
+      fi: Calendar,
+      ff: Calendar,
+      empr_id: Long,
+      periodos: Int
+  ): Sheet = {
       db.withConnection { implicit connection =>
-        val dti = new DateTime(fecha_inicial)
-        val dtf = new DateTime(fecha_final)
+        val empresa = empresaService.buscarPorId(empr_id).get
+        val dti = new DateTime(fi.getTime())
+        val dtf = new DateTime(ff.getTime())
         val fmt = DateTimeFormat.forPattern("yyyyMMdd")
         val sdf = new SimpleDateFormat("yyyy-MM-dd")
         val fecha_ini = sdf.format(fi.getTime())
@@ -10643,16 +10661,25 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
         var _listRow03 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
         var _listMerged04 = new ListBuffer[CellRange]()
         var _listRow04 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _csc = 0
+        val fuente = Font(height = 12.points, fontName = "Liberation Sans", bold = true, italic = false, strikeout = false)
+        val fuenteNoBold = Font(height = 12.points, fontName = "Liberation Sans", bold = false, italic = false, strikeout = false)        
         val sheet01 = Sheet(
-          name = "Por Tipo Reporte_" + fmt.print(dti) + "_" + fmt.print(dtf),
+          name = "Por Tipo Reporte",
           rows = {
             val titleRow1 = com.norbitltd.spoiwo.model
                 .Row()
                 .withCellValues(empresa.empr_descripcion)
             _listRow01 += titleRow1                
             val titleRow2 = com.norbitltd.spoiwo.model
-                .Row()
-                .withCellValues("Reportes Por Tipo")
+                .Row(
+                  StringCell(
+                    "Reportes Atendidos Por Tipo de Reporte",
+                    Some(0),
+                    style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet    
+                  )
+                )
             _listRow01 += titleRow2
             val titleRow3 = com.norbitltd.spoiwo.model.Row(
               StringCell(
@@ -10685,65 +10712,101 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
               ),   
             )     
             _listRow01 += titleRow3  
-            val headerRow = com.norbitltd.spoiwo.model.Row(
-               StringCell(
+            var _listCellHeader = new ListBuffer[Cell]() 
+            var cell = StringCell(
                 "Item",
                 Some(0),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-               ),
-               StringCell(
-                "Descripción",
-                Some(1),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
                )
-            )
+            _listCellHeader += cell
+            cell = StringCell(
+                "Descripción",
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
             var fecha_tmp = Calendar.getInstance()
             fecha_tmp.setTime(fi.getTime())
             var x = 0
             for ( x <- 1 to periodos) {
               val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
-              println("Etiqueta:" + etiqueta)
+              val position = x + 1
               val cell = StringCell(etiqueta,
-                Some((1+x)),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                Some(position),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-              headerRow.addCell(cell)
+              _listCellHeader += cell
               fecha_tmp.add(Calendar.MONTH, 1)
             }
-
-            _listRow04 += headerRow
-            var i = 0
+            var cell1 = Cell.Empty
+            cell1 = StringCell(
+                "TOTALES",
+                Some(2 + periodos),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCellHeader += cell1
+            var headerRow = com.norbitltd.spoiwo.model.Row(_listCellHeader.toList)
+            _listRow01 += headerRow
             val _parser01: RowParser[scala.collection.mutable.Map[String, Any]] = SqlParser.folder(scala.collection.mutable.Map.empty[String, Any]) { (map, value, meta) => Right(map + (meta.column.qualified -> value)) }
 
             var query =
               s"""SELECT * FROM public.crosstab(
-                  (${"'"} SELECT to_char(rt1.reti_id, ${"'"}${"'"}00${"'"}${"'"}) AS reti_id, rt1.reti_descripcion, CONCAT(EXTRACT(YEAR FROM r2.repo_fechasolucion),to_char(EXTRACT(MONTH FROM r2.repo_fechasolucion), ${"'"}${"'"}00${"'"}${"'"})) AS periodo, count(rd.*) AS luminarias FROM siap.reporte_tipo rt1
-                    LEFT JOIN siap.reporte r2 ON r2.reti_id = rt1.reti_id AND r2.repo_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND r2.empr_id = $empr_id
-                    LEFT JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id AND rd.even_estado < 8
-                    GROUP BY rt1.reti_id, CONCAT(EXTRACT(YEAR FROM r2.repo_fechasolucion),to_char(EXTRACT(MONTH FROM r2.repo_fechasolucion), ${"'"}${"'"}00${"'"}${"'"}))
-                    ORDER BY rt1.reti_id ASC ${"'"})::TEXT,
-					        (${"'"} SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo ${"'"})::TEXT
-                 )
-                 AS (
+                  	${"'"}SELECT o.reti_id, o.reti_descripcion, o.periodo, SUM(o.reportes) FROM (SELECT 
+	                      rt.reti_id, rt.reti_descripcion,
+	                      CONCAT(EXTRACT(YEAR FROM r3.repo_fechasolucion), to_char(EXTRACT(MONTH FROM r3.repo_fechasolucion), ${"'"}${"'"}00${"'"}${"'"})) AS periodo,
+	                      CASE WHEN (r3.repo_id IS NULL) THEN 0
+	                      ELSE (1 + CASE WHEN (array_length(string_to_array(r3.repo_subrepoconsecutivo, ${"'"}${"'"},${"'"}${"'"}),1) IS NULL ) THEN 0
+		                    ELSE array_length(string_to_array(r3.repo_subrepoconsecutivo, ${"'"}${"'"},${"'"}${"'"}),1)
+			                  END)
+	                    END AS reportes FROM siap.reporte_tipo rt
+                      LEFT JOIN siap.reporte r3 ON rt.reti_id = r3.reti_id AND r3.repo_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND r3.empr_id = $empr_id
+                      ORDER BY 1,3) o
+                      GROUP BY 1,2,3
+                      ORDER BY 1,2,3${"'"},
+                  ${"'"} SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo ${"'"}
+                  ) AS (
                   reti_id TEXT,
 	                reti_descripcion TEXT, """
             fecha_tmp = Calendar.getInstance()
             fecha_tmp.setTime(fi.getTime())
-            i = 0
-            for (i <- 1 to periodos ) {
+            x = 0
+            for (x <- 1 to periodos ) {
               val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
               query += etiqueta + " INTEGER"
-              if (i != periodos) {
+              if (x != periodos) {
                 query += ", \n"
               }
               fecha_tmp.add(Calendar.MONTH, 1)
             }
-            query += ")"            
-            println("query:" + query)
-            val resultSet =
+            query += ") "
+            query += s"""UNION ALL
+              SELECT * FROM public.crosstab(
+	              ${"'"}SELECT ${"'"}${"'"}90${"'"}${"'"} AS reti_id, ${"'"}${"'"}OBRA${"'"}${"'"} AS reti_descripcion, CONCAT(EXTRACT(YEAR FROM o1.obra_fechasolucion), to_char(EXTRACT(MONTH FROM o1.obra_fechasolucion), ${"'"}${"'"}00${"'"}${"'"}) ), 0 AS operaciones FROM siap.obra o1
+                  WHERE o1.obra_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND o1.empr_id = $empr_id
+                  GROUP BY 1,2,3
+                  ORDER BY 1,2,3${"'"},
+	             ${"'"}SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo${"'"}
+              ) AS (
+                reti_id TEXT,
+                reti_descripcion TEXT, """
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for (x <- 1 to periodos ) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              query += etiqueta + " INTEGER"
+              if (x != periodos) {
+                query += ", \n"
+              }
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            query += ")"
+            println("query: " + query)
+            var resultSet =
               SQL(query)
                 .on(
                   'fecha_inicial -> new DateTime(fi),
@@ -10751,39 +10814,1407 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                   'empr_id -> empr_id
                 )
                 .as(_parser01 *)
-            var _csc = 0;
-            val rows = resultSet.map { i =>
-              _csc += 1
-            }
-            val totalRow = com.norbitltd.spoiwo.model.Row(
-                FormulaCell(
-                  "SUM(D5:D" + (_csc + 4) + ")",
-                  Some(3),
+            var rows = resultSet.map { i =>
+              val _listCell = new ListBuffer[Cell]()
+              var cell = Cell.Empty
+              cell = StringCell(
+                i.get(".reti_id") match { case Some(v) => v.asInstanceOf[String] case None => "" },
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              cell = StringCell(
+                i.get(".reti_descripcion") match { case Some(v) => v.asInstanceOf[String] case None => "" },
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              x = 0
+              fecha_tmp = Calendar.getInstance()
+              fecha_tmp.setTime(fi.getTime())              
+              for (x <- 1 to periodos ) {
+                val etiqueta = "." + Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+                cell = NumericCell(
+                  i.get(etiqueta.toLowerCase()) match { case Some(v) => v.asInstanceOf[Int] case None => 0 },
+                  Some( x + 1),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet                  
+                )
+                _listCell += cell
+                fecha_tmp.add(Calendar.MONTH, 1)
+              }
+              var cell1 = Cell.Empty  
+              cell1 = FormulaCell(
+                  "SUM(C"+ (_csc + 5) + ":" + (periodos+98).asInstanceOf[Char] + (_csc + 5) + ")",
+                  Some(2+periodos),
                   style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
+              )
+              _listCell += cell1
+              _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+              _csc += 1
+            }
+            x = 0
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            var _listCell = new ListBuffer[Cell]()
+            cell1 = StringCell(
+              "TOTALES",
+              Some(1),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
             )
+            _listCell += cell1
+            for (x <- 1 to periodos ) {            
+              cell1 = FormulaCell(
+                  "SUM("+(x+98).asInstanceOf[Char] + "5:" + (x+98).asInstanceOf[Char] + (_csc + 4) + ")",
+                  Some(1+x),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1
+            }
             
-            _listRow04 += totalRow
+            _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+            _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("")
+            _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("")
+            _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("")
+// LAS LUMINARIAS
+            val titleRow22 = com.norbitltd.spoiwo.model
+                .Row(
+                  StringCell(
+                    "Operaciones Atendidas Por Tipo de Reporte",
+                    Some(0),
+                    style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet    
+                  )                  
+                )
+            _listRow01 += titleRow22
+            val titleRow23 = com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "Desde:",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                fi.getTime(),
+                Some(1),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              StringCell(
+                "Hasta:",
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                ff.getTime(),
+                Some(3),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),   
+            )
+            _listRow01 += titleRow23
+            _csc += 8
+            _listMerged04 += CellRange(((_csc), (_csc)), (0, 5))
 
-            _listRow04.toList
+            val _csc0 = _csc + 4
+            _csc = _csc0 - 5
+            _listCellHeader = new ListBuffer[Cell]()            
+            cell = StringCell(
+                "Item",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            cell = StringCell(
+                "Descripción",
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for ( x <- 1 to periodos) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              val position = x + 1
+              val cell = Cell(etiqueta,
+                position,
+                style = CellStyle(dataFormat = CellDataFormat("@"), font = fuente),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCellHeader += cell
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            cell1 = StringCell(
+                "TOTALES",
+                Some(2 + periodos),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCellHeader += cell1
+            headerRow = com.norbitltd.spoiwo.model.Row(_listCellHeader.toList)
+            _listRow01 += headerRow
+
+            query =
+              s"""SELECT * FROM public.crosstab(
+                  ${"'"} SELECT to_char(rt1.reti_id, ${"'"}${"'"}00${"'"}${"'"}) AS reti_id, rt1.reti_descripcion, CONCAT(EXTRACT(YEAR FROM r2.repo_fechasolucion),to_char(EXTRACT(MONTH FROM r2.repo_fechasolucion), ${"'"}${"'"}00${"'"}${"'"})) AS periodo, count(rd.*) AS luminarias FROM siap.reporte_tipo rt1
+                    LEFT JOIN siap.reporte r2 ON r2.reti_id = rt1.reti_id AND r2.repo_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND r2.empr_id = $empr_id
+                    LEFT JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id AND rd.even_estado < 8
+                    GROUP BY rt1.reti_id, CONCAT(EXTRACT(YEAR FROM r2.repo_fechasolucion),to_char(EXTRACT(MONTH FROM r2.repo_fechasolucion), ${"'"}${"'"}00${"'"}${"'"}))
+                    ORDER BY rt1.reti_id ASC ${"'"},
+					        ${"'"} SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo ${"'"}
+                 )
+                 AS (
+                  reti_id TEXT,
+	                reti_descripcion TEXT, """
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for (x <- 1 to periodos ) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              query += etiqueta + " INTEGER"
+              if (x != periodos) {
+                query += ", \n"
+              }
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            query += ")"
+            query += s"""UNION ALL
+              SELECT * FROM public.crosstab(
+	              ${"'"}SELECT ${"'"}${"'"}90${"'"}${"'"} AS reti_id, ${"'"}${"'"}OBRA${"'"}${"'"} AS reti_descripcion, CONCAT(EXTRACT(YEAR FROM o1.obra_fechasolucion), to_char(EXTRACT(MONTH FROM o1.obra_fechasolucion), ${"'"}${"'"}00${"'"}${"'"}) ), COUNT(*) AS reportes  FROM siap.obra o1
+                  WHERE o1.obra_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND o1.empr_id = $empr_id
+                  GROUP BY 1,2,3
+                  ORDER BY 1,2,3${"'"},
+	             ${"'"}SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo${"'"}
+              ) AS (
+                reti_id TEXT,
+                reti_descripcion TEXT, """
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for (x <- 1 to periodos ) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              query += etiqueta + " INTEGER"
+              if (x != periodos) {
+                query += ", \n"
+              }
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            query += ")"
+            resultSet =
+              SQL(query)
+                .on(
+                  'fecha_inicial -> new DateTime(fi),
+                  'fecha_final -> new DateTime(ff),
+                  'empr_id -> empr_id
+                )
+                .as(_parser01 *)
+
+            rows = resultSet.map { i =>
+              _listCell = new ListBuffer[Cell]()
+              var cell = Cell.Empty
+              cell = StringCell(
+                i.get(".reti_id") match { case Some(v) => v.asInstanceOf[String].trim() case None => "" },
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              cell = StringCell(
+                i.get(".reti_descripcion") match { case Some(v) => v.asInstanceOf[String] case None => "" },
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              x = 0
+              fecha_tmp = Calendar.getInstance()
+              fecha_tmp.setTime(fi.getTime())              
+              for (x <- 1 to periodos ) {
+                val etiqueta = "." + Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+                cell = NumericCell(
+                  i.get(etiqueta.toLowerCase()) match { case Some(v) => v.asInstanceOf[Int] case None => 0 },
+                  Some( x + 1),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet                  
+                )
+                _listCell += cell
+                fecha_tmp.add(Calendar.MONTH, 1)
+              }    
+              var cell1 = Cell.Empty  
+              cell1 = FormulaCell(
+                  "SUM(C"+ (_csc + 5) + ":" + (periodos+98).asInstanceOf[Char] + (_csc + 5) + ")",
+                  Some(2+periodos),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1                            
+              _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+              _csc += 1
+            }
+            x = 0
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            _listCell = new ListBuffer[Cell]()
+            cell1 = Cell.Empty
+            cell1 = StringCell(
+              "TOTALES",
+              Some(1),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCell += cell1            
+            for (x <- 1 to periodos ) {            
+              cell1 = FormulaCell(
+                  "SUM("+(x+98).asInstanceOf[Char] + (_csc0) + ":" + (x+98).asInstanceOf[Char] + (_csc + 4) + ")",
+                  Some(1+x),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1
+            }
+
+            _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+
+            _listRow01.toList
           },
           mergedRegions = {
             _listMerged04 += CellRange((0, 0), (0, 5))
             _listMerged04 += CellRange((1, 1), (0, 5))
             _listMerged04.toList
            }
-        )        
-      
-        println("Escribiendo en el Stream")
-        var os: ByteArrayOutputStream = new ByteArrayOutputStream()
-        Workbook(sheet01).writeToOutputStream(os)
-        println("Stream Listo")
-        os.toByteArray  
+        )
+        sheet01
       }
-    } else {
-      var os = Array[Byte]()
-      os
-    }
   }
+
+  // ESTADISTICA POR ORIGEN
+  def siap_informe_general_estadistica_origen_xls(
+      fi: Calendar,
+      ff: Calendar,
+      empr_id: Long,
+      periodos: Int
+  ): Sheet = {
+      db.withConnection { implicit connection =>
+        val empresa = empresaService.buscarPorId(empr_id).get
+        val dti = new DateTime(fi.getTime())
+        val dtf = new DateTime(ff.getTime())
+        val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+        val sdf = new SimpleDateFormat("yyyy-MM-dd")
+        val fecha_ini = sdf.format(fi.getTime())
+        val fecha_fin = sdf.format(ff.getTime())
+        var _listMerged01 = new ListBuffer[CellRange]()
+        var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged02 = new ListBuffer[CellRange]()
+        var _listRow02 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged03 = new ListBuffer[CellRange]()
+        var _listRow03 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged04 = new ListBuffer[CellRange]()
+        var _listRow04 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _csc = 0
+        val fuente = Font(height = 12.points, fontName = "Liberation Sans", bold = true, italic = false, strikeout = false)
+        val fuenteNoBold = Font(height = 12.points, fontName = "Liberation Sans", bold = false, italic = false, strikeout = false)        
+        val sheet01 = Sheet(
+          name = "Por Origen",
+          rows = {
+            val titleRow1 = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(empresa.empr_descripcion)
+            _listRow01 += titleRow1                
+            val titleRow2 = com.norbitltd.spoiwo.model
+                .Row(
+                  StringCell(
+                    "Reportes Atendidos Por Origen de Reporte",
+                    Some(0),
+                    style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet    
+                  )
+                )
+            _listRow01 += titleRow2
+            val titleRow3 = com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "Desde:",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                fi.getTime(),
+                Some(1),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              StringCell(
+                "Hasta:",
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                ff.getTime(),
+                Some(3),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),   
+            )     
+            _listRow01 += titleRow3  
+            var _listCellHeader = new ListBuffer[Cell]() 
+            var cell = StringCell(
+                "Item",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            cell = StringCell(
+                "Descripción",
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            var fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            var x = 0
+            for ( x <- 1 to periodos) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              val position = x + 1
+              val cell = Cell(etiqueta,
+                position,
+                style = CellStyle(dataFormat = CellDataFormat("@"), font = fuente),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCellHeader += cell
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+                        var cell1 = Cell.Empty
+            cell1 = StringCell(
+                "TOTALES",
+                Some(2 + periodos),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCellHeader += cell1
+            var headerRow = com.norbitltd.spoiwo.model.Row(_listCellHeader.toList)
+            _listRow01 += headerRow
+            val _parser01: RowParser[scala.collection.mutable.Map[String, Any]] = SqlParser.folder(scala.collection.mutable.Map.empty[String, Any]) { (map, value, meta) => Right(map + (meta.column.qualified -> value)) }
+
+            var query =
+              s"""SELECT * FROM public.crosstab(
+                  	${"'"}SELECT o.orig_id, o.orig_descripcion, o.periodo, SUM(o.reportes) FROM (SELECT 
+	                      o1.orig_id, o1.orig_descripcion,
+	                      CONCAT(EXTRACT(YEAR FROM r3.repo_fechasolucion), to_char(EXTRACT(MONTH FROM r3.repo_fechasolucion), ${"'"}${"'"}00${"'"}${"'"})) AS periodo,
+	                      CASE WHEN (r3.repo_id IS NULL) THEN 0
+	                      ELSE (1 + CASE WHEN (array_length(string_to_array(r3.repo_subrepoconsecutivo, ${"'"}${"'"},${"'"}${"'"}),1) IS NULL ) THEN 0
+		                    ELSE array_length(string_to_array(r3.repo_subrepoconsecutivo, ${"'"}${"'"},${"'"}${"'"}),1)
+			                  END)
+	                    END AS reportes FROM siap.origen o1
+                      LEFT JOIN siap.reporte r3 ON r3.orig_id = o1.orig_id AND r3.repo_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND r3.empr_id = $empr_id
+                      ORDER BY 1,3) o
+                      GROUP BY 1,2,3
+                      ORDER BY 1,2,3${"'"},
+                  ${"'"} SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo ${"'"}
+                  ) AS (
+                  orig_id TEXT,
+	                orig_descripcion TEXT, """
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for (x <- 1 to periodos ) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              query += etiqueta + " INTEGER"
+              if (x != periodos) {
+                query += ", \n"
+              }
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            query += ") "
+            query += s"""UNION ALL
+              SELECT * FROM public.crosstab(
+	              ${"'"}SELECT ${"'"}${"'"}90${"'"}${"'"} AS orig_id, ${"'"}${"'"}ORDEN DE TRABAJO${"'"}${"'"} AS orig_descripcion, CONCAT(EXTRACT(YEAR FROM o1.obra_fechasolucion), to_char(EXTRACT(MONTH FROM o1.obra_fechasolucion), ${"'"}${"'"}00${"'"}${"'"}) ), COUNT(*) AS reportes FROM siap.obra o1
+                  WHERE o1.obra_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND o1.empr_id = $empr_id
+                  GROUP BY 1,2,3
+                  ORDER BY 1,2,3${"'"},
+	             ${"'"}SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo${"'"}
+              ) AS (
+                orig_id TEXT,
+                orig_descripcion TEXT, """
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for (x <- 1 to periodos ) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              query += etiqueta + " INTEGER"
+              if (x != periodos) {
+                query += ", \n"
+              }
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            query += ")"
+            var resultSet =
+              SQL(query)
+                .on(
+                  'fecha_inicial -> new DateTime(fi),
+                  'fecha_final -> new DateTime(ff),
+                  'empr_id -> empr_id
+                )
+                .as(_parser01 *)
+            var rows = resultSet.map { i =>
+              val _listCell = new ListBuffer[Cell]()
+              var cell = Cell.Empty
+              cell = StringCell(
+                i.get(".orig_id") match { case Some(v) => v.asInstanceOf[String] case None => "" },
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              cell = StringCell(
+                i.get(".orig_descripcion") match { case Some(v) => v.asInstanceOf[String] case None => "" },
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              x = 0
+              fecha_tmp = Calendar.getInstance()
+              fecha_tmp.setTime(fi.getTime())              
+              for (x <- 1 to periodos ) {
+                val etiqueta = "." + Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+                cell = NumericCell(
+                  i.get(etiqueta.toLowerCase()) match { case Some(v) => v.asInstanceOf[Int] case None => 0 },
+                  Some( x + 1),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet                  
+                )
+                _listCell += cell
+                fecha_tmp.add(Calendar.MONTH, 1)
+              }      
+              var cell1 = Cell.Empty  
+              cell1 = FormulaCell(
+                  "SUM(C"+ (_csc + 5) + ":" + (periodos+98).asInstanceOf[Char] + (_csc + 5) + ")",
+                  Some(2+periodos),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1                          
+              _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+              _csc += 1
+            }
+            x = 0
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            var _listCell = new ListBuffer[Cell]()
+            cell1 = StringCell(
+              "TOTALES",
+              Some(1),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCell += cell1            
+            for (x <- 1 to periodos ) {            
+              cell1 = FormulaCell(
+                  "SUM("+(x+98).asInstanceOf[Char] + "5:" + (x+98).asInstanceOf[Char] + (_csc + 4) + ")",
+                  Some(1+x),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1
+            }
+            
+            _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+            _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("")
+            _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("")
+            _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("")
+// LAS LUMINARIAS
+            val titleRow22 = com.norbitltd.spoiwo.model
+                .Row(
+                  StringCell(
+                    "Operaciones Atendidas Por Origen de Reporte",
+                    Some(0),
+                    style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet    
+                  )                  
+                )
+            _listRow01 += titleRow22
+            val titleRow23 = com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "Desde:",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                fi.getTime(),
+                Some(1),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              StringCell(
+                "Hasta:",
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                ff.getTime(),
+                Some(3),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),   
+            )
+            _listRow01 += titleRow23
+            _csc += 8
+            _listMerged04 += CellRange(((_csc), (_csc)), (0, 5))
+
+            val _csc0 = _csc + 4
+            _csc = _csc0 - 5
+            _listCellHeader = new ListBuffer[Cell]()            
+            cell = StringCell(
+                "Item",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            cell = StringCell(
+                "Descripción",
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for ( x <- 1 to periodos) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              val position = x + 1
+              val cell = Cell(etiqueta,
+                position,
+                style = CellStyle(dataFormat = CellDataFormat("@"), font = fuente),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCellHeader += cell
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            cell1 = StringCell(
+                "TOTALES",
+                Some(2 + periodos),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCellHeader += cell1
+            headerRow = com.norbitltd.spoiwo.model.Row(_listCellHeader.toList)
+            _listRow01 += headerRow
+
+            query =
+              s"""SELECT * FROM public.crosstab(
+                  ${"'"} SELECT to_char(o1.orig_id, ${"'"}${"'"}00${"'"}${"'"}) AS orig_id, o1.orig_descripcion, CONCAT(EXTRACT(YEAR FROM r2.repo_fechasolucion),to_char(EXTRACT(MONTH FROM r2.repo_fechasolucion), ${"'"}${"'"}00${"'"}${"'"})) AS periodo, count(rd.*) AS luminarias FROM siap.origen o1
+                    LEFT JOIN siap.reporte r2 ON r2.orig_id = o1.orig_id AND r2.repo_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND r2.empr_id = $empr_id
+                    LEFT JOIN siap.reporte_direccion rd ON rd.repo_id = r2.repo_id AND rd.even_estado < 8
+                    GROUP BY 1,2,3
+                    ORDER BY 1,2,3${"'"},
+					        ${"'"} SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo ${"'"}
+                 )
+                 AS (
+                  orig_id TEXT,
+	                orig_descripcion TEXT, """
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for (x <- 1 to periodos ) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              query += etiqueta + " INTEGER"
+              if (x != periodos) {
+                query += ", \n"
+              }
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            query += ")"
+            query += s"""UNION ALL
+              SELECT * FROM public.crosstab(
+	              ${"'"}SELECT ${"'"}${"'"}90${"'"}${"'"} AS reti_id, ${"'"}${"'"}ORDEN DE TRABAJO${"'"}${"'"} AS reti_descripcion, CONCAT(EXTRACT(YEAR FROM o1.obra_fechasolucion), to_char(EXTRACT(MONTH FROM o1.obra_fechasolucion), ${"'"}${"'"}00${"'"}${"'"}) ), 0 AS operaciones  FROM siap.obra o1
+                  WHERE o1.obra_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND o1.empr_id = $empr_id
+                  GROUP BY 1,2,3
+                  ORDER BY 1,2,3${"'"},
+	             ${"'"}SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo${"'"}
+              ) AS (
+                orig_id TEXT,
+                orig_descripcion TEXT, """
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for (x <- 1 to periodos ) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              query += etiqueta + " INTEGER"
+              if (x != periodos) {
+                query += ", \n"
+              }
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            query += ")"
+            resultSet =
+              SQL(query)
+                .on(
+                  'fecha_inicial -> new DateTime(fi),
+                  'fecha_final -> new DateTime(ff),
+                  'empr_id -> empr_id
+                )
+                .as(_parser01 *)
+            rows = resultSet.map { i =>
+              _listCell = new ListBuffer[Cell]()
+              var cell = Cell.Empty
+              cell = StringCell(
+                i.get(".orig_id") match { case Some(v) => v.asInstanceOf[String] case None => "" },
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              cell = StringCell(
+                i.get(".orig_descripcion") match { case Some(v) => v.asInstanceOf[String] case None => "" },
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              x = 0
+              fecha_tmp = Calendar.getInstance()
+              fecha_tmp.setTime(fi.getTime())              
+              for (x <- 1 to periodos ) {
+                val etiqueta = "." + Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+                cell = NumericCell(
+                  i.get(etiqueta.toLowerCase()) match { case Some(v) => v.asInstanceOf[Int] case None => 0 },
+                  Some( x + 1),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet                  
+                )
+                _listCell += cell
+                fecha_tmp.add(Calendar.MONTH, 1)
+              }            
+              var cell1 = Cell.Empty  
+              cell1 = FormulaCell(
+                  "SUM(C"+ (_csc + 5) + ":" + (periodos+98).asInstanceOf[Char] + (_csc + 5) + ")",
+                  Some(2+periodos),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1                    
+              _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+              _csc += 1
+            }
+            x = 0
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            _listCell = new ListBuffer[Cell]()
+            cell1 = Cell.Empty
+            cell1 = StringCell(
+              "TOTALES",
+              Some(1),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCell += cell1            
+            for (x <- 1 to periodos ) {            
+              cell1 = FormulaCell(
+                  "SUM("+(x+98).asInstanceOf[Char] + (_csc0) + ":" + (x+98).asInstanceOf[Char] + (_csc + 4) + ")",
+                  Some(1+x),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1
+            }
+
+            _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+
+            _listRow01.toList
+          },
+          mergedRegions = {
+            _listMerged04 += CellRange((0, 0), (0, 5))
+            _listMerged04 += CellRange((1, 1), (0, 5))
+            _listMerged04.toList
+           }
+        )
+        sheet01
+      }
+  }
+
+  // ESTADISTICA POR CUADRILLA
+  def siap_informe_general_estadistica_cuadrilla_xls(
+      fi: Calendar,
+      ff: Calendar,
+      empr_id: Long,
+      periodos: Int
+  ): Sheet = {
+      db.withConnection { implicit connection =>
+        val empresa = empresaService.buscarPorId(empr_id).get
+        val dti = new DateTime(fi.getTime())
+        val dtf = new DateTime(ff.getTime())
+        val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+        val sdf = new SimpleDateFormat("yyyy-MM-dd")
+        val fecha_ini = sdf.format(fi.getTime())
+        val fecha_fin = sdf.format(ff.getTime())
+        var _listMerged01 = new ListBuffer[CellRange]()
+        var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged02 = new ListBuffer[CellRange]()
+        var _listRow02 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged03 = new ListBuffer[CellRange]()
+        var _listRow03 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged04 = new ListBuffer[CellRange]()
+        var _listRow04 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _csc = 0
+        val fuente = Font(height = 12.points, fontName = "Liberation Sans", bold = true, italic = false, strikeout = false)
+        val fuenteNoBold = Font(height = 12.points, fontName = "Liberation Sans", bold = false, italic = false, strikeout = false)        
+        val sheet01 = Sheet(
+          name = "Por Cuadrilla",
+          rows = {
+            val titleRow1 = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(empresa.empr_descripcion)
+            _listRow01 += titleRow1                
+            val titleRow2 = com.norbitltd.spoiwo.model
+                .Row(
+                  StringCell(
+                    "Reportes Atendidos Por Cuadrilla",
+                    Some(0),
+                    style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet    
+                  )
+                )
+            _listRow01 += titleRow2
+            val titleRow3 = com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "Desde:",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                fi.getTime(),
+                Some(1),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              StringCell(
+                "Hasta:",
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                ff.getTime(),
+                Some(3),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),   
+            )     
+            _listRow01 += titleRow3  
+            var _listCellHeader = new ListBuffer[Cell]() 
+            var cell = StringCell(
+                "Item",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            cell = StringCell(
+                "Descripción",
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            var fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            var x = 0
+            for ( x <- 1 to periodos) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              val position = x + 1
+              val cell = Cell(etiqueta,
+                position,
+                style = CellStyle(dataFormat = CellDataFormat("@"), font = fuente),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCellHeader += cell
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+                        var cell1 = Cell.Empty
+            cell1 = StringCell(
+                "TOTALES",
+                Some(2 + periodos),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCellHeader += cell1
+            var headerRow = com.norbitltd.spoiwo.model.Row(_listCellHeader.toList)
+            _listRow01 += headerRow
+            val _parser01: RowParser[scala.collection.mutable.Map[String, Any]] = SqlParser.folder(scala.collection.mutable.Map.empty[String, Any]) { (map, value, meta) => Right(map + (meta.column.qualified -> value)) }
+
+            var query =
+              s"""SELECT to_char(ROW_NUMBER() OVER (ORDER BY cuad_id), ${"'"}00${"'"}) AS item, * FROM public.crosstab(
+                  	${"'"}SELECT o.cuad_id, CASE WHEN o.cuad_id ISNULL THEN ${"'"}${"'"}SIN ASIGNAR${"'"}${"'"} ELSE o.cuad_descripcion END, o.periodo, COUNT(*) AS reportes FROM (SELECT DISTINCT ON (r1.repo_id, c.cuad_id) c.cuad_id, c.cuad_descripcion, CONCAT(EXTRACT(YEAR FROM r1.repo_fechasolucion), to_char(EXTRACT(MONTH FROM r1.repo_fechasolucion), ${"'"}${"'"}00${"'"}${"'"})) AS periodo, r1.repo_id, ot.ortr_fecha FROM siap.reporte r1
+                            LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = r1.repo_id
+                            LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+                            LEFT JOIN siap.cuadrilla c ON c.cuad_id = ot.cuad_id
+                            WHERE r1.repo_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND r1.empr_id = $empr_id
+                          ORDER BY r1.repo_id, c.cuad_id DESC) o
+                          GROUP BY 1,2,3
+                          ORDER BY 1,2,3${"'"},
+                  ${"'"} SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo ${"'"}
+                  ) AS (
+                  cuad_id TEXT,
+	                cuad_descripcion TEXT, """
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for (x <- 1 to periodos ) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              query += etiqueta + " INTEGER"
+              if (x != periodos) {
+                query += ", \n"
+              }
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            query += ") "
+            var resultSet =
+              SQL(query)
+                .on(
+                  'fecha_inicial -> new DateTime(fi),
+                  'fecha_final -> new DateTime(ff),
+                  'empr_id -> empr_id
+                )
+                .as(_parser01 *)
+            var rows = resultSet.map { i =>
+              val _listCell = new ListBuffer[Cell]()
+              var cell = Cell.Empty
+              cell = StringCell(
+                i.get(".item") match { case Some(v) => v.asInstanceOf[String] case None => "" },
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              cell = StringCell(
+                i.get(".cuad_descripcion") match { case Some(v) => v.asInstanceOf[String] case None => "Sin Asignar" },
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              x = 0
+              fecha_tmp = Calendar.getInstance()
+              fecha_tmp.setTime(fi.getTime())              
+              for (x <- 1 to periodos ) {
+                val etiqueta = "." + Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+                cell = NumericCell(
+                  i.get(etiqueta.toLowerCase()) match { case Some(v) => v.asInstanceOf[Int] case None => 0 },
+                  Some( x + 1),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet                  
+                )
+                _listCell += cell
+                fecha_tmp.add(Calendar.MONTH, 1)
+              }      
+              var cell1 = Cell.Empty  
+              cell1 = FormulaCell(
+                  "SUM(C"+ (_csc + 5) + ":" + (periodos+98).asInstanceOf[Char] + (_csc + 5) + ")",
+                  Some(2+periodos),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1                          
+              _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+              _csc += 1
+            }
+            x = 0
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            var _listCell = new ListBuffer[Cell]()
+            cell1 = StringCell(
+              "TOTALES",
+              Some(1),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCell += cell1            
+            for (x <- 1 to periodos ) {            
+              cell1 = FormulaCell(
+                  "SUM("+(x+98).asInstanceOf[Char] + "5:" + (x+98).asInstanceOf[Char] + (_csc + 4) + ")",
+                  Some(1+x),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1
+            }
+            
+            _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+            _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("")
+            _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("")
+            _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("")
+// LAS LUMINARIAS
+            val titleRow22 = com.norbitltd.spoiwo.model
+                .Row(
+                  StringCell(
+                    "Operaciones Atendidas Por Cuadrilla",
+                    Some(0),
+                    style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet    
+                  )                  
+                )
+            _listRow01 += titleRow22
+            val titleRow23 = com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "Desde:",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                fi.getTime(),
+                Some(1),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              StringCell(
+                "Hasta:",
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                ff.getTime(),
+                Some(3),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),   
+            )
+            _listRow01 += titleRow23
+            _csc += 8
+            _listMerged04 += CellRange(((_csc), (_csc)), (0, 5))
+
+            val _csc0 = _csc + 4
+            _csc = _csc0 - 5
+            _listCellHeader = new ListBuffer[Cell]()            
+            cell = StringCell(
+                "Item",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            cell = StringCell(
+                "Descripción",
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for ( x <- 1 to periodos) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              val position = x + 1
+              val cell = Cell(etiqueta,
+                position,
+                style = CellStyle(dataFormat = CellDataFormat("@"), font = fuente),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCellHeader += cell
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            cell1 = StringCell(
+                "TOTALES",
+                Some(2 + periodos),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCellHeader += cell1
+            headerRow = com.norbitltd.spoiwo.model.Row(_listCellHeader.toList)
+            _listRow01 += headerRow
+
+            query =
+              s"""SELECT to_char(ROW_NUMBER() OVER (ORDER BY cuad_id), ${"'"}00${"'"}) AS item, * FROM public.crosstab(
+                  ${"'"} SELECT o.cuad_id, CASE WHEN o.cuad_id ISNULL THEN ${"'"}${"'"}SIN ASIGNAR${"'"}${"'"} ELSE o.cuad_descripcion END, o.periodo, COUNT(*) AS operaciones FROM (SELECT DISTINCT ON (rd.aap_id, r1.repo_id) c.cuad_id, c.cuad_descripcion, CONCAT(EXTRACT(YEAR FROM r1.repo_fechasolucion), to_char(EXTRACT(MONTH FROM r1.repo_fechasolucion), ${"'"}${"'"}00${"'"}${"'"})) AS periodo, r1.repo_id, rd.aap_id, ot.ortr_fecha FROM siap.reporte r1
+                          INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r1.repo_id AND rd.even_estado < 8
+                          LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = r1.repo_id
+                          LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+                          LEFT JOIN siap.cuadrilla c ON c.cuad_id = ot.cuad_id
+                          WHERE r1.repo_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND r1.empr_id = $empr_id
+                        ORDER BY rd.aap_id, r1.repo_id DESC) o
+                        GROUP BY 1,2,3
+                        ORDER BY 1,2,3${"'"},
+					        ${"'"} SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo ${"'"}
+                 )
+                 AS (
+                  cuad_id TEXT,
+	                cuad_descripcion TEXT, """
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for (x <- 1 to periodos ) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              query += etiqueta + " INTEGER"
+              if (x != periodos) {
+                query += ", \n"
+              }
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            query += ")"
+            resultSet =
+              SQL(query)
+                .on(
+                  'fecha_inicial -> new DateTime(fi),
+                  'fecha_final -> new DateTime(ff),
+                  'empr_id -> empr_id
+                )
+                .as(_parser01 *)
+            rows = resultSet.map { i =>
+              _listCell = new ListBuffer[Cell]()
+              var cell = Cell.Empty
+              cell = StringCell(
+                i.get(".item") match { case Some(v) => v.asInstanceOf[String] case None => "" },
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              cell = StringCell(
+                i.get(".cuad_descripcion") match { case Some(v) => v.asInstanceOf[String] case None => "Sin Asignar" },
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              x = 0
+              fecha_tmp = Calendar.getInstance()
+              fecha_tmp.setTime(fi.getTime())              
+              for (x <- 1 to periodos ) {
+                val etiqueta = "." + Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+                cell = NumericCell(
+                  i.get(etiqueta.toLowerCase()) match { case Some(v) => v.asInstanceOf[Int] case None => 0 },
+                  Some( x + 1),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet                  
+                )
+                _listCell += cell
+                fecha_tmp.add(Calendar.MONTH, 1)
+              }            
+              var cell1 = Cell.Empty  
+              cell1 = FormulaCell(
+                  "SUM(C"+ (_csc + 5) + ":" + (periodos+98).asInstanceOf[Char] + (_csc + 5) + ")",
+                  Some(2+periodos),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1                    
+              _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+              _csc += 1
+            }
+            x = 0
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            _listCell = new ListBuffer[Cell]()
+            cell1 = Cell.Empty
+            cell1 = StringCell(
+              "TOTALES",
+              Some(1),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCell += cell1            
+            for (x <- 1 to periodos ) {            
+              cell1 = FormulaCell(
+                  "SUM("+(x+98).asInstanceOf[Char] + (_csc0) + ":" + (x+98).asInstanceOf[Char] + (_csc + 4) + ")",
+                  Some(1+x),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1
+            }
+
+            _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+
+            _listRow01.toList
+          },
+          mergedRegions = {
+            _listMerged04 += CellRange((0, 0), (0, 5))
+            _listMerged04 += CellRange((1, 1), (0, 5))
+            _listMerged04.toList
+           }
+        )
+        sheet01
+      }
+  }
+
+  // ESTADISTICA POR LUMINARIA INTERVENIDA
+  def siap_informe_general_estadistica_luminaria_xls(
+      fi: Calendar,
+      ff: Calendar,
+      empr_id: Long,
+      periodos: Int
+  ): Sheet = {
+      db.withConnection { implicit connection =>
+        val empresa = empresaService.buscarPorId(empr_id).get
+        val dti = new DateTime(fi.getTime())
+        val dtf = new DateTime(ff.getTime())
+        val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+        val sdf = new SimpleDateFormat("yyyy-MM-dd")
+        val fecha_ini = sdf.format(fi.getTime())
+        val fecha_fin = sdf.format(ff.getTime())
+        var _listMerged01 = new ListBuffer[CellRange]()
+        var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged02 = new ListBuffer[CellRange]()
+        var _listRow02 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged03 = new ListBuffer[CellRange]()
+        var _listRow03 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged04 = new ListBuffer[CellRange]()
+        var _listRow04 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _csc = 0
+        val fuente = Font(height = 12.points, fontName = "Liberation Sans", bold = true, italic = false, strikeout = false)
+        val fuenteNoBold = Font(height = 12.points, fontName = "Liberation Sans", bold = false, italic = false, strikeout = false)        
+        val sheet01 = Sheet(
+          name = "Por Luminaria",
+          rows = {
+            val titleRow1 = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(empresa.empr_descripcion)
+            _listRow01 += titleRow1                
+            val titleRow2 = com.norbitltd.spoiwo.model
+                .Row(
+                  StringCell(
+                    "Luminarias Intervenidas",
+                    Some(0),
+                    style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet    
+                  )
+                )
+            _listRow01 += titleRow2
+            val titleRow3 = com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "Desde:",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                fi.getTime(),
+                Some(1),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              StringCell(
+                "Hasta:",
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                ff.getTime(),
+                Some(3),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),   
+            )     
+            _listRow01 += titleRow3  
+            var _listCellHeader = new ListBuffer[Cell]() 
+            var cell = StringCell(
+                "Item",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            cell = StringCell(
+                "Tecnología",
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            cell = StringCell(
+                "Potencia",
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            var fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            var x = 0
+            for ( x <- 1 to periodos) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              val position = x + 2
+              val cell = Cell(etiqueta,
+                position,
+                style = CellStyle(dataFormat = CellDataFormat("@"), font = fuente),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCellHeader += cell
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            var cell1 = Cell.Empty
+            cell1 = StringCell(
+                "TOTALES",
+                Some(3 + periodos),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCellHeader += cell1
+            var headerRow = com.norbitltd.spoiwo.model.Row(_listCellHeader.toList)
+            _listRow01 += headerRow
+            val _parser01: RowParser[scala.collection.mutable.Map[String, Any]] = SqlParser.folder(scala.collection.mutable.Map.empty[String, Any]) { (map, value, meta) => Right(map + (meta.column.qualified -> value)) }
+
+            var query =
+              s"""SELECT to_char(ROW_NUMBER() OVER (ORDER BY tecnologia), ${"'"}00${"'"}) AS item, * FROM public.crosstab(
+                  	${"'"}SELECT CONCAT(ad1.aap_tecnologia, ${"'"}${"'"} ${"'"}${"'"}, ad1.aap_potencia) AS tecnologia, ad1.aap_tecnologia, ad1.aap_potencia, CONCAT(EXTRACT(YEAR FROM r1.repo_fechasolucion), to_char(EXTRACT(MONTH FROM r1.repo_fechasolucion), ${"'"}${"'"}00${"'"}${"'"})), COUNT(a1.aap_id) FILTER (WHERE r1.repo_id IS NOT NULL) FROM siap.aap_adicional ad1
+                            INNER JOIN siap.aap a1 ON a1.aap_id = ad1.aap_id
+                            INNER JOIN siap.reporte_direccion rd1 ON rd1.aap_id = a1.aap_id AND rd1.even_estado < 8
+                            LEFT JOIN siap.reporte r1 ON r1.repo_id = rd1.repo_id AND r1.repo_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND r1.empr_id = $empr_id
+                          WHERE ad1.aap_potencia IN (SELECT unnest(string_to_array(cara_valores, ${"'"}${"'"},${"'"}${"'"}))::INTEGER FROM siap.caracteristica c1 WHERE c1.cara_id = 5)
+                          GROUP BY ad1.aap_tecnologia, ad1.aap_potencia, 4
+                          ORDER BY ad1.aap_tecnologia, ad1.aap_potencia${"'"},
+                  ${"'"} SELECT CONCAT(EXTRACT(YEAR FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), to_char(EXTRACT(MONTH FROM date ${"'"}${"'"}$fecha_ini${"'"}${"'"} + interval ${"'"}${"'"}1 month${"'"}${"'"} * (periodo - 1)), ${"'"}${"'"}00${"'"}${"'"})) FROM generate_series(1,$periodos) AS periodo ${"'"}
+                  ) AS (
+                  tecnologia TEXT,
+	                aap_tecnologia TEXT, 
+                  aap_potencia INTEGER, """
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            x = 0
+            for (x <- 1 to periodos ) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              query += etiqueta + " INTEGER"
+              if (x != periodos) {
+                query += ", \n"
+              }
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+            query += ") ORDER BY aap_tecnologia, aap_potencia"
+            var resultSet =
+              SQL(query)
+                .on(
+                  'fecha_inicial -> new DateTime(fi),
+                  'fecha_final -> new DateTime(ff),
+                  'empr_id -> empr_id
+                )
+                .as(_parser01 *)
+            var rows = resultSet.map { i =>
+              val _listCell = new ListBuffer[Cell]()
+              var cell = Cell.Empty
+              cell = StringCell(
+                i.get(".item") match { case Some(v) => v.asInstanceOf[String] case None => "" },
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              cell = StringCell(
+                i.get(".aap_tecnologia") match { case Some(v) => v.asInstanceOf[String] case None => "Sin Asignar" },
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell
+              cell = NumericCell(
+                i.get(".aap_potencia") match { case Some(v) => v.asInstanceOf[Int] case None => 0D },
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("#0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell              
+              x = 0
+              fecha_tmp = Calendar.getInstance()
+              fecha_tmp.setTime(fi.getTime())              
+              for (x <- 1 to periodos ) {
+                val etiqueta = "." + Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+                cell = NumericCell(
+                  i.get(etiqueta.toLowerCase()) match { case Some(v) => v.asInstanceOf[Int] case None => 0 },
+                  Some( x + 2),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet                  
+                )
+                _listCell += cell
+                fecha_tmp.add(Calendar.MONTH, 1)
+              }      
+              var cell1 = Cell.Empty  
+              cell1 = FormulaCell(
+                  "SUM(D"+ (_csc + 5) + ":" + (periodos+99).asInstanceOf[Char] + (_csc + 5) + ")",
+                  Some(3+periodos),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1                          
+              _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+              _csc += 1
+            }
+            x = 0
+            fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            var _listCell = new ListBuffer[Cell]()
+            cell1 = StringCell(
+              "TOTALES",
+              Some(1),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCell += cell1            
+            for (x <- 1 to periodos ) {            
+              cell1 = FormulaCell(
+                  "SUM("+(x+99).asInstanceOf[Char] + "5:" + (x+99).asInstanceOf[Char] + (_csc + 4) + ")",
+                  Some(x+2),
+                  style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCell += cell1
+            }
+            
+            _listRow01 += com.norbitltd.spoiwo.model.Row(_listCell.toList)
+
+            _listRow01.toList
+          },
+          mergedRegions = {
+            _listMerged04 += CellRange((0, 0), (0, 5))
+            _listMerged04 += CellRange((1, 1), (0, 5))
+            _listMerged04.toList
+           }
+        )
+        sheet01
+      }
+  }
+
+
 }
