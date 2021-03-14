@@ -2,7 +2,7 @@
   <el-container>
   <el-header>
     <el-col :span="24">
-      <span>{{ $t('informe.scc')}}</span>
+      <span>{{ $t('informe.srax')}}</span>
     </el-col>
   </el-header>
   <el-main>
@@ -34,7 +34,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import { informe_siap_calculo_carga_xls } from '@/api/informe'
+import { informe_siap_resumen_aforo_xls } from '@/api/informe'
 export default {
   data () {
     return {
@@ -53,17 +53,8 @@ export default {
   },
   methods: {
     obtenerDatos () {
-      // Calcular Fecha Inicial y Fecha Final
-      console.log('Periodo: ' + this.periodo)
-      this.fecha_inicial = new Date(this.periodo.getFullYear(), this.periodo.getMonth(), 1)
       this.fecha_final = new Date(this.periodo.getFullYear(), this.periodo.getMonth() + 1, 0)
-      informe_siap_calculo_carga_xls(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.empresa.empr_id)
-    },
-    establecerFechaFinal () {
-      this.fecha_final = new Date()
-      this.fecha_final.setYear(this.fecha_inicial.getFullYear())
-      this.fecha_final.setMonth(this.fecha_inicial.getMonth() + 1)
-      this.fecha_final.setDate(this.fecha_inicial.getDate() - 1)
+      informe_siap_resumen_aforo_xls(this.fecha_final.getTime(), this.empresa.empr_id)
     }
   }
 }

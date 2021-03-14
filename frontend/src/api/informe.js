@@ -445,3 +445,13 @@ export function informe_siap_general_estadistica_xls (fecha_inicial, fecha_final
   const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sigex/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.formato + '/' + data.empr_id + '/' + token
   window.open(url, '_self', 'location=no, menubar=no')
 }
+
+export function informe_siap_resumen_aforo_xls (fecha_final, empr_id) {
+  const data = {
+    fecha_final,
+    empr_id
+  }
+  const token = '43f44388-5cd1-4657-9f7e-ea4e014e9333'
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sirax/' + data.fecha_final + '/' + data.empr_id + '/' + token
+  window.open(url, '_self', 'location=no, menubar=no')
+}

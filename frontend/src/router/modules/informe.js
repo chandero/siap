@@ -56,6 +56,12 @@ const informeRouter = {
           component: () => import('@/views/informe/menu1consolidado/menu1-6estadistica'),
           name: 'menu_informe_menu1consolidado_menu1-6estadistica',
           meta: { title: 'menu_informe_menu1consolidado_menu1-6estadistica', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
+        },
+        {
+          path: 'menu1-7aforo',
+          component: () => import('@/views/informe/menu1consolidado/menu1-7aforo'),
+          name: 'menu_informe_menu1consolidado_menu1-7aforo',
+          meta: { title: 'menu_informe_menu1consolidado_menu1-7aforo', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
         }
       ]
     },

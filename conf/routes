@@ -561,7 +561,7 @@ GET     /api/info/sipcx/:fi/:ff                 controllers.InformeController.si
 GET     /api/info/siocx/:fi/:ff                 controllers.InformeController.siap_informe_obra_cuadrilla_xls(fi: Long, ff: Long)
 GET     /api/info/sigox/:fi/:ff/:ft/:e/:t       controllers.InformeController.siap_informe_general_operaciones_xls(fi: Long, ff:Long, ft:String, e: Long, t:String)
 GET     /api/info/sigex/:fi/:ff/:ft/:e/:t       controllers.InformeController.siap_informe_general_estadistica_xls(fi: Long, ff:Long, ft:String, e: Long, t:String)
-
+GET     /api/info/sirax/:ff/:e/:t               controllers.InformeController.siap_informe_resumen_aforo_xls(ff: Long, e: Long, t: String)
 
 # Graficas
 GET     /api/graf/sgrp                           controllers.GraficaController.siap_grafica_reporte_pendiente()
