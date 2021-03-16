@@ -40,6 +40,7 @@ import scala.concurrent.{Await, Future}
 import scala.collection.immutable.List
 import scala.collection.mutable.Map
 import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
 import org.joda.time.DateTime
@@ -10785,7 +10786,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
             query += ") "
             query += s"""UNION ALL
               SELECT * FROM public.crosstab(
-	              ${"'"}SELECT ${"'"}${"'"}90${"'"}${"'"} AS reti_id, ${"'"}${"'"}OBRA${"'"}${"'"} AS reti_descripcion, CONCAT(EXTRACT(YEAR FROM o1.obra_fechasolucion), to_char(EXTRACT(MONTH FROM o1.obra_fechasolucion), ${"'"}${"'"}00${"'"}${"'"}) ), 0 AS operaciones FROM siap.obra o1
+	              ${"'"}SELECT ${"'"}${"'"}90${"'"}${"'"} AS reti_id, ${"'"}${"'"}OBRA${"'"}${"'"} AS reti_descripcion, CONCAT(EXTRACT(YEAR FROM o1.obra_fechasolucion), to_char(EXTRACT(MONTH FROM o1.obra_fechasolucion), ${"'"}${"'"}00${"'"}${"'"}) ), COUNT(*) AS reportes FROM siap.obra o1
                   WHERE o1.obra_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND o1.empr_id = $empr_id
                   GROUP BY 1,2,3
                   ORDER BY 1,2,3${"'"},
@@ -10993,7 +10994,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
             query += ")"
             query += s"""UNION ALL
               SELECT * FROM public.crosstab(
-	              ${"'"}SELECT ${"'"}${"'"}90${"'"}${"'"} AS reti_id, ${"'"}${"'"}OBRA${"'"}${"'"} AS reti_descripcion, CONCAT(EXTRACT(YEAR FROM o1.obra_fechasolucion), to_char(EXTRACT(MONTH FROM o1.obra_fechasolucion), ${"'"}${"'"}00${"'"}${"'"}) ), COUNT(*) AS reportes  FROM siap.obra o1
+	              ${"'"}SELECT ${"'"}${"'"}90${"'"}${"'"} AS reti_id, ${"'"}${"'"}OBRA${"'"}${"'"} AS reti_descripcion, CONCAT(EXTRACT(YEAR FROM o1.obra_fechasolucion), to_char(EXTRACT(MONTH FROM o1.obra_fechasolucion), ${"'"}${"'"}00${"'"}${"'"}) ), 0 AS operaciones FROM siap.obra o1
                   WHERE o1.obra_fechasolucion BETWEEN ${"'"}${"'"}$fecha_ini${"'"}${"'"} AND ${"'"}${"'"}$fecha_fin${"'"}${"'"} AND o1.empr_id = $empr_id
                   GROUP BY 1,2,3
                   ORDER BY 1,2,3${"'"},
@@ -12220,7 +12221,9 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
       db.withConnection { implicit connection =>
         val empresa = empresaService.buscarPorId(empr_id).get
         var ff = Calendar.getInstance()
+        var fc = Calendar.getInstance()
         ff.setTimeInMillis(fecha_final)
+        fc.setTimeInMillis(fecha_final)
         ff.set(Calendar.DATE, ff.getActualMaximum(Calendar.DATE))    
         val dtf = new DateTime(ff.getTime())
         val fmt = DateTimeFormat.forPattern("yyyyMMdd")
@@ -12243,7 +12246,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
             _listRow04 += titleRow1
             val titleRow2 = com.norbitltd.spoiwo.model
                 .Row()
-                .withCellValues("Luminarias Por Cuenta Alumbrado")
+                .withCellValues("Luminarias En Aforo Por Cuenta Alumbrado")
             _listRow04 += titleRow2
             val titleRow3 = com.norbitltd.spoiwo.model.Row(
               StringCell(
@@ -12253,7 +12256,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               DateCell(
-                ff.getTime(),
+                fc.getTime(), 
                 Some(1),
                         style = Some(
                           CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
@@ -12307,7 +12310,8 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
             var _es_el_primero = true
             var aacu_descripcion_ant = ""
             var aap_tecnologia_ant = ""
-            var _listSubTotal = Array.empty[String]
+            var _listSubTotal = new ArrayBuffer[String]()
+            var _listTotal = new ArrayBuffer[String]()
             val rows = resultSet.map { i =>
                 if (_es_el_primero) {
                   _es_el_primero = false
@@ -12334,7 +12338,8 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       )
                     )
-                    _listSubTotal :+ ("C"+_final)
+                    _listSubTotal += ("C"+_final)
+                    _listMerged04 += CellRange((_inicial-1, _final-2), (1, 1))
                     aap_tecnologia_ant = i._2
                     _inicial = _final + 1
                   }
@@ -12345,7 +12350,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         aacu_descripcion_ant,
                         Some(0),
                         style = Some(
-                            CellStyle(dataFormat = CellDataFormat("@"))
+                            CellStyle(dataFormat = CellDataFormat("@"), horizontalAlignment = HA.Center, verticalAlignment = VA.Center)
                           ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
@@ -12358,7 +12363,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         CellStyleInheritance.CellThenRowThenColumnThenSheet               
                       ),
                       FormulaCell(
-                        "SUM(" + _listSubTotal.mkString(";")+ ")",
+                        "SUM(" + _listSubTotal.mkString(",")+ ")",
                         Some(2),
                         style = Some(
                           CellStyle(dataFormat = CellDataFormat("#,##0"))
@@ -12366,11 +12371,11 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       )
                     )
-                    _listSubTotal = Array.empty[String]
-                    println("inicial cuenta:" + _inicial_cuenta)
-                    println("final cuenta: " + _final_cuenta)
-                    // _listMerged04 += CellRange((_inicial_cuenta-1, _final_cuenta-1), (0, 0))
+                    _listTotal += ("C" + (_final_cuenta + 1))
+                    _listSubTotal = new ArrayBuffer[String]()
+                    _listMerged04 += CellRange((_inicial_cuenta-1, _final_cuenta), (0, 0))
                     _inicial_cuenta = _final + 2
+                    _final += 1
                     _inicial = _inicial_cuenta
                     aacu_descripcion_ant = i._1
                   }
@@ -12380,7 +12385,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                     i._1,
                     Some(0),
                            style = Some(
-                             CellStyle(dataFormat = CellDataFormat("@"))
+                             CellStyle(dataFormat = CellDataFormat("@"), horizontalAlignment = HA.Center, verticalAlignment = VA.Center)
                             ),
                           CellStyleInheritance.CellThenRowThenColumnThenSheet               
                   ),                  
@@ -12407,6 +12412,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                 )
               _final += 1
             }
+            _listMerged04 += CellRange((_inicial-1, _final-1), (1, 1))
             _listRow04 += com.norbitltd.spoiwo.model.Row(
                       StringCell(
                         "TOTAL " + aap_tecnologia_ant,
@@ -12425,13 +12431,13 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       )
             )
-            _listSubTotal :+ ("C"+_final)            
+            _listSubTotal += ("C"+ (_final + 1))
             _listRow04 += com.norbitltd.spoiwo.model.Row(
                       StringCell(
                         aacu_descripcion_ant,
                         Some(0),
                         style = Some(
-                            CellStyle(dataFormat = CellDataFormat("@"))
+                            CellStyle(dataFormat = CellDataFormat("@"), horizontalAlignment = HA.Center, verticalAlignment = VA.Center)
                           ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
@@ -12444,13 +12450,34 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         CellStyleInheritance.CellThenRowThenColumnThenSheet               
                       ),
                       FormulaCell(
-                        "SUM(" + _listSubTotal.mkString(";")+ ")",
+                        "SUM(" + _listSubTotal.mkString(",")+ ")",
                         Some(2),
                         style = Some(
                           CellStyle(dataFormat = CellDataFormat("#,##0"))
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       )
+            )
+            _final_cuenta = _final + 2
+            _listMerged04 += CellRange((_inicial_cuenta-1, (_final_cuenta - 1)), (0, 0))
+            _listTotal += ("C" + _final_cuenta)
+            _listRow04 += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "TOTAL LUMINARIAS EN AFORO",
+                Some(1),
+                style = Some(
+                  CellStyle(dataFormat = CellDataFormat("@"))
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              FormulaCell(
+                "SUM(" + _listTotal.mkString(",")+ ")",
+                Some(2),
+                style = Some(
+                  CellStyle(dataFormat = CellDataFormat("#,##0"))
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
             )            
 
             _listRow04.toList

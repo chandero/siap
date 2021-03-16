@@ -53,7 +53,8 @@ export default {
   },
   methods: {
     obtenerDatos () {
-      this.fecha_final = new Date(this.periodo.getFullYear(), this.periodo.getMonth() + 1, 0)
+      this.fecha_final = this.periodo
+      // this.fecha_final = new Date(this.periodo.getFullYear(), this.periodo.getMonth() + 1, 0)
       informe_siap_resumen_aforo_xls(this.fecha_final.getTime(), this.empresa.empr_id)
     }
   }
