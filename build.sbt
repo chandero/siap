@@ -3,9 +3,9 @@ mappings in Universal ++= directory(baseDirectory.value / "public")
 
 name := "siap"
 
-version := "1.1"
+version := "1.2"
 
-packageSummary in Windows := "SIAP v1.1"
+packageSummary in Windows := "SIAP v1.2"
 packageDescription in Windows := "Inventario de Luminarias SIAP"
 maintainer := "aldacm2001@gmail.com"
 
@@ -17,6 +17,8 @@ scalacOptions += "-language:postfixOps"
 crossScalaVersions := Seq("2.12.7", "2.12.11")
 
 lazy val `siap` = (project in file(".")).enablePlugins(PlayScala)
+
+// addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.7.0")
 
 libraryDependencies ++= Seq(
   guice, 

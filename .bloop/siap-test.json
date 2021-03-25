@@ -304,7 +304,7 @@
         "platform": {
             "name": "jvm",
             "config": {
-                "home": "/usr/lib/jvm/java-8-openjdk/jre",
+                "home": "/usr/lib/jvm/java-11-openjdk",
                 "options": [
                     "-Duser.dir=/home/chandero/Documentos/git/siap/siap_v1.1"
                 ]

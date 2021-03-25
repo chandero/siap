@@ -791,6 +791,29 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
     /**
     * Recuperar un aap por su aap_codigo
     */
+    def buscarPorCodigoWeb(aap_id: Long, empr_id: Long): Option[Aap] = {
+      db.withConnection { implicit connection => 
+        val a = SQL("""SELECT a.*, b.*, t.* FROM siap.aap a
+               LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
+               LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id WHERE aap_id = {aap_id} and empr_id = {empr_id}""").on('aap_id -> aap_id, 'empr_id -> empr_id).as(simple.singleOpt)
+            a match {
+            case None => None
+            case Some(a) => 
+                        val c =  SQL("SELECT aael.* FROM siap.aap_elemento aael WHERE aap_id = {aap_id} and empr_id = {empr_id}").
+                        on(
+                            'aap_id -> a.aap_id,
+                            'empr_id -> empr_id
+                        ).as(AapElemento.aapelementoSet.singleOpt)
+                        val aap = a.copy(aap_elemento = c)
+                        Some(aap)
+        }
+
+      }
+    }    
+
+    /**
+    * Recuperar un aap por su aap_codigo
+    */
     def buscarPorCodigo(aap_codigo: String, empr_id: Long): Option[Aap] = {
       db.withConnection { implicit connection => 
         val a = SQL("""SELECT a.*, b.*, t.* FROM siap.aap a

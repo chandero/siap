@@ -217,6 +217,7 @@ GET     /api/aap/del/:id               controllers.AapController.borrarAap(id: L
 GET     /api/aap/rec/:id               controllers.AapController.recuperarAap(id: Long)
 POST    /api/aap/save                  controllers.AapController.guardarAap
 POST    /api/aap/upd                   controllers.AapController.actualizarAap
+GET     /api/aap/gbc/:id/:e/:t         controllers.AapController.buscarPorCodigoWeb(id: Long, e:Long, t:String)
 
 # Aap Tipo Carcasa
 GET     /api/aatc/get/:p/:c             controllers.AapTipoCarcasaController.todos(p:Long, c:Long)
