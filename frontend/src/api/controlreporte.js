@@ -133,13 +133,12 @@ export function actualizarHistoria () {
   })
 }
 
-export function convertirReporte (repo_id, reti_id) {
+export function convertirReporte (repo_id) {
   const data = {
-    repo_id,
-    reti_id
+    repo_id
   }
   return request({
-    url: '/core/conv/' + data.repo_id + '/' + reti_id,
+    url: '/core/conv/' + data.repo_id,
     method: 'get'
   })
 }

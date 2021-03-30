@@ -1337,13 +1337,13 @@ class ControlReporteRepository @Inject()(
     * @return Boolean
     */
   def convertir(id: scala.Long): scala.Long = {
-    db.withConnection { implicit connection =>
+    db.withTransaction { implicit connection =>
       var _id: scala.Long = 0
-      val control = SQL(
-        "SELECT * FROM siap.control_reporte WHERE repo_id = {repo_id}"
-      ).on('repo_id -> id).as(Reporte._set.single)
+      val control = SQL("SELECT * FROM siap.control_reporte WHERE repo_id = {repo_id}")
+        .on('repo_id -> id)
+        .as(Reporte._set.single)
       // Validar si previamente fue convertido
-      val reporte: Option[Reporte] = SQL(
+      val reporte = SQL(
         "SELECT * FROM siap.reporte WHERE repo_consecutivo = {repo_consecutivo} and reti_id = {reti_id}"
       ).on(
           'repo_consecutivo -> control.repo_consecutivo,
@@ -1354,6 +1354,7 @@ class ControlReporteRepository @Inject()(
         case None =>
           val queryReporte =
             """INSERT INTO siap.reporte (
+                      tireuc_id,
                       repo_fecharecepcion, 
                       repo_direccion, 
                       repo_nombre, 
@@ -1370,9 +1371,11 @@ class ControlReporteRepository @Inject()(
                       repo_horafin, 
                       reti_id, 
                       repo_consecutivo, 
+                      repo_subrepoconsecutivo,
                       tiba_id, 
                       barr_id_anterior) 
                       SELECT 
+                      1,
                       repo_fecharecepcion, 
                       repo_direccion, 
                       repo_nombre, 
@@ -1389,35 +1392,35 @@ class ControlReporteRepository @Inject()(
                       repo_horafin, 
                       reti_id, 
                       repo_consecutivo, 
+                      repo_subrepoconsecutivo,
                       tiba_id, 
                       barr_id_anterior
                       FROM siap.control_reporte r 
                       WHERE r.repo_consecutivo = {repo_consecutivo} and r.reti_id = {reti_id}"""
           val queryAdicional =
-            """SELECT
-                               repo_id,
-                               repo_fechadigitacion,
-                               repo_tipo_expansion,
-                               repo_luminaria,
-                               repo_redes,
-                               repo_poste,
-                               repo_modificado,
-                               repo_subreporte,
-                               acti_id,
-                               repo_subid,
-                               repo_email,
-                               repo_codigo,
-                               repo_apoyo,
-                               urba_id,
-                               muot_id,
-                               aaco_id_anterior,
-                               aaco_id_nuevo,
-                               medi_id,
-                               tran_id,
-                               medi_acta
-                              FROM siap.control_reporte_adicional a WHERE a.repo_id = {repo_id}
+            """INSERT INTO siap.reporte_adicional SELECT {id},
+                               ra.repo_fechadigitacion,
+                               ra.repo_tipo_expansion,
+                               ra.repo_luminaria,
+                               ra.repo_redes,
+                               ra.repo_poste,
+                               ra.repo_modificado,
+                               ra.repo_subreporte,
+                               ra.acti_id,
+                               ra.repo_subid,
+                               ra.repo_email,
+                               ra.repo_codigo,
+                               ra.repo_apoyo,
+                               ra.urba_id,
+                               ra.muot_id,
+                               ra.aaco_id_anterior,
+                               ra.aaco_id_nuevo,
+                               ra.medi_id,
+                               ra.tran_id,
+                               ra.medi_acta
+                              FROM siap.control_reporte_adicional ra
+                              WHERE ra.repo_id = {repo_id}
                               """
-
           _id = SQL(queryReporte)
             .on(
               'repo_consecutivo -> control.repo_consecutivo,
@@ -1426,70 +1429,26 @@ class ControlReporteRepository @Inject()(
             .executeInsert()
             .get
 
-          val resultSet = SQL(queryAdicional)
-            .on('repo_id -> control.repo_id)
-            .as(ReporteAdicional.reporteAdicionalSet *)
-          resultSet.map { r =>
-            SQL("""INSERT INTO siap.reporte_adicional VALUES(
-                               {repo_id},
-                               {repo_fechadigitacion},
-                               {repo_tipo_expansion},
-                               {repo_luminaria},
-                               {repo_redes},
-                               {repo_poste},
-                               {repo_modificado},
-                               {repo_subreporte},
-                               {acti_id},
-                               {repo_subid},
-                               {repo_email},
-                               {repo_codigo},
-                               {repo_apoyo},
-                               {urba_id},
-                               {muot_id},
-                               {aaco_id_anterior},
-                               {aaco_id_nuevo},
-                               {medi_id},
-                               {tran_id},
-                               {medi_acta}
-                )""")
-              .on(
-                'repo_id -> _id,
-                'repo_fechadigitacion -> r.repo_fechadigitacion,
-                'repo_tipo_expansion -> r.repo_tipo_expansion,
-                'repo_luminaria -> r.repo_luminaria,
-                'repo_redes -> r.repo_redes,
-                'repo_poste -> r.repo_poste,
-                'repo_modificado -> r.repo_modificado,
-                'repo_subreporte -> r.repo_subreporte,
-                'acti_id -> r.acti_id,
-                'repo_subid -> r.repo_subid,
-                'repo_email -> r.repo_email,
-                'repo_codigo -> r.repo_codigo,
-                'repo_apoyo -> r.repo_apoyo,
-                'urba_id -> r.urba_id,
-                'muot_id -> r.muot_id,
-                'aaco_id_anterior -> r.aaco_id_anterior,
-                'aaco_id_nuevo -> r.aaco_id_nuevo,
-                'medi_id -> r.medi_id,
-                'tran_id -> r.tran_id,
-                'medi_acta -> r.medi_acta
-              )
-              .executeInsert()
+          if (_id > 0 ) {
+              SQL(queryAdicional)
+              .on('repo_id -> control.repo_id,
+                'id -> _id
+            )
+            .executeUpdate()
           }
 
-        case Some(r) =>
-          _id = r.repo_id.get
+        case Some(c) =>
+          _id = c.repo_id.get
           SQL(
             """UPDATE siap.reporte SET rees_id = 1 WHERE repo_id = {repo_id}"""
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> c.repo_id
             )
             .executeUpdate()
       }
       // Eliminar de Reporte y Reporte Adicional
-      SQL(
-        """UPDATE siap.control_reporte SET rees_id = 10 WHERE repo_id = {repo_id}"""
-      ).on(
+      SQL("""UPDATE siap.control_reporte SET rees_id = 10 WHERE repo_id = {repo_id}""")
+        .on(
           'repo_id -> control.repo_id
         )
         .executeUpdate()

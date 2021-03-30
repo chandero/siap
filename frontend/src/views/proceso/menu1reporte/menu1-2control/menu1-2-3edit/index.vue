@@ -2690,7 +2690,7 @@ export default {
       convertirReporte(this.reporte.repo_id).then((response) => {
         if (response.status === 200) {
           this.$router.push({
-            path: '/procesos/control/editartags/' + response.data
+            path: '/proceso/menu1reporte/menu1-1luminaria/menu1-1-3edit/' + response.data
           })
         } else {
           this.$alert('No se pudo convertir el reporte', 'Convertir Reporte', {
