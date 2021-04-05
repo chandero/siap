@@ -2971,20 +2971,27 @@ export default {
                 }
               }
             })
-            .catch((error) => {
+            .catch(() => {
               this.existe = false
               direccion.materiales.forEach((m) => {
                 m.aap_id = direccion.aap_id
               })
-              if (
-                this.reporte.reti_id === 2 &&
-                this.reporte.adicional.repo_tipo_expansion !== 4
-              ) {
+              if ((this.reporte.reti_id === 2 && this.reporte.adicional.repo_tipo_expansion !== 4)) {
                 console.log('Ingrese a llamar validar siguiente consecutivo')
                 this.validarSiguienteConsecutivo(direccion)
+              } else {
+                this.$message({
+                  type: 'error',
+                  message:
+                    'El código (' + direccion.aap_id + ') no existe',
+                  duration: 5000
+                })
+                this.invalid = true
+                this.$refs['aap_id_' + id].select()
+                this.$refs['aap_id_' + id].focus()
               }
-              this.estadoLuminaria()
-              console.log('Estoy en Error: ' + error)
+              // this.estadoLuminaria()
+              // console.log('Estoy en Error: ' + error)
               // this.centerDialogVisible = true
             })
         }
