@@ -173,7 +173,7 @@
               <i class="el-icon-s-custom"></i>
             </el-button>
             <el-button
-              :disabled="scope.row.b.soli_estado < 2 || scope.row.b.soli_estado === 6"
+              :disabled="scope.row.b.soli_estado < 2 || scope.row.b.soli_estado === 6 || scope.row.b.soli_estado === 7"
               size="mini"
               circle
               type="primary"
@@ -182,7 +182,7 @@
               <i class="el-icon-s-order"></i>
             </el-button>
             <el-button
-              :disabled="scope.row.b.soli_estado < 2 || scope.row.b.soli_estado === 6"
+              :disabled="scope.row.b.soli_estado < 2 || scope.row.b.soli_estado === 6 || scope.row.b.soli_estado === 7"
               size="mini"
               circle
               type="warning"
@@ -198,7 +198,7 @@
               </el-menu>
               <el-button
                 slot="reference"
-                :disabled="scope.row.b.soli_estado === 1"
+                :disabled="scope.row.b.soli_estado === 1 || scope.row.b.soli_estado === 7"
                 size="mini"
                 circle
                 type="success"
@@ -206,6 +206,14 @@
               ><i class="el-icon-document"></i>
               </el-button>
             </el-popover>
+            <el-button
+              :disabled="scope.row.b.soli_estado !== 6"
+              size="mini"
+              circle
+              type="warning"
+              @click="handleClickFechaEntregaRespuesta(scope.$index, scope.row)" :title="$t('solicitud.dentrega')">
+              <i class="el-icon-date"></i>
+            </el-button>
            </template>
           </el-table-column>
               </el-table>
@@ -234,11 +242,22 @@
      <el-button type="primary" @click="handleSupervisor()">Sí</el-button>
     </span>
   </el-dialog>
+  <el-dialog :title="'Actualizar Fecha de Entrega de Respuesta Solicitud Radicado No.' + registro.a.soli_radicado" :visible.sync="dialogFechaEntregaRespuestaVisible">
+    <el-form :model="formEntregaRespuesta">
+      <el-form-item label="Fecha y Hora de Entrega" label-width="150">
+        <el-date-picker v-model="formEntregaRespuesta.date" type="datetime"></el-date-picker>
+      </el-form-item>
+    </el-form>
+    <span slot="footer" class="dialog-footer">
+     <el-button @click="dialogFechaEntregaRespuestaVisible = false">No</el-button>
+     <el-button type="primary" @click="handleFechaEntregaRespuesta()">Sí</el-button>
+    </span>
+  </el-dialog>
  </el-container>
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import { getSolicitudesRango, deleteSolicitud, entregarSupervisor, entregarFormatoRTE, imprimirFormatoRTE, imprimirRespuestaSolicitud, getTipos } from '@/api/solicitud'
+import { getSolicitudesRango, deleteSolicitud, entregarSupervisor, fechaEntregaRespuesta, entregarFormatoRTE, imprimirFormatoRTE, imprimirRespuestaSolicitud, getTipos } from '@/api/solicitud'
 import { getBarriosEmpresa } from '@/api/barrio'
 
 export default {
@@ -247,7 +266,11 @@ export default {
       formSupervisor: {
         date: new Date()
       },
+      formEntregaRespuesta: {
+        date: new Date()
+      },
       dialogEntregaSupervisorVisible: false,
+      dialogFechaEntregaRespuestaVisible: false,
       tabPosition: 'left',
       filtro: '',
       loading: false,
@@ -481,6 +504,33 @@ export default {
         })
       })
     },
+    handleClickFechaEntregaRespuesta (index, row) {
+      this.registro = row
+      this.index = index
+      this.dialogFechaEntregaRespuestaVisible = true
+    },
+    handleFechaEntregaRespuesta () {
+      this.dialogFechaEntregaRespuestaVisible = false
+      fechaEntregaRespuesta(this.registro.a.soli_id, this.formEntregaRespuesta.date.getTime()).then(response => {
+        if (response.status === 200) {
+          this.registro.b.soli_estado = 7
+          this.$message({
+            type: 'info',
+            message: 'Fecha Entrega Respuesta Confirmada'
+          })
+        } else {
+          this.$message({
+            type: 'warning',
+            message: 'No se pudo Confirmar la fecha de entrega de la respuesta'
+          })
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: 'Entrega Cancelada'
+        })
+      })
+    },
     handleRespuesta (soli_id, editable) {
       console.log('ingresar respuesta')
       this.$confirm('Desea Incluir la Firma de Gerencia?', 'Respuesta', {
@@ -548,7 +598,7 @@ export default {
       this.getData(anho, mes, index, data.name)
     },
     actualizar () {
-      this.filtro = this.fconsec ? this.fconsec : ''
+      this.filtro = this.fconsec ? this.fconsec.toString() : ''
     },
     nuevo () {
       this.$router.push({ path: '/solicitud/menu1carta/menu1-2create' })
@@ -576,17 +626,17 @@ export default {
       if (!this.filtro) {
         return data
       } else {
-        if (data.soli_radicado === this.filtro) {
+        if (data.a.soli_radicado.toString() === this.filtro) {
           return data
-        } else if (data.soli_nombre != null && data.soli_nombre.toLowerCase().includes(this.filtro.toLowerCase())) {
+        } else if (data.a.soli_nombre != null && data.a.soli_nombre.toLowerCase().includes(this.filtro.toLowerCase())) {
           return data
-        } else if (data.soli_telefono != null && data.soli_telefono.toLowerCase().includes(this.filtro.toLowerCase())) {
+        } else if (data.a.soli_telefono != null && data.a.soli_telefono.toLowerCase().includes(this.filtro.toLowerCase())) {
           return data
-        } else if (this.barrio(data.barr_id).toLowerCase().includes(this.filtro.toLowerCase())) {
+        } else if (this.barrio(data.a.barr_id).toLowerCase().includes(this.filtro.toLowerCase())) {
           return data
-        } else if (data.soli_direccion != null && data.soli_direccion.toLowerCase().includes(this.filtro.toLowerCase())) {
+        } else if (data.a.soli_direccion != null && data.a.soli_direccion.toLowerCase().includes(this.filtro.toLowerCase())) {
           return data
-        } else if (data.soli_solicitud != null && data.soli_solicitud.toLowerCase().includes(this.filtro.toLowerCase())) {
+        } else if (data.a.soli_solicitud != null && data.a.soli_solicitud.toLowerCase().includes(this.filtro.toLowerCase())) {
           return data
         } else {
           return null

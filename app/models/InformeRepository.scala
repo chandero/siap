@@ -9244,6 +9244,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
         )
         val b = new SolicitudBR(
           s.soli_fecharespuesta,
+          s.soli_fechaentrega,
           s.soli_fechadigitado,
           s.soli_fechalimite,
           s.soli_fechasupervisor,
@@ -9307,6 +9308,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
         )
         val b = new SolicitudBR(
           s.soli_fecharespuesta,
+          s.soli_fechaentrega,
           s.soli_fechadigitado,
           s.soli_fechalimite,
           s.soli_fechasupervisor,
@@ -12493,5 +12495,338 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
         os.toByteArray        
       }
   }
+
+  /*
+  def siap_informe_uso_material_xls(fecha_inicial: Long, fecha_final: Long, empr_id: Long): Array[Byte] = {
+      db.withConnection { implicit connection =>
+        val empresa = empresaService.buscarPorId(empr_id).get
+        var fi = Calendar.getInstance()
+        var ff = Calendar.getInstance()
+        fi.setTimeInMillis(fecha_inicial)
+        ff.setTimeInMillis(fecha_final)
+        fi.set(Calendar.DATE, 1)
+        fi.set(Calendar.MILLISECOND, 0)
+        fi.set(Calendar.SECOND, 0)
+        fi.set(Calendar.MINUTE, 0)
+        fi.set(Calendar.HOUR, 0)
+
+        // ff.set(Calendar.MILLISECOND, 0)
+        // ff.set(Calendar.SECOND, 58)
+        // ff.set(Calendar.MINUTE, 59)
+        // ff.set(Calendar.HOUR, 23)
+        ff.set(Calendar.DATE, ff.getActualMaximum(Calendar.DATE))    
+
+        var periodos = Utility.mesesEntreFechas(fecha_inicial, fecha_final)
+        periodos += 1
+        val dtf = new DateTime(ff.getTime())
+        val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+        val sdf = new SimpleDateFormat("yyyy-MM-dd")        
+        var _listMerged01 = new ListBuffer[CellRange]()
+        var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged02 = new ListBuffer[CellRange]()
+        var _listRow02 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged03 = new ListBuffer[CellRange]()
+        var _listRow03 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listMerged04 = new ListBuffer[CellRange]()
+        var _listRow04 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _csc = 0
+        val fuente = Font(height = 12.points, fontName = "Liberation Sans", bold = true, italic = false, strikeout = false)
+        val fuenteNoBold = Font(height = 12.points, fontName = "Liberation Sans", bold = false, italic = false, strikeout = false)        
+
+        val sheet01 = Sheet(
+          name = "Material",
+          rows = {
+            val titleRow1 = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(empresa.empr_descripcion)
+            _listRow04 += titleRow1
+            val titleRow2 = com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Material Usado Por Periodo")
+            _listRow04 += titleRow2
+            val titleRow3 = com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "Desde:",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                fi.getTime(),
+                Some(1),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              StringCell(
+                "Hasta:",
+                Some(2),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              DateCell(
+                ff.getTime(),
+                Some(3),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),   
+            )     
+            _listRow01 += titleRow3  
+            var _listCellHeader = new ListBuffer[Cell]() 
+            var cell = StringCell(
+                "Código",
+                Some(0),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            cell = StringCell(
+                "Material",
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"), font = fuente)),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+               )
+            _listCellHeader += cell
+            var fecha_tmp = Calendar.getInstance()
+            fecha_tmp.setTime(fi.getTime())
+            var x = 0
+            for ( x <- 1 to periodos) {
+              val etiqueta = Utility.mes(fecha_tmp.get(Calendar.MONTH) + 1) + fecha_tmp.get(Calendar.YEAR)
+              val position = x + 1
+              val cell = Cell(etiqueta,
+                position,
+                style = CellStyle(dataFormat = CellDataFormat("@"), font = fuente),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+              _listCellHeader += cell
+              fecha_tmp.add(Calendar.MONTH, 1)
+            }
+                        var cell1 = Cell.Empty
+            cell1 = StringCell(
+                "TOTALES",
+                Some(2 + periodos),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            _listCellHeader += cell1
+            var headerRow = com.norbitltd.spoiwo.model.Row(_listCellHeader.toList)
+            _listRow01 += headerRow
+            val _parser01: RowParser[scala.collection.mutable.Map[String, Any]] = SqlParser.folder(scala.collection.mutable.Map.empty[String, Any]) { (map, value, meta) => Right(map + (meta.column.qualified -> value)) }
+
+            var query =
+              """SELECT acp1.aacu_orden, acp1.aacu_descripcion, ad1.aap_tecnologia,  count(ad1) as cantidad, ad1.aap_potencia FROM siap.aap a1
+                  INNER JOIN siap.aap_adicional ad1 ON ad1.aap_id = a1.aap_id
+                  INNER JOIN siap.aap_cuentaap acp1 ON acp1.aacu_id = a1.aacu_id AND acp1.aacu_estado = 1
+                  WHERE
+	                a1.aaco_id = {aaco_id}
+                 AND
+	                a1.aap_fechacreacion <= {fecha_corte}
+                 AND 
+                  a1.empr_id = {empr_id}
+                 GROUP BY 1,2,3,5
+                 ORDER BY 1,2,3,5
+              """
+            val resultSet =
+              SQL(query)
+                .on(
+                  'aaco_id -> 1,
+                  'fecha_corte -> new DateTime(ff),
+                  'empr_id -> empr_id
+                )
+                .as(_parser01 *)
+            var _inicial = 5
+            var _final = 4
+            var _inicial_cuenta = 5
+            var _final_cuenta = 5
+            var _es_el_primero = true
+            var aacu_descripcion_ant = ""
+            var aap_tecnologia_ant = ""
+            var _listSubTotal = new ArrayBuffer[String]()
+            var _listTotal = new ArrayBuffer[String]()
+            val rows = resultSet.map { i =>
+                if (_es_el_primero) {
+                  _es_el_primero = false
+                  aacu_descripcion_ant = i._1
+                  aap_tecnologia_ant = i._2
+                } else { 
+                  if (i._2 != aap_tecnologia_ant) {
+                    _final += 1
+                    _listRow04 += com.norbitltd.spoiwo.model.Row(
+                      StringCell(
+                        "TOTAL " + aap_tecnologia_ant,
+                        Some(1),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"))
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      FormulaCell(
+                        "SUM(C"+_inicial + ":C" + (_final-1) + ")",
+                        Some(2),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      )
+                    )
+                    _listSubTotal += ("C"+_final)
+                    _listMerged04 += CellRange((_inicial-1, _final-2), (1, 1))
+                    aap_tecnologia_ant = i._2
+                    _inicial = _final + 1
+                  }
+                  if (i._1 != aacu_descripcion_ant) {
+                    _final_cuenta = _final
+                    _listRow04 += com.norbitltd.spoiwo.model.Row(
+                      StringCell(
+                        aacu_descripcion_ant,
+                        Some(0),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), horizontalAlignment = HA.Center, verticalAlignment = VA.Center)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      ),
+                      StringCell(
+                        "TOTAL " + aacu_descripcion_ant,
+                        Some(1),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"))
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      FormulaCell(
+                        "SUM(" + _listSubTotal.mkString(",")+ ")",
+                        Some(2),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      )
+                    )
+                    _listTotal += ("C" + (_final_cuenta + 1))
+                    _listSubTotal = new ArrayBuffer[String]()
+                    _listMerged04 += CellRange((_inicial_cuenta-1, _final_cuenta), (0, 0))
+                    _inicial_cuenta = _final + 2
+                    _final += 1
+                    _inicial = _inicial_cuenta
+                    aacu_descripcion_ant = i._1
+                  }
+                }
+                _listRow04 += com.norbitltd.spoiwo.model.Row(
+                  StringCell(
+                    i._1,
+                    Some(0),
+                           style = Some(
+                             CellStyle(dataFormat = CellDataFormat("@"), horizontalAlignment = HA.Center, verticalAlignment = VA.Center)
+                            ),
+                          CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                  ),                  
+                  StringCell(
+                  i._2,
+                  Some(1),
+                          style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"))
+                          ),
+                          CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                  ),
+                  NumericCell(
+                    i._3,
+                    Some(2),
+                    style = Some(CellStyle(dataFormat = CellDataFormat("#,###"))),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  ),
+                  NumericCell(
+                    i._4,
+                    Some(3),
+                    style = Some(CellStyle(dataFormat = CellDataFormat("####0"))),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
+                )
+              _final += 1
+            }
+            _listMerged04 += CellRange((_inicial-1, _final-1), (1, 1))
+            _listRow04 += com.norbitltd.spoiwo.model.Row(
+                      StringCell(
+                        "TOTAL " + aap_tecnologia_ant,
+                        Some(1),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"))
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      FormulaCell(
+                        "SUM(C"+_inicial + ":C" + (_final-1) + ")",
+                        Some(2),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      )
+            )
+            _listSubTotal += ("C"+ (_final + 1))
+            _listRow04 += com.norbitltd.spoiwo.model.Row(
+                      StringCell(
+                        aacu_descripcion_ant,
+                        Some(0),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), horizontalAlignment = HA.Center, verticalAlignment = VA.Center)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      ),
+                      StringCell(
+                        "TOTAL " + aacu_descripcion_ant,
+                        Some(1),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"))
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      FormulaCell(
+                        "SUM(" + _listSubTotal.mkString(",")+ ")",
+                        Some(2),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      )
+            )
+            _final_cuenta = _final + 2
+            _listMerged04 += CellRange((_inicial_cuenta-1, (_final_cuenta - 1)), (0, 0))
+            _listTotal += ("C" + _final_cuenta)
+            _listRow04 += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "TOTAL LUMINARIAS EN AFORO",
+                Some(1),
+                style = Some(
+                  CellStyle(dataFormat = CellDataFormat("@"))
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              FormulaCell(
+                "SUM(" + _listTotal.mkString(",")+ ")",
+                Some(2),
+                style = Some(
+                  CellStyle(dataFormat = CellDataFormat("#,##0"))
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )            
+
+            _listRow04.toList
+          },
+          mergedRegions = {
+            _listMerged04 += CellRange((0, 0), (0, 5))
+            _listMerged04 += CellRange((1, 1), (0, 5))
+            _listMerged04.toList
+          }
+        )
+        var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+        Workbook(sheet01).writeToOutputStream(os)
+        os.toByteArray        
+      }
+  }
+  */
 
 }

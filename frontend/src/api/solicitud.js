@@ -101,6 +101,17 @@ export function entregarSupervisor (soli_id) {
   })
 }
 
+export function fechaEntregaRespuesta (soli_id, soli_fechaentrega) {
+  const data = {
+    soli_id,
+    soli_fechaentrega
+  }
+  return request({
+    url: '/soli/feenre/' + data.soli_id + '/' + data.soli_fechaentrega,
+    method: 'get'
+  })
+}
+
 export function asignarRteSolicitud (soli_id, soli_fechaalmacen, soli_numerorte) {
   const data = {
     soli_id,

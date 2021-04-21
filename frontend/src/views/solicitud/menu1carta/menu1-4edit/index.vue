@@ -167,6 +167,15 @@
             </el-col>
           </el-row>
         </el-collapse-item>
+        <el-collapse-item v-if="solicitud.b.soli_estado >= 2 || solicitud.b.soli_estado === 3" name="3" title="Fecha Entrega Respuesta">
+          <el-row :gutter="4">
+            <el-col :span="6">
+              <el-form-item :label="$t('solicitud.fechaentrega')">
+                <el-date-picker type="datetime" name="fechaentrega" v-model="solicitud.b.soli_fechaentrega" style="width: 90%;"></el-date-picker>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-collapse-item>
        </el-collapse>
        <el-button :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="confirmacionGuardar = true">Guardar</el-button>
       </el-form>
@@ -207,6 +216,7 @@ export default {
         },
         b: {
           soli_fecharespuesta: null,
+          soli_fechaentrega: null,
           soli_fechadigitado: null,
           soli_fechalimite: null,
           soli_fechasupervisor: null,

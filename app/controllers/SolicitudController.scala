@@ -110,6 +110,7 @@ class SolicitudController @Inject()(
                                  soli.a.soli_informe,
                                  soli.a.soli_consecutivo)
       val b = new SolicitudB(soli.b.soli_fecharespuesta,
+                             soli.b.soli_fechaentrega,
                              soli.b.soli_fechadigitado,
                              soli.b.soli_fechalimite,
                              soli.b.soli_fechasupervisor,
@@ -156,6 +157,7 @@ class SolicitudController @Inject()(
                                  soli.a.soli_informe,
                                  soli.a.soli_consecutivo)
       val b = new SolicitudB(soli.b.soli_fecharespuesta,
+                             soli.b.soli_fechaentrega,
                              soli.b.soli_fechadigitado,
                              soli.b.soli_fechalimite,
                              soli.b.soli_fechasupervisor,
@@ -196,6 +198,17 @@ class SolicitudController @Inject()(
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
       if (soliService.entregarSupervisor(soli_id, empr_id.get, usua_id.get)) {
+        Future.successful(Ok(Json.toJson("true")))
+      } else {
+        Future.successful(ServiceUnavailable(Json.toJson("false")))
+      }    
+  }
+
+  def fechaEntregaRespuesta(soli_id: Long, soli_fechaentrega: Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] => 
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)
+      if (soliService.fechaEntregaRespuesta(soli_id, soli_fechaentrega, usua_id.get)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
         Future.successful(ServiceUnavailable(Json.toJson("false")))

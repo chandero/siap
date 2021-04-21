@@ -78,6 +78,7 @@ case class Soli(
     soli_informe: Option[String],
     soli_consecutivo: Option[Int],
     soli_fecharespuesta: Option[DateTime],
+    soli_fechaentrega: Option[DateTime],
     soli_fechadigitado: Option[DateTime],
     soli_fechalimite: Option[DateTime],
     soli_fechasupervisor: Option[DateTime],
@@ -114,6 +115,7 @@ case class SolicitudA(
 )
 case class SolicitudB(
     soli_fecharespuesta: Option[DateTime],
+    soli_fechaentrega: Option[DateTime],
     soli_fechadigitado: Option[DateTime],
     soli_fechalimite: Option[DateTime],
     soli_fechasupervisor: Option[DateTime],
@@ -154,6 +156,7 @@ case class SolicitudAR(
 
 case class SolicitudBR(
     soli_fecharespuesta: Option[DateTime],
+    soli_fechaentrega: Option[DateTime],
     soli_fechadigitado: Option[DateTime],
     soli_fechalimite: Option[DateTime],
     soli_fechasupervisor: Option[DateTime],
@@ -252,6 +255,7 @@ object SolicitudB {
   implicit val soliWrites = new Writes[SolicitudB] {
     def writes(soli: SolicitudB) = Json.obj(
       "soli_fecharespuesta" -> soli.soli_fecharespuesta,
+      "soli_fechaentrega" -> soli.soli_fechaentrega,
       "soli_fechadigitado" -> soli.soli_fechadigitado,
       "soli_fechalimite" -> soli.soli_fechalimite,
       "soli_fechasupervisor" -> soli.soli_fechasupervisor,
@@ -273,6 +277,7 @@ object SolicitudB {
 
   implicit val soliReads: Reads[SolicitudB] = (
     (__ \ "soli_fecharespuesta").readNullable[DateTime] and
+     (__ \ "soli_fechaentrega").readNullable[DateTime] and
       (__ \ "soli_fechadigitado").readNullable[DateTime] and
       (__ \ "soli_fechalimite").readNullable[DateTime] and
       (__ \ "soli_fechasupervisor").readNullable[DateTime] and
@@ -365,6 +370,7 @@ object SolicitudBR {
   implicit val soliWrites = new Writes[SolicitudBR] {
     def writes(soli: SolicitudBR) = Json.obj(
       "soli_fecharespuesta" -> soli.soli_fecharespuesta,
+      "soli_fechaentrega" -> soli.soli_fechaentrega,
       "soli_fechadigitado" -> soli.soli_fechadigitado,
       "soli_fechalimite" -> soli.soli_fechalimite,
       "soli_fechasupervisor" -> soli.soli_fechasupervisor,
@@ -387,6 +393,7 @@ object SolicitudBR {
 
   implicit val soliReads: Reads[SolicitudBR] = (
     (__ \ "soli_fecharespuesta").readNullable[DateTime] and
+     (__ \ "soli_fechaentrega").readNullable[DateTime] and
       (__ \ "soli_fechadigitado").readNullable[DateTime] and
       (__ \ "soli_fechalimite").readNullable[DateTime] and
       (__ \ "soli_fechasupervisor").readNullable[DateTime] and
@@ -444,6 +451,7 @@ object Soli {
       get[Option[String]]("soli_informe") ~
       get[Option[Int]]("soli_consecutivo") ~
       get[Option[DateTime]]("soli_fecharespuesta") ~
+      get[Option[DateTime]]("soli_fechaentrega") ~
       get[Option[DateTime]]("soli_fechadigitado") ~
       get[Option[DateTime]]("soli_fechalimite") ~
       get[Option[DateTime]]("soli_fechasupervisor") ~
@@ -477,6 +485,7 @@ object Soli {
             soli_informe ~
             soli_consecutivo ~
             soli_fecharespuesta ~
+            soli_fechaentrega ~
             soli_fechadigitado ~
             soli_fechalimite ~
             soli_fechasupervisor ~
@@ -511,6 +520,7 @@ object Soli {
           soli_informe,
           soli_consecutivo,
           soli_fecharespuesta,
+          soli_fechaentrega,
           soli_fechadigitado,
           soli_fechalimite,
           soli_fechasupervisor,
@@ -575,6 +585,7 @@ class SolicitudRepository @Inject()(
           )
           val b = new SolicitudB(
             s.soli_fecharespuesta,
+            s.soli_fechaentrega,
             s.soli_fechadigitado,
             s.soli_fechalimite,
             s.soli_fechasupervisor,
@@ -611,6 +622,7 @@ class SolicitudRepository @Inject()(
             None
           )
           val b = new SolicitudB(
+            None,
             None,
             None,
             None,
@@ -694,6 +706,7 @@ class SolicitudRepository @Inject()(
           )
           val b = new SolicitudB(
             s.soli_fecharespuesta,
+            s.soli_fechaentrega,
             s.soli_fechadigitado,
             s.soli_fechalimite,
             s.soli_fechasupervisor,
@@ -730,6 +743,7 @@ class SolicitudRepository @Inject()(
             None
           )
           val b = new SolicitudB(
+            None,
             None,
             None,
             None,
@@ -792,6 +806,7 @@ class SolicitudRepository @Inject()(
         )
         val b = new SolicitudB(
           s.soli_fecharespuesta,
+          s.soli_fechaentrega,
           s.soli_fechadigitado,
           s.soli_fechalimite,
           s.soli_fechasupervisor,
@@ -873,6 +888,7 @@ class SolicitudRepository @Inject()(
         )
         val b = new SolicitudB(
           s.soli_fecharespuesta,
+          s.soli_fechaentrega,
           s.soli_fechadigitado,
           s.soli_fechalimite,
           s.soli_fechasupervisor,
@@ -931,6 +947,7 @@ class SolicitudRepository @Inject()(
           )
           val b = new SolicitudB(
             s.soli_fecharespuesta,
+            s.soli_fechaentrega,
             s.soli_fechadigitado,
             s.soli_fechalimite,
             s.soli_fechasupervisor,
@@ -1012,6 +1029,7 @@ class SolicitudRepository @Inject()(
         )
         val b = new SolicitudB(
           s.soli_fecharespuesta,
+          s.soli_fechaentrega,
           s.soli_fechadigitado,
           s.soli_fechalimite,
           s.soli_fechasupervisor,
@@ -1075,6 +1093,7 @@ class SolicitudRepository @Inject()(
           )
           val b = new SolicitudB(
             s.soli_fecharespuesta,
+            s.soli_fechaentrega,
             s.soli_fechadigitado,
             s.soli_fechalimite,
             s.soli_fechasupervisor,
@@ -1248,6 +1267,7 @@ class SolicitudRepository @Inject()(
                                           soli_fechainforme = {soli_fechainforme},
                                           soli_informe = {soli_informe},
                                           soli_fecharespuesta = {soli_fecharespuesta},
+                                          soli_fechaentrega = {soli_fechaentrega},
                                           soli_respuesta = {soli_respuesta},
                                           soli_codigorespuesta = {soli_codigorespuesta},
                                           soli_aprobada = {soli_aprobada},
@@ -1267,6 +1287,7 @@ class SolicitudRepository @Inject()(
           'soli_fechainforme -> soli.b.soli_fechainforme,
           'soli_informe -> soli.a.soli_informe,
           'soli_fecharespuesta -> soli.b.soli_fecharespuesta,
+          'soli_fechaentrega -> soli.b.soli_fechaentrega,
           'soli_codigorespuesta -> soli.b.soli_codigorespuesta,
           'soli_respuesta -> soli.a.soli_respuesta,
           'soli_aprobada -> true,
@@ -1642,6 +1663,43 @@ class SolicitudRepository @Inject()(
           'audi_valorantiguo -> "",
           'audi_valornuevo -> info,
           'audi_evento -> "E"
+        )
+        .executeInsert()
+
+      count > 0
+    }
+  }
+
+  def fechaEntregaRespuesta(soli_id: Long, soli_fechaentrega: Long, usua_id: Long): Boolean = {
+    db.withConnection { implicit connection =>
+      val fecha: LocalDate =
+        new LocalDate(Calendar.getInstance().getTimeInMillis())
+      val hora: LocalDateTime =
+        new LocalDateTime(Calendar.getInstance().getTimeInMillis())      
+      val fechaEntrega = Calendar.getInstance()
+      fechaEntrega.setTimeInMillis(soli_fechaentrega)
+
+      val count: Long = SQL(
+        "UPDATE siap.solicitud SET soli_fechaentrega = {soli_fechaentrega}, soli_estado = {soli_estado} WHERE soli_id = {soli_id}"
+      ).on(
+          'soli_id -> soli_id,
+          'soli_fechaentrega -> hora,
+          'soli_estado -> 7
+        )
+        .executeUpdate()
+
+      SQL(
+        "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+      ).on(
+          'audi_fecha -> fecha,
+          'audi_hora -> hora,
+          'usua_id -> usua_id,
+          'audi_tabla -> "solicitud",
+          'audi_uid -> soli_id,
+          'audi_campo -> "soli_fechaentrega",
+          'audi_valorantiguo -> "",
+          'audi_valornuevo -> hora,
+          'audi_evento -> "A"
         )
         .executeInsert()
 

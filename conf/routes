@@ -101,6 +101,7 @@ POST    /api/soli/inre                  controllers.SolicitudController.ingresar
 GET     /api/soli/frte/:id/:e/:t        controllers.SolicitudController.formatoRTE(id: Long, e: Long, t: String)
 GET     /api/soti/get                   controllers.SolicitudController.tipos
 GET     /api/soli/frs/:id/:e/:f/:b/:t   controllers.SolicitudController.imprimirRespuesta(id: Long, e: Long, f:Int, b:Boolean, t: String)
+GET     /api/soli/feenre/:id/:d         controllers.SolicitudController.fechaEntregaRespuesta(id: Long, d: Long)
 
 
 # Tipo Solicitud
