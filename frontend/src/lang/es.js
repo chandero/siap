@@ -1349,6 +1349,7 @@ export default {
     soli_direccion: 'Dirección',
     soli_nombre: 'Nombre Solicitante',
     soli_fecharespuesta: 'Fecha Respuesta',
+    soli_fechaentrega: 'Fecha Entrega Respuesta',
     soli_informetecnico: 'Informe Técnico',
     soli_fechaalmacen: 'Fecha Programación',
     soli_codigorespuesta: 'Código Respuesta',

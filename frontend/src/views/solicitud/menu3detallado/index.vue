@@ -110,6 +110,15 @@
           </template>
     </el-table-column>
     <el-table-column
+      :label="$t('informe.soli_fechaentrega')"
+      prop="soli_fechaentrega"
+      width="100"
+    >
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ scope.row.b.soli_fechaentrega | moment('YYYY/MM/DD HH:mm:ss') }}</span>
+          </template>
+    </el-table-column>
+    <el-table-column
       :label="$t('informe.soli_informetecnico')"
       prop="a.soli_informe"
       width="100"
@@ -222,6 +231,7 @@ export default {
           soli_informe: d.a.soli_informe,
           soli_consecutivo: d.a.soli_consecutivo,
           soli_fecharespuesta: d.b.soli_fecharespuesta,
+          soli_fechaentrega: d.b.soli_fechaentrega,
           soli_fechalimite: d.b.soli_fechalimite,
           soli_fechasupervisor: d.b.soli_fechasupervisor,
           soli_fechainforme: d.b.soli_fechainforme,
@@ -236,8 +246,8 @@ export default {
         datos.push(data)
       })
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['Radicado', 'Tipo', 'Estado', 'Fecha Radicado', 'Fecha Límite', 'Nombre', 'Direccion', 'Barrio', 'Teléfono', 'Email', 'Descripción', 'Fecha Supervisor', 'Csc Atención', 'Informe', 'Fecha Informe', 'Fecha Programa', 'Puntos', 'Puesto', 'Luminarias', 'Tipo Expansión', 'Fecha Respuesta', 'Código Respuesta']
-        const filterVal = ['soli_radicado', 'soti_descripcion', 'soli_estado_descripcion', 'soli_fecha', 'soli_fechalimite', 'soli_nombre', 'soli_direccion', 'barr_descripcion', 'soli_telefono', 'soli_email', 'soli_solicitud', 'soli_fechasupervisor', 'soli_consecutivo', 'soli_informe', 'soli_fechainforme', 'soli_fechaalmacen', 'soli_puntos', 'soli_numerorte', 'soli_luminarias', 'soli_tipoexpansion', 'soli_fecharespuesta', 'soli_codigorespuesta']
+        const tHeader = ['Radicado', 'Tipo', 'Estado', 'Fecha Radicado', 'Fecha Límite', 'Nombre', 'Direccion', 'Barrio', 'Teléfono', 'Email', 'Descripción', 'Fecha Supervisor', 'Csc Atención', 'Informe', 'Fecha Informe', 'Fecha Programa', 'Puntos', 'Puesto', 'Luminarias', 'Tipo Expansión', 'Fecha Respuesta', 'Código Respuesta', 'Fecha Entrega Respuesta']
+        const filterVal = ['soli_radicado', 'soti_descripcion', 'soli_estado_descripcion', 'soli_fecha', 'soli_fechalimite', 'soli_nombre', 'soli_direccion', 'barr_descripcion', 'soli_telefono', 'soli_email', 'soli_solicitud', 'soli_fechasupervisor', 'soli_consecutivo', 'soli_informe', 'soli_fechainforme', 'soli_fechaalmacen', 'soli_puntos', 'soli_numerorte', 'soli_luminarias', 'soli_tipoexpansion', 'soli_fecharespuesta', 'soli_codigorespuesta', 'soli_fechaentrega']
         const list = datos
         const data = this.formatJson(filterVal, list)
         excel.export_json_to_excel(tHeader, data, 'detallado_solicitud_' + this.$moment(this.fecha_inicial).format('YYYYMMDD') + '_' + this.$moment(this.fecha_final).format('YYYYMMDD'))
@@ -246,8 +256,12 @@ export default {
     },
     formatJson (filterVal, jsonData) {
       return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
+        if (j.includes('fecha')) {
+          if (v[j] !== undefined && v[j] !== null) {
+            return parseTime(v[j])
+          } else {
+            return v[j]
+          }
         } else {
           return v[j]
         }
