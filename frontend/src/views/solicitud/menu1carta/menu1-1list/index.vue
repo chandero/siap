@@ -98,7 +98,7 @@
         </el-table-column>
         <el-table-column
           :label="$t('solicitud.estado')"
-          width="100"
+          width="130"
           sortable="custom"
           prop="b.soli_estado"
           resizable
@@ -106,6 +106,15 @@
           <template slot-scope="scope">
             <span style="margin-left: 10px">{{ estado(scope.row.b.soli_estado) }}</span>
           </template>
+        </el-table-column>
+        <el-table-column
+         :label="$t('solicitud.codigorespuesta')"
+         width="150"
+         resizable
+         >
+           <template slot-scope="scope">
+             <span style="margin-left: 2px;">{{ scope.row.b.soli_codigorespuesta }}</span>
+           </template>
         </el-table-column>
         <el-table-column
           :label="$t('solicitud.nombre')"

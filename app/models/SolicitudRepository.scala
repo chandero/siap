@@ -678,10 +678,10 @@ class SolicitudRepository @Inject()(
   ): Option[Solicitud] = {
     db.withConnection { implicit connection =>
       val s = SQL(
-        """SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' END) as soli_estado_descripcion FROM siap.solicitud 
+        """SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' END) as soli_estado_descripcion FROM siap.solicitud s
             LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
             LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
-            WHERE soli_radicado = {soli_radicado} and empr_id = {empr_id} and soli_estado <> 9"""
+            WHERE s.soli_radicado = {soli_radicado} and s.empr_id = {empr_id} and s.soli_estado <> 9"""
       ).on(
           'soli_radicado -> soli_radicado,
           'empr_id -> empr_id

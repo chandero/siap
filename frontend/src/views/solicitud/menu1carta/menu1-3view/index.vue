@@ -124,11 +124,51 @@
                 <el-date-picker readonly type="datetime" name="fecharespuesta" v-model="solicitud.b.soli_fecharespuesta"></el-date-picker>
               </el-form-item>
             </el-col>
+            <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+                <template v-if="soli_codigorespuesta_state">
+                  <el-form-item prop="soli_codigorespuesta" :label="$t('solicitud.codigorespuesta')">
+                    <el-input
+                      ref="codigorespuesta"
+                      v-model="solicitud.b.soli_codigorespuesta"
+                    ></el-input>
+                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); soli_codigorespuesta_state = false" />
+                    <el-button
+                      class="cancel-btn"
+                      size="mini"
+                      icon="el-icon-close"
+                      type="warning"
+                      circle
+                      @click="solicitud.b.soli_codigorespuesta = soli_codigorespuesta; soli_codigorespuesta_state = false"
+                    />
+                  </el-form-item>
+                </template>
+                <template v-else>
+                  <el-form-item :label="$t('solicitud.codigorespuesta')">
+                    <span style="400 13.3333px Arial;">{{ solicitud.b.soli_codigorespuesta }}</span>
+                    <el-button
+                      circle
+                      size="mini"
+                      icon="el-icon-edit"
+                      style="border-style: hidden;"
+                      @click="soli_codigorespuesta_state=!soli_codigorespuesta_state"
+                    />
+                  </el-form-item>
+                </template>
+            </el-col>
           </el-row>
           <el-row :gutter="4">
             <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
               <el-form-item :label="$t('solicitud.respuesta')">
                 <el-input readonly type="textarea" :rows="5" name="respuesta" v-model="solicitud.a.soli_respuesta"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-collapse-item>
+        <el-collapse-item  name="4" title="Fecha Entrega Respuesta">
+          <el-row :gutter="4">
+            <el-col :span="6">
+              <el-form-item :label="$t('solicitud.fechaentrega')">
+                <el-date-picker readonly type="datetime" name="fechaentrega" v-model="solicitud.b.soli_fechaentrega" style="width: 90%;"></el-date-picker>
               </el-form-item>
             </el-col>
           </el-row>
@@ -139,13 +179,15 @@
   </el-container>
 </template>
 <script>
-import { saveSolicitud, getSolicitud } from '@/api/solicitud'
+import { updateSolicitud, getSolicitud } from '@/api/solicitud'
 import { getBarriosEmpresa } from '@/api/barrio'
 
 export default {
   data () {
     return {
-      activeNames: ['1', '2', '3'],
+      activeNames: ['1', '2', '3', '4'],
+      soli_codigorespuesta_state: false,
+      soli_codigorespuesta: null,
       confirmacionGuardar: false,
       solicitud: {
         a: {
@@ -160,10 +202,12 @@ export default {
           soli_email: null,
           soli_solicitud: null,
           soli_respuesta: null,
-          soli_informe: null
+          soli_informe: null,
+          soli_consecutivo: null
         },
         b: {
           soli_fecharespuesta: null,
+          soli_fechaentrega: null,
           soli_fechadigitado: null,
           soli_fechalimite: null,
           soli_fechasupervisor: null,
@@ -172,6 +216,11 @@ export default {
           soli_fecharte: null,
           soli_fechaalmacen: null,
           soli_numerorte: null,
+          soli_puntos: null,
+          soli_tipoexpansion: null,
+          soli_aprobada: null,
+          soli_codigorespuesta: null,
+          soli_luminarias: null,
           soli_estado: null,
           empr_id: null,
           usua_id: null
@@ -189,6 +238,19 @@ export default {
     })
   },
   methods: {
+    confirmEdit () {
+      updateSolicitud(this.solicitud)
+        .then(() => {
+          this.$message({ message: 'Solicitud Actualizada.', type: 'success' })
+        })
+        .catch((error) => {
+          this.solicitud.b.soli_codigorespuesta = this.soli_codigorespuesta
+          this.$message({
+            message: 'Solicitud NO se actualizó, error:' + error,
+            type: 'warning'
+          })
+        })
+    },
     estado (soli_estado) {
       if (soli_estado === 1) {
         return 'PENDIENTE'
@@ -227,6 +289,7 @@ export default {
       getSolicitud(id).then(response => {
         if (response.status === 200) {
           this.solicitud = response.data
+          this.soli_codigorespuesta = this.solicitud.b.soli_codigorespuesta
         } else {
           this.$alert('Solicitud No Encontrada', 'Ver Solicitud', {
             confirmButtonText: 'Continuar',
@@ -242,16 +305,6 @@ export default {
             this.limpiarAndBack()
           }
         })
-      })
-    },
-    aplicar () {
-      this.confirmacionGuardar = false
-      saveSolicitud(this.solicitud).then(response => {
-        if (response.status === 201) {
-          this.success()
-        }
-      }).catch(error => {
-        this.error(error)
       })
     },
     validate () {
@@ -293,6 +346,7 @@ export default {
           soli_fechaalmacen: null,
           soli_numerorte: null,
           soli_estado: null,
+          soli_codigorespuesta: null,
           empr_id: null,
           usua_id: null
         }
@@ -326,6 +380,7 @@ export default {
           soli_fechaalmacen: null,
           soli_numerorte: null,
           soli_estado: null,
+          soli_codigorespuesta: null,
           empr_id: null,
           usua_id: null
         }
