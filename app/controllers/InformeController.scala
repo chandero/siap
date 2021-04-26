@@ -726,4 +726,22 @@ class InformeController @Inject()(
     }
   } 
 
+  def siap_informe_carga_aforo_xls(
+    fecha_final: Long,
+    empr_id: Long,
+    token: String
+  ) = Action {
+    if (config.get[String]("play.http.secret.key") == token) {
+      val os = informeService.siap_informe_carga_aforo_xls(fecha_final, empr_id)
+      val fmt = DateTimeFormat.forPattern("yyyyMM")
+      val filename = "Informe_Carga_Aforo_" + fmt.print(fecha_final) + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Ok(os)
+        .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        .withHeaders("Content-Disposition" -> attach)
+    } else {
+      Forbidden("Dude, you’re not logged in.")
+    }    
+  }
+
 }

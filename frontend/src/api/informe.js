@@ -10,6 +10,16 @@ export function informe_siap_calculo_carga_xls (periodo, anho, empr_id) {
   window.open(url, '_self', 'location=no, menubar=no')
 }
 
+export function informe_siap_carga_aforo_xls (periodo, empr_id) {
+  const data = {
+    periodo,
+    empr_id
+  }
+  const token = '43f44388-5cd1-4657-9f7e-ea4e014e9333'
+  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sicax/' + data.periodo + '/' + data.empr_id + '/' + token
+  window.open(url, '_self', 'location=no, menubar=no')
+}
+
 export function informe_siap_visita_por_barrio_xls (fecha_inicial, fecha_final) {
   const data = {
     fecha_inicial,
