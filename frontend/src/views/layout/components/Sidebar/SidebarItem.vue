@@ -12,13 +12,15 @@
       <template slot="title">
         <item v-if="item.meta" :icon="item.meta && item.meta.icon" :title="generateTitle(item.meta.title)" />
       </template>
-      <sidebar-item
-        v-for="child in item.children"
-        :is-nest="true"
-        :item="child"
-        :key="child.path"
-        :base-path="resolvePath(child.path)"
-        class="nest-menu" />
+      <el-scrollbar>
+        <sidebar-item
+          v-for="child in item.children"
+          :is-nest="true"
+          :item="child"
+          :key="child.path"
+          :base-path="resolvePath(child.path)"
+          class="nest-menu" />
+      </el-scrollbar>
     </el-submenu>
 
   </div>

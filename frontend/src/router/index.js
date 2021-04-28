@@ -462,13 +462,13 @@ export const asyncRouterMap = [
       { path: 'barrio/editar/:id', component: _import('administracion/barrio/edit'), name: 'barrioedit', hidden: true, redirect: false, meta: { title: 'barrioedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
       { path: 'barrio/crear/:did/:mid', component: _import('administracion/barrio/create'), name: 'barriocreate', hidden: true, meta: { title: 'barriocreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
       { path: 'medidor', component: _import('administracion/medidor'), name: 'medidor', meta: { title: 'medidor', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
-      { path: 'medidor/editar/:id', component: _import('administracion/medidor/edit'), name: 'medidoredit', hidden: true, redirect: false, meta: { title: 'medidoredit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
+      { path: 'medidor/editar/:id', component: _import('administracion/medidor/edit'), name: 'medidoredit', hidden: true, meta: { title: 'medidoredit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
       { path: 'medidor/crear', component: _import('administracion/medidor/create'), name: 'medidorcreate', hidden: true, meta: { title: 'medidorcreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
       { path: 'transformador', component: _import('administracion/transformador'), name: 'transformador', meta: { title: 'transformador', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
-      { path: 'transformador/editar/:id', component: _import('administracion/transformador/edit'), name: 'transformadoredit', hidden: true, redirect: false, meta: { title: 'transformadoredit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
+      { path: 'transformador/editar/:id', component: _import('administracion/transformador/edit'), name: 'transformadoredit', hidden: true, meta: { title: 'transformadoredit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
       { path: 'transformador/crear', component: _import('administracion/transformador/create'), name: 'transformadorcreate', hidden: true, meta: { title: 'transformadorcreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
       { path: 'urbanizadora', component: _import('administracion/urbanizadora'), name: 'urba', meta: { title: 'urba', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
-      { path: 'urbanizadora/editar/:id', component: _import('administracion/urbanizadora/edit'), name: 'urbaedit', hidden: true, redirect: false, meta: { title: 'urbaedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
+      { path: 'urbanizadora/editar/:id', component: _import('administracion/urbanizadora/edit'), name: 'urbaedit', hidden: true, meta: { title: 'urbaedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
       { path: 'urbanizadora/crear', component: _import('administracion/urbanizadora/create'), name: 'urbacreate', hidden: true, meta: { title: 'urbacreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } }
     ]
   },

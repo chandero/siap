@@ -12285,22 +12285,28 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                           } 
 
             var query =
-              """SELECT acp1.aacu_orden, acp1.aacu_descripcion, ad1.aap_tecnologia,  count(ad1) as cantidad, ad1.aap_potencia FROM siap.aap a1
-                  INNER JOIN siap.aap_adicional ad1 ON ad1.aap_id = a1.aap_id
-                  INNER JOIN siap.aap_cuentaap acp1 ON acp1.aacu_id = a1.aacu_id AND acp1.aacu_estado = 1
-                  WHERE
-	                a1.aaco_id = {aaco_id}
-                 AND
-	                a1.aap_fechacreacion <= {fecha_corte}
-                 AND 
-                  a1.empr_id = {empr_id}
-                 GROUP BY 1,2,3,5
-                 ORDER BY 1,2,3,5
+              """SELECT acp1.aacu_orden, acp1.aacu_descripcion, a.aap_tecnologia, a.aap_potencia, count(*) AS cantidad FROM 
+                  (SELECT DISTINCT ON (aap_id) o.aap_id, o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia,o.upd_fecha FROM (
+                    (SELECT a1.aap_id, a1.aaco_id, a1.aacu_id, ad1.aap_tecnologia, ad1.aap_potencia, {fecha_hoy} AS upd_fecha FROM siap.aap a1
+                      INNER JOIN siap.aap_adicional ad1 ON ad1.aap_id = a1.aap_id
+                      WHERE a1.aap_fechatoma <= {fecha_corte} AND a1.empr_id = {empr_id} AND a1.esta_id <> 9 )
+                    UNION
+                    (SELECT ah1.aap_id, ah1.aaco_id, ah1.aacu_id, adh1.aap_tecnologia, adh1.aap_potencia, ah1.upd_fecha FROM siap.aap_historia ah1 
+                      INNER JOIN siap.aap_adicional_historia adh1 ON adh1.aap_id = ah1.aap_id AND adh1.upd_fecha = ah1.upd_fecha
+                      WHERE ah1.upd_fecha > {fecha_corte} AND ah1.empr_id = {empr_id} AND ah1.esta_id <> 9 ORDER BY ah1.upd_fecha ASC)
+                      ORDER BY aap_id, upd_fecha DESC
+                    ) o 
+                  ) a
+                 INNER JOIN siap.aap_cuentaap acp1 ON acp1.aacu_id = a.aacu_id AND acp1.aacu_estado = 1
+                 WHERE a.aaco_id = {aaco_id}
+                 GROUP BY 1,2,3,4
+                 ORDER BY 1,2,3,4
               """
             val resultSet =
               SQL(query)
                 .on(
                   'aaco_id -> 1,
+                  'fecha_hoy -> new DateTime(),
                   'fecha_corte -> new DateTime(ff),
                   'empr_id -> empr_id
                 )
@@ -12341,7 +12347,9 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                       )
                     )
                     _listSubTotal += ("C"+_final)
-                    _listMerged04 += CellRange((_inicial-1, _final-2), (1, 1))
+                    if ((_inicial-1) != (_final-2)){
+                      _listMerged04 += CellRange((_inicial-1, _final-2), (1, 1))
+                    }
                     aap_tecnologia_ant = i._2
                     _inicial = _final + 1
                   }
@@ -12375,7 +12383,9 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                     )
                     _listTotal += ("C" + (_final_cuenta + 1))
                     _listSubTotal = new ArrayBuffer[String]()
-                    _listMerged04 += CellRange((_inicial_cuenta-1, _final_cuenta), (0, 0))
+                    if ((_inicial_cuenta-1) != _final_cuenta){
+                      _listMerged04 += CellRange((_inicial_cuenta-1, _final_cuenta), (0, 0))
+                    }
                     _inicial_cuenta = _final + 2
                     _final += 1
                     _inicial = _inicial_cuenta
@@ -12414,7 +12424,9 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                 )
               _final += 1
             }
-            _listMerged04 += CellRange((_inicial-1, _final-1), (1, 1))
+            if (_inicial != _final) {
+              _listMerged04 += CellRange((_inicial-1, _final-1), (1, 1))
+            }
             _listRow04 += com.norbitltd.spoiwo.model.Row(
                       StringCell(
                         "TOTAL " + aap_tecnologia_ant,
@@ -12461,7 +12473,9 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                       )
             )
             _final_cuenta = _final + 2
-            _listMerged04 += CellRange((_inicial_cuenta-1, (_final_cuenta - 1)), (0, 0))
+            if (_inicial_cuenta != _final_cuenta) {
+              _listMerged04 += CellRange((_inicial_cuenta-1, (_final_cuenta - 1)), (0, 0))
+            }
             _listTotal += ("C" + _final_cuenta)
             _listRow04 += com.norbitltd.spoiwo.model.Row(
               StringCell(
@@ -12932,11 +12946,11 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                   (SELECT DISTINCT ON (aap_id) o.aap_id, o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia,o.upd_fecha FROM (
                     (SELECT a1.aap_id, a1.aaco_id, a1.aacu_id, ad1.aap_tecnologia, ad1.aap_potencia, {fecha_hoy} AS upd_fecha FROM siap.aap a1
                       INNER JOIN siap.aap_adicional ad1 ON ad1.aap_id = a1.aap_id
-                      WHERE a1.aap_fechatoma <= {fecha_corte} AND a1.empr_id = {empr_id} )
+                      WHERE a1.aap_fechatoma <= {fecha_corte} AND a1.empr_id = {empr_id} AND a1.esta_id <> 9 )
                     UNION
                     (SELECT ah1.aap_id, ah1.aaco_id, ah1.aacu_id, adh1.aap_tecnologia, adh1.aap_potencia, ah1.upd_fecha FROM siap.aap_historia ah1 
                       INNER JOIN siap.aap_adicional_historia adh1 ON adh1.aap_id = ah1.aap_id AND adh1.upd_fecha = ah1.upd_fecha
-                      WHERE ah1.upd_fecha > {fecha_corte} AND ah1.empr_id = {empr_id} ORDER BY ah1.upd_fecha ASC)
+                      WHERE ah1.upd_fecha > {fecha_corte} AND ah1.empr_id = {empr_id} AND ah1.esta_id <> 9 ORDER BY ah1.upd_fecha ASC)
                       ORDER BY aap_id, upd_fecha DESC
                     ) o 
                   ) a
@@ -13015,7 +13029,9 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                       )                      
                     )
                     _listSubTotal += ("E"+_final)
-                    _listMerged04 += CellRange((_inicial-1, _final-2), (1, 1))
+                    if ( (_inicial-1) != (_final-2)){
+                      _listMerged04 += CellRange((_inicial-1, _final-2), (1, 1))
+                    }
                     aap_tecnologia_ant = i._2
                     _inicial = _final + 1
                   }
@@ -13073,7 +13089,9 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                     )
                     _listTotal += ("E" + (_final_cuenta + 1))
                     _listSubTotal = new ArrayBuffer[String]()
-                    _listMerged04 += CellRange((_inicial_cuenta-1, _final_cuenta), (0, 0))
+                    if (_inicial_cuenta != _final_cuenta ) {
+                      _listMerged04 += CellRange((_inicial_cuenta-1, _final_cuenta), (0, 0))
+                    }
                     _inicial_cuenta = _final + 2
                     _final += 1
                     _inicial = _inicial_cuenta
@@ -13154,7 +13172,9 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                 )
               _final += 1
             }
-            _listMerged04 += CellRange((_inicial-1, _final-1), (1, 1))
+            if (_inicial != _final ) {
+              _listMerged04 += CellRange((_inicial-1, _final-1), (1, 1))
+            }
             _listRow04 += com.norbitltd.spoiwo.model.Row(
                       StringCell(
                         "TOTAL " + aap_tecnologia_ant,
@@ -13249,7 +13269,9 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                       )                                                                  
             )
             _final_cuenta = _final + 2
-            _listMerged04 += CellRange((_inicial_cuenta-1, (_final_cuenta - 1)), (0, 0))
+            if (_inicial_cuenta != _final_cuenta) {
+              _listMerged04 += CellRange((_inicial_cuenta-1, (_final_cuenta - 1)), (0, 0))
+            }
             _listTotal += ("E" + _final_cuenta)
             _listRow04 += com.norbitltd.spoiwo.model.Row(
               StringCell(
@@ -13297,10 +13319,10 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
             _listRow04.toList
           },
           mergedRegions = {
-            _listMerged04 += CellRange((0, 0), (0, 9))
-            _listMerged04 += CellRange((1, 1), (0, 9))
-            _listMerged04 += CellRange((2, 2), (0, 9))
-            _listMerged04.toList
+           _listMerged04 += CellRange((0, 0), (0, 9))
+           _listMerged04 += CellRange((1, 1), (0, 9))
+           _listMerged04 += CellRange((2, 2), (0, 9))
+           _listMerged04.toList
           }
         )
         var os: ByteArrayOutputStream = new ByteArrayOutputStream()
