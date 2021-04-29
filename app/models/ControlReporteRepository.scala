@@ -1218,7 +1218,7 @@ class ControlReporteRepository @Inject()(
         val consec = consecutivo(reporte.reti_id.get)
         if (consec > 0) {
           val id: scala.Long = SQL(
-            "INSERT INTO siap.control_reporte (repo_fecharecepcion, repo_direccion, repo_nombre, repo_telefono, repo_fechasolucion, repo_horainicio, repo_horafin, repo_reportetecnico, repo_descripcion, rees_id, orig_id, barr_id, empr_id, tiba_id, usua_id, reti_id, repo_consecutivo) VALUES ({repo_fecharecepcion}, {repo_direccion}, {repo_nombre}, {repo_telefono}, {repo_fechasolucion}, {repo_horainicio}, {repo_horafin}, {repo_reportetecnico}, {repo_descripcion}, {rees_id}, {orig_id}, {barr_id}, {empr_id}, {tiba_id}, {usua_id}, {reti_id}, {repo_consecutivo})"
+            "INSERT INTO siap.control_reporte (repo_fecharecepcion, repo_direccion, repo_nombre, repo_telefono, repo_fechasolucion, repo_horainicio, repo_horafin, repo_reportetecnico, repo_descripcion, rees_id, orig_id, barr_id, empr_id, tiba_id, usua_id, reti_id, repo_consecutivo, tireuc_id) VALUES ({repo_fecharecepcion}, {repo_direccion}, {repo_nombre}, {repo_telefono}, {repo_fechasolucion}, {repo_horainicio}, {repo_horafin}, {repo_reportetecnico}, {repo_descripcion}, {rees_id}, {orig_id}, {barr_id}, {empr_id}, {tiba_id}, {usua_id}, {reti_id}, {repo_consecutivo}, {tireuc_id})"
           ).on(
               'repo_fecharecepcion -> reporte.repo_fecharecepcion,
               'repo_direccion -> reporte.repo_direccion,
@@ -1236,7 +1236,8 @@ class ControlReporteRepository @Inject()(
               'repo_horafin -> reporte.repo_horafin,
               'reti_id -> reporte.reti_id,
               'repo_consecutivo -> consec,
-              'tiba_id -> reporte.tiba_id
+              'tiba_id -> reporte.tiba_id,
+              'tireuc_id -> 2
             )
             .executeInsert()
             .get
