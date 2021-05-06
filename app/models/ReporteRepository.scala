@@ -3150,6 +3150,7 @@ class ReporteRepository @Inject()(
               None,
               None,
               None,
+              None,
               None
             )
             val aapOption =

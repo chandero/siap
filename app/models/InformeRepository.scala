@@ -12865,6 +12865,11 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
         var _listRow03 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
         var _listMerged04 = new ListBuffer[CellRange]()
         var _listRow04 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        val fuenteTotal = Font(height = 12.points, fontName = "Liberation Sans", bold = true, italic = true, strikeout = false)
+        val fuenteSubTotal = Font(height = 11.points, fontName = "Liberation Sans", bold = true, italic = true, strikeout = false)
+        val fuenteCantidadTotal = Font(height = 10.points, fontName = "Liberation Sans", bold = true, italic = true, strikeout = false)
+        val fuenteNoBold = Font(height = 12.points, fontName = "Liberation Sans", bold = false, italic = false, strikeout = false)        
+        val colorSubTotal = Color(255,182,108)
 
         val sheet01 = Sheet(
           name = "Luminarias",
@@ -12941,6 +12946,19 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                             case a ~ b ~ c ~ d ~ e ~ f => (a, b, c, d, e, f)
                           } 
 
+            val _parseFotoControl = get[Option[Int]]("aacu_orden") ~ get[Option[String]]("aap_fotocontrol") ~ get[Option[Int]]("total") map { case a ~ b ~ c => (a,b,c) }
+
+            val _resultFotocontrol = SQL("""SELECT ac1.aacu_orden, ad1.aap_fotocontrol, COUNT(ad1.*) AS total FROM siap.aap a1
+                                              LEFT JOIN siap.aap_adicional ad1 ON ad1.aap_id = a1.aap_id
+                                              LEFT JOIN siap.aap_cuentaap ac1 ON ac1.aacu_id = a1.aacu_id
+                                              WHERE a1.empr_id = 1 AND a1.esta_id < 9 AND a1.aaco_id = 1 AND ac1.aacu_orden < 5 AND a1.aap_fechatoma <= {fecha_corte}
+                                              GROUP BY 1,2
+                                              ORDER BY 1,2""").
+                                      on(
+                                        'empr_id -> empr_id,
+                                        'fecha_corte -> new DateTime(ff)
+                                      ).as(_parseFotoControl *)
+
             var query =
               """SELECT acp1.aacu_orden, acp1.aacu_descripcion, a.aap_tecnologia, a.aap_potencia, apr1.aap_potenciareal, count(*) AS cantidad FROM 
                   (SELECT DISTINCT ON (aap_id) o.aap_id, o.aaco_id, o.aacu_id, o.aap_tecnologia, o.aap_potencia,o.upd_fecha FROM (
@@ -12978,6 +12996,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
             var aap_tecnologia_ant = ""
             var _listSubTotal = new ArrayBuffer[String]()
             var _listTotal = new ArrayBuffer[String]()
+            var _listCargaTotal = new ArrayBuffer[String]()
             val rows = resultSet.map { i =>
                 if (_es_el_primero) {
                   _es_el_primero = false
@@ -12988,18 +13007,34 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                     _final += 1
                     _listRow04 += com.norbitltd.spoiwo.model.Row(
                       StringCell(
-                        "TOTAL " + aap_tecnologia_ant,
+                        "Subtotal " + aap_tecnologia_ant,
                         Some(1),
                         style = Some(
-                            CellStyle(dataFormat = CellDataFormat("@"))
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                           ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet               
                       ),
+                      StringCell(
+                        "",
+                        Some(2),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      StringCell(
+                        "",
+                        Some(3),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),                      
                       FormulaCell(
                         "SUM(E"+_inicial + ":E" + (_final-1) + ")",
                         Some(4),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                          CellStyle(dataFormat = CellDataFormat("#,##0"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
@@ -13007,7 +13042,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         "SUM(F"+_inicial + ":F" + (_final-1) + ")",
                         Some(5),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
@@ -13015,15 +13050,31 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         "SUM(G"+_inicial + ":G" + (_final-1) + ")",
                         Some(6),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
+                      StringCell(
+                        " ",
+                        Some(7),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      StringCell(
+                        " ",
+                        Some(8),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),                                            
                       FormulaCell(
                         "SUM(J"+_inicial + ":J" + (_final-1) + ")",
                         Some(9),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       )                      
@@ -13039,6 +13090,80 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                     _final_cuenta = _final
                     _listRow04 += com.norbitltd.spoiwo.model.Row(
                       StringCell(
+                        "Total Luminarias " + aacu_descripcion_ant,
+                        Some(1),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      StringCell(
+                        " ",
+                        Some(2),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      StringCell(
+                        " ",
+                        Some(3),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),                      
+                      FormulaCell(
+                        "SUM(" + _listSubTotal.mkString(",")+ ")",
+                        Some(4),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("#,##0"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      ),
+                      FormulaCell(
+                        "SUM(" + _listSubTotal.mkString(",").replaceAll("E","F")+ ")",
+                        Some(5),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      ),
+                      FormulaCell(
+                        "SUM(" + _listSubTotal.mkString(",").replaceAll("E","G")+ ")",
+                        Some(6),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      ),
+                      StringCell(
+                        " ",
+                        Some(7),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      StringCell(
+                        " ",
+                        Some(8),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),                      
+                      FormulaCell(
+                        "SUM(" + _listSubTotal.mkString(",").replaceAll("E","J")+ ")",
+                        Some(9),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      )
+                    )
+                    _listRow04 += com.norbitltd.spoiwo.model.Row(
+                      StringCell(
                         aacu_descripcion_ant,
                         Some(0),
                         style = Some(
@@ -13047,50 +13172,90 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
                       StringCell(
-                        "TOTAL " + aacu_descripcion_ant,
+                        "Cantidad Fotocontrol Exclusivo",
                         Some(1),
                         style = Some(
-                            CellStyle(dataFormat = CellDataFormat("@"))
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteCantidadTotal)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      NumericCell(
+                        0,
+                        Some(4),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("#,##0"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      NumericCell(
+                        0,
+                        Some(6),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      )                       
+                    )
+                    _listRow04 += com.norbitltd.spoiwo.model.Row(
+                      StringCell(
+                        "Cantidad Fotocontrol General",
+                        Some(1),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteCantidadTotal)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      NumericCell(
+                        0,
+                        Some(4),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("#,##0"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      NumericCell(
+                        0,
+                        Some(6),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      )                      
+                    )
+                    _listRow04 += com.norbitltd.spoiwo.model.Row(
+                      StringCell(
+                        "TOTAL CARGA INSTALADA",
+                        Some(1),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                           ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet               
                       ),
                       FormulaCell(
-                        "SUM(" + _listSubTotal.mkString(",")+ ")",
+                        "SUM(E" + (_final + 2) + ":E"+ (_final + 3) + ")",
                         Some(4),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
-                        ),
-                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                            CellStyle(dataFormat = CellDataFormat("#,##0"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
                       ),
                       FormulaCell(
-                        "SUM(" + _listSubTotal.mkString(",").replaceAll("E","F")+ ")",
-                        Some(5),
-                        style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
-                        ),
-                        CellStyleInheritance.CellThenRowThenColumnThenSheet
-                      ),
-                      FormulaCell(
-                        "SUM(" + _listSubTotal.mkString(",").replaceAll("E","G")+ ")",
+                        "SUM(G" + (_final + 1) + ":G"+ (_final + 3) + ")",
                         Some(6),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
-                        ),
-                        CellStyleInheritance.CellThenRowThenColumnThenSheet
-                      ),
-                      FormulaCell(
-                        "SUM(" + _listSubTotal.mkString(",").replaceAll("E","J")+ ")",
-                        Some(9),
-                        style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
-                        ),
-                        CellStyleInheritance.CellThenRowThenColumnThenSheet
-                      )
-                    )
+                            CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      )                      
+                    )                    
                     _listTotal += ("E" + (_final_cuenta + 1))
+                    _listCargaTotal += ("G" + (_final_cuenta + 4))
                     _listSubTotal = new ArrayBuffer[String]()
+                    _final = _final + 3 // adicione esto
                     if (_inicial_cuenta != _final_cuenta ) {
-                      _listMerged04 += CellRange((_inicial_cuenta-1, _final_cuenta), (0, 0))
+                      // _listMerged04 += CellRange((_inicial_cuenta-1, _final_cuenta), (0, 0))
+                      // hice este cambio
+                      _listMerged04 += CellRange((_inicial_cuenta-1, _final), (0, 0))
                     }
                     _inicial_cuenta = _final + 2
                     _final += 1
@@ -13177,10 +13342,10 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
             }
             _listRow04 += com.norbitltd.spoiwo.model.Row(
                       StringCell(
-                        "TOTAL " + aap_tecnologia_ant,
+                        "Subtotal " + aap_tecnologia_ant,
                         Some(1),
                         style = Some(
-                            CellStyle(dataFormat = CellDataFormat("@"))
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                           ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet               
                       ),
@@ -13188,7 +13353,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         "SUM(E"+_inicial + ":E" + (_final-1) + ")",
                         Some(4),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"), fillBackgroundColor = Color.AquaMarine )
+                          CellStyle(dataFormat = CellDataFormat("#,##0"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White )
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
@@ -13196,7 +13361,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         "SUM(F"+_inicial + ":F" + (_final-1) + ")",
                         Some(5),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
@@ -13204,7 +13369,23 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         "SUM(G"+_inicial + ":G" + (_final-1) + ")",
                         Some(6),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      ),
+                      StringCell(
+                        "",
+                        Some(7),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                        ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      ),
+                      StringCell(
+                        "",
+                        Some(8),
+                        style = Some(
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
@@ -13212,7 +13393,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         "SUM(J"+_inicial + ":J" + (_final-1) + ")",
                         Some(9),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       )                                                                  
@@ -13228,10 +13409,10 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
                       StringCell(
-                        "TOTAL " + aacu_descripcion_ant,
+                        "Total Luminarias " + aacu_descripcion_ant,
                         Some(1),
                         style = Some(
-                            CellStyle(dataFormat = CellDataFormat("@"))
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                           ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet               
                       ),
@@ -13239,7 +13420,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         "SUM(" + _listSubTotal.mkString(",")+ ")",
                         Some(4),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                          CellStyle(dataFormat = CellDataFormat("#,##0"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
@@ -13247,7 +13428,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         "SUM(" + _listSubTotal.mkString(",").replaceAll("E", "F")+ ")",
                         Some(5),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
@@ -13255,7 +13436,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         "SUM(" + _listSubTotal.mkString(",").replaceAll("E", "G") + ")",
                         Some(6),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       ),
@@ -13263,30 +13444,134 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         "SUM(" + _listSubTotal.mkString(",").replaceAll("E", "J") + ")",
                         Some(9),
                         style = Some(
-                          CellStyle(dataFormat = CellDataFormat("#,##0"))
+                          CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
                         ),
                         CellStyleInheritance.CellThenRowThenColumnThenSheet
                       )                                                                  
             )
+                    _listRow04 += com.norbitltd.spoiwo.model.Row(
+                      StringCell(
+                        aacu_descripcion_ant,
+                        Some(0),
+                        style = Some(
+                            CellStyle(horizontalAlignment = HA.Center, verticalAlignment = VA.Center, rotation = 90)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet
+                      ),
+                      StringCell(
+                        "Cantidad Fotocontrol Exclusivo",
+                        Some(1),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      NumericCell(
+                        0,
+                        Some(4),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("#,##0"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      NumericCell(
+                        0,
+                        Some(6),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      )                     
+                    )
+                    _listRow04 += com.norbitltd.spoiwo.model.Row(
+                      StringCell(
+                        "Cantidad Fotocontrol General",
+                        Some(1),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      NumericCell(
+                        0,
+                        Some(4),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("#,##0"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      NumericCell(
+                        0,
+                        Some(6),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      )                      
+                    )
+                    _listRow04 += com.norbitltd.spoiwo.model.Row(
+                      StringCell(
+                        "TOTAL CARGA INSTALADA",
+                        Some(1),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("@"), font = fuenteSubTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      FormulaCell(
+                        "SUM(E" + (_final + 2)  + ":E"+ (_final + 3)  + ")",
+                        Some(4),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("#,##0"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      ),
+                      FormulaCell(
+                        "SUM(G" + (_final + 2)  + ":G"+(_final + 4)  + ")",
+                        Some(6),
+                        style = Some(
+                            CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteCantidadTotal, fillPattern = CellFill.Pattern.BigSpots, fillForegroundColor = colorSubTotal, fillBackgroundColor = Color.White)
+                          ),
+                        CellStyleInheritance.CellThenRowThenColumnThenSheet               
+                      )                          
+                    )            
             _final_cuenta = _final + 2
+            _final = _final + 4
             if (_inicial_cuenta != _final_cuenta) {
-              _listMerged04 += CellRange((_inicial_cuenta-1, (_final_cuenta - 1)), (0, 0))
+              _listMerged04 += CellRange((_inicial_cuenta-1, (_final)), (0, 0))
             }
             _listTotal += ("E" + _final_cuenta)
+            _listCargaTotal += ("G" + (_final_cuenta + 3))
             _listRow04 += com.norbitltd.spoiwo.model.Row(
               StringCell(
                 "TOTAL LUMINARIAS EN AFORO",
                 Some(1),
                 style = Some(
-                  CellStyle(dataFormat = CellDataFormat("@"))
+                  CellStyle(dataFormat = CellDataFormat("@"), font = fuenteTotal, fillForegroundColor = Color.Orange, fillBackgroundColor = Color.White, fillPattern = CellFill.Solid)
                 ),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet               
               ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(dataFormat = CellDataFormat("@"), font = fuenteTotal, fillForegroundColor = Color.Orange, fillBackgroundColor = Color.White, fillPattern = CellFill.Solid)
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some( 
+                  CellStyle(dataFormat = CellDataFormat("@"), font = fuenteTotal, fillForegroundColor = Color.Orange, fillBackgroundColor = Color.White, fillPattern = CellFill.Solid)
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),              
               FormulaCell(
                 "SUM(" + _listTotal.mkString(",")+ ")",
                 Some(4),
                 style = Some(
-                  CellStyle(dataFormat = CellDataFormat("#,##0"))
+                  CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteTotal, fillForegroundColor = Color.Orange, fillBackgroundColor = Color.White, fillPattern = CellFill.Solid)
                 ),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
@@ -13294,23 +13579,39 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                 "SUM(" + _listTotal.mkString(",").replaceAll("E", "F") + ")",
                 Some(5),
                 style = Some(
-                  CellStyle(dataFormat = CellDataFormat("#,##0"))
+                  CellStyle(dataFormat = CellDataFormat("#,##0"), font = fuenteTotal, fillForegroundColor = Color.Orange, fillBackgroundColor = Color.White, fillPattern = CellFill.Solid)
                 ),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               FormulaCell(
-                "SUM(" + _listTotal.mkString(",").replaceAll("E", "G") + ")",
+                "SUM(" + _listCargaTotal.mkString(",") + ")",
                 Some(6),
                 style = Some(
-                  CellStyle(dataFormat = CellDataFormat("#,##0"))
+                  CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteTotal, fillForegroundColor = Color.Orange, fillBackgroundColor = Color.White, fillPattern = CellFill.Solid)
                 ),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some( 
+                  CellStyle(dataFormat = CellDataFormat("@"), font = fuenteTotal, fillForegroundColor = Color.Orange, fillBackgroundColor = Color.White, fillPattern = CellFill.Solid)
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ), 
+              StringCell(
+                "",
+                Some(8),
+                style = Some( 
+                  CellStyle(dataFormat = CellDataFormat("@"), font = fuenteTotal, fillForegroundColor = Color.Orange, fillBackgroundColor = Color.White, fillPattern = CellFill.Solid)
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),                             
               FormulaCell(
                 "SUM(" + _listTotal.mkString(",").replaceAll("E", "J") + ")",
                 Some(9),
                 style = Some(
-                  CellStyle(dataFormat = CellDataFormat("#,##0"))
+                  CellStyle(dataFormat = CellDataFormat("#,##0.00"), font = fuenteTotal, fillForegroundColor = Color.Orange, fillBackgroundColor = Color.White, fillPattern = CellFill.Solid)
                 ),
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               )                                          

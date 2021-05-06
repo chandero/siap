@@ -672,6 +672,8 @@ export default {
         return 'EN INFORME TECNICO'
       } else if (soli_estado === 6) {
         return 'RESPONDIDA'
+      } else if (soli_estado === 7) {
+        return 'RESPUESTA ENTREGADA'
       } else {
         return 'NO ASIGNADO'
       }
