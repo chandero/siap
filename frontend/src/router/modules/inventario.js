@@ -174,6 +174,35 @@ const inventarioRouter = {
         { path: 'menu6-1activa/gestion/edit/:id', component: () => import('@/views/inventario/menu6transformador/menu6-1activa/gestion/edit/index'), name: 'transformadorgestionedit', hidden: true, redirect: false, meta: { title: 'transformadorgestionedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] } },
         { path: 'menu6-1activa/gestion/create', component: () => import('@/views/inventario/menu6transformador/menu6-1activa/gestion/create/index'), name: 'transformadorgestioncreate', hidden: true, meta: { title: 'transformadorgestioncreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] } }
       ]
+    },
+    {
+      path: 'menu7medidor',
+      component: () => import('@/views/inventario/menu7medidor/index'), // Parent router-view
+      name: 'menu_inventario_menu7medidor',
+      meta: { title: 'menu_inventario_menu7medidor', icon: 'el-icon-c-scale-to-original', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'supervisor', 'ingeniero'] },
+      redirect: '/inventario/menu7medidor/menu7-1activa',
+      children: [
+        /* {
+          path: 'menu7-1activa',
+          component: () => import('@/views/inventario/menu7medidor/menu7-1activa'),
+          name: 'menu_inventario_menu7medidor_menu7-1activa',
+          meta: { title: 'menu_inventario_menu7medidor_menu7-1activa', icon: 'el-icon-sunrise', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'supervisor', 'ingeniero'] }
+        },
+        {
+          path: 'menu7-2enbaja',
+          component: () => import('@/views/inventario/menu7medidor/menu7-2enbaja'),
+          name: 'menu_inventario_menu7medidor_menu7-2enbaja',
+          meta: { title: 'menu_inventario_menu7medidor_menu7-2enbaja', icon: 'el-icon-sunset', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'supervisor', 'ingeniero'] }
+        },
+        { path: 'menu7-1activa/gestion/edit/:id', component: () => import('@/views/inventario/menu7medidor/menu7-1activa/gestion/edit/index'), name: 'medidorgestionedit', hidden: true, redirect: false, meta: { title: 'medidorgestionedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] } },
+        { path: 'menu7-1activa/gestion/create', component: () => import('@/views/inventario/menu7medidor/menu7-1activa/gestion/create/index'), name: 'medidorgestioncreate', hidden: true, meta: { title: 'medidorgestioncreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar', 'supervisor'] } }, */
+        {
+          path: 'menu7-3carga',
+          component: () => import('@/views/inventario/menu7medidor/menu7-3carga'),
+          name: 'menu_inventario_menu7medidor_menu7-3carga',
+          meta: { title: 'menu_inventario_menu7medidor_menu7-3carga', icon: 'el-icon-sunrise', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'supervisor', 'ingeniero'] }
+        }
+      ]
     }
   ]
 }

@@ -52,6 +52,8 @@ import '../node_modules/ag-grid-community/dist/styles/ag-theme-balham.css'
 
 import VueClipboard from 'vue-clipboard2'
 
+import { v4 as uuidv4 } from 'uuid'
+
 Vue.use(VueClipboard)
 Vue.use(VueQueryBuilder)
 Vue.use(VueCookie)
@@ -120,6 +122,17 @@ Vue.use(IdleVue, {
   idleTime: 60000, // 60 segundos
   startAtIdle: false
 })
+
+const uuid = localStorage.getItem('siapSessionUUID')
+console.log('Uuid almacenado: ' + uuid)
+if (uuid !== undefined && uuid !== null && uuid !== '') {
+  console.log('Usando uuid almacenado: ' + uuid)
+  store.dispatch('SetUUID', uuid)
+} else {
+  const nuuid = uuidv4()
+  console.log('Usando uuid NUEVO: ' + nuuid)
+  store.dispatch('SetUUID', nuuid)
+}
 
 new Vue({
   router,

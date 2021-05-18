@@ -608,6 +608,17 @@ POST    /api/maob/upd                            controllers.ManoObraController.
 GET     /api/maob/bdesc/:q                       controllers.ManoObraController.buscarPorDescripcion(q: String)
 POST    /api/maob/upa                            controllers.ManoObraController.actualizarPrecio 
 
+# Cargar Archivos
+POST    /api/mdone/:a/:m/:e                      controllers.UploadController.upload_medidor_lectura(a:Int, m: Int, e: Long)
+
+# Cargar Archivo
+GET     /api/caar/elim/:a/:m/:t                  controllers.CargaController.eliminar(a: Int, m: Int, t: Int)
+POST    /api/caar/get                            controllers.CargaController.todos
+GET     /api/caar/last                           controllers.CargaController.ultimaCarga()
+GET     /api/caar/xlsx/:a/:m/:t/:u               controllers.CargaController.procesar_xlsx(a: Int, m: Int, t: Int, u: String)
+
+# SSE - Server Send Event
+GET     /api/progressStatuses/:uuid              controllers.ProcessingProgressController.getProgressStatuses(uuid: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

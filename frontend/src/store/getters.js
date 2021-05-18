@@ -19,6 +19,7 @@ const getters = {
   months: state => state.app.months,
   secret: state => state.app.secret,
   baseurl: state => state.app.baseurl,
-  tipo_inventario: state => state.app.tipo_inventario
+  tipo_inventario: state => state.app.tipo_inventario,
+  sessionUUID: state => state.app.sessionUUID
 }
 export default getters

@@ -3,9 +3,9 @@ mappings in Universal ++= directory(baseDirectory.value / "public")
 
 name := "siap"
 
-version := "1.2"
+version := "1.3"
 
-packageSummary in Windows := "SIAP v1.2"
+packageSummary in Windows := "SIAP v1.3"
 packageDescription in Windows := "Inventario de Luminarias SIAP"
 maintainer := "aldacm2001@gmail.com"
 
@@ -45,7 +45,20 @@ libraryDependencies ++= Seq(
   "org.mozilla" % "rhino" % "1.7R3",
   // JSON
   "net.liftweb" %% "lift-json" % "3.4.1",
-  "net.liftweb" %% "lift-json-ext" % "3.4.1"
+  "net.liftweb" %% "lift-json-ext" % "3.4.1",
+  // CSV parser
+  "org.apache.poi" % "poi" % "3.17",
+  "org.apache.poi" % "poi-ooxml" % "3.17",
+  "com.univocity" % "univocity-parsers" % "2.4.1",
+  //
+  "org.apache.httpcomponents" % "httpcore" % "4.4.13",
+  //
+  "com.beachape" %% "enumeratum" % "1.6.1",
+  // Pdf Generator
+  "com.hhandoko" %% "play28-scala-pdf" % "4.3.0",
+  //
+  "net.codingwell" %% "scala-guice" % "4.2.11",
+  "commons-io" % "commons-io" % "2.4"
 )
 
 // Play framework hooks for development
@@ -58,7 +71,9 @@ resolvers += "Jasper" at "https://jaspersoft.artifactoryonline.com/jaspersoft/jr
 resolvers += "Jasper2" at "https://jaspersoft.jfrog.io/jaspersoft/jaspersoft-repo/"
 resolvers += "Jasper3" at "https://jaspersoft.artifactoryonline.com/jaspersoft/repo/"
 resolvers += "Jasper4" at "https://mvnrepository.com/artifact/net.sf.jasperreports/jasperreports"
-
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("snapshots")
+)
 // Production front-end build
 lazy val cleanFrontEndBuild = taskKey[Unit]("Remove the old front-end build")
 
