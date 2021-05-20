@@ -61,14 +61,6 @@
                     :row-class-name="tachado"
                     style="width: 100%">
                     <el-table-column
-                      :label="$t('comenergia.descripcion')"
-                      width="400"
-                    >
-                      <template slot-scope="scope">
-                        <span style="margin-left: 10px">{{ comenergia(scope.row.comenergia_id) }}</span>
-                      </template>
-                    </el-table-column>
-                    <el-table-column
                       :label="$t('anho')"
                       width="150">
                       <template slot-scope="scope">
@@ -111,13 +103,6 @@
                       </template>
                     </el-table-column>
                     <el-table-column
-                      :label="$t('procesado')"
-                      width="100">
-                      <template slot-scope="scope">
-                        <i style="font-size: 20px;" :class="scope.row.controlcarga_procesado ? 'el-icon-circle-check': 'el-icon-circle-close'" />
-                      </template>
-                    </el-table-column>
-                    <el-table-column
                       fixed="right"
                       :label="$t('table.accion')"
                       width="140">
@@ -136,13 +121,6 @@
                           type="danger"
                           title="Borrar"
                           @click="handleDelete(scope.$index, scope.row)"><i class="el-icon-delete"></i></el-button>
-                        <el-button
-                          :disabled="scope.row.controlcarga_procesado || scope.row.controlcarga_estado === 9"
-                          size="mini"
-                          circle
-                          type="warning"
-                          title="Procesar"
-                          @click="handleProcess(scope.$index, scope.row)"><i class="el-icon-s-tools"></i></el-button>
                       </template>
                     </el-table-column>
                   </el-table>
@@ -193,7 +171,7 @@ export default {
   },
   methods: {
     handleView (index, row) {
-      this.$router.push({ path: '/proceso/menu1carga/menu1-1consumo/menu1-1-2view/' + row.comenergia_id + '/' + row.controlcarga_anho + '/' + row.controlcarga_mes })
+      this.$router.push({ path: '/inventario/menu7medidor/menu7-4lectura/' + row.controlcarga_anho + '/' + row.controlcarga_mes })
     },
     handleDelete (index, row) {
       this.$confirm('Se borraran de forma permanente los datos. Continuar?', 'Advertencia', {

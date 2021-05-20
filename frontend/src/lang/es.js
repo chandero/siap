@@ -17,6 +17,11 @@ export default {
   xls: 'Exportar a Excel',
   lostserverconnection: 'Se perdión conexión con el servidor. Verificando...',
   ver: 'Ver Detalle',
+  anho: 'Año',
+  mes: 'Mes',
+  fecha: 'Fecha',
+  registros: 'Registros',
+  mensaje: 'Ultimo Mensaje',
   months: {
     m1: 'Enero',
     m2: 'Febrero',
@@ -319,6 +324,7 @@ export default {
     menu_inventario_menu7medidor: 'Medidor',
     'menu_inventario_menu7medidor_menu7-1activa': 'Activo',
     'menu_inventario_menu7medidor_menu7-2enbaja': 'En Baja',
+    'menu_inventario_menu7medidor_menu7-3carga': 'Cargar Lectura',
     menu_proceso: 'Proceso',
     menu_proceso_menu1reporte: 'Reporte',
     'menu_proceso_menu1reporte_menu1-1luminaria': 'Luminaria',
@@ -868,7 +874,8 @@ export default {
       select: 'Seleccione el Tipo de Reporte'
     },
     estado: {
-      select: 'Seleccione el Estado del Reporte'
+      select: 'Seleccione el Estado del Reporte',
+      title: 'Estado'
     },
     origen: {
       select: 'Seleccione el Origen del Reporte'
@@ -1000,7 +1007,8 @@ export default {
     telefono: 'Teléfono Solicitante'
   },
   estado: {
-    select: 'Seleccione el Estado'
+    select: 'Seleccione el Estado',
+    title: 'Estado'
   },
   origen: {
     select: 'Seleccione el Origen'

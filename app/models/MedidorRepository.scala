@@ -833,7 +833,7 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
     val formulaEvaluator: FormulaEvaluator =
       wb.getCreationHelper().createFormulaEvaluator()
     registerNewStatus(
-      new ProcessEvent("0", "0", "1", "comenergiaPreparingEvent"),
+      new ProcessEvent("0", "0", "1", "medidorPreparingEvent"),
       sessionUUID
     )
     // wb.asScala.zipWithIndex.map {
@@ -862,7 +862,7 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
                       totalRow.toString(),
                       filaPos.toString(),
                       "2",
-                      "comenergiaParsingEvent"
+                      "medidorParsingEvent"
                     ),
                     sessionUUID
                   )
@@ -886,7 +886,7 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
                   // if (headersLength == rowData.length) {
                   // println(s"escribiendo Fila número ${row.getRowNum}")
                   // csvWriter.write(rowData)
-                  escribirFilaOne(rowData)
+                  escribirFilaOne(rowData, e_id)
                   // } else {
                   // println(s"Fila invalida [Fila no - ${row.getRowNum}] [Headers count = $headersLength and current row columns count = ${rowData.length}]")
                   // }
@@ -905,7 +905,7 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
         }
         // registerNewStatus(Status.Done, sessionUUID)
         registerNewStatus(
-          new ProcessEvent("0", "0", "3", "comenergiaDoneEvent"),
+          new ProcessEvent("0", "0", "3", "medidorDoneEvent"),
           sessionUUID
         )
         println("Fin Carga: " + sdf.format(Calendar.getInstance().getTime()))
@@ -952,7 +952,7 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
     true
   }
 
-  def escribirFilaOne(fila: Array[String]): Unit = {
+  def escribirFilaOne(fila: Array[String], empr_id: Long): Unit = {
     val medi_id = {
       val medi_numero = fila(3).replaceAll("[a-zA-Z\\-]{0,}","") 
       val medidor = buscarPorComenergia(fila(3).replaceAll("[a-zA-Z\\-]{0,}",""))
@@ -965,6 +965,18 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
         case None => 0
       }
     }
+    val mele_cuenta = (fila(1) match {
+      case "" => ""
+      case v => v
+    })
+    val mele_nombre = (fila(2) match {
+      case "" => ""
+      case v => v
+    })
+    val mele_comenergia = (fila(3) match {
+      case "" => ""
+      case v => v
+    })
     val mele_activa_anterior = (fila(4) match {
       case "" => "0"
       case v  => v
@@ -994,7 +1006,11 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
                     mele_activa_actual,
                     mele_reactiva,
                     mele_reactiva_anterior,
-                    mele_reactiva_actual
+                    mele_reactiva_actual,
+                    mele_comenergia,
+                    mele_cuenta,
+                    mele_nombre,
+                    empr_id
                 ) VALUES (
                     {medi_id},
                     {mele_anho},
@@ -1003,7 +1019,11 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
                     {mele_activa_actual},
                     {mele_reactiva},
                     {mele_reactiva_anterior},
-                    {mele_reactiva_actual}                    
+                    {mele_reactiva_actual},   
+                    {mele_comenergia},
+                    {mele_cuenta},
+                    {mele_nombre},
+                    {empr_id}
                 )""")
         .on(
             'medi_id -> medi_id,
@@ -1013,7 +1033,11 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
             'mele_activa_actual -> mele_activa_actual,
             'mele_reactiva -> mele_reactiva,
             'mele_reactiva_anterior -> mele_reactiva_anterior,
-            'mele_reactiva_actual -> mele_reactiva_actual
+            'mele_reactiva_actual -> mele_reactiva_actual,
+            'mele_comenergia -> mele_comenergia,
+            'mele_cuenta -> mele_cuenta,
+            'mele_nombre -> mele_nombre,
+            'empr_id -> empr_id
         )
         .executeUpdate()
     }
