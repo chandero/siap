@@ -13355,7 +13355,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                         CellStyleInheritance.CellThenRowThenColumnThenSheet               
                       )                      
                     )
-                    val _resumen = (i._1, (_final + 4))
+                    val _resumen = (aacu_descripcion_ant, (_final + 4))
                     _listResumen += _resumen
                     _listMerged04 += CellRange( (_final , _final ), (1,3))
                     _listMerged04 += CellRange( (_final + 1, _final +1), (1,3))
@@ -14156,14 +14156,14 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
-                StringCell(
-                  "=$Luminarias.G" + f._2.toString(),
+                FormulaCell(
+                  "Luminarias!G" + f._2.toString(),
                   Some(1),
                   style = Some(CellStyle(dataFormat = CellDataFormat("#,##0.00"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet                  
                 ),
-                StringCell(
-                  "=$Luminarias.K" + (f._2 - 3).toString(),
+                FormulaCell(
+                  "Luminarias!K" + (f._2 - 3).toString(),
                   Some(2),
                   style = Some(CellStyle(dataFormat = CellDataFormat("#,##0.00"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet                  
@@ -14204,8 +14204,8 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet                  
                 ),
-                StringCell(
-                  "=$Lectura_Medidores.E" + _lastMedidor,
+                FormulaCell(
+                  "Lectura_Medidores!E" + _lastMedidor,
                   Some(2),
                   style = Some(CellStyle(dataFormat = CellDataFormat("#,##0.00"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet                  
