@@ -1448,7 +1448,7 @@ class ControlReporteRepository @Inject()(
             .executeUpdate()
       }
       // Eliminar de Reporte y Reporte Adicional
-      SQL("""UPDATE siap.control_reporte SET rees_id = 10 WHERE repo_id = {repo_id}""")
+      SQL("""UPDATE siap.control_reporte SET rees_id = 9 WHERE repo_id = {repo_id}""")
         .on(
           'repo_id -> control.repo_id
         )

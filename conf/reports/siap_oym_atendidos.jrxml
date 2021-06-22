@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.13.0  -->
+<!-- 2021-06-22T08:22:40 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_oym_recibidas" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="63639537-9742-435b-a7c6-dc73cfd2e140">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="siap"/>
@@ -12,9 +13,15 @@
 	<parameter name="EMPR_ID" class="java.lang.Long"/>
 	<queryString language="SQL">
 		<![CDATA[SELECT o.orig_estado, count(o.repo_id) AS cantidad FROM
-(SELECT DISTINCT o.orig_estado, r.repo_id  FROM siap.reporte r
-LEFT JOIN siap.origen o ON o.orig_id = r.orig_id
-WHERE r.repo_fecharecepcion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.reti_id = 1 and r.rees_id <> 9 and r.empr_id = $P{EMPR_ID} ) o
+(
+	SELECT DISTINCT o.orig_estado, r.repo_id  FROM siap.reporte r
+    LEFT JOIN siap.origen o ON o.orig_id = r.orig_id
+    WHERE r.repo_fecharecepcion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.reti_id = 1 and r.rees_id <> 9 and r.empr_id = $P{EMPR_ID} 
+	UNION
+	SELECT DISTINCT o.orig_estado, r.repo_id  FROM siap.control_reporte r
+    LEFT JOIN siap.origen o ON o.orig_id = r.orig_id
+    WHERE r.repo_fecharecepcion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.reti_id = 1 and r.rees_id <> 9 and r.empr_id = $P{EMPR_ID} 	    
+) o
 GROUP BY o.orig_estado
 ORDER BY o.orig_estado]]>
 	</queryString>
@@ -173,6 +180,7 @@ ORDER BY o.orig_estado]]>
 					<chartLegend position="Right"/>
 				</chart>
 				<categoryDataset>
+					<dataset resetType="Report"/>
 					<categorySeries>
 						<seriesExpression><![CDATA[IF($F{orig_estado} == 1, T("REPORTES"),$P{EMPRESA})]]></seriesExpression>
 						<categoryExpression><![CDATA[CONCATENATE(DATEFORMAT($P{FECHA_INICIAL}, "YYYY/MM/dd")," AL ",DATEFORMAT($P{FECHA_FINAL}, "YYYY/MM/dd"))]]></categoryExpression>

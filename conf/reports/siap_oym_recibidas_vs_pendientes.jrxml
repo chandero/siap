@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.13.0  -->
+<!-- 2021-06-22T08:18:33 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_oym_recibidas" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="63639537-9742-435b-a7c6-dc73cfd2e140">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="siap"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="152"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="843"/>
 	<parameter name="FECHA_INICIAL" class="java.sql.Timestamp"/>
 	<parameter name="FECHA_FINAL" class="java.sql.Timestamp"/>
 	<parameter name="MUNICIPIO" class="java.lang.String"/>
@@ -11,6 +14,10 @@
 	<queryString language="SQL">
 		<![CDATA[SELECT o.rees_descripcion, COUNT(o.repo_id) AS cantidad FROM 
 (SELECT DISTINCT re.rees_descripcion, r.repo_id FROM siap.reporte r
+LEFT JOIN siap.reporte_estado re ON re.rees_id = r.rees_id
+WHERE r.repo_fecharecepcion BETWEEN $P{FECHA_INICIAL} and  $P{FECHA_FINAL} and r.reti_id = 1 and r.empr_id = $P{EMPR_ID} and r.rees_id <> 9
+UNION
+SELECT DISTINCT re.rees_descripcion, r.repo_id FROM siap.control_reporte r
 LEFT JOIN siap.reporte_estado re ON re.rees_id = r.rees_id
 WHERE r.repo_fecharecepcion BETWEEN $P{FECHA_INICIAL} and  $P{FECHA_FINAL} and r.reti_id = 1 and r.empr_id = $P{EMPR_ID} and r.rees_id <> 9) o
 GROUP BY o.rees_descripcion
@@ -171,6 +178,7 @@ ORDER BY o.rees_descripcion]]>
 					<chartLegend position="Right"/>
 				</chart>
 				<categoryDataset>
+					<dataset resetType="Report"/>
 					<categorySeries>
 						<seriesExpression><![CDATA[$F{rees_descripcion}]]></seriesExpression>
 						<categoryExpression><![CDATA[CONCATENATE(DATEFORMAT($P{FECHA_INICIAL},"yyyy/MM/dd") , " AL " , DATEFORMAT($P{FECHA_FINAL},"yyyy/MM/dd"))]]></categoryExpression>
