@@ -1832,6 +1832,9 @@ export default {
               } else if (this.reporte.reti_id === 2) {
                 this.existe = true
                 if (this.reporte.adicional.repo_tipo_expansion !== 4) {
+                  this.$alert('Error: Código de Luminaria "' + value + '" ya Existe', 'Error', {
+                    confirmButtonText: 'Reintentar'
+                  })
                   callback(new Error('Ya Existe'))
                 } else {
                   callback()
@@ -3218,8 +3221,8 @@ export default {
         })
       })
       // Validar cada direccion dato por todos sus valores requeridos
-      const dirForm = 'dirform_' + this.reporte.direcciones[this.didx].even_id
-      this.$refs[dirForm].validate()
+      // const dirForm = 'dirform_' + this.reporte.direcciones.length
+      // valido = valido && this.$refs[dirForm].validate()
       this.reporte.direcciones.forEach((d) => {
         if (
           d.aap_id !== null &&
@@ -3289,13 +3292,13 @@ export default {
       })
       //
       const start = async () => {
-        /*
         for (let index = 0; index < this.reporte.direcciones.length; index++) {
-          var result = await this.validatForm('dirform_' + this.reporte.direcciones[index].even_id)
+          var result = await this.validatForm('dirform_' + (index + 1))
           console.log('validación result: ' + result)
           validacion = validacion && result
           console.log('validación: ' + validacion)
         }
+        /*
         validacion = true
         for (let index = 0; index < this.reporte.eventos.length; index++) {
           result = await this.validatForm('matform_' + this.reporte.eventos[index].even_id)
@@ -3372,7 +3375,7 @@ export default {
             this.reporte.direcciones[index].aap_id > 0
           ) {
             var valido = new Promise((resolve, reject) => {
-              this.$refs[form][0].validate((valid) => {
+              this.$refs[form].validate((valid) => {
                 console.log(form + ' validation :' + valid)
                 resolve(valid)
               })

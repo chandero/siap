@@ -34,7 +34,8 @@ case class AapAdicional(aap_id: Option[scala.Long],
                         aap_modernizada_anho: Option[Int],
                         aap_rte: Option[String],
                         aap_poste_propietario: Option[String],
-                        aap_fotocontrol: Option[String]
+                        aap_fotocontrol: Option[String],
+                        aap_medidor_comercializadora: Option[String]
                         )
 
 case class AapElemento(aap_id: Option[scala.Long],
@@ -142,7 +143,8 @@ object AapAdicional {
             "aap_modernizada_anho" -> a.aap_modernizada_anho,
             "aap_rte" -> a.aap_rte,
             "aap_poste_propietario" -> a.aap_poste_propietario,
-            "aap_fotocontrol" -> a.aap_fotocontrol
+            "aap_fotocontrol" -> a.aap_fotocontrol,
+            "aap_medidor_comercializadora" -> a.aap_medidor_comercializadora
         )
     }
 
@@ -157,7 +159,8 @@ object AapAdicional {
        (__ \ "aap_modernizada_anho").readNullable[Int] and
        (__ \ "aap_rte").readNullable[String] and
        (__ \ "aap_poste_propietario").readNullable[String] and
-       (__ \ "aap_fotocontrol").readNullable[String]
+       (__ \ "aap_fotocontrol").readNullable[String] and
+       (__ \ "aap_medidor_comercializadora").readNullable[String]
     )(AapAdicional.apply _)
 
     val aapadicionalSet = {
@@ -171,7 +174,8 @@ object AapAdicional {
         get[Option[Int]]("aap_modernizada_anho") ~
         get[Option[String]]("aap_rte") ~ 
         get[Option[String]]("aap_poste_propietario") ~
-        get[Option[String]]("aap_fotocontrol") map {
+        get[Option[String]]("aap_fotocontrol") ~
+        get[Option[String]]("aap_medidor_comercializadora")  map {
          case aap_id ~
               tipo_id ~
               aap_poste_altura ~
@@ -182,7 +186,8 @@ object AapAdicional {
               aap_modernizada_anho ~
               aap_rte ~
               aap_poste_propietario ~
-              aap_fotocontrol => AapAdicional(aap_id, 
+              aap_fotocontrol ~ 
+              aap_medidor_comercializadora => AapAdicional(aap_id, 
                                         tipo_id,
                                         aap_poste_altura,
                                         aap_brazo,
@@ -192,11 +197,11 @@ object AapAdicional {
                                         aap_modernizada_anho,
                                         aap_rte,
                                         aap_poste_propietario,
-                                        aap_fotocontrol)
+                                        aap_fotocontrol,
+                                        aap_medidor_comercializadora)
         }
     }
 }
-
 
 object AapHistoria {
     implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -1036,6 +1041,7 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                                 a.aap_modernizada, 
                                 a.aatc_id, 
                                 a.aap_medidor, 
+                                ad.aap_medidor_comercializadora,
                                 a.aap_fechatoma, 
                                 a.aama_id, 
                                 a.aamo_id, 
@@ -1111,6 +1117,7 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                         a.aap_modernizada, 
                         a.aatc_id, 
                         a.aap_medidor, 
+                        a.aap_medidor_comercializadora,
                         a.aap_fechatoma, 
                         a.aama_id, 
                         a.aamo_id, 
@@ -1183,6 +1190,7 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                                 a.aap_modernizada, 
                                 a.aatc_id, 
                                 a.aap_medidor, 
+                                a.aap_medidor_comercializadora,
                                 a.aap_fechatoma, 
                                 a.aama_id, 
                                 a.aamo_id, 
@@ -1349,7 +1357,7 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
             activo.aap_adicional match {
                 case None => None
                 case Some(aap_adicional) =>
-                        SQL("INSERT INTO siap.aap_adicional (aap_id, tipo_id, aap_poste_altura, aap_brazo, aap_collarin, aap_potencia, aap_tecnologia, aap_modernizada_anho, aap_rte, aap_poste_propietario, aap_fotocontrol, empr_id) VALUES ({aap_id}, {tipo_id}, {aap_poste_altura}, {aap_brazo}, {aap_collarin}, {aap_potencia}, {aap_tecnologia}, {aap_modernizada_anho}, {aap_rte}, {aap_poste_propietario}, {aap_fotocontrol}, {empr_id})").
+                        SQL("INSERT INTO siap.aap_adicional (aap_id, tipo_id, aap_poste_altura, aap_brazo, aap_collarin, aap_potencia, aap_tecnologia, aap_modernizada_anho, aap_rte, aap_poste_propietario, aap_fotocontrol, empr_id, aap_medidor_comercializadora) VALUES ({aap_id}, {tipo_id}, {aap_poste_altura}, {aap_brazo}, {aap_collarin}, {aap_potencia}, {aap_tecnologia}, {aap_modernizada_anho}, {aap_rte}, {aap_poste_propietario}, {aap_fotocontrol}, {empr_id}, {aap_medidor_comercializadora})").
                             on(
                                 'aap_id -> aap.aap_id,
                                 'tipo_id -> aap_adicional.tipo_id,
@@ -1362,7 +1370,8 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                                 'aap_rte -> aap_adicional.aap_rte,
                                 'aap_poste_propietario -> aap_adicional.aap_poste_propietario,
                                 'aap_fotocontrol -> aap_adicional.aap_fotocontrol,
-                                'empr_id -> empr_id
+                                'empr_id -> empr_id,
+                                'aap_medidor_comercializadora -> aap_adicional.aap_medidor_comercializadora
                             ).executeInsert()
             }
 
@@ -1524,7 +1533,7 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
             activo.aap_adicional match {
                 case None => None
                 case Some(aap_adicional) =>
-                        SQL("INSERT INTO siap.aap_adicional (aap_id, tipo_id, aap_poste_altura, aap_brazo, aap_collarin, aap_potencia, aap_tecnologia, aap_modernizada_anho, aap_rte, aap_poste_propietario, aap_fotocontrol, empr_id) VALUES ({aap_id}, {tipo_id}, {aap_poste_altura}, {aap_brazo}, {aap_collarin}, {aap_potencia}, {aap_tecnologia}, {aap_modernizada_anho}, {aap_rte}, {aap_poste_propietario}, {aap_fotocontrol}, {empr_id})").
+                        SQL("INSERT INTO siap.aap_adicional (aap_id, tipo_id, aap_poste_altura, aap_brazo, aap_collarin, aap_potencia, aap_tecnologia, aap_modernizada_anho, aap_rte, aap_poste_propietario, aap_fotocontrol, empr_id, aap_medidor_comercializadora) VALUES ({aap_id}, {tipo_id}, {aap_poste_altura}, {aap_brazo}, {aap_collarin}, {aap_potencia}, {aap_tecnologia}, {aap_modernizada_anho}, {aap_rte}, {aap_poste_propietario}, {aap_fotocontrol}, {empr_id}, {aap_medidor_comercializadora})").
                             on(
                                 'aap_id -> aap.aap_id,
                                 'tipo_id -> aap_adicional.tipo_id,
@@ -1537,7 +1546,8 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                                 'aap_rte -> aap_adicional.aap_rte,
                                 'aap_poste_propietario -> aap_adicional.aap_poste_propietario,
                                 'aap_fotocontrol -> aap_adicional.aap_fotocontrol,
-                                'empr_id -> empr_id
+                                'empr_id -> empr_id,
+                                'aap_medidor_comercializadora -> aap_adicional.aap_medidor_comercializadora
                             ).executeInsert()
             }
 
@@ -1706,7 +1716,7 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                     activo.aap_adicional match {
                         case None => None
                         case Some(aap_adicional) =>
-                            SQL("UPDATE siap.aap_adicional SET tipo_id = {tipo_id}, aap_poste_altura = {aap_poste_altura}, aap_brazo = {aap_brazo}, aap_collarin = {aap_collarin}, aap_potencia = {aap_potencia}, aap_tecnologia = {aap_tecnologia}, aap_modernizada_anho = {aap_modernizada_anho}, aap_rte = {aap_rte}, aap_poste_propietario = {aap_poste_propietario}, aap_fotocontrol = {aap_fotocontrol} WHERE aap_id = {aap_id} and empr_id = {empr_id}").
+                            SQL("UPDATE siap.aap_adicional SET tipo_id = {tipo_id}, aap_poste_altura = {aap_poste_altura}, aap_brazo = {aap_brazo}, aap_collarin = {aap_collarin}, aap_potencia = {aap_potencia}, aap_tecnologia = {aap_tecnologia}, aap_modernizada_anho = {aap_modernizada_anho}, aap_rte = {aap_rte}, aap_poste_propietario = {aap_poste_propietario}, aap_fotocontrol = {aap_fotocontrol}, aap_medidor_comercializadora = {aap_medidor_comercializadora} WHERE aap_id = {aap_id} and empr_id = {empr_id}").
                             on(
                                 'aap_id -> aap.aap_id,
                                 'empr_id -> empr_id,
@@ -1719,7 +1729,8 @@ class AapRepository @Inject()(eventoService:EventoRepository, dbapi: DBApi)(impl
                                 'aap_modernizada_anho -> aap_adicional.aap_modernizada_anho,
                                 'aap_rte -> aap_adicional.aap_rte,
                                 'aap_poste_propietario -> aap_adicional.aap_poste_propietario,
-                                'aap_fotocontrol -> aap_adicional.aap_fotocontrol
+                                'aap_fotocontrol -> aap_adicional.aap_fotocontrol,
+                                'aap_medidor_comercializadora -> aap_adicional.aap_medidor_comercializadora
                             ).executeUpdate()
                     }                                                
 

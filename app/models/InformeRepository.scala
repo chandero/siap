@@ -131,6 +131,7 @@ case class Siap_inventario_b(
     aap_fotocelda: Option[String],
     medi_codigo: Option[String],
     medi_numero: Option[String],
+    aap_medidor_comercializadora: Option[String],
     aacu_descripcion: Option[String],
     tran_codigo: Option[String],
     tran_numero: Option[String]
@@ -166,6 +167,7 @@ case class Inventario(
     aap_fotocelda: Option[String],
     medi_codigo: Option[String],
     medi_numero: Option[String],
+    aap_medidor_comercializadora: Option[String],
     aacu_descripcion: Option[String],
     tran_codigo: Option[String],
     tran_numero: Option[String]
@@ -377,6 +379,7 @@ object Siap_inventario_b {
       "aap_fotocelda" -> sib.aap_fotocelda,
       "medi_codigo" -> sib.medi_codigo,
       "medi_numero" -> sib.medi_numero,
+      "aap_medidor_comercializadora" -> sib.aap_medidor_comercializadora,
       "aacu_descripcion" -> sib.aacu_descripcion,
       "tran_codigo" -> sib.tran_codigo,
       "tran_numero" -> sib.tran_numero
@@ -443,6 +446,7 @@ object Siap_inventario {
       get[Option[String]]("aap_fotocelda") ~
       get[Option[String]]("medi_codigo") ~
       get[Option[String]]("medi_numero") ~
+      get[Option[String]]("aap_medidor_comercializadora") ~
       get[Option[String]]("aacu_descripcion") ~
       get[Option[String]]("tran_codigo") ~
       get[Option[String]]("tran_numero") map {
@@ -475,6 +479,7 @@ object Siap_inventario {
             aap_fotocelda ~
             medi_codigo ~
             medi_numero ~
+            aap_medidor_comercializadora ~
             aacu_descripcion ~
             tran_codigo ~
             tran_numero =>
@@ -508,6 +513,7 @@ object Siap_inventario {
           aap_fotocelda,
           medi_codigo,
           medi_numero,
+          aap_medidor_comercializadora,
           aacu_descripcion,
           tran_codigo,
           tran_numero
@@ -2630,6 +2636,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           e.aap_fotocelda,
                           to_char(m.medi_id, '0000') as medi_codigo,
                           m.medi_numero,
+                          d.aap_medidor_comercializadora,
                           (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
                           to_char(t.tran_id, '0000') as tran_codigo,
                           t.tran_numero
@@ -2694,6 +2701,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
           i.aap_fotocelda,
           i.medi_codigo,
           i.medi_numero,
+          i.aap_medidor_comercializadora,
           i.aacu_descripcion,
           i.tran_codigo,
           i.tran_numero
@@ -2744,6 +2752,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
               "Fotocelda",
               "Medidor Código",
               "Medidor Número",
+              "Medidor Comercializadora",
               "Cuenta Alumbrado",
               "Transformador Código",
               "Transformador Número"
@@ -2779,6 +2788,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           e.aap_fotocelda,
                           to_char(m.medi_id, '0000') as medi_codigo,
                           m.medi_numero,
+                          d.aap_medidor_comercializadora,
                           (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
                           to_char(t.tran_id, '0000') as tran_codigo,
                           t.tran_numero
@@ -2926,6 +2936,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     case None        => ""
                   },
                   i.medi_numero match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.aap_medidor_comercializadora match {
                     case Some(value) => value
                     case None        => ""
                   },
@@ -3123,6 +3137,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
               "Fotocelda",
               "Medidor Código",
               "Medidor Número",
+              "Medidor Comercializadora",
               "Cuenta Alumbrado",
               "Transformador Código",
               "Transformador Número"
@@ -3159,6 +3174,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           e.aap_fotocelda,
                           to_char(m.medi_id, '0000') as medi_codigo,
                           m.medi_numero,
+                          d.aap_medidor_comercializadora,
                           (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
                           to_char(t.tran_id, '0000') as tran_codigo,
                           t.tran_numero
@@ -3318,6 +3334,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     case Some(value) => value
                     case None        => ""
                   },
+                  i.aap_medidor_comercializadora match {
+                    case Some(value) => value
+                    case None        => ""
+                  },                  
                   i.aacu_descripcion match {
                     case Some(value) => value
                     case None        => ""
@@ -7772,6 +7792,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     "Fotocelda",
                     "Medidor Código",
                     "Medidor Número",
+                    "Medidor Comercializadora",
                     "Cuenta Alumbrado",
                     "Transformador Código",
                     "Transformador Número"
@@ -7807,6 +7828,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           e.aap_fotocelda,
                           to_char(m.medi_id, '0000') as medi_codigo,
                           m.medi_numero,
+                          d.aap_medidor_comercializadora,
                           (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
                           to_char(t.tran_id, '0000') as tran_codigo,
                           t.tran_numero
@@ -7957,6 +7979,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           case Some(value) => value
                           case None        => ""
                         },
+                        i.aap_medidor_comercializadora match {
+                          case Some(value) => value
+                          case None        => ""
+                        },                        
                         i.aacu_descripcion match {
                           case Some(value) => value
                           case None        => ""
@@ -8114,6 +8140,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     "Fotocelda",
                     "Medidor Código",
                     "Medidor Número",
+                    "Medidor Comercializadora",
                     "Cuenta Alumbrado",
                     "Transformador Código",
                     "Transformador Número"
@@ -8149,6 +8176,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                   e.aap_fotocelda,
                   to_char(m.medi_id, '0000') as medi_codigo,
                   m.medi_numero,
+                  d.aap_medidor_comercializadora,
                   (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
                   to_char(t.tran_id, '0000') as tran_codigo,
                   t.tran_numero
@@ -8299,6 +8327,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           case Some(value) => value
                           case None        => ""
                         },
+                        i.aap_medidor_comercializadora match {
+                          case Some(value) => value
+                          case None        => ""
+                        },                        
                         i.aacu_descripcion match {
                           case Some(value) => value
                           case None        => ""
@@ -8456,6 +8488,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     "Fotocelda",
                     "Medidor Código",
                     "Medidor Número",
+                    "Medidor Comercializadora",
                     "Cuenta Alumbrado",
                     "Transformador Código",
                     "Transformador Número"
@@ -8491,6 +8524,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                   e.aap_fotocelda,
                   to_char(m.medi_id, '0000') as medi_codigo,
                   m.medi_numero,
+                  d.aap_medidor_comercializadora,
                   (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
                   to_char(t.tran_id, '0000') as tran_codigo,
                   t.tran_numero
@@ -8643,6 +8677,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           case Some(value) => value
                           case None        => ""
                         },
+                        i.aap_medidor_comercializadora match {
+                          case Some(value) => value
+                          case None        => ""
+                        },                        
                         i.aacu_descripcion match {
                           case Some(value) => value
                           case None        => ""
@@ -8800,6 +8838,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     "Fotocelda",
                     "Medidor Código",
                     "Medidor Número",
+                    "Medidor Comercializadora",
                     "Cuenta Alumbrado",
                     "Transformador Código",
                     "Transformador Número"
@@ -8835,6 +8874,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                   e.aap_fotocelda,
                   to_char(m.medi_id, '0000') as medi_codigo,
                   m.medi_numero,
+                  d.aap_medidor_comercializadora,
                   (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
                   to_char(t.tran_id, '0000') as tran_codigo,
                   t.tran_numero
@@ -8984,6 +9024,10 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           case None        => ""
                         },
                         i.medi_numero match {
+                          case Some(value) => value
+                          case None        => ""
+                        },
+                        i.aap_medidor_comercializadora match {
                           case Some(value) => value
                           case None        => ""
                         },
