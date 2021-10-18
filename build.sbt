@@ -21,11 +21,11 @@ lazy val `siap` = (project in file(".")).enablePlugins(PlayScala)
 // addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.7.0")
 
 libraryDependencies ++= Seq(
-  guice, 
-  filters, 
-  jdbc, 
+  guice,
+  filters,
+  jdbc,
   cacheApi,
-  ws, 
+  ws,
   specs2 % Test,
   "com.typesafe.play" %% "anorm" % "2.5.3",
   "org.postgresql" % "postgresql" % "42.2.2",
@@ -64,8 +64,15 @@ libraryDependencies ++= Seq(
 // Play framework hooks for development
 // PlayKeys.playRunHooks += WebpackServer(file("./front"))
 
-unmanagedResourceDirectories in Test +=  baseDirectory ( _ /"target/web/public/test" ).value
-
+unmanagedResourceDirectories in Test += baseDirectory(
+  _ / "target/web/public/test"
+).value
+/*
+resolvers += ("Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/")
+  .withAllowInsecureProtocol(true)
+resolvers += ("Typesafe Releases" at "https://repo.typesafe.com/typesafe/releases/")
+  .withAllowInsecureProtocol(true)
+*/
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 resolvers += "Jasper" at "https://jaspersoft.artifactoryonline.com/jaspersoft/jr-ce-releases/"
 resolvers += "Jasper2" at "https://jaspersoft.jfrog.io/jaspersoft/jaspersoft-repo/"
@@ -81,12 +88,13 @@ cleanFrontEndBuild := {
   val d = file("public/bundle")
   if (d.exists()) {
     d.listFiles.foreach(f => {
-      if(f.isFile) f.delete
+      if (f.isFile) f.delete
     })
   }
 }
 
-lazy val frontEndBuild = taskKey[Unit]("Execute the npm build command to build the front-end")
+lazy val frontEndBuild =
+  taskKey[Unit]("Execute the npm build command to build the front-end")
 
 /*
 frontEndBuild := {
@@ -97,4 +105,4 @@ frontEndBuild := {
 frontEndBuild := (frontEndBuild dependsOn cleanFrontEndBuild).value
 
 dist := (dist dependsOn frontEndBuild).value
-*/
+ */

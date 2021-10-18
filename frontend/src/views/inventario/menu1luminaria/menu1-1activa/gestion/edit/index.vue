@@ -471,7 +471,7 @@ export default {
           this.activo.aap_adicional.aap_tecnologia &&
           this.activo.aap_adicional.aap_potencia &&
           this.activo.aap_adicional.tipo_id &&
-          this.activo.aap_adicional.aap_poste_altura &&
+          this.activo.aap_adicional.aap_poste_altura !== '' &&
           this.activo.aap_adicional.aap_poste_propietario &&
           this.activo.aap_adicional.aap_brazo &&
           this.activo.aap_adicional.aap_collarin) {

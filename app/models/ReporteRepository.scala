@@ -3101,11 +3101,13 @@ class ReporteRepository @Inject()(
         }
       }
 
+
       // Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
-      reporte.direcciones.map { direcciones =>
-        for (d <- direcciones) {
-          if (d.aap_id != None) {
-            var aap_elemento: AapElemento = new AapElemento(
+      if (reporte.reti_id.get == 2 && reporte.adicional.get.repo_tipo_expansion.get != 4) { 
+        reporte.direcciones.map { direcciones =>
+          for (d <- direcciones) {
+            if (d.aap_id != None) {
+              var aap_elemento: AapElemento = new AapElemento(
               d.aap_id,
               None,
               None,
@@ -3115,8 +3117,8 @@ class ReporteRepository @Inject()(
               None,
               reporte.reti_id,
               reporte.repo_consecutivo.map(_.toInt)
-            )
-            var aap: Aap = new Aap(
+              )
+              var aap: Aap = new Aap(
               d.aap_id,
               None,
               None,
@@ -3139,8 +3141,8 @@ class ReporteRepository @Inject()(
               reporte.usua_id.get,
               Some(aap_elemento),
               None
-            )
-            var aap_adicional: AapAdicional = new AapAdicional(
+              )
+              var aap_adicional: AapAdicional = new AapAdicional(
               d.aap_id,
               None,
               None,
@@ -3153,10 +3155,10 @@ class ReporteRepository @Inject()(
               None,
               None,
               None
-            )
-            val aapOption =
+              )
+              val aapOption =
               aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get)
-            var activo = new Activo(
+              var activo = new Activo(
               Some(aap),
               None,
               None,
@@ -3164,18 +3166,21 @@ class ReporteRepository @Inject()(
               Some(aap_elemento),
               None,
               Some(1)
-            )
-            aapOption match {
-              case None =>
-                aapService.creardirecto(
-                  activo,
-                  reporte.empr_id.get,
-                  reporte.usua_id.get
-                )
-              case (a) => aap = a.get
-            }
+              )
+              aapOption match {
+                case None =>
+                  if (d.even_estado.get == 1) {
+                    aapService.creardirecto(
+                      activo,
+                      reporte.empr_id.get,
+                      reporte.usua_id.get
+                    )
+                  }
+                case (a) => aap = a.get
+              }
 
             // Fin Proceso de Creación de Luminarias Nuevas por Expansión Tipo I,II,III,V
+            }
           }
         }
       }

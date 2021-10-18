@@ -3,72 +3,115 @@
     <el-header>
       <el-row>
         <el-col :span="20">
-          <span>{{ $t('route.reporteedit') }} - Estado Actual: {{ estado() }}</span>
+          <span
+            >{{ $t("route.reporteedit") }} - Estado Actual: {{ estado() }}</span
+          >
         </el-col>
         <el-col :span="4">
           <el-button
             align="right"
             type="primary"
             title="Convertir en Reporte de Control"
-            @click="showConvertirDlg=true"
-          >Convertir</el-button>
+            @click="showConvertirDlg = true"
+            >Convertir</el-button
+          >
         </el-col>
       </el-row>
     </el-header>
     <el-main>
-      <el-form ref="reporteForm" :model="reporte" :rules="rules" :label-position="labelPosition">
+      <el-form
+        ref="reporteForm"
+        :model="reporte"
+        :rules="rules"
+        :label-position="labelPosition"
+      >
         <el-collapse v-model="activePages" @change="handleActivePagesChange">
-          <el-collapse-item name="1" :title="$t('reporte.general')" style="font-weight: bold;">
+          <el-collapse-item
+            name="1"
+            :title="$t('reporte.general')"
+            style="font-weight: bold"
+          >
             <el-row :gutter="4">
               <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
                 <template v-if="repo_fecharecepcion_state">
-                  <el-form-item prop="repo_fecharecepcion" :label="$t('reporte.receptiondate')">
+                  <el-form-item
+                    prop="repo_fecharecepcion"
+                    :label="$t('reporte.receptiondate')"
+                  >
                     <el-date-picker
                       type="datetime"
                       ref="receptiondate"
                       v-model="reporte.repo_fecharecepcion"
                       width="85%"
                     ></el-date-picker>
-                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); repo_fecharecepcion_state = false " />
+                    <el-button
+                      circle
+                      size="mini"
+                      icon="el-icon-check"
+                      type="success"
+                      @click="
+                        confirmEdit();
+                        repo_fecharecepcion_state = false;
+                      "
+                    />
                     <el-button
                       class="cancel-btn"
                       size="mini"
                       icon="el-icon-close"
                       type="warning"
                       circle
-                      @click="reporte.repo_fecharecepcion = repo_fecharecepcion; repo_fecharecepcion_state = false"
+                      @click="
+                        reporte.repo_fecharecepcion = repo_fecharecepcion;
+                        repo_fecharecepcion_state = false;
+                      "
                     />
                   </el-form-item>
                 </template>
                 <template v-else>
                   <el-form-item :label="$t('reporte.receptiondate')">
-                    <span
-                      style="font-size: 24px;"
-                    >{{ reporte.repo_fecharecepcion | moment("YYYY/MM/DD HH:mm") }}</span>
+                    <span style="font-size: 24px">{{
+                      reporte.repo_fecharecepcion | moment("YYYY/MM/DD HH:mm")
+                    }}</span>
                     <el-button
                       v-if="reporte.rees_id === 1"
                       circle
                       size="mini"
                       icon="el-icon-edit"
-                      style="border-style: hidden;"
-                      @click="repo_fecharecepcion_state=!repo_fecharecepcion_state"
+                      style="border-style: hidden"
+                      @click="
+                        repo_fecharecepcion_state = !repo_fecharecepcion_state
+                      "
                     />
                   </el-form-item>
                 </template>
               </el-col>
               <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
                 <el-form-item prop="reti_id" :label="$t('reporte.type')">
-                  <span style="font-size: 24px;">{{ reporte_tipo(reporte.reti_id) }}</span>
+                  <span style="font-size: 24px">{{
+                    reporte_tipo(reporte.reti_id)
+                  }}</span>
                 </el-form-item>
               </el-col>
               <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
-                <el-form-item prop="repo_consecutivo" :label="$t('reporte.number')">
-                  <span style="font-size: 30px;">{{ reporte.repo_consecutivo | fillZeros(6) }}</span>
+                <el-form-item
+                  prop="repo_consecutivo"
+                  :label="$t('reporte.number')"
+                >
+                  <span style="font-size: 30px">{{
+                    reporte.repo_consecutivo | fillZeros(6)
+                  }}</span>
                 </el-form-item>
               </el-col>
             </el-row>
             <el-row>
-              <el-col v-if="reporte.reti_id===2" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+              <el-col
+                v-if="reporte.reti_id === 2"
+                :xs="24"
+                :sm="24"
+                :md="4"
+                :lg="4"
+                :xl="4"
+              >
                 <el-form-item
                   prop="adicional.repo_tipo_expansion"
                   :label="$t('reporte.tipo_expansion.title')"
@@ -101,9 +144,14 @@
                 :lg="5"
                 :xl="5"
               >
-                <el-form-item :label="$t('reporte.urba.title')" prop="adicional.urba_id">
+                <el-form-item
+                  :label="$t('reporte.urba.title')"
+                  prop="adicional.urba_id"
+                >
                   <el-select
-                    :disabled="reporte.rees_id == 3 || reporte.direcciones.lenght"
+                    :disabled="
+                      reporte.rees_id == 3 || reporte.direcciones.lenght
+                    "
                     clearable
                     :title="$t('reporte.urba.select')"
                     style="width: 80%"
@@ -122,7 +170,7 @@
                 </el-form-item>
               </el-col>
               <el-col
-                v-if="(reporte.reti_id===2 || reporte.reti_id===9)"
+                v-if="reporte.reti_id === 2 || reporte.reti_id === 9"
                 :xs="24"
                 :sm="24"
                 :md="3"
@@ -132,7 +180,7 @@
                 <el-form-item prop="muot_id" :label="$t('reporte.otm')">
                   <el-input
                     type="number"
-                    style="font-size: 30px;"
+                    style="font-size: 30px"
                     v-model="reporte.adicional.muot_id"
                     @input="reporte.adicional.muot_id = parseInt($event)"
                   ></el-input>
@@ -140,7 +188,14 @@
               </el-col>
             </el-row>
             <el-row :gutter="4">
-              <el-col v-if="reporte.reti_id === 9" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+              <el-col
+                v-if="reporte.reti_id === 9"
+                :xs="24"
+                :sm="24"
+                :md="4"
+                :lg="4"
+                :xl="4"
+              >
                 <el-form-item
                   :label="$t('reporte.aaco_id_anterior')"
                   prop="adicional.aaco_id_anterior"
@@ -163,8 +218,18 @@
                   </el-select>
                 </el-form-item>
               </el-col>
-              <el-col v-if="reporte.reti_id === 9" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
-                <el-form-item :label="$t('reporte.aaco_id_nuevo')" prop="adicional.aaco_id_nuevo">
+              <el-col
+                v-if="reporte.reti_id === 9"
+                :xs="24"
+                :sm="24"
+                :md="4"
+                :lg="4"
+                :xl="4"
+              >
+                <el-form-item
+                  :label="$t('reporte.aaco_id_nuevo')"
+                  prop="adicional.aaco_id_nuevo"
+                >
                   <el-select
                     clearable
                     filterable
@@ -184,14 +249,20 @@
                 </el-form-item>
               </el-col>
               <el-col
-                v-if="reporte.reti_id === 9 & reporte.adicional.aaco_id_nuevo == 2"
+                v-if="
+                  (reporte.reti_id === 9) &
+                  (reporte.adicional.aaco_id_nuevo == 2)
+                "
                 :xs="24"
                 :sm="6"
                 :md="4"
                 :lg="4"
                 :xl="4"
               >
-                <el-form-item prop="adicional.medi_id" :label="$t('gestion.medidor.title')">
+                <el-form-item
+                  prop="adicional.medi_id"
+                  :label="$t('gestion.medidor.title')"
+                >
                   <el-select
                     clearable
                     filterable
@@ -210,14 +281,20 @@
                 </el-form-item>
               </el-col>
               <el-col
-                v-if="reporte.reti_id === 9 & reporte.adicional.aaco_id_nuevo == 2"
+                v-if="
+                  (reporte.reti_id === 9) &
+                  (reporte.adicional.aaco_id_nuevo == 2)
+                "
                 :xs="24"
                 :sm="6"
                 :md="4"
                 :lg="4"
                 :xl="4"
               >
-                <el-form-item prop="adicional.tran_id" :label="$t('gestion.transformador.title')">
+                <el-form-item
+                  prop="adicional.tran_id"
+                  :label="$t('gestion.transformador.title')"
+                >
                   <el-select
                     clearable
                     filterable
@@ -241,7 +318,7 @@
                 <template v-if="orig_id_state">
                   <el-form-item prop="orig_id" :label="$t('reporte.origin')">
                     <el-select
-                      style="width:100%;"
+                      style="width: 100%"
                       ref="origin"
                       v-model="reporte.orig_id"
                       name="origen"
@@ -255,27 +332,41 @@
                         :value="origen.orig_id"
                       ></el-option>
                     </el-select>
-                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); orig_id_state = false" />
+                    <el-button
+                      circle
+                      size="mini"
+                      icon="el-icon-check"
+                      type="success"
+                      @click="
+                        confirmEdit();
+                        orig_id_state = false;
+                      "
+                    />
                     <el-button
                       class="cancel-btn"
                       size="mini"
                       icon="el-icon-close"
                       type="warning"
                       circle
-                      @click="reporte.orig_id = orig_id; orig_id_state = false"
+                      @click="
+                        reporte.orig_id = orig_id;
+                        orig_id_state = false;
+                      "
                     />
                   </el-form-item>
                 </template>
                 <template v-else>
                   <el-form-item :label="$t('reporte.origin')">
-                    <span style="400 13.3333px Arial;">{{ origen(reporte.orig_id) }}</span>
+                    <span style="400 13.3333px Arial;">{{
+                      origen(reporte.orig_id)
+                    }}</span>
                     <el-button
                       v-if="reporte.rees_id === 1"
                       circle
                       size="mini"
                       icon="el-icon-edit"
-                      style="border-style: hidden;"
-                      @click="orig_id_state=!orig_id_state"
+                      style="border-style: hidden"
+                      @click="orig_id_state = !orig_id_state"
                     />
                   </el-form-item>
                 </template>
@@ -286,30 +377,46 @@
                     <el-input
                       ref="code"
                       v-model="reporte.adicional.repo_codigo"
-                      @input="reporte.adicional.repo_codigo = $event.toUpperCase()"
+                      @input="
+                        reporte.adicional.repo_codigo = $event.toUpperCase()
+                      "
                       @keyup.enter.native="changeFocus('apoyo')"
                     ></el-input>
-                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); repo_codigo_state = false" />
+                    <el-button
+                      circle
+                      size="mini"
+                      icon="el-icon-check"
+                      type="success"
+                      @click="
+                        confirmEdit();
+                        repo_codigo_state = false;
+                      "
+                    />
                     <el-button
                       class="cancel-btn"
                       size="mini"
                       icon="el-icon-close"
                       type="warning"
                       circle
-                      @click="reporte.adicional.repo_codigo = repo_codigo; repo_codigo_state = false"
+                      @click="
+                        reporte.adicional.repo_codigo = repo_codigo;
+                        repo_codigo_state = false;
+                      "
                     />
                   </el-form-item>
                 </template>
                 <template v-else>
                   <el-form-item :label="$t('reporte.code')">
-                    <span style="400 13.3333px Arial;">{{ reporte.adicional.repo_codigo }}</span>
+                    <span style="400 13.3333px Arial;">{{
+                      reporte.adicional.repo_codigo
+                    }}</span>
                     <el-button
                       v-if="reporte.rees_id === 1"
                       circle
                       size="mini"
                       icon="el-icon-edit"
-                      style="border-style: hidden;"
-                      @click="repo_codigo_state=!repo_codigo_state"
+                      style="border-style: hidden"
+                      @click="repo_codigo_state = !repo_codigo_state"
                     />
                   </el-form-item>
                 </template>
@@ -320,39 +427,59 @@
                     <el-input
                       ref="apoyo"
                       v-model="reporte.adicional.repo_apoyo"
-                      @input="reporte.adicional.repo_apoyo = $event.toUpperCase()"
+                      @input="
+                        reporte.adicional.repo_apoyo = $event.toUpperCase()
+                      "
                       @keyup.enter.native="changeFocus('nombre')"
                     ></el-input>
-                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); repo_apoyo_state = false" />
+                    <el-button
+                      circle
+                      size="mini"
+                      icon="el-icon-check"
+                      type="success"
+                      @click="
+                        confirmEdit();
+                        repo_apoyo_state = false;
+                      "
+                    />
                     <el-button
                       class="cancel-btn"
                       size="mini"
                       icon="el-icon-close"
                       type="warning"
                       circle
-                      @click="reporte.adicional.repo_apoyo = repo_apoyo; repo_apoyo_state = false"
+                      @click="
+                        reporte.adicional.repo_apoyo = repo_apoyo;
+                        repo_apoyo_state = false;
+                      "
                     />
                   </el-form-item>
                 </template>
                 <template v-else>
                   <el-form-item :label="$t('reporte.apoyo')">
-                    <span style="400 13.3333px Arial;">{{ reporte.adicional.repo_apoyo }}</span>
+                    <span style="400 13.3333px Arial;">{{
+                      reporte.adicional.repo_apoyo
+                    }}</span>
                     <el-button
                       v-if="reporte.rees_id === 1"
                       circle
                       size="mini"
                       icon="el-icon-edit"
-                      style="border-style: hidden;"
-                      @click="repo_apoyo_state=!repo_apoyo_state"
+                      style="border-style: hidden"
+                      @click="repo_apoyo_state = !repo_apoyo_state"
                     />
                   </el-form-item>
                 </template>
               </el-col>
               <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
                 <template v-if="ortr_id_state">
-                  <el-form-item prop="adicional.ortr_id" :label="$t('reporte.ot')" required>
+                  <el-form-item
+                    prop="adicional.ortr_id"
+                    :label="$t('reporte.ot')"
+                    required
+                  >
                     <el-select
-                      style="width:100%;"
+                      style="width: 100%"
                       ref="ortr_id"
                       v-model="reporte.adicional.ortr_id"
                       name="ortr_id"
@@ -366,27 +493,41 @@
                         :value="ot.ortr_id"
                       ></el-option>
                     </el-select>
-                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmOrdenTrabajo(); ortr_id_state = false" />
+                    <el-button
+                      circle
+                      size="mini"
+                      icon="el-icon-check"
+                      type="success"
+                      @click="
+                        confirmOrdenTrabajo();
+                        ortr_id_state = false;
+                      "
+                    />
                     <el-button
                       class="cancel-btn"
                       size="mini"
                       icon="el-icon-close"
                       type="warning"
                       circle
-                      @click="reporte.adicional.ortr_id = ortr_id; ortr_id_state = false"
+                      @click="
+                        reporte.adicional.ortr_id = ortr_id;
+                        ortr_id_state = false;
+                      "
                     />
                   </el-form-item>
                 </template>
                 <template v-else>
                   <el-form-item :label="$t('reporte.ot')">
-                    <span style="400 13.3333px Arial;">{{ ordenes(reporte.adicional.ortr_id) }}</span>
+                    <span style="400 13.3333px Arial;">{{
+                      ordenes(reporte.adicional.ortr_id)
+                    }}</span>
                     <el-button
                       v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
-                      style="border-style: hidden;"
-                      @click="ortr_id_state=!ortr_id_state"
+                      style="border-style: hidden"
+                      @click="ortr_id_state = !ortr_id_state"
                     />
                   </el-form-item>
                 </template>
@@ -402,61 +543,92 @@
                       @input="reporte.repo_nombre = $event.toUpperCase()"
                       @keyup.enter.native="changeFocus('direccion')"
                     ></el-input>
-                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); repo_nombre_state = false" />
+                    <el-button
+                      circle
+                      size="mini"
+                      icon="el-icon-check"
+                      type="success"
+                      @click="
+                        confirmEdit();
+                        repo_nombre_state = false;
+                      "
+                    />
                     <el-button
                       class="cancel-btn"
                       size="mini"
                       icon="el-icon-close"
                       type="warning"
                       circle
-                      @click="reporte.repo_nombre = repo_nombre; repo_nombre_state = false"
+                      @click="
+                        reporte.repo_nombre = repo_nombre;
+                        repo_nombre_state = false;
+                      "
                     />
                   </el-form-item>
                 </template>
                 <template v-else>
                   <el-form-item :label="$t('reporte.name')">
-                    <span style="400 13.3333px Arial;">{{ reporte.repo_nombre }}</span>
+                    <span style="400 13.3333px Arial;">{{
+                      reporte.repo_nombre
+                    }}</span>
                     <el-button
                       v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
-                      style="border-style: hidden;"
-                      @click="repo_nombre_state=!repo_nombre_state"
+                      style="border-style: hidden"
+                      @click="repo_nombre_state = !repo_nombre_state"
                     />
                   </el-form-item>
                 </template>
               </el-col>
               <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
                 <template v-if="repo_direccion_state">
-                  <el-form-item prop="repo_direccion" :label="$t('reporte.address')">
+                  <el-form-item
+                    prop="repo_direccion"
+                    :label="$t('reporte.address')"
+                  >
                     <el-input
                       ref="direccion"
                       v-model="reporte.repo_direccion"
                       @input="reporte.repo_direccion = $event.toUpperCase()"
                       @keyup.enter.native="changeFocus('barrio')"
                     ></el-input>
-                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); repo_direccion_state = false" />
+                    <el-button
+                      circle
+                      size="mini"
+                      icon="el-icon-check"
+                      type="success"
+                      @click="
+                        confirmEdit();
+                        repo_direccion_state = false;
+                      "
+                    />
                     <el-button
                       class="cancel-btn"
                       size="mini"
                       icon="el-icon-close"
                       type="warning"
                       circle
-                      @click="reporte.repo_direccion; repo_direccion_state = false"
+                      @click="
+                        reporte.repo_direccion;
+                        repo_direccion_state = false;
+                      "
                     />
                   </el-form-item>
                 </template>
                 <template v-else>
                   <el-form-item :label="$t('reporte.address')">
-                    <span style="400 13.3333px Arial;">{{ reporte.repo_direccion }}</span>
+                    <span style="400 13.3333px Arial;">{{
+                      reporte.repo_direccion
+                    }}</span>
                     <el-button
                       v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
-                      style="border-style: hidden;"
-                      @click="repo_direccion_state=!repo_direccion_state"
+                      style="border-style: hidden"
+                      @click="repo_direccion_state = !repo_direccion_state"
                     />
                   </el-form-item>
                 </template>
@@ -465,9 +637,12 @@
             <el-row :gutter="4">
               <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
                 <template v-if="barr_id_state">
-                  <el-form-item prop="barr_id" :label="$t('reporte.neighborhood')">
+                  <el-form-item
+                    prop="barr_id"
+                    :label="$t('reporte.neighborhood')"
+                  >
                     <el-select
-                      style="width:100%;"
+                      style="width: 100%"
                       filterable
                       ref="barrio"
                       v-model="reporte.barr_id"
@@ -482,27 +657,41 @@
                         :value="barrio.barr_id"
                       ></el-option>
                     </el-select>
-                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); barr_id_state = false" />
+                    <el-button
+                      circle
+                      size="mini"
+                      icon="el-icon-check"
+                      type="success"
+                      @click="
+                        confirmEdit();
+                        barr_id_state = false;
+                      "
+                    />
                     <el-button
                       class="cancel-btn"
                       size="mini"
                       icon="el-icon-close"
                       type="warning"
                       circle
-                      @click="reporte.barr_id = barr_id; barr_id_state = false"
+                      @click="
+                        reporte.barr_id = barr_id;
+                        barr_id_state = false;
+                      "
                     />
                   </el-form-item>
                 </template>
                 <template v-else>
                   <el-form-item :label="$t('reporte.neighborhood')">
-                    <span style="400 13.3333px Arial;">{{ barrio(reporte.barr_id) }}</span>
+                    <span style="400 13.3333px Arial;">{{
+                      barrio(reporte.barr_id)
+                    }}</span>
                     <el-button
                       v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
-                      style="border-style: hidden;"
-                      @click="barr_id_state=!barr_id_state"
+                      style="border-style: hidden"
+                      @click="barr_id_state = !barr_id_state"
                     />
                   </el-form-item>
                 </template>
@@ -515,7 +704,7 @@
                     :read-only="reporte.rees_id == 3"
                   >
                     <el-select
-                      style="width:100%;"
+                      style="width: 100%"
                       filterable
                       ref="tiba"
                       v-model="reporte.tiba_id"
@@ -530,60 +719,91 @@
                         :value="tiba.tiba_id"
                       ></el-option>
                     </el-select>
-                    <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); tiba_id_state = false" />
+                    <el-button
+                      circle
+                      size="mini"
+                      icon="el-icon-check"
+                      type="success"
+                      @click="
+                        confirmEdit();
+                        tiba_id_state = false;
+                      "
+                    />
                     <el-button
                       class="cancel-btn"
                       size="mini"
                       icon="el-icon-close"
                       type="warning"
                       circle
-                      @click="reporte.tiba_id = tiba_id; tiba_id_state = false"
+                      @click="
+                        reporte.tiba_id = tiba_id;
+                        tiba_id_state = false;
+                      "
                     />
                   </el-form-item>
                 </template>
                 <template v-else>
                   <el-form-item :label="$t('reporte.sector')">
-                    <span style="400 13.3333px Arial;">{{ sector(reporte.tiba_id) }}</span>
+                    <span style="400 13.3333px Arial;">{{
+                      sector(reporte.tiba_id)
+                    }}</span>
                     <el-button
                       v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
-                      style="border-style: hidden;"
-                      @click="tiba_id_state=!tiba_id_state"
+                      style="border-style: hidden"
+                      @click="tiba_id_state = !tiba_id_state"
                     />
                   </el-form-item>
                 </template>
               </el-col>
               <el-col :xs="24" :sm="24" :md="7" :lg="7" :xl="7">
                 <template v-if="repo_telefono_state">
-                  <el-form-item prop="repo_telefono" :label="$t('reporte.phone')">
+                  <el-form-item
+                    prop="repo_telefono"
+                    :label="$t('reporte.phone')"
+                  >
                     <el-input
                       ref="telefono"
                       v-model="reporte.repo_telefono"
                       @keyup.enter.native="changeFocus('descripcion')"
                     ></el-input>
                   </el-form-item>
-                  <el-button circle size="mini" icon="el-icon-check" type="success" @click="confirmEdit(); repo_telefono_state = false" />
+                  <el-button
+                    circle
+                    size="mini"
+                    icon="el-icon-check"
+                    type="success"
+                    @click="
+                      confirmEdit();
+                      repo_telefono_state = false;
+                    "
+                  />
                   <el-button
                     class="cancel-btn"
                     size="mini"
                     icon="el-icon-close"
                     type="warning"
                     circle
-                    @click="reporte.repo_telefono = repo_telefono; repo_telefono_state = false"
+                    @click="
+                      reporte.repo_telefono = repo_telefono;
+                      repo_telefono_state = false;
+                    "
                   />
                 </template>
                 <template v-else>
                   <el-form-item :label="$t('reporte.phone')">
-                    <span style="400 13.3333px Arial;">{{ reporte.repo_telefono }}</span>
+                    <span style="400 13.3333px Arial;">{{
+                      reporte.repo_telefono
+                    }}</span>
                     <el-button
                       v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
-                      style="border-style: hidden;"
-                      @click="repo_telefono_state=!repo_telefono_state"
+                      style="border-style: hidden"
+                      @click="repo_telefono_state = !repo_telefono_state"
                     />
                   </el-form-item>
                 </template>
@@ -592,9 +812,12 @@
             <el-row :gutter="4">
               <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
                 <template v-if="acti_id_state">
-                  <el-form-item prop="adicional.acti_id" :label="$t('reporte.activity')">
+                  <el-form-item
+                    prop="adicional.acti_id"
+                    :label="$t('reporte.activity')"
+                  >
                     <el-select
-                      style="width:90%;"
+                      style="width: 90%"
                       filterable
                       ref="tiba"
                       v-model="reporte.adicional.acti_id"
@@ -616,12 +839,17 @@
                       v-model="dialogonuevodanhovisible"
                     >
                       <el-form ref="danho" :model="actividad">
-                        <el-form-item prop="acti_descripcion" label="Descripción del Daño">
+                        <el-form-item
+                          prop="acti_descripcion"
+                          label="Descripción del Daño"
+                        >
                           <el-input
                             :disabled="reporte.rees_id == 3"
                             autofocus
                             v-model="actividad.acti_descripcion"
-                            @input="actividad.acti_descripcion = $event.toUpperCase()"
+                            @input="
+                              actividad.acti_descripcion = $event.toUpperCase()
+                            "
                           ></el-input>
                         </el-form-item>
                         <el-form-item>
@@ -654,7 +882,10 @@
                       size="mini"
                       icon="el-icon-check"
                       type="success"
-                      @click="confirmEdit(); acti_id_state = false"
+                      @click="
+                        confirmEdit();
+                        acti_id_state = false;
+                      "
                     />
                     <el-button
                       class="cancel-btn"
@@ -662,41 +893,52 @@
                       icon="el-icon-close"
                       type="warning"
                       circle
-                      @click="reporte.adicional.acti_id = acti_id; acti_id_state = false"
+                      @click="
+                        reporte.adicional.acti_id = acti_id;
+                        acti_id_state = false;
+                      "
                     />
                   </el-form-item>
                 </template>
                 <template v-else>
                   <el-form-item :label="$t('reporte.activity')">
-                    <span style="400 13.3333px Arial;">{{ tipo_actividad(reporte.adicional.acti_id) }}</span>
+                    <span style="400 13.3333px Arial;">{{
+                      tipo_actividad(reporte.adicional.acti_id)
+                    }}</span>
                     <el-button
                       v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
-                      style="border-style: hidden;"
-                      @click="acti_id_state=!acti_id_state"
+                      style="border-style: hidden"
+                      @click="acti_id_state = !acti_id_state"
                     />
                   </el-form-item>
                 </template>
               </el-col>
               <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
                 <template v-if="repo_descripcion_state">
-                <el-form-item prop="repo_descripcion" :label="$t('reporte.description')">
-                  <el-input
-                    ref="descripcion"
-                    v-model="reporte.repo_descripcion"
-                    type="textarea"
-                    :rows="2"
-                    @input="reporte.repo_descripcion = $event.toUpperCase()"
-                    @keyup.enter.native="changeFocus('submit')"
-                  ></el-input>
+                  <el-form-item
+                    prop="repo_descripcion"
+                    :label="$t('reporte.description')"
+                  >
+                    <el-input
+                      ref="descripcion"
+                      v-model="reporte.repo_descripcion"
+                      type="textarea"
+                      :rows="2"
+                      @input="reporte.repo_descripcion = $event.toUpperCase()"
+                      @keyup.enter.native="changeFocus('submit')"
+                    ></el-input>
                     <el-button
                       circle
                       size="mini"
                       icon="el-icon-check"
                       type="success"
-                      @click="confirmEdit(); repo_descripcion_state = false"
+                      @click="
+                        confirmEdit();
+                        repo_descripcion_state = false;
+                      "
                     />
                     <el-button
                       class="cancel-btn"
@@ -704,98 +946,142 @@
                       icon="el-icon-close"
                       type="warning"
                       circle
-                      @click="reporte.repo_descripcion = repo_descripcion; repo_descripcion_state = false"
+                      @click="
+                        reporte.repo_descripcion = repo_descripcion;
+                        repo_descripcion_state = false;
+                      "
                     />
-                </el-form-item>
+                  </el-form-item>
                 </template>
                 <template v-else>
                   <el-form-item :label="$t('reporte.description')">
-                    <span style="400 13.3333px Arial;">{{ reporte.repo_descripcion }}</span>
+                    <span style="400 13.3333px Arial;">{{
+                      reporte.repo_descripcion
+                    }}</span>
                     <el-button
                       v-if="reporte.rees_id !== 3"
                       circle
                       size="mini"
                       icon="el-icon-edit"
-                      style="border-style: hidden;"
-                      @click="repo_descripcion_state=!repo_descripcion_state"
+                      style="border-style: hidden"
+                      @click="repo_descripcion_state = !repo_descripcion_state"
                     />
                   </el-form-item>
                 </template>
               </el-col>
             </el-row>
           </el-collapse-item>
-          <el-collapse-item name="5" :title="$t('reporte.subreporte')" style="font-weight: bold;">
+          <el-collapse-item
+            name="5"
+            :title="$t('reporte.subreporte')"
+            style="font-weight: bold"
+          >
             <el-row>
               <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
                 <span>Agregar Subreporte</span>
-                <el-input :disabled="reporte.rees_id === 3"
+                <el-input
+                  :disabled="reporte.rees_id === 3"
                   type="number"
                   v-model="subreporte"
                   size="mini"
                   placeholder="Nuevo SubReporte"
                   style="width: 10%"
                 />
-                <el-button :disabled="reporte.rees_id === 3" circle mini type="primary" icon="el-icon-plus" @click="addSubReporte()"/>
+                <el-button
+                  :disabled="reporte.rees_id === 3"
+                  circle
+                  mini
+                  type="primary"
+                  icon="el-icon-plus"
+                  @click="addSubReporte()"
+                />
                 <el-row :gutter="4">
-                  <el-col v-for="item in reporte.subreportes" :key="item.csc" :span="2">
+                  <el-col
+                    v-for="item in reporte.subreportes"
+                    :key="item.csc"
+                    :span="2"
+                  >
                     <template>
                       <span>{{ item.csc }}</span>
                     </template>
                     <template>
-                      <el-button :disabled="reporte.rees_id === 3" type="danger" icon="el-icon-delete" circle @click="delSubReporte(item.csc)"></el-button>
+                      <el-button
+                        :disabled="reporte.rees_id === 3"
+                        type="danger"
+                        icon="el-icon-delete"
+                        circle
+                        @click="delSubReporte(item.csc)"
+                      ></el-button>
                     </template>
                   </el-col>
                 </el-row>
               </el-col>
             </el-row>
           </el-collapse-item>
-          <el-collapse-item name="4" :title="$t('reporte.novedades').toUpperCase()">
+          <el-collapse-item
+            name="4"
+            :title="$t('reporte.novedades').toUpperCase()"
+          >
             <el-row :gutter="4" class="hidden-sm-and-down">
               <el-col :md="1" :lg="1" :xl="1">
-                <span style="font-weight: bold;">No.</span>
+                <span style="font-weight: bold">No.</span>
               </el-col>
               <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
-                <span style="font-weight: bold;">Novedad</span>
+                <span style="font-weight: bold">Novedad</span>
               </el-col>
               <el-col :xs="24" :sm="24" :md="3" :lg="3" :xl="3">
-                <span style="font-weight: bold;">Hora Inicio</span>
+                <span style="font-weight: bold">Hora Inicio</span>
               </el-col>
               <el-col :xs="24" :sm="24" :md="3" :lg="3" :xl="3">
-                <span style="font-weight: bold;">Hora Terminación</span>
+                <span style="font-weight: bold">Hora Terminación</span>
               </el-col>
               <el-col :xs="24" :sm="24" :md="9" :lg="9" :xl="9">
-                <span style="font-weight: bold;">Observación</span>
+                <span style="font-weight: bold">Observación</span>
               </el-col>
             </el-row>
             <div v-for="(evento, id) in reporte.novedades" v-bind:key="id">
               <el-form :model="evento" ref="novedadform">
                 <el-row :gutter="4">
                   <el-col class="hidden-md-and-up" :xs="1" :sm="1">
-                    <span style="font-weight: bold;">No.</span>
+                    <span style="font-weight: bold">No.</span>
                   </el-col>
-                  <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ evento.even_id }}</el-col>
-                    <el-col class="hidden-md-and-up" :xs="5" :sm="5">
-                      <span style="font-weight: bold;">Novedad</span>
-                    </el-col>
+                  <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{
+                    evento.even_id
+                  }}</el-col>
+                  <el-col class="hidden-md-and-up" :xs="5" :sm="5">
+                    <span style="font-weight: bold">Novedad</span>
+                  </el-col>
                   <el-col :xs="13" :sm="13" :md="6" :lg="6" :xl="6">
                     <el-form-item>
-                      <el-select :disabled="evento.even_estado > 7" filterable clearable ref="type" v-model="evento.nove_id" name="nove" :placeholder="$t('ordentrabajo.novedad.select')"  style="width:95%;">
-                        <el-option v-for="nove in novedades" :key="nove.nove_id" :label="nove.nove_descripcion" :value="nove.nove_id" >
+                      <el-select
+                        :disabled="evento.even_estado > 7"
+                        filterable
+                        clearable
+                        ref="type"
+                        v-model="evento.nove_id"
+                        name="nove"
+                        :placeholder="$t('ordentrabajo.novedad.select')"
+                        style="width: 95%"
+                      >
+                        <el-option
+                          v-for="nove in novedades"
+                          :key="nove.nove_id"
+                          :label="nove.nove_descripcion"
+                          :value="nove.nove_id"
+                        >
                         </el-option>
                       </el-select>
                     </el-form-item>
                   </el-col>
                   <el-col class="hidden-md-and-up" :xs="5" :sm="5">
-                    <span style="font-weight: bold;">Hora Inicio</span>
+                    <span style="font-weight: bold">Hora Inicio</span>
                   </el-col>
                   <el-col :xs="16" :sm="16" :md="3" :lg="3" :xl="3">
-                    <el-form-item
-                      prop="reno_horaini"
-                    >
+                    <el-form-item prop="reno_horaini">
                       <el-time-select
                         :disabled="evento.even_estado > 7"
                         v-model="evento.reno_horaini"
-                        style="width:90%"
+                        style="width: 90%"
                         :picker-options="{
                           start: '07:00',
                           step: '00:15',
@@ -805,66 +1091,95 @@
                     </el-form-item>
                   </el-col>
                   <el-col class="hidden-md-and-up" :xs="5" :sm="5">
-                    <span style="font-weight: bold;">Hora Terminacion</span>
+                    <span style="font-weight: bold">Hora Terminacion</span>
                   </el-col>
                   <el-col :xs="16" :sm="16" :md="3" :lg="3" :xl="3">
-                    <el-form-item
-                      prop="reno_horafin"
-                    >
+                    <el-form-item prop="reno_horafin">
                       <el-time-select
                         :disabled="evento.even_estado > 7"
                         v-model="evento.reno_horafin"
-                        style="width:90%"
+                        style="width: 90%"
                         :picker-options="{
                           start: '07:00',
                           step: '00:15',
                           end: '23:45',
-                          minTime: evento.reno_horaini
-                      }"
-                    />
+                          minTime: evento.reno_horaini,
+                        }"
+                      />
                     </el-form-item>
                   </el-col>
                   <el-col class="hidden-md-and-up" :xs="8" :sm="8">
-                    <span style="font-weight: bold;">Observaciön</span>
+                    <span style="font-weight: bold">Observaciön</span>
                   </el-col>
                   <el-col :xs="16" :sm="16" :md="9" :lg="9" :xl="9">
                     <el-form-item>
-                      <el-input :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.reno_observacion"></el-input>
+                      <el-input
+                        :disabled="evento.even_estado > 7"
+                        class="sinpadding"
+                        v-model="evento.reno_observacion"
+                      ></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
-                    <el-button v-if="evento.even_estado < 8 || reporte.rees_id === 3" size="mini" type="danger" circle icon="el-icon-minus" title="Quitar Fila" @click="evento.even_estado === 1? evento.even_estado = 8 : evento.even_estado = 9"></el-button>
-                    <el-button v-if="evento.even_estado > 7 || reporte.rees_id === 3" size="mini" type="success" circle icon="el-icon-success" title="Restaurar Fila" @click="evento.even_estado === 9? evento.even_estado = 2 : evento.even_estado = 1"></el-button>
+                    <el-button
+                      v-if="evento.even_estado < 8 || reporte.rees_id === 3"
+                      size="mini"
+                      type="danger"
+                      circle
+                      icon="el-icon-minus"
+                      title="Quitar Fila"
+                      @click="
+                        evento.even_estado === 1
+                          ? (evento.even_estado = 8)
+                          : (evento.even_estado = 9)
+                      "
+                    ></el-button>
+                    <el-button
+                      v-if="evento.even_estado > 7 || reporte.rees_id === 3"
+                      size="mini"
+                      type="success"
+                      circle
+                      icon="el-icon-success"
+                      title="Restaurar Fila"
+                      @click="
+                        evento.even_estado === 9
+                          ? (evento.even_estado = 2)
+                          : (evento.even_estado = 1)
+                      "
+                    ></el-button>
                   </el-col>
                 </el-row>
               </el-form>
-            <el-row class="hidden-md-and-up">
-              <el-col style="border-bottom: 1px dotted #000;"></el-col>
+              <el-row class="hidden-md-and-up">
+                <el-col style="border-bottom: 1px dotted #000"></el-col>
+              </el-row>
+            </div>
+            <el-row>
+              <el-col :span="24">
+                <el-button
+                  :disabled="reporte.rees_id === 3"
+                  style="display: table-cell"
+                  type="primary"
+                  size="mini"
+                  circle
+                  icon="el-icon-plus"
+                  title="Adicionar Nueva Fila"
+                  @click="onAddNovedad()"
+                />
+              </el-col>
             </el-row>
-          </div>
-          <el-row>
-            <el-col :span="24">
-              <el-button
-                :disabled="reporte.rees_id === 3"
-                style="display: table-cell;"
-                type="primary"
-                size="mini"
-                circle
-                icon="el-icon-plus"
-                title="Adicionar Nueva Fila"
-                @click="onAddNovedad()" />
-            </el-col>
-          </el-row>
           </el-collapse-item>
           <el-collapse-item name="2" :title="$t('reporte.inform')">
             <el-row :gutter="4">
               <el-col :span="8">
                 <el-form-item
+                  ref="f_repo_fechasolucion"
                   prop="repo_fechasolucion"
                   :label="$t('reporte.solutiondate')"
                   :read-only="reporte.rees_id == 3"
                 >
                   <el-date-picker
+                    ref="i_repo_fechasolucion"
                     :disabled="reporte.rees_id == 3"
                     v-model="reporte.repo_fechasolucion"
                     :picker-options="datePickerOptions"
@@ -882,10 +1197,10 @@
                     :disabled="reporte.rees_id == 3"
                     v-model="reporte.repo_horainicio"
                     :picker-options="{
-                                        start: '07:00',
-                                        step: '00:15',
-                                        end: '19:00',
-                                   }"
+                      start: '07:00',
+                      step: '00:15',
+                      end: '19:00',
+                    }"
                   ></el-time-select>
                 </el-form-item>
               </el-col>
@@ -899,18 +1214,21 @@
                     :disabled="reporte.rees_id == 3"
                     v-model="reporte.repo_horafin"
                     :picker-options="{
-                                        start: '07:00',
-                                        step: '00:15',
-                                        end: '23:45',
-                                        minTime: reporte.repo_horainicio
-                                   }"
+                      start: '07:00',
+                      step: '00:15',
+                      end: '23:45',
+                      minTime: reporte.repo_horainicio,
+                    }"
                   ></el-time-select>
                 </el-form-item>
               </el-col>
             </el-row>
             <el-row :gutter="4">
               <el-col :span="24">
-                <el-form-item prop="repo_reportetecnico" :label="$t('reporte.tecnicalreport')">
+                <el-form-item
+                  prop="repo_reportetecnico"
+                  :label="$t('reporte.tecnicalreport')"
+                >
                   <el-input
                     :disabled="reporte.rees_id == 3"
                     type="textarea"
@@ -931,16 +1249,21 @@
                     :indeterminate="isIndeterminate"
                     v-model="checkAll"
                     @change="handleCheckAllChange"
-                  >Marcar todos</el-checkbox>
-                  <div style="margin: 15px 0;"></div>
-                  <el-checkbox-group v-model="reporte.meams" @change="handleReporteMeamChange">
+                    >Marcar todos</el-checkbox
+                  >
+                  <div style="margin: 15px 0"></div>
+                  <el-checkbox-group
+                    v-model="reporte.meams"
+                    @change="handleReporteMeamChange"
+                  >
                     <el-checkbox
                       :disabled="reporte.rees_id == 3"
                       border
                       v-for="meam in medioambiente"
                       :label="meam.meam_id"
                       :key="meam.meam_id"
-                    >{{ meam.meam_descripcion }}</el-checkbox>
+                      >{{ meam.meam_descripcion }}</el-checkbox
+                    >
                   </el-checkbox-group>
                 </el-form-item>
               </el-col>
@@ -959,8 +1282,9 @@
                     size="medium"
                     @click="handleTag(tag.idx)"
                     :title="'Información Luminaria ' + tag.aap_id"
-                    style="cursor: pointer;"
-                  >L: {{tag.aap_id}}</el-tag>
+                    style="cursor: pointer"
+                    >L: {{ tag.aap_id }}</el-tag
+                  >
                   <el-input
                     class="input-new-address"
                     v-if="inputVisible01"
@@ -974,7 +1298,8 @@
                     v-else-if="reporte.rees_id != 3"
                     size="small"
                     @click="showInputAddress01"
-                  >+ Agregar Luminaria</el-button>
+                    >+ Agregar Luminaria</el-button
+                  >
                 </el-col>
               </el-row>
               <el-form
@@ -987,103 +1312,156 @@
               >
                 <el-row :gutter="4">
                   <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
-                    <span style="font-weight: bold;">No.</span>
+                    <span style="font-weight: bold">No.</span>
                   </el-col>
-                  <el-col
-                    :xs="24"
-                    :sm="1"
-                    :md="1"
-                    :lg="1"
-                    :xl="1"
-                  >{{ reporte.direcciones[didx].even_id }}</el-col>
+                  <el-col :xs="24" :sm="1" :md="1" :lg="1" :xl="1">{{
+                    reporte.direcciones[didx].even_id
+                  }}</el-col>
                   <el-col :xs="24" :sm="10" :md="10" :lg="10" :xl="10">
                     <el-form-item prop="aap_id" label="Código Luminaria">
-                      <div style="display: table;">
+                      <div style="display: table">
                         <el-input
-                          :disabled="reporte.direcciones[didx].even_estado === 3 || reporte.direcciones[didx].even_estado > 7"
+                          :disabled="
+                            reporte.direcciones[didx].even_estado === 3 ||
+                            reporte.direcciones[didx].even_estado > 7
+                          "
                           autofocus
                           :ref="'aap_id_' + didx"
                           type="number"
                           class="sinpadding"
-                          style="display: table-cell;"
+                          style="display: table-cell"
                           v-model="reporte.direcciones[didx].aap_id"
-                          @input="reporte.direcciones[didx].aap_id = parseInt($event,10)"
+                          @input="
+                            reporte.direcciones[didx].aap_id = parseInt(
+                              $event,
+                              10
+                            )
+                          "
                           @blur="validateAap(reporte.direcciones[didx], didx)"
                         ></el-input>
                         <span
-                          :class="reporte.direcciones[didx].dato !== undefined && reporte.direcciones[didx].dato.aaco_id_anterior === 3 ? 'errorClass': 'activeClass'"
-                        >{{ status }}</span>
+                          :class="
+                            reporte.direcciones[didx].dato !== undefined &&
+                            reporte.direcciones[didx].dato.aaco_id_anterior ===
+                              3
+                              ? 'errorClass'
+                              : 'activeClass'
+                          "
+                          >{{ status }}</span
+                        >
                       </div>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="7" :md="7" :lg="7" :xl="7">
-                    <el-form-item prop="dato_adicional.aap_apoyo" :label="$t('reporte.apoyo')">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="7"
+                    :md="7"
+                    :lg="7"
+                    :xl="7"
+                  >
+                    <el-form-item
+                      prop="dato_adicional.aap_apoyo"
+                      :label="$t('reporte.apoyo')"
+                    >
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         ref="aap_apoyo"
-                        v-model="reporte.direcciones[didx].dato_adicional.aap_apoyo"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.aap_apoyo
+                        "
                         name="aap_apoyo"
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="5" :md="5" :lg="5" :xl="5">
-                    <el-form-item prop="aap_fechatoma" :label="$t('reporte.aap_fechatoma')">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="5"
+                    :md="5"
+                    :lg="5"
+                    :xl="5"
+                  >
+                    <el-form-item
+                      prop="aap_fechatoma"
+                      :label="$t('reporte.aap_fechatoma')"
+                    >
                       <el-date-picker
-                        :disabled="reporte.direcciones[didx].even_estado > 7 || reporte.reti_id !== 3"
+                        :disabled="
+                          reporte.direcciones[didx].even_estado > 7 ||
+                          reporte.reti_id !== 3
+                        "
                         ref="aap_fechatoma"
                         v-model="reporte.direcciones[didx].aap_fechatoma"
                         name="aap_fechatoma"
                       />
                     </el-form-item>
                   </el-col>
-              <el-col :span="8">
-                <el-form-item
-                  prop="even_horaini"
-                  :label="$t('reporte.timestart')"
-                >
-                  <el-time-select
-                    v-model="reporte.direcciones[didx].even_horaini"
-                    :picker-options="{
-                                        start: '07:00',
-                                        step: '00:15',
-                                        end: '19:00',
-                                   }"
-                  ></el-time-select>
-                </el-form-item>
-              </el-col>
-              <el-col :span="8">
-                <el-form-item
-                  prop="even_horafin"
-                  :label="$t('reporte.timeend')"
-                >
-                  <el-time-select
-                    v-model="reporte.direcciones[didx].even_horafin"
-                    :picker-options="{
-                                        start: '07:00',
-                                        step: '00:15',
-                                        end: '23:45',
-                                        minTime: reporte.direcciones[didx].even_horaini
-                                   }"
-                  ></el-time-select>
-                </el-form-item>
-              </el-col>
+                  <el-col :span="8">
+                    <el-form-item
+                      prop="even_horaini"
+                      :label="$t('reporte.timestart')"
+                    >
+                      <el-time-select
+                        v-model="reporte.direcciones[didx].even_horaini"
+                        :picker-options="{
+                          start: '07:00',
+                          step: '00:15',
+                          end: '19:00',
+                        }"
+                      ></el-time-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="8">
+                    <el-form-item
+                      prop="even_horafin"
+                      :label="$t('reporte.timeend')"
+                    >
+                      <el-time-select
+                        v-model="reporte.direcciones[didx].even_horafin"
+                        :picker-options="{
+                          start: '07:00',
+                          step: '00:15',
+                          end: '23:45',
+                          minTime: reporte.direcciones[didx].even_horaini,
+                        }"
+                      ></el-time-select>
+                    </el-form-item>
+                  </el-col>
                 </el-row>
                 <el-row>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="16"
+                    :md="16"
+                    :lg="16"
+                    :xl="16"
+                  >
                     <el-form-item prop="even_direccion" label="Nueva Dirección">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
-                        :name="'even_direccion_'+didx"
+                        :name="'even_direccion_' + didx"
                         v-model="reporte.direcciones[didx].even_direccion"
-                        @input="reporte.direcciones[didx].even_direccion = $event.toUpperCase()"
+                        @input="
+                          reporte.direcciones[didx].even_direccion =
+                            $event.toUpperCase()
+                        "
                       ></el-input>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="8"
+                    :md="8"
+                    :lg="8"
+                    :xl="8"
+                  >
                     <el-form-item prop="barr_id" label="Barrio/Vereda">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
-                        style="width:100%;"
+                        style="width: 100%"
                         filterable
                         clearable
                         v-model="reporte.direcciones[didx].barr_id"
@@ -1101,33 +1479,61 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="12"
+                    :md="12"
+                    :lg="12"
+                    :xl="12"
+                  >
                     <el-form-item prop="dato_adicional.aap_lat" label="Latitud">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
-                        :name="'aap_lat_'+didx"
-                        v-model="reporte.direcciones[didx].dato_adicional.aap_lat"
+                        :name="'aap_lat_' + didx"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.aap_lat
+                        "
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                    <el-form-item prop="dato_adicional.aap_lng" label="Longitud">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="12"
+                    :md="12"
+                    :lg="12"
+                    :xl="12"
+                  >
+                    <el-form-item
+                      prop="dato_adicional.aap_lng"
+                      label="Longitud"
+                    >
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
-                        :name="'aap_lng_'+didx"
-                        v-model="reporte.direcciones[didx].dato_adicional.aap_lng"
+                        :name="'aap_lng_' + didx"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.aap_lng
+                        "
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="24"
+                    :md="8"
+                    :lg="8"
+                    :xl="8"
+                  >
                     <el-form-item prop="dato.aatc_id" label="Tipo Luminaria">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
-                        style="width:100%;"
+                        style="width: 100%"
                         filterable
                         clearable
                         v-model="reporte.direcciones[didx].dato.aatc_id"
-                        :name="'aatc_id_'+didx"
+                        :name="'aatc_id_' + didx"
                         :placeholder="$t('cover.select')"
                       >
                         <el-option
@@ -1139,11 +1545,18 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="24"
+                    :md="8"
+                    :lg="8"
+                    :xl="8"
+                  >
                     <el-form-item prop="dato.aama_id" label="Marca">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
-                        style="width:100%;"
+                        style="width: 100%"
                         filterable
                         clearable
                         v-model="reporte.direcciones[didx].dato.aama_id"
@@ -1159,11 +1572,18 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="24"
+                    :md="8"
+                    :lg="8"
+                    :xl="8"
+                  >
                     <el-form-item prop="dato.aamo_id" label="Modelo">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
-                        style="width:100%;"
+                        style="width: 100%"
                         filterable
                         clearable
                         v-model="reporte.direcciones[didx].dato.aamo_id"
@@ -1181,23 +1601,45 @@
                   </el-col>
                 </el-row>
                 <el-row :gutter="4">
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="24"
+                    :md="4"
+                    :lg="4"
+                    :xl="4"
+                  >
                     <el-form-item prop="dato.aap_tecnologia" label="Tecnología">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
-                        style="width:100%;"
+                        style="width: 100%"
                         filterable
                         clearable
                         v-model="reporte.direcciones[didx].dato.aap_tecnologia"
                         name="tecnologia"
                         :placeholder="$t('gestion.tecnology.select')"
                       >
-                        <el-option v-for="tec in tecnologias" :key="tec" :label="tec" :value="tec"></el-option>
+                        <el-option
+                          v-for="tec in tecnologias"
+                          :key="tec"
+                          :label="tec"
+                          :value="tec"
+                        ></el-option>
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
-                    <el-form-item prop="dato.aap_potencia" :label="$t('gestion.power.title')">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="6"
+                    :md="4"
+                    :lg="4"
+                    :xl="4"
+                  >
+                    <el-form-item
+                      prop="dato.aap_potencia"
+                      :label="$t('gestion.power.title')"
+                    >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         clearable
@@ -1216,8 +1658,18 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
-                    <el-form-item prop="dato.aaco_id" :label="$t('gestion.connection.title')">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="6"
+                    :md="4"
+                    :lg="4"
+                    :xl="4"
+                  >
+                    <el-form-item
+                      prop="dato.aaco_id"
+                      :label="$t('gestion.connection.title')"
+                    >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         clearable
@@ -1237,7 +1689,10 @@
                     </el-form-item>
                   </el-col>
                   <el-col
-                    v-if="reporte.reti_id !== 0 & reporte.direcciones[didx].dato.aaco_id === 2"
+                    v-if="
+                      (reporte.reti_id !== 0) &
+                      (reporte.direcciones[didx].dato.aaco_id === 2)
+                    "
                     :xs="24"
                     :sm="6"
                     :md="4"
@@ -1253,7 +1708,9 @@
                         clearable
                         filterable
                         ref="medidor"
-                        v-model="reporte.direcciones[didx].dato_adicional.medi_id"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.medi_id
+                        "
                         name="medidor"
                         :placeholder="$t('gestion.medidor.select')"
                       >
@@ -1266,7 +1723,14 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="6"
+                    :md="4"
+                    :lg="4"
+                    :xl="4"
+                  >
                     <el-form-item
                       prop="dato_adicional.tran_id"
                       :label="$t('gestion.transformador.title')"
@@ -1276,10 +1740,23 @@
                         clearable
                         filterable
                         ref="transformador"
-                        v-model="reporte.direcciones[didx].dato_adicional.tran_id"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.tran_id
+                        "
                         name="transformador"
                         :placeholder="$t('gestion.transformador.select')"
-                        :change="reporte.direcciones[didx].dato_adicional.tran_id == '' ? reporte.direcciones[didx].dato_adicional.tran_id=null: reporte.direcciones[didx].dato_adicional.tran_id=reporte.direcciones[didx].dato_adicional.tran_id"
+                        :change="
+                          reporte.direcciones[didx].dato_adicional.tran_id == ''
+                            ? (reporte.direcciones[
+                                didx
+                              ].dato_adicional.tran_id = null)
+                            : (reporte.direcciones[
+                                didx
+                              ].dato_adicional.tran_id =
+                                reporte.direcciones[
+                                  didx
+                                ].dato_adicional.tran_id)
+                        "
                       >
                         <el-option
                           v-for="t in transformadores"
@@ -1292,8 +1769,18 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                    <el-form-item prop="dato.tipo_id" :label="$t('gestion.post.title')">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="8"
+                    :md="8"
+                    :lg="8"
+                    :xl="8"
+                  >
+                    <el-form-item
+                      prop="dato.tipo_id"
+                      :label="$t('gestion.post.title')"
+                    >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         clearable
@@ -1312,36 +1799,78 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                    <el-form-item prop="dato.aap_poste_altura" :label="$t('gestion.post.size')">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="8"
+                    :md="8"
+                    :lg="8"
+                    :xl="8"
+                  >
+                    <el-form-item
+                      prop="dato.aap_poste_altura"
+                      :label="$t('gestion.post.size')"
+                    >
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         ref="postsize"
-                        v-model="reporte.direcciones[didx].dato.aap_poste_altura"
-                        @input="reporte.direcciones[didx].dato.aap_poste_altura=parseInt($event)"
+                        v-model="
+                          reporte.direcciones[didx].dato.aap_poste_altura
+                        "
+                        @input="
+                          reporte.direcciones[didx].dato.aap_poste_altura =
+                            parseInt($event)
+                        "
                         name="postsize"
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="8" :md="8" :lg="8" :xl="8">
-                    <el-form-item prop="dato.aap_poste_propietario" :label="$t('gestion.post.own')">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="8"
+                    :md="8"
+                    :lg="8"
+                    :xl="8"
+                  >
+                    <el-form-item
+                      prop="dato.aap_poste_propietario"
+                      :label="$t('gestion.post.own')"
+                    >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         clearable
                         filterable
                         ref="postowner"
-                        v-model="reporte.direcciones[didx].dato.aap_poste_propietario"
+                        v-model="
+                          reporte.direcciones[didx].dato.aap_poste_propietario
+                        "
                         name="postowner"
                         :placeholder="$t('gestion.post.selectown')"
                       >
-                        <el-option v-for="own in owns" :key="own" :label="own" :value="own"></el-option>
+                        <el-option
+                          v-for="own in owns"
+                          :key="own"
+                          :label="own"
+                          :value="own"
+                        ></el-option>
                       </el-select>
                     </el-form-item>
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
-                    <el-form-item prop="dato.aap_brazo" :label="$t('gestion.arm')">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="6"
+                    :md="6"
+                    :lg="6"
+                    :xl="6"
+                  >
+                    <el-form-item
+                      prop="dato.aap_brazo"
+                      :label="$t('gestion.arm')"
+                    >
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         ref="arm"
@@ -1350,8 +1879,18 @@
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
-                    <el-form-item prop="dato.aap_collarin" :label="$t('gestion.collar')">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="6"
+                    :md="6"
+                    :lg="6"
+                    :xl="6"
+                  >
+                    <el-form-item
+                      prop="dato.aap_collarin"
+                      :label="$t('gestion.collar')"
+                    >
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         ref="collar"
@@ -1360,14 +1899,26 @@
                       />
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
-                    <el-form-item prop="dato_adicional.aaus_id" :label="$t('gestion.use')">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="6"
+                    :md="6"
+                    :lg="6"
+                    :xl="6"
+                  >
+                    <el-form-item
+                      prop="dato_adicional.aaus_id"
+                      :label="$t('gestion.use')"
+                    >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         clearable
                         filterable
                         ref="use"
-                        v-model="reporte.direcciones[didx].dato_adicional.aaus_id"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.aaus_id
+                        "
                         name="use"
                         :placeholder="$t('use.select')"
                       >
@@ -1380,14 +1931,26 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col v-if="reporte.reti_id !== 0" :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
-                    <el-form-item prop="dato_adicional.aacu_id" :label="$t('gestion.account')">
+                  <el-col
+                    v-if="reporte.reti_id !== 0"
+                    :xs="24"
+                    :sm="6"
+                    :md="6"
+                    :lg="6"
+                    :xl="6"
+                  >
+                    <el-form-item
+                      prop="dato_adicional.aacu_id"
+                      :label="$t('gestion.account')"
+                    >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         clearable
                         filterable
                         ref="account"
-                        v-model="reporte.direcciones[didx].dato_adicional.aacu_id"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.aacu_id
+                        "
                         name="account"
                         :placeholder="$t('account.select')"
                       >
@@ -1402,8 +1965,18 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col v-if="reporte.reti_id == 8" :xs="24" :sm="6" :md="4" :lg="4" :xl="4">
-                    <el-form-item prop="tire_id" :label="$t('gestion.tiporetiro')">
+                  <el-col
+                    v-if="reporte.reti_id == 8"
+                    :xs="24"
+                    :sm="6"
+                    :md="4"
+                    :lg="4"
+                    :xl="4"
+                  >
+                    <el-form-item
+                      prop="tire_id"
+                      :label="$t('gestion.tiporetiro')"
+                    >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         clearable
@@ -1432,7 +2005,11 @@
                       circle
                       icon="el-icon-minus"
                       title="Quitar Fila"
-                      @click="reporte.direcciones[didx].even_estado === 1? reporte.direcciones[didx].even_estado = 8: reporte.direcciones[didx].even_estado = 9"
+                      @click="
+                        reporte.direcciones[didx].even_estado === 1
+                          ? (reporte.direcciones[didx].even_estado = 8)
+                          : (reporte.direcciones[didx].even_estado = 9)
+                      "
                     ></el-button>
                     <el-button
                       v-if="reporte.direcciones[didx].even_estado > 7"
@@ -1441,7 +2018,11 @@
                       circle
                       icon="el-icon-success"
                       title="Restaurar Fila"
-                      @click="reporte.direcciones[didx].even_estado === 9? reporte.direcciones[didx].even_estado = 2 : reporte.direcciones[didx].even_estado = 1"
+                      @click="
+                        reporte.direcciones[didx].even_estado === 9
+                          ? (reporte.direcciones[didx].even_estado = 2)
+                          : (reporte.direcciones[didx].even_estado = 1)
+                      "
                     ></el-button>
                   </el-col>
                 </el-row>
@@ -1450,7 +2031,7 @@
                 </el-row>-->
               </el-form>
               <el-row class="hidden-md-and-up">
-                <el-col style="border-bottom: 1px dotted #000;"></el-col>
+                <el-col style="border-bottom: 1px dotted #000"></el-col>
               </el-row>
             </div>
             <el-card :disabled="reporte.direcciones[didx].even_estado > 7">
@@ -1465,8 +2046,9 @@
                     size="medium"
                     @click="handleTag(tag.idx)"
                     :title="'Material Luminaria ' + tag.aap_id"
-                    style="cursor: pointer;"
-                  >L: {{tag.aap_id}}</el-tag>
+                    style="cursor: pointer"
+                    >L: {{ tag.aap_id }}</el-tag
+                  >
                   <el-input
                     class="input-new-address"
                     v-if="inputVisible02"
@@ -1480,38 +2062,50 @@
                     v-else-if="reporte.rees_id != 3"
                     size="small"
                     @click="showInputAddress02"
-                  >+ Agregar Luminaria</el-button>
+                    >+ Agregar Luminaria</el-button
+                  >
                 </el-col>
               </el-row>
               <el-row>
                 <el-col :span="24">
-                  <span>MATERIAL LUMINARIA {{ reporte.direcciones[didx].aap_id }}</span>
+                  <span
+                    >MATERIAL LUMINARIA
+                    {{ reporte.direcciones[didx].aap_id }}</span
+                  >
                 </el-col>
               </el-row>
               <el-row :gutter="4" class="hidden-sm-and-down">
                 <el-col :md="1" :lg="1" :xl="1">
-                  <span style="font-weight: bold;">No.</span>
+                  <span style="font-weight: bold">No.</span>
                 </el-col>
                 <el-col :md="3" :lg="3" :xl="3">
-                  <span style="font-weight: bold;">Código de la Luminaria</span>
+                  <span style="font-weight: bold">Código de la Luminaria</span>
                 </el-col>
                 <el-col :xs="24" :sm="24" :md="11" :lg="11" :xl="11">
-                  <span style="font-weight: bold;">Nombre del Material</span>
+                  <span style="font-weight: bold">Nombre del Material</span>
                 </el-col>
                 <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
-                  <span style="font-weight: bold;">Código Material Retirado</span>
+                  <span style="font-weight: bold"
+                    >Código Material Retirado</span
+                  >
                 </el-col>
                 <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
-                  <span style="font-weight: bold;">Cantidad Material Retirado</span>
+                  <span style="font-weight: bold"
+                    >Cantidad Material Retirado</span
+                  >
                 </el-col>
                 <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
-                  <span style="font-weight: bold;">Código Material Instalado</span>
+                  <span style="font-weight: bold"
+                    >Código Material Instalado</span
+                  >
                 </el-col>
                 <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
-                  <span style="font-weight: bold;">Cantidad Material Instalado</span>
+                  <span style="font-weight: bold"
+                    >Cantidad Material Instalado</span
+                  >
                 </el-col>
               </el-row>
-              <div style="max-height: 600px; overflow: auto;">
+              <div style="max-height: 600px; overflow: auto">
                 <el-form
                   :disabled="reporte.rees_id == 3"
                   :model="evento"
@@ -1524,28 +2118,32 @@
                     v-bind:key="evento.even_id"
                   >
                     <el-col class="hidden-md-and-up" :xs="1" :sm="1">
-                      <span style="font-weight: bold;">No.</span>
+                      <span style="font-weight: bold">No.</span>
                     </el-col>
-                    <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ id + 1 }}</el-col>
+                    <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{
+                      id + 1
+                    }}</el-col>
                     <el-col class="hidden-md-and-up" :xs="9" :sm="9">
-                      <span style="font-weight: bold;">Código de la Luminaria</span>
+                      <span style="font-weight: bold"
+                        >Código de la Luminaria</span
+                      >
                     </el-col>
                     <el-col :xs="13" :sm="13" :md="3" :lg="3" :xl="3">
                       <el-form-item prop="aap_id">
-                        <div style="display: table;">
+                        <div style="display: table">
                           <el-input
                             disabled
                             class="sinpadding"
-                            style="display: table-cell;"
+                            style="display: table-cell"
                             type="number"
                             v-model="evento.aap_id"
-                            @input="evento.aap_id = parseInt($event,10)"
+                            @input="evento.aap_id = parseInt($event, 10)"
                           ></el-input>
                         </div>
                       </el-form-item>
                     </el-col>
                     <el-col class="hidden-md-and-up" :xs="7" :sm="7">
-                      <span style="font-weight: bold;">Nombre del Material</span>
+                      <span style="font-weight: bold">Nombre del Material</span>
                     </el-col>
                     <el-col :xs="2" :sm="2" :md="2" :lg="2" :xl="2">
                       <el-form-item prop="elem_codigo">
@@ -1566,7 +2164,7 @@
                           :clearable="evento.even_estado === 1"
                           v-model="evento.elem_id"
                           :placeholder="$t('elemento.select')"
-                          style="width: 100%;"
+                          style="width: 100%"
                           @change="codigoElemento(evento)"
                           remote
                           :remote-method="remoteMethodElemento"
@@ -1582,7 +2180,9 @@
                       </el-form-item>
                     </el-col>
                     <el-col class="hidden-md-and-up" :xs="8" :sm="8">
-                      <span style="font-weight: bold;">Código Material Retirado</span>
+                      <span style="font-weight: bold"
+                        >Código Material Retirado</span
+                      >
                     </el-col>
                     <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
                       <el-form-item prop="even_codigo_retirado">
@@ -1590,12 +2190,19 @@
                           :disabled="evento.even_estado > 7"
                           class="sinpadding"
                           v-model="evento.even_codigo_retirado"
-                          @blur="validarCodigoElementoRetirado(evento.elem_id, evento.even_codigo_retirado)"
+                          @blur="
+                            validarCodigoElementoRetirado(
+                              evento.elem_id,
+                              evento.even_codigo_retirado
+                            )
+                          "
                         ></el-input>
                       </el-form-item>
                     </el-col>
                     <el-col class="hidden-md-and-up" :xs="8" :sm="8">
-                      <span style="font-weight: bold;">Cantidad Material Retirado</span>
+                      <span style="font-weight: bold"
+                        >Cantidad Material Retirado</span
+                      >
                     </el-col>
                     <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
                       <el-form-item prop="even_cantidad_retirado">
@@ -1603,12 +2210,18 @@
                           :disabled="evento.even_estado > 7"
                           class="sinpadding"
                           v-model="evento.even_cantidad_retirado"
-                          @blur="evento.even_cantidad_retirado = parseFloat(evento.even_cantidad_retirado)"
+                          @blur="
+                            evento.even_cantidad_retirado = parseFloat(
+                              evento.even_cantidad_retirado
+                            )
+                          "
                         ></el-input>
                       </el-form-item>
                     </el-col>
                     <el-col class="hidden-md-and-up" :xs="8" :sm="8">
-                      <span style="font-weight: bold;">Código Material Instalado</span>
+                      <span style="font-weight: bold"
+                        >Código Material Instalado</span
+                      >
                     </el-col>
                     <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
                       <el-form-item prop="even_codigo_instalado">
@@ -1616,12 +2229,19 @@
                           :disabled="evento.even_estado > 7"
                           class="sinpadding"
                           v-model="evento.even_codigo_instalado"
-                          @blur="validarCodigoElementoInstalado(evento.elem_id, evento.even_codigo_instalado)"
+                          @blur="
+                            validarCodigoElementoInstalado(
+                              evento.elem_id,
+                              evento.even_codigo_instalado
+                            )
+                          "
                         ></el-input>
                       </el-form-item>
                     </el-col>
                     <el-col class="hidden-md-and-up" :xs="8" :sm="8">
-                      <span style="font-weight: bold;">Cantidad Material Instalado</span>
+                      <span style="font-weight: bold"
+                        >Cantidad Material Instalado</span
+                      >
                     </el-col>
                     <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
                       <el-form-item prop="even_cantidad_instalado">
@@ -1629,7 +2249,11 @@
                           :disabled="evento.even_estado === 9"
                           class="sinpadding"
                           v-model="evento.even_cantidad_instalado"
-                          @blur="evento.even_cantidad_instalado = parseFloat(evento.even_cantidad_instalado)"
+                          @blur="
+                            evento.even_cantidad_instalado = parseFloat(
+                              evento.even_cantidad_instalado
+                            )
+                          "
                         ></el-input>
                       </el-form-item>
                     </el-col>
@@ -1641,7 +2265,11 @@
                         circle
                         icon="el-icon-minus"
                         title="Quitar Fila"
-                        @click="evento.even_estado === 1? evento.even_estado = 8 : evento.even_estado = 9"
+                        @click="
+                          evento.even_estado === 1
+                            ? (evento.even_estado = 8)
+                            : (evento.even_estado = 9)
+                        "
                       ></el-button>
                       <el-button
                         v-if="evento.even_estado > 7"
@@ -1650,13 +2278,17 @@
                         circle
                         icon="el-icon-success"
                         title="Restaurar Fila"
-                        @click="evento.even_estado === 9? evento.even_estado = 2 : evento.even_estado = 1"
+                        @click="
+                          evento.even_estado === 9
+                            ? (evento.even_estado = 2)
+                            : (evento.even_estado = 1)
+                        "
                       ></el-button>
                     </el-col>
                   </el-row>
                 </el-form>
                 <el-row class="hidden-md-and-up">
-                  <el-col style="border-bottom: 1px dotted #000;"></el-col>
+                  <el-col style="border-bottom: 1px dotted #000"></el-col>
                 </el-row>
               </div>
               <el-row>
@@ -1665,8 +2297,10 @@
                 </el-col>
                 <el-col :span="22">
                   <el-button
-                    :disabled="!reporte.direcciones[didx].aap_id || reporte.rees_id === 3"
-                    style="display: table-cell;"
+                    :disabled="
+                      !reporte.direcciones[didx].aap_id || reporte.rees_id === 3
+                    "
+                    style="display: table-cell"
                     type="primary"
                     size="mini"
                     circle
@@ -1690,7 +2324,8 @@
         type="primary"
         icon="el-icon-check"
         @click="confirmacionGuardar = !confirmacionGuardar"
-      >Guardar Reporte</el-button>
+        >Guardar Reporte</el-button
+      >
       <el-button
         v-if="canPrint"
         ref="print"
@@ -1698,7 +2333,8 @@
         type="success"
         icon="el-icon-printer"
         @click="imprimir"
-      >Imprimir</el-button>
+        >Imprimir</el-button
+      >
       <el-button
         v-if="reporte.rees_id === 3"
         ref="abrir"
@@ -1706,49 +2342,72 @@
         type="success"
         icon="el-icon-edit-outline"
         @click="abrirReporte()"
-      >Abrir Reporte</el-button>
+        >Abrir Reporte</el-button
+      >
     </el-footer>
     <el-dialog title="Atención" :visible.sync="centerDialogVisible" center>
-      <span style="font-size: 20px;">
+      <span style="font-size: 20px">
         El Código de Luminaria
-        <b>{{ aap.aap_id }}</b>, No Existe, Por Favor Verifique.
+        <b>{{ aap.aap_id }}</b
+        >, No Existe, Por Favor Verifique.
       </span>
       <span slot="footer" class="dialog-footer">
         <el-button
           v-if="reporte.reti_id === 2"
           type="primary"
-          @click="centerDialogVisible = false; showAapModal=!showAapModal"
-        >Crear Nuevo Código</el-button>
-        <el-button type="primary" @click="centerDialogVisible = false">Cerrar</el-button>
+          @click="
+            centerDialogVisible = false;
+            showAapModal = !showAapModal;
+          "
+          >Crear Nuevo Código</el-button
+        >
+        <el-button type="primary" @click="centerDialogVisible = false"
+          >Cerrar</el-button
+        >
       </span>
     </el-dialog>
     <el-dialog title="Confirmación" :visible.sync="confirmacionGuardar">
-      <span style="font-size:20px;">Seguro de Guardar las Modificaciones al Reporte?</span>
+      <span style="font-size: 20px"
+        >Seguro de Guardar las Modificaciones al Reporte?</span
+      >
       <span slot="footer" class="dialog-footer">
         <el-button @click="confirmacionGuardar = false">No</el-button>
         <el-button type="primary" @click="aplicar">Sí</el-button>
       </span>
     </el-dialog>
     <el-dialog title="Atención" :visible.sync="retiradoDialogVisible" center>
-      <span style="font-size: 20px;">
+      <span style="font-size: 20px">
         El Código de Luminaria
-        <b>{{ aap.aap_id }}</b>, No Esta en Estado RETIRADO, Por Favor Verifique.
+        <b>{{ aap.aap_id }}</b
+        >, No Esta en Estado RETIRADO, Por Favor Verifique.
       </span>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="retiradoDialogVisible = false">Cerrar</el-button>
+        <el-button type="primary" @click="retiradoDialogVisible = false"
+          >Cerrar</el-button
+        >
       </span>
     </el-dialog>
     <el-dialog title="Atención" :visible.sync="yaretiradoDialogVisible" center>
-      <span style="font-size: 20px;">
+      <span style="font-size: 20px">
         El Código de Luminaria
-        <b>{{ aap.aap_id }}</b>, Se encuentra en Estado RETIRADO, Por Favor Verifique.
+        <b>{{ aap.aap_id }}</b
+        >, Se encuentra en Estado RETIRADO, Por Favor Verifique.
       </span>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="yaretiradoDialogVisible = false">Cerrar</el-button>
+        <el-button type="primary" @click="yaretiradoDialogVisible = false"
+          >Cerrar</el-button
+        >
       </span>
     </el-dialog>
-    <el-dialog title="Recuperar Información" :visible.sync="recoveryVisible" width="30%">
-      <span>Existe información de Recuperación para el Reporte {{ reporte_previo.repo_consecutivo }}</span>
+    <el-dialog
+      title="Recuperar Información"
+      :visible.sync="recoveryVisible"
+      width="30%"
+    >
+      <span
+        >Existe información de Recuperación para el Reporte
+        {{ reporte_previo.repo_consecutivo }}</span
+      >
       <span>Desea recuperarla ?</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">No</el-button>
@@ -1805,7 +2464,6 @@ import { getTransformadors } from '@/api/transformador'
 import { getOrdenes, addReporteAOrden } from '@/api/ordentrabajo'
 import { getNovedades } from '@/api/novedad'
 // component
-
 // import { inspect } from 'util'
 
 export default {
@@ -1815,7 +2473,10 @@ export default {
         this.aap.aap_id = value
         getAapValidar(value)
           .then((response) => {
-            var result = response.data
+            var result = response.data._1
+            var reports = response.data._2
+            this.luminaria_reportes.set(value, { status: result, reports: reports })
+            console.log('result:', result, 'reports: ', reports)
             if (result === 404) {
               this.existe = false
               if (this.reporte.reti_id !== 2) {
@@ -1831,10 +2492,17 @@ export default {
                 callback(new Error('No Retirada'))
               } else if (this.reporte.reti_id === 2) {
                 this.existe = true
-                if (this.reporte.adicional.repo_tipo_expansion !== 4) {
-                  this.$alert('Error: Código de Luminaria "' + value + '" ya Existe', 'Error', {
-                    confirmButtonText: 'Reintentar'
-                  })
+                if (
+                  this.reporte.adicional.repo_tipo_expansion !== 4 &&
+                  this.reporte.rees_id === 1
+                ) {
+                  this.$alert(
+                    'Error: Código de Luminaria "' + value + '" ya Existe',
+                    'Error',
+                    {
+                      confirmButtonText: 'Reintentar'
+                    }
+                  )
                   callback(new Error('Ya Existe'))
                 } else {
                   callback()
@@ -1844,11 +2512,31 @@ export default {
                 callback()
               }
             } else if (result === 204) {
-              if (this.reporte.reti_id === 1 || this.reporte.reti_id === 8) {
+              if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
+                const l_fecha_reporte_retiro = reports[this.reportIndex(reports, 8)]._2
+                console.log('fecha solucion:', this.reporte.repo_fechasolucion)
+                if (this.reporte.repo_fechasolucion === undefined || this.reporte.repo_fechasolucion.is_null) {
+                  this.$alert('Por favor ingrese la fecha de solución', 'Atención', {
+                    callback: action => { this.$refs.i_repo_fechasolucion.focus() }
+                  })
+                  callback(new Error('Por favor ingrese la fecha de solución'))
+                }
+                const d_fecha_reporte = this.reporte.repo_fechasolucion
+                const d_now = Date.now()
+                d_fecha_reporte.setHours(d_now.getHours())
+                d_fecha_reporte.setMinutes(d_now.getMinutes())
+                d_fecha_reporte.setSeconds(d_now.getSeconds())
+                if (d_fecha_reporte.getTime() < l_fecha_reporte_retiro) {
+                  this.$alert('La fecha de solución de la reubicación es previa a la fecha del reporte de retiro. Por favor verifique la fecha de solución', 'Atención', {
+                    callback: action => { this.$refs.i_repo_fechasolucion.focus() }
+                  })
+                  callback(new Error('Por favor revise la fecha de solución'))
+                }
+              } else if ((this.reporte.reti_id === 1 || this.reporte.reti_id === 8) && this.reporte.rees_id === 1) {
                 callback(new Error('Retirada'))
               } else if (this.reporte.reti_id === 2) {
                 this.existe = true
-                if (this.reporte.adicional.repo_tipo_expansion === 3) {
+                if (this.reporte.adicional.repo_tipo_expansion === 3 && this.reporte.rees_id === 1) {
                   callback(new Error('Ya Existe'))
                 } else {
                   callback()
@@ -1970,7 +2658,13 @@ export default {
         eventos: [],
         direcciones: [
           {
-            materiales: []
+            materiales: [],
+            dato: {
+              aatc_id: null
+            },
+            dato_adicional: {
+              aap_apoyo: null
+            }
           }
         ],
         adicional: {
@@ -2355,6 +3049,8 @@ export default {
       actividades: [],
       urbanizadoras: [],
       ordenestrabajo: [],
+      owns: [],
+      luminaria_reportes: new Map(),
       status: '',
       dialogonuevodanhovisible: false,
       actividad: {
@@ -2419,15 +3115,22 @@ export default {
     pending: { name: 'pending', time: 30000, autostart: false, repeat: true }
   },
   methods: {
+    reportIndex (reports, repo_id) {
+      return reports.map((r) => r._3).indexOf(repo_id)
+    },
     addSubReporte () {
       console.log('adicionando subreporte número: ' + this.subreporte)
-      if (this.subreporte !== undefined && this.subreporte !== null && this.subreporte > 0) {
+      if (
+        this.subreporte !== undefined &&
+        this.subreporte !== null &&
+        this.subreporte > 0
+      ) {
         this.reporte.subreportes.push({ csc: this.subreporte })
       }
       this.subreporte = null
     },
     delSubReporte (i) {
-      var item = this.reporte.subreportes.find(o => o.csc === i)
+      var item = this.reporte.subreportes.find((o) => o.csc === i)
       if (item) {
         var idx = this.reporte.subreportes.indexOf(item)
         if (idx > -1) {
@@ -2436,21 +3139,26 @@ export default {
       }
     },
     confirmOrdenTrabajo () {
-      addReporteAOrden(this.reporte.adicional.ortr_id, this.reporte.repo_id, this.reporte.tireuc_id).then(response => {
-        if (response.data === 'true') {
-          this.$message({
-            message: 'Orden de Trabajo Actualizada',
-            type: 'success'
-          })
-        } else {
-
-        }
-      }).catch((error) => {
-        this.$message({
-          message: 'Orden de Trabajo NO Actualizada, error:' + error,
-          type: 'warning'
+      addReporteAOrden(
+        this.reporte.adicional.ortr_id,
+        this.reporte.repo_id,
+        this.reporte.tireuc_id
+      )
+        .then((response) => {
+          if (response.data === 'true') {
+            this.$message({
+              message: 'Orden de Trabajo Actualizada',
+              type: 'success'
+            })
+          } else {
+          }
         })
-      })
+        .catch((error) => {
+          this.$message({
+            message: 'Orden de Trabajo NO Actualizada, error:' + error,
+            type: 'warning'
+          })
+        })
     },
     confirmEdit () {
       const data = {
@@ -2689,7 +3397,9 @@ export default {
       convertirReporte(this.reporte.repo_id).then((response) => {
         if (response.status === 200) {
           this.$router.push({
-            path: '/proceso/menu1reporte/menu1-2control/menu1-2-3edit/' + response.data
+            path:
+              '/proceso/menu1reporte/menu1-2control/menu1-2-3edit/' +
+              response.data
           })
         } else {
           this.$alert('No se pudo convertir el reporte', 'Convertir Reporte', {
@@ -2812,8 +3522,10 @@ export default {
                       activo.aap_adicional.aap_brazo !== null &&
                       activo.aap_adicional.aap_brazo !== undefined
                     ) {
-                      direccion.dato.aap_brazo_anterior = activo.aap_adicional.aap_brazo.toString()
-                      direccion.dato.aap_brazo = activo.aap_adicional.aap_brazo.toString()
+                      direccion.dato.aap_brazo_anterior =
+                        activo.aap_adicional.aap_brazo.toString()
+                      direccion.dato.aap_brazo =
+                        activo.aap_adicional.aap_brazo.toString()
                     } else {
                       direccion.dato.aap_brazo_anterior = ''
                       direccion.dato.aap_brazo = ''
@@ -2872,10 +3584,13 @@ export default {
                         'Cambiando tipo de medida a : ' +
                           this.reporte.adicional.aaco_id_nuevo
                       )
-                      direccion.dato.aaco_id = this.reporte.adicional.aaco_id_nuevo
+                      direccion.dato.aaco_id =
+                        this.reporte.adicional.aaco_id_nuevo
                       if (this.reporte.adicional.aaco_id_nuevo === 2) {
-                        direccion.dato_adicional.medi_id = this.reporte.adicional.medi_id
-                        direccion.dato_adicional.tran_id = this.reporte.adicional.tran_id
+                        direccion.dato_adicional.medi_id =
+                          this.reporte.adicional.medi_id
+                        direccion.dato_adicional.tran_id =
+                          this.reporte.adicional.tran_id
                       } else {
                         direccion.dato_adicional.medi_id = null
                         direccion.dato_adicional.tran_id = null
@@ -2936,8 +3651,10 @@ export default {
                       activo.aap_adicional.aap_brazo !== null &&
                       activo.aap_adicional.aap_brazo !== undefined
                     ) {
-                      direccion.dato.aap_brazo_anterior = activo.aap_adicional.aap_brazo.toString()
-                      direccion.dato.aap_brazo = activo.aap_adicional.aap_brazo.toString()
+                      direccion.dato.aap_brazo_anterior =
+                        activo.aap_adicional.aap_brazo.toString()
+                      direccion.dato.aap_brazo =
+                        activo.aap_adicional.aap_brazo.toString()
                     } else {
                       direccion.dato.aap_brazo_anterior = ''
                       direccion.dato.aap_brazo = ''
@@ -2979,14 +3696,16 @@ export default {
               direccion.materiales.forEach((m) => {
                 m.aap_id = direccion.aap_id
               })
-              if ((this.reporte.reti_id === 2 && this.reporte.adicional.repo_tipo_expansion !== 4)) {
+              if (
+                this.reporte.reti_id === 2 &&
+                this.reporte.adicional.repo_tipo_expansion !== 4
+              ) {
                 console.log('Ingrese a llamar validar siguiente consecutivo')
                 this.validarSiguienteConsecutivo(direccion)
               } else {
                 this.$message({
                   type: 'error',
-                  message:
-                    'El código (' + direccion.aap_id + ') no existe',
+                  message: 'El código (' + direccion.aap_id + ') no existe',
                   duration: 5000
                 })
                 this.invalid = true
@@ -3189,10 +3908,17 @@ export default {
       this.confirmacionGuardar = false
       var validacion = true
       // Validar si el reporte tiene la orden de trabajo asignada
-      if (this.reporte.adicional.ortr_id === undefined || this.reporte.adicional.ortr_id === null || this.reporte.adicional.ortr_id < 1) {
+      if (
+        this.reporte.adicional.ortr_id === undefined ||
+        this.reporte.adicional.ortr_id === null ||
+        this.reporte.adicional.ortr_id < 1
+      ) {
         this.$notify.warning({
           title: 'Atención',
-          message: 'Reporte ' + this.reporte.repo_consecutivo + ' No Asignado a Orden de Trabajo, Por favor verifique la información',
+          message:
+            'Reporte ' +
+            this.reporte.repo_consecutivo +
+            ' No Asignado a Orden de Trabajo, Por favor verifique la información',
           offset: 100
         })
         return false
@@ -3200,9 +3926,11 @@ export default {
       // Mover subreportes a repo_subrepoconsecutivos
       this.reporte.repo_subrepoconsecutivo = ''
       this.reporte.subreportes.forEach((i) => {
-        this.reporte.repo_subrepoconsecutivo = this.reporte.repo_subrepoconsecutivo + i.csc + ','
+        this.reporte.repo_subrepoconsecutivo =
+          this.reporte.repo_subrepoconsecutivo + i.csc + ','
       })
-      this.reporte.repo_subrepoconsecutivo = this.reporte.repo_subrepoconsecutivo.slice(0, -1)
+      this.reporte.repo_subrepoconsecutivo =
+        this.reporte.repo_subrepoconsecutivo.slice(0, -1)
       // Mover material a reporte.eventos
       // // var even_length = 1
       this.reporte.eventos = []
@@ -3258,13 +3986,35 @@ export default {
                 offset: 0
               })
             }
+            // validar fecha del reporte de retiro
+            const aapData = this.luminaria_reportes.get(d.aap_id)
+            const reports = aapData.reports
+            const l_fecha_reporte_retiro = reports[this.reportIndex(reports, 8)]._2
+            console.log('fecha solucion:', this.reporte.repo_fechasolucion)
+            if (this.reporte.repo_fechasolucion === undefined || this.reporte.repo_fechasolucion.is_null) {
+              validacion = false
+              this.$alert('Por favor ingrese la fecha de solución', 'Atención', {
+                callback: action => { this.$refs.i_repo_fechasolucion.focus() }
+              })
+            }
+            const d_fecha_reporte = this.reporte.repo_fechasolucion
+            const d_now = Date.now()
+            d_fecha_reporte.setHours(d_now.getHours())
+            d_fecha_reporte.setMinutes(d_now.getMinutes())
+            d_fecha_reporte.setSeconds(d_now.getSeconds())
+            if (d_fecha_reporte.getTime() < l_fecha_reporte_retiro) {
+              validacion = false
+              this.$alert('La fecha de solución de la reubicación es previa a la fecha del reporte de retiro. Por favor verifique la fecha de solución', 'Atención', {
+                callback: action => { this.$refs.i_repo_fechasolucion.focus() }
+              })
+            }
           }
 
           if (
             this.reporte.reti_id === 2 &&
             this.reporte.adicional.repo_tipo_expansion === 3
           ) {
-            if (d.esnueva === false) {
+            if (d.esnueva === false && d.even_estado === 1) {
               aap_no_nueva.push(d.aap)
               this.$notify.error({
                 title: 'Luminaria Ya Existe',
@@ -3435,7 +4185,8 @@ export default {
       })
     },
     onAddNovedad () {
-      this.novedad_siguiente_consecutivo = this.novedad_siguiente_consecutivo + 1
+      this.novedad_siguiente_consecutivo =
+        this.novedad_siguiente_consecutivo + 1
       var novedad = {
         nove_id: null,
         reno_horaini: null,
@@ -3669,8 +4420,9 @@ export default {
           this.reporte_previo.subreportes = []
         } else {
           this.reporte_previo.subreportes = []
-          var subreportes = this.reporte_previo.repo_subrepoconsecutivo.split(',')
-          subreportes.forEach(i => {
+          var subreportes =
+            this.reporte_previo.repo_subrepoconsecutivo.split(',')
+          subreportes.forEach((i) => {
             this.reporte_previo.subreportes.push({ csc: i })
           })
         }
@@ -4304,20 +5056,23 @@ export default {
                                                       response.data
                                                     getCaracteristica(7)
                                                       .then((response) => {
-                                                        this.tecnologias = response.data.cara_valores.split(
-                                                          ','
-                                                        )
+                                                        this.tecnologias =
+                                                          response.data.cara_valores.split(
+                                                            ','
+                                                          )
                                                         getCaracteristica(5)
                                                           .then((response) => {
-                                                            this.potencias = response.data.cara_valores.split(
-                                                              ','
-                                                            )
+                                                            this.potencias =
+                                                              response.data.cara_valores.split(
+                                                                ','
+                                                              )
                                                             getCaracteristica(8)
                                                               .then(
                                                                 (response) => {
-                                                                  const poste = response.data.cara_valores.split(
-                                                                    ','
-                                                                  )
+                                                                  const poste =
+                                                                    response.data.cara_valores.split(
+                                                                      ','
+                                                                    )
                                                                   for (
                                                                     var i = 0;
                                                                     i <
@@ -4342,9 +5097,10 @@ export default {
                                                                       (
                                                                         response
                                                                       ) => {
-                                                                        this.owns = response.data.cara_valores.split(
-                                                                          ','
-                                                                        )
+                                                                        this.owns =
+                                                                          response.data.cara_valores.split(
+                                                                            ','
+                                                                          )
                                                                         getAapConexiones()
                                                                           .then(
                                                                             (
@@ -4393,20 +5149,47 @@ export default {
                                                                                                               ) => {
                                                                                                                 this.transformadores =
                                                                                                                   response.data
-                                                                                                                getOrdenes().then(response => {
-                                                                                                                  this.ordenestrabajo = response.data
-                                                                                                                  getNovedades(1).then(response => {
-                                                                                                                    this.novedades = response.data
-                                                                                                                    this.obtenerReporte()
-                                                                                                                  }).catch(error => {
-                                                                                                                    console.log('getNovedades:' + error)
-                                                                                                                  })
-                                                                                                                }).catch(error => {
-                                                                                                                  console.log(
-                                                                                                                    'Error Ordenes Trabajo: ' +
-                                                                                                                    error
+                                                                                                                getOrdenes()
+                                                                                                                  .then(
+                                                                                                                    (
+                                                                                                                      response
+                                                                                                                    ) => {
+                                                                                                                      this.ordenestrabajo =
+                                                                                                                        response.data
+                                                                                                                      getNovedades(
+                                                                                                                        1
+                                                                                                                      )
+                                                                                                                        .then(
+                                                                                                                          (
+                                                                                                                            response
+                                                                                                                          ) => {
+                                                                                                                            this.novedades =
+                                                                                                                              response.data
+                                                                                                                            this.obtenerReporte()
+                                                                                                                          }
+                                                                                                                        )
+                                                                                                                        .catch(
+                                                                                                                          (
+                                                                                                                            error
+                                                                                                                          ) => {
+                                                                                                                            console.log(
+                                                                                                                              'getNovedades:' +
+                                                                                                                                error
+                                                                                                                            )
+                                                                                                                          }
+                                                                                                                        )
+                                                                                                                    }
                                                                                                                   )
-                                                                                                                })
+                                                                                                                  .catch(
+                                                                                                                    (
+                                                                                                                      error
+                                                                                                                    ) => {
+                                                                                                                      console.log(
+                                                                                                                        'Error Ordenes Trabajo: ' +
+                                                                                                                          error
+                                                                                                                      )
+                                                                                                                    }
+                                                                                                                  )
                                                                                                               }
                                                                                                             )
                                                                                                             .catch(

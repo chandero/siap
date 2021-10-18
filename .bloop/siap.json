@@ -2,15 +2,15 @@
     "version": "1.4.0",
     "project": {
         "name": "siap",
-        "directory": "/home/chandero/Documentos/git/siap/siap_v1.1",
-        "workspaceDir": "/home/chandero/Documentos/git/siap/siap_v1.1",
+        "directory": "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1",
+        "workspaceDir": "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1",
         "sources": [
-            "/home/chandero/Documentos/git/siap/siap_v1.1/app-2.12",
-            "/home/chandero/Documentos/git/siap/siap_v1.1/app",
-            "/home/chandero/Documentos/git/siap/siap_v1.1/app",
-            "/home/chandero/Documentos/git/siap/siap_v1.1/target/scala-2.12/src_managed/main",
-            "/home/chandero/Documentos/git/siap/siap_v1.1/target/scala-2.12/twirl/main",
-            "/home/chandero/Documentos/git/siap/siap_v1.1/target/scala-2.12/routes/main"
+            "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/app-2.12",
+            "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/app",
+            "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/app",
+            "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/target/scala-2.12/src_managed/main",
+            "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/target/scala-2.12/twirl/main",
+            "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/target/scala-2.12/routes/main"
         ],
         "dependencies": [
             
@@ -159,11 +159,11 @@
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/com/pauldijou/jwt-core_2.12/4.2.0/jwt-core_2.12-4.2.0.jar",
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/com/fasterxml/jackson/module/jackson-module-paranamer/2.10.3/jackson-module-paranamer-2.10.3.jar"
         ],
-        "out": "/home/chandero/Documentos/git/siap/siap_v1.1/.bloop/siap",
-        "classesDir": "/home/chandero/Documentos/git/siap/siap_v1.1/.bloop/siap/scala-2.12/classes",
+        "out": "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/.bloop/siap",
+        "classesDir": "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/.bloop/siap/scala-2.12/classes",
         "resources": [
-            "/home/chandero/Documentos/git/siap/siap_v1.1/conf",
-            "/home/chandero/Documentos/git/siap/siap_v1.1/target/scala-2.12/resource_managed/main"
+            "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/conf",
+            "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/target/scala-2.12/resource_managed/main"
         ],
         "scala": {
             "organization": "org.scala-lang",
@@ -185,7 +185,7 @@
                 "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/jline/jline/2.14.6/jline-2.14.6.jar",
                 "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/fusesource/jansi/jansi/1.12/jansi-1.12.jar"
             ],
-            "analysis": "/home/chandero/Documentos/git/siap/siap_v1.1/target/streams/compile/bloopAnalysisOut/_global/streams/inc_compile_2.12.zip",
+            "analysis": "/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/target/streams/compile/bloopAnalysisOut/_global/streams/inc_compile_2.12.zip",
             "setup": {
                 "order": "mixed",
                 "addLibraryToBootClasspath": true,
@@ -246,7 +246,7 @@
             "config": {
                 "home": "/usr/lib/jvm/java-11-openjdk",
                 "options": [
-                    "-Duser.dir=/home/chandero/Documentos/git/siap/siap_v1.1"
+                    "-Duser.dir=/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1"
                 ]
             },
             "mainClass": [

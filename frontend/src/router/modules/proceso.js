@@ -290,6 +290,7 @@ const procesoRouter = {
           path: 'menu4-2externa',
           component: () => import('@/views/proceso/menu4orden/menu4-2externa'),
           name: 'menu_proceso_menu4orden_menu4-2externa',
+          hidden: true,
           meta: { title: 'menu_proceso_menu4orden_menu4-2externa', icon: 'el-icon-receiving', roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor'] },
           redirect: '/proceso/menu4orden/menu4-2externa/menu4-2-1list',
           children: [
@@ -320,6 +321,22 @@ const procesoRouter = {
               name: 'menu_proceso_menu4orden_menu4-2externa_menu4-2-4info',
               hidden: true,
               meta: { title: 'menu_proceso_menu4orden_menu4-2externa_menu4-2-4info', roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor'] }
+            }
+          ]
+        },
+        {
+          path: 'menu4-3cobro',
+          component: () => import('@/views/proceso/menu4orden/menu4-3cobro'),
+          name: 'menu_proceso_menu4orden_menu4-3cobro',
+          meta: { title: 'menu_proceso_menu4orden_menu4-3cobro', icon: 'el-icon-receiving', roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor'] },
+          redirect: '/proceso/menu4orden/menu4-3cobro/menu4-3-1list',
+          children: [
+            {
+              path: 'menu4-3-1list',
+              component: () => import('@/views/proceso/menu4orden/menu4-3cobro/menu4-3-1list'),
+              name: 'menu_proceso_menu4orden_menu4-3cobro_menu4-3-1list',
+              hidden: true,
+              meta: { title: 'menu_proceso_menu4orden_menu4-2externa_menu4-2-1list', roles: ['super', 'admin', 'supervisor'] }
             }
           ]
         }

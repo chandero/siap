@@ -115,7 +115,7 @@ class AapController @Inject()(
     implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
       val result = aapService.buscarParaVerificar(aap_id, empr_id.get)
-      Future.successful(Ok(Json.toJson(result)))
+      Future.successful(Ok(write(result)))
   }
 
   def buscarParaEditar(id: Long) = authenticatedUserAction.async {

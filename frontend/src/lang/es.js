@@ -365,6 +365,8 @@ export default {
     'menu_proceso_menu4orden_menu4-2externa_menu4-2-2create': 'Crear',
     'menu_proceso_menu4orden_menu4-2externa_menu4-2-3edit': 'Actualizar',
     'menu_proceso_menu4orden_menu4-2externa_menu4-2-4info': 'Material',
+    'menu_proceso_menu4orden_menu4-3cobro': 'Cobranza',
+    'menu_proceso_menu4orden_menu4-3cobro_menu4-3-1list': 'Cobro',
     menu_proceso_menu5formato: 'Formato en Blanco',
     menu_proceso_menu6recuperar: 'Recuperar Historial',
     menu_informe: 'Informe',
@@ -803,6 +805,7 @@ export default {
     redestitle: 'Reportes de Redes',
     transformadortitle: 'Reportes de Transformadores',
     workordertitle: 'Orden de Trabajo',
+    workordercobrotitle: 'Cobro Orden de Trabajo Municipio',
     obratitle: 'Obras',
     vencidotitle: 'Reportes Fuera de Fecha'
   },
@@ -1389,7 +1392,8 @@ export default {
     ortr_dia: 'Día Semana',
     obras: 'Obras',
     obra_consecutivo: 'Nro. Obra',
-    obra_fecharecepcion: 'Fecha Obra'
+    obra_fecharecepcion: 'Fecha Obra',
+    repo_tipo_expansion: 'Tipo'
   },
   grafica: {
     cantidad: 'Cantidad',
