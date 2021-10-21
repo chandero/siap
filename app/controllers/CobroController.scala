@@ -35,6 +35,16 @@ class CobroController @Inject()(
     DateTimeSerializer
   )
 
+  def siap_obtener_orden_trabajo_cobro_modernizacion(reti_id: Long) = authenticatedUserAction.async { implicit request => 
+      val empr_id = Utility.extraerEmpresa(request)
+      reti_id match {
+        case 6 => cobroService.siap_obtener_orden_trabajo_cobro_modernizacion(empr_id.get, 6).map { result =>
+                  Ok(write(result))
+                }
+        case _ => Future.successful(Ok(write(List.empty)))
+      }
+  }
+
   def siap_generar_orden_trabajo_cobro_modernizacion(
       anho: Int,
       mes: Int,

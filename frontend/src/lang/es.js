@@ -50,6 +50,20 @@ export default {
   buscar: {
     pormaterial: 'Busqueda por Código de Material'
   },
+  cotr: {
+    anho: 'Año',
+    mes: 'Periodo',
+    fecha: 'Fecha',
+    consecutivo: 'Consecutivo',
+    luminaria_anterior: 'Luminaria Anterior',
+    luminaria_nueva: 'Luminaria Nueva',
+    tecnologia_anterior: 'Tecnologia Anterior',
+    tecnologia_nueva: 'Tecnologia Nueva',
+    potencia_anterior: 'Potencia Anterior',
+    potencia_nueva: 'Potencia Nueva',
+    direccion: 'Dirección',
+    cantidad: 'Cantidad'
+  },
   route: {
     dashboard: 'Tablero',
     procesos: 'Procesos',

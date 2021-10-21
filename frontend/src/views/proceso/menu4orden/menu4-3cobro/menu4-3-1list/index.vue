@@ -12,12 +12,14 @@
       <el-container>
           <el-header>
             <el-button type="primary" icon="el-icon-circle-plus" circle @click="showDialog = true" ></el-button>
-            <el-button type="success" icon="el-icon-refresh" circle @click="actualizar"></el-button>
+            <el-button type="success" icon="el-icon-refresh" circle @click="obtener()"></el-button>
           </el-header>
           <el-main>
             <el-table
             :data="tableData"
             stripe
+            show-summary
+            :summary-method="getSummaries"
             :default-sort = "{prop: 'ortr_id', order: 'descending'}"
             style="width: 100%"
             max-height="600"
@@ -25,76 +27,158 @@
             @sort-change="handleSort"
             @filter-change="handleFilter">
             <el-table-column
-              :label="$t('ordentrabajo.consecutive')"
-              width="120"
+              :label="$t('cotr.anho')"
+              width="60"
               sortable="custom"
-              prop="ortr_consecutivo"
+              prop="cotr_anho"
               resizable
                >
               <template slot-scope="scope">
-                <span style="margin-left: 10px">{{ scope.row.ortr_consecutivo }}</span>
+                <span style="margin-left: 10px">{{ scope.row.cotr_anho }}</span>
               </template>
             </el-table-column>
             <el-table-column
-          :label="$t('ordentrabajo.date')"
-          width="210"
-          sortable="custom"
-          prop="ortr_fecha"
-          resizable
-           >
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row.ortr_fecha | moment('YYYY-MM-DD') }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('ordentrabajo.crew')"
-          min-width="200"
-          sortable="custom"
-          prop="cuad_descripcion"
-          resizable
-          >
-          <template slot-scope="scope">
-            <span >{{ cuadrilla(scope.row.cuad_id) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('barrio.type')"
-          min-width="150"
-          sortable="custom"
-          prop="tiba_descripcion"
-          resizable
-          >
-          <template slot-scope="scope">
-            <span >{{ sector(scope.row.tiba_id) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          fixed="right"
-          :label="$t('table.accion')"
-          width="140">
-          <template slot-scope="scope">
-            <el-button
-              size="mini"
-              circle
-              @click="handleEdit(scope.$index, scope.row)"><i class="el-icon-edit"></i></el-button>
-            <el-button
-              size="mini"
-              circle
-              type="success"
-              :title="$t('print')"
-              @click="handlePrint(scope.$index, scope.row)"><i class="el-icon-printer"></i></el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-pagination
+              :label="$t('cotr.mes')"
+              width="80"
+              sortable="custom"
+              prop="cotr_periodo"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.cotr_periodo }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="$t('cotr.consecutivo')"
+              width="100"
+              sortable="custom"
+              prop="cotr_consecutivo"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.cotr_consecutivo }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="$t('cotr.fecha')"
+              width="100"
+              sortable="custom"
+              prop="cotr_fecha"
+              resizable
+            >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.cotr_fecha | moment('YYYY-MM-DD') }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="$t('cotr.luminaria_anterior')"
+              width="200"
+              sortable="custom"
+              prop="cotr_luminaria_anterior"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.cotr_luminaria_anterior }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="$t('cotr.luminaria_nueva')"
+              width="200"
+              sortable="custom"
+              prop="cotr_luminaria_nueva"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.cotr_luminaria_nueva }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="$t('cotr.tecnologia_anterior')"
+              width="200"
+              sortable="custom"
+              prop="cotr_tecnologia_anterior"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.cotr_tecnologia_anterior }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="$t('cotr.tecnologia_nueva')"
+              width="200"
+              sortable="custom"
+              prop="cotr_tecnologia_nueva"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.cotr_tecnologia_nueva }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="$t('cotr.potencia_anterior')"
+              width="200"
+              sortable="custom"
+              prop="cotr_potencia_anterior"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.cotr_potencia_anterior }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="$t('cotr.potencia_nueva')"
+              width="200"
+              sortable="custom"
+              prop="cotr_potencia_nueva"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.cotr_potencia_nueva }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="$t('cotr.direccion')"
+              width="200"
+              sortable="custom"
+              prop="cotr_direccion"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.cotr_direccion }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="$t('cotr.cantidad')"
+              width="200"
+              sortable="custom"
+              prop="cotr_cantidad"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ scope.row.cotr_cantidad }}</span>
+              </template>
+            </el-table-column>
+            </el-table>
+      <!-- <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :page-size="page_size"
         layout="sizes, prev, pager, next, total"
         :total="total">
-      </el-pagination>
+      </el-pagination> -->
     </el-main>
   </el-container>
+        <el-row>
+        <el-col :span='24'>
+          <img
+            :title="$t('xls')"
+            @click='exportarXls()'
+            style='width: 32px; height: 36px; cursor: pointer;'
+            :src="require('@/assets/xls.png')"
+          />
+        </el-col>
+      </el-row>
+
   </el-main>
   <el-dialog
     title="Generar Orden de Trabajo"
@@ -122,7 +206,7 @@
           <el-row>
             <el-col>
               <el-form-item>
-                <el-label>MODERNIZACION</el-label>
+                <span>MODERNIZACION</span>
               </el-form-item>
             </el-col>
           </el-row>
@@ -139,7 +223,8 @@
 <script>
 import { mapGetters } from 'vuex'
 import { getTipos } from '@/api/reporte'
-import { generar } from '@/api/cobro'
+import { obtener, generar } from '@/api/cobro'
+import { parseTime } from '@/utils'
 export default {
   data () {
     return {
@@ -161,14 +246,111 @@ export default {
   mounted () {
     getTipos().then(response => {
       this.reporte_tipo = response.data
+      this.obtener()
     })
     const today = new Date()
     this.anho = today.getFullYear()
     this.mes = today.getMonth()
   },
   methods: {
+    obtener () {
+      this.tableData = []
+      obtener(this.reti_id).then(response => {
+        this.tableData = response.data
+      })
+    },
     generar () {
-      generar(this.anho, this.mes, this.tireuc_id, this.reti_id)
+      this.showDialog = false
+      generar(this.anho, this.mes, this.tireuc_id, this.reti_id).then(response => {
+        if (response.data === true) {
+          this.$message({
+            showClose: true,
+            message: 'Generación Finalizada...',
+            type: 'success',
+            duration: 5000
+          })
+          this.obtener()
+        }
+      })
+    },
+    exportarXls () {
+      this.downloadLoading = true
+      import('@/vendor/Export2Excel').then((excel) => {
+        const tHeader = [
+          'Año',
+          'Periodo',
+          'Consecutivo',
+          'Fecha',
+          'Luminaria Anterior',
+          'Luminaria Nueva',
+          'Tecnología Anterior',
+          'Tecnología Nueva',
+          'Potencia Anterior',
+          'Potencia Nueva',
+          'Dirección',
+          'Cantidad'
+        ]
+        const filterVal = [
+          'cotr_anho',
+          'cotr_periodo',
+          'cotr_consecutivo',
+          'cotr_fecha',
+          'cotr_luminaria_anterior',
+          'cotr_luminaria_nueva',
+          'cotr_tecnologia_anterior',
+          'cotr_tecnologia_nueva',
+          'cotr_potencia_anterior',
+          'cotr_potencia_nueva',
+          'cotr_direccion',
+          'cotr_cantidad'
+        ]
+        const list = this.tableData
+        const data = this.formatJson(filterVal, list)
+        excel.export_json_to_excel(
+          tHeader,
+          data,
+          'general_orden_de_trabajo_itaf_año_' +
+            this.anho +
+            '_periodo_' +
+            this.$i18n.t(`months.m${this.mes}`)
+        )
+        this.downloadLoading = false
+      })
+    },
+    formatJson (filterVal, jsonData) {
+      return jsonData.map((v) =>
+        filterVal.map((j) => {
+          if (j === 'cotr_fecha') {
+            return parseTime(v[j], '{y}-{m}-{d}')
+          } else {
+            return v[j]
+          }
+        })
+      )
+    },
+    getSummaries (param) {
+      const { columns, data } = param
+      const sums = []
+      columns.forEach((column, index) => {
+        if (index === 10) {
+          sums[index] = 'Total Luminarias'
+          return
+        }
+        const values = data.map(item => Number(item[column.property]))
+        if (index === 11 && !values.every(value => isNaN(value))) {
+          sums[index] = '' + values.reduce((prev, curr) => {
+            const value = Number(curr)
+            if (!isNaN(value)) {
+              return prev + curr
+            } else {
+              return prev
+            }
+          }, 0)
+        } else {
+          sums[index] = ''
+        }
+      })
+      return sums
     },
     handleSort () {},
     handleFilter () {},
