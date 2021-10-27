@@ -49,7 +49,8 @@ class CobroController @Inject()(
       anho: Int,
       mes: Int,
       tireuc_id: Int,
-      reti_id: Long
+      reti_id: Long,
+      cotr_consecutivo: Long
   ) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
     val empr_id = Utility.extraerEmpresa(request)
     cobroService
@@ -58,7 +59,8 @@ class CobroController @Inject()(
         mes,
         tireuc_id,
         reti_id,
-        empr_id.get
+        empr_id.get,
+        cotr_consecutivo
       )
       .map { result =>
         Ok(write(result))
@@ -66,4 +68,14 @@ class CobroController @Inject()(
 
   }
 
+  def siap_orden_trabajo_cobro(cotr_id: Long) = authenticatedUserAction.async { implicit request =>
+      val empr_id = Utility.extraerEmpresa(request)
+      val (cotr_consecutivo, os) = cobroService.siap_orden_trabajo_cobro(empr_id.get , cotr_id)
+      val filename = "Informe_Orden_Trabajo_ITAF_" + cotr_consecutivo + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Future.successful(Ok(os)
+        .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        .withHeaders("Content-Disposition" -> attach)
+      )
+  }
 }

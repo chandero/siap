@@ -577,7 +577,7 @@
         size='medium'
         type='primary'
         icon='el-icon-check'
-        @click='aplicar'
+        @click='aplicar()'
       >Guardar Luminaria</el-button>
     </el-footer>
   </el-container>
@@ -832,19 +832,19 @@ export default {
     aplicar () {
       getAapValidar(this.activo.aap.aap_id)
         .then(response => {
-          if (response.data === 401) {
+          if (response.data._1 === 401) {
             this.$alert('El código de luminaria ya existe y se encuentra en estado ELIMINADA', 'Buscar Luminaria', {
               confirmButtonText: 'Cancelar'
             })
-          } if (response.data === 204) {
+          } if (response.data._1 === 204) {
             this.$alert('El código de luminaria ya existe y se encuentra en estado RETIRADA', 'Buscar Luminaria', {
               confirmButtonText: 'Cancelar'
             })
-          } if (response.data === 200) {
+          } if (response.data._1 === 200) {
             this.$alert('El código de luminaria ya existe', 'Buscar Luminaria', {
               confirmButtonText: 'Cancelar'
             })
-          } else if (response.data === 404) {
+          } else if (response.data._1 === 404) {
             saveAap(this.activo)
               .then(response => {
                 if (response.status === 201) {
@@ -863,21 +863,21 @@ export default {
     },
     validate () {
       if (
-        this.activo.aap.aap_id &&
-        this.activo.aap.aap_direccion &&
-        this.activo.aap.barr_id &&
-        this.activo.aap.aap_fechatoma &&
-        this.activo.aap.aama_id &&
-        this.activo.aap.aamo_id &&
-        this.activo.aap.aatc_id &&
-        this.activo.aap.aaus_id &&
-        this.activo.aap.aaco_id &&
-        this.activo.aap.aacu_id &&
-        this.activo.aap_adicional.aap_tecnologia &&
-        this.activo.aap_adicional.aap_potencia &&
-        this.activo.aap_adicional.tipo_id &&
-        this.activo.aap_adicional.aap_poste_altura &&
-        this.activo.aap_adicional.aap_poste_propietario &&
+        this.activo.aap.aap_id !== null &&
+        this.activo.aap.aap_direccion !== null &&
+        this.activo.aap.barr_id !== null &&
+        this.activo.aap.aap_fechatoma !== null &&
+        this.activo.aap.aama_id !== null &&
+        this.activo.aap.aamo_id !== null &&
+        this.activo.aap.aatc_id !== null &&
+        this.activo.aap.aaus_id !== null &&
+        this.activo.aap.aaco_id !== null &&
+        this.activo.aap.aacu_id !== null &&
+        this.activo.aap_adicional.aap_tecnologia !== null &&
+        this.activo.aap_adicional.aap_potencia !== null &&
+        this.activo.aap_adicional.tipo_id !== null &&
+        this.activo.aap_adicional.aap_poste_altura !== null &&
+        this.activo.aap_adicional.aap_poste_propietario !== null &&
         this.activo.aap_adicional.aap_brazo !== null &&
         this.activo.aap_adicional.aap_collarin !== null
       ) {

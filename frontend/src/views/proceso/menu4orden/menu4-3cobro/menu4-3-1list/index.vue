@@ -158,7 +158,27 @@
                 <span style="margin-left: 10px">{{ scope.row.cotr_cantidad }}</span>
               </template>
             </el-table-column>
-            </el-table>
+        <el-table-column
+          fixed="right"
+          :label="$t('table.accion')"
+          width="100">
+          <template slot-scope="scope">
+            <!-- <el-button
+              size="mini"
+              circle
+              type="warning"
+              @click="handleEdit2(scope.$index, scope.row)" :title="$t('edit')"><i class="el-icon-edit"></i>
+            </el-button> -->
+            <el-button
+              size="mini"
+              circle
+              type="success"
+              :title="$t('xls')"
+              @click="handleXls(scope.$index, scope.row)"><i class="el-icon-download"></i>
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
       <!-- <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -190,7 +210,7 @@
       <el-main>
         <el-form>
           <el-row>
-            <el-col>
+            <el-col :span="8">
               <el-form-item label="Año">
                 <el-input type="number" v-model="anho" />
               </el-form-item>
@@ -200,6 +220,13 @@
                 <el-select v-model="mes">
                   <el-option v-for="m in months" :key="m.id" :value="m.id" :label="$t(`months.${m.label}`)"></el-option>
                 </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="8">
+              <el-form-item label="Consecutivo ITAF Siguente">
+                <el-input v-model="cotr_consecutivo" />
               </el-form-item>
             </el-col>
           </el-row>
@@ -223,7 +250,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { getTipos } from '@/api/reporte'
-import { obtener, generar } from '@/api/cobro'
+import { obtener, generar, xls } from '@/api/cobro'
 import { parseTime } from '@/utils'
 export default {
   data () {
@@ -232,6 +259,7 @@ export default {
       mes: null,
       tireuc_id: 1,
       reti_id: 6,
+      cotr_consecutivo: null,
       reporte_tipo: null,
       tableData: [],
       showDialog: false,
@@ -261,7 +289,7 @@ export default {
     },
     generar () {
       this.showDialog = false
-      generar(this.anho, this.mes, this.tireuc_id, this.reti_id).then(response => {
+      generar(this.anho, this.mes, this.tireuc_id, this.reti_id, this.cotr_consecutivo).then(response => {
         if (response.data === true) {
           this.$message({
             showClose: true,
@@ -351,6 +379,23 @@ export default {
         }
       })
       return sums
+    },
+    handleXls (idx, orden) {
+      console.log('_idx: ', idx, ', row: ', JSON.stringify(orden))
+      xls(orden.cotr_id).then(resp => {
+        var blob = resp.data
+        const filename = 'Informe_Orden_Trabajo_ITAF_' + orden.cotr_consecutivo + '.xlsx'
+        if (window.navigator.msSaveOrOpenBlob) {
+          window.navigator.msSaveBlob(blob, filename)
+        } else {
+          var downloadLink = window.document.createElement('a')
+          downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+          downloadLink.download = filename
+          document.body.appendChild(downloadLink)
+          downloadLink.click()
+          document.body.removeChild(downloadLink)
+        }
+      })
     },
     handleSort () {},
     handleFilter () {},
