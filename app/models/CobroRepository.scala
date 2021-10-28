@@ -947,7 +947,7 @@ class CobroRepository @Inject()(
             case a1 ~ a2 ~ a3 ~ a4 => (a1, a2, a3, a4)
           }
           val _materiales = SQL(
-            """select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, cotm1.cotrma_cantidad from siap.cobro_orden_trabajo cotr1
+            """select distinct e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, cotm1.cotrma_cantidad from siap.cobro_orden_trabajo cotr1
                                  inner join siap.cobro_orden_trabajo_material cotm1 on cotm1.cotr_id = cotr1.cotr_id 
                                  inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id 
                                  left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cotr1.cotr_fecha)

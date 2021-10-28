@@ -336,7 +336,7 @@ const procesoRouter = {
               component: () => import('@/views/proceso/menu4orden/menu4-3cobro/menu4-3-1list'),
               name: 'menu_proceso_menu4orden_menu4-3cobro_menu4-3-1list',
               hidden: true,
-              meta: { title: 'menu_proceso_menu4orden_menu4-2externa_menu4-2-1list', roles: ['super', 'admin', 'supervisor'] }
+              meta: { title: 'menu_proceso_menu4orden_menu4-2externa_menu4-2-1list', roles: ['super', 'admin', 'auxiliar', 'supervisor'] }
             }
           ]
         }
