@@ -33,7 +33,8 @@ case class Evento(
                   elem_id: Option[Long],
                   usua_id: Option[Long],
                   empr_id: Option[Long],
-                  even_id: Option[Long])
+                  even_id: Option[Long],
+                  unit_id: Option[Long])
 
 object Evento {
   implicit val yourJodaDateReads =
@@ -54,7 +55,8 @@ object Evento {
       "elem_id" -> evento.elem_id,
       "usua_id" -> evento.usua_id,
       "empr_id" -> evento.empr_id,
-      "even_id" -> evento.even_id
+      "even_id" -> evento.even_id,
+      "unit_id" -> evento.unit_id
     )
   }
 
@@ -70,7 +72,8 @@ object Evento {
       (__ \ "elem_id").readNullable[Long] and
       (__ \ "usua_id").readNullable[Long] and
       (__ \ "empr_id").readNullable[Long] and
-      (__ \ "even_id").readNullable[Long]
+      (__ \ "even_id").readNullable[Long] and 
+      (__ \ "unit_id").readNullable[Long]
   )(Evento.apply _)
 
   val eventoSet = {
@@ -85,8 +88,9 @@ object Evento {
       get[Option[Long]]("elem_id") ~
       get[Option[Long]]("usua_id") ~
       get[Option[Long]]("empr_id") ~
-      get[Option[Long]]("even_id") map {
-      case even_fecha ~ even_codigo_instalado ~ even_cantidad_instalado ~ even_codigo_retirado ~ even_cantidad_retirado ~ even_estado ~ aap_id ~ repo_id ~ elem_id ~ usua_id ~ empr_id ~ even_id =>
+      get[Option[Long]]("even_id") ~ 
+      get[Option[Long]]("unit_id") map {
+      case even_fecha ~ even_codigo_instalado ~ even_cantidad_instalado ~ even_codigo_retirado ~ even_cantidad_retirado ~ even_estado ~ aap_id ~ repo_id ~ elem_id ~ usua_id ~ empr_id ~ even_id ~ unit_id =>
         Evento(
                even_fecha,
                even_codigo_instalado,
@@ -99,7 +103,8 @@ object Evento {
                elem_id,
                usua_id,
                empr_id,
-               even_id)
+               even_id,
+               unit_id)
     }
   }
 }
@@ -144,7 +149,8 @@ class EventoRepository @Inject()(dbapi: DBApi)(
                                     elem_id, 
                                     usua_id, 
                                     empr_id,
-                                    even_id) VALUES (
+                                    even_id,
+                                    unit_id) VALUES (
                                     {even_fecha}, 
                                     {even_codigo_instalado},
                                     {even_cantidad_instalado},
@@ -156,7 +162,8 @@ class EventoRepository @Inject()(dbapi: DBApi)(
                                     {elem_id}, 
                                     {usua_id}, 
                                     {empr_id},
-                                    {even_id})""")
+                                    {even_id},
+                                    {unit_id})""")
         .on(
           "even_fecha" -> hora,
           "even_codigo_instalado" -> evento.even_codigo_instalado,
@@ -169,7 +176,8 @@ class EventoRepository @Inject()(dbapi: DBApi)(
           "elem_id" -> evento.elem_id,
           "usua_id" -> evento.usua_id,
           "empr_id" -> evento.empr_id,
-          "even_id" -> evento.even_id
+          "even_id" -> evento.even_id,
+          "unit_id" -> evento.unit_id
         )
         .executeInsert()
         .get

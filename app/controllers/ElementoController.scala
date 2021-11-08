@@ -99,7 +99,8 @@ class ElementoController @Inject()(
                                    usua_id,
                                    elemento.ucap_id,
                                    elemento.caracteristicas,
-                                   elemento.precio)
+                                   elemento.precio,
+                                   elemento.unitarios)
       elementoService.crear(elementonuevo).map { result =>
         if (result > 0) {
           Created(Json.toJson("true"))
@@ -125,7 +126,8 @@ class ElementoController @Inject()(
         usua_id,
         elemento.ucap_id,
         elemento.caracteristicas,
-        elemento.precio
+        elemento.precio,
+        elemento.unitarios
       )
       if (elementoService.actualizar(elementonuevo)) {
         Future.successful(Ok(Json.toJson("true")))

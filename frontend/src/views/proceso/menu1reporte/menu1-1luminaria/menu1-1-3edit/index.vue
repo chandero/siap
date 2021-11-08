@@ -2081,7 +2081,7 @@
                 <el-col :md="3" :lg="3" :xl="3">
                   <span style="font-weight: bold">Código de la Luminaria</span>
                 </el-col>
-                <el-col :xs="24" :sm="24" :md="11" :lg="11" :xl="11">
+                <el-col :xs="24" :sm="24" :md="9" :lg="9" :xl="9">
                   <span style="font-weight: bold">Nombre del Material</span>
                 </el-col>
                 <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
@@ -2102,6 +2102,11 @@
                 <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
                   <span style="font-weight: bold"
                     >Cantidad Material Instalado</span
+                  >
+                </el-col>
+                <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
+                  <span style="font-weight: bold"
+                    >Ucap</span
                   >
                 </el-col>
               </el-row>
@@ -2156,7 +2161,7 @@
                       </el-form-item>
                       <!-- <span style="width: 100%;">{{ codigoElemento(evento.elem_id) }}</span> -->
                     </el-col>
-                    <el-col :xs="15" :sm="15" :md="9" :lg="9" :xl="9">
+                    <el-col :xs="15" :sm="15" :md="7" :lg="7" :xl="7">
                       <el-form-item prop="elem_id">
                         <el-select
                           :disabled="evento.even_estado > 7"
@@ -2255,6 +2260,22 @@
                             )
                           "
                         ></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col class="hidden-md-and-up" :xs="8" :sm="8">
+                      <span style="font-weight: bold"
+                        >Ucap</span
+                      >
+                    </el-col>
+                    <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
+                      <el-form-item prop="unit_id">
+                        <el-select
+                          :disabled="evento.even_estado === 9"
+                          class="sinpadding"
+                          v-model="evento.unit_id"
+                        >
+                          <el-option v-for="unitario in unitarios" :key="unitario.unit_id" :label="unitario.unit_codigo + '-' + unitario.unit_descripcion" :value="unitario.unit_id" />
+                        </el-select>
                       </el-form-item>
                     </el-col>
                     <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
@@ -2463,6 +2484,7 @@ import { getMedidors } from '@/api/medidor'
 import { getTransformadors } from '@/api/transformador'
 import { getOrdenes, addReporteAOrden } from '@/api/ordentrabajo'
 import { getNovedades } from '@/api/novedad'
+import { getUnitariosTodas } from '@/api/unitario'
 // component
 // import { inspect } from 'util'
 
@@ -2521,8 +2543,8 @@ export default {
                   })
                   callback(new Error('Por favor ingrese la fecha de solución'))
                 }
-                const d_fecha_reporte = this.reporte.repo_fechasolucion
-                const d_now = Date.now()
+                const d_fecha_reporte = new Date(this.reporte.repo_fechasolucion)
+                const d_now = new Date()
                 d_fecha_reporte.setHours(d_now.getHours())
                 d_fecha_reporte.setMinutes(d_now.getMinutes())
                 d_fecha_reporte.setSeconds(d_now.getSeconds())
@@ -2531,6 +2553,8 @@ export default {
                     callback: action => { this.$refs.i_repo_fechasolucion.focus() }
                   })
                   callback(new Error('Por favor revise la fecha de solución'))
+                } else {
+                  callback()
                 }
               } else if ((this.reporte.reti_id === 1 || this.reporte.reti_id === 8) && this.reporte.rees_id === 1) {
                 callback(new Error('Retirada'))
@@ -2539,6 +2563,7 @@ export default {
                 if (this.reporte.adicional.repo_tipo_expansion === 3 && this.reporte.rees_id === 1) {
                   callback(new Error('Ya Existe'))
                 } else {
+                  console.log('Fecha solucion valida')
                   callback()
                 }
               } else {
@@ -2554,6 +2579,19 @@ export default {
       } else {
         console.log('En Validator sin aap_id')
         this.existe = false
+        callback()
+      }
+    }
+    var validateUnitEventoRule = (rule, value, callback) => {
+      console.log('rule:', rule)
+      console.log('value:', value)
+      if (this.reporte.reti_id === 2 || this.reporte.reti_id === 6) {
+        if (!value) {
+          callback(new Error('Por favor seleccione la ucap'))
+        } else {
+          callback()
+        }
+      } else {
         callback()
       }
     }
@@ -2700,7 +2738,8 @@ export default {
         elem_descripcion: null,
         empr_id: 0,
         usua_id: 0,
-        even_id: null
+        even_id: null,
+        unit_id: null
       },
       direccion: {
         repo_id: null,
@@ -2863,7 +2902,8 @@ export default {
         ]
       },
       matrules: {
-        aap_id: [{ validator: validateAapEventoRule, trigger: 'blur' }]
+        'evento.aap_id': [{ validator: validateAapEventoRule, trigger: 'blur' }],
+        'evento.unit_id': [{ validator: validateUnitEventoRule, trigger: 'change' }]
       },
       dirrules: {
         aap_id: [
@@ -3050,6 +3090,8 @@ export default {
       urbanizadoras: [],
       ordenestrabajo: [],
       owns: [],
+      unitarios: [],
+      unitario_lista: [],
       luminaria_reportes: new Map(),
       status: '',
       dialogonuevodanhovisible: false,
@@ -3278,7 +3320,10 @@ export default {
           d.type = 'success'
           this.didx = idx - 1
           console.log('Didx =' + this.didx)
-          this.completarMaterial()
+          const promise = new Promise((resolve, reject) => {
+            this.completarMaterial()
+            resolve()
+          })
         } else {
           d.type = 'info'
         }
@@ -3819,11 +3864,25 @@ export default {
       ) {
         return '-'
       } else {
-        this.completarMaterial()
-        evento.elem_codigo = this.elementos_list.find(
-          (o) => o.elem_id === evento.elem_id,
-          { elem_codigo: '-' }
-        ).elem_codigo
+        const promise = new Promise((resolve, reject) => {
+          this.completarMaterial()
+          resolve()
+        })
+        promise.then(() => {
+          var elemento = this.elementos.find((e) => {
+            return e.elem_id === evento.elem_id
+          })
+          if (elemento) {
+            if (elemento.unitarios.length > 0) {
+              this.unitario_lista = elemento.unitarios
+            } else {
+              this.unitario_lista = this.unitarios
+            }
+            return elemento.elem_codigo
+          } else {
+            return '-'
+          }
+        })
       }
     },
     buscarCodigoElemento (evento) {
@@ -3987,6 +4046,7 @@ export default {
               })
             }
             // validar fecha del reporte de retiro
+            /*
             const aapData = this.luminaria_reportes.get(d.aap_id)
             const reports = aapData.reports
             const l_fecha_reporte_retiro = reports[this.reportIndex(reports, 8)]._2
@@ -3997,8 +4057,8 @@ export default {
                 callback: action => { this.$refs.i_repo_fechasolucion.focus() }
               })
             }
-            const d_fecha_reporte = this.reporte.repo_fechasolucion
-            const d_now = Date.now()
+            const d_fecha_reporte = new Date(this.reporte.repo_fechasolucion)
+            const d_now = new Date()
             d_fecha_reporte.setHours(d_now.getHours())
             d_fecha_reporte.setMinutes(d_now.getMinutes())
             d_fecha_reporte.setSeconds(d_now.getSeconds())
@@ -4008,6 +4068,7 @@ export default {
                 callback: action => { this.$refs.i_repo_fechasolucion.focus() }
               })
             }
+            */
           }
 
           if (
@@ -4332,6 +4393,17 @@ export default {
         return elemento.elem_descripcion
       }
     },
+    unitario_s (elem_id) {
+      if (elem_id === null) {
+        return ''
+      } else {
+        const elemento = this.elementos_list.find(
+          (o) => o.elem_id === elem_id,
+          { unitarios: this.unitario_lista }
+        )
+        return elemento.unitarios
+      }
+    },
     getElementos () {
       return this.elementos_list
     },
@@ -4625,7 +4697,10 @@ export default {
     },
     cargarEventos () {
       // validar si existe un reporte previo
-      var stringReporteAnterior = localStorage.getItem('currEditRepFecha')
+      var stringReporteAnterior = null
+      if (this.reporte_previo.rees_id < 3) {
+        stringReporteAnterior = localStorage.getItem('currEditRepFecha')
+      }
       if (
         stringReporteAnterior !== undefined &&
         stringReporteAnterior !== null &&
@@ -4642,6 +4717,9 @@ export default {
             this.reporte_previo.eventos = []
             this.reporte_previo.direcciones.forEach((d) => {
               d.materiales.forEach((m) => {
+                if (m.unit_id === undefined) {
+                  m.unit_id = null
+                }
                 this.reporte_previo.eventos.push(m)
               })
             })
@@ -4780,7 +4858,8 @@ export default {
                     cantidad_retirado: true,
                     codigo_instalado: true,
                     cantidad_instalado: true
-                  }
+                  },
+                  unit_id: e.unit_id
                 }
                 direccion.materiales.push(evento)
               })
@@ -4913,7 +4992,8 @@ export default {
                 cantidad_retirado: true,
                 codigo_instalado: true,
                 cantidad_instalado: true
-              }
+              },
+              unit_id: e.unit_id
             }
             d.materiales.push(evento)
           })
@@ -4953,7 +5033,8 @@ export default {
                 cantidad_retirado: true,
                 codigo_instalado: true,
                 cantidad_instalado: true
-              }
+              },
+              unit_id: null
             }
             console.log('agregando material vacio a direccion: ' + d.even_id)
             d.materiales.push(evento)
@@ -4978,7 +5059,7 @@ export default {
         this.elementos = []
       }
     },
-    completarMaterial () {
+    async completarMaterial () {
       for (var j = 0; j < this.reporte.direcciones.length; j++) {
         if (this.reporte.direcciones[j].materiales !== undefined) {
           for (
@@ -5002,7 +5083,8 @@ export default {
                   elem_id: this.reporte.direcciones[j].materiales[i].elem_id,
                   elem_descripcion: this.elemento(
                     this.reporte.direcciones[j].materiales[i].elem_id
-                  )
+                  ),
+                  unitarios: this.unitario_s(this.reporte.direcciones[j].materiales[i].elem_id)
                 })
               }
             }
@@ -5165,7 +5247,10 @@ export default {
                                                                                                                           ) => {
                                                                                                                             this.novedades =
                                                                                                                               response.data
-                                                                                                                            this.obtenerReporte()
+                                                                                                                            getUnitariosTodas().then(response => {
+                                                                                                                              this.unitarios = response.data
+                                                                                                                              this.obtenerReporte()
+                                                                                                                            })
                                                                                                                           }
                                                                                                                         )
                                                                                                                         .catch(

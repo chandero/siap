@@ -40,14 +40,16 @@ case class Elemento(
     usua_id: Option[Long],
     ucap_id: Option[Long],
     caracteristicas: List[ElementoCaracteristica],
-    precio: Option[Elemento_Precio]
+    precio: Option[Elemento_Precio],
+    unitarios: List[Unitario]
 )
 
 case class ElementoD(
     elem_id: Option[Long],
     elem_descripcion: Option[String],
     elem_codigo: Option[String],
-    elem_ucap: Option[Boolean]
+    elem_ucap: Option[Boolean],
+    unitarios: List[Unitario]
 )
 
 object Elemento_Precio {
@@ -101,7 +103,8 @@ object Elemento {
       "usua_id" -> elemento.usua_id,
       "ucap_id" -> elemento.ucap_id,
       "caracteristicas" -> elemento.caracteristicas,
-      "precio" -> elemento.precio
+      "precio" -> elemento.precio,
+      "unitarios" -> elemento.unitarios
     )
   }
 
@@ -116,7 +119,8 @@ object Elemento {
       (__ \ "usua_id").readNullable[Long] and
       (__ \ "ucap_id").readNullable[Long] and
       (__ \ "caracteristicas").read[List[ElementoCaracteristica]] and
-      (__ \ "precio").readNullable[Elemento_Precio]
+      (__ \ "precio").readNullable[Elemento_Precio] and
+      (__ \ "unitarios").read[List[Unitario]]
   )(Elemento.apply _)
 }
 
@@ -131,7 +135,8 @@ object ElementoD {
       "elem_id" -> elemento.elem_id,
       "elem_descripcion" -> elemento.elem_descripcion,
       "elem_codigo" -> elemento.elem_codigo,
-      "elem_ucap" -> elemento.elem_ucap
+      "elem_ucap" -> elemento.elem_ucap,
+      "unitarios" -> elemento.unitarios
     )
   }
 
@@ -139,7 +144,8 @@ object ElementoD {
     (__ \ "elem_id").readNullable[Long] and
       (__ \ "elem_descripcion").readNullable[String] and
       (__ \ "elem_codigo").readNullable[String] and
-      (__ \ "elem_ucap").readNullable[Boolean]
+      (__ \ "elem_ucap").readNullable[Boolean] and
+      (__ \ "unitarios").read[List[Unitario]]
   )(ElementoD.apply _)
 
   val _set = {
@@ -148,7 +154,7 @@ object ElementoD {
       get[Option[String]]("elemento.elem_codigo") ~
       get[Option[Boolean]]("elemento.elem_ucap") map {
       case elem_id ~ elem_descripcion ~ elem_codigo ~ elem_ucap =>
-        ElementoD(elem_id, elem_descripcion, elem_codigo, elem_ucap)
+        ElementoD(elem_id, elem_descripcion, elem_codigo, elem_ucap, null)
     }
   }
 }
@@ -183,7 +189,8 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
           usua_id,
           ucap_id,
           null,
-          None
+          None,
+          null
         )
     }
   }
@@ -214,7 +221,7 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
   def buscarPorId(elem_id: Long): Option[Elemento] = {
     db.withConnection { implicit connection =>
       var elemen: Option[Elemento] = SQL(
-        "SELECT * FROM siap.elemento WHERE elem_id = {elem_id}"
+        "SELECT * FROM siap.elemento e1 WHERE e1.elem_id = {elem_id}"
       ).on(
           'elem_id -> elem_id
         )
@@ -239,11 +246,20 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
                   'elem_id -> elem_id
                 ).as(Elemento_Precio._set.singleOpt)
               }
+
+              var eu = db.withConnection { implicit connection =>
+                SQL("""SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
+                       INNER JOIN siap.unitario u1 ON u1.unit_id = eu1.unit_id
+                       WHERE elem_id = {elem_id}"""
+                    ).on('elem_id -> elem_id).as(Unitario._set *)
+              }
+
               var nep = ep match {
                 case None     => new Elemento_Precio(None, Some(anho), None, None)
                 case Some(ep) => ep
               }
-              val elemento = e.copy(caracteristicas = caracts, precio = Some(nep))
+              val elemento = e.copy(caracteristicas = caracts, precio = Some(nep), unitarios = eu)
+    
               Some(elemento)
           case None => None
       }
@@ -268,7 +284,17 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
             'empr_id -> empr_id
           )
           .as(ElementoD._set *)
-        lista
+        lista.map { e =>
+          var eu = db.withConnection { implicit connection =>
+            SQL("""SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
+                  INNER JOIN siap.unitario u1 ON u1.unit_id = eu1.unit_id
+                  WHERE elem_id = {elem_id}"""
+            ).on('elem_id -> e.elem_id.get).as(Unitario._set *)
+          }
+          lista_result += e.copy(unitarios = eu)
+        }
+
+        lista_result.toList
       }
     }
 
@@ -283,7 +309,14 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
           'elem_codigo -> elem_codigo.toInt
         )
         .as(ElementoD._set.singleOpt)
-      elemen
+      var eu = db.withConnection { implicit connection =>
+         SQL("""SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
+                INNER JOIN siap.unitario u1 ON u1.unit_id = eu1.unit_id
+                WHERE elem_id = {elem_id}"""
+             ).on('elem_id -> elemen.get.elem_id.get).as(Unitario._set *)
+      }
+
+      Some(elemen.get.copy(unitarios = eu))
     }
   }
 
@@ -357,7 +390,15 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
                 case None     => new Elemento_Precio(None, Some(anho), None, None)
                 case Some(ep) => ep
               }
-              val elemento = e.copy(caracteristicas = caracts, precio = Some(nep))
+
+              var eu = db.withConnection { implicit connection =>
+                SQL("""SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
+                       INNER JOIN siap.unitario u1 ON u1.unit_id = eu1.unit_id
+                       WHERE elem_id = {elem_id}"""
+                    ).on('elem_id -> e.elem_id).as(Unitario._set *)
+              }
+
+              val elemento = e.copy(caracteristicas = caracts, precio = Some(nep), unitarios = eu)
               lista_result += elemento
         }
         lista_result.toList
@@ -399,7 +440,13 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
                 case None     => new Elemento_Precio(None, Some(anho), None, None)
                 case Some(ep) => ep
               }
-              val elemento = e.copy(caracteristicas = caracts, precio = Some(nep))
+              var eu = db.withConnection { implicit connection =>
+                SQL("""SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
+                       INNER JOIN siap.unitario u1 ON u1.unit_id = eu1.unit_id
+                       WHERE elem_id = {elem_id}"""
+                    ).on('elem_id -> e.elem_id).as(Unitario._set *)
+              }              
+              val elemento = e.copy(caracteristicas = caracts, precio = Some(nep), unitarios = eu)
               lista_result += elemento
         }
         lista_result.toList

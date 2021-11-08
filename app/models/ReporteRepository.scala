@@ -3216,10 +3216,10 @@ class ReporteRepository @Inject()(
             }
             var eventoActualizado: Boolean = false
             var eventoInsertado: Boolean = false
-            println("empr_id: " + reporte.empr_id)
+            /*println("empr_id: " + reporte.empr_id)
             println("repo_id: " + reporte.repo_id)
             println("aap_id: " + e.aap_id)
-            println("even_id: " + e.even_id)
+            println("even_id: " + e.even_id)*/
             eventoActualizado = SQL(
               """UPDATE siap.reporte_evento SET 
                                                                 even_fecha = {even_fecha}, 
@@ -3229,7 +3229,8 @@ class ReporteRepository @Inject()(
                                                                 even_cantidad_retirado = {even_cantidad_retirado}, 
                                                                 even_codigo_instalado = {even_codigo_instalado}, 
                                                                 even_cantidad_instalado = {even_cantidad_instalado},
-                                                                usua_id = {usua_id}
+                                                                usua_id = {usua_id},
+                                                                unit_id = {unit_id}
                                                             WHERE empr_id = {empr_id} and repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}
                                                         """
             ).on(
@@ -3244,7 +3245,8 @@ class ReporteRepository @Inject()(
                 'empr_id -> reporte.empr_id,
                 'repo_id -> reporte.repo_id,
                 'aap_id -> e.aap_id,
-                'even_id -> e.even_id
+                'even_id -> e.even_id,
+                'unit_id -> e.unit_id
               )
               .executeUpdate() > 0
             if (!eventoActualizado) {
@@ -3260,7 +3262,8 @@ class ReporteRepository @Inject()(
                                     elem_id, 
                                     usua_id, 
                                     empr_id,
-                                    even_id) VALUES (
+                                    even_id,
+                                    unit_id) VALUES (
                                     {even_fecha}, 
                                     {even_codigo_instalado},
                                     {even_cantidad_instalado},
@@ -3272,7 +3275,8 @@ class ReporteRepository @Inject()(
                                     {elem_id}, 
                                     {usua_id}, 
                                     {empr_id},
-                                    {even_id})"""
+                                    {even_id},
+                                    {unit_id})"""
               ).on(
                   "even_fecha" -> hora,
                   "even_codigo_instalado" -> e.even_codigo_instalado,
@@ -3285,7 +3289,8 @@ class ReporteRepository @Inject()(
                   "elem_id" -> e.elem_id,
                   "usua_id" -> e.usua_id,
                   "empr_id" -> reporte.empr_id,
-                  "even_id" -> e.even_id
+                  "even_id" -> e.even_id,
+                  "unit_id" -> e.unit_id
                 )
                 .executeUpdate() > 0
             }
@@ -5406,8 +5411,15 @@ class ReporteRepository @Inject()(
           var compiledFile = REPORT_DEFINITION_PATH + "siap_reporte.jasper";
           reporte match {
             case Some(r) =>
-              if (reporte.get.reti_id.get == 2 || reporte.get.reti_id.get == 6) {
+              if ( reporte.get.reti_id.get == 6) {
                 compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_expansion.jasper"
+              }
+              if (reporte.get.reti_id.get == 2) {
+                if (reporte.get.adicional.get.repo_tipo_expansion.get.toInt == 3) {
+                  compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_expansion_tipo_III.jasper"
+                } else {
+                  compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_expansion.jasper"
+                }
               } else if (reporte.get.reti_id.get == 8) {
                 compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_retiro.jasper"
               } else if (reporte.get.reti_id.get == 3) {

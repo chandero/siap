@@ -165,6 +165,14 @@ class CobroRepository @Inject()(
 
   private val db = dbapi.database("default")
   private val REPORT_DEFINITION_PATH = System.getProperty("user.dir") + "/conf/reports/"
+  private var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+  private var _listMerged01 = new ListBuffer[CellRange]()
+  private var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]() 
+  private var _listSubTotal = new ArrayBuffer[String]()
+  private var _listTotal = new ArrayBuffer[String]()
+  private var _idx = 0
+
+  
 
   def buscarPorId(empr_id: Long, cotr_id: Long): Option[orden_trabajo_cobro] = {
     db.withConnection { implicit connection =>
@@ -635,11 +643,6 @@ class CobroRepository @Inject()(
       orden: orden_trabajo_cobro
   ): Sheet = {
     db.withConnection { implicit connection =>
-      var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
-      var _listMerged01 = new ListBuffer[CellRange]()
-      var _listSubTotal = new ArrayBuffer[String]()
-      var _listTotal = new ArrayBuffer[String]()
-      var _idx = 0
       val fuenteTotal = Font(
         height = 12.points,
         fontName = "Liberation Sans",
@@ -669,10 +672,44 @@ class CobroRepository @Inject()(
         strikeout = false
       )
       val colorSubTotal = Color(255, 182, 108)
-
+      siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_101(empresa, orden)
+      siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_102(empresa, orden)
+      siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_103(empresa, orden)            
+      siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_104(empresa, orden)            
+      /* 
+      siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_105(empresa, orden)            
+      siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_106(empresa, orden)            
+      siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_107(empresa, orden)            
+      siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_108(empresa, orden)            
+      siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_109(empresa, orden)            
+      siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_110(empresa, orden)            
+      siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_111(empresa, orden)            
+      siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_112(empresa, orden)            
+      */
       Sheet(
         name = "Unitarios",
-        rows = {
+        rows = { 
+          _listRow01.toList
+        },
+        mergedRegions = {
+          _listMerged01.toList
+        },
+        columns = {
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 6, width = new Width(18, WidthUnit.Character))
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 7, width = new Width(18, WidthUnit.Character))
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 8, width = new Width(18, WidthUnit.Character))
+
+          _listColumn.toList
+        }        
+      )
+    }
+  }
+
+  def siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_101(empresa: Empresa, orden: orden_trabajo_cobro) {
+    db.withConnection { implicit connection =>
           val emptyRow = com.norbitltd.spoiwo.model
             .Row()
             .withCellValues("")
@@ -698,9 +735,6 @@ class CobroRepository @Inject()(
               "",
               "",
               "",
-              "",
-              "",
-              "",
               "Item",
               "1.01"
             )
@@ -716,9 +750,6 @@ class CobroRepository @Inject()(
               "",
               "",
               "",
-              "",
-              "",
-              "",
               "Und",
               "UND"
             )
@@ -729,9 +760,6 @@ class CobroRepository @Inject()(
               "Area",
               "",
               orden.cotr_direccion.get,
-              "",
-              "",
-              "",
               "",
               "",
               "",
@@ -753,9 +781,6 @@ class CobroRepository @Inject()(
               "",
               "",
               "",
-              "",
-              "",
-              "",
               ""
             )
           val headerRow08 = com.norbitltd.spoiwo.model
@@ -768,11 +793,8 @@ class CobroRepository @Inject()(
               "",
               "CANT",
               "TARIFA / DIA",
-              "",
               "RENDIMIENTO",
-              "",
               "VALOR PARCIAL",
-              "",
               "",
               ""
             )
@@ -789,9 +811,6 @@ class CobroRepository @Inject()(
               "UNID/DIA/EQU.",
               "",
               "",
-              "",
-              "",
-              "",
               ""
             )
           val headerRow10 = com.norbitltd.spoiwo.model
@@ -804,11 +823,8 @@ class CobroRepository @Inject()(
               "",
               "(a)",
               "(b)",
-              "",
               "(c)",
-              "",
               "a x b / c",
-              "",
               "",
               ""
             )
@@ -816,56 +832,155 @@ class CobroRepository @Inject()(
           _listRow01 += emptyRow
           _idx += 1
           _listRow01 += headerRow01
-          _listMerged01 += CellRange((_idx, _idx), (1, 13))
+          _listMerged01 += CellRange((_idx, _idx), (1, 10))
           _idx += 1
           _listRow01 += emptyRow
           _idx += 1
           _listRow01 += headerRow02
-          _listMerged01 += CellRange((_idx, _idx), (1, 13))
+          _listMerged01 += CellRange((_idx, _idx), (1, 10))
           _idx += 1
           _listRow01 += emptyRow
           _idx += 1
           _listRow01 += headerRow03
-          _listMerged01 += CellRange((_idx, _idx), (1, 13))
+          _listMerged01 += CellRange((_idx, _idx), (1, 10))
           _idx += 1
           _listRow01 += headerRow04
           _idx += 1
           _listRow01 += headerRow05
           _listMerged01 += CellRange((_idx, _idx), (1, 2))
-          _listMerged01 += CellRange((_idx, _idx), (3, 11))
+          _listMerged01 += CellRange((_idx, _idx), (3, 8))
           _idx += 1
           _listRow01 += headerRow06
           _listMerged01 += CellRange((_idx, _idx), (1, 2))
-          _listMerged01 += CellRange((_idx, _idx), (3, 11))
+          _listMerged01 += CellRange((_idx, _idx), (3, 8))
           _idx += 1
           _listRow01 += headerRow07
           _listMerged01 += CellRange((_idx, _idx), (1, 2))
-          _listMerged01 += CellRange((_idx, _idx), (3, 11))
+          _listMerged01 += CellRange((_idx, _idx), (3, 8))
           _idx += 1
           _listRow01 += emptyRow
           _idx += 1
           _listRow01 += headerRow08
           _listMerged01 += CellRange((_idx, _idx), (1, 4))
-          _listMerged01 += CellRange((_idx, _idx), (6, 7))
-          _listMerged01 += CellRange((_idx, _idx), (8, 9))
-          _listMerged01 += CellRange((_idx, _idx), (10, 11))
-          _listMerged01 += CellRange((_idx, _idx), (12, 13))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
           _idx += 1
           _listRow01 += headerRow09
-          _listMerged01 += CellRange((_idx, _idx), (1, 4))
-          _listMerged01 += CellRange((_idx, _idx), (6, 7))
-          _listMerged01 += CellRange((_idx, _idx), (8, 9))
-          _listMerged01 += CellRange((_idx, _idx), (10, 11))
-          _listMerged01 += CellRange((_idx, _idx), (12, 13))
+           _listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
           _idx += 1
           _listRow01 += headerRow10
           _listMerged01 += CellRange((_idx, _idx), (1, 4))
-          _listMerged01 += CellRange((_idx, _idx), (6, 7))
-          _listMerged01 += CellRange((_idx, _idx), (8, 9))
-          _listMerged01 += CellRange((_idx, _idx), (10, 11))
-          _listMerged01 += CellRange((_idx, _idx), (12, 13))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
           _idx += 1
           /// AQUI DEBE IR LA INFO DE TRANSPORTE, EQUIPO Y HERRAMIENTA
+          var _herramientaLista = new ArrayBuffer[(String, Long, Long, Long)]()
+          _herramientaLista += (("HERRAMIENTA MENOR", 2, 2647, 1))
+          _herramientaLista += (("CAMIONETA", 1, 158908,8))
+          var _idx_inicial = _idx + 1
+          var _idx_final = _idx + 1          
+          _herramientaLista.map { _m =>
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(1),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._2,
+                  Some(5),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._3,
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._4,
+                  Some(7),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),                
+                FormulaCell(
+                  "SUM(F" + (_idx + 1) + "*G" + (_idx + 1) + "/H" + (_idx + 1) +")",
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _idx += 1
+              _idx_final += 1              
+            }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "SUBTOTAL (A)",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            FormulaCell(
+              "SUM(I" + (_idx_inicial) + ":I" + (_idx_final) + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listSubTotal += ("J" + (_idx + 1))
+          _idx += 1
           _listRow01 += emptyRow
           _idx += 1
           _listRow01 += com.norbitltd.spoiwo.model
@@ -878,19 +993,16 @@ class CobroRepository @Inject()(
               "",
               "UND",
               "PRECIO POR",
-              "",
               "CANTIDAD DE",
-              "",
               "VALOR",
-              "",
               "",
               ""
             )
-          _listMerged01 += CellRange((_idx, _idx), (1, 4))
-          _listMerged01 += CellRange((_idx, _idx), (6, 7))
-          _listMerged01 += CellRange((_idx, _idx), (8, 9))
-          _listMerged01 += CellRange((_idx, _idx), (10, 11))
-          _listMerged01 += CellRange((_idx, _idx), (12, 13))
+          //_listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
           _idx += 1
           _listRow01 += com.norbitltd.spoiwo.model
             .Row()
@@ -902,19 +1014,16 @@ class CobroRepository @Inject()(
               "",
               "",
               "UNIDAD",
-              "",
               "MATERIAL/UND",
-              "",
               "PARCIAL",
-              "",
               "",
               ""
             )
-          _listMerged01 += CellRange((_idx, _idx), (1, 4))
-          _listMerged01 += CellRange((_idx, _idx), (6, 7))
-          _listMerged01 += CellRange((_idx, _idx), (8, 9))
-          _listMerged01 += CellRange((_idx, _idx), (10, 11))
-          _listMerged01 += CellRange((_idx, _idx), (12, 13))
+          //_listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
           _idx += 1
           val headerRow11 = com.norbitltd.spoiwo.model
             .Row()
@@ -926,19 +1035,16 @@ class CobroRepository @Inject()(
               "",
               "",
               "(d)",
-              "",
               "(e)",
-              "",
               "d x e",
-              "",
               "",
               ""
             )
-          _listMerged01 += CellRange((_idx, _idx), (1, 4))
-          _listMerged01 += CellRange((_idx, _idx), (6, 7))
-          _listMerged01 += CellRange((_idx, _idx), (8, 9))
-          _listMerged01 += CellRange((_idx, _idx), (10, 11))
-          _listMerged01 += CellRange((_idx, _idx), (12, 13))
+          //_listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
           _listRow01 += headerRow11
           _idx += 1
           val _parseMaterial = str("elem_descripcion") ~ get[Option[String]](
@@ -949,16 +1055,19 @@ class CobroRepository @Inject()(
           val _materiales = SQL(
             """select distinct e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, cotm1.cotrma_cantidad from siap.cobro_orden_trabajo cotr1
                                  inner join siap.cobro_orden_trabajo_material cotm1 on cotm1.cotr_id = cotr1.cotr_id 
-                                 inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id 
+                                 inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                                 inner join siap.elemento_unitario eu1 on eu1.elem_id = e1.elem_id
+                                 inner join siap.unitario u1 on u1.unit_id = eu1.unit_id
                                  left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cotr1.cotr_fecha)
-                                 where cotr1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id}"""
+                                 where cotr1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo}"""
           ).on(
               'cotr_id -> orden.cotr_id,
-              'empr_id -> empresa.empr_id.get
+              'empr_id -> empresa.empr_id.get,
+              'unit_codigo -> "1.01"
             )
             .as(_parseMaterial *)
-          var _idx_inicial = _idx + 1
-          var _idx_final = _idx + 1
+          _idx_inicial = _idx + 1
+          _idx_final = _idx + 1
           _materiales.map {
             _m =>
               _listRow01 += com.norbitltd.spoiwo.model.Row(
@@ -1000,7 +1109,7 @@ class CobroRepository @Inject()(
                 ),
                 NumericCell(
                   _m._4,
-                  Some(8),
+                  Some(7),
                   style = Some(
                     CellStyle(
                       dataFormat = CellDataFormat("#,##0.00")
@@ -1009,8 +1118,8 @@ class CobroRepository @Inject()(
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 FormulaCell(
-                  "SUM(G" + (_idx + 1) + "* I" + (_idx + 1) + ")",
-                  Some(10),
+                  "SUM(G" + (_idx + 1) + "*H" + (_idx + 1) + ")",
+                  Some(8),
                   style = Some(
                     CellStyle(
                       dataFormat = CellDataFormat("#,##0")
@@ -1020,10 +1129,10 @@ class CobroRepository @Inject()(
                 )
               )
               _listMerged01 += CellRange((_idx, _idx), (1, 4))
-              _listMerged01 += CellRange((_idx, _idx), (6, 7))
-              _listMerged01 += CellRange((_idx, _idx), (8, 9))
-              _listMerged01 += CellRange((_idx, _idx), (10, 11))
-              _listMerged01 += CellRange((_idx, _idx), (12, 13))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
               _idx += 1
               _idx_final += 1
           }
@@ -1032,7 +1141,7 @@ class CobroRepository @Inject()(
           _listRow01 += com.norbitltd.spoiwo.model.Row(
             StringCell(
               "SUBTOTAL (B)",
-              Some(12),
+              Some(9),
               style = Some(
                 CellStyle(
                   dataFormat = CellDataFormat("@")
@@ -1041,14 +1150,14 @@ class CobroRepository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             )
           )
-          _listMerged01 += CellRange((_idx, _idx), (12, 13))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
           _idx += 1
           _listRow01 += emptyRow
           _idx += 1
           _listRow01 += com.norbitltd.spoiwo.model.Row(
             FormulaCell(
-              "SUM(K" + (_idx_inicial) + ":K" + (_idx_final) + ")",
-              Some(12),
+              "SUM(I" + (_idx_inicial) + ":I" + (_idx_final) + ")",
+              Some(9),
               style = Some(
                 CellStyle(
                   dataFormat = CellDataFormat("#,##0")
@@ -1057,8 +1166,8 @@ class CobroRepository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             )
           )
-          _listMerged01 += CellRange((_idx, _idx), (12, 13))
-          _listSubTotal += ("M" + (_idx + 1))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listSubTotal += ("J" + (_idx + 1))
           _idx += 1
           // MANO OBRA
           _listRow01 += emptyRow
@@ -1073,19 +1182,16 @@ class CobroRepository @Inject()(
               "",
               "CANT",
               "SALARIO",
-              "",
               "RENDIMIENTO",
-              "",
               "VALOR",
-              "",
               "",
               ""
             )
               _listMerged01 += CellRange((_idx, _idx), (1, 4))
-              _listMerged01 += CellRange((_idx, _idx), (6, 7))
-              _listMerged01 += CellRange((_idx, _idx), (8, 9))
-              _listMerged01 += CellRange((_idx, _idx), (10, 11))
-              _listMerged01 += CellRange((_idx, _idx), (12, 13))            
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))            
           _idx += 1
           _listRow01 += com.norbitltd.spoiwo.model
             .Row()
@@ -1097,19 +1203,16 @@ class CobroRepository @Inject()(
               "",
               "",
               "INTEGRAL / DIA",
-              "",
               "UNID / DIA",
-              "",
               "PARCIAL",
-              "",
               "",
               ""
             )
               _listMerged01 += CellRange((_idx, _idx), (1, 4))
-              _listMerged01 += CellRange((_idx, _idx), (6, 7))
-              _listMerged01 += CellRange((_idx, _idx), (8, 9))
-              _listMerged01 += CellRange((_idx, _idx), (10, 11))
-              _listMerged01 += CellRange((_idx, _idx), (12, 13))            
+              // _listMerged01 += CellRange((_idx, _idx), (6, 7))
+              // _listMerged01 += CellRange((_idx, _idx), (8, 9))
+              // _listMerged01 += CellRange((_idx, _idx), (10, 11))
+              // _listMerged01 += CellRange((_idx, _idx), (12, 13))            
           _idx += 1
           _listRow01 += com.norbitltd.spoiwo.model
             .Row()
@@ -1121,19 +1224,16 @@ class CobroRepository @Inject()(
               "",
               "(f)",
               "(g)",
-              "",
               "(h)",
-              "",
               "(f x g / h)",
-              "",
               "",
               ""
             )
               _listMerged01 += CellRange((_idx, _idx), (1, 4))
-              _listMerged01 += CellRange((_idx, _idx), (6, 7))
-              _listMerged01 += CellRange((_idx, _idx), (8, 9))
-              _listMerged01 += CellRange((_idx, _idx), (10, 11))
-              _listMerged01 += CellRange((_idx, _idx), (12, 13))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
             _idx += 1            
           //
           // LEER MANO DE OBRA
@@ -1183,7 +1283,7 @@ class CobroRepository @Inject()(
                 ),
                 NumericCell(
                   _m._3,
-                  Some(8),
+                  Some(7),
                   style = Some(
                     CellStyle(
                       dataFormat = CellDataFormat("#,##0.00")
@@ -1192,8 +1292,8 @@ class CobroRepository @Inject()(
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 FormulaCell(
-                  "SUM(F" + (_idx + 1) + "* G" + (_idx + 1) + "/ I" + (_idx + 1) + ")",
-                  Some(10),
+                  "SUM(F" + (_idx + 1) + "* G" + (_idx + 1) + "/ H" + (_idx + 1) + ")",
+                  Some(8),
                   style = Some(
                     CellStyle(
                       dataFormat = CellDataFormat("#,##0")
@@ -1203,10 +1303,10 @@ class CobroRepository @Inject()(
                 )
               )
               _listMerged01 += CellRange((_idx, _idx), (1, 4))
-              _listMerged01 += CellRange((_idx, _idx), (6, 7))
-              _listMerged01 += CellRange((_idx, _idx), (8, 9))
-              _listMerged01 += CellRange((_idx, _idx), (10, 11))
-              _listMerged01 += CellRange((_idx, _idx), (12, 13))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
               _idx += 1
               _idx_final += 1            
           }
@@ -1215,7 +1315,7 @@ class CobroRepository @Inject()(
           _listRow01 += com.norbitltd.spoiwo.model.Row(
             StringCell(
               "SUBTOTAL (C)",
-              Some(12),
+              Some(9),
               style = Some(
                 CellStyle(
                   dataFormat = CellDataFormat("@")
@@ -1224,14 +1324,14 @@ class CobroRepository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             )
           )
-          _listMerged01 += CellRange((_idx, _idx), (12, 13))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
           _idx += 1
           _listRow01 += emptyRow
           _idx += 1
           _listRow01 += com.norbitltd.spoiwo.model.Row(
             FormulaCell(
-              "SUM(K" + (_idx_inicial) + ":K" + (_idx_final) + ")",
-              Some(12),
+              "SUM(I" + (_idx_inicial) + ":I" + (_idx_final) + ")",
+              Some(9),
               style = Some(
                 CellStyle(
                   dataFormat = CellDataFormat("#,##0")
@@ -1240,8 +1340,8 @@ class CobroRepository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             )
           )
-          _listMerged01 += CellRange((_idx, _idx), (12, 13))
-          _listSubTotal += ("M" + (_idx + 1))          
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listSubTotal += ("J" + (_idx + 1))
           _idx += 1
           _listRow01 += emptyRow
           _idx += 1
@@ -1258,7 +1358,7 @@ class CobroRepository @Inject()(
               ),
               FormulaCell(
                 "SUM(" + _listSubTotal.mkString(",") + ")",
-                Some(12),
+                Some(9),
                 style = Some(
                   CellStyle(
                     dataFormat = CellDataFormat("#,##0")
@@ -1268,17 +1368,2326 @@ class CobroRepository @Inject()(
               )
             )
             _listMerged01 += CellRange((_idx, _idx), (1, 5))
-            _listMerged01 += CellRange((_idx, _idx), (6, 11))
-            _listMerged01 += CellRange((_idx, _idx), (12, 13))
+            _listMerged01 += CellRange((_idx, _idx), (6, 8))
+            _idx_final = _idx
+            //_listMerged01 += CellRange((_idx, _idx), (12, 13))
             _idx += 1
-          _listRow01.toList
-        },
-        mergedRegions = {
-          _listMerged01.toList
-        }
-      )
+          /// AQUI DEBE IR LA INFO DE INGENIERIA
+          var _ingLista = new ArrayBuffer[(String, Double)]()
+          _ingLista += (("INGENIERIA", 0.05))
+          _ingLista += (("ADMINISTRACION DE LA OBRA", 0.28))
+          _ingLista += (("INSPECTORES DE OBRA", 0.02))
+          _idx_inicial = _idx + 1
+          var _idx_subtotal = _idx
+          _listSubTotal = new ArrayBuffer[String]()
+          _listSubTotal += ("I"+ _idx_subtotal)
+          _ingLista.map { _m =>
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._2,
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("##0.00%")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),          
+                FormulaCell(
+                  "SUM(J" + (_idx_subtotal ) + "*I" + (_idx + 1) + ")",
+                  Some(9),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 5))
+              _listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _listSubTotal += ("J" + (_idx + 1))
+              _idx += 1
+              _idx_final += 1              
+            }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "TOTAL PRECIO UNIDAD CONSTRUCTIVA",
+              Some(6),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            FormulaCell(
+              "SUM(" + _listSubTotal.mkString(",") + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          _listRow01 += emptyRow
+          _listRow01 += emptyRow
+          _idx = _idx + 3
     }
   }
+
+  def siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_102(empresa: Empresa, orden: orden_trabajo_cobro) {
+    db.withConnection { implicit connection =>
+          val emptyRow = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("")
+
+          val headerRow01 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("", empresa.empr_descripcion)
+          val headerRow02 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("", empresa.muni_descripcion.get)
+          val headerRow03 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("", "ANALISIS DE PRECIOS UNITARIOS")
+          val headerRow04 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "Item",
+              "1.02"
+            )
+          val headerRow05 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "Obra",
+              "",
+              "MODERNIZACION A LED",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "Und",
+              "UND"
+            )
+          val headerRow06 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "Area",
+              "",
+              orden.cotr_direccion.get,
+              "",
+              "",
+              "",
+              "",
+              "",
+              "Cant",
+              orden.cotr_cantidad.get
+            )
+          val headerRow07 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "Actividad",
+              "",
+              "SUMINISTRO E INSTALACION DE POSTES" ,
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            )
+          val headerRow08 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "CANT",
+              "TARIFA / DIA",
+              "RENDIMIENTO",
+              "VALOR PARCIAL",
+              "",
+              ""
+            )
+          val headerRow09 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "TRANSPORTE, EQUIPOS Y HERRAMIENTAS",
+              "",
+              "",
+              "",
+              "",
+              "INST / EQUIPO",
+              "UNID/DIA/EQU.",
+              "",
+              "",
+              ""
+            )
+          val headerRow10 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "(a)",
+              "(b)",
+              "(c)",
+              "a x b / c",
+              "",
+              ""
+            )
+
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += headerRow01
+          _listMerged01 += CellRange((_idx, _idx), (1, 10))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += headerRow02
+          _listMerged01 += CellRange((_idx, _idx), (1, 10))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += headerRow03
+          _listMerged01 += CellRange((_idx, _idx), (1, 10))
+          _idx += 1
+          _listRow01 += headerRow04
+          _idx += 1
+          _listRow01 += headerRow05
+          _listMerged01 += CellRange((_idx, _idx), (1, 2))
+          _listMerged01 += CellRange((_idx, _idx), (3, 8))
+          _idx += 1
+          _listRow01 += headerRow06
+          _listMerged01 += CellRange((_idx, _idx), (1, 2))
+          _listMerged01 += CellRange((_idx, _idx), (3, 8))
+          _idx += 1
+          _listRow01 += headerRow07
+          _listMerged01 += CellRange((_idx, _idx), (1, 2))
+          _listMerged01 += CellRange((_idx, _idx), (3, 8))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += headerRow08
+          _listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += headerRow09
+           _listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += headerRow10
+          _listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          /// AQUI DEBE IR LA INFO DE TRANSPORTE, EQUIPO Y HERRAMIENTA
+          var _herramientaLista = new ArrayBuffer[(String, Long, Long, Long)]()
+          _herramientaLista += (("HERRAMIENTA MENOR", 2, 2647, 1))
+          _herramientaLista += (("CAMIONETA", 1, 158908,8))
+          var _idx_inicial = _idx + 1
+          var _idx_final = _idx + 1          
+          _herramientaLista.map { _m =>
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(1),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._2,
+                  Some(5),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._3,
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._4,
+                  Some(7),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),                
+                FormulaCell(
+                  "SUM(F" + (_idx + 1) + "*G" + (_idx + 1) + "/H" + (_idx + 1) +")",
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _idx += 1
+              _idx_final += 1              
+            }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "SUBTOTAL (A)",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            FormulaCell(
+              "SUM(I" + (_idx_inicial) + ":I" + (_idx_final) + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listSubTotal += ("J" + (_idx + 1))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "UND",
+              "PRECIO POR",
+              "CANTIDAD DE",
+              "VALOR",
+              "",
+              ""
+            )
+          //_listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "MATERIALES",
+              "",
+              "",
+              "",
+              "",
+              "UNIDAD",
+              "MATERIAL/UND",
+              "PARCIAL",
+              "",
+              ""
+            )
+          //_listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          val headerRow11 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "(d)",
+              "(e)",
+              "d x e",
+              "",
+              ""
+            )
+          //_listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listRow01 += headerRow11
+          _idx += 1
+          val _parseMaterial = str("elem_descripcion") ~ get[Option[String]](
+            "elpr_unidad"
+          ) ~ get[Option[Int]]("elpr_precio") ~ double("cotrma_cantidad") map {
+            case a1 ~ a2 ~ a3 ~ a4 => (a1, a2, a3, a4)
+          }
+          val _materiales = SQL(
+            """select distinct e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, cotm1.cotrma_cantidad from siap.cobro_orden_trabajo cotr1
+                                 inner join siap.cobro_orden_trabajo_material cotm1 on cotm1.cotr_id = cotr1.cotr_id 
+                                 inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                                 inner join siap.elemento_unitario eu1 on eu1.elem_id = e1.elem_id
+                                 inner join siap.unitario u1 on u1.unit_id = eu1.unit_id
+                                 left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cotr1.cotr_fecha)
+                                 where cotr1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo}"""
+          ).on(
+              'cotr_id -> orden.cotr_id,
+              'empr_id -> empresa.empr_id.get,
+              'unit_codigo -> "1.02"
+            )
+            .as(_parseMaterial *)
+          _idx_inicial = _idx + 1
+          _idx_final = _idx + 1
+          _materiales.map {
+            _m =>
+              _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(1),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                StringCell(
+                  _m._2 match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  Some(5),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._3 match {
+                    case Some(value) => value
+                    case None        => 0
+                  },
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._4,
+                  Some(7),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                FormulaCell(
+                  "SUM(G" + (_idx + 1) + "*H" + (_idx + 1) + ")",
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _idx += 1
+              _idx_final += 1
+          }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "SUBTOTAL (B)",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            FormulaCell(
+              "SUM(I" + (_idx_inicial) + ":I" + (_idx_final) + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listSubTotal += ("J" + (_idx + 1))
+          _idx += 1
+          // MANO OBRA
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "CANT",
+              "SALARIO",
+              "RENDIMIENTO",
+              "VALOR",
+              "",
+              ""
+            )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))            
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "MANO DE OBRA",
+              "",
+              "",
+              "",
+              "",
+              "INTEGRAL / DIA",
+              "UNID / DIA",
+              "PARCIAL",
+              "",
+              ""
+            )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              // _listMerged01 += CellRange((_idx, _idx), (6, 7))
+              // _listMerged01 += CellRange((_idx, _idx), (8, 9))
+              // _listMerged01 += CellRange((_idx, _idx), (10, 11))
+              // _listMerged01 += CellRange((_idx, _idx), (12, 13))            
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "(f)",
+              "(g)",
+              "(h)",
+              "(f x g / h)",
+              "",
+              ""
+            )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+            _idx += 1            
+          //
+          // LEER MANO DE OBRA
+          val _parseManoObra = str("maob_descripcion") ~ get[Option[Int]]("maobpr_precio") ~ double("maobpr_rendimiento") map { case a1 ~ a2 ~ a3 => (a1, a2, a3) }
+          val _manoObra = SQL("""SELECT mob1.maob_descripcion, mop1.maobpr_precio, mop1.maobpr_rendimiento from siap.mano_obra mob1
+                                 INNER JOIN siap.mano_obra_precio mop1 ON mop1.maob_id = mob1.maob_id
+                                 WHERE mop1.maobpr_anho = {anho}""").
+                                 on(
+                                   'anho -> orden.cotr_anho.get
+                                 ).as(_parseManoObra *)
+          _idx_inicial = _idx + 1
+          _idx_final = _idx + 1
+          _manoObra.map { _m => 
+              _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(1),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  1,
+                  Some(5),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._2 match {
+                    case Some(value) => value
+                    case None        => 0
+                  },
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._3,
+                  Some(7),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                FormulaCell(
+                  "SUM(F" + (_idx + 1) + "* G" + (_idx + 1) + "/ H" + (_idx + 1) + ")",
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _idx += 1
+              _idx_final += 1            
+          }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "SUBTOTAL (C)",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            FormulaCell(
+              "SUM(I" + (_idx_inicial) + ":I" + (_idx_final) + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listSubTotal += ("J" + (_idx + 1))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "SUBTOTAL SUMINISTRO Y MONTAJE",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@")
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              FormulaCell(
+                "SUM(" + _listSubTotal.mkString(",") + ")",
+                Some(9),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("#,##0")
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )
+            _listMerged01 += CellRange((_idx, _idx), (1, 5))
+            _listMerged01 += CellRange((_idx, _idx), (6, 8))
+            _idx_final = _idx
+            //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+            _idx += 1
+          /// AQUI DEBE IR LA INFO DE INGENIERIA
+          var _ingLista = new ArrayBuffer[(String, Double)]()
+          _ingLista += (("INGENIERIA", 0.05))
+          _ingLista += (("ADMINISTRACION DE LA OBRA", 0.28))
+          _ingLista += (("INSPECTORES DE OBRA", 0.02))
+          _idx_inicial = _idx + 1
+          var _idx_subtotal = _idx
+          _listSubTotal = new ArrayBuffer[String]()
+          _listSubTotal += ("I"+ _idx_subtotal)
+          _ingLista.map { _m =>
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._2,
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("##0.00%")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),          
+                FormulaCell(
+                  "SUM(J" + (_idx_subtotal ) + "*I" + (_idx + 1) + ")",
+                  Some(9),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 5))
+              _listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _listSubTotal += ("J" + (_idx + 1))
+              _idx += 1
+              _idx_final += 1              
+            }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "TOTAL PRECIO UNIDAD CONSTRUCTIVA",
+              Some(6),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            FormulaCell(
+              "SUM(" + _listSubTotal.mkString(",") + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          _listRow01 += emptyRow
+          _listRow01 += emptyRow
+          _idx = _idx + 3
+    }
+  }
+
+  def siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_103(empresa: Empresa, orden: orden_trabajo_cobro) {
+    db.withConnection { implicit connection =>
+          val emptyRow = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("")
+
+          val headerRow01 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("", empresa.empr_descripcion)
+          val headerRow02 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("", empresa.muni_descripcion.get)
+          val headerRow03 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("", "ANALISIS DE PRECIOS UNITARIOS")
+          val headerRow04 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "Item",
+              "1.03"
+            )
+          val headerRow05 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "Obra",
+              "",
+              "MODERNIZACION A LED",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "Und",
+              "GLB"
+            )
+          val headerRow06 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "Area",
+              "",
+              orden.cotr_direccion.get,
+              "",
+              "",
+              "",
+              "",
+              "",
+              "Cant",
+              orden.cotr_cantidad.get
+            )
+          val headerRow07 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "Actividad",
+              "",
+              "SUMINISTRO E INSTALACION DE CANALIZACION DE REDES" ,
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            )
+          val headerRow08 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "CANT",
+              "TARIFA / DIA",
+              "RENDIMIENTO",
+              "VALOR PARCIAL",
+              "",
+              ""
+            )
+          val headerRow09 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "TRANSPORTE, EQUIPOS Y HERRAMIENTAS",
+              "",
+              "",
+              "",
+              "",
+              "INST / EQUIPO",
+              "UNID/DIA/EQU.",
+              "",
+              "",
+              ""
+            )
+          val headerRow10 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "(a)",
+              "(b)",
+              "(c)",
+              "a x b / c",
+              "",
+              ""
+            )
+
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += headerRow01
+          _listMerged01 += CellRange((_idx, _idx), (1, 10))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += headerRow02
+          _listMerged01 += CellRange((_idx, _idx), (1, 10))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += headerRow03
+          _listMerged01 += CellRange((_idx, _idx), (1, 10))
+          _idx += 1
+          _listRow01 += headerRow04
+          _idx += 1
+          _listRow01 += headerRow05
+          _listMerged01 += CellRange((_idx, _idx), (1, 2))
+          _listMerged01 += CellRange((_idx, _idx), (3, 8))
+          _idx += 1
+          _listRow01 += headerRow06
+          _listMerged01 += CellRange((_idx, _idx), (1, 2))
+          _listMerged01 += CellRange((_idx, _idx), (3, 8))
+          _idx += 1
+          _listRow01 += headerRow07
+          _listMerged01 += CellRange((_idx, _idx), (1, 2))
+          _listMerged01 += CellRange((_idx, _idx), (3, 8))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += headerRow08
+          _listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += headerRow09
+           _listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += headerRow10
+          _listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          /// AQUI DEBE IR LA INFO DE TRANSPORTE, EQUIPO Y HERRAMIENTA
+          var _herramientaLista = new ArrayBuffer[(String, Long, Long, Long)]()
+          _herramientaLista += (("HERRAMIENTA MENOR", 2, 2647, 1))
+          _herramientaLista += (("CAMIONETA", 1, 158908,8))
+          var _idx_inicial = _idx + 1
+          var _idx_final = _idx + 1          
+          _herramientaLista.map { _m =>
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(1),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._2,
+                  Some(5),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._3,
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._4,
+                  Some(7),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),                
+                FormulaCell(
+                  "SUM(F" + (_idx + 1) + "*G" + (_idx + 1) + "/H" + (_idx + 1) +")",
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _idx += 1
+              _idx_final += 1              
+            }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "SUBTOTAL (A)",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            FormulaCell(
+              "SUM(I" + (_idx_inicial) + ":I" + (_idx_final) + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listSubTotal += ("J" + (_idx + 1))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "UND",
+              "PRECIO POR",
+              "CANTIDAD DE",
+              "VALOR",
+              "",
+              ""
+            )
+          //_listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "MATERIALES",
+              "",
+              "",
+              "",
+              "",
+              "UNIDAD",
+              "MATERIAL/UND",
+              "PARCIAL",
+              "",
+              ""
+            )
+          //_listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          val headerRow11 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "(d)",
+              "(e)",
+              "d x e",
+              "",
+              ""
+            )
+          //_listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listRow01 += headerRow11
+          _idx += 1
+          val _parseMaterial = str("elem_descripcion") ~ get[Option[String]](
+            "elpr_unidad"
+          ) ~ get[Option[Int]]("elpr_precio") ~ double("cotrma_cantidad") map {
+            case a1 ~ a2 ~ a3 ~ a4 => (a1, a2, a3, a4)
+          }
+          val _materiales = SQL(
+            """select distinct e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, cotm1.cotrma_cantidad from siap.cobro_orden_trabajo cotr1
+                                 inner join siap.cobro_orden_trabajo_material cotm1 on cotm1.cotr_id = cotr1.cotr_id 
+                                 inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                                 inner join siap.elemento_unitario eu1 on eu1.elem_id = e1.elem_id
+                                 inner join siap.unitario u1 on u1.unit_id = eu1.unit_id
+                                 left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cotr1.cotr_fecha)
+                                 where cotr1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo}"""
+          ).on(
+              'cotr_id -> orden.cotr_id,
+              'empr_id -> empresa.empr_id.get,
+              'unit_codigo -> "1.03"
+            )
+            .as(_parseMaterial *)
+          _idx_inicial = _idx + 1
+          _idx_final = _idx + 1
+          _materiales.map {
+            _m =>
+              _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(1),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                StringCell(
+                  _m._2 match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  Some(5),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._3 match {
+                    case Some(value) => value
+                    case None        => 0
+                  },
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._4,
+                  Some(7),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                FormulaCell(
+                  "SUM(G" + (_idx + 1) + "*H" + (_idx + 1) + ")",
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _idx += 1
+              _idx_final += 1
+          }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "SUBTOTAL (B)",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            FormulaCell(
+              "SUM(I" + (_idx_inicial) + ":I" + (_idx_final) + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listSubTotal += ("J" + (_idx + 1))
+          _idx += 1
+          // MANO OBRA
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "CANT",
+              "SALARIO",
+              "RENDIMIENTO",
+              "VALOR",
+              "",
+              ""
+            )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))            
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "MANO DE OBRA",
+              "",
+              "",
+              "",
+              "",
+              "INTEGRAL / DIA",
+              "UNID / DIA",
+              "PARCIAL",
+              "",
+              ""
+            )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              // _listMerged01 += CellRange((_idx, _idx), (6, 7))
+              // _listMerged01 += CellRange((_idx, _idx), (8, 9))
+              // _listMerged01 += CellRange((_idx, _idx), (10, 11))
+              // _listMerged01 += CellRange((_idx, _idx), (12, 13))            
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "(f)",
+              "(g)",
+              "(h)",
+              "(f x g / h)",
+              "",
+              ""
+            )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+            _idx += 1            
+          //
+          // LEER MANO DE OBRA
+          val _parseManoObra = str("maob_descripcion") ~ get[Option[Int]]("maobpr_precio") ~ double("maobpr_rendimiento") map { case a1 ~ a2 ~ a3 => (a1, a2, a3) }
+          val _manoObra = SQL("""SELECT mob1.maob_descripcion, mop1.maobpr_precio, mop1.maobpr_rendimiento from siap.mano_obra mob1
+                                 INNER JOIN siap.mano_obra_precio mop1 ON mop1.maob_id = mob1.maob_id
+                                 WHERE mop1.maobpr_anho = {anho}""").
+                                 on(
+                                   'anho -> orden.cotr_anho.get
+                                 ).as(_parseManoObra *)
+          _idx_inicial = _idx + 1
+          _idx_final = _idx + 1
+          _manoObra.map { _m => 
+              _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(1),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  1,
+                  Some(5),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._2 match {
+                    case Some(value) => value
+                    case None        => 0
+                  },
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._3,
+                  Some(7),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                FormulaCell(
+                  "SUM(F" + (_idx + 1) + "* G" + (_idx + 1) + "/ H" + (_idx + 1) + ")",
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _idx += 1
+              _idx_final += 1            
+          }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "SUBTOTAL (C)",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            FormulaCell(
+              "SUM(I" + (_idx_inicial) + ":I" + (_idx_final) + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listSubTotal += ("J" + (_idx + 1))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "SUBTOTAL SUMINISTRO Y MONTAJE",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@")
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              FormulaCell(
+                "SUM(" + _listSubTotal.mkString(",") + ")",
+                Some(9),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("#,##0")
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )
+            _listMerged01 += CellRange((_idx, _idx), (1, 5))
+            _listMerged01 += CellRange((_idx, _idx), (6, 8))
+            _idx_final = _idx
+            //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+            _idx += 1
+          /// AQUI DEBE IR LA INFO DE INGENIERIA
+          var _ingLista = new ArrayBuffer[(String, Double)]()
+          _ingLista += (("INGENIERIA", 0.05))
+          _ingLista += (("ADMINISTRACION DE LA OBRA", 0.28))
+          _ingLista += (("INSPECTORES DE OBRA", 0.02))
+          _idx_inicial = _idx + 1
+          var _idx_subtotal = _idx
+          _listSubTotal = new ArrayBuffer[String]()
+          _listSubTotal += ("I"+ _idx_subtotal)
+          _ingLista.map { _m =>
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._2,
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("##0.00%")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),          
+                FormulaCell(
+                  "SUM(J" + (_idx_subtotal ) + "*I" + (_idx + 1) + ")",
+                  Some(9),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 5))
+              _listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _listSubTotal += ("J" + (_idx + 1))
+              _idx += 1
+              _idx_final += 1              
+            }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "TOTAL PRECIO UNIDAD CONSTRUCTIVA",
+              Some(6),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            FormulaCell(
+              "SUM(" + _listSubTotal.mkString(",") + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          _listRow01 += emptyRow
+          _listRow01 += emptyRow
+          _idx = _idx + 3
+    }
+  }
+
+  def siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios_104(empresa: Empresa, orden: orden_trabajo_cobro) {
+    db.withConnection { implicit connection =>
+          val emptyRow = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("")
+
+          val headerRow01 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("", empresa.empr_descripcion)
+          val headerRow02 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("", empresa.muni_descripcion.get)
+          val headerRow03 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("", "ANALISIS DE PRECIOS UNITARIOS")
+          val headerRow04 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "Item",
+              "1.04"
+            )
+          val headerRow05 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "Obra",
+              "",
+              "MODERNIZACION A LED",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "Und",
+              "UND"
+            )
+          val headerRow06 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "Area",
+              "",
+              orden.cotr_direccion.get,
+              "",
+              "",
+              "",
+              "",
+              "",
+              "Cant",
+              orden.cotr_cantidad.get
+            )
+          val headerRow07 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "Actividad",
+              "",
+              "DESMONTE DE LUMINARIA" ,
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            )
+          val headerRow08 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "CANT",
+              "TARIFA / DIA",
+              "RENDIMIENTO",
+              "VALOR PARCIAL",
+              "",
+              ""
+            )
+          val headerRow09 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "TRANSPORTE, EQUIPOS Y HERRAMIENTAS",
+              "",
+              "",
+              "",
+              "",
+              "INST / EQUIPO",
+              "UNID/DIA/EQU.",
+              "",
+              "",
+              ""
+            )
+          val headerRow10 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "(a)",
+              "(b)",
+              "(c)",
+              "a x b / c",
+              "",
+              ""
+            )
+
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += headerRow01
+          _listMerged01 += CellRange((_idx, _idx), (1, 10))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += headerRow02
+          _listMerged01 += CellRange((_idx, _idx), (1, 10))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += headerRow03
+          _listMerged01 += CellRange((_idx, _idx), (1, 10))
+          _idx += 1
+          _listRow01 += headerRow04
+          _idx += 1
+          _listRow01 += headerRow05
+          _listMerged01 += CellRange((_idx, _idx), (1, 2))
+          _listMerged01 += CellRange((_idx, _idx), (3, 8))
+          _idx += 1
+          _listRow01 += headerRow06
+          _listMerged01 += CellRange((_idx, _idx), (1, 2))
+          _listMerged01 += CellRange((_idx, _idx), (3, 8))
+          _idx += 1
+          _listRow01 += headerRow07
+          _listMerged01 += CellRange((_idx, _idx), (1, 2))
+          _listMerged01 += CellRange((_idx, _idx), (3, 8))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += headerRow08
+          _listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += headerRow09
+           _listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += headerRow10
+          _listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          /// AQUI DEBE IR LA INFO DE TRANSPORTE, EQUIPO Y HERRAMIENTA
+          var _herramientaLista = new ArrayBuffer[(String, Long, Long, Long)]()
+          _herramientaLista += (("HERRAMIENTA MENOR", 2, 2647, 1))
+          _herramientaLista += (("CAMIONETA", 1, 158908,8))
+          var _idx_inicial = _idx + 1
+          var _idx_final = _idx + 1          
+          _herramientaLista.map { _m =>
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(1),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._2,
+                  Some(5),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._3,
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._4,
+                  Some(7),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),                
+                FormulaCell(
+                  "SUM(F" + (_idx + 1) + "*G" + (_idx + 1) + "/H" + (_idx + 1) +")",
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _idx += 1
+              _idx_final += 1              
+            }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "SUBTOTAL (A)",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            FormulaCell(
+              "SUM(I" + (_idx_inicial) + ":I" + (_idx_final) + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listSubTotal += ("J" + (_idx + 1))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "UND",
+              "PRECIO POR",
+              "CANTIDAD DE",
+              "VALOR",
+              "",
+              ""
+            )
+          //_listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "MATERIALES",
+              "",
+              "",
+              "",
+              "",
+              "UNIDAD",
+              "MATERIAL/UND",
+              "PARCIAL",
+              "",
+              ""
+            )
+          //_listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          val headerRow11 = com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "(d)",
+              "(e)",
+              "d x e",
+              "",
+              ""
+            )
+          //_listMerged01 += CellRange((_idx, _idx), (1, 4))
+          //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+          //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+          //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listRow01 += headerRow11
+          _idx += 1
+          val _parseMaterial = str("elem_descripcion") ~ get[Option[String]](
+            "elpr_unidad"
+          ) ~ get[Option[Int]]("elpr_precio") ~ double("cotrma_cantidad") map {
+            case a1 ~ a2 ~ a3 ~ a4 => (a1, a2, a3, a4)
+          }
+          val _materiales = SQL(
+            """select distinct e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, cotm1.cotrma_cantidad from siap.cobro_orden_trabajo cotr1
+                                 inner join siap.cobro_orden_trabajo_material cotm1 on cotm1.cotr_id = cotr1.cotr_id 
+                                 inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                                 inner join siap.elemento_unitario eu1 on eu1.elem_id = e1.elem_id
+                                 inner join siap.unitario u1 on u1.unit_id = eu1.unit_id
+                                 left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cotr1.cotr_fecha)
+                                 where cotr1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo}"""
+          ).on(
+              'cotr_id -> orden.cotr_id,
+              'empr_id -> empresa.empr_id.get,
+              'unit_codigo -> "1.04"
+            )
+            .as(_parseMaterial *)
+          _idx_inicial = _idx + 1
+          _idx_final = _idx + 1
+          _materiales.map {
+            _m =>
+              _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(1),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                StringCell(
+                  _m._2 match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  Some(5),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._3 match {
+                    case Some(value) => value
+                    case None        => 0
+                  },
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._4,
+                  Some(7),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                FormulaCell(
+                  "SUM(G" + (_idx + 1) + "*H" + (_idx + 1) + ")",
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _idx += 1
+              _idx_final += 1
+          }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "SUBTOTAL (B)",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            FormulaCell(
+              "SUM(I" + (_idx_inicial) + ":I" + (_idx_final) + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listSubTotal += ("J" + (_idx + 1))
+          _idx += 1
+          // MANO OBRA
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "CANT",
+              "SALARIO",
+              "RENDIMIENTO",
+              "VALOR",
+              "",
+              ""
+            )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))            
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "MANO DE OBRA",
+              "",
+              "",
+              "",
+              "",
+              "INTEGRAL / DIA",
+              "UNID / DIA",
+              "PARCIAL",
+              "",
+              ""
+            )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              // _listMerged01 += CellRange((_idx, _idx), (6, 7))
+              // _listMerged01 += CellRange((_idx, _idx), (8, 9))
+              // _listMerged01 += CellRange((_idx, _idx), (10, 11))
+              // _listMerged01 += CellRange((_idx, _idx), (12, 13))            
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(
+              "",
+              "",
+              "",
+              "",
+              "",
+              "(f)",
+              "(g)",
+              "(h)",
+              "(f x g / h)",
+              "",
+              ""
+            )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+            _idx += 1            
+          //
+          // LEER MANO DE OBRA
+          val _parseManoObra = str("maob_descripcion") ~ get[Option[Int]]("maobpr_precio") ~ double("maobpr_rendimiento") map { case a1 ~ a2 ~ a3 => (a1, a2, a3) }
+          val _manoObra = SQL("""SELECT mob1.maob_descripcion, mop1.maobpr_precio, mop1.maobpr_rendimiento from siap.mano_obra mob1
+                                 INNER JOIN siap.mano_obra_precio mop1 ON mop1.maob_id = mob1.maob_id
+                                 WHERE mop1.maobpr_anho = {anho}""").
+                                 on(
+                                   'anho -> orden.cotr_anho.get
+                                 ).as(_parseManoObra *)
+          _idx_inicial = _idx + 1
+          _idx_final = _idx + 1
+          _manoObra.map { _m => 
+              _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(1),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  1,
+                  Some(5),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._2 match {
+                    case Some(value) => value
+                    case None        => 0
+                  },
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._3,
+                  Some(7),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0.00")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                FormulaCell(
+                  "SUM(F" + (_idx + 1) + "* G" + (_idx + 1) + "/ H" + (_idx + 1) + ")",
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 4))
+              //_listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _idx += 1
+              _idx_final += 1            
+          }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "SUBTOTAL (C)",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            FormulaCell(
+              "SUM(I" + (_idx_inicial) + ":I" + (_idx_final) + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+          _listSubTotal += ("J" + (_idx + 1))
+          _idx += 1
+          _listRow01 += emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "SUBTOTAL SUMINISTRO Y MONTAJE",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@")
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet               
+              ),
+              FormulaCell(
+                "SUM(" + _listSubTotal.mkString(",") + ")",
+                Some(9),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("#,##0")
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )
+            _listMerged01 += CellRange((_idx, _idx), (1, 5))
+            _listMerged01 += CellRange((_idx, _idx), (6, 8))
+            _idx_final = _idx
+            //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+            _idx += 1
+          /// AQUI DEBE IR LA INFO DE INGENIERIA
+          var _ingLista = new ArrayBuffer[(String, Double)]()
+          _ingLista += (("INGENIERIA", 0.05))
+          _ingLista += (("ADMINISTRACION DE LA OBRA", 0.28))
+          _ingLista += (("INSPECTORES DE OBRA", 0.02))
+          _idx_inicial = _idx + 1
+          var _idx_subtotal = _idx
+          _listSubTotal = new ArrayBuffer[String]()
+          _listSubTotal += ("I"+ _idx_subtotal)
+          _ingLista.map { _m =>
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  _m._1,
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                NumericCell(
+                  _m._2,
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("##0.00%")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),          
+                FormulaCell(
+                  "SUM(J" + (_idx_subtotal ) + "*I" + (_idx + 1) + ")",
+                  Some(9),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0")
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                )
+              )
+              _listMerged01 += CellRange((_idx, _idx), (1, 5))
+              _listMerged01 += CellRange((_idx, _idx), (6, 7))
+              //_listMerged01 += CellRange((_idx, _idx), (8, 9))
+              //_listMerged01 += CellRange((_idx, _idx), (10, 11))
+              //_listMerged01 += CellRange((_idx, _idx), (12, 13))
+              _listSubTotal += ("J" + (_idx + 1))
+              _idx += 1
+              _idx_final += 1              
+            }
+          _idx_final -= 1
+          // Subtotal B (Material)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "TOTAL PRECIO UNIDAD CONSTRUCTIVA",
+              Some(6),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            FormulaCell(
+              "SUM(" + _listSubTotal.mkString(",") + ")",
+              Some(9),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("#,##0")
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          _listRow01 += emptyRow
+          _listRow01 += emptyRow
+          _idx = _idx + 3
+    }
+  }
+
 
   def siap_orden_trabajo_cobro_modernizacion_hoja_4_reporte_luminaria(
       empresa: Empresa,

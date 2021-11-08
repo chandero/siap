@@ -683,6 +683,8 @@ GET /api/cotr/get/:i                            controllers.CobroController.siap
 GET /api/cotr/gen/:a/:m/:u/:t/:c                  controllers.CobroController.siap_generar_orden_trabajo_cobro_modernizacion(a:Int, m:Int, u:Int, t:Long, c:Long)
 GET /api/cotr/prn/:i                            controllers.CobroController.siap_orden_trabajo_cobro(i:Long)
 
+# Unitarios
+GET /api/unit/all                               controllers.UnitarioController.unitarios
 # SSE - Server Send Event
 
 GET /api/progressStatuses/:uuid controllers.ProcessingProgressController.getProgressStatuses(uuid: String)
