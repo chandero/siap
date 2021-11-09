@@ -77,6 +77,19 @@ class UnitarioRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionC
     }
 
     /**
+    * Recuperar un Unitario dado su unit_id
+    * @param unit_codigo: String
+    */
+    def buscarPorCodigo(unit_codigo:String) : Option[Unitario] = {
+        db.withConnection { implicit connection => 
+            SQL("SELECT unit_id, unit_codigo, unit_descripcion, empr_id FROM siap.unitario WHERE unit_codigo = {unit_codigo}").
+            on(
+                'unit_codigo -> unit_codigo
+            ).as(Unitario._set.singleOpt)
+        }
+    }    
+
+    /**
     * Recuperar un Unitario dado su unit_descripcion
     * @param unit_descripcion: String
     */
