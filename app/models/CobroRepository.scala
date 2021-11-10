@@ -172,11 +172,6 @@ class CobroRepository @Inject()(
 
   private val db = dbapi.database("default")
   private val REPORT_DEFINITION_PATH = System.getProperty("user.dir") + "/conf/reports/"
-  private var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
-  private var _listMerged01 = new ListBuffer[CellRange]()
-  private var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]() 
-  private var _idx = 0
-
   
 
   def buscarPorId(empr_id: Long, cotr_id: Long): Option[orden_trabajo_cobro] = {
@@ -494,20 +489,31 @@ class CobroRepository @Inject()(
     val empresa = empresaService.buscarPorId(empr_id)
     val orden = buscarPorId(empr_id, cotr_id)
     var barrio = barrioService.buscarPorId(orden.get.barr_id.get)
+    var _listCuadroGeneralUnitario = new ListBuffer[(String, String, String, Double, String, String, String, String)]()
 
     val sheet1 = siap_orden_trabajo_cobro_modernizacion_hoja_1_orden(
       empresa.get,
       orden.get
     )
-    val sheet3 = siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(
+
+    var sheet3 = siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(
       empresa.get,
       orden.get,
-      barrio.get
+      barrio.get,
+      _listCuadroGeneralUnitario
     )
+
+    val sheet2 = siap_orden_trabajo_cobro_modernizacion_hoja_2_cuadro_general(
+      empresa.get,
+      orden.get,
+      barrio.get,
+      _listCuadroGeneralUnitario
+    )
+
     val sheet4 = siap_orden_trabajo_cobro_modernizacion_hoja_4_reporte_luminaria(empresa.get, orden.get)
     println("Escribiendo en el Stream")
     var os: ByteArrayOutputStream = new ByteArrayOutputStream()
-    Workbook(sheet1, sheet3, sheet4).writeToOutputStream(os)
+    Workbook(sheet1, sheet2, sheet3, sheet4).writeToOutputStream(os)
     println("Stream Listo")
     (orden.get.cotr_consecutivo.get, os.toByteArray)
   }
@@ -645,10 +651,1168 @@ class CobroRepository @Inject()(
     )
   }
 
+  def siap_orden_trabajo_cobro_modernizacion_hoja_2_cuadro_general(
+      empresa: Empresa,
+      orden: orden_trabajo_cobro,
+      barrio: Barrio,
+      _listCuadroGeneralUnitario: ListBuffer[(String, String, String, Double, String, String, String, String)]
+  ): Sheet = {
+    var _listRow02 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+    var _idx = 0
+
+    val _fuenteTitulo = Font(
+      height = 10.points,
+      fontName = "Liberation Sans",
+      bold = true,
+      italic = false,
+      strikeout = false
+    )      
+    val _fuenteTotal = Font(
+      height = 10.points,
+      fontName = "Liberation Sans",
+      bold = true,
+      italic = true,
+      strikeout = false
+    )
+    val _fuenteSubTotal = Font(
+      height = 9.points,
+      fontName = "Liberation Sans",
+      bold = true,
+      italic = true,
+      strikeout = false
+    )
+    val _fuenteCantidadTotal = Font(
+      height = 9.points,
+      fontName = "Liberation Sans",
+      bold = true,
+      italic = true,
+      strikeout = false
+    )
+    val _fuenteNoBold = Font(
+      height = 10.points,
+      fontName = "Liberation Sans",
+      bold = false,
+      italic = false,
+      strikeout = false
+    )
+
+    Sheet(
+      name = "Cuadro General",
+      rows = {
+        val emptyRow = com.norbitltd.spoiwo.model
+          .Row()
+          .withCellValues("")
+        val header1 = com.norbitltd.spoiwo.model
+          .Row()
+          .withCellValues(
+            "ALUMBRADO PUBLICO " + empresa.muni_descripcion.get.toUpperCase()
+          )
+        val header2 = com.norbitltd.spoiwo.model
+          .Row()
+          .withCellValues(
+            "ORDEN DE TRABAJO ITAF S.A.S No. " + "%06d".format(orden.cotr_consecutivo.get) + " " + Utility.mes(orden.cotr_fecha.get.getMonthOfYear).toUpperCase + "/" + orden.cotr_fecha.get.getYear
+          )
+        val header3 = com.norbitltd.spoiwo.model
+          .Row()
+          .withCellValues("SECTOR" + " " + orden.cotr_direccion.get.toUpperCase())
+        val header4 = com.norbitltd.spoiwo.model.Row().withCellValues(
+          "CUADRO GENERAL"
+        )
+        _listRow02 += emptyRow
+        _idx = _idx + 1
+        _listRow02 += header1
+        _idx = _idx + 1
+        _listRow02 += header2
+        _idx = _idx + 1
+        _listRow02 += header3
+        _idx = _idx + 1
+        _listRow02 += header4
+        _idx = _idx + 1
+        _listRow02 += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "ITEM",
+                index = Some(0),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    wrapText = true,
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "DESCRIPCION",
+                index = Some(1),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center, 
+                    wrapText = true,                                       
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "UND",
+                index = Some(2),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    wrapText = true,                    
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "CANT",
+                index = Some(3),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center, 
+                    wrapText = true,                                       
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "MONTAJE DE EQUIPOS",
+                index = Some(4),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    wrapText = true,                    
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "SUMINISTRO DE MATERIALES",
+                index = Some(5),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,  
+                    wrapText = true,                  
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "MONTAJE MANO DE OBRA",
+                index = Some(6),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    wrapText = true,                    
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "COSTO UNITARIO PARCIAL",
+                index = Some(7),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,  
+                    wrapText = true,                                      
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "COSTO PARCIAL ITEM",
+                index = Some(8),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    font = _fuenteTitulo,
+                    wrapText = true,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )              
+        ).withHeight(50.points)
+        _idx = _idx + 1
+        var _idx_inicial = _idx + 1
+        var _idx_final = _idx
+        _listCuadroGeneralUnitario.map { _u =>
+          _listRow02 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+                _u._1,
+                index = Some(0),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@"),                    
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    font = _fuenteNoBold,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thin,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+            StringCell(
+                _u._2,
+                index = Some(1),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,                                       
+                    font = _fuenteNoBold,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thin,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+            StringCell(
+                _u._3,
+                index = Some(2),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Center,
+                    verticalAlignment = VA.Center,                    
+                    font = _fuenteNoBold,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thin,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+            NumericCell(
+                _u._4,
+                index = Some(3),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Right,
+                    verticalAlignment = VA.Center, 
+                    font = _fuenteNoBold,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thin,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+            FormulaCell(
+                _u._5,
+                index = Some(4),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Right,
+                    verticalAlignment = VA.Center, 
+                    dataFormat = CellDataFormat("#,##0.00"),
+                    font = _fuenteNoBold,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thin,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+            FormulaCell(
+                _u._6,
+                index = Some(5),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Right,
+                    verticalAlignment = VA.Center, 
+                    dataFormat = CellDataFormat("#,##0"),
+                    font = _fuenteNoBold,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thin,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+            FormulaCell(
+                _u._7,
+                index = Some(6),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Right,
+                    dataFormat = CellDataFormat("#,##0"),
+                    verticalAlignment = VA.Center, 
+                    font = _fuenteNoBold,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thin,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+            FormulaCell(
+                _u._8,
+                index = Some(7),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Right,
+                    dataFormat = CellDataFormat("#,##0"),
+                    verticalAlignment = VA.Center, 
+                    font = _fuenteNoBold,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thin,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+            FormulaCell(
+                "SUM(H" + (_idx + 1) + "*D" + (_idx + 1) + ")",
+                index = Some(8),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Right,
+                    verticalAlignment = VA.Center, 
+                    dataFormat = CellDataFormat("#,##0"),
+                    font = _fuenteTotal,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thin,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )              
+          ).withHeight(40.points)
+          _idx = _idx + 1
+          _idx_final = _idx_final + 1
+        }
+        _listRow02 += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                index = Some(0),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    wrapText = true,
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "VALOR COSTO DIRECTO",
+                index = Some(1),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Right,
+                    verticalAlignment = VA.Center, 
+                    wrapText = true,                                       
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                index = Some(2),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    wrapText = true,                    
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                index = Some(3),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center, 
+                    wrapText = true,                                       
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                index = Some(4),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    wrapText = true,                    
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                index = Some(5),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,  
+                    wrapText = true,                  
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                index = Some(6),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    wrapText = true,                    
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                index = Some(7),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,  
+                    wrapText = true,                                      
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              FormulaCell(
+                "SUM(I" + _idx_inicial + ":I" + _idx_final + ")",
+                index = Some(8),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("#,#00"),
+                    horizontalAlignment = HA.Right,
+                    verticalAlignment = VA.Center,
+                    font = _fuenteTitulo,
+                    wrapText = true,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )              
+        ).withHeight(40.points)
+        // INGENIERIA
+          val _ingParser = str("main_descripcion") ~ double("mainpr_precio") map {
+            case main_descripcion ~ mainpr_precio => (main_descripcion, mainpr_precio)
+          }
+          var _ingLista = db.withConnection { implicit connection => 
+            SQL("""select main_descripcion, mainpr_precio from siap.mano_ingenieria mi1
+                left join siap.mano_ingenieria_precio mip1 on mip1.main_id = mi1.main_id 
+                where mip1.mainpr_anho = {anho} and mi1.empr_id = {empr_id}""").
+            on(
+              'anho -> orden.cotr_anho.get,
+              'empr_id -> empresa.empr_id
+            ).as(_ingParser.*)
+          }
+          _idx = _idx + 1
+          _idx_inicial = _idx 
+          var _idx_subtotal = _idx
+          _idx_final = _idx + 1
+          _ingLista.map { _m =>
+          _listRow02 += com.norbitltd.spoiwo.model.Row(
+                StringCell(
+                  "",
+                  Some(0),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@"),
+                      horizontalAlignment = HA.Center,
+                      borders = CellBorders(
+                        leftStyle = CellBorderStyle.Thick,
+                        leftColor = Color.Black,
+                        topStyle = CellBorderStyle.Thin,
+                        topColor = Color.Black,
+                        bottomStyle = CellBorderStyle.Thin,
+                        bottomColor = Color.Black,
+                        rightStyle = CellBorderStyle.Thin,
+                        rightColor = Color.Black
+                      )
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                StringCell(
+                  _m._1,
+                  Some(1),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@"),
+                      borders = CellBorders(
+                        leftStyle = CellBorderStyle.Thin,
+                        leftColor = Color.Black,
+                        topStyle = CellBorderStyle.Thin,
+                        topColor = Color.Black,
+                        bottomStyle = CellBorderStyle.Thin,
+                        bottomColor = Color.Black,
+                        rightStyle = CellBorderStyle.Thin,
+                        rightColor = Color.Black
+                      )
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                StringCell(
+                  "",
+                  Some(2),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@"),
+                      horizontalAlignment = HA.Center,
+                      borders = CellBorders(
+                        leftStyle = CellBorderStyle.Thin,
+                        leftColor = Color.Black,
+                        topStyle = CellBorderStyle.Thin,
+                        topColor = Color.Black,
+                        bottomStyle = CellBorderStyle.Thin,
+                        bottomColor = Color.Black,
+                        rightStyle = CellBorderStyle.Thin,
+                        rightColor = Color.Black
+                      )
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),                
+                StringCell(
+                  "",
+                  Some(3),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@"),
+                      horizontalAlignment = HA.Center,
+                      borders = CellBorders(
+                        leftStyle = CellBorderStyle.Thin,
+                        leftColor = Color.Black,
+                        topStyle = CellBorderStyle.Thin,
+                        topColor = Color.Black,
+                        bottomStyle = CellBorderStyle.Thin,
+                        bottomColor = Color.Black,
+                        rightStyle = CellBorderStyle.Thin,
+                        rightColor = Color.Black
+                      )
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                StringCell(
+                  "",
+                  Some(4),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@"),
+                      horizontalAlignment = HA.Center,
+                      borders = CellBorders(
+                        leftStyle = CellBorderStyle.Thin,
+                        leftColor = Color.Black,
+                        topStyle = CellBorderStyle.Thin,
+                        topColor = Color.Black,
+                        bottomStyle = CellBorderStyle.Thin,
+                        bottomColor = Color.Black,
+                        rightStyle = CellBorderStyle.Thin,
+                        rightColor = Color.Black
+                      )
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                StringCell(
+                  "",
+                  Some(5),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@"),
+                      horizontalAlignment = HA.Center,
+                      borders = CellBorders(
+                        leftStyle = CellBorderStyle.Thin,
+                        leftColor = Color.Black,
+                        topStyle = CellBorderStyle.Thin,
+                        topColor = Color.Black,
+                        bottomStyle = CellBorderStyle.Thin,
+                        bottomColor = Color.Black,
+                        rightStyle = CellBorderStyle.Thin,
+                        rightColor = Color.Black
+                      )
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+                StringCell(
+                  "",
+                  Some(6),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("@"),
+                      horizontalAlignment = HA.Center,
+                      borders = CellBorders(
+                        leftStyle = CellBorderStyle.Thin,
+                        leftColor = Color.Black,
+                        topStyle = CellBorderStyle.Thin,
+                        topColor = Color.Black,
+                        bottomStyle = CellBorderStyle.Thin,
+                        bottomColor = Color.Black,
+                        rightStyle = CellBorderStyle.Thin,
+                        rightColor = Color.Black
+                      )
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),                                                                              
+                NumericCell(
+                  _m._2,
+                  Some(7),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("##0.00%"),
+                      borders = CellBorders(
+                        leftStyle = CellBorderStyle.Thin,
+                        leftColor = Color.Black,
+                        topStyle = CellBorderStyle.Thin,
+                        topColor = Color.Black,
+                        bottomStyle = CellBorderStyle.Thin,
+                        bottomColor = Color.Black,
+                        rightStyle = CellBorderStyle.Thin,
+                        rightColor = Color.Black
+                      )
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),          
+                FormulaCell(
+                  "SUM(I" + (_idx_subtotal ) + "*H" + (_idx + 1) + ")",
+                  Some(8),
+                  style = Some(
+                    CellStyle(
+                      dataFormat = CellDataFormat("#,##0"),
+                      borders = CellBorders(
+                        leftStyle = CellBorderStyle.Thin,
+                        leftColor = Color.Black,
+                        topStyle = CellBorderStyle.Thin,
+                        topColor = Color.Black,
+                        bottomStyle = CellBorderStyle.Thin,
+                        bottomColor = Color.Black,
+                        rightStyle = CellBorderStyle.Thick,
+                        rightColor = Color.Black
+                      )
+                    )
+                  ),
+                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                ),
+              ).withHeight(30.points)
+              _idx = _idx + 1
+              _idx_final += 1              
+            }
+            _idx_final = _idx_final - 1
+          _listRow02 += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                index = Some(0),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    wrapText = true,
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "TOTAL PROYECTO",
+                index = Some(1),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Right,
+                    verticalAlignment = VA.Center, 
+                    wrapText = true,                                       
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                index = Some(2),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    wrapText = true,                    
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                index = Some(3),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center, 
+                    wrapText = true,                                       
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                index = Some(4),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    wrapText = true,                    
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                index = Some(5),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,  
+                    wrapText = true,                  
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                index = Some(6),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,
+                    wrapText = true,                    
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                index = Some(7),
+                style = Some(
+                  CellStyle(
+                    horizontalAlignment = HA.Left,
+                    verticalAlignment = VA.Center,  
+                    wrapText = true,                                      
+                    font = _fuenteTitulo,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              FormulaCell(
+                "SUM(I" + _idx_inicial + ":I" + _idx_final + ")",
+                index = Some(8),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("#,##0"),
+                    horizontalAlignment = HA.Right,
+                    verticalAlignment = VA.Center,
+                    font = _fuenteTitulo,
+                    wrapText = true,
+                    borders = CellBorders(
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                    )                      
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )              
+        ).withHeight(40.points)
+        // FIN INGENIERIA
+        _listRow02.toList
+      },
+      columns = {
+          var _listColumn = new ArrayBuffer[com.norbitltd.spoiwo.model.Column]()
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 0, width = new Width(6, WidthUnit.Character))           
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 1, width = new Width(56, WidthUnit.Character))          
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 2, width = new Width(5, WidthUnit.Character))           
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 3, width = new Width(7, WidthUnit.Character))
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 4, width = new Width(15, WidthUnit.Character))
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 5, width = new Width(15, WidthUnit.Character))
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 6, width = new Width(15, WidthUnit.Character))
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 7, width = new Width(15, WidthUnit.Character))
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 8, width = new Width(15, WidthUnit.Character))
+          _listColumn.toList
+        }
+    )
+  }
+
   def siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(
       empresa: Empresa,
       orden: orden_trabajo_cobro,
-      barrio: Barrio
+      barrio: Barrio,
+      _listCuadroGeneralUnitario: ListBuffer[(String, String, String, Double, String, String, String, String)]
   ): Sheet = {
     db.withConnection { implicit connection =>
       val _fuenteTitulo = Font(
@@ -687,7 +1851,10 @@ class CobroRepository @Inject()(
         strikeout = false
       )
       val colorSubTotal = Color(255, 182, 108)
-
+      var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()     
+      var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+      var _listMerged01 = new ListBuffer[CellRange]()
+      var _idx = 0
 
       val _unitarios = SQL("""select distinct u1.unit_codigo
                           from siap.cobro_orden_trabajo cot1
@@ -705,7 +1872,7 @@ class CobroRepository @Inject()(
         ).as(SqlParser.str("unit_codigo").*)
 
       _unitarios.map { unitario =>
-        siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(empresa, orden, barrio, unitario)
+        _idx = siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(empresa, orden, barrio, unitario, _listRow01, _listMerged01, _idx, _listCuadroGeneralUnitario)
       } 
       Sheet(
         name = "Unitarios",
@@ -739,10 +1906,24 @@ class CobroRepository @Inject()(
     }
   }
 
-  def siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(empresa: Empresa, orden: orden_trabajo_cobro, barrio: Barrio, unit_codigo: String) {
+  def siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(empresa: Empresa, orden: orden_trabajo_cobro, barrio: Barrio, unit_codigo: String, _listRow01: ListBuffer[com.norbitltd.spoiwo.model.Row], _listMerged01: ListBuffer[CellRange], _idx01: Int, _listCuadroGeneralUnitario: ListBuffer[(String, String, String, Double, String, String, String, String)]): Int = {
     db.withConnection { implicit connection =>
-
+      var _idx = _idx01
       val _unitario = unitarioService.buscarPorCodigo(unit_codigo).get
+      var _unidad = unit_codigo match {
+        case "1.01" => "UND"
+        case "1.02" => "UND"
+        case "1.03" => "ML"
+        case "1.04" => "UND"
+        case "1.05" => "UND"
+        case "1.06" => "ML"
+        case "1.07" => "UND"
+        case "1.08" => "ML"
+        case "1.09" => "UND"
+        case "1.10" => "UND"
+        case "1.11" => "UND"
+        case "1.12" => "UND"
+      }
       var _descripcion = unit_codigo match {
         case "1.01" => { "SUMINISTRO E INSTALACION DE LUMINARIA " + orden.cotr_luminaria_nueva.get + " " + orden.cotr_tecnologia_nueva.get + " " + orden.cotr_potencia_nueva.get.toString() + "W" }
         case "1.02" | "1.03" | "1.08" | "1.09" | "1.10" | "1.11" | "1.12" => "SUMINISTRO E INSTALACION DE " + _unitario.unit_descripcion.get
@@ -752,6 +1933,7 @@ class CobroRepository @Inject()(
         case "1.07" => "INSTALACION " + _unitario.unit_descripcion.get
         case _ => _unitario.unit_descripcion.get
       }
+
 
       var _listSubTotal = new ArrayBuffer[String]()
       var _listTotal = new ArrayBuffer[String]()
@@ -1215,7 +2397,7 @@ class CobroRepository @Inject()(
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 )              
             )
-
+          var _cantidad = orden.cotr_cantidad.get.toDouble
           val headerRow07 = com.norbitltd.spoiwo.model
             .Row(
               StringCell(
@@ -2026,6 +3208,7 @@ class CobroRepository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),            
           )
+          var _subtotal_a = "+Unitarios!$J$" + (_idx + 1);
           _listMerged01 += CellRange((_idx, _idx), (1, 4))          
           _listMerged01 += CellRange((_idx, _idx), (9, 10))
           _listSubTotal += ("J" + (_idx + 1))
@@ -2756,6 +3939,7 @@ class CobroRepository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),             
           )
+          var _subtotal_b = "+Unitarios!$J$" + (_idx + 1);          
           _listMerged01 += CellRange((_idx, _idx), (1, 4))          
           _listMerged01 += CellRange((_idx, _idx), (9, 10))
           _listSubTotal += ("J" + (_idx + 1))
@@ -3472,6 +4656,7 @@ class CobroRepository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
           )
+          var _subtotal_c = "+Unitarios!$J$" + (_idx + 1);
           _listMerged01 += CellRange((_idx, _idx), (1, 4))
           _listMerged01 += CellRange((_idx, _idx), (9, 10))
           _listSubTotal += ("J" + (_idx + 1))
@@ -3558,6 +4743,7 @@ class CobroRepository @Inject()(
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
             )
+            var _subtotal_suministro_montaje = "+Unitarios!$J$" + (_idx + 1);
             _listMerged01 += CellRange((_idx, _idx), (1, 5))
             _listMerged01 += CellRange((_idx, _idx), (6, 8))
             _idx_final = _idx
@@ -3638,6 +4824,8 @@ class CobroRepository @Inject()(
             _listMerged01 += CellRange((_idx, _idx), (9, 10))
             var _idx_subtotal = _idx            
             _idx = _idx + 1
+
+          _listCuadroGeneralUnitario += ((unit_codigo, _descripcion, _unidad, _cantidad,_subtotal_a, _subtotal_b, _subtotal_c, _subtotal_suministro_montaje))
           /// AQUI DEBE IR LA INFO DE INGENIERIA
           val _ingParser = str("main_descripcion") ~ double("mainpr_precio") map {
             case main_descripcion ~ mainpr_precio => (main_descripcion, mainpr_precio)
@@ -4151,6 +5339,7 @@ class CobroRepository @Inject()(
           _listMerged01 += CellRange((_idx, _idx), (6, 8))          
           _listMerged01 += CellRange((_idx, _idx), (9, 10))
           _idx = _idx + 1
+          _idx
     }
   }
 
