@@ -513,7 +513,7 @@ class CobroRepository @Inject()(
     val sheet4 = siap_orden_trabajo_cobro_modernizacion_hoja_4_reporte_luminaria(empresa.get, orden.get)
     println("Escribiendo en el Stream")
     var os: ByteArrayOutputStream = new ByteArrayOutputStream()
-    Workbook(sheet1, sheet2, sheet3, sheet4).writeToOutputStream(os)
+    Workbook(sheet2, sheet3, sheet4).writeToOutputStream(os)
     println("Stream Listo")
     (orden.get.cotr_consecutivo.get, os.toByteArray)
   }
@@ -658,6 +658,7 @@ class CobroRepository @Inject()(
       _listCuadroGeneralUnitario: ListBuffer[(String, String, String, Double, String, String, String, String)]
   ): Sheet = {
     var _listRow02 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+    var _listMerged02 = new ListBuffer[com.norbitltd.spoiwo.model.CellRange]()
     var _idx = 0
 
     val _fuenteTitulo = Font(
@@ -702,31 +703,181 @@ class CobroRepository @Inject()(
         val emptyRow = com.norbitltd.spoiwo.model
           .Row()
           .withCellValues("")
+        val emptyFullRow = com.norbitltd.spoiwo.model
+          .Row(
+            StringCell(
+              "",
+              Some(0),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders (
+                    leftStyle = CellBorderStyle.Thick,
+                    leftColor = Color.Black,
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(8),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders (
+                    rightStyle = CellBorderStyle.Thick,
+                    rightColor = Color.Black,
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+        )
         val header1 = com.norbitltd.spoiwo.model
-          .Row()
-          .withCellValues(
-            "ALUMBRADO PUBLICO " + empresa.muni_descripcion.get.toUpperCase()
+          .Row(
+            StringCell(
+              "ALUMBRADO PUBLICO " + empresa.muni_descripcion.get.toUpperCase(),
+              Some(0),
+              style = Some(
+                CellStyle(
+                  font = _fuenteTitulo,
+                  horizontalAlignment = HA.Center,
+                  verticalAlignment = VA.Center,
+                  borders = CellBorders (
+                    topStyle = CellBorderStyle.Thick,
+                    topColor = Color.Black,
+                    leftStyle = CellBorderStyle.Thick,
+                    leftColor = Color.Black,
+                    rightStyle = CellBorderStyle.Thick,
+                    rightColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(8),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders (
+                    rightStyle = CellBorderStyle.Thick,
+                    rightColor = Color.Black,
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
           )
         val header2 = com.norbitltd.spoiwo.model
-          .Row()
-          .withCellValues(
-            "ORDEN DE TRABAJO ITAF S.A.S No. " + "%06d".format(orden.cotr_consecutivo.get) + " " + Utility.mes(orden.cotr_fecha.get.getMonthOfYear).toUpperCase + "/" + orden.cotr_fecha.get.getYear
+          .Row(
+            StringCell(
+              "ORDEN DE TRABAJO ITAF S.A.S No. " + "%06d".format(orden.cotr_consecutivo.get) + " " + Utility.mes(orden.cotr_fecha.get.getMonthOfYear).toUpperCase + "/" + orden.cotr_fecha.get.getYear,
+              Some(0),
+              style = Some(
+                CellStyle(
+                  font = _fuenteTitulo,
+                  horizontalAlignment = HA.Center,
+                  verticalAlignment = VA.Center,
+                  borders = CellBorders (
+                    leftStyle = CellBorderStyle.Thick,
+                    leftColor = Color.Black,
+                    rightStyle = CellBorderStyle.Thick,
+                    rightColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(8),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders (
+                    rightStyle = CellBorderStyle.Thick,
+                    rightColor = Color.Black,
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )            
           )
         val header3 = com.norbitltd.spoiwo.model
-          .Row()
-          .withCellValues("SECTOR" + " " + orden.cotr_direccion.get.toUpperCase())
-        val header4 = com.norbitltd.spoiwo.model.Row().withCellValues(
-          "CUADRO GENERAL"
+          .Row(
+            StringCell(
+              "SECTOR" + " " + orden.cotr_direccion.get.toUpperCase(),
+              Some(0),
+              style = Some(
+                CellStyle(
+                  font = _fuenteTitulo,
+                  horizontalAlignment = HA.Center,
+                  verticalAlignment = VA.Center,
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(8),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders (
+                    rightStyle = CellBorderStyle.Thick,
+                    rightColor = Color.Black,
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )            
+          )
+        val header4 = com.norbitltd.spoiwo.model.Row(
+          StringCell(
+            "CUADRO GENERAL",
+            Some(0),
+            style = Some(
+              CellStyle(
+                font = _fuenteTitulo,
+                horizontalAlignment = HA.Center,
+                verticalAlignment = VA.Center,
+                borders = CellBorders (
+                  leftStyle = CellBorderStyle.Thick,
+                  leftColor = Color.Black,
+                  rightStyle = CellBorderStyle.Thick,
+                  rightColor = Color.Black,
+                  bottomStyle = CellBorderStyle.Thick,
+                  bottomColor = Color.Black
+                )
+              )
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+            StringCell(
+              "",
+              Some(8),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders (
+                    rightStyle = CellBorderStyle.Thick,
+                    rightColor = Color.Black,
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )          
         )
         _listRow02 += emptyRow
         _idx = _idx + 1
         _listRow02 += header1
+        _listMerged02 += CellRange((_idx, _idx),(0, 8))
         _idx = _idx + 1
         _listRow02 += header2
+        _listMerged02 += CellRange((_idx, _idx),(0, 8))        
         _idx = _idx + 1
         _listRow02 += header3
+        _listMerged02 += CellRange((_idx, _idx),(0, 8))        
         _idx = _idx + 1
         _listRow02 += header4
+        _listMerged02 += CellRange((_idx, _idx),(0, 8))        
         _idx = _idx + 1
         _listRow02 += com.norbitltd.spoiwo.model.Row(
               StringCell(
@@ -734,6 +885,7 @@ class CobroRepository @Inject()(
                 index = Some(0),
                 style = Some(
                   CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Left,
                     verticalAlignment = VA.Center,
                     wrapText = true,
@@ -757,6 +909,7 @@ class CobroRepository @Inject()(
                 index = Some(1),
                 style = Some(
                   CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Left,
                     verticalAlignment = VA.Center, 
                     wrapText = true,                                       
@@ -780,6 +933,7 @@ class CobroRepository @Inject()(
                 index = Some(2),
                 style = Some(
                   CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Left,
                     verticalAlignment = VA.Center,
                     wrapText = true,                    
@@ -803,7 +957,8 @@ class CobroRepository @Inject()(
                 index = Some(3),
                 style = Some(
                   CellStyle(
-                    horizontalAlignment = HA.Left,
+                    dataFormat = CellDataFormat("@"),                    
+                    horizontalAlignment = HA.Center,
                     verticalAlignment = VA.Center, 
                     wrapText = true,                                       
                     font = _fuenteTitulo,
@@ -826,6 +981,7 @@ class CobroRepository @Inject()(
                 index = Some(4),
                 style = Some(
                   CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Left,
                     verticalAlignment = VA.Center,
                     wrapText = true,                    
@@ -849,6 +1005,7 @@ class CobroRepository @Inject()(
                 index = Some(5),
                 style = Some(
                   CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Left,
                     verticalAlignment = VA.Center,  
                     wrapText = true,                  
@@ -872,6 +1029,7 @@ class CobroRepository @Inject()(
                 index = Some(6),
                 style = Some(
                   CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Left,
                     verticalAlignment = VA.Center,
                     wrapText = true,                    
@@ -895,6 +1053,7 @@ class CobroRepository @Inject()(
                 index = Some(7),
                 style = Some(
                   CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Left,
                     verticalAlignment = VA.Center,  
                     wrapText = true,                                      
@@ -918,6 +1077,7 @@ class CobroRepository @Inject()(
                 index = Some(8),
                 style = Some(
                   CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Left,
                     verticalAlignment = VA.Center,
                     font = _fuenteTitulo,
@@ -948,7 +1108,7 @@ class CobroRepository @Inject()(
                 style = Some(
                   CellStyle(
                     dataFormat = CellDataFormat("@"),                    
-                    horizontalAlignment = HA.Left,
+                    horizontalAlignment = HA.Center,
                     verticalAlignment = VA.Center,
                     font = _fuenteNoBold,
                     borders = CellBorders(
@@ -970,6 +1130,7 @@ class CobroRepository @Inject()(
                 index = Some(1),
                 style = Some(
                   CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Left,
                     verticalAlignment = VA.Center,                                       
                     font = _fuenteNoBold,
@@ -992,6 +1153,7 @@ class CobroRepository @Inject()(
                 index = Some(2),
                 style = Some(
                   CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Center,
                     verticalAlignment = VA.Center,                    
                     font = _fuenteNoBold,
@@ -1014,7 +1176,8 @@ class CobroRepository @Inject()(
                 index = Some(3),
                 style = Some(
                   CellStyle(
-                    horizontalAlignment = HA.Right,
+                    dataFormat = CellDataFormat("#,##0"),
+                    horizontalAlignment = HA.Center,
                     verticalAlignment = VA.Center, 
                     font = _fuenteNoBold,
                     borders = CellBorders(
@@ -1781,8 +1944,243 @@ class CobroRepository @Inject()(
               )              
         ).withHeight(40.points)
         // FIN INGENIERIA
+        _listRow02 += emptyFullRow
+        _listRow02 += emptyFullRow        
+        _listRow02 += emptyFullRow        
+        _listRow02 += emptyFullRow    
+        _listRow02 += emptyFullRow   
+        _idx = _idx + 6            
+        // FIRMAS CUADRO GENERAL
+          // FIRMAS UNITARIOS
+          var _firma03 = firmaService.buscarPorCodigo(3, empresa.empr_id.get)
+          var _firma02 = firmaService.buscarPorCodigo(2, empresa.empr_id.get)
+          _listRow02 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              _firma03.firm_nombre.get,
+              Some(0),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center,
+                  font = _fuenteTitulo,                  
+                  borders = CellBorders(
+                    leftStyle = CellBorderStyle.Thick,
+                    leftColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              _firma02.firm_nombre.get,
+              Some(5),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center,
+                  font = _fuenteTitulo,                  
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(8),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  borders = CellBorders(
+                    rightStyle = CellBorderStyle.Thick,
+                    rightColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )             
+          )
+          _listMerged02 += CellRange((_idx, _idx), (0, 1))          
+          _listMerged02 += CellRange((_idx, _idx), (5, 7))            
+          _idx = _idx + 1
+          _listRow02 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              _firma03.firm_titulo.get,
+              Some(0),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center,
+                  font = _fuenteTitulo,                  
+                  borders = CellBorders(
+                    leftStyle = CellBorderStyle.Thick,
+                    leftColor = Color.Black,
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet,
+            ),
+            StringCell(
+              _firma02.firm_titulo.get,
+              Some(5),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center,
+                  font = _fuenteTitulo,                  
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(8),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  borders = CellBorders(
+                    rightStyle = CellBorderStyle.Thick,
+                    rightColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )             
+          )
+          _listMerged02 += CellRange((_idx, _idx), (0, 1))          
+          _listMerged02 += CellRange((_idx, _idx), (5, 7)) 
+          _idx = _idx + 1 
+          _listRow02 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "CONCESIONARIO ALUMBRADO PUBLICO",
+              Some(0),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center,
+                  font = _fuenteTitulo,
+                  borders = CellBorders(
+                    leftStyle = CellBorderStyle.Thick,
+                    leftColor = Color.Black,
+                    bottomStyle = CellBorderStyle.Thick,
+                    bottomColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(1),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders(
+                    bottomStyle = CellBorderStyle.Thick,
+                    bottomColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(2),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders(
+                    bottomStyle = CellBorderStyle.Thick,
+                    bottomColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(3),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders(
+                    bottomStyle = CellBorderStyle.Thick,
+                    bottomColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(4),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders(
+                    bottomStyle = CellBorderStyle.Thick,
+                    bottomColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(5),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders(
+                    bottomStyle = CellBorderStyle.Thick,
+                    bottomColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(6),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders(
+                    bottomStyle = CellBorderStyle.Thick,
+                    bottomColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(7),
+              style = Some(
+                CellStyle(
+                  borders = CellBorders(
+                    bottomStyle = CellBorderStyle.Thick,
+                    bottomColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),                                                                        
+            StringCell(
+              "",
+              Some(8),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  borders = CellBorders(
+                    rightStyle = CellBorderStyle.Thick,
+                    rightColor = Color.Black,
+                    bottomStyle = CellBorderStyle.Thick,
+                    bottomColor = Color.Black
+                  )
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          _listMerged02 += CellRange((_idx, _idx), (0, 1))
+          _idx = _idx + 1
+        // FIN FIRMAS CUADRO GENERAL
         _listRow02.toList
       },
+      mergedRegions = _listMerged02.toList,
       columns = {
           var _listColumn = new ArrayBuffer[com.norbitltd.spoiwo.model.Column]()
           _listColumn += com.norbitltd.spoiwo.model
@@ -1934,6 +2332,37 @@ class CobroRepository @Inject()(
         case _ => _unitario.unit_descripcion.get
       }
 
+
+      var _ucap_id = unit_codigo match {
+        case "1.01" => 1
+        case "1.02" => 2
+        case "1.03" => 3
+        case "1.04" => 4
+        case "1.05" => 5
+        case "1.06" => 6
+        case "1.07" => 7
+        case "1.08" => 8
+        case "1.09" => 9
+        case "1.10" => 10
+        case "1.11" => 11
+        case "1.12" => 12
+        case _ => 0
+      }
+      var _cantidad_item = SQL("""select SUM(even_cantidad_instalado) AS cantidad FROM
+                siap.cobro_orden_trabajo cot1
+                inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
+                inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
+                inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
+                inner join siap.elemento e1 on e1.elem_id = re1.elem_id
+                inner join siap.unitario u1 on u1.unit_id = re1.unit_id
+                left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
+              where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo} AND e1.ucap_id = {ucap_id}    
+      """).on(
+        'empr_id -> empresa.empr_id,
+        'cotr_id -> orden.cotr_id,
+        'unit_codigo -> unit_codigo,
+        'ucap_id -> _ucap_id
+      ).as(SqlParser.scalar[Double].singleOpt)
 
       var _listSubTotal = new ArrayBuffer[String]()
       var _listTotal = new ArrayBuffer[String]()
@@ -2376,7 +2805,7 @@ class CobroRepository @Inject()(
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 NumericCell(
-                  orden.cotr_cantidad.get.toDouble,
+                  _cantidad_item match { case Some(v) => v case None => 0D }, // orden.cotr_cantidad.get.toDouble,
                   index = Some(10),
                   style = Some(
                     CellStyle(
@@ -3576,7 +4005,7 @@ class CobroRepository @Inject()(
             case a1 ~ a2 ~ a3 ~ a4 => (a1, a2, a3, a4)
           }
           val _materiales = SQL(
-            """select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, SUM(re1.even_cantidad_instalado) as cotrma_cantidad
+            """select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, AVG(re1.even_cantidad_instalado) as cotrma_cantidad
                 from siap.cobro_orden_trabajo cot1
                 inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
                 inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
