@@ -309,14 +309,17 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
           'elem_codigo -> elem_codigo.toInt
         )
         .as(ElementoD._set.singleOpt)
-      var eu = db.withConnection { implicit connection =>
-         SQL("""SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
-                INNER JOIN siap.unitario u1 ON u1.unit_id = eu1.unit_id
-                WHERE elem_id = {elem_id}"""
-             ).on('elem_id -> elemen.get.elem_id.get).as(Unitario._set *)
+      elemen match {
+        case Some(e) =>
+          var eu = db.withConnection { implicit connection =>
+            SQL("""SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
+                  INNER JOIN siap.unitario u1 ON u1.unit_id = eu1.unit_id
+                  WHERE elem_id = {elem_id}"""
+            ).on('elem_id -> e.elem_id.get).as(Unitario._set *)
+          }
+          Some(e.copy(unitarios = eu))
+        case None => None
       }
-
-      Some(elemen.get.copy(unitarios = eu))
     }
   }
 
@@ -495,6 +498,19 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
       }
       //
 
+      for (u <- elemento.unitarios) {
+        SQL(
+          """INSERT INTO siap.elemento_unitario
+               (unit_id, elem_id) VALUES 
+               ({unit_id}, {elem_id})
+            """
+        ).on(
+            'unit_id -> u.unit_id,
+            'elem_id -> id,
+          )
+          .executeInsert()
+      }
+
       SQL(
         "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
       ).on(
@@ -561,6 +577,25 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
               'cara_id -> ec.cara_id,
               'elem_id -> ec.elem_id,
               'elca_estado -> ec.elca_estado
+            )
+            .executeInsert()
+        }
+
+        SQL(
+          "DELETE FROM siap.elemento_unitario WHERE elem_id = {elem_id}"
+        ).on(
+          'elem_id -> elemento.elem_id
+        ).executeUpdate()
+
+        for (u <- elemento.unitarios) {
+          SQL(
+            """INSERT INTO siap.elemento_unitario
+                   (unit_id, elem_id) VALUES 
+                   ({unit_id}, {elem_id})
+                """
+          ).on(
+              'unit_id -> u.unit_id,
+              'elem_id -> elemento.elem_id
             )
             .executeInsert()
         }

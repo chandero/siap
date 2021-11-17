@@ -614,7 +614,11 @@ export default {
     reporte_tipo: 'Tipo Reporte',
     elpr_precio: 'Precio',
     elem_descripcion: 'Descripción',
-    elem_codigo: 'Código'
+    elem_codigo: 'Código',
+    unitario: 'Ucap Unitario'
+  },
+  unitario: {
+    select: 'Seleccione las Ucap'
   },
   manoobra: {
     tabletitle: 'Mano de Obra',

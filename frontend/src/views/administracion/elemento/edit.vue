@@ -20,6 +20,13 @@
         </el-option>
      </el-select>
      <p/>
+     <span>{{ $t('elemento.unitario')}}</span>
+     <el-select v-model="elemento.unitarios" name="unitario" multiple :placeholder="$t('unitario.select')">
+        <el-option v-for="u in unitarios" :key="u.unit_id" :label="u.unit_codigo + '-' + u.unit_descripcion" :value="u.unit_id" >
+        </el-option>
+     </el-select>
+     <p/>
+     <!--
      <el-form>
             <el-row :gutter="4">
               <el-col :xs="24" :sm="24" :md="10" :lg="10" :xl="10">
@@ -86,6 +93,7 @@
               </el-col>
             </el-row>
      </el-form>
+     -->
      <el-button :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="aplicar"></el-button>
        </el-form>
      </el-main>
@@ -95,6 +103,7 @@
 import { getTiposElemento } from '@/api/tipoelemento'
 import { getElemento, updateElemento } from '@/api/elemento'
 import { getCaracteristicas } from '@/api/caracteristica'
+import { getUnitariosTodas } from '@/api/unitario'
 
 export default {
   data () {
@@ -107,7 +116,8 @@ export default {
         tiel_id: '',
         empr_id: 0,
         usua_id: 0,
-        caracteristicas: []
+        caracteristicas: [],
+        unitarios: []
       },
       elemento_caracteristica: {
         elem_id: Number(this.$route.params.id),
@@ -120,6 +130,7 @@ export default {
       caracteristicas: [],
       valores: [],
       checkedCaracteristicas: [],
+      unitarios: [],
       message: '',
       loading: false,
       page_size: 10,
@@ -129,7 +140,13 @@ export default {
   },
   methods: {
     aplicar () {
-      updateElemento(this.elemento).then(response => {
+      var e = Object.assign({}, this.elemento)
+      var unitarios = []
+      this.elemento.unitarios.forEach(u => {
+        unitarios.push({ unit_id: u })
+      })
+      e.unitarios = unitarios
+      updateElemento(e).then(response => {
         if (response.status === 200) {
           this.success()
         }
@@ -138,7 +155,7 @@ export default {
       })
     },
     validate () {
-      if (this.elemento.elem_descripcion && this.elemento.elem_codigo && this.elemento.tiel_id) {
+      if (this.elemento.elem_descripcion && this.elemento.elem_codigo && this.elemento.tiel_id && this.elemento.unitarios.length > 0) {
         return true
       } else {
         return false
@@ -182,7 +199,8 @@ export default {
         tiel_id: '',
         empr_id: 0,
         usua_id: 0,
-        caracteristicas: []
+        caracteristicas: [],
+        unitarios: []
       }
     },
     success () {
@@ -190,14 +208,12 @@ export default {
         title: this.$i18n.t('elemento.success'),
         message: this.$i18n.t('elemento.updated') + ' ' + this.elemento.elem_descripcion,
         type: 'success'
-        // onClose: this.limpiarAndBack()
       })
     },
     error (e) {
       this.$notify.error({
         title: this.$i18n.t('elemento.error'),
-        message: this.$i18n.t('elemento.notupdated') + ' ' + e,
-        onClose: this.limpiar()
+        message: this.$i18n.t('elemento.notupdated') + ' ' + e
       })
     },
     caracteristica (cara_id) {
@@ -217,6 +233,11 @@ export default {
         this.caracteristicas = response.data
       }).catch(() => {})
     },
+    getUnitarios () {
+      getUnitariosTodas().then(response => {
+        this.unitarios = response.data
+      }).catch(() => {})
+    },
     handleCheckAllChange (val) {
       this.checkedCaracteristicas = val ? this.caracteristicas : []
       this.isIndeterminate = false
@@ -230,8 +251,10 @@ export default {
   mounted () {
     this.getTipos()
     this.getCaracteristicas()
+    this.getUnitarios()
     getElemento(this.$route.params.id).then(response => {
       this.elemento = response.data
+      this.elemento.unitarios = this.elemento.unitarios.map(u => u.unit_id)
     }).catch(error => {
       console.log(error)
     })

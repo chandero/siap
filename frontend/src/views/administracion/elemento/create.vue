@@ -9,7 +9,7 @@
      <el-input name="descripcion" v-model="elemento.elem_descripcion"></el-input>
      <p/>
      <span>{{ $t('elemento.code')}}</span>
-     <el-input name="codigo" v-model="elemento.elem_codigo" @blur="validarCodigo()"></el-input>
+     <el-input ref="codigo" name="codigo" v-model="elemento.elem_codigo" @blur="validarCodigo()"></el-input>
      <p/>
      <span>{{ $t('elemento.ucap')}}</span>
      <el-checkbox name="ucap" v-model="elemento.elem_ucap" ></el-checkbox>
@@ -26,6 +26,13 @@
         </el-option>
      </el-select>
      <p/>
+     <span>{{ $t('elemento.unitario')}}</span>
+     <el-select v-model="elemento.unitarios" name="unitario" multiple :placeholder="$t('unitario.select')">
+        <el-option v-for="u in unitarios" :key="u.unit_id" :label="u.unit_codigo + '-' + u.unit_descripcion" :value="u.unit_id" >
+        </el-option>
+     </el-select>
+     <p/>
+     <!--
      <el-form>
             <el-row :gutter="4">
               <el-col :xs="24" :sm="24" :md="10" :lg="10" :xl="10">
@@ -92,6 +99,7 @@
               </el-col>
             </el-row>
      </el-form>
+     -->
      <el-button :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="aplicar"></el-button>
        </el-form>
      </el-main>
@@ -102,6 +110,7 @@ import { getElementoByCode, saveElemento } from '@/api/elemento'
 import { getTiposElemento } from '@/api/tipoelemento'
 import { getCaracteristicas } from '@/api/caracteristica'
 import { getUcapsTodas } from '@/api/ucap'
+import { getUnitariosTodas } from '@/api/unitario'
 
 export default {
   data () {
@@ -115,7 +124,8 @@ export default {
         empr_id: 0,
         usua_id: 0,
         ucap_id: null,
-        caracteristicas: []
+        caracteristicas: [],
+        unitarios: []
       },
       elemento_caracteristica: {
         elem_id: 0,
@@ -124,11 +134,18 @@ export default {
         elca_valor: null,
         elca_estado: 1
       },
+      unitario: {
+        unit_id: null,
+        unit_codigo: null,
+        unit_descripcion: null,
+        empr_id: null
+      },
       tiposElemento: [],
       caracteristicas: [],
       ucaps: [],
       valores: [],
       checkedCaracteristicas: [],
+      unitarios: [],
       isIndeterminate: false,
       checkAll: false,
       message: '',
@@ -142,20 +159,27 @@ export default {
   methods: {
     validarCodigo () {
       getElementoByCode(this.elemento.elem_codigo).then(response => {
-        this.elemento = response.data
+        const elemento = response.data
         this.$notify({
-          title: 'Material código ' + this.elemento.elem_codigo + ' ya existe',
-          message: this.elemento.elem_descripcion,
+          title: 'Material código ' + elemento.elem_codigo + ' ya existe',
+          message: elemento.elem_descripcion,
           type: 'warning'
         })
         this.noexiste = false
-        this.limpiar()
+        this.elemento.elem_codigo = ''
+        this.$refs.codigo.focus()
       }).catch(() => {
         this.noexiste = true
       })
     },
     aplicar () {
-      saveElemento(this.elemento).then(response => {
+      var e = Object.assign({}, this.elemento)
+      var unitarios = []
+      this.elemento.unitarios.forEach(u => {
+        unitarios.push({ unit_id: u })
+      })
+      e.unitarios = unitarios
+      saveElemento(e).then(response => {
         if (response.status === 201) {
           this.success()
         }
@@ -179,7 +203,9 @@ export default {
         tiel_id: null,
         empr_id: 0,
         usua_id: 0,
-        ucap_id: null
+        ucap_id: null,
+        caracteristica: [],
+        unitarios: []
       }
       this.$router.push({ path: '/administracion/elemento' })
     },
@@ -191,7 +217,9 @@ export default {
         elem_estado: 1,
         tiel_id: '',
         empr_id: 0,
-        usua_id: 0
+        usua_id: 0,
+        caracteristica: [],
+        unitarios: []
       }
     },
     success () {
@@ -199,7 +227,7 @@ export default {
         title: this.$i18n.t('elemento.success'),
         message: this.$i18n.t('elemento.created') + ' ' + this.elemento.elem_descripcion,
         type: 'success',
-        onClose: this.limpiarAndBack()
+        onClose: this.limpiar()
       })
     },
     error (e) {
@@ -256,6 +284,11 @@ export default {
         this.ucaps = response.data
       }).catch(() => {})
     },
+    getUnitarios () {
+      getUnitariosTodas().then(response => {
+        this.unitarios = response.data
+      }).catch(() => {})
+    },
     handleCheckAllChange (val) {
       this.checkedCaracteristicas = val ? this.caracteristicas : []
       this.isIndeterminate = false
@@ -270,6 +303,7 @@ export default {
     this.getTipos()
     this.getCaracteristicas()
     this.getUcaps()
+    this.getUnitarios()
   }
 }
 </script>

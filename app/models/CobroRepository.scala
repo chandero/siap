@@ -2270,7 +2270,30 @@ class CobroRepository @Inject()(
         ).as(SqlParser.str("unit_codigo").*)
 
       _unitarios.map { unitario =>
-        _idx = siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(empresa, orden, barrio, unitario, _listRow01, _listMerged01, _idx, _listCuadroGeneralUnitario)
+        if (unitario == "1.01") {
+          /// buscar si existe más de una ucap en el unitario para separar valores
+          val elements = SQL("""select distinct e1.elem_id, e1.elem_descripcion
+                          from siap.cobro_orden_trabajo cot1
+                          inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
+                          inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
+                          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
+                          inner join siap.elemento e1 on e1.elem_id = re1.elem_id
+                          inner join siap.unitario u1 on u1.unit_id = re1.unit_id
+                          left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
+                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} and u1.unit_codigo = {unitario} and e1.ucap_id = 1
+                          order by e1.elem_id""")
+            .on(
+              'empr_id -> orden.empr_id,
+              'cotr_id -> orden.cotr_id,
+              'unitario -> "1.01"
+            ).as(SqlParser.int("elem_id").*)
+            println("Lista de Elementos de 1.01:" + elements)
+            elements.map { e =>
+              _idx = siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(empresa, orden, barrio, unitario, _listRow01, _listMerged01, _idx, _listCuadroGeneralUnitario, Some(e))
+            }
+        } else {
+          _idx = siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(empresa, orden, barrio, unitario, _listRow01, _listMerged01, _idx, _listCuadroGeneralUnitario, None)
+        }
       } 
       Sheet(
         name = "Unitarios",
@@ -2304,7 +2327,7 @@ class CobroRepository @Inject()(
     }
   }
 
-  def siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(empresa: Empresa, orden: orden_trabajo_cobro, barrio: Barrio, unit_codigo: String, _listRow01: ListBuffer[com.norbitltd.spoiwo.model.Row], _listMerged01: ListBuffer[CellRange], _idx01: Int, _listCuadroGeneralUnitario: ListBuffer[(String, String, String, Double, String, String, String, String)]): Int = {
+  def siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(empresa: Empresa, orden: orden_trabajo_cobro, barrio: Barrio, unit_codigo: String, _listRow01: ListBuffer[com.norbitltd.spoiwo.model.Row], _listMerged01: ListBuffer[CellRange], _idx01: Int, _listCuadroGeneralUnitario: ListBuffer[(String, String, String, Double, String, String, String, String)], elem_id: Option[Int]): Int = {
     db.withConnection { implicit connection =>
       var _idx = _idx01
       val _unitario = unitarioService.buscarPorCodigo(unit_codigo).get
@@ -2348,7 +2371,8 @@ class CobroRepository @Inject()(
         case "1.12" => 12
         case _ => 0
       }
-      var _cantidad_item = SQL("""select SUM(even_cantidad_instalado) AS cantidad FROM
+      var _cantidad_item = elem_id match {
+        case Some(elem_id) => SQL("""select SUM(even_cantidad_instalado) AS cantidad FROM
                 siap.cobro_orden_trabajo cot1
                 inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
                 inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
@@ -2356,13 +2380,36 @@ class CobroRepository @Inject()(
                 inner join siap.elemento e1 on e1.elem_id = re1.elem_id
                 inner join siap.unitario u1 on u1.unit_id = re1.unit_id
                 left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-              where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo} AND e1.ucap_id = {ucap_id}    
-      """).on(
-        'empr_id -> empresa.empr_id,
-        'cotr_id -> orden.cotr_id,
-        'unit_codigo -> unit_codigo,
-        'ucap_id -> _ucap_id
-      ).as(SqlParser.scalar[Double].singleOpt)
+                where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo} AND e1.ucap_id = {ucap_id} AND e1.elem_id = {elem_id}""").
+                on(
+                  'empr_id -> empresa.empr_id,
+                  'cotr_id -> orden.cotr_id,
+                  'unit_codigo -> unit_codigo,
+                  'ucap_id -> _ucap_id,
+                  'elem_id -> elem_id
+                ).as(SqlParser.scalar[Double].singleOpt)                  
+                
+        case None => SQL("""select SUM(even_cantidad_instalado) AS cantidad FROM
+                siap.cobro_orden_trabajo cot1
+                inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
+                inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
+                inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
+                inner join siap.elemento e1 on e1.elem_id = re1.elem_id
+                inner join siap.unitario u1 on u1.unit_id = re1.unit_id
+                left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
+                where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo} AND e1.ucap_id = {ucap_id}""").
+                on(
+                  'empr_id -> empresa.empr_id,
+                  'cotr_id -> orden.cotr_id,
+                  'unit_codigo -> unit_codigo,
+                  'ucap_id -> _ucap_id
+                ).as(SqlParser.scalar[Double].singleOpt)
+      }
+
+      var _cantidad_xls = _cantidad_item match {
+        case Some(v) => v
+        case None => orden.cotr_cantidad.get.toDouble
+      }
 
       var _listSubTotal = new ArrayBuffer[String]()
       var _listTotal = new ArrayBuffer[String]()
@@ -2805,7 +2852,7 @@ class CobroRepository @Inject()(
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 NumericCell(
-                  _cantidad_item match { case Some(v) => v case None => 0D }, // orden.cotr_cantidad.get.toDouble,
+                  _cantidad_xls, // orden.cotr_cantidad.get.toDouble,
                   index = Some(10),
                   style = Some(
                     CellStyle(
@@ -2826,7 +2873,7 @@ class CobroRepository @Inject()(
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 )              
             )
-          var _cantidad = orden.cotr_cantidad.get.toDouble
+          var _cantidad = _cantidad_xls
           val headerRow07 = com.norbitltd.spoiwo.model
             .Row(
               StringCell(
@@ -3288,7 +3335,8 @@ class CobroRepository @Inject()(
           }
           var _herramientaLista = SQL("""select math_codigo, math_descripcion, mathpr_precio, mathpr_es_porcentaje, mathpr_cantidad, mathpr_rendimiento from siap.mano_transporte_herramienta mth1
               left join siap.mano_transporte_herramienta_precio mthp1 on mthp1.math_id = mth1.math_id 
-              where mthp1.mathpr_anho = {anho} and mth1.empr_id = {empr_id}""").
+              where mthp1.mathpr_anho = {anho} and mth1.empr_id = {empr_id}
+              order by mth1.math_id ASC""").
             on(
               'anho -> orden.cotr_anho.get,
               'empr_id -> empresa.empr_id
@@ -4004,7 +4052,45 @@ class CobroRepository @Inject()(
           ) ~ get[Option[Int]]("elpr_precio") ~ double("cotrma_cantidad") map {
             case a1 ~ a2 ~ a3 ~ a4 => (a1, a2, a3, a4)
           }
-          val _materiales = SQL(
+          val _materiales = elem_id match {
+            case Some(elem_id) => 
+              // Buscar Luminarias Correspondientes para el material correcto
+              var _luminarias = SQL("""select re1.aap_id
+                          from siap.cobro_orden_trabajo cot1
+                          inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
+                          inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
+                          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
+                          inner join siap.elemento e1 on e1.elem_id = re1.elem_id
+                          inner join siap.unitario u1 on u1.unit_id = re1.unit_id
+                          left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
+                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} and u1.unit_codigo = {unit_codigo} and e1.ucap_id = 1 and e1.elem_id = {elem_id}
+                          order by re1.aap_id """).
+                          on(
+                            'cotr_id -> orden.cotr_id,
+                            'empr_id -> empresa.empr_id.get,
+                            'unit_codigo -> unit_codigo,
+                            'elem_id -> elem_id
+                          ).as(
+                            SqlParser.scalar[Int] *
+                          )
+              println("Luminarias: (" + _luminarias.mkString(",") + ")")
+              SQL("""select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, AVG(re1.even_cantidad_instalado) as cotrma_cantidad
+                      from siap.cobro_orden_trabajo cot1
+                      inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
+                      inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
+                      inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
+                      inner join siap.elemento e1 on e1.elem_id = re1.elem_id
+                      inner join siap.unitario u1 on u1.unit_id = re1.unit_id
+                      left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
+                      where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo} and CAST(re1.aap_id as VARCHAR) IN ({luminarias})
+                      group by 1,2,3""").on(
+                  'cotr_id -> orden.cotr_id,
+                  'empr_id -> empresa.empr_id.get,
+                  'unit_codigo -> unit_codigo,
+                  'luminarias -> _luminarias.mkString(",").split(",").toSeq
+                )
+              .as(_parseMaterial *)
+            case None => SQL(
             """select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, AVG(re1.even_cantidad_instalado) as cotrma_cantidad
                 from siap.cobro_orden_trabajo cot1
                 inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
@@ -4021,6 +4107,7 @@ class CobroRepository @Inject()(
               'unit_codigo -> unit_codigo
             )
             .as(_parseMaterial *)
+          }
           _idx_inicial = _idx + 1
           _idx_final = _idx + 1
           _materiales.map {
@@ -5261,7 +5348,7 @@ class CobroRepository @Inject()(
           }
           var _ingLista = SQL("""select main_descripcion, mainpr_precio from siap.mano_ingenieria mi1
                 left join siap.mano_ingenieria_precio mip1 on mip1.main_id = mi1.main_id 
-                where mip1.mainpr_anho = {anho} and mi1.empr_id = {empr_id}""").
+                where mip1.mainpr_anho = {anho} and mi1.empr_id = {empr_id} ORDER BY mi1.main_id ASC""").
           on(
             'anho -> orden.cotr_anho.get,
             'empr_id -> empresa.empr_id
