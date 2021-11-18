@@ -70,7 +70,8 @@ class CobroController @Inject()(
 
   def siap_orden_trabajo_cobro(cotr_id: Long) = authenticatedUserAction.async { implicit request =>
       val empr_id = Utility.extraerEmpresa(request)
-      val (cotr_consecutivo, os) = cobroService.siap_orden_trabajo_cobro(empr_id.get , cotr_id)
+      val usua_id = Utility.extraerUsuario(request)
+      val (cotr_consecutivo, os) = cobroService.siap_orden_trabajo_cobro(empr_id.get , cotr_id, usua_id.get)
       val filename = "Informe_Orden_Trabajo_ITAF_" + cotr_consecutivo + ".xlsx"
       val attach = "attachment; filename=" + filename
       Future.successful(Ok(os)
