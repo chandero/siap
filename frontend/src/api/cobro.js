@@ -14,9 +14,23 @@ export function obtener (reti_id) {
   })
 }
 
-export function xls (cotr_id) {
+export function verificar (reti_id, anho, mes) {
   return request({
-    url: `cotr/prn/${cotr_id}`,
+    url: `cotr/chk/${reti_id}/${anho}/${mes}`,
+    method: 'get'
+  })
+}
+
+export function consecutivo (reti_id) {
+  return request({
+    url: `cotr/csc/${reti_id}`,
+    method: 'get'
+  })
+}
+
+export function xls (cotr_id, reti_id) {
+  return request({
+    url: `cotr/prn/${cotr_id}/${reti_id}`,
     method: 'get',
     responseType: 'blob'
   })

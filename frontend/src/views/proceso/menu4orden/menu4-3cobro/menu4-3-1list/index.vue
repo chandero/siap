@@ -10,11 +10,24 @@
         </el-main>
       </el-container>
       <el-container>
-          <el-header>
-            <el-button type="primary" icon="el-icon-circle-plus" circle @click="showDialog = true" ></el-button>
-            <el-button type="success" icon="el-icon-refresh" circle @click="obtener()"></el-button>
-          </el-header>
           <el-main>
+            <el-form>
+              <el-row>
+                <el-col>
+                  <el-form-item label="Tipo de Obra">
+                    <el-select v-model="reti_id">
+                      <el-option v-for="r in tipos_obra" :key="r.reti_id" :value="r.reti_id" :label="r.reti_descripcion"></el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col>
+                  <el-button type="primary" icon="el-icon-circle-plus" circle @click="showDialog = true" ></el-button>
+                  <el-button type="success" icon="el-icon-refresh" circle @click="obtener()"></el-button>
+                </el-col>
+              </el-row>
+            </el-form>
+            <el-row>
+            <el-col>
             <el-table
             :data="tableData"
             stripe
@@ -186,6 +199,8 @@
         layout="sizes, prev, pager, next, total"
         :total="total">
       </el-pagination> -->
+        </el-col>
+      </el-row>
     </el-main>
   </el-container>
         <el-row>
@@ -204,7 +219,9 @@
     title="Generar Orden de Trabajo"
     :visible.sync="showDialog"
     width="50%"
-    :before-close="handleClose"
+    destroy-on-close
+    center
+    @closed="handleDialogClosed"
   >
     <el-container>
       <el-main>
@@ -224,16 +241,18 @@
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="8">
-              <el-form-item label="Consecutivo ITAF Siguente">
-                <el-input v-model="cotr_consecutivo" />
+            <el-col>
+              <el-form-item label="Tipo de Obra">
+                <el-select v-model="reti_id_gen">
+                  <el-option v-for="r in tipos_obra" :key="r.reti_id" :value="r.reti_id" :label="r.reti_descripcion"></el-option>
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row>
-            <el-col>
-              <el-form-item>
-                <span>MODERNIZACION</span>
+            <el-col :span="8">
+              <el-form-item label="Consecutivo ITAF Siguente">
+                <el-input :disabled="validCsc" v-model="cotr_consecutivo" />
               </el-form-item>
             </el-col>
           </el-row>
@@ -242,7 +261,7 @@
     </el-container>
     <span slot="footer" class="dialog-footer">
         <el-button @click="showDialog = false">Cancelar</el-button>
-        <el-button type="primary" @click="generar()">Confirmar</el-button>
+        <el-button :disabled="!reti_id_gen || !cotr_consecutivo || esGenerando" type="primary" @click="generar()">Confirmar</el-button>
     </span>
   </el-dialog>
   </el-container>
@@ -250,22 +269,47 @@
 <script>
 import { mapGetters } from 'vuex'
 import { getTipos } from '@/api/reporte'
-import { obtener, generar, xls } from '@/api/cobro'
+import { obtener, generar, xls, verificar, consecutivo } from '@/api/cobro'
 import { parseTime } from '@/utils'
 export default {
   data () {
     return {
+      esGenerando: false,
+      validCsc: false,
       anho: null,
       mes: null,
       tireuc_id: 1,
       reti_id: 6,
+      reti_id_gen: null,
       cotr_consecutivo: null,
       reporte_tipo: null,
       tableData: [],
       showDialog: false,
       total: 0,
       page_size: 50,
-      current_page: 1
+      current_page: 1,
+      tipos_obra: [
+        {
+          reti_id: 2,
+          reti_descripcion: 'EXPANSION'
+        },
+        {
+          reti_id: 6,
+          reti_descripcion: 'MODERNIZACION'
+        }
+      ]
+    }
+  },
+  watch: {
+    reti_id () {
+      this.obtener()
+    },
+    reti_id_gen () {
+      if (this.reti_id_gen) {
+        consecutivo(this.reti_id_gen).then(res => {
+          this.cotr_consecutivo = res.data
+        })
+      }
     }
   },
   computed: {
@@ -281,6 +325,9 @@ export default {
     this.mes = today.getMonth()
   },
   methods: {
+    handleDialogClosed () {
+      this.reti_id_gen = null
+    },
     obtener () {
       this.tableData = []
       obtener(this.reti_id).then(response => {
@@ -288,16 +335,29 @@ export default {
       })
     },
     generar () {
-      this.showDialog = false
-      generar(this.anho, this.mes, this.tireuc_id, this.reti_id, this.cotr_consecutivo).then(response => {
+      verificar(this.reti_id_gen, this.anho, this.mes).then(response => {
         if (response.data === true) {
-          this.$message({
-            showClose: true,
-            message: 'Generación Finalizada...',
-            type: 'success',
-            duration: 5000
+          this.$alert('Ya existen ordenes de trabajo para este periodo', 'Atención', {
+            confirmButtonText: 'Cerrar'
           })
-          this.obtener()
+        } else {
+          this.esGenerando = true
+          generar(this.anho, this.mes, this.tireuc_id, this.reti_id_gen, this.cotr_consecutivo).then(response => {
+            this.esGenerando = false
+            this.showDialog = false
+            if (response.data === true) {
+              this.$message({
+                showClose: true,
+                message: 'Generación Finalizada...',
+                type: 'success',
+                duration: 5000
+              })
+              this.obtener()
+            }
+          }).catch(() => {
+            this.esGenerando = false
+            this.showDialog = false
+          })
         }
       })
     },
@@ -382,7 +442,7 @@ export default {
     },
     handleXls (idx, orden) {
       console.log('_idx: ', idx, ', row: ', JSON.stringify(orden))
-      xls(orden.cotr_id).then(resp => {
+      xls(orden.cotr_id, orden.cotr_tipo_obra).then(resp => {
         var blob = resp.data
         const filename = 'Informe_Orden_Trabajo_ITAF_' + orden.cotr_consecutivo + '.xlsx'
         if (window.navigator.msSaveOrOpenBlob) {
