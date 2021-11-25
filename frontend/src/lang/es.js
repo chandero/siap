@@ -62,7 +62,9 @@ export default {
     potencia_anterior: 'Potencia Anterior',
     potencia_nueva: 'Potencia Nueva',
     direccion: 'Dirección',
-    cantidad: 'Cantidad'
+    cantidad: 'Cantidad',
+    tipo_obra: 'Tipo de Obra',
+    tipo_obra_tipo: 'Tipo'
   },
   route: {
     dashboard: 'Tablero',

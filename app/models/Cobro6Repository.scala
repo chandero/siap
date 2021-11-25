@@ -218,17 +218,26 @@ class Cobro6Repository @Inject()(
 
   def siap_obtener_orden_trabajo_cobro_modernizacion(
       empr_id: Long,
-      reti_id: Long
+      filter: String,
+      orderby: String
   ): Future[Iterable[orden_trabajo_cobro]] = Future {
     db.withConnection { implicit connection =>
-      val query =
-        """SELECT * FROM siap.cobro_orden_trabajo 
-           WHERE empr_id = {empr_id} and cotr_tipo_obra = {reti_id}
-           ORDER BY cotr_anho, cotr_periodo, cotr_consecutivo"""
+      var query =
+        """SELECT * FROM siap.cobro_orden_trabajo co1
+           WHERE empr_id = {empr_id}
+        """
+      if (!filter.isEmpty) {
+        query = query + " and " + filter
+        // curr_page = 1
+      }
+      if (!orderby.isEmpty) {
+        query = query + s" ORDER BY $orderby"
+      } else {
+        query = query + s" ORDER BY co1,cotr_anho, co1.cotr_periodo, co1.cotr_consecutivo"
+      }           
       val _lista = SQL(query)
         .on(
-          'empr_id -> empr_id,
-          'reti_id -> reti_id
+          'empr_id -> empr_id
         )
         .as(orden_trabajo_cobro._set *)
       _lista
@@ -293,8 +302,8 @@ class Cobro6Repository @Inject()(
                 	rdd1.aap_potencia_anterior as cotr_potencia_anterior,  
                 	rdd1.aap_tecnologia as cotr_tecnologia_nueva,
                   rdd1.aap_potencia as cotr_potencia_nueva, 
-                	atc1.aatc_descripcion as cotr_luminaria_anterior,
-                	atc2.aatc_descripcion as cotr_luminaria_nueva,
+                	amo1.aamo_descripcion as cotr_luminaria_anterior,
+                	amo2.aamo_descripcion as cotr_luminaria_nueva,
 					        r1.repo_id as repo_id,
 	                r1.repo_consecutivo as repo_consecutivo, 
 					        rd1.aap_id as aap_id,	
@@ -305,12 +314,12 @@ class Cobro6Repository @Inject()(
                 inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id 
                 inner join siap.aap a1 on a1.aap_id = rd1.aap_id
                 inner join siap.aap_adicional ad1 on ad1.aap_id = a1.aap_id 
-                left join siap.aap_tipo_carcasa atc1 on atc1.aatc_id = rdd1.aatc_id_anterior 
-                left join siap.aap_tipo_carcasa atc2 on atc2.aatc_id = rdd1.aatc_id
+                left join siap.aap_modelo amo1 on amo1.aamo_id = rdd1.aamo_id_anterior 
+                left join siap.aap_modelo amo2 on amo2.aamo_id = rdd1.aamo_id
                 inner join siap.aap_uso au1 on au1.aaus_id = a1.aaus_id
                 inner join siap.barrio b1 on b1.barr_id = r1.barr_id 
                 where
-                    r1.empr_id = {empr_id} and r1.rees_id = 3 and
+                  r1.empr_id = {empr_id} and r1.rees_id = 3 and
 	                r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and 
 	                rd1.even_estado < 8 and
 	                r1.reti_id = {reti_id}
@@ -322,8 +331,8 @@ class Cobro6Repository @Inject()(
                   	rdd1.aap_potencia_anterior as cotr_potencia_anterior,  
                   	rdd1.aap_tecnologia as cotr_tecnologia_nueva,
                     rdd1.aap_potencia as cotr_potencia_nueva, 
-                  	max(atc1.aatc_descripcion) as cotr_luminaria_anterior,
-                  	max(atc2.aatc_descripcion) as cotr_luminaria_nueva,
+                  	max(amo1.aamo_descripcion) as cotr_luminaria_anterior,
+                  	max(amo2.aamo_descripcion) as cotr_luminaria_nueva,
 					          count(*) as repo_id,
 	                  count(*) as repo_consecutivo,
 	                  count(*) as aap_id,                	
@@ -334,12 +343,12 @@ class Cobro6Repository @Inject()(
                 inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id 
                 inner join siap.aap a1 on a1.aap_id = rd1.aap_id
                 inner join siap.aap_adicional ad1 on ad1.aap_id = a1.aap_id 
-                left join siap.aap_tipo_carcasa atc1 on atc1.aatc_id = rdd1.aatc_id_anterior 
-                left join siap.aap_tipo_carcasa atc2 on atc2.aatc_id = rdd1.aatc_id
+                left join siap.aap_modelo amo1 on amo1.aamo_id = rdd1.aamo_id_anterior 
+                left join siap.aap_modelo amo2 on amo2.aamo_id = rdd1.aamo_id
                 inner join siap.aap_uso au1 on au1.aaus_id = a1.aaus_id
                 inner join siap.barrio b1 on b1.barr_id = r1.barr_id 
                 where
-                    r1.empr_id = {empr_id} and r1.rees_id = 3 and
+                  r1.empr_id = {empr_id} and r1.rees_id = 3 and
 	                r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and 
 	                rd1.even_estado < 8 and
 	                r1.reti_id = {reti_id}
@@ -361,29 +370,6 @@ class Cobro6Repository @Inject()(
           'mes -> mes
         )
         .as(_parseOrden *)
-
-      /*      val _queryReporte =
-        """select distinct r1.repo_id, r1.tireuc_id, rdd1.aap_id from siap.reporte r1
-                               inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id
-                               inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id
-                               inner join siap.aap a1 on a1.aap_id = rd1.aap_id
-                               inner join siap.aap_adicional ad1 on ad1.aap_id = a1.aap_id
-                               inner join siap.aap_uso au1 on au1.aaus_id = a1.aaus_id
-                               inner join siap.barrio b1 on b1.barr_id = r1.barr_id
-                               where
-                                r1.empr_id = {empr_id} and r1.rees_id = 3 and
-	                              r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and
-	                              rd1.even_estado < 8 and
-	                              r1.reti_id = {reti_id} and
-	                              r1.barr_id = {barr_id} and
-                                rdd1.aap_tecnologia_anterior = {cotr_tecnologia_anterior} and
-	                              rdd1.aap_potencia_anterior = {cotr_potencia_anterior} and
-	                              rdd1.aap_tecnologia = {cotr_tecnologia_nueva} and
-	                              rdd1.aap_potencia = {cotr_potencia_nueva}
-                               order by 1,3"""
-      val _queryReporteParser = int("repo_id") ~ int("tireuc_id") ~ int("aap_id") map {
-        case a ~ b ~ c => (a, b, c)
-      }*/
 
       var _idx = 0L;
       ordenes.map { orden =>

@@ -5,21 +5,21 @@
         <el-header class="ordentrabajo_header">{{ $t('operativo.workordercobrotitle') }}
         </el-header>
         <el-main>
-          <!-- <vue-query-builder v-model="qbquery" :rules="qrules" :labels="qlabels" :styled="qstyled" :maxDepth="3"></vue-query-builder> -->
-          <!-- <el-button type="warning" icon="el-icon-search" circle @click="actualizar"></el-button> -->
+          <query-builder :labels="qlabels" :rules="qrules" :styled="qstyled" :maxDepth="3" v-model="qbquery"></query-builder>
+          <el-button type="warning" icon="el-icon-search" circle @click="actualizar" title="Actualizar Aplicando el Filtro"></el-button>
         </el-main>
       </el-container>
       <el-container>
           <el-main>
             <el-form>
               <el-row>
-                <el-col>
+<!--                 <el-col>
                   <el-form-item label="Tipo de Obra">
                     <el-select v-model="reti_id">
                       <el-option v-for="r in tipos_obra" :key="r.reti_id" :value="r.reti_id" :label="r.reti_descripcion"></el-option>
                     </el-select>
                   </el-form-item>
-                </el-col>
+                </el-col> -->
                 <el-col>
                   <el-button type="primary" icon="el-icon-circle-plus" circle @click="showDialog = true" ></el-button>
                   <el-button type="success" icon="el-icon-refresh" circle @click="obtener()"></el-button>
@@ -33,16 +33,13 @@
             stripe
             show-summary
             :summary-method="getSummaries"
-            :default-sort = "{prop: 'ortr_id', order: 'descending'}"
             style="width: 100%"
             max-height="600"
             border
-            @sort-change="handleSort"
-            @filter-change="handleFilter">
+            >
             <el-table-column
               :label="$t('cotr.anho')"
               width="60"
-              sortable="custom"
               prop="cotr_anho"
               resizable
                >
@@ -53,7 +50,6 @@
             <el-table-column
               :label="$t('cotr.mes')"
               width="80"
-              sortable="custom"
               prop="cotr_periodo"
               resizable
                >
@@ -62,9 +58,18 @@
               </template>
             </el-table-column>
             <el-table-column
+              :label="$t('cotr.tipo_obra')"
+              width="150"
+              prop="cotr_tipo_obra"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ tipo_obra(scope.row.cotr_tipo_obra) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
               :label="$t('cotr.consecutivo')"
               width="100"
-              sortable="custom"
               prop="cotr_consecutivo"
               resizable
                >
@@ -75,7 +80,6 @@
             <el-table-column
               :label="$t('cotr.fecha')"
               width="100"
-              sortable="custom"
               prop="cotr_fecha"
               resizable
             >
@@ -84,9 +88,20 @@
               </template>
             </el-table-column>
             <el-table-column
+              v-if="reti_id === 2"
+              :label="$t('cotr.tipo_obra_tipo')"
+              width="80"
+              prop="cotr_tipo_obra_tipo"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ parseInt(scope.row.cotr_tipo_obra_tipo) | arabicToRoman }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              v-if="reti_id === 6"
               :label="$t('cotr.luminaria_anterior')"
               width="200"
-              sortable="custom"
               prop="cotr_luminaria_anterior"
               resizable
                >
@@ -97,7 +112,6 @@
             <el-table-column
               :label="$t('cotr.luminaria_nueva')"
               width="200"
-              sortable="custom"
               prop="cotr_luminaria_nueva"
               resizable
                >
@@ -106,9 +120,9 @@
               </template>
             </el-table-column>
             <el-table-column
+              v-if="reti_id === 6"
               :label="$t('cotr.tecnologia_anterior')"
-              width="200"
-              sortable="custom"
+              width="135"
               prop="cotr_tecnologia_anterior"
               resizable
                >
@@ -118,8 +132,7 @@
             </el-table-column>
             <el-table-column
               :label="$t('cotr.tecnologia_nueva')"
-              width="200"
-              sortable="custom"
+              width="130"
               prop="cotr_tecnologia_nueva"
               resizable
                >
@@ -128,9 +141,9 @@
               </template>
             </el-table-column>
             <el-table-column
+              v-if="reti_id === 6"
               :label="$t('cotr.potencia_anterior')"
-              width="200"
-              sortable="custom"
+              width="125"
               prop="cotr_potencia_anterior"
               resizable
                >
@@ -140,8 +153,7 @@
             </el-table-column>
             <el-table-column
               :label="$t('cotr.potencia_nueva')"
-              width="200"
-              sortable="custom"
+              width="120"
               prop="cotr_potencia_nueva"
               resizable
                >
@@ -151,8 +163,7 @@
             </el-table-column>
             <el-table-column
               :label="$t('cotr.direccion')"
-              width="200"
-              sortable="custom"
+              width="250"
               prop="cotr_direccion"
               resizable
                >
@@ -163,7 +174,6 @@
             <el-table-column
               :label="$t('cotr.cantidad')"
               width="200"
-              sortable="custom"
               prop="cotr_cantidad"
               resizable
                >
@@ -218,21 +228,21 @@
   <el-dialog
     title="Generar Orden de Trabajo"
     :visible.sync="showDialog"
-    width="50%"
+    width="40%"
     destroy-on-close
     center
     @closed="handleDialogClosed"
   >
     <el-container>
       <el-main>
-        <el-form>
+        <el-form label-position="left" label-width="200px">
           <el-row>
-            <el-col :span="8">
+            <el-col :span="24">
               <el-form-item label="Año">
                 <el-input type="number" v-model="anho" />
               </el-form-item>
             </el-col>
-            <el-col>
+            <el-col :span="24">
               <el-form-item label="Periodo">
                 <el-select v-model="mes">
                   <el-option v-for="m in months" :key="m.id" :value="m.id" :label="$t(`months.${m.label}`)"></el-option>
@@ -250,9 +260,9 @@
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="8">
+            <el-col :span="24">
               <el-form-item label="Consecutivo ITAF Siguente">
-                <el-input :disabled="validCsc" v-model="cotr_consecutivo" />
+                <el-input :disabled="validCsc" v-model="cotr_consecutivo" style="font-weight: bolder;" />
               </el-form-item>
             </el-col>
           </el-row>
@@ -267,13 +277,84 @@
   </el-container>
 </template>
 <script>
+import VueQueryBuilder from 'vue-query-builder'
 import { mapGetters } from 'vuex'
 import { getTipos } from '@/api/reporte'
 import { obtener, generar, xls, verificar, consecutivo } from '@/api/cobro'
+import { getCaracteristica } from '@/api/caracteristica'
 import { parseTime } from '@/utils'
 export default {
+  components: {
+    'query-builder': VueQueryBuilder
+  },
   data () {
     return {
+      qbquery: {},
+      qrules: [
+        {
+          type: 'select',
+          id: 'co1.cotr_tipo_obra',
+          label: this.$i18n.t('cotr.tipo_obra'),
+          choices: [
+            { label: 'EXPANSION', value: 2 },
+            { label: 'MODERNIZACION', value: 6 }
+          ],
+          operators: ['=']
+        },
+        {
+          type: 'custom',
+          id: 'co1.cotr_anho',
+          label: this.$i18n.t('cotr.anho'),
+          operators: ['=', '<>', '<', '<=', '>', '>=']
+        },
+        {
+          type: 'select',
+          id: 'co1.cotr_periodo',
+          label: this.$i18n.t('cotr.mes'),
+          choices: [],
+          operators: ['=']
+        },
+        {
+          type: 'select',
+          id: 'cotr.cotr_direccion',
+          label: this.$i18n.t('cotr.direccion'),
+          choices: [],
+          operators: ['=']
+        },
+        {
+          type: 'select',
+          id: 'co1.cotr_tecnologia_nueva',
+          label: this.$i18n.t('cotr.tecnologia_nueva'),
+          choices: [],
+          operators: ['=']
+        },
+        {
+          type: 'custom',
+          id: 'co1.cotr_potencia_nueva',
+          label: this.$i18n.t('cotr.potencia_nueva'),
+          choices: [],
+          operators: ['=', '<>', '<', '<=', '>', '>=']
+        }
+      ],
+      qlabels: {
+        matchType: this.$i18n.t('qb.matchType'),
+        matchTypes: [
+          {
+            id: 'all',
+            label: this.$i18n.t('qb.matchTypeAll')
+          },
+          {
+            id: 'any',
+            label: this.$i18n.t('qb.matchTypeAny')
+          }
+        ],
+        addRule: this.$i18n.t('qb.addRule'),
+        removeRule: this.$i18n.t('qb.removeRule'),
+        addGroup: this.$i18n.t('qb.addGroup'),
+        removeGroup: this.$i18n.t('qb.removeGroup'),
+        textInputPlaceholder: this.$i18n.t('qb.textInputPlaceholder')
+      },
+      qstyled: true,
       esGenerando: false,
       validCsc: false,
       anho: null,
@@ -297,17 +378,24 @@ export default {
           reti_id: 6,
           reti_descripcion: 'MODERNIZACION'
         }
-      ]
+      ],
+      order: 'co1.cotr_anho, co1.cotr_periodo, co1.cotr_tipo_obra, co1.cotr_tipo_obra_tipo, co1.cotr_consecutivo'
     }
   },
   watch: {
-    reti_id () {
+    qbquery () {
       this.obtener()
     },
     reti_id_gen () {
       if (this.reti_id_gen) {
         consecutivo(this.reti_id_gen).then(res => {
-          this.cotr_consecutivo = res.data
+          if (res.data) {
+            this.cotr_consecutivo = res.data + 1
+            this.validCsc = true
+          } else {
+            this.cotr_consecutivo = null
+            this.validCsc = false
+          }
         })
       }
     }
@@ -318,19 +406,34 @@ export default {
   mounted () {
     getTipos().then(response => {
       this.reporte_tipo = response.data
-      this.obtener()
+      this.months.forEach(m => {
+        this.qrules[2].choices.push({ label: this.$i18n.t(`months.${m.label}`), value: m.id })
+      })
+      getCaracteristica(7).then(response => {
+        const tecnologias = response.data.cara_valores.split(',')
+        const qtecnologias = []
+        tecnologias.forEach(t => {
+          qtecnologias.push({ label: t, value: t })
+        })
+        this.qrules[4].choices = qtecnologias
+        this.obtener()
+      })
     })
     const today = new Date()
     this.anho = today.getFullYear()
     this.mes = today.getMonth()
   },
   methods: {
+    tipo_obra (tipo) {
+      return this.tipos_obra.find(t => t.reti_id === tipo).reti_descripcion
+    },
     handleDialogClosed () {
       this.reti_id_gen = null
+      this.cotr_consecutivo = null
     },
     obtener () {
       this.tableData = []
-      obtener(this.reti_id).then(response => {
+      obtener(this.order, this.qbquery).then(response => {
         this.tableData = response.data
       })
     },
@@ -420,12 +523,12 @@ export default {
       const { columns, data } = param
       const sums = []
       columns.forEach((column, index) => {
-        if (index === 10) {
+        if ((index === 10 && this.reti_id === 6) || (index === 8 && this.reti_id === 2)) {
           sums[index] = 'Total Luminarias'
           return
         }
         const values = data.map(item => Number(item[column.property]))
-        if (index === 11 && !values.every(value => isNaN(value))) {
+        if (((index === 11 && this.reti_id === 6) || (index === 9 && this.reti_id === 2)) && !values.every(value => isNaN(value))) {
           sums[index] = '' + values.reduce((prev, curr) => {
             const value = Number(curr)
             if (!isNaN(value)) {

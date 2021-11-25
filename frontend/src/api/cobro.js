@@ -7,10 +7,11 @@ export function generar (anho, mes, tireuc_id, reti_id, cotr_consecutivo) {
   })
 }
 
-export function obtener (reti_id) {
+export function obtener (order, filter) {
   return request({
-    url: `cotr/get/${reti_id}`,
-    method: 'get'
+    url: 'cotr/get',
+    method: 'post',
+    data: { orderby: order, filter: filter }
   })
 }
 

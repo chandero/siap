@@ -270,87 +270,80 @@ class Cobro2Repository @Inject()(
         )
       println("Fecha Inicial: " + fi.getTime())
       println("Fecha Final: " + ff.getTime())
-      val _parseOrden = int("barr_id") ~ str("cotr_direccion") ~ int("cotr_tipo_obra_tipo") ~ get[Option[String]](
-        "cotr_tecnologia_anterior"
-      ) ~ get[Option[Int]]("cotr_potencia_anterior") ~
-        str("cotr_tecnologia_nueva") ~ int("cotr_potencia_nueva") ~ 
-        get[Option[String]]("cotr_luminaria_anterior") ~ 
-        str("cotr_luminaria_nueva") ~
-        int("repo_id") ~ int("repo_consecutivo") ~ int("aap_id") ~ str(
-        "aaus_descripcion"
-      ) ~ bool("is_orden") map {
-        case a1 ~ a2 ~ a3 ~ a4 ~ a5 ~ a6 ~ a7 ~ a8 ~ a9 ~ a10 ~ a11 ~ a12 ~ a13 ~ a14 =>
-          (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)
-      }
+      val _parseOrden = int("barr_id") ~ 
+                        str("cotr_direccion") ~ 
+                        int("cotr_tipo_obra_tipo") ~ 
+                        str("cotr_tecnologia_nueva") ~ 
+                        int("cotr_potencia_nueva") ~ 
+                        str("cotr_luminaria_nueva") ~
+                        int("repo_id") ~ 
+                        int("repo_consecutivo") ~ 
+                        int("aap_id") ~ 
+                        str("aaus_descripcion") ~ 
+                        bool("is_orden") map {
+                          case a1 ~ a2 ~ a3 ~ a4 ~ a5 ~ a6 ~ a7 ~ a8 ~ a9 ~ a10 ~ a11 =>
+                          (a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)
+                        }
       val ordenes = SQL(
         """select 
                   r1.barr_id as barr_id, 
-                	b1.barr_descripcion as cotr_direccion,
+                  b1.barr_descripcion as cotr_direccion,
                   ra1.repo_tipo_expansion as cotr_tipo_obra_tipo,
-	                rdd1.aap_tecnologia_anterior as cotr_tecnologia_anterior,
-                	rdd1.aap_potencia_anterior as cotr_potencia_anterior,  
-                	rdd1.aap_tecnologia as cotr_tecnologia_nueva,
+                  rdd1.aap_tecnologia as cotr_tecnologia_nueva,
                   rdd1.aap_potencia as cotr_potencia_nueva, 
-                	atc1.aatc_descripcion as cotr_luminaria_anterior,
-                	atc2.aatc_descripcion as cotr_luminaria_nueva,
-					        r1.repo_id as repo_id,
+                  amo2.aamo_descripcion as cotr_luminaria_nueva,
+				          r1.repo_id as repo_id,
 	                r1.repo_consecutivo as repo_consecutivo, 
-					        rd1.aap_id as aap_id,	
-                	au1.aaus_descripcion as aaus_descripcion,
-                	false as is_orden
+				          rd1.aap_id as aap_id,	
+                  au1.aaus_descripcion as aaus_descripcion,
+                  false as is_orden
                 from siap.reporte r1
-                inner join siap.reporte_adiciona ra1 on ra1.repo_id = r1.repo_id
+                inner join siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                 inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id
                 inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id 
                 inner join siap.aap a1 on a1.aap_id = rd1.aap_id
                 inner join siap.aap_adicional ad1 on ad1.aap_id = a1.aap_id 
-                left join siap.aap_tipo_carcasa atc1 on atc1.aatc_id = rdd1.aatc_id_anterior 
-                left join siap.aap_tipo_carcasa atc2 on atc2.aatc_id = rdd1.aatc_id
+                left join siap.aap_modelo amo2 on amo2.aamo_id = rdd1.aamo_id
                 inner join siap.aap_uso au1 on au1.aaus_id = a1.aaus_id
                 inner join siap.barrio b1 on b1.barr_id = r1.barr_id 
                 where
-                    r1.empr_id = {empr_id} and r1.rees_id = 3 and
+                  r1.empr_id = {empr_id} and r1.rees_id = 3 and
 	                r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and 
 	                rd1.even_estado < 8 and
-	                r1.reti_id = {reti_id}
+	                r1.reti_id = 2
                 union all
                 select
-                    r1.barr_id, 
-                  	b1.barr_descripcion as cotr_direccion,
-                    ra1.repo_tipo_expansion as cotr_tipo_obra_tipo,
-  	                rdd1.aap_tecnologia_anterior as cotr_tecnologia_anterior,
-                  	rdd1.aap_potencia_anterior as cotr_potencia_anterior,  
-                  	rdd1.aap_tecnologia as cotr_tecnologia_nueva,
-                    rdd1.aap_potencia as cotr_potencia_nueva,
-                  	max(atc1.aatc_descripcion) as cotr_luminaria_anterior,
-                  	max(atc2.aatc_descripcion) as cotr_luminaria_nueva,
-					          count(*) as repo_id,
-	                  count(*) as repo_consecutivo,
-	                  count(*) as aap_id,                	
-                	  max(au1.aaus_descripcion) as aaus_descripcion,
-                	  true as is_orden
+                  r1.barr_id, 
+                  b1.barr_descripcion as cotr_direccion,
+                  ra1.repo_tipo_expansion as cotr_tipo_obra_tipo,
+                  rdd1.aap_tecnologia as cotr_tecnologia_nueva,
+                  rdd1.aap_potencia as cotr_potencia_nueva,
+                  max(amo2.aamo_descripcion) as cotr_luminaria_nueva,
+  		            count(*) as repo_id,
+	                count(*) as repo_consecutivo,
+	                count(*) as aap_id,                	
+                	max(au1.aaus_descripcion) as aaus_descripcion,
+                	true as is_orden
                 from siap.reporte r1
-                inner join siap.reporte_adiciona ra1 on ra1.repo_id = r1.repo_id
+                inner join siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                 inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id
                 inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id 
                 inner join siap.aap a1 on a1.aap_id = rd1.aap_id
                 inner join siap.aap_adicional ad1 on ad1.aap_id = a1.aap_id 
-                left join siap.aap_tipo_carcasa atc1 on atc1.aatc_id = rdd1.aatc_id_anterior 
-                left join siap.aap_tipo_carcasa atc2 on atc2.aatc_id = rdd1.aatc_id
+                left join siap.aap_modelo amo2 on amo2.aamo_id = rdd1.aamo_id
                 inner join siap.aap_uso au1 on au1.aaus_id = a1.aaus_id
                 inner join siap.barrio b1 on b1.barr_id = r1.barr_id 
                 where
-                    r1.empr_id = {empr_id} and r1.rees_id = 3 and
+                  r1.empr_id = {empr_id} and r1.rees_id = 3 and
 	                r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and 
 	                rd1.even_estado < 8 and
-	                r1.reti_id = {reti_id}
-                group by 1,2,3,4,5,6
+	                r1.reti_id = 2
+                group by 1,2,3,4,5
                 order by  barr_id, 
                           cotr_direccion,
-	                        cotr_tecnologia_anterior,
-                          cotr_potencia_anterior,  
                           cotr_tecnologia_nueva,
                           cotr_potencia_nueva, 
+                          cotr_tipo_obra_tipo,
                           is_orden desc
       """
       ).on(
@@ -388,7 +381,7 @@ class Cobro2Repository @Inject()(
 
       var _idx = 0L;
       ordenes.map { orden =>
-        if (orden._14) {
+        if (orden._11) {
           orden_consecutivo_inicial = orden_consecutivo_inicial + 1
           _idx = SQL("""INSERT INTO siap.cobro_orden_trabajo (
                 cotr_anho, 
@@ -432,14 +425,14 @@ class Cobro2Repository @Inject()(
               'cotr_periodo -> mes,
               'cotr_consecutivo -> orden_consecutivo_inicial,
               'cotr_fecha -> fi.getTime(),
-              'cotr_luminaria_anterior -> orden._8,
-              'cotr_luminaria_nueva -> orden._9,
-              'cotr_tecnologia_anterior -> orden._4,
-              'cotr_tecnologia_nueva -> orden._6,
-              'cotr_potencia_anterior -> orden._5,
-              'cotr_potencia_nueva -> orden._7,
+              'cotr_luminaria_anterior -> Option.empty[String],
+              'cotr_luminaria_nueva -> orden._6,
+              'cotr_tecnologia_anterior -> Option.empty[String],
+              'cotr_tecnologia_nueva -> orden._4,
+              'cotr_potencia_anterior -> Option.empty[Int],
+              'cotr_potencia_nueva -> orden._5,
               'cotr_direccion -> orden._2,
-              'cotr_cantidad -> orden._11,
+              'cotr_cantidad -> orden._9,
               'cotr_tipo_obra -> reti_id,
               'cotr_tipo_obra_tipo -> orden._3,
               'empr_id -> empr_id,
@@ -456,13 +449,13 @@ class Cobro2Repository @Inject()(
             """INSERT INTO siap.cobro_orden_trabajo_reporte (cotr_id, repo_id, tireuc_id, aap_id) VALUES ({cotr_id}, {repo_id}, {tireuc_id}, {aap_id})"""
           ).on(
               'cotr_id -> _idx,
-              'repo_id -> orden._10,
+              'repo_id -> orden._7,
               'tireuc_id -> 1,
-              'aap_id -> orden._12
+              'aap_id -> orden._9
             )
             .executeInsert()
           println(
-            "Insertanto reporte luminaria _idx:" + _idx + ", repo_id:" + orden._10 + ", app_id:" + orden._12
+            "Insertanto reporte luminaria _idx:" + _idx + ", repo_id:" + orden._7 + ", app_id:" + orden._9
           )
         }
       }
@@ -807,7 +800,7 @@ class Cobro2Repository @Inject()(
             "",
             "OBJETO",
             ":",
-            "OBRA COMPLEMENTARIA DE EXPANSION DEL ALUMBRADO PÚBLICO DEL MUNICIPIO DE " + empresa.muni_descripcion.get
+            "OBRA DE EXPANSION DEL ALUMBRADO PÚBLICO DEL MUNICIPIO DE " + empresa.muni_descripcion.get
           )
           .withHeight(30.points)
 
@@ -984,7 +977,16 @@ class Cobro2Repository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             StringCell(
-              "EXPANSION",
+              "EXPANSION TIPO " + (orden.cotr_tipo_obra_tipo match { 
+                case Some(v) => v match {
+                  case "1" => "I" 
+                  case "2" => "II" 
+                  case "3" => "III" 
+                  case "4" => "IV"
+                  case _ => "-"
+                }
+                case None => "--"
+              }),
               Some(1),
               style = Some(
                 CellStyle(
@@ -1081,8 +1083,6 @@ class Cobro2Repository @Inject()(
             ),
             StringCell(
               "EXPANSION DE " + N2T
-                .convertirLetras(orden.cotr_cantidad.get)
-                .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_anterior.get + " DE " + orden.cotr_potencia_anterior.get + "W" + " POR " + N2T
                 .convertirLetras(orden.cotr_cantidad.get)
                 .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_nueva.get + " DE " + orden.cotr_potencia_nueva.get + " W",
               Some(5),
@@ -1656,7 +1656,16 @@ class Cobro2Repository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             StringCell(
-              "EXPANSION A LED",
+              "EXPANSION TIPO " + (orden.cotr_tipo_obra_tipo match { 
+                case Some(v) => v match {
+                  case "1" => "I" 
+                  case "2" => "II" 
+                  case "3" => "III" 
+                  case "4" => "IV"
+                  case _ => "-"
+                }
+                case None => "--"
+              }),
               Some(1),
               style = Some(
                 CellStyle(
@@ -1893,7 +1902,16 @@ class Cobro2Repository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             StringCell(
-              "EXPANSION",
+              "EXPANSION TIPO " + (orden.cotr_tipo_obra_tipo match { 
+                case Some(v) => v match {
+                  case "1" => "I" 
+                  case "2" => "II" 
+                  case "3" => "III" 
+                  case "4" => "IV"
+                  case _ => "X1"
+                }
+                case None => "X2"
+              }),
               Some(1),
               style = Some(
                 CellStyle(
@@ -2014,8 +2032,6 @@ class Cobro2Repository @Inject()(
             ),
             StringCell(
               "EXPANSION DE " + N2T
-                .convertirLetras(orden.cotr_cantidad.get)
-                .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_anterior.get + " DE " + orden.cotr_potencia_anterior.get + "W" + " POR " + N2T
                 .convertirLetras(orden.cotr_cantidad.get)
                 .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_nueva.get + " DE " + orden.cotr_potencia_nueva.get + " W",
               Some(6),
@@ -8974,7 +8990,6 @@ class Cobro2Repository @Inject()(
       elem_id: Option[Int]
   ): Int = {
       var _idx = _idx01
-
       val _fuenteTitulo = Font(
         height = 22.points,
         fontName = "Liberation Sans",
@@ -10090,7 +10105,16 @@ class Cobro2Repository @Inject()(
           _listRow01 += com.norbitltd.spoiwo.model
             .Row(
               StringCell(
-                "EXPANSION",
+              "EXPANSION TIPO " + (orden.cotr_tipo_obra_tipo match { 
+                case Some(v) => v match {
+                  case "1" => "I" 
+                  case "2" => "II" 
+                  case "3" => "III" 
+                  case "4" => "IV"
+                  case _ => "-"
+                }
+                case None => "--"
+              }),
                 Some(0),
                 style = Some(
                   CellStyle(

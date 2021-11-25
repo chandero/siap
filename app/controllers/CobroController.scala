@@ -21,7 +21,7 @@ import org.joda.time.DateTime
 import pdi.jwt.JwtSession
 
 import utilities._
-
+import dto.QueryDto
 @Singleton
 class CobroController @Inject()(
     cobro6Service: Cobro6Repository,
@@ -36,8 +36,22 @@ class CobroController @Inject()(
     DateTimeSerializer
   )
 
-  def siap_obtener_orden_trabajo_cobro_modernizacion(reti_id: Long) = authenticatedUserAction.async { implicit request => 
+  def siap_obtener_orden_trabajo_cobro_modernizacion = authenticatedUserAction.async { implicit request => 
       val empr_id = Utility.extraerEmpresa(request)
+      val json = request.body.asJson.get
+      // val page_size = (json \ "page_size").as[Long]
+      // val current_page = (json \ "current_page").as[Long]
+      val orderby = (json \ "orderby").as[String]
+      val filter = (json \ "filter").as[QueryDto]
+      val filtro_a = Utility.procesarFiltrado(filter)
+      var filtro = filtro_a.replace("\"", "'")
+      if (filtro == "()") {
+        filtro = ""
+      }
+      cobro6Service.siap_obtener_orden_trabajo_cobro_modernizacion(empr_id.get, filtro, orderby).map { result =>
+        Ok(write(result))
+      }
+      /*     
       reti_id match {
         case 6 => cobro6Service.siap_obtener_orden_trabajo_cobro_modernizacion(empr_id.get, 6).map { result =>
                   Ok(write(result))
@@ -47,6 +61,7 @@ class CobroController @Inject()(
                 }
         case _ => Future.successful(Ok(write(List.empty)))
       }
+      */
   }
 
   def siap_generar_orden_trabajo_cobro_modernizacion(

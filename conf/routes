@@ -679,7 +679,7 @@ GET /api/caar/xlsx/:a/:m/:t/:u controllers.CargaController.procesar_xlsx(a: Int,
 
 # Cobro orden de trabajo
 
-GET /api/cotr/get/:i                            controllers.CobroController.siap_obtener_orden_trabajo_cobro_modernizacion(i:Long)
+POST /api/cotr/get                            controllers.CobroController.siap_obtener_orden_trabajo_cobro_modernizacion
 GET /api/cotr/gen/:a/:m/:u/:t/:c                  controllers.CobroController.siap_generar_orden_trabajo_cobro_modernizacion(a:Int, m:Int, u:Int, t:Long, c:Long)
 GET /api/cotr/prn/:i/:r                            controllers.CobroController.siap_orden_trabajo_cobro(i:Long, r:Long)
 GET /api/cotr/chk/:r/:a/:m                            controllers.CobroController.siap_orden_trabajo_cobro_verificar(r:Long, a:Int, m:Int)
