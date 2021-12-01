@@ -223,7 +223,11 @@ POST /api/elem/save controllers.ElementoController.guardarElemento
 POST /api/elem/upd controllers.ElementoController.actualizarElemento
 GET /api/elem/bdesc/:q controllers.ElementoController.buscarPorDescripcion(q: String)
 GET /api/elem/bcode/:c controllers.ElementoController.buscarPorCodigo(c: String)
-POST /api/elem/upa controllers.ElementoController.actualizarPrecio
+POST /api/elem/mat/upa controllers.ElementoController.actualizarPrecio
+GET /api/elem/mat/espr controllers.ElementoController.buscarElementoSinPrecio
+POST /api/elem/mat/gap controllers.ElementoController.todosPrecio
+GET /api/elem/mat/xls controllers.ElementoController.todosXls
+GET /api/elem/mat/xlsp controllers.ElementoController.todosPrecioXls
 
 # Cuadrilla
 

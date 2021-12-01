@@ -1,5 +1,6 @@
 package controllers
 
+import java.util.Calendar
 import javax.inject.Inject
 import models._
 import play.api.mvc._
@@ -12,8 +13,19 @@ import pdi.jwt.JwtSession
 
 import utilities._
 
+
+import net.liftweb.json._
+import net.liftweb.json.Serialization.write
+import net.liftweb.json.Serialization.read
+import net.liftweb.json.parse
+
 import dto.ResultDto
 import dto.QueryDto
+
+import org.joda.time.format.DateTimeFormat
+
+import java.io.BufferedOutputStream
+import java.io.FileOutputStream
 
 @Singleton
 class ElementoController @Inject()(
@@ -22,6 +34,9 @@ class ElementoController @Inject()(
     authenticatedUserAction: AuthenticatedUserAction)(
     implicit ec: ExecutionContext)
     extends AbstractController(cc) {
+  implicit val formats = Serialization.formats(NoTypeHints) ++ List(
+    DateTimeSerializer
+  )      
   def todos(): Action[AnyContent] =
     authenticatedUserAction.async { implicit request: Request[AnyContent] => 
       val json = request.body.asJson.get
@@ -38,6 +53,25 @@ class ElementoController @Inject()(
       val total = elementoService.cuenta(empr_id.get, filtro)
       elementoService.todos(empr_id.get, page_size, current_page, orderby, filtro).map { elementos =>
         Ok(Json.obj("elementos" -> elementos, "total" -> total))
+      }
+    }
+
+  def todosPrecio(): Action[AnyContent] =
+    authenticatedUserAction.async { implicit request: Request[AnyContent] => 
+      val json = request.body.asJson.get
+      val page_size = ( json \ "page_size").as[Long]
+      val current_page = ( json \ "current_page").as[Long]
+      val orderby = ( json \ "orderby").as[String]
+      val filter = ( json \ "filter").as[QueryDto]
+      val filtro_a = Utility.procesarFiltrado(filter)
+      var filtro = filtro_a.replace("\"", "'")
+      if (filtro == "()") {
+        filtro = ""
+      }
+      val empr_id = Utility.extraerEmpresa(request)    
+      val total = elementoService.cuentaPrecio(empr_id.get, filtro)
+      elementoService.todosPrecio(empr_id.get, page_size, current_page, orderby, filtro).map { elementos =>
+        Ok(write(ResultDto(elementos.toList, total)))
       }
     }
 
@@ -150,13 +184,50 @@ class ElementoController @Inject()(
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
       val elem_id = (json \ "elem_id").as[Long]
-      val elpr_anho = (json \ "elpr_anho").as[Int]
       val elpr_precio = (json \ "elpr_precio").as[BigDecimal]
       val usua_id = Utility.extraerUsuario(request)
-      if (elementoService.actualizarPrecio(elem_id, elpr_anho, elpr_precio, usua_id.get)) {
+      if (elementoService.agregarPrecio(elem_id, elpr_precio, "UND", usua_id.get)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
         Future.successful(ServiceUnavailable(Json.toJson("false")))
       }
   }  
+
+  def buscarElementoSinPrecio = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+    val empr_id = Utility.extraerEmpresa(request)
+    elementoService.buscarElementoSinPrecio(empr_id.get).map { elementos =>
+      Ok(write(elementos))
+    }
+  }
+
+  def todosXls() = authenticatedUserAction.async { implicit request =>
+      val empr_id = Utility.extraerEmpresa(request)
+      val os = elementoService.todosXls(empr_id.get)
+      val _fecha = Calendar.getInstance().getTimeInMillis()
+      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+      val filename = "Informe_Material_" + fmt.print(_fecha) +".xlsx"
+      val attach = "attachment; filename=" + filename
+      Future.successful(Ok(os)
+        .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        .withHeaders("Content-Disposition" -> attach)
+      )
+  }
+
+  def todosPrecioXls() = authenticatedUserAction.async { implicit request =>
+      val empr_id = Utility.extraerEmpresa(request)
+      val os = elementoService.todosPrecioXls(empr_id.get)
+      val _fecha = Calendar.getInstance().getTimeInMillis()
+      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+      val filename = "Informe_Material_Precio" + fmt.print(_fecha) +".xlsx"
+      val attach = "attachment; filename=" + filename
+      val bos = new BufferedOutputStream(new FileOutputStream("/tmp/" + filename))
+          bos.write(os)
+          bos.close()
+      Future.successful(Ok(os)
+        .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        .withHeaders("Content-Disposition" -> attach)
+      )
+  }  
+
 }

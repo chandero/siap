@@ -443,9 +443,38 @@ export const asyncRouterMap = [
       { path: 'tipoelemento', component: _import('administracion/tipoelemento'), name: 'tipoelemento', meta: { title: 'tipoelemento', roles: ['super'] } },
       { path: 'tipoelemento/editar/:id', component: _import('administracion/tipoelemento/edit'), name: 'tipoelementoedit', hidden: true, redirect: false, meta: { title: 'tipoelementoedit', roles: ['super'] } },
       { path: 'tipoelemento/crear', component: _import('administracion/tipoelemento/create'), name: 'tipoelementocreate', hidden: true, meta: { title: 'tipoelementocreate', roles: ['super'] } },
-      { path: 'elemento', component: _import('administracion/elemento'), name: 'elemento', meta: { title: 'elemento', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
+      // ELEMENTO
+      {
+        path: 'elemento',
+        component: () => import('@/views/administracion/elemento/index'),
+        redirect: '/administracion/elemento/list',
+        name: 'elemento',
+        meta: {
+          title: 'elemento.elemento',
+          icon: 'el-icon-document',
+          roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor']
+        },
+        children: [
+          {
+            path: 'list',
+            component: () => import('@/views/administracion/elemento/menu00/index'),
+            name: 'elemento_lista',
+            meta: { title: 'elemento.lista', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
+          },
+          {
+            path: 'price',
+            component: () => import('@/views/administracion/elemento/menu03/index'),
+            name: 'elemento_precio',
+            meta: { title: 'elemento.precio', icon: 'el-icon-money', roles: ['super', 'admin', 'supervisor'] }
+          },
+          { path: 'editar/:id', component: _import('administracion/elemento/menu02/index'), name: 'elementoedit', hidden: true, redirect: false, meta: { title: 'elemento.elementoedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
+          { path: 'crear', component: _import('administracion/elemento/menu01/index'), name: 'elementocreate', hidden: true, meta: { title: 'elemento.elementocreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } }
+        ]
+      },
+      /* { path: 'elemento', component: _import('administracion/elemento/elemento'), name: 'elemento', meta: { title: 'elemento', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
       { path: 'elemento/editar/:id', component: _import('administracion/elemento/edit'), name: 'elementoedit', hidden: true, redirect: false, meta: { title: 'elementoedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
       { path: 'elemento/crear', component: _import('administracion/elemento/create'), name: 'elementocreate', hidden: true, meta: { title: 'elementocreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
+      */// FIN ELEMENTO
       { path: 'manoobra', component: _import('administracion/manoobra'), name: 'manoobra', meta: { title: 'manoobra', roles: ['super', 'admin', 'almacen'] } },
       { path: 'manoobra/editar/:id', component: _import('administracion/manoobra/edit'), name: 'manoobraedit', hidden: true, redirect: false, meta: { title: 'manoobraedit', roles: ['super', 'admin', 'almacen'] } },
       { path: 'manoobra/crear', component: _import('administracion/manoobra/create'), name: 'manoobracreate', hidden: true, meta: { title: 'manoobracreate', roles: ['super', 'admin', 'almacen'] } },

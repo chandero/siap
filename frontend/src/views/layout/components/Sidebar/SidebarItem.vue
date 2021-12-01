@@ -90,7 +90,6 @@ export default {
       }
       return path.resolve(this.basePath, routePath)
     },
-
     generateTitle
   }
 }

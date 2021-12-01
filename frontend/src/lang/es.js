@@ -224,9 +224,13 @@ export default {
     tipoelemento: 'Tipo de Material',
     tipoelementocreate: 'Tipo de Material / Nuevo Tipo de Material',
     tipoelementoedit: 'Tipo de Material / Editar Tipo de Material',
-    elemento: 'Material',
-    elementocreate: 'Material / Nuevo Material',
-    elementoedit: 'Material / Editar Material',
+    elemento: {
+      elemento: 'Material',
+      elementocreate: 'Material / Nuevo Material',
+      elementoedit: 'Material / Editar Material',
+      lista: 'Material / Lista',
+      precio: 'Material / Precio'
+    },
     manoobra: 'Mano de Obra',
     manoobracreate: 'Mano de Obra / Nuevo',
     manoobraedit: 'Mano de Obra / Editar',
@@ -617,7 +621,8 @@ export default {
     elpr_precio: 'Precio',
     elem_descripcion: 'Descripción',
     elem_codigo: 'Código',
-    unitario: 'Ucap Unitario'
+    unitario: 'Ucap Unitario',
+    date: 'Fecha Precio'
   },
   unitario: {
     select: 'Seleccione las Ucap'

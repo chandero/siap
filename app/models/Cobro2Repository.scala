@@ -10032,23 +10032,25 @@ class Cobro2Repository @Inject()(
         italic = false,
         strikeout = false
       )
-      val _parseMaterial = str("elem_codigo") ~ str("elem_descripcion") ~ double(
-        "even_cantidad"
-      ) ~ get[Option[String]]("elpr_unidad") ~ get[Option[Double]](
-        "elpr_precio"
-      ) map { case a1 ~ a2 ~ a3 ~ a4 ~ a5 => (a1, a2, a3, a4, a5) }
+      val _parseMaterial = 
+        str("elem_codigo") ~ 
+        str("elem_descripcion") ~ 
+        double("even_cantidad") ~ 
+        get[Option[String]]("elpr_unidad") ~ 
+        get[Option[Double]]("elpr_precio") ~ 
+        int("elem_estado") map { case a1 ~ a2 ~ a3 ~ a4 ~ a5 ~ a6 => (a1, a2, a3, a4, a5, a6) }
       val _materiales = SQL(
-        """select e1.elem_codigo, e1.elem_descripcion, sum(re1.even_cantidad_instalado) as even_cantidad, ep1.elpr_unidad, ep1.elpr_precio 
-                          from siap.cobro_orden_trabajo cot1
-                          inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                          inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-                          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
-                          inner join siap.elemento e1 on e1.elem_id = re1.elem_id
-                          inner join siap.unitario u1 on u1.unit_id = re1.unit_id
-                          left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id}
-                          group by 1,2,4,5
-                          order by 2"""
+        """select e1.elem_codigo, e1.elem_descripcion, sum(re1.even_cantidad_instalado) as even_cantidad, ep1.elpr_unidad, ep1.elpr_precio, e1.elem_estado 
+            from siap.cobro_orden_trabajo cot1
+            inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
+            inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
+            inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
+            inner join siap.elemento e1 on e1.elem_id = re1.elem_id
+            inner join siap.unitario u1 on u1.unit_id = re1.unit_id
+            left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
+           where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id}
+           group by 1,2,4,5,6
+           order by 2"""
       ).on(
           'empr_id -> empresa.empr_id,
           'cotr_id -> orden.cotr_id
@@ -10174,7 +10176,10 @@ class Cobro2Repository @Inject()(
                   Some(0),
                   style = Some(
                     CellStyle(
-                      dataFormat = CellDataFormat("@")
+                      dataFormat = CellDataFormat("@"),
+                      fillPattern = CellFill.Solid,
+                      fillForegroundColor = _m._6 match { case 2 => Color.LightBlue case _ => Color.White },
+                      fillBackgroundColor = _m._6 match { case 2 => Color.White case _ => Color.Black }
                     )
                   ),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -10184,7 +10189,10 @@ class Cobro2Repository @Inject()(
                   Some(1),
                   style = Some(
                     CellStyle(
-                      dataFormat = CellDataFormat("@")
+                      dataFormat = CellDataFormat("@"),
+                      fillPattern = CellFill.Solid,
+                      fillForegroundColor = _m._6 match { case 2 => Color.LightBlue case _ => Color.White },
+                      fillBackgroundColor = _m._6 match { case 2 => Color.White case _ => Color.Black }
                     )
                   ),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -10194,7 +10202,10 @@ class Cobro2Repository @Inject()(
                   Some(2),
                   style = Some(
                     CellStyle(
-                      dataFormat = CellDataFormat("#,##0.00")
+                      dataFormat = CellDataFormat("#,##0.00"),
+                      fillPattern = CellFill.Solid,
+                      fillForegroundColor = _m._6 match { case 2 => Color.LightBlue case _ => Color.White },
+                      fillBackgroundColor = _m._6 match { case 2 => Color.White case _ => Color.Black }
                     )
                   ),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -10207,7 +10218,10 @@ class Cobro2Repository @Inject()(
                   Some(3),
                   style = Some(
                     CellStyle(
-                      dataFormat = CellDataFormat("@")
+                      dataFormat = CellDataFormat("@"),
+                      fillPattern = CellFill.Solid,
+                      fillForegroundColor = _m._6 match { case 2 => Color.LightBlue case _ => Color.White },
+                      fillBackgroundColor = _m._6 match { case 2 => Color.White case _ => Color.Black }
                     )
                   ),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -10220,7 +10234,10 @@ class Cobro2Repository @Inject()(
                   Some(4),
                   style = Some(
                     CellStyle(
-                      dataFormat = CellDataFormat("#,##0")
+                      dataFormat = CellDataFormat("#,##0"),
+                      fillPattern = CellFill.Solid,
+                      fillForegroundColor = _m._6 match { case 2 => Color.LightBlue case _ => Color.White },
+                      fillBackgroundColor = _m._6 match { case 2 => Color.White case _ => Color.Black }
                     )
                   ),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -10240,7 +10257,10 @@ class Cobro2Repository @Inject()(
                   Some(5),
                   style = Some(
                     CellStyle(
-                      dataFormat = CellDataFormat("#,##0.00")
+                      dataFormat = CellDataFormat("#,##0.00"),
+                      fillPattern = CellFill.Solid,
+                      fillForegroundColor = _m._6 match { case 2 => Color.LightBlue case _ => Color.White },
+                      fillBackgroundColor = _m._6 match { case 2 => Color.White case _ => Color.Black }
                     )
                   ),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -10250,7 +10270,10 @@ class Cobro2Repository @Inject()(
                   Some(6),
                   style = Some(
                     CellStyle(
-                      dataFormat = CellDataFormat("#,##0")
+                      dataFormat = CellDataFormat("#,##0"),
+                      fillPattern = CellFill.Solid,
+                      fillForegroundColor = _m._6 match { case 2 => Color.LightBlue case _ => Color.White },
+                      fillBackgroundColor = _m._6 match { case 2 => Color.White case _ => Color.Black }
                     )
                   ),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -10260,7 +10283,10 @@ class Cobro2Repository @Inject()(
                   Some(7),
                   style = Some(
                     CellStyle(
-                      dataFormat = CellDataFormat("#,##0")
+                      dataFormat = CellDataFormat("#,##0"),
+                      fillPattern = CellFill.Solid,
+                      fillForegroundColor = _m._6 match { case 2 => Color.LightBlue case _ => Color.White },
+                      fillBackgroundColor = _m._6 match { case 2 => Color.White case _ => Color.Black }
                     )
                   ),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet

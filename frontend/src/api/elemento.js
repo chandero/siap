@@ -14,6 +14,20 @@ export function getTodos (page_size, current_page, orderby, filter) {
   })
 }
 
+export function getTodosPrecio (page_size, current_page, orderby, filter) {
+  const data = {
+    page_size,
+    current_page,
+    orderby,
+    filter
+  }
+  return request({
+    url: '/elem/mat/gap',
+    method: 'post',
+    data: data
+  })
+}
+
 export function getElementos () {
   return request({
     url: '/elem/all',
@@ -83,15 +97,30 @@ export function deleteElemento (elem_id) {
   })
 }
 
-export function updatePriceElemento (elem_id, elpr_anho, elpr_precio) {
+export function updatePriceElemento (elem_id, elpr_precio) {
   const data = {
     elem_id,
-    elpr_anho,
     elpr_precio
   }
   return request({
-    url: '/elem/upa',
+    url: '/elem/mat/upa',
     method: 'post',
     data: data
+  })
+}
+
+export function todosXls () {
+  return request({
+    url: '/elem/mat/xls',
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
+export function todosPrecioXls () {
+  return request({
+    url: '/elem/mat/xlsp',
+    method: 'get',
+    responseType: 'blob'
   })
 }
