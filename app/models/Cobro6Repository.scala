@@ -252,6 +252,7 @@ class Cobro6Repository @Inject()(
       empr_id: scala.Long,
       cotr_consecutivo: scala.Long
   ): Future[Boolean] = Future {
+    val _hoy = Calendar.getInstance().getTime()
     db.withConnection { implicit connection =>
       var fi = Calendar.getInstance()
       var ff = Calendar.getInstance()
@@ -392,7 +393,8 @@ class Cobro6Repository @Inject()(
                 cotr_tipo_obra_tipo,
                 empr_id,
                 tireuc_id,
-                barr_id
+                barr_id,
+                cotr_fecha_proceso
                 ) VALUES (
                     {cotr_anho},
                     {cotr_periodo},
@@ -410,7 +412,8 @@ class Cobro6Repository @Inject()(
                     {cotr_tipo_obra_tipo},
                     {empr_id},
                     {tireuc_id},
-                    {barr_id}
+                    {barr_id},
+                    {cotr_fecha_proceso}
                 )""")
             .on(
               'cotr_anho -> anho,
@@ -429,7 +432,8 @@ class Cobro6Repository @Inject()(
               'cotr_tipo_obra_tipo -> "I",
               'empr_id -> empr_id,
               'tireuc_id -> 1,
-              'barr_id -> orden._1
+              'barr_id -> orden._1,
+              'cotr_fecha_proceso -> _hoy
             )
             .executeInsert()
             .get
