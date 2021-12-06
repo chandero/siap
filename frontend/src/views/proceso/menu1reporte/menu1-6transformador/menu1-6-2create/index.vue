@@ -210,10 +210,11 @@ import { getBarriosEmpresa } from '@/api/barrio'
 import { getTiposBarrio } from '@/api/tipobarrio'
 import { saveReporte, printReporte, getTipos } from '@/api/transformadorreporte'
 import { getActividades, saveActividad } from '@/api/actividad'
-import { getAap, getAapApoyo, getTransformadors } from '@/api/transformador'
 import { getUrbanizadoraTodas } from '@/api/urbanizadora'
 import { getAapConexiones } from '@/api/aap_conexion'
 import { getMedidors } from '@/api/medidor'
+import { getAap, getAapApoyo, getTransformadors } from '@/api/transformador'
+import { getNovedades } from '@/api/novedad'
 
 export default {
   data () {
@@ -226,6 +227,7 @@ export default {
       confirmacionGuardar: false,
       nuevoReporte: false,
       inactivo: false,
+      tireuc_id: null,
       rules: {
         repo_fecharecepcion: [
           { required: true, message: 'Debe diligencia la Fecha de Recepción del Reporte', trigger: 'change' }
@@ -276,6 +278,7 @@ export default {
       },
       reporte: {
         reti_id: 1,
+        tireuc_id: this.tireuc_id,
         repo_id: null,
         repo_consecutivo: null,
         tiba_id: null,
@@ -289,6 +292,7 @@ export default {
         repo_horafin: null,
         repo_reportetecnico: null,
         repo_descripcion: null,
+        repo_subrepoconsecutivo: null,
         rees_id: 1,
         orig_id: 1,
         barr_id: null,
@@ -302,15 +306,24 @@ export default {
           repo_luminaria: null,
           repo_redes: null,
           repo_poste: null,
+          repo_subreporte: null,
+          repo_subid: null,
           repo_email: null,
           acti_id: null,
           repo_codigo: null,
           repo_apoyo: null,
           urba_id: null,
-          muot_id: null
+          muot_id: null,
+          aaco_id_anterior: null,
+          aaco_id_nuevo: null,
+          medi_id: null,
+          tran_id: null,
+          medi_acta: null
         },
+        meams: [],
         eventos: [],
-        direcciones: []
+        direcciones: [],
+        novedades: []
       },
       direccion: {
         repo_id: null,
@@ -329,6 +342,7 @@ export default {
       conexiones: [],
       medidores: [],
       transformadores: [],
+      novedades: [],
       dialogonuevodanhovisible: false,
       actividad: {
         acti_id: null,
@@ -427,6 +441,7 @@ export default {
       if (!this.guardando) {
         this.guardando = true
         this.confirmacionGuardar = false
+        this.reporte.tireuc_id = this.tireuc_id
         this.$refs.reporte.validate((valid) => {
           if (valid) {
             saveReporte(this.reporte)
@@ -470,11 +485,11 @@ export default {
     nuevo () {
       this.nuevoReporte = false
       this.reporte = {
-        reti_id: 1,
         repo_id: null,
+        tireuc_id: this.tireuc_id,
+        reti_id: 1,
         repo_consecutivo: null,
         tiba_id: null,
-        repo_numero: null,
         repo_fecharecepcion: new Date(),
         repo_direccion: null,
         repo_nombre: null,
@@ -484,6 +499,7 @@ export default {
         repo_horafin: null,
         repo_reportetecnico: null,
         repo_descripcion: null,
+        repo_subrepoconsecutivo: null,
         rees_id: 1,
         orig_id: 1,
         barr_id: null,
@@ -497,6 +513,8 @@ export default {
           repo_luminaria: null,
           repo_redes: null,
           repo_poste: null,
+          repo_subreporte: null,
+          repo_subid: null,
           repo_email: null,
           acti_id: null,
           repo_codigo: null,
@@ -507,10 +525,13 @@ export default {
           tran_id: null,
           medi_acta: null,
           aaco_id_anterior: null,
-          aaco_id_nuevo: null
+          aaco_id_nuevo: null,
+          orto_id: null
         },
+        meams: [],
         eventos: [],
-        direcciones: []
+        direcciones: [],
+        novedades: []
       }
       this.direccion = {
         repo_id: null,
@@ -535,8 +556,12 @@ export default {
           saveActividad(this.actividad).then(response => {
             this.limpiarActividad()
             if (response.status === 201) {
-              this.getActividades()
-              this.actividad.acti_id = response.data
+              getActividades().then(resp => {
+                this.actividades = resp.data
+                this.reporte.adicional.acti_id = response.data
+              }).catch(error => {
+                console.log('getActividades :' + error)
+              })
             } else {
               this.$notify.error({
                 title: 'Error al Crear Descripción de Daño',
@@ -665,6 +690,14 @@ export default {
     }).catch(error => {
       console.log('getActividades :' + error)
     })
+    getNovedades(1).then(response => {
+      this.novedades = response.data
+    }).catch(error => {
+      console.log('getNovedades:' + error)
+    })
+  },
+  mounted () {
+    this.tireuc_id = parseInt(this.$route.params.tireuc_id)
   }
 }
 </script>

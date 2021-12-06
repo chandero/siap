@@ -557,8 +557,12 @@ export default {
           saveActividad(this.actividad).then(response => {
             this.limpiarActividad()
             if (response.status === 201) {
-              this.getActividades()
-              this.actividad.acti_id = response.data
+              getActividades().then(resp => {
+                this.actividades = resp.data
+                this.reporte.adicional.acti_id = response.data
+              }).catch(error => {
+                console.log('getActividades :' + error)
+              })
             } else {
               this.$notify.error({
                 title: 'Error al Crear Descripción de Daño',

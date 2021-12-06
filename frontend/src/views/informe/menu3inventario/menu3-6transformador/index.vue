@@ -30,14 +30,74 @@
     >
     </el-table-column>
     <el-table-column
+      :label="$t('gestion.transformador.tran_codigo_apoyo')"
+      prop="tran_codigo_apoyo"
+      width="120"
+    >
+    </el-table-column>
+    <el-table-column
       :label="$t('gestion.transformador.direccion')"
       prop="tran_direccion"
-      width="350"
+      width="250"
     >
     </el-table-column>
     <el-table-column
       :label="$t('gestion.transformador.barr_descripcion')"
       prop="barr_descripcion"
+      width="200"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_propietario')"
+      prop="tran_propietario"
+      width="120"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_marca')"
+      prop="tran_marca"
+      width="120"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_serial')"
+      prop="tran_serial"
+      width="120"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_kva')"
+      prop="tran_kva"
+      width="100"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tipo_id')"
+      prop="tipo_id"
+      width="100"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_fases')"
+      prop="tran_fases"
+      width="110"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_tension_p')"
+      prop="tran_tension_p"
+      width="100"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_tension_s')"
+      prop="tran_tension_s"
+      width="100"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_referencia')"
+      prop="tran_referencia"
       width="100"
     >
     </el-table-column>
@@ -62,6 +122,7 @@
 import { mapGetters } from 'vuex'
 import { informe_siap_transformador_xls } from '@/api/informe'
 import { informe_siap_transformador } from '@/api/transformador'
+import { getCaracteristica } from '@/api/caracteristica'
 export default {
   data () {
     return {
@@ -71,7 +132,8 @@ export default {
       loading: false,
       page_size: 10,
       current_page: 1,
-      total: 0
+      total: 0,
+      postes: []
     }
   },
   computed: {
@@ -79,6 +141,14 @@ export default {
       'empresa',
       'usuario'
     ])
+  },
+  mounted () {
+    getCaracteristica(8).then((response) => {
+      const poste = response.data.cara_valores.split(',')
+      for (var i = 0; i < poste.length; i++) {
+        this.postes.push({ tipo_id: i + 1, tipo_descripcion: poste[i] })
+      }
+    })
   },
   methods: {
     obtenerDatos () {
@@ -92,7 +162,21 @@ export default {
       })
     },
     exportarXls () {
-      informe_siap_transformador_xls(this.empresa.empr_id)
+      informe_siap_transformador_xls().then(resp => {
+        var blob = resp.data
+        const filename = 'Informe_Transformador.xlsx'
+        if (window.navigator.msSaveOrOpenBlob) {
+          window.navigator.msSaveBlob(blob, filename)
+        } else {
+          var downloadLink = window.document.createElement('a')
+          downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+          downloadLink.download = filename
+          document.body.appendChild(downloadLink)
+          downloadLink.click()
+          document.body.removeChild(downloadLink)
+        }
+      })
+        .catch(() => {})
     },
     cellValueRenderer (row, column, cellValue, index) {
       let value = ''

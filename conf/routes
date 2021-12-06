@@ -225,6 +225,7 @@ GET /api/elem/bdesc/:q controllers.ElementoController.buscarPorDescripcion(q: St
 GET /api/elem/bcode/:c controllers.ElementoController.buscarPorCodigo(c: String)
 POST /api/elem/mat/upa controllers.ElementoController.actualizarPrecio
 GET /api/elem/mat/espr controllers.ElementoController.buscarElementoSinPrecio
+GET /api/elem/mat/aspr controllers.ElementoController.alertaElementoSinPrecio
 POST /api/elem/mat/gap controllers.ElementoController.todosPrecio
 GET /api/elem/mat/xls controllers.ElementoController.todosXls
 GET /api/elem/mat/xlsp controllers.ElementoController.todosPrecioXls
@@ -310,7 +311,10 @@ GET /api/tran/:id controllers.TransformadorController.buscarPorId(id: Long)
 GET /api/tran/del/:id controllers.TransformadorController.borrar(id: Long)
 POST /api/tran/save controllers.TransformadorController.guardar
 POST /api/tran/upd controllers.TransformadorController.actualizar
+GET /api/tran/vali/:id controllers.TransformadorController.buscarParaVerificar(id: Long)
+GET /api/tran/edit/:id controllers.TransformadorController.buscarParaEditar(id: Long)
 GET /api/tran/ism/:e controllers.TransformadorController.informe_siap_transformador(e: Long)
+
 
 # Control
 
@@ -608,7 +612,7 @@ GET /api/info/sdrr/:fi/:ff controllers.InformeController.siap_detallado_retiro_r
 GET /api/info/sifx/:fc/:o/:f/:e controllers.InformeController.siap_inventario_filtro_xls(fc: Long, o: String, f:String, e: Long)
 GET /api/info/scfx/:fc/:o/:f/:e controllers.InformeController.siap_control_filtro_xls(fc: Long, o: String, f:String, e: Long)
 GET /api/info/smx/:e/:t controllers.InformeController.siap_medidor_xls(e: Long, t:String)
-GET /api/info/stx/:e/:t controllers.InformeController.siap_transformador_xls(e: Long, t:String)
+GET /api/info/stx controllers.InformeController.siap_transformador_xls
 GET /api/info/spx/:e/:t controllers.InformeController.siap_poste_xls(e: Long, t:String)
 GET /api/info/srx/:e/:t controllers.InformeController.siap_redes_xls(e: Long, t:String)
 GET /api/info/sucx/:fi/:ff/:e controllers.InformeController.siap_ucap_xls(fi: Long, ff: Long, e: Long)

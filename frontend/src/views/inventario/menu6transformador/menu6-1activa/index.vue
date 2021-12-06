@@ -12,31 +12,84 @@
           <el-table
         :data="tableData.filter(data => !search || data.tran_numero.toLowerCase().includes(search.toLowerCase()) || (data.tran_direccion !== null && data.tran_direccion.toLowerCase().includes(search.toLowerCase())) || (data.barr_descripcion !== null && data.barr_descripcion.toLowerCase().includes(search.toLowerCase())))"
         width="100%" height="500">
-        <el-table-column
-          :label="$t('gestion.transformador.numero')"
-          width="100"
-          prop="tran_numero"
-           >
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row.tran_numero }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('gestion.transformador.direccion')"
-          width="350"
-          prop="tran_direccion">
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row.tran_direccion }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('gestion.transformador.barr_descripcion')"
-          width="150"
-          prop="barr_descripcion">
-          <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ barrio(scope.row.barr_id) }}</span>
-          </template>
-        </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.numero')"
+      prop="tran_numero"
+      width="120"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_codigo_apoyo')"
+      prop="tran_codigo_apoyo"
+      width="120"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.direccion')"
+      prop="tran_direccion"
+      width="250"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.barr_descripcion')"
+      prop="barr_descripcion"
+      width="200"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_propietario')"
+      prop="tran_propietario"
+      width="120"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_marca')"
+      prop="tran_marca"
+      width="120"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_serial')"
+      prop="tran_serial"
+      width="120"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_kva')"
+      prop="tran_kva"
+      width="100"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tipo_id')"
+      prop="tipo_id"
+      width="100"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_fases')"
+      prop="tran_fases"
+      width="110"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_tension_p')"
+      prop="tran_tension_p"
+      width="150"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_tension_s')"
+      prop="tran_tension_s"
+      width="150"
+    >
+    </el-table-column>
+    <el-table-column
+      :label="$t('gestion.transformador.tran_referencia')"
+      prop="tran_referencia"
+      width="100"
+    >
+    </el-table-column>
         <el-table-column
           fixed="right"
           align="right"
@@ -60,6 +113,11 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-row>
+        <el-col :span="24">
+          <img :title="$t('xls')" @click="exportarXls()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
+        </el-col>
+      </el-row>
     </el-main>
    </el-container>
   </el-main>
@@ -68,7 +126,7 @@
 
 <script>
 import { getTransformadors, deleteTransformador } from '@/api/transformador'
-
+import { informe_siap_transformador_xls } from '@/api/informe'
 import { getBarriosEmpresa } from '@/api/barrio'
 
 export default {
@@ -145,6 +203,18 @@ export default {
         this.getTransformadores()
       }).catch(error => {
         console.log(error)
+      })
+    },
+    exportarXls () {
+      informe_siap_transformador_xls().then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'siap_transformadores.xls')
+        document.body.appendChild(link)
+        link.click()
+      }).catch(error => {
+        console.log('informe transformador error:', error)
       })
     }
   },

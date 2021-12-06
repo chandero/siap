@@ -333,13 +333,12 @@ export function informe_siap_medidor_xls (empr_id) {
   window.open(url, '_self', 'location=no, menubar=no')
 }
 
-export function informe_siap_transformador_xls (empr_id) {
-  const data = {
-    empr_id
-  }
-  const token = '43f44388-5cd1-4657-9f7e-ea4e014e9333'
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/stx/' + data.empr_id + '/' + token
-  window.open(url, '_self', 'location=no, menubar=no')
+export function informe_siap_transformador_xls () {
+  return request({
+    url: '/info/stx',
+    method: 'get',
+    responseType: 'blob'
+  })
 }
 
 export function informe_siap_poste_xls (empr_id) {

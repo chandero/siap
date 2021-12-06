@@ -8038,22 +8038,18 @@ ORDER BY e.reti_id, e.elem_codigo""")
             _listMerged += CellRange((2, 2), (0, 3))
             _listMerged.toList
           }
-          val _mParser = int("tran_id") ~ str("tran_numero") ~ str(
-            "tran_direccion"
-          ) ~ str("barr_descripcion") ~ int("cantidad") map {
-            case a ~ b ~ c ~ d ~ e => (a, b, c, d, e)
-          }
           val resultSet = SQL(
-            """SELECT m.tran_id, m.tran_numero, m.tran_direccion, b.barr_descripcion, COUNT(a.*) AS cantidad FROM siap.transformador m
+            """SELECT m.*, b.barr_descripcion, tp.tipo_descripcion, COUNT(a.*) AS cantidad FROM siap.transformador m
                                  LEFT JOIN siap.aap_transformador am ON am.tran_id = m.tran_id AND am.empr_id = m.empr_id
                                  LEFT JOIN siap.aap a ON a.aap_id = am.aap_id and a.empr_id = am.empr_id
                                  LEFT JOIN siap.barrio b ON b.barr_id = m.barr_id
+                                 LEFT JOIN siap.tipo_poste tp ON tp.tipo_id = m.tipo_id                                 
                                  WHERE m.empr_id = {empr_id}
-                                 GROUP BY m.tran_id, m.tran_numero, m.tran_direccion, b.barr_descripcion """
+                                 GROUP BY m.tran_id, m.tran_numero, m.tran_direccion, b.barr_descripcion, tp.tipo_descripcion"""
           ).on(
               'empr_id -> empr_id
             )
-            .as(_mParser.*)
+            .as(InformeT._set *)
           val sheet1 = Sheet(
             name = "Transformadores",
             rows = {
@@ -8071,12 +8067,12 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 )
               val headerRow = com.norbitltd.spoiwo.model
                 .Row()
-                .withCellValues("Número", "Dirección", "Barrio", "Cantidad")
+                .withCellValues("Número", "Código Apoyo", "Dirección", "Barrio", "Propietario", "Marca", "Serial", "Kva", "Poste", "Fases", "Tensión P", "Tensión S", "Referencia", "Estado", "Cantidad")
               var j = 2
               val rows = resultSet.map {
                 med =>
                   j += 1
-                  val link = new HyperLinkUrl(med._2, "#T" + med._2)
+                  val link = new HyperLinkUrl(med.tran_numero.get, "#T" + med.tran_numero.get)
                   com.norbitltd.spoiwo.model.Row(
                     HyperLinkUrlCell(
                       link,
@@ -8085,20 +8081,119 @@ ORDER BY e.reti_id, e.elem_codigo""")
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
                     StringCell(
-                      med._3,
+                      med.tran_codigo_apoyo match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
                       Some(1),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
-                    ),
+                    ),                    
                     StringCell(
-                      med._4,
+                      med.tran_direccion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
                       Some(2),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
-                    NumericCell(
-                      med._5,
+                    StringCell(
+                      med.barr_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
                       Some(3),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),                    
+                    StringCell(
+                      med.tran_propietario match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(4),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      med.tran_marca match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(5),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),  
+                    StringCell(
+                      med.tran_serial match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(6),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),                                        
+                    NumericCell(
+                      med.tran_kva match {
+                        case Some(value) => value
+                        case None        => 0D
+                      },
+                      Some(7),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      med.tipo_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(8),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      med.tran_fases match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(9),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),      
+                    NumericCell(
+                      med.tran_tension_p match {
+                        case Some(value) => value
+                        case None        => 0D
+                      },
+                      Some(10),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    NumericCell(
+                      med.tran_tension_s match {
+                        case Some(value) => value
+                        case None        => 0D
+                      },
+                      Some(11),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),       
+                    StringCell(
+                      med.tran_referencia match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(12),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    NumericCell(
+                      med.cantidad match {
+                        case Some(value) => value.toDouble
+                        case None        => 0D
+                      },
+                      Some(14),
                       style = Some(CellStyle(dataFormat = CellDataFormat("#0"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     )
@@ -8113,7 +8208,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
           resultSet.map { m =>
             val fmt = DateTimeFormat.forPattern("yyyyMMdd")
             val sheet = Sheet(
-              name = "T" + m._2,
+              name = "T" + m.tran_numero.get,
               rows = {
                 val headerRow = com.norbitltd.spoiwo.model
                   .Row()
@@ -8206,12 +8301,12 @@ ORDER BY e.reti_id, e.elem_codigo""")
                  LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id
                  LEFT JOIN siap.aap_transformador at ON at.aap_id = a.aap_id and at.empr_id = a.empr_id
                  LEFT JOIN siap.transformador t ON t.tran_id = at.tran_id and t.empr_id = at.empr_id
-                 WHERE a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999 and am.tran_id = {tran_id}
+                 WHERE a.empr_id = {empr_id} and a.esta_id <> 9 and a.aap_id <> 9999999 and t.tran_id = {tran_id}
                                 ORDER BY a.aap_id ASC
                                 """)
                     .on(
                       'empr_id -> empr_id,
-                      'tran_id -> m._1
+                      'tran_id -> m.tran_id
                     )
                     .as(Siap_inventario.Siap_inventario_set *)
                 val rows = aapSet.map {

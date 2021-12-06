@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.18.1.final using JasperReports Library version 6.18.1-9d75d1969e774d4f179fb3be8401e98a0e6d1611  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_2" pageWidth="586" pageHeight="725" whenNoDataType="AllSectionsNoDetail" columnWidth="566" leftMargin="0" rightMargin="20" topMargin="0" bottomMargin="0" isSummaryWithPageHeaderAndFooter="true" whenResourceMissingType="Error" uuid="8742b210-9f35-4c6a-a893-aff515883b47">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Siap_Adapter"/>
+	<queryString language="SQL">
+		<![CDATA[select * from siap.medioambiente]]>
+	</queryString>
+	<field name="meam_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="meam_id"/>
+	</field>
+	<field name="meam_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="meam_descripcion"/>
+	</field>
+	<field name="meam_estado" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="meam_estado"/>
+	</field>
+	<field name="usua_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
+	</field>
+	<pageHeader>
+		<band height="232" splitType="Prevent">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="69" height="27" backcolor="#FFFFFF" uuid="9ee09943-6b64-4030-8600-7deddf3402bb"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[CODIGO LUMINARIA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="69" y="0" width="311" height="27" backcolor="#FFFFFF" uuid="f15bad9d-f9ce-46ea-8c46-3769199b2137"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[MATERIAL UTILIZADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="380" y="0" width="104" height="13" backcolor="#FFFFFF" uuid="ebd0c5ec-0bc9-4766-819d-9e2c99806b12"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[RETIRADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="484" y="0" width="102" height="13" backcolor="#FFFFFF" uuid="eadc7759-71f5-453f-b9da-72a5e2ddd895"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[INSTALADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="380" y="14" width="68" height="13" backcolor="#FFFFFF" uuid="c8e148a5-5d83-4783-8477-c6d7949587b1"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[CODIGO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="449" y="14" width="36" height="13" backcolor="#FFFFFF" uuid="a32161f1-0aaf-4500-b0c7-c1a5e67cf721"/>
+				<box>
+					<pen lineWidth="0.0" lineStyle="Dotted"/>
+					<bottomPen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[CANTIDAD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="484" y="14" width="65" height="13" backcolor="#FFFFFF" uuid="6f27b455-b216-40af-9acc-c53b223f4e4f"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[CODIGO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="550" y="14" width="36" height="13" backcolor="#FFFFFF" uuid="fa7c6920-8a04-4b59-b748-ec1a85ee3db8"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="6" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[CANTIDAD]]></text>
+			</staticText>
+			<line>
+				<reportElement x="1" y="90" width="586" height="1" uuid="2f09aca8-0318-4e2e-bc2c-ec3fecc0ae3d"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="0" y="169" width="586" height="1" uuid="ae9092cd-4cab-40ae-8942-992f6c93759f"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="0" y="50" width="586" height="1" uuid="5cea8686-7b7e-4454-a3df-abc3d40f80e1"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="380" y="27" width="1" height="203" uuid="2ab34f34-a7e0-46b5-8b54-ad83e7abbe03"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="484" y="27" width="1" height="204" uuid="4f039759-83e9-4edd-9afa-fb16a16010c6"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="0" y="190" width="586" height="1" uuid="dbca0f91-3913-4a63-ae2d-63e0aac541ce"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="230" width="586" height="1" uuid="3acaf0c6-4eef-48a5-862d-1301dee775c4"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="150" width="586" height="1" uuid="e32f8f7d-bf85-41e7-a7bf-ee9ae7428422"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="209" width="586" height="1" uuid="fbc24e13-e289-48ef-98c5-51777d783ecd"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="448" y="27" width="1" height="203" uuid="b8f5cecc-ff7c-4f39-aa47-36e762c85df4"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="69" y="27" width="1" height="204" uuid="49cfec6e-93a7-443e-9ccc-0314603136e2"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="549" y="27" width="1" height="203" uuid="ddb59257-a5fc-4658-8fd6-d44b3f683935"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="110" width="586" height="1" uuid="dac570eb-3e57-4909-bb0e-b53b362dbb30"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="0" y="70" width="586" height="1" uuid="9f0efc94-42d7-4f29-aa5a-09cf5e52f7ff"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="27" width="1" height="203" uuid="f026c08c-9bc9-49c1-95a4-f131cf260991"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="1" y="129" width="586" height="1" uuid="b4dd62dc-6bb8-4060-95e9-ac04ea5be8b3"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="587" y="27" width="1" height="203" uuid="3a274e80-7ded-44a8-b9a7-61964e679ca3"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+		</band>
+	</pageHeader>
+	<summary>
+		<band height="431" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="1" y="-1" width="585" height="13" backcolor="#FFFFFF" uuid="e02a6721-5a7d-43c5-8b1d-129780221c4a"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[REPORTE TÉCNICO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="79" y="323" width="80" height="100" uuid="b909b3cc-6aec-450a-86a2-32c46ebfee83"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[RESIDENTE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="399" y="323" width="90" height="100" uuid="a5ad6d96-e1ed-4a7b-876d-df1e73c49785"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[ALMACENISTA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="489" y="323" width="94" height="76" uuid="d41848aa-b8c8-489c-b4fa-0033d7902dfe"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[FIRMA USUARIO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="489" y="399" width="94" height="24" uuid="ad217f7f-9955-407e-9edf-edf6b5950e8f"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[(VERIFICACIÓN DE VISITA Y ARREGLO DEL DAÑO)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="323" width="79" height="100" uuid="363b884a-27e9-4ed3-93ba-ebabf50f1fac"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[RECEPCION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="319" y="323" width="80" height="100" uuid="4c91d8ab-d445-48c4-a922-e616394bb36c"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[INTERVENTOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="239" y="323" width="80" height="100" uuid="5a550cc6-472d-4511-b58a-e66944164c48"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[JEFE CUADRILLA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="159" y="323" width="80" height="100" uuid="5b35edeb-dcd6-43e0-996e-47fc6a887565"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[SUPERVISOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="13" width="586" height="200" uuid="0cdfbd94-0fc9-4407-bdcf-9195352fb52f"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Dotted" lineColor="#000000"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="-1" y="293" width="585" height="15" backcolor="#FFFFFF" uuid="3cc5cd37-90af-443e-a163-5f6cece150fe"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[SEÑOR USUARIO: ESTE SERVICIO NO TIENE COSTO ADICIONAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="213" width="585" height="13" backcolor="#FFFFFF" uuid="ca3a8b55-91ad-484d-9b35-8be794227184"/>
+				<box>
+					<pen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[MANEJO AMBIENTAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="-1" y="308" width="585" height="13" uuid="553dc8c0-4e69-4632-b769-454fd9a3cb63"/>
+				<box>
+					<leftPen lineWidth="1.0" lineStyle="Dotted"/>
+					<rightPen lineWidth="1.0" lineStyle="Dotted"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[FIRMAS]]></text>
+			</staticText>
+			<subreport>
+				<reportElement mode="Opaque" x="0" y="226" width="585" height="66" uuid="7aa39b76-7d09-426e-9238-8b163f591aa5"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["medioambiente.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</summary>
+</jasperReport>

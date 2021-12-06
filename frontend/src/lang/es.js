@@ -1163,7 +1163,17 @@ export default {
       error: 'Error',
       notcreated: 'Transformador no fue creado',
       updated: 'Transformador Actualizado',
-      notupdated: 'Transformador No Actualizado'
+      notupdated: 'Transformador No Actualizado',
+      tran_propietario: 'Propietario',
+      tran_marca: 'Marca',
+      tran_serial: 'Serial',
+      tran_kva: 'KVA',
+      tipo_id: 'Tipo Poste',
+      tran_fases: 'Fases',
+      tran_tension_p: 'Tensión Primaria',
+      tran_tension_s: 'Tensión Secundaria',
+      tran_referencia: 'Referencia',
+      tran_codigo_apoyo: 'Código Apoyo'
     },
     arm: 'Brazo',
     collar: 'Collarin',

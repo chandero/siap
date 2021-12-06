@@ -36,8 +36,8 @@ class TransformadorReporteController @Inject()(
     config: Configuration,
     authenticatedUserAction: AuthenticatedUserAction)(
     implicit ec: ExecutionContext)
-    extends AbstractController(cc) {
-  implicit val formats = net.liftweb.json.DefaultFormats                  
+    extends AbstractController(cc) with ImplicitJsonFormats {
+  implicit val formats = Serialization.formats(NoTypeHints) ++ List(DateTimeSerializer)                          
   def todos(): Action[AnyContent] =
     authenticatedUserAction.async { implicit request: Request[AnyContent] => 
     val json = request.body.asJson.get

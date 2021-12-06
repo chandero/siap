@@ -24,6 +24,10 @@ import utilities._
 
 import dto._
 
+import java.io.BufferedOutputStream
+import java.io.FileOutputStream
+import java.io.File
+
 @Singleton
 class InformeController @Inject()(
     informeService: InformeRepository,
@@ -554,19 +558,17 @@ class InformeController @Inject()(
     }
   }
 
-  def siap_transformador_xls(empr_id: scala.Long, token: String) = Action {
-    if (config.get[String]("play.http.secret.key") == token) {
-      val os = informeService.siap_transformador_xls(empr_id)
-      val fi = new DateTime()
-      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
-      val filename = "Informe_Transformadores_" + fmt.print(fi) + ".xlsx"
-      val attach = "attachment; filename=" + filename
-      Ok(os)
-        .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        .withHeaders("Content-Disposition" -> attach)
-    } else {
-      Forbidden("Dude, you’re not logged in.")
-    }
+  def siap_transformador_xls = authenticatedUserAction.async { implicit request =>
+    val empr_id = Utility.extraerEmpresa(request)
+    val os = informeService.siap_transformador_xls(empr_id.get)
+    val fi = new DateTime()
+    val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+    val filename = "Informe_Transformadores_" + fmt.print(fi) + ".xlsx"
+    val attach = "attachment; filename=" + filename
+    Future.successful(Ok(os)
+      .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+      .withHeaders("Content-Disposition" -> attach)
+    )
   }
 
   def siap_poste_xls(empr_id: scala.Long, token: String) = Action {

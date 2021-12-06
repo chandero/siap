@@ -92,7 +92,16 @@ export default {
       })
     },
     exportarXls () {
-      informe_siap_transformador_xls(this.empresa.empr_id)
+      informe_siap_transformador_xls().then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'siap_transformadores.xls')
+        document.body.appendChild(link)
+        link.click()
+      }).catch(error => {
+        console.log('informe transformador error:', error)
+      })
     },
     cellValueRenderer (row, column, cellValue, index) {
       let value = ''

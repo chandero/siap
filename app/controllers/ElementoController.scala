@@ -201,6 +201,18 @@ class ElementoController @Inject()(
     }
   }
 
+  def alertaElementoSinPrecio = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+    val empr_id = Utility.extraerEmpresa(request)
+    elementoService.buscarElementoSinPrecio(empr_id.get).map { elementos =>
+      if (elementos.length > 0) {
+        Ok(write(true))
+      } else {
+        Ok(write(false))
+      }
+    }
+  }
+
   def todosXls() = authenticatedUserAction.async { implicit request =>
       val empr_id = Utility.extraerEmpresa(request)
       val os = elementoService.todosXls(empr_id.get)

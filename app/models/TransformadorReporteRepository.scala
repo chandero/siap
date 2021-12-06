@@ -269,9 +269,13 @@ class TransformadorReporteRepository @Inject()(
           .as(Reporte._set *)
         reps.map { r =>
           val adicional = SQL(
-            """SELECT * FROM siap.transformador_reporte_adicional WHERE repo_id = {repo_id}"""
+            """SELECT * FROM siap.transformador_reporte_adicional 
+               LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+               LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+               WHERE repo_id = {repo_id}"""
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
           val eventos = SQL(
@@ -430,9 +434,13 @@ class TransformadorReporteRepository @Inject()(
             )
             .as(scalar[scala.Long].*)
           val adicional = SQL(
-            """SELECT * FROM siap.transformador_reporte_adicional WHERE repo_id = {repo_id}"""
+            """SELECT * FROM siap.transformador_reporte_adicional 
+               LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+               LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+               WHERE repo_id = {repo_id}"""
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
           val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
@@ -604,11 +612,14 @@ class TransformadorReporteRepository @Inject()(
         )
         .as(scalar[scala.Long].*)
       val adicional = SQL(
-        """SELECT * FROM siap.transformador_reporte_adicional WHERE repo_id = {repo_id}"""
+        """SELECT * FROM siap.transformador_reporte_adicional ra
+               LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+               LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+           WHERE ra.repo_id = {repo_id}"""
       ).on(
-          'repo_id -> repo_id
-        )
-        .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
+          'repo_id -> repo_id,
+          'tireuc_id -> r.get.tireuc_id
+      ).as(ReporteAdicional.reporteAdicionalSet.singleOpt)
       val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
           on(
             'repo_id -> repo_id
@@ -769,9 +780,13 @@ class TransformadorReporteRepository @Inject()(
             )
             .as(scalar[scala.Long].*)
           val adicional = SQL(
-            """SELECT * FROM siap.transformador_reporte_adicional WHERE repo_id = {repo_id}"""
+            """SELECT * FROM siap.transformador_reporte_adicional 
+               LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+               LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+               WHERE repo_id = {repo_id}"""
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
           val novedades = SQL("""SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id}""").
@@ -922,9 +937,13 @@ class TransformadorReporteRepository @Inject()(
       r match {
         case Some(r) =>
           val adicional = SQL(
-            """SELECT * FROM siap.transformador_reporte_adicional WHERE repo_id = {repo_id}"""
+            """SELECT * FROM siap.transformador_reporte_adicional 
+               LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+               LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+               WHERE repo_id = {repo_id}"""
           ).on(
-              'repo_id -> r.repo_id
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
           val reporte = new ReporteConsulta(
@@ -992,9 +1011,13 @@ class TransformadorReporteRepository @Inject()(
         .as(Reporte._set *)
       reps.map { r =>
         val adicional = SQL(
-          """SELECT * FROM siap.transformador_reporte_adicional WHERE repo_id = {repo_id}"""
+          """SELECT * FROM siap.transformador_reporte_adicional  ra
+               LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+               LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+            WHERE ra.repo_id = {repo_id}"""
         ).on(
-            'repo_id -> r.repo_id
+            'repo_id -> r.repo_id,
+            'tireuc_id -> r.tireuc_id
           )
           .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
         val eventos = SQL(
@@ -1581,7 +1604,7 @@ class TransformadorReporteRepository @Inject()(
         for (d <- direcciones) {
           if (d.aap_id != None) {
             // var aap_elemento: AapElemento = new AapElemento(d.aap_id, None, None, None, None, None, None, reporte.reti_id, reporte.repo_consecutivo.map(_.toInt))
-            var aap: Transformador = new Transformador(d.aap_id, Some(""), reporte.empr_id, reporte.usua_id, None, None, Some(1))
+            var aap: Transformador = new Transformador(d.aap_id, Some(d.aap_id.toString()), reporte.empr_id, reporte.usua_id, None, None, None, None, None, None, None, None, None, None, None, None, Some(1))
             // var aap_adicional: AapAdicional = new AapAdicional(d.aap_id, None, None, None, None, None, None, None, None, None)
             val aapOption =
               aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get)

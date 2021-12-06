@@ -85,6 +85,7 @@ const procesoRouter = {
           path: 'menu1-3canalizacion',
           component: () => import('@/views/proceso/menu1reporte/menu1-3canalizacion'),
           name: 'menu_proceso_menu1reporte_menu1-3canalizacion',
+          hidden: true,
           meta: { title: 'menu_proceso_menu1reporte_menu1-3canalizacion', icon: 'el-icon-cherry', roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor'] },
           redirect: '/proceso/menu1reporte/menu1-3canalizacion/menu1-3-1list',
           children: [
@@ -115,6 +116,7 @@ const procesoRouter = {
           path: 'menu1-4poste',
           component: () => import('@/views/proceso/menu1reporte/menu1-4poste'),
           name: 'menu_proceso_menu1reporte_menu1-4poste',
+          hidden: true,
           meta: { title: 'menu_proceso_menu1reporte_menu1-4poste', icon: 'el-icon-wind-power', roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor'] },
           redirect: '/proceso/menu1reporte/menu1-4poste/menu1-4-1list',
           children: [
@@ -145,6 +147,7 @@ const procesoRouter = {
           path: 'menu1-5redes',
           component: () => import('@/views/proceso/menu1reporte/menu1-5redes'),
           name: 'menu_proceso_menu1reporte_menu1-5redes',
+          hidden: true,
           meta: { title: 'menu_proceso_menu1reporte_menu1-5redes', icon: 'el-icon-phone-outline', roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor'] },
           redirect: '/proceso/menu1reporte/menu1-5redes/menu1-5-1list',
           children: [
@@ -186,7 +189,7 @@ const procesoRouter = {
               meta: { title: 'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-1list', roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor'] }
             },
             {
-              path: 'menu1-6-2create',
+              path: 'menu1-6-2create/:tireuc_id',
               component: () => import('@/views/proceso/menu1reporte/menu1-6transformador/menu1-6-2create'),
               name: 'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-2create',
               hidden: true,
