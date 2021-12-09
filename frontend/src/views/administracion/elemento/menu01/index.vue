@@ -9,7 +9,7 @@
      <el-input name="descripcion" v-model="elemento.elem_descripcion"></el-input>
      <p/>
      <span>{{ $t('elemento.code')}}</span>
-     <el-input ref="codigo" name="codigo" v-model="elemento.elem_codigo" @blur="validarCodigo()"></el-input>
+     <el-input v-maska="'######'" ref="codigo" name="codigo" v-model="elemento.elem_codigo" @blur="validarCodigo()" style="width:150px;"></el-input>
      <p/>
      <span>{{ $t('elemento.ucap')}}</span>
      <el-checkbox name="ucap" v-model="elemento.elem_ucap" ></el-checkbox>
@@ -158,6 +158,10 @@ export default {
   },
   methods: {
     validarCodigo () {
+      let codigo = this.elemento.elem_codigo
+      codigo = '000000' + codigo
+      codigo = codigo.substr(codigo.length - 6)
+      this.elemento.elem_codigo = codigo
       getElementoByCode(this.elemento.elem_codigo).then(response => {
         const elemento = response.data
         this.$notify({

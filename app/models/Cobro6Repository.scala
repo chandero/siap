@@ -233,7 +233,7 @@ class Cobro6Repository @Inject()(
       if (!orderby.isEmpty) {
         query = query + s" ORDER BY $orderby"
       } else {
-        query = query + s" ORDER BY co1,cotr_anho, co1.cotr_periodo, co1.cotr_consecutivo"
+        query = query + s" ORDER BY co1.cotr_anho, co1.cotr_periodo, co1.cotr_consecutivo"
       }           
       val _lista = SQL(query)
         .on(

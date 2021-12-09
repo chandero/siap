@@ -9,7 +9,7 @@
      <el-input name="descripcion" v-model="elemento.elem_descripcion"></el-input>
      <p/>
      <span>{{ $t('elemento.code')}}</span>
-     <el-input name="codigo" v-model="elemento.elem_codigo"></el-input>
+     <el-input v-maska="'######'" name="codigo" v-model="elemento.elem_codigo" @blur="validarCodigo()" style="width:150px;"></el-input>
      <p/>
      <span>{{ $t('elemento.ucap')}}</span>
      <el-checkbox name="ucap" v-model="elemento.elem_ucap"></el-checkbox>
@@ -101,7 +101,7 @@
 </template>
 <script>
 import { getTiposElemento } from '@/api/tipoelemento'
-import { getElemento, updateElemento } from '@/api/elemento'
+import { getElemento, updateElemento, getElementoByCode } from '@/api/elemento'
 import { getCaracteristicas } from '@/api/caracteristica'
 import { getUnitariosTodas } from '@/api/unitario'
 
@@ -119,6 +119,7 @@ export default {
         caracteristicas: [],
         unitarios: []
       },
+      elem_codigo: null,
       elemento_caracteristica: {
         elem_id: Number(this.$route.params.id),
         cara_id: null,
@@ -139,6 +140,29 @@ export default {
     }
   },
   methods: {
+    validarCodigo () {
+      let codigo = this.elemento.elem_codigo
+      codigo = '000000' + codigo
+      codigo = codigo.substr(codigo.length - 6)
+      this.elemento.elem_codigo = codigo
+      getElementoByCode(this.elemento.elem_codigo).then(response => {
+        const elemento = response.data
+        if (this.elem_codigo !== elemento.elem_codigo) {
+          this.$notify({
+            title: 'Material código ' + elemento.elem_codigo + ' ya existe',
+            message: elemento.elem_descripcion,
+            type: 'warning'
+          })
+          this.noexiste = false
+          this.elemento.elem_codigo = this.elem_codigo
+          this.$refs.codigo.focus()
+        } else {
+          this.noexiste = true
+        }
+      }).catch(() => {
+        this.noexiste = true
+      })
+    },
     aplicar () {
       var e = Object.assign({}, this.elemento)
       var unitarios = []
@@ -255,6 +279,7 @@ export default {
     getElemento(this.$route.params.id).then(response => {
       this.elemento = response.data
       this.elemento.unitarios = this.elemento.unitarios.map(u => u.unit_id)
+      this.elem_codigo = this.elemento.elem_codigo
     }).catch(error => {
       console.log(error)
     })

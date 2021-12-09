@@ -910,10 +910,11 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
            left join siap.elemento_precio elpr1 on elpr1.elem_id = e1.elem_id
            WHERE r1.reti_id IN (2,6) AND
            		 r1.empr_id = {empr_id} AND
-           		 e1.elem_estado = 1) as o """
+           		 e1.elem_estado = 1"""
       if (!filter.isEmpty){
         query = query + " and " + filter
       }
+      query = query + ") as o "
       val result = SQL(query).on(
           'empr_id -> empr_id
         )

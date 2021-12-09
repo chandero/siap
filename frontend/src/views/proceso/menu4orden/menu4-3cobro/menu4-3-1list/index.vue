@@ -379,7 +379,7 @@ export default {
           reti_descripcion: 'MODERNIZACION'
         }
       ],
-      order: 'co1.cotr_anho, co1.cotr_periodo, co1.cotr_tipo_obra, co1.cotr_tipo_obra_tipo, co1.cotr_consecutivo'
+      order: 'co1.cotr_anho, co1.cotr_periodo, co1.cotr_tipo_obra, co1.cotr_consecutivo'
     }
   },
   watch: {
@@ -523,12 +523,12 @@ export default {
       const { columns, data } = param
       const sums = []
       columns.forEach((column, index) => {
-        if ((index === 10 && this.reti_id === 6) || (index === 8 && this.reti_id === 2)) {
+        if ((index === 10 && this.reti_id === 6) || (index === 10 && this.reti_id === 2)) {
           sums[index] = 'Total Luminarias'
           return
         }
         const values = data.map(item => Number(item[column.property]))
-        if (((index === 11 && this.reti_id === 6) || (index === 9 && this.reti_id === 2)) && !values.every(value => isNaN(value))) {
+        if (((index === 11 && this.reti_id === 6) || (index === 11 && this.reti_id === 2)) && !values.every(value => isNaN(value))) {
           sums[index] = '' + values.reduce((prev, curr) => {
             const value = Number(curr)
             if (!isNaN(value)) {

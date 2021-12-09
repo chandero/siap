@@ -15,6 +15,7 @@ import 'element-ui/lib/theme-chalk/icon.css'
 // -- import 'vue-awesome/icons'
 // Session Idle
 import IdleVue from 'idle-vue'
+import Maska from 'maska'
 
 /* Register component with one of 2 methods */
 
@@ -90,6 +91,7 @@ Object.keys(filters).forEach(key => {
 
 Vue.use(VueMoment)
 Vue.use(VueTimers)
+Vue.use(Maska)
 
 Vue.prototype.$equals = function (o1, o2) {
   for (var p in o1) {
