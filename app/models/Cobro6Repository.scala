@@ -8494,13 +8494,16 @@ class Cobro6Repository @Inject()(
       }
       var _herramientaLista = db.withConnection { implicit connection =>
         SQL(
-        """select math_codigo, math_descripcion, mathpr_precio, mathpr_es_porcentaje, mathpr_cantidad, mathpr_rendimiento from siap.mano_transporte_herramienta mth1
+        """select mth1.math_codigo, mth1.math_descripcion, mthp1.mathpr_precio, mthp1.mathpr_es_porcentaje, mthp1.mathpr_cantidad, mthp1.mathpr_rendimiento from siap.mano_transporte_herramienta mth1
               left join siap.mano_transporte_herramienta_precio mthp1 on mthp1.math_id = mth1.math_id 
-              where mthp1.mathpr_anho = {anho} and mth1.empr_id = {empr_id}
+              where mthp1.mathpr_anho = {anho} and mth1.empr_id = {empr_id} and
+              mthp1.cotr_tipo_obra = {cotr_tipo_obra} and mthp1.cotr_tipo_obra_tipo = {cotr_tipo_obra_tipo}
               order by mth1.math_id ASC"""
       ).on(
           'anho -> orden.cotr_anho.get,
-          'empr_id -> empresa.empr_id
+          'empr_id -> empresa.empr_id,
+          'cotr_tipo_obra -> orden.cotr_tipo_obra.get,
+          'cotr_tipo_obra_tipo -> orden.cotr_tipo_obra_tipo.get
         )
         .as(_herramientaParser.*)
       }
@@ -9438,10 +9441,13 @@ class Cobro6Repository @Inject()(
         SQL(
           """SELECT mob1.maob_descripcion, mop1.maobpr_precio, mop1.maobpr_rendimiento from siap.mano_obra mob1
                   INNER JOIN siap.mano_obra_precio mop1 ON mop1.maob_id = mob1.maob_id
-                  WHERE mop1.maobpr_anho = {anho} and mob1.empr_id = {empr_id}"""
+                  WHERE mop1.maobpr_anho = {anho} and mob1.empr_id = {empr_id} and 
+                  mop1.cotr_tipo_obra = {cotr_tipo_obra} and mop1.cotr_tipo_obra_tipo = {cotr_tipo_obra_tipo}"""
         ).on(
           'anho -> orden.cotr_anho.get,
-          'empr_id -> empresa.empr_id
+          'empr_id -> empresa.empr_id,
+          'cotr_tipo_obra -> orden.cotr_tipo_obra.get,
+          'cotr_tipo_obra_tipo -> orden.cotr_tipo_obra_tipo.get
         )
         .as(_parseManoObra *)
       }
