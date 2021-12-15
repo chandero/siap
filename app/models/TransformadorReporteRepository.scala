@@ -172,8 +172,8 @@ class TransformadorReporteRepository @Inject()(
         .as(SqlParser.scalar[scala.Long].single)
 
       val conteo5: scala.Long = SQL(
-        """SELECT COUNT(*) AS conteo FROM siap.control_reporte_evento r
-                           INNER JOIN siap.control_reporte s ON s.repo_id = r.repo_id            
+        """SELECT COUNT(*) AS conteo FROM siap.transformador_reporte_evento r
+                           INNER JOIN siap.transformador_reporte s ON s.repo_id = r.repo_id            
                            INNER JOIN siap.elemento e ON e.elem_id = r.elem_id
                            INNER JOIN siap.tipoelemento t ON t.tiel_id = e.tiel_id
                            WHERE r.even_codigo_retirado = {codigo} and s.empr_id = {empr_id} and t.tiel_id = {tiel_id}"""
@@ -185,8 +185,8 @@ class TransformadorReporteRepository @Inject()(
         .as(SqlParser.scalar[scala.Long].single)
 
       val conteo6: scala.Long = SQL(
-        """SELECT COUNT(*) AS conteo FROM siap.control_reporte_evento r
-                           INNER JOIN siap.control_reporte s ON s.repo_id = r.repo_id            
+        """SELECT COUNT(*) AS conteo FROM siap.transformador_reporte_evento r
+                           INNER JOIN siap.transformador_reporte s ON s.repo_id = r.repo_id            
                            INNER JOIN siap.elemento e ON e.elem_id = r.elem_id
                            INNER JOIN siap.tipoelemento t ON t.tiel_id = e.tiel_id
                            WHERE r.even_codigo_instalado = {codigo} and s.empr_id = {empr_id} and t.tiel_id = {tiel_id}"""
@@ -1248,7 +1248,7 @@ class TransformadorReporteRepository @Inject()(
                                                                urba_id,
                                                                muot_id,
                                                                medi_id,
-                                                               tran_id,
+                                                               aap_id,
                                                                medi_acta,
                                                                aaco_id_anterior,
                                                                aaco_id_nuevo) VALUES (
@@ -1289,7 +1289,7 @@ class TransformadorReporteRepository @Inject()(
                 'urba_id -> adicional.urba_id,
                 'muot_id -> adicional.muot_id,
                 'medi_id -> adicional.medi_id,
-                'tran_id -> adicional.tran_id,
+                'aap_id -> adicional.tran_id,
                 'medi_acta -> adicional.medi_acta,
                 'aaco_id_anterior -> adicional.aaco_id_anterior,
                 'aaco_id_nuevo -> adicional.aaco_id_nuevo,
@@ -1398,7 +1398,7 @@ class TransformadorReporteRepository @Inject()(
                                aaco_id_anterior,
                                aaco_id_nuevo,
                                medi_id,
-                               tran_id,
+                               aap_id,
                                medi_acta
                               FROM siap.transformador_reporte_adicional a WHERE a.repo_id = {repo_id}
                               """
@@ -1431,7 +1431,7 @@ class TransformadorReporteRepository @Inject()(
                                {aaco_id_anterior},
                                {aaco_id_nuevo},
                                {medi_id},
-                               {tran_id},
+                               {aap_id},
                                {medi_acta}
                 )""").on(
                       'repo_id -> _id,
@@ -2178,7 +2178,7 @@ class TransformadorReporteRepository @Inject()(
                   'barr_id -> d.barr_id,
                   'even_id -> d.even_id,
                   'tire_id -> d.tire_id,
-                  'even_direccion_anterior -> aap.tran_direccion,
+                  'even_direccion_anterior -> aap.aap_direccion,
                   'barr_id_anterior -> aap.barr_id,
                   'even_estado -> estado
                 )
@@ -2634,22 +2634,22 @@ class TransformadorReporteRepository @Inject()(
                     }
                   case None => false
                 }
-                dato_adicional.tran_id match {
-                  case Some(tran_id) =>
+                dato_adicional.aap_id match {
+                  case Some(aap_id) =>
                     println("Actualizando Transformador")
                     val actualizar = SQL(
-                      "UPDATE siap.aap_transformador SET tran_id = {tran_id} WHERE aap_id = {aap_id} and empr_id = {empr_id}"
+                      "UPDATE siap.aap_transformador SET aap_id = {aap_id} WHERE aap_id = {aap_id} and empr_id = {empr_id}"
                     ).on(
-                        'tran_id -> tran_id,
+                        'aap_id -> aap_id,
                         'aap_id -> d.aap_id,
                         'empr_id -> reporte.empr_id
                       )
                       .executeUpdate() > 0
                     if (!actualizar) {
                       val insertado = SQL(
-                        "INSERT INTO siap.aap_transformador (aap_id, empr_id, tran_id) VALUES ({aap_id}, {empr_id}, {tran_id});"
+                        "INSERT INTO siap.aap_transformador (aap_id, empr_id, aap_id) VALUES ({aap_id}, {empr_id}, {aap_id});"
                       ).on(
-                          'tran_id -> tran_id,
+                          'aap_id -> aap_id,
                           'aap_id -> d.aap_id,
                           'empr_id -> reporte.empr_id
                         )
@@ -2721,7 +2721,7 @@ class TransformadorReporteRepository @Inject()(
                 d.tire_id match {
                   case Some(3) =>
                     SQL(
-                      """UPDATE siap.transformador SET esta_id = 9 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
+                      """UPDATE siap.transformador SET aap_estado = 9 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
                     ).on(
                         'aap_id -> d.aap_id,
                         'empr_id -> reporte.empr_id
@@ -2729,7 +2729,7 @@ class TransformadorReporteRepository @Inject()(
                       .executeUpdate()
                   case _ =>
                     SQL(
-                      """UPDATE siap.transformador SET esta_id = 2 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
+                      """UPDATE siap.transformador SET aap_estado = 2 WHERE aap_id = {aap_id} and empr_id = {empr_id}"""
                     ).on(
                         'aap_id -> d.aap_id,
                         'empr_id -> reporte.empr_id
@@ -2795,7 +2795,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_fecharecepcion",
               'audi_valorantiguo -> reporte_ant.get.repo_fecharecepcion,
@@ -2812,7 +2812,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_direccion",
               'audi_valorantiguo -> reporte_ant.get.repo_direccion,
@@ -2829,7 +2829,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_nombre",
               'audi_valorantiguo -> reporte_ant.get.repo_nombre,
@@ -2846,7 +2846,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_telefono",
               'audi_valorantiguo -> reporte_ant.get.repo_telefono,
@@ -2863,7 +2863,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_fechasolucion",
               'audi_valorantiguo -> reporte_ant.get.repo_fechasolucion,
@@ -2880,7 +2880,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_horainicio",
               'audi_valorantiguo -> reporte_ant.get.repo_horainicio,
@@ -2897,7 +2897,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_horafin",
               'audi_valorantiguo -> reporte_ant.get.repo_horafin,
@@ -2914,7 +2914,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "repo_reportetecnico",
               'audi_valorantiguo -> reporte_ant.get.repo_reportetecnico,
@@ -2931,7 +2931,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.rees_id,
               'audi_campo -> "rees_id",
               'audi_valorantiguo -> reporte_ant.get.rees_id,
@@ -2948,7 +2948,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "orig_id",
               'audi_valorantiguo -> reporte_ant.get.orig_id,
@@ -2965,7 +2965,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "barr_id",
               'audi_valorantiguo -> reporte_ant.get.barr_id,
@@ -2982,7 +2982,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "empr_id",
               'audi_valorantiguo -> reporte_ant.get.empr_id,
@@ -2999,7 +2999,7 @@ class TransformadorReporteRepository @Inject()(
               'audi_fecha -> fecha,
               'audi_hora -> hora,
               'usua_id -> reporte.usua_id,
-              'audi_tabla -> "control_reporte",
+              'audi_tabla -> "transformador_reporte",
               'audi_uid -> reporte.repo_id,
               'audi_campo -> "usua_id",
               'audi_valorantiguo -> reporte_ant.get.usua_id,
@@ -3036,7 +3036,7 @@ class TransformadorReporteRepository @Inject()(
           'audi_fecha -> fecha,
           'audi_hora -> hora,
           'usua_id -> usua_id,
-          'audi_tabla -> "control_reporte",
+          'audi_tabla -> "transformador_reporte",
           'audi_uid -> repo_id,
           'audi_campo -> "",
           'audi_valorantiguo -> "",

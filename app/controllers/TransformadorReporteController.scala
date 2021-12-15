@@ -255,9 +255,17 @@ class TransformadorReporteController @Inject()(
   def actualizarReporte() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
-      var reporte = net.liftweb.json.parse(( json \ "reporte").toString).extract[Reporte]            
-      val coau_codigo = ( json \ "coau_codigo").as[String]
-      val coau_tipo = (json \ "coau_tipo").as[Int]
+      println("json: " + json)
+      var reporteRequest = net.liftweb.json.parse(json.toString).extract[ReporteRequest]
+      val coau_codigo = reporteRequest.coau_codigo match {
+        case Some(c) => c
+        case None => ""
+      }
+      val coau_tipo = reporteRequest.coau_tipo match {
+        case Some(c) => c
+        case None => 0
+      }
+      val reporte = reporteRequest.reporte
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)      
       val reportenuevo = new Reporte(reporte.repo_id,

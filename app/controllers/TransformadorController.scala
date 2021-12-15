@@ -25,9 +25,9 @@ class TransformadorController @Inject()(mService: TransformadorRepository, cc: C
   implicit val formats = Serialization.formats(NoTypeHints) ++ List(
     DateTimeSerializer
   )  
-    def buscarPorId(tran_id: Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+    def buscarPorId(aap_id: Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
-      val m = mService.buscarPorId(tran_id, empr_id.get)
+      val m = mService.buscarPorId(aap_id, empr_id.get)
       m match {
         case None => {
             Future.successful(NotFound(Json.toJson("false")))
@@ -59,22 +59,22 @@ class TransformadorController @Inject()(mService: TransformadorRepository, cc: C
       val empr_id = Utility.extraerEmpresa(request)
       val mnuevo = new Transformador(
           Some(0), 
-          m.tran_numero,
+          m.aap_numero,
           empr_id,
           usua_id,
           m.barr_id,
-          m.tran_direccion,
-          m.tran_codigo_apoyo,
-          m.tran_propietario,
-          m.tran_marca,
-          m.tran_serial,
-          m.tran_kva,
+          m.aap_direccion,
+          m.aap_codigo_apoyo,
+          m.aap_propietario,
+          m.aap_marca,
+          m.aap_serial,
+          m.aap_kva,
           m.tipo_id,
-          m.tran_fases,
-          m.tran_tension_p,
-          m.tran_tension_s,
-          m.tran_referencia,
-          m.tran_estado
+          m.aap_fases,
+          m.aap_tension_p,
+          m.aap_tension_s,
+          m.aap_referencia,
+          m.aap_estado
           )
       mService.crear(mnuevo).map { result =>
         if (result > 0){
@@ -91,23 +91,23 @@ class TransformadorController @Inject()(mService: TransformadorRepository, cc: C
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
       val mnuevo = new Transformador(
-          m.tran_id,
-          m.tran_numero,
+          m.aap_id,
+          m.aap_numero,
           m.empr_id,
           usua_id,
           m.barr_id,
-          m.tran_direccion,
-          m.tran_codigo_apoyo,
-          m.tran_propietario,
-          m.tran_marca,
-          m.tran_serial,
-          m.tran_kva,
+          m.aap_direccion,
+          m.aap_codigo_apoyo,
+          m.aap_propietario,
+          m.aap_marca,
+          m.aap_serial,
+          m.aap_kva,
           m.tipo_id,
-          m.tran_fases,
-          m.tran_tension_p,
-          m.tran_tension_s,
-          m.tran_referencia,
-          m.tran_estado
+          m.aap_fases,
+          m.aap_tension_p,
+          m.aap_tension_s,
+          m.aap_referencia,
+          m.aap_estado
           )
       val result = mService.actualizar(mnuevo)
       if (result == true) {

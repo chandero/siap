@@ -22,38 +22,38 @@ import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 
 
-case class Transformador(tran_id: Option[Long], 
-                         tran_numero: Option[String],
+case class Transformador(aap_id: Option[Long], 
+                         aap_numero: Option[String],
                          empr_id: Option[Long],
                          usua_id: Option[Long],
                          barr_id: Option[Long],
-                         tran_direccion: Option[String],
-                         tran_codigo_apoyo: Option[String],
-                         tran_propietario: Option[String],
-                         tran_marca: Option[String],
-                         tran_serial: Option[String],
-                         tran_kva: Option[Double],
+                         aap_direccion: Option[String],
+                         aap_codigo_apoyo: Option[String],
+                         aap_propietario: Option[String],
+                         aap_marca: Option[String],
+                         aap_serial: Option[String],
+                         aap_kva: Option[Double],
                          tipo_id: Option[Int],
-                         tran_fases: Option[String],
-                         tran_tension_p: Option[Double],
-                         tran_tension_s: Option[Double],
-                         tran_referencia: Option[String],
-                         tran_estado: Option[Int])
+                         aap_fases: Option[String],
+                         aap_tension_p: Option[Double],
+                         aap_tension_s: Option[Double],
+                         aap_referencia: Option[String],
+                         aap_estado: Option[Int])
 
-case class InformeT( tran_id: Option[Long],
-                     tran_numero: Option[String], 
-                     tran_direccion: Option[String], 
-                     tran_codigo_apoyo: Option[String],
-                     tran_propietario: Option[String],
-                     tran_marca: Option[String],
-                     tran_serial: Option[String],
-                     tran_kva: Option[Double],
+case class InformeT( aap_id: Option[Long],
+                     aap_numero: Option[String], 
+                     aap_direccion: Option[String], 
+                     aap_codigo_apoyo: Option[String],
+                     aap_propietario: Option[String],
+                     aap_marca: Option[String],
+                     aap_serial: Option[String],
+                     aap_kva: Option[Double],
                      tipo_id: Option[Int],
-                     tran_fases: Option[String],
-                     tran_tension_p: Option[Double],
-                     tran_tension_s: Option[Double],
-                     tran_referencia: Option[String],
-                     tran_estado: Option[Int], 
+                     aap_fases: Option[String],
+                     aap_tension_p: Option[Double],
+                     aap_tension_s: Option[Double],
+                     aap_referencia: Option[String],
+                     aap_estado: Option[Int], 
                      barr_descripcion: Option[String], 
                      tipo_descripcion: Option[String],
                      cantidad: Option[Int])
@@ -63,57 +63,57 @@ object Transformador {
     implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
 
     val _set = {
-      get[Option[Long]]("tran_id") ~
-      get[Option[String]]("tran_numero") ~ 
+      get[Option[Long]]("aap_id") ~
+      get[Option[String]]("aap_numero") ~ 
       get[Option[Long]]("empr_id") ~
       get[Option[Long]]("usua_id") ~
       get[Option[Long]]("barr_id") ~
-      get[Option[String]]("tran_direccion") ~
-      get[Option[String]]("tran_codigo_apoyo") ~
-      get[Option[String]]("tran_propietario") ~
-      get[Option[String]]("tran_marca") ~
-      get[Option[String]]("tran_serial") ~
-      get[Option[Double]]("tran_kva") ~
+      get[Option[String]]("aap_direccion") ~
+      get[Option[String]]("aap_codigo_apoyo") ~
+      get[Option[String]]("aap_propietario") ~
+      get[Option[String]]("aap_marca") ~
+      get[Option[String]]("aap_serial") ~
+      get[Option[Double]]("aap_kva") ~
       get[Option[Int]]("tipo_id") ~
-      get[Option[String]]("tran_fases") ~
-      get[Option[Double]]("tran_tension_p") ~
-      get[Option[Double]]("tran_tension_s") ~
-      get[Option[String]]("tran_referencia") ~
-      get[Option[Int]]("tran_estado") map {
-          case tran_id ~
-               tran_numero ~
+      get[Option[String]]("aap_fases") ~
+      get[Option[Double]]("aap_tension_p") ~
+      get[Option[Double]]("aap_tension_s") ~
+      get[Option[String]]("aap_referencia") ~
+      get[Option[Int]]("aap_estado") map {
+          case aap_id ~
+               aap_numero ~
                empr_id ~
                usua_id ~
                barr_id ~
-               tran_direccion ~
-               tran_codigo_apoyo ~
-               tran_propietario ~
-               tran_marca ~
-               tran_serial ~
-               tran_kva ~
+               aap_direccion ~
+               aap_codigo_apoyo ~
+               aap_propietario ~
+               aap_marca ~
+               aap_serial ~
+               aap_kva ~
                tipo_id ~
-               tran_fases ~
-               tran_tension_p ~
-               tran_tension_s ~
-               tran_referencia ~
-               tran_estado => Transformador(
-                 tran_id,
-                 tran_numero,
+               aap_fases ~
+               aap_tension_p ~
+               aap_tension_s ~
+               aap_referencia ~
+               aap_estado => Transformador(
+                 aap_id,
+                 aap_numero,
                  empr_id,
                  usua_id,
                  barr_id,               
-                 tran_direccion,
-                 tran_codigo_apoyo,
-                 tran_propietario,
-                 tran_marca,
-                 tran_serial,
-                 tran_kva,
+                 aap_direccion,
+                 aap_codigo_apoyo,
+                 aap_propietario,
+                 aap_marca,
+                 aap_serial,
+                 aap_kva,
                  tipo_id,
-                 tran_fases,
-                 tran_tension_p,
-                 tran_tension_s,
-                 tran_referencia,
-                 tran_estado)
+                 aap_fases,
+                 aap_tension_p,
+                 aap_tension_s,
+                 aap_referencia,
+                 aap_estado)
       }
   }    
 }
@@ -123,54 +123,54 @@ object InformeT {
     implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
 
     val _set = {
-      get[Option[Long]]("tran_id") ~
-      get[Option[String]]("tran_numero") ~ 
-      get[Option[String]]("tran_direccion") ~
-      get[Option[String]]("tran_codigo_apoyo") ~
-      get[Option[String]]("tran_propietario") ~
-      get[Option[String]]("tran_marca") ~
-      get[Option[String]]("tran_serial") ~
-      get[Option[Double]]("tran_kva") ~
+      get[Option[Long]]("aap_id") ~
+      get[Option[String]]("aap_numero") ~ 
+      get[Option[String]]("aap_direccion") ~
+      get[Option[String]]("aap_codigo_apoyo") ~
+      get[Option[String]]("aap_propietario") ~
+      get[Option[String]]("aap_marca") ~
+      get[Option[String]]("aap_serial") ~
+      get[Option[Double]]("aap_kva") ~
       get[Option[Int]]("tipo_id") ~
-      get[Option[String]]("tran_fases") ~
-      get[Option[Double]]("tran_tension_p") ~
-      get[Option[Double]]("tran_tension_s") ~
-      get[Option[String]]("tran_referencia") ~
-      get[Option[Int]]("tran_estado") ~      
+      get[Option[String]]("aap_fases") ~
+      get[Option[Double]]("aap_tension_p") ~
+      get[Option[Double]]("aap_tension_s") ~
+      get[Option[String]]("aap_referencia") ~
+      get[Option[Int]]("aap_estado") ~      
       get[Option[String]]("barr_descripcion") ~
       get[Option[String]]("tipo_descripcion") ~
       get[Option[Int]]("cantidad") map {
-          case tran_id ~
-               tran_numero ~
-               tran_direccion ~
-               tran_codigo_apoyo ~
-               tran_propietario ~
-               tran_marca ~
-               tran_serial ~
-               tran_kva ~
+          case aap_id ~
+               aap_numero ~
+               aap_direccion ~
+               aap_codigo_apoyo ~
+               aap_propietario ~
+               aap_marca ~
+               aap_serial ~
+               aap_kva ~
                tipo_id ~
-               tran_fases ~
-               tran_tension_p ~
-               tran_tension_s ~
-               tran_referencia ~
-               tran_estado ~
+               aap_fases ~
+               aap_tension_p ~
+               aap_tension_s ~
+               aap_referencia ~
+               aap_estado ~
                barr_descripcion ~  
                tipo_descripcion ~           
                cantidad => InformeT(
-                 tran_id,
-                 tran_numero,
-                 tran_direccion,
-                 tran_codigo_apoyo,
-                 tran_propietario,
-                 tran_marca,
-                 tran_serial,
-                 tran_kva,
+                 aap_id,
+                 aap_numero,
+                 aap_direccion,
+                 aap_codigo_apoyo,
+                 aap_propietario,
+                 aap_marca,
+                 aap_serial,
+                 aap_kva,
                  tipo_id,
-                 tran_fases,
-                 tran_tension_p,
-                 tran_tension_s,
-                 tran_referencia,
-                 tran_estado,
+                 aap_fases,
+                 aap_tension_p,
+                 aap_tension_s,
+                 aap_referencia,
+                 aap_estado,
                  barr_descripcion,
                  tipo_descripcion,
                  cantidad)
@@ -188,14 +188,14 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
 
 
     /**
-    * Recuperar un Transformador dado su tran_id
-    * @param tran_id: Long
+    * Recuperar un Transformador dado su aap_id
+    * @param aap_id: Long
     */
-    def buscarPorId(tran_id: Long, empr_id: Long) : Option[Transformador] = {
+    def buscarPorId(aap_id: Long, empr_id: Long) : Option[Transformador] = {
         db.withConnection { implicit connection =>
-            SQL("SELECT * FROM siap.transformador WHERE tran_id = {tran_id} and empr_id = {empr_id}").
+            SQL("SELECT * FROM siap.transformador WHERE aap_id = {aap_id} and empr_id = {empr_id}").
             on(
-                'tran_id -> tran_id,
+                'aap_id -> aap_id,
                 'empr_id -> empr_id
             ).
             as(Transformador._set.singleOpt)
@@ -208,7 +208,7 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
    */
    def cuenta(empr_id: Long): Long =  {
      db.withConnection{ implicit connection =>
-       val result = SQL("SELECT COUNT(*) AS c FROM siap.transformador WHERE tran_estado <> 9 and empr_id = {empr_id}")
+       val result = SQL("SELECT COUNT(*) AS c FROM siap.transformador WHERE aap_estado <> 9 and empr_id = {empr_id}")
        .on(
          'empr_id -> empr_id
        )
@@ -224,7 +224,7 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
     */
     def todos(page_size: Long, current_page: Long, empr_id: Long): Future[Iterable[Transformador]] = Future[Iterable[Transformador]] {
         db.withConnection { implicit connection =>
-            SQL("SELECT * FROM siap.transformador WHERE tran_estado <> 9 and empr_id = {empr_id} LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1) ORDER BY tran_id").
+            SQL("SELECT * FROM siap.transformador WHERE aap_estado <> 9 and empr_id = {empr_id} LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1) ORDER BY aap_id").
             on(
               'page_size -> page_size,
               'current_page -> current_page,
@@ -240,7 +240,7 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
     */
     def transformadores(empr_id: Long): Future[Iterable[Transformador]] = Future[Iterable[Transformador]] {
         db.withConnection { implicit connection =>
-            SQL("SELECT * FROM siap.transformador WHERE tran_estado <> 9 and empr_id = {empr_id} ORDER BY tran_id").
+            SQL("SELECT * FROM siap.transformador WHERE aap_estado <> 9 and empr_id = {empr_id} ORDER BY aap_id").
             on(
               'empr_id -> empr_id
             ).
@@ -257,25 +257,26 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
         val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())        
         db.withConnection { implicit connection =>
             val id: Long = SQL("""INSERT INTO siap.transformador
-                    (empr_id, tran_numero, tran_direccion, barr_id, usua_id, tran_estado, tran_codigo_apoyo, tran_propietario, tran_marca, tran_serial, tran_kva, tipo_id, tran_fases, tran_tension_p, tran_tension_s, tran_referencia)
-                    VALUES({empr_id}, {tran_numero}, {tran_direccion}, {barr_id}, {usua_id}, {tran_estado}, {tran_codigo_apoyo}, {tran_propietario}, {tran_marca}, {tran_serial}, {tran_kva}, {tipo_id}, {tran_fases}, {tran_tension_p}, {tran_tension_s}, {tran_referencia});""").
+                    (aap_id, empr_id, aap_numero, aap_direccion, barr_id, usua_id, aap_estado, aap_codigo_apoyo, aap_propietario, aap_marca, aap_serial, aap_kva, tipo_id, aap_fases, aap_tension_p, aap_tension_s, aap_referencia)
+                    VALUES({aap_id}, {empr_id}, {aap_numero}, {aap_direccion}, {barr_id}, {usua_id}, {aap_estado}, {aap_codigo_apoyo}, {aap_propietario}, {aap_marca}, {aap_serial}, {aap_kva}, {tipo_id}, {aap_fases}, {aap_tension_p}, {aap_tension_s}, {aap_referencia});""").
             on(
-              'tran_numero -> transformador.tran_numero,
+              'aap_id -> transformador.aap_numero,
+              'aap_numero -> transformador.aap_numero,
               'empr_id -> transformador.empr_id,
               'usua_id -> transformador.usua_id,
-              'tran_direccion -> transformador.tran_direccion,
+              'aap_direccion -> transformador.aap_direccion,
               'barr_id -> transformador.barr_id,
-              'tran_codigo_apoyo -> transformador.tran_codigo_apoyo,
-              'tran_propietario -> transformador.tran_propietario,
-              'tran_marca -> transformador.tran_marca,
-              'tran_serial -> transformador.tran_serial,
-              'tran_kva -> transformador.tran_kva,
+              'aap_codigo_apoyo -> transformador.aap_codigo_apoyo,
+              'aap_propietario -> transformador.aap_propietario,
+              'aap_marca -> transformador.aap_marca,
+              'aap_serial -> transformador.aap_serial,
+              'aap_kva -> transformador.aap_kva,
               'tipo_id -> transformador.tipo_id,
-              'tran_fases -> transformador.tran_fases,
-              'tran_tension_p -> transformador.tran_tension_p,
-              'tran_tension_s -> transformador.tran_tension_s,
-              'tran_referencia -> transformador.tran_referencia,
-              'tran_estado -> 1
+              'aap_fases -> transformador.aap_fases,
+              'aap_tension_p -> transformador.aap_tension_p,
+              'aap_tension_s -> transformador.aap_tension_s,
+              'aap_referencia -> transformador.aap_referencia,
+              'aap_estado -> 1
             ).executeInsert().get
 
             SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
@@ -285,9 +286,9 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
                 'usua_id -> transformador.usua_id,
                 'audi_tabla -> "Transformador", 
                 'audi_uid -> id,
-                'audi_campo -> "tran_numero", 
+                'audi_campo -> "aap_numero", 
                 'audi_valorantiguo -> "",
-                'audi_valornuevo -> transformador.tran_numero,
+                'audi_valornuevo -> transformador.aap_numero,
                 'audi_evento -> "I").
                 executeInsert()
 
@@ -301,59 +302,59 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
     * @param Transformador: Transformador
     */
     def actualizar(transformador: Transformador) : Boolean = {
-        val transformador_ant: Option[Transformador] = buscarPorId(transformador.tran_id.get, transformador.empr_id.get)
+        val transformador_ant: Option[Transformador] = buscarPorId(transformador.aap_id.get, transformador.empr_id.get)
         db.withConnection { implicit connection =>
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())
             val result: Boolean = SQL("""UPDATE siap.transformador
-                         SET tran_numero = {tran_numero},
-                            tran_direccion = {tran_direccion},
+                         SET aap_numero = {aap_numero},
+                            aap_direccion = {aap_direccion},
                             barr_id = {barr_id},
                             usua_id = {usua_id},
-                            tran_estado = {tran_estado},
-                            tran_codigo_apoyo = {tran_codigo_apoyo},
-                            tran_propietario = {tran_propietario},
-                            tran_marca = {tran_marca},
-                            tran_serial = {tran_serial},
-                            tran_kva = {tran_kva},
+                            aap_estado = {aap_estado},
+                            aap_codigo_apoyo = {aap_codigo_apoyo},
+                            aap_propietario = {aap_propietario},
+                            aap_marca = {aap_marca},
+                            aap_serial = {aap_serial},
+                            aap_kva = {aap_kva},
                             tipo_id = {tipo_id},
-                            tran_fases = {tran_fases},
-                            tran_tension_p = {tran_tension_p},
-                            tran_tension_s = {tran_tension_s},
-                            tran_referencia = {tran_referencia}
-                         WHERE tran_id = {tran_id} and empr_id = {empr_id}""").
+                            aap_fases = {aap_fases},
+                            aap_tension_p = {aap_tension_p},
+                            aap_tension_s = {aap_tension_s},
+                            aap_referencia = {aap_referencia}
+                         WHERE aap_id = {aap_id} and empr_id = {empr_id}""").
             on(
-                'tran_id -> transformador.tran_id,
-                'tran_numero -> transformador.tran_numero,
+                'aap_id -> transformador.aap_id,
+                'aap_numero -> transformador.aap_numero,
                 'empr_id -> transformador.empr_id,
                 'usua_id -> transformador.usua_id,
                 'barr_id -> transformador.barr_id,
-                'tran_direccion -> transformador.tran_direccion,
-                'tran_codigo_apoyo -> transformador.tran_codigo_apoyo,
-                'tran_propietario -> transformador.tran_propietario,
-                'tran_marca -> transformador.tran_marca,
-                'tran_serial -> transformador.tran_serial,
-                'tran_kva -> transformador.tran_kva,
+                'aap_direccion -> transformador.aap_direccion,
+                'aap_codigo_apoyo -> transformador.aap_codigo_apoyo,
+                'aap_propietario -> transformador.aap_propietario,
+                'aap_marca -> transformador.aap_marca,
+                'aap_serial -> transformador.aap_serial,
+                'aap_kva -> transformador.aap_kva,
                 'tipo_id -> transformador.tipo_id,
-                'tran_fases -> transformador.tran_fases,
-                'tran_tension_p -> transformador.tran_tension_p,
-                'tran_tension_s -> transformador.tran_tension_s,
-                'tran_referencia -> transformador.tran_referencia,
-                'tran_estado -> transformador.tran_estado
+                'aap_fases -> transformador.aap_fases,
+                'aap_tension_p -> transformador.aap_tension_p,
+                'aap_tension_s -> transformador.aap_tension_s,
+                'aap_referencia -> transformador.aap_referencia,
+                'aap_estado -> transformador.aap_estado
             ).executeUpdate() > 0
 
             if (transformador_ant != None){
-                if (transformador_ant.get.tran_numero != transformador.tran_numero){
+                if (transformador_ant.get.aap_numero != transformador.aap_numero){
                 SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
                 on(
                     'audi_fecha -> fecha,
                     'audi_hora -> hora,
                     'usua_id -> transformador.usua_id,
                     'audi_tabla -> "Transformador", 
-                    'audi_uid -> transformador.tran_numero,
-                    'audi_campo -> "tran_numero", 
-                    'audi_valorantiguo -> transformador_ant.get.tran_numero,
-                    'audi_valornuevo -> transformador.tran_numero,
+                    'audi_uid -> transformador.aap_numero,
+                    'audi_campo -> "aap_numero", 
+                    'audi_valorantiguo -> transformador_ant.get.aap_numero,
+                    'audi_valornuevo -> transformador.aap_numero,
                     'audi_evento -> "A").
                     executeInsert()                    
                 }
@@ -371,17 +372,17 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
                             'audi_evento -> "A").
                             executeInsert()                    
                 }
-                if (transformador_ant.get.tran_direccion != transformador.tran_direccion){
+                if (transformador_ant.get.aap_direccion != transformador.aap_direccion){
                           SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
                           on(
                               'audi_fecha -> fecha,
                               'audi_hora -> hora,
                               'usua_id -> transformador.usua_id,
                               'audi_tabla -> "Transformador", 
-                              'audi_uid -> transformador.tran_direccion,
-                              'audi_campo -> "tran_direccion", 
-                              'audi_valorantiguo -> transformador_ant.get.tran_direccion,
-                              'audi_valornuevo -> transformador.tran_direccion,
+                              'audi_uid -> transformador.aap_direccion,
+                              'audi_campo -> "aap_direccion", 
+                              'audi_valorantiguo -> transformador_ant.get.aap_direccion,
+                              'audi_valornuevo -> transformador.aap_direccion,
                               'audi_evento -> "A").
                               executeInsert()                    
                 }
@@ -409,14 +410,14 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
     * Elimnar TipoTransformador
     * @param Transformador: TipoTransformador
     */
-    def borrar(tran_id: Long, usua_id: Long): Boolean = {
+    def borrar(aap_id: Long, usua_id: Long): Boolean = {
         val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
         val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())        
 
         db.withConnection { implicit connection => 
-            val count: Long = SQL("UPDATE siap.transformador SET tran_estado = 9 WHERE tran_id = {tran_id}").
+            val count: Long = SQL("UPDATE siap.transformador SET aap_estado = 9 WHERE aap_id = {aap_id}").
             on(
-                'tran_id -> tran_id
+                'aap_id -> aap_id
             ).executeUpdate()
 
             SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
@@ -425,7 +426,7 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
                     'audi_hora -> hora,
                     'usua_id -> usua_id,
                     'audi_tabla -> "Transformador", 
-                    'audi_uid -> tran_id,
+                    'audi_uid -> aap_id,
                     'audi_campo -> "", 
                     'audi_valorantiguo -> "",
                     'audi_valornuevo -> "",
@@ -440,10 +441,10 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
       db.withConnection { implicit connection =>
         var result = 0
         val _aapParser = int("aap_id") ~ int("esta_id") map { case a ~ e => (a,e)}
-        val a = SQL("""SELECT a.tran_id AS aap_id, a.tran_estado as esta_id FROM siap.transformador a
+        val a = SQL("""SELECT a.aap_id AS aap_id, a.aap_estado as esta_id FROM siap.transformador a
                LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
                LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
-               WHERE a.tran_id = {aap_id} and a.empr_id = {empr_id}""").
+               WHERE a.aap_id = {aap_id} and a.empr_id = {empr_id}""").
         on(
             'aap_id -> aap_id,
             'empr_id -> empr_id
@@ -469,7 +470,7 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
         SQL("""SELECT a.*, b.*, t.* FROM siap.transformador a
                LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
                LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
-               WHERE a.tran_id = {aap_id} and a.empr_id = {empr_id}""").
+               WHERE a.aap_id = {aap_id} and a.empr_id = {empr_id}""").
         on('aap_id -> aap_id, 'empr_id-> empr_id).as(Transformador._set.singleOpt)
       }
     }      
@@ -477,13 +478,13 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
     def informe_siap_transformador(empr_id: scala.Long): Future[Iterable[InformeT]] = Future[Iterable[InformeT]] {
         db.withConnection { implicit connection => 
             SQL("""SELECT m.*, b.barr_descripcion, tp.tipo_descripcion, COUNT(a.*) AS cantidad FROM siap.transformador m
-            LEFT JOIN siap.aap_transformador am ON am.tran_id = m.tran_id AND am.empr_id = m.empr_id
+            LEFT JOIN siap.aap_transformador am ON am.aap_id = m.aap_id AND am.empr_id = m.empr_id
             LEFT JOIN siap.aap a ON a.aap_id = am.aap_id and a.empr_id = am.empr_id
             LEFT JOIN siap.barrio b ON b.barr_id = m.barr_id
             LEFT JOIN siap.tipo_poste tp ON tp.tipo_id = m.tipo_id
             WHERE m.empr_id = {empr_id}
-            GROUP BY m.tran_id, m.tran_direccion, b.barr_descripcion, tp.tipo_descripcion
-            ORDER BY m.tran_numero""").
+            GROUP BY m.aap_id, m.aap_direccion, b.barr_descripcion, tp.tipo_descripcion
+            ORDER BY m.aap_numero""").
             on(
                 'empr_id -> empr_id
             ).

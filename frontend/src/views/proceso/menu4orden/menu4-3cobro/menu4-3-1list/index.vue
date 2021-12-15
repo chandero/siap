@@ -214,7 +214,7 @@
     </el-main>
   </el-container>
         <el-row>
-        <el-col :span='24'>
+        <el-col :span='1'>
           <img
             :title="$t('xls')"
             @click='exportarXls()'
@@ -222,8 +222,15 @@
             :src="require('@/assets/xls.png')"
           />
         </el-col>
+        <el-col :span='1'>
+          <img
+            :title="$t('relacion')"
+            @click='showRelacionDialog = true'
+            style='width: 32px; height: 36px; cursor: pointer;'
+            :src="require('@/assets/prnt.png')"
+          />
+        </el-col>
       </el-row>
-
   </el-main>
   <el-dialog
     title="Generar Orden de Trabajo"
@@ -274,13 +281,46 @@
         <el-button :disabled="!reti_id_gen || !cotr_consecutivo || esGenerando" type="primary" @click="generar()">Confirmar</el-button>
     </span>
   </el-dialog>
+  <el-dialog
+    title="Generar Relación"
+    :visible.sync="showRelacionDialog"
+    width="40%"
+    destroy-on-close
+    center
+    @closed="handleRelacionDialogClosed"
+  >
+    <el-container>
+      <el-main>
+        <el-form label-position="left" label-width="200px">
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="Año">
+                <el-input type="number" v-model="anho" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="Periodo">
+                <el-select v-model="mes">
+                  <el-option v-for="m in months" :key="m.id" :value="m.id" :label="$t(`months.${m.label}`)"></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </el-main>
+    </el-container>
+    <span slot="footer" class="dialog-footer">
+        <el-button @click="showRelacionDialog = false">Cancelar</el-button>
+        <el-button :disabled="!anho || !mes" type="primary" @click="handleRelacion()">Imprimir</el-button>
+    </span>
+  </el-dialog>
   </el-container>
 </template>
 <script>
 import VueQueryBuilder from 'vue-query-builder'
 import { mapGetters } from 'vuex'
 import { getTipos } from '@/api/reporte'
-import { obtener, generar, xls, verificar, consecutivo } from '@/api/cobro'
+import { obtener, generar, xls, verificar, consecutivo, relacion } from '@/api/cobro'
 import { getCaracteristica } from '@/api/caracteristica'
 import { parseTime } from '@/utils'
 export default {
@@ -366,6 +406,7 @@ export default {
       reporte_tipo: null,
       tableData: [],
       showDialog: false,
+      showRelacionDialog: false,
       total: 0,
       page_size: 50,
       current_page: 1,
@@ -560,11 +601,29 @@ export default {
         }
       })
     },
+    handleRelacion () {
+      this.showRelacionDialog = false
+      relacion(this.anho, this.mes).then(resp => {
+        var blob = resp.data
+        const filename = 'Relacion_Orden_Trabajo_ITAF_' + this.anho + '_' + this.$i18n.t(this.mes) + '.xlsx'
+        if (window.navigator.msSaveOrOpenBlob) {
+          window.navigator.msSaveBlob(blob, filename)
+        } else {
+          var downloadLink = window.document.createElement('a')
+          downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+          downloadLink.download = filename
+          document.body.appendChild(downloadLink)
+          downloadLink.click()
+          document.body.removeChild(downloadLink)
+        }
+      })
+    },
     handleSort () {},
     handleFilter () {},
     handleSizeChange () {},
     handleCurrentChange () {},
     handleClose () {},
+    handleRelacionDialogClosed () {},
     actualizar () {}
   }
 }

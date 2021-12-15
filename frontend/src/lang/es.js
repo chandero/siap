@@ -15,6 +15,7 @@ export default {
   print: 'Imprimir',
   pdf: 'Exportar a Pdf',
   xls: 'Exportar a Excel',
+  relacion: 'Imprimir Relación',
   lostserverconnection: 'Se perdión conexión con el servidor. Verificando...',
   ver: 'Ver Detalle',
   anho: 'Año',

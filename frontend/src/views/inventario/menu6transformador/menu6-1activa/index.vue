@@ -10,53 +10,56 @@
           </el-header>
           <el-main>
           <el-table
-        :data="tableData.filter(data => !search || data.tran_numero.toLowerCase().includes(search.toLowerCase()) || (data.tran_direccion !== null && data.tran_direccion.toLowerCase().includes(search.toLowerCase())) || (data.barr_descripcion !== null && data.barr_descripcion.toLowerCase().includes(search.toLowerCase())))"
+        :data="tableData.filter(data => !search || data.aap_numero.toLowerCase().includes(search.toLowerCase()) || (data.aap_direccion !== null && data.aap_direccion.toLowerCase().includes(search.toLowerCase())) || (data.barr_descripcion !== null && data.barr_descripcion.toLowerCase().includes(search.toLowerCase())))"
         width="100%" height="500">
     <el-table-column
       :label="$t('gestion.transformador.numero')"
-      prop="tran_numero"
+      prop="aap_numero"
       width="120"
     >
     </el-table-column>
     <el-table-column
       :label="$t('gestion.transformador.tran_codigo_apoyo')"
-      prop="tran_codigo_apoyo"
+      prop="aap_codigo_apoyo"
       width="120"
     >
     </el-table-column>
     <el-table-column
       :label="$t('gestion.transformador.direccion')"
-      prop="tran_direccion"
+      prop="aap_direccion"
       width="250"
     >
     </el-table-column>
     <el-table-column
       :label="$t('gestion.transformador.barr_descripcion')"
-      prop="barr_descripcion"
+      prop="barr_id"
       width="200"
     >
+    <template slot-scope="scope">
+      <span>{{ barrio(scope.row.barr_id) }}</span>
+    </template>
     </el-table-column>
     <el-table-column
       :label="$t('gestion.transformador.tran_propietario')"
-      prop="tran_propietario"
+      prop="aap_propietario"
       width="120"
     >
     </el-table-column>
     <el-table-column
       :label="$t('gestion.transformador.tran_marca')"
-      prop="tran_marca"
+      prop="aap_marca"
       width="120"
     >
     </el-table-column>
     <el-table-column
       :label="$t('gestion.transformador.tran_serial')"
-      prop="tran_serial"
+      prop="aap_serial"
       width="120"
     >
     </el-table-column>
     <el-table-column
       :label="$t('gestion.transformador.tran_kva')"
-      prop="tran_kva"
+      prop="aap_kva"
       width="100"
     >
     </el-table-column>
@@ -68,25 +71,25 @@
     </el-table-column>
     <el-table-column
       :label="$t('gestion.transformador.tran_fases')"
-      prop="tran_fases"
+      prop="aap_fases"
       width="110"
     >
     </el-table-column>
     <el-table-column
       :label="$t('gestion.transformador.tran_tension_p')"
-      prop="tran_tension_p"
+      prop="aap_tension_p"
       width="150"
     >
     </el-table-column>
     <el-table-column
       :label="$t('gestion.transformador.tran_tension_s')"
-      prop="tran_tension_s"
+      prop="aap_tension_s"
       width="150"
     >
     </el-table-column>
     <el-table-column
       :label="$t('gestion.transformador.tran_referencia')"
-      prop="tran_referencia"
+      prop="aap_referencia"
       width="100"
     >
     </el-table-column>
@@ -141,16 +144,16 @@ export default {
   },
   methods: {
     handleEdit (index, row) {
-      this.$router.push({ path: '/inventario/menu6transformador/menu6-1activa/gestion/edit/' + row.tran_id })
+      this.$router.push({ path: '/inventario/menu6transformador/menu6-1activa/gestion/edit/' + row.aap_id })
       console.log(index, row)
     },
     handleDelete (index, row) {
-      this.$confirm(this.$i18n.t('gestion.transformador.confirmationmsg') + ' "' + row.tran_numero + '"', this.$i18n.t('general.warning'), {
+      this.$confirm(this.$i18n.t('gestion.transformador.confirmationmsg') + ' "' + row.aap_numero + '"', this.$i18n.t('general.warning'), {
         confirmButtonText: this.$i18n.t('general.ok'),
         cancelButtonText: this.$i18n.t('general.cancel'),
         type: 'warning'
       }).then(() => {
-        deleteTransformador(row.tran_id).then(response => {
+        deleteTransformador(row.aap_id).then(response => {
           this.$message({
             type: 'success',
             message: this.$i18n.t('general.deletesuccessful')

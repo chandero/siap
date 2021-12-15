@@ -36,3 +36,11 @@ export function xls (cotr_id, reti_id) {
     responseType: 'blob'
   })
 }
+
+export function relacion (anho, periodo) {
+  return request({
+    url: `cotr/rel/${anho}/${periodo}`,
+    method: 'get',
+    responseType: 'blob'
+  })
+}

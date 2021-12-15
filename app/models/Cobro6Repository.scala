@@ -188,6 +188,20 @@ class Cobro6Repository @Inject()(
     }
   }
 
+  def buscarPorEmpresaAnhoPeriodo(empr_id: Long, anho: Int, periodo: Int) = {
+    db.withConnection { implicit connection =>
+      val query =
+        "SELECT * FROM siap.cobro_orden_trabajo WHERE empr_id = {empr_id} and cotr_anho = {cotr_anho} and cotr_periodo = {cotr_periodo}"
+      SQL(query)
+        .on(
+          'empr_id -> empr_id,
+          'cotr_anho -> anho,
+          'cotr_periodo -> periodo
+        )
+        .as(orden_trabajo_cobro._set *)
+    }
+  }  
+
   def siap_orden_trabajo_cobro_consecutivo(empr_id: Long): Int = {
     db.withConnection { implicit connection =>
       val query =
@@ -10518,5 +10532,287 @@ class Cobro6Repository @Inject()(
         }
       )
     }
+  }
+
+  def siap_orden_trabajo_cobro_relacion(empr_id: Long, anho: Int, periodo: Int): Array[Byte] = {
+    var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+    var _listMerged01 = new ListBuffer[CellRange]()
+    val _emptyRow = com.norbitltd.spoiwo.model.Row()
+    val empresa = empresaService.buscarPorId(empr_id) match {
+      case Some(e) => e
+      case None => Empresa(None, "", "", "", "", "", None, 0, 0, 0, 0, None, None)
+    }
+    val ordenes =  buscarPorEmpresaAnhoPeriodo(empresa.empr_id.get, anho, periodo)
+    var _idx = 0
+    val sheet1 =  Sheet(
+        name = "Relación",
+        properties = SheetProperties(autoBreaks = true),
+        rows = {
+          _listRow01 += _emptyRow
+          _idx += 1
+          _listRow01 += _emptyRow
+          _idx += 1          
+          _listRow01 += _emptyRow
+          _idx += 1          
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "MUNICIPIO DE" + empresa.muni_descripcion,
+              Some(0),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          _listMerged01 += CellRange((_idx, _idx), (0, 3))
+          _idx += 1
+          _listRow01 += _emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "ORDENES DE TRABAJO OBRAS DE EXPANSION Y COMPLEMENTARIAS AÑO " + anho.toString(),
+              Some(0),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+          )
+          _listMerged01 += CellRange((_idx, _idx), (0, 3))
+          _idx += 1
+          _listRow01 += _emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "PERIODO: " + Utility.mes(periodo) + " /" + anho.toString(),
+              Some(0),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+          )
+          _listMerged01 += CellRange((_idx, _idx), (0, 3))
+          _idx += 1          
+          _listRow01 += _emptyRow
+          _idx += 1
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "FECHA",
+              Some(0),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "NUMERO ORDEN",
+              Some(1),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "DESCRIPCION",
+              Some(2),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "BARRIO",
+              Some(3),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "TOTAL",
+              Some(4),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  horizontalAlignment = HA.Center
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )            
+          )
+          _idx += 1
+          ordenes.map { orden =>
+                val _fecha = orden.cotr_fecha.get
+                val _consecutivo = orden.cotr_consecutivo.get
+                val _descripcion = orden.cotr_tipo_obra match {
+                   case Some(2) => { "EXPANSION DE " + N2T.convertirLetras(orden.cotr_cantidad.get).toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_nueva.get + " DE " + orden.cotr_potencia_nueva.get + " W" }
+                   case Some(6) => { "MODERNIZACION DE " + N2T
+                                    .convertirLetras(orden.cotr_cantidad.get)
+                                    .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_anterior.get + " DE " + orden.cotr_potencia_anterior.get + "W" + " POR " + N2T
+                                    .convertirLetras(orden.cotr_cantidad.get)
+                                    .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_nueva.get + " DE " + orden.cotr_potencia_nueva.get + " W" }
+                  case _ => s""
+                }
+                val _barrio = orden.cotr_direccion match {
+                  case Some(b) => b
+                  case None => ""
+                }
+                val _total = siap_orden_trabajo_cobro_calculo_total(orden.cotr_id.get)
+                _listRow01 += com.norbitltd.spoiwo.model.Row(
+                  DateCell(
+                    _fecha.toDate(),
+                    Some(0),
+                    style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("MMMM DD / YYYY")
+                      )
+                    ),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  ),
+                  NumericCell(
+                    _consecutivo,
+                    Some(1),
+                    style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("#########0")
+                      )
+                    ),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  ),
+                  StringCell(
+                    _descripcion,
+                    Some(2),
+                    style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        wrapText = java.lang.Boolean.TRUE
+                      )
+                    ),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  ),
+                  StringCell(
+                    _barrio,
+                    Some(3),
+                    style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("@")
+                      )
+                    ),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  ),
+                  NumericCell(
+                    _total,
+                    Some(4),
+                    style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("#,##0")
+                      )
+                    ),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
+                )
+                _idx += 1
+            }
+
+            _listRow01 += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@")
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@")
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@")
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@")
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              FormulaCell(
+                "SUM(E11:E" + _idx + ")",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@")
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )
+          _listRow01.toList
+        },
+        mergedRegions = _listMerged01.toList,
+        columns = {
+          var _listColumn = new ArrayBuffer[com.norbitltd.spoiwo.model.Column]()
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 0, width = new Width(25, WidthUnit.Character))          
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 2, width = new Width(60, WidthUnit.Character))
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 3, width = new Width(40, WidthUnit.Character))
+
+        _listColumn.toList            
+        }
+      )
+    println("Escribiendo en el Stream")
+    var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+    Workbook(sheet1)
+      .writeToOutputStream(os)
+    println("Stream Listo")
+    os.toByteArray
+  }
+
+  def siap_orden_trabajo_cobro_calculo_total(cotr_id: Long) = {
+    var _total = 0D
+    _total
   }
 }

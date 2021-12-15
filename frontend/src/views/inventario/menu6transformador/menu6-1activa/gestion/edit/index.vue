@@ -6,13 +6,13 @@
      <el-main>
        <el-form>
         <span>{{ $t('gestion.transformador.numero')}}</span>
-        <el-input name="numero" v-model="transformador.tran_numero"></el-input>
+        <el-input name="numero" v-model="transformador.aap_numero"></el-input>
         <p/>
         <span>{{ $t('gestion.transformador.tran_codigo_apoyo')}}</span>
-        <el-input name="numero" v-model="transformador.tran_codigo_apoyo"></el-input>
+        <el-input name="numero" v-model="transformador.aap_codigo_apoyo"></el-input>
         <p/>
         <span>{{ $t('gestion.transformador.direccion')}}</span>
-        <el-input name="direccion" v-model="transformador.tran_direccion"></el-input>
+        <el-input name="direccion" v-model="transformador.aap_direccion"></el-input>
         <p/>
         <span>{{ $t('gestion.transformador.barr_descripcion')}}</span>
         <el-select  style="width:100%;" filterable clearable ref="barrio" v-model="transformador.barr_id" name="barrio" :placeholder="$t('barrio.select')">
@@ -21,16 +21,16 @@
         </el-select>
         <p/>
         <span>{{ $t('gestion.transformador.tran_propietario')}}</span>
-        <el-input name="direccion" v-model="transformador.tran_propietario"></el-input>
+        <el-input name="direccion" v-model="transformador.aap_propietario"></el-input>
         <p/>
         <span>{{ $t('gestion.transformador.tran_marca')}}</span>
-        <el-input name="direccion" v-model="transformador.tran_marca"></el-input>
+        <el-input name="direccion" v-model="transformador.aap_marca"></el-input>
         <p/>
         <span>{{ $t('gestion.transformador.tran_serial')}}</span>
-        <el-input name="direccion" v-model="transformador.tran_serial"></el-input>
+        <el-input name="direccion" v-model="transformador.aap_serial"></el-input>
         <p/>
         <span>{{ $t('gestion.transformador.tran_kva')}}</span>
-        <el-input name="direccion" v-model="transformador.tran_kva"></el-input>
+        <el-input name="direccion" v-model="transformador.aap_kva"></el-input>
         <p/>
         <span>{{ $t('gestion.transformador.tipo_id')}}</span>
           <el-form-item
@@ -54,16 +54,16 @@
           </el-form-item>
         <p/>
         <span>{{ $t('gestion.transformador.tran_fases')}}</span>
-        <el-input name="direccion" v-model="transformador.tran_fases"></el-input>
+        <el-input name="direccion" v-model="transformador.aap_fases"></el-input>
         <p/>
         <span>{{ $t('gestion.transformador.tran_tension_p')}}</span>
-        <el-input name="direccion" v-model="transformador.tran_tension_p"></el-input>
+        <el-input name="direccion" v-model="transformador.aap_tension_p"></el-input>
         <p/>
         <span>{{ $t('gestion.transformador.tran_tension_s')}}</span>
-        <el-input name="direccion" v-model="transformador.tran_tension_s"></el-input>
+        <el-input name="direccion" v-model="transformador.aap_tension_s"></el-input>
         <p/>
         <span>{{ $t('gestion.transformador.tran_referencia')}}</span>
-        <el-input name="direccion" v-model="transformador.tran_referencia"></el-input>
+        <el-input name="direccion" v-model="transformador.aap_referencia"></el-input>
         <p/>
         <el-button :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="aplicar"></el-button>
       </el-form>
@@ -78,23 +78,23 @@ export default {
   data () {
     return {
       transformador: {
-        tran_id: null,
+        aap_id: null,
         empr_id: null,
-        tran_numero: null,
-        tran_direccion: null,
+        aap_numero: null,
+        aap_direccion: null,
         barr_id: null,
         usua_id: null,
-        tran_estado: null,
-        tran_codigo_apoyo: null,
-        tran_propietario: null,
-        tran_marca: null,
-        tran_serial: null,
-        tran_kva: null,
+        aap_estado: null,
+        aap_codigo_apoyo: null,
+        aap_propietario: null,
+        aap_marca: null,
+        aap_serial: null,
+        aap_kva: null,
         tipo_id: null,
-        tran_fases: null,
-        tran_tension_p: null,
-        tran_tension_s: null,
-        tran_referencia: null
+        aap_fases: null,
+        aap_tension_p: null,
+        aap_tension_s: null,
+        aap_referencia: null
       },
       barrios: [],
       isIndeterminate: false,
@@ -103,14 +103,15 @@ export default {
       loading: false,
       page_size: 10,
       current_page: 1,
-      total: 0
+      total: 0,
+      postes: []
     }
   },
   methods: {
     aplicar () {
-      this.transformador.tran_kva = parseFloat(this.transformador.tran_kva)
-      this.transformador.tran_tension_p = parseFloat(this.transformador.tran_tension_p)
-      this.transformador.tran_tension_s = parseFloat(this.transformador.tran_tension_s)
+      this.transformador.aap_kva = parseFloat(this.transformador.aap_kva)
+      this.transformador.aap_tension_p = parseFloat(this.transformador.aap_tension_p)
+      this.transformador.aap_tension_s = parseFloat(this.transformador.aap_tension_s)
       updateTransformador(this.transformador).then(response => {
         if (response.status === 201) {
           this.success()
@@ -120,7 +121,7 @@ export default {
       })
     },
     validate () {
-      if (this.transformador.tran_direccion && this.transformador.tran_numero) {
+      if (this.transformador.aap_direccion && this.transformador.aap_numero) {
         return true
       } else {
         return false
@@ -128,50 +129,50 @@ export default {
     },
     limpiarAndBack () {
       this.transformador = {
-        tran_id: null,
+        aap_id: null,
         empr_id: null,
-        tran_numero: null,
-        tran_direccion: null,
+        aap_numero: null,
+        aap_direccion: null,
         barr_id: null,
         usua_id: null,
-        tran_estado: null,
-        tran_codigo_apoyo: null,
-        tran_propietario: null,
-        tran_marca: null,
-        tran_serial: null,
-        tran_kva: null,
+        aap_estado: null,
+        aap_codigo_apoyo: null,
+        aap_propietario: null,
+        aap_marca: null,
+        aap_serial: null,
+        aap_kva: null,
         tipo_id: null,
-        tran_fases: null,
-        tran_tension_p: null,
-        tran_tension_s: null,
-        tran_referencia: null
+        aap_fases: null,
+        aap_tension_p: null,
+        aap_tension_s: null,
+        aap_referencia: null
       }
     },
     limpiar () {
       this.transformador = {
-        tran_id: null,
+        aap_id: null,
         empr_id: null,
-        tran_numero: null,
-        tran_direccion: null,
+        aap_numero: null,
+        aap_direccion: null,
         barr_id: null,
         usua_id: null,
-        tran_estado: null,
-        tran_codigo_apoyo: null,
-        tran_propietario: null,
-        tran_marca: null,
-        tran_serial: null,
-        tran_kva: null,
+        aap_estado: null,
+        aap_codigo_apoyo: null,
+        aap_propietario: null,
+        aap_marca: null,
+        aap_serial: null,
+        aap_kva: null,
         tipo_id: null,
-        tran_fases: null,
-        tran_tension_p: null,
-        tran_tension_s: null,
-        tran_referencia: null
+        aap_fases: null,
+        aap_tension_p: null,
+        aap_tension_s: null,
+        aap_referencia: null
       }
     },
     success () {
       this.$notify({
         title: this.$i18n.t('gestion.transformador.success'),
-        message: this.$i18n.t('gestion.transformador.updated') + ' ' + this.transformador.tran_direccion,
+        message: this.$i18n.t('gestion.transformador.updated') + ' ' + this.transformador.aap_direccion,
         type: 'success'
       })
     },
