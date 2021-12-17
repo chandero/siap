@@ -68,6 +68,16 @@
               </template>
             </el-table-column>
             <el-table-column
+              :label="$t('cotr.tipo_obra_tipo')"
+              width="80"
+              prop="cotr_tipo_obra_tipo"
+              resizable
+               >
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{ parseInt(scope.row.cotr_tipo_obra_tipo) | arabicToRoman }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
               :label="$t('cotr.consecutivo')"
               width="100"
               prop="cotr_consecutivo"
@@ -88,18 +98,6 @@
               </template>
             </el-table-column>
             <el-table-column
-              v-if="reti_id === 2"
-              :label="$t('cotr.tipo_obra_tipo')"
-              width="80"
-              prop="cotr_tipo_obra_tipo"
-              resizable
-               >
-              <template slot-scope="scope">
-                <span style="margin-left: 10px">{{ parseInt(scope.row.cotr_tipo_obra_tipo) | arabicToRoman }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              v-if="reti_id === 6"
               :label="$t('cotr.luminaria_anterior')"
               width="200"
               prop="cotr_luminaria_anterior"
@@ -120,7 +118,6 @@
               </template>
             </el-table-column>
             <el-table-column
-              v-if="reti_id === 6"
               :label="$t('cotr.tecnologia_anterior')"
               width="135"
               prop="cotr_tecnologia_anterior"
@@ -141,7 +138,6 @@
               </template>
             </el-table-column>
             <el-table-column
-              v-if="reti_id === 6"
               :label="$t('cotr.potencia_anterior')"
               width="125"
               prop="cotr_potencia_anterior"
@@ -511,6 +507,8 @@ export default {
         const tHeader = [
           'Año',
           'Periodo',
+          'Tipo Obra',
+          'Tipo',
           'Consecutivo',
           'Fecha',
           'Luminaria Anterior',
@@ -525,6 +523,8 @@ export default {
         const filterVal = [
           'cotr_anho',
           'cotr_periodo',
+          'cotr_tipo_obra',
+          'cotr_tipo_obra_tipo',
           'cotr_consecutivo',
           'cotr_fecha',
           'cotr_luminaria_anterior',
@@ -554,6 +554,10 @@ export default {
         filterVal.map((j) => {
           if (j === 'cotr_fecha') {
             return parseTime(v[j], '{y}-{m}-{d}')
+          } else if (j === 'cotr_tipo_obra') {
+            return this.tipo_obra(v[j])
+          } else if (j === 'cotr_tipo_obra_tipo') {
+            return this.$options.filters.arabicToRoman(v[j])
           } else {
             return v[j]
           }
@@ -564,12 +568,12 @@ export default {
       const { columns, data } = param
       const sums = []
       columns.forEach((column, index) => {
-        if ((index === 10 && this.reti_id === 6) || (index === 10 && this.reti_id === 2)) {
+        if (index === 12) {
           sums[index] = 'Total Luminarias'
           return
         }
         const values = data.map(item => Number(item[column.property]))
-        if (((index === 11 && this.reti_id === 6) || (index === 11 && this.reti_id === 2)) && !values.every(value => isNaN(value))) {
+        if ((index === 13) && !values.every(value => isNaN(value))) {
           sums[index] = '' + values.reduce((prev, curr) => {
             const value = Number(curr)
             if (!isNaN(value)) {

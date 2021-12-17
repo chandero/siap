@@ -4346,7 +4346,9 @@ class Cobro2Repository @Inject()(
                     topStyle = CellBorderStyle.Thick,
                     topColor = Color.Black,
                     bottomStyle = CellBorderStyle.Thick,
-                    bottomColor = Color.Black
+                    bottomColor = Color.Black,
+                    rightStyle = CellBorderStyle.Thick,
+                    rightColor = Color.Black
                   )
                 )
               ),
