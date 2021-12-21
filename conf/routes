@@ -696,6 +696,7 @@ GET /api/cotr/rel/:a/:p                         controllers.CobroController.siap
 
 # Unitarios
 GET /api/unit/all                               controllers.UnitarioController.unitarios
+GET /api/unit/elems                             controllers.UnitarioController.material
 # SSE - Server Send Event
 
 GET /api/progressStatuses/:uuid controllers.ProcessingProgressController.getProgressStatuses(uuid: String)

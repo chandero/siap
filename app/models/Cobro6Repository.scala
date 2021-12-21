@@ -8526,9 +8526,15 @@ class Cobro6Repository @Inject()(
       var _idx_inicial = _idx + 1
       var _idx_final = _idx + 1
       _herramientaLista.map { _m =>
-        if ((_m._1 == 2 && (orden.aaus_id.get == 3 || orden.aaus_id.get == 4)) || (_m._1 == 3 && (orden.aaus_id.get != 3 && orden.aaus_id.get != 4))) {
+/*         if ((_m._1 == 2 && (orden.aaus_id.get == 3 || orden.aaus_id.get == 4)) || (_m._1 == 3 && (orden.aaus_id.get != 3 && orden.aaus_id.get != 4)) || (orden.cotr_tipo_obra_tipo.get.trim == '3')) {
           None
-        } else {
+        } else */
+        if (
+            (_m._1 != 2 && _m._1 != 3) ||
+            (_m._1 == 3 && orden.cotr_tipo_obra.get == 2 && orden.cotr_tipo_obra_tipo.get.trim.toInt == 3) ||
+            (_m._1 == 2 && (orden.aaus_id.get != 3 && orden.aaus_id.get != 4) && (!(orden.cotr_tipo_obra.get == 2 && orden.cotr_tipo_obra_tipo.get.trim.toInt == 3))) ||
+            (_m._1 == 3 && (orden.aaus_id.get == 3 || orden.aaus_id.get == 4))           
+        ) {
           _listRow01 += com.norbitltd.spoiwo.model.Row(
             StringCell(
               _m._2,
@@ -8700,6 +8706,8 @@ class Cobro6Repository @Inject()(
           _listMerged01 += CellRange((_idx, _idx), (9, 10))
           _idx += 1
           _idx_final += 1
+        } else {
+          None
         }
       }
       _idx_final -= 1
@@ -11030,11 +11038,19 @@ class Cobro6Repository @Inject()(
         .as(_herramientaParser.*)
       }
       var _total=0D
-      _herramientaLista.map { _h =>
-        if ((_h._1 == 2 && (orden.aaus_id.get == 3 || orden.aaus_id.get == 4)) || (_h._1 == 3 && (orden.aaus_id.get != 3 && orden.aaus_id.get != 4))) {
+      _herramientaLista.map { _m =>
+/*         if ((_h._1 == 2 && (orden.aaus_id.get == 3 || orden.aaus_id.get == 4)) || (_h._1 == 3 && (orden.aaus_id.get != 3 && orden.aaus_id.get != 4)) || (orden.cotr_tipo_obra_tipo.get.trim == '3')) {
           } else {        
             _total += ((_h._3 * _h._4) / _h._5)
-          }
+          } */
+        if (
+            (_m._1 != 2 && _m._1 != 3) ||
+            (_m._1 == 3 && orden.cotr_tipo_obra.get == 2 && orden.cotr_tipo_obra_tipo.get.trim.toInt == 3) ||
+            (_m._1 == 2 && (orden.aaus_id.get != 3 && orden.aaus_id.get != 4) && (!(orden.cotr_tipo_obra.get == 2 && orden.cotr_tipo_obra_tipo.get.trim.toInt == 3))) ||
+            (_m._1 == 3 && (orden.aaus_id.get == 3 || orden.aaus_id.get == 4))          
+        ) {
+          _total += ((_m._3 * _m._4) / _m._5)
+        }
       }
       _total
   }

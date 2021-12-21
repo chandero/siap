@@ -8535,9 +8535,12 @@ class Cobro2Repository @Inject()(
       var _idx_inicial = _idx + 1
       var _idx_final = _idx + 1
       _herramientaLista.map { _m =>
-        if ((_m._1 == 2 && (orden.aaus_id.get == 3 || orden.aaus_id.get == 4)) || (_m._1 == 3 && (orden.aaus_id.get != 3 && orden.aaus_id.get != 4))) {
-          None
-        } else {
+        if (
+            (_m._1 != 2 && _m._1 != 3) ||
+            (_m._1 == 3 && orden.cotr_tipo_obra.get == 2 && orden.cotr_tipo_obra_tipo.get.trim.toInt == 3) ||
+            (_m._1 == 2 && (orden.aaus_id.get != 3 && orden.aaus_id.get != 4) && (!(orden.cotr_tipo_obra.get == 2 && orden.cotr_tipo_obra_tipo.get.trim.toInt == 3))) ||
+            (_m._1 == 3 && (orden.aaus_id.get == 3 || orden.aaus_id.get == 4))
+        ) {
           _listRow01 += com.norbitltd.spoiwo.model.Row(
             StringCell(
               _m._2,
@@ -8709,6 +8712,8 @@ class Cobro2Repository @Inject()(
           _listMerged01 += CellRange((_idx, _idx), (9, 10))
           _idx += 1
           _idx_final += 1
+        } else {
+          None
         }
       }
       _idx_final -= 1

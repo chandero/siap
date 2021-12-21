@@ -59,3 +59,10 @@ export function deleteUnitario (unit_id) {
     method: 'get'
   })
 }
+
+export function unitarioMaterial () {
+  return request({
+    url: '/unit/elems',
+    method: 'get'
+  })
+}

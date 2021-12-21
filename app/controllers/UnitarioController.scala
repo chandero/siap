@@ -97,4 +97,13 @@ class UnitarioController @Inject()(
         Future.successful(ServiceUnavailable(Json.toJson("false")))
       }
   }
+
+  def material() = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)
+      uService.material(empr_id.get).map { material =>
+        Ok(Json.toJson(material))
+      }
+  }
 }
