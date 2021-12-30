@@ -388,6 +388,7 @@ export default {
     'menu_proceso_menu4orden_menu4-2externa_menu4-2-4info': 'Material',
     'menu_proceso_menu4orden_menu4-3cobro': 'Cobranza',
     'menu_proceso_menu4orden_menu4-3cobro_menu4-3-1list': 'Cobro',
+    'menu_proceso_menu4orden_menu4-2externa_menu4-3-2factura': 'Factura',
     menu_proceso_menu5formato: 'Formato en Blanco',
     menu_proceso_menu6recuperar: 'Recuperar Historial',
     menu_informe: 'Informe',

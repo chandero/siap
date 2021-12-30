@@ -44,3 +44,40 @@ export function relacion (anho, periodo) {
     responseType: 'blob'
   })
 }
+
+export function facturaTodas () {
+  return request({
+    url: '/cofa/all',
+    method: 'get'
+  })
+}
+
+export function facturaBuscar (numero) {
+  return request({
+    url: `/cofa/get/${numero}`,
+    method: 'get'
+  })
+}
+
+export function facturaCrear (data) {
+  return request({
+    url: '/cofa/save',
+    method: 'post',
+    data: data
+  })
+}
+
+export function facturaActualizar (data) {
+  return request({
+    url: '/cofa/upd',
+    method: 'post',
+    data: data
+  })
+}
+
+export function facturaEliminar (cofa_id) {
+  return request({
+    url: `/cofa/del/${cofa_id}`,
+    method: 'get'
+  })
+}

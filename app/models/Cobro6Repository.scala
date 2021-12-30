@@ -3861,7 +3861,7 @@ class Cobro6Repository @Inject()(
                           inner join siap.elemento e1 on e1.elem_id = re1.elem_id
                           inner join siap.unitario u1 on u1.unit_id = re1.unit_id
                           left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} 
+                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} and e1.elem_estado = 1
           union all
           select '1.04' as unit_codigo
           order by unit_codigo
@@ -10865,7 +10865,7 @@ class Cobro6Repository @Inject()(
                           inner join siap.elemento e1 on e1.elem_id = re1.elem_id
                           inner join siap.unitario u1 on u1.unit_id = re1.unit_id
                           left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} """
+                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} and e1.elem_estado = 1 """
     orden.cotr_tipo_obra match {
       case Some(v) => v match {
             case 6 => _query += """ union all

@@ -694,6 +694,11 @@ GET /api/cotr/chk/:r/:a/:m                            controllers.CobroControlle
 GET /api/cotr/csc/:r                            controllers.CobroController.siap_orden_trabajo_cobro_consecutivo(r:Long)
 GET /api/cotr/rel/:a/:p                         controllers.CobroController.siap_orden_trabajo_cobro_relacion(a:Int, p:Int)
 
+# Cobro Factura
+GET /api/cofa/get/:n                  controllers.CobroFacturaController.buscarPorNumero(n: Long)
+POST /api/cofa/save                    controllers.CobroFacturaController.crear
+POST /api/cofa/upd                     controllers.CobroFacturaController.actualizar
+GET /api/cofa/del/:id                 controllers.CobroFacturaController.borrar(id: Long)
 # Unitarios
 GET /api/unit/all                               controllers.UnitarioController.unitarios
 GET /api/unit/elems                             controllers.UnitarioController.material
