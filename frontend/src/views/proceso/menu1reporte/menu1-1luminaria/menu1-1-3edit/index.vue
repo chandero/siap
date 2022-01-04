@@ -2274,7 +2274,7 @@
                           class="sinpadding"
                           v-model="evento.unit_id"
                         >
-                          <el-option v-for="unitario in unitarios" :key="unitario.unit_id" :label="unitario.unit_codigo + '-' + unitario.unit_descripcion" :value="unitario.unit_id" />
+                          <el-option v-for="unitario in unitarios[evento.elem_id]" :key="unitario.unit_id" :label="unitario.unit_codigo + '-' + unitario.unit_descripcion" :value="unitario.unit_id" />
                         </el-select>
                       </el-form-item>
                     </el-col>
@@ -3865,22 +3865,28 @@ export default {
         return '-'
       } else {
         const promise = new Promise((resolve, reject) => {
+          console.info('DEBUG: llamando completarMaterial')
           this.completarMaterial()
+          console.info('DEBUG: Retornando de completarMaterial')
           resolve()
         })
         promise.then(() => {
+          console.info('DEBUG: En el then de la promesa de completarMaterial')
           var elemento = this.elementos.find((e) => {
             return e.elem_id === evento.elem_id
           })
           if (elemento) {
             if (elemento.unitarios.length > 0) {
-              this.unitario_lista = elemento.unitarios
+              this.unitarios[evento.elem_id] = elemento.unitarios
+              //  this.unitario_lista = elemento.unitarios
             } else {
-              this.unitario_lista = this.unitarios
+              this.unitarios[evento.elem_id] = []
+              //  this.unitario_lista = this.unitarios
             }
-            return elemento.elem_codigo
+            evento.elem_codigo = elemento.elem_codigo
+            evento.unit_id = this.unitarios[evento.elem_id][0].unit_id
           } else {
-            return '-'
+            evento.elem_codigo = '-'
           }
         })
       }
@@ -4277,6 +4283,7 @@ export default {
           empr_id: 0,
           usua_id: 0,
           even_id: this.evento_siguiente_consecutivo,
+          unit_id: null,
           even_valido: {
             aap_id: true,
             codigo_retirado: true,
@@ -4399,7 +4406,7 @@ export default {
       } else {
         const elemento = this.elementos_list.find(
           (o) => o.elem_id === elem_id,
-          { unitarios: this.unitario_lista }
+          { unitarios: this.unitarios[elem_id] }
         )
         return elemento.unitarios
       }
@@ -4852,15 +4859,16 @@ export default {
                   empr_id: e.empr_id,
                   usua_id: e.usua_id,
                   even_id: e.even_id,
+                  unit_id: e.unit_id,
                   even_valido: {
                     aap_id: true,
                     codigo_retirado: true,
                     cantidad_retirado: true,
                     codigo_instalado: true,
                     cantidad_instalado: true
-                  },
-                  unit_id: e.unit_id
+                  }
                 }
+                this.unitarios[e.elem_id] = this.unitario_s(e.elem_id)
                 direccion.materiales.push(evento)
               })
               this.reporte_previo.direcciones.push(direccion)
@@ -5027,14 +5035,14 @@ export default {
               empr_id: 0,
               usua_id: 0,
               even_id: even_length + i,
+              unit_id: null,
               even_valido: {
                 aap_id: true,
                 codigo_retirado: true,
                 cantidad_retirado: true,
                 codigo_instalado: true,
                 cantidad_instalado: true
-              },
-              unit_id: null
+              }
             }
             console.log('agregando material vacio a direccion: ' + d.even_id)
             d.materiales.push(evento)
@@ -5060,6 +5068,7 @@ export default {
       }
     },
     async completarMaterial () {
+      console.info('DEBUG: En completarMaterial')
       for (var j = 0; j < this.reporte.direcciones.length; j++) {
         if (this.reporte.direcciones[j].materiales !== undefined) {
           for (
@@ -5079,6 +5088,7 @@ export default {
                     this.reporte.direcciones[j].materiales[i].elem_id
                 ) === undefined
               ) {
+                console.info('DEBUG: Agregando elemento a la lista:', this.reporte.direcciones[j].materiales[i].elem_id)
                 this.elementos.push({
                   elem_id: this.reporte.direcciones[j].materiales[i].elem_id,
                   elem_descripcion: this.elemento(
@@ -5091,6 +5101,7 @@ export default {
           }
         }
       }
+      console.info('DEBUG: Saliendo de completarMaterial')
     }
   },
   beforeMount () {
@@ -5248,7 +5259,7 @@ export default {
                                                                                                                             this.novedades =
                                                                                                                               response.data
                                                                                                                             getUnitariosTodas().then(response => {
-                                                                                                                              this.unitarios = response.data
+                                                                                                                              this.unitario_lista = response.data
                                                                                                                               this.obtenerReporte()
                                                                                                                             })
                                                                                                                           }

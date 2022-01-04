@@ -54,7 +54,7 @@ case class AapElemento(
 case class AapHistoria(
     aap_id: Option[scala.Long],
     aael_fecha: Option[DateTime],
-    aap_bombillo_retirado: Option[String],
+    /* aap_bombillo_retirado: Option[String],
     aap_bombillo_instalado: Option[String],
     aap_balasto_retirado: Option[String],
     aap_balasto_instalado: Option[String],
@@ -64,6 +64,7 @@ case class AapHistoria(
     aap_condensador_instalado: Option[String],
     aap_fotocelda_retirado: Option[String],
     aap_fotocelda_instalado: Option[String],
+    */
     reti_id: Option[scala.Long],
     repo_consecutivo: Option[Int]
 )
@@ -225,7 +226,7 @@ object AapHistoria {
     def writes(aaelhi: AapHistoria) = Json.obj(
       "aap_id" -> aaelhi.aap_id,
       "aael_fecha" -> aaelhi.aael_fecha,
-      "aap_bombillo_retirado" -> aaelhi.aap_bombillo_retirado,
+      /* "aap_bombillo_retirado" -> aaelhi.aap_bombillo_retirado,
       "aap_bombillo_instalado" -> aaelhi.aap_bombillo_instalado,
       "aap_balasto_retirado" -> aaelhi.aap_balasto_retirado,
       "aap_balasto_instalado" -> aaelhi.aap_balasto_instalado,
@@ -235,6 +236,7 @@ object AapHistoria {
       "aap_condensador_instalado" -> aaelhi.aap_condensador_instalado,
       "aap_fotocelda_retirado" -> aaelhi.aap_fotocelda_retirado,
       "aap_fotocelda_instalado" -> aaelhi.aap_fotocelda_instalado,
+      */
       "reti_id" -> aaelhi.reti_id,
       "repo_consecutivo" -> aaelhi.repo_consecutivo
     )
@@ -243,6 +245,7 @@ object AapHistoria {
   implicit val aaelhiReads: Reads[AapHistoria] = (
     (__ \ "aap_id").readNullable[Long] and
       (__ \ "aael_fecha").readNullable[DateTime] and
+      /*
       (__ \ "aap_bombillo_retirado").readNullable[String] and
       (__ \ "aap_bombillo_instalado").readNullable[String] and
       (__ \ "aap_balasto_retirado").readNullable[String] and
@@ -253,6 +256,7 @@ object AapHistoria {
       (__ \ "aap_condensador_instalado").readNullable[String] and
       (__ \ "aap_fotocelda_retirado").readNullable[String] and
       (__ \ "aap_fotocelda_instalado").readNullable[String] and
+      */
       (__ \ "reti_id").readNullable[scala.Long] and
       (__ \ "repo_consecutivo").readNullable[Int]
   )(AapHistoria.apply _)
@@ -260,7 +264,7 @@ object AapHistoria {
   val aapelementohistoriaSet = {
     get[Option[Long]]("aap_id") ~
       get[Option[DateTime]]("aael_fecha") ~
-      get[Option[String]]("aap_bombillo_retirado") ~
+      /* get[Option[String]]("aap_bombillo_retirado") ~
       get[Option[String]]("aap_bombillo_instalado") ~
       get[Option[String]]("aap_balasto_retirado") ~
       get[Option[String]]("aap_balasto_instalado") ~
@@ -269,12 +273,12 @@ object AapHistoria {
       get[Option[String]]("aap_condensador_retirado") ~
       get[Option[String]]("aap_condensador_instalado") ~
       get[Option[String]]("aap_fotocelda_retirado") ~
-      get[Option[String]]("aap_fotocelda_instalado") ~
+      get[Option[String]]("aap_fotocelda_instalado") ~ */
       get[Option[scala.Long]]("reti_id") ~
       get[Option[Int]]("repo_consecutivo") map {
       case aap_id ~
             aael_fecha ~
-            aap_bombillo_retirado ~
+            /*aap_bombillo_retirado ~
             aap_bombillo_instalado ~
             aap_balasto_retirado ~
             aap_balasto_instalado ~
@@ -283,13 +287,13 @@ object AapHistoria {
             aap_condensador_retirado ~
             aap_condensador_instalado ~
             aap_fotocelda_retirado ~
-            aap_fotocelda_instalado ~
+            aap_fotocelda_instalado ~ */
             reti_id ~
             repo_consecutivo =>
         AapHistoria(
           aap_id,
           aael_fecha,
-          aap_bombillo_retirado,
+          /* aap_bombillo_retirado,
           aap_bombillo_instalado,
           aap_balasto_retirado,
           aap_balasto_instalado,
@@ -299,6 +303,7 @@ object AapHistoria {
           aap_condensador_instalado,
           aap_fotocelda_retirado,
           aap_fotocelda_instalado,
+          */
           reti_id,
           repo_consecutivo
         )
@@ -834,9 +839,15 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
             .as(AapElemento.aapelementoSet.singleOpt)
           val aap = a.copy(aap_elemento = c)
           val h = SQL(
-            "SELECT * FROM siap.aap_elemento_historia WHERE aap_id = {aap_id} ORDER BY aael_fecha DESC"
+            """select distinct rd1.aap_id, r1.repo_fechasolucion as aael_fecha, rt1.reti_id, r1.repo_consecutivo from siap.reporte r1
+                inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id 
+                inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+                inner join siap.reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+               where rd1.aap_id = {aap_id} and rd1.even_estado < 8 and r1.empr_id = {empr_id}
+               order by r1.repo_fechasolucion desc"""
           ).on(
-              'aap_id -> a.aap_id
+              'aap_id -> a.aap_id,
+              'empr_id -> empr_id
             )
             .as(AapHistoria.aapelementohistoriaSet *)
           val aaph = aap.copy(historia = Some(h))
@@ -1091,9 +1102,15 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
 
         val aap = e.copy(aap_elemento = c)
         val h = SQL(
-          "SELECT * FROM siap.aap_elemento_historia WHERE aap_id = {aap_id} ORDER BY aael_fecha DESC"
+          """select distinct rd1.aap_id, r1.repo_fechasolucion as aael_fecha, rt1.reti_id, r1.repo_consecutivo from siap.reporte r1
+                inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id 
+                inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+                inner join siap.reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+               where rd1.aap_id = {aap_id} and rd1.even_estado < 8 and r1.empr_id = {empr_id}
+               order by r1.repo_fechasolucion desc"""
         ).on(
-            'aap_id -> e.aap_id
+            'aap_id -> e.aap_id,
+            'empr_id -> empr_id
           )
           .as(AapHistoria.aapelementohistoriaSet *)
         val aaph = aap.copy(historia = Some(h))
@@ -1232,9 +1249,15 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
         val aap = e.copy(aap_elemento = c)
 
         val h = SQL(
-          "SELECT * FROM siap.aap_elemento_historia WHERE aap_id = {aap_id} ORDER BY aael_fecha DESC"
+              """select distinct rd1.aap_id, r1.repo_fechasolucion as aael_fecha, rt1.reti_id, r1.repo_consecutivo from siap.reporte r1
+                inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id 
+                inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+                inner join siap.reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+               where rd1.aap_id = {aap_id} and rd1.even_estado < 8 and r1.empr_id = {empr_id}
+               order by r1.repo_fechasolucion desc"""
         ).on(
-            'aap_id -> e.aap_id
+            'aap_id -> e.aap_id,
+            'empr_id -> empr_id
           )
           .as(AapHistoria.aapelementohistoriaSet *)
         val aaph = aap.copy(historia = Some(h))
@@ -1315,9 +1338,15 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
         val aap = e.copy(aap_elemento = c)
 
         val h = SQL(
-          "SELECT * FROM siap.aap_elemento_historia WHERE aap_id = {aap_id} ORDER BY aael_fecha DESC"
+               """select distinct rd1.aap_id, r1.repo_fechasolucion as aael_fecha, rt1.reti_id, r1.repo_consecutivo from siap.reporte r1
+                inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id 
+                inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+                inner join siap.reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+               where rd1.aap_id = {aap_id} and rd1.even_estado < 8 and r1.empr_id = {empr_id}
+               order by r1.repo_fechasolucion desc"""
         ).on(
-            'aap_id -> e.aap_id
+            'aap_id -> e.aap_id,
+            'empr_id -> empr_id
           )
           .as(AapHistoria.aapelementohistoriaSet *)
         val aaph = aap.copy(historia = Some(h))
@@ -1394,9 +1423,15 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
 
           val aap = e.copy(aap_elemento = c)
           val h = SQL(
-            "SELECT * FROM siap.aap_elemento_historia WHERE aap_id = {aap_id} ORDER BY aael_fecha DESC"
+            """select distinct rd1.aap_id, r1.repo_fechasolucion as aael_fecha, rt1.reti_id, r1.repo_consecutivo from siap.reporte r1
+                inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id 
+                inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+                inner join siap.reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+               where rd1.aap_id = {aap_id} and rd1.even_estado < 8 and r1.empr_id = {empr_id}
+               order by r1.repo_fechasolucion desc"""
           ).on(
-              'aap_id -> e.aap_id
+              'aap_id -> e.aap_id,
+              'empr_id -> empr_id
             )
             .as(AapHistoria.aapelementohistoriaSet *)
           val aaph = aap.copy(historia = Some(h))

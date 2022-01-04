@@ -61,7 +61,7 @@
                       <span style="margin-left: 10px">{{ scope.row.repo_consecutivo }}</span>
                     </template>
                   </el-table-column>
-                  <el-table-column
+<!--                   <el-table-column
                     :label="$t('elemento.bombillo')">
                    <el-table-column
                     :label="$t('elemento.retirado')"
@@ -146,7 +146,7 @@
                     </template>
                    </el-table-column>
                   </el-table-column>
-              </el-table>
+ -->              </el-table>
           </template>
         </el-table-column>
         <el-table-column
