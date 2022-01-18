@@ -241,6 +241,7 @@ export default {
     usuario: 'Usuario',
     usuariocreate: 'Usuario / Nuevo Usuario',
     usuarioedit: 'Usuario / Editar Usuario',
+    unitario: 'Unitario',
     unidad: 'Unidad',
     unidadcreate: 'Unidad / Nueva Unidad',
     unidadedit: 'Unidad / Editar Unidad',
@@ -624,10 +625,18 @@ export default {
     elem_descripcion: 'Descripción',
     elem_codigo: 'Código',
     unitario: 'Ucap Unitario',
-    date: 'Fecha Precio'
+    date: 'Fecha Precio',
+    elpr_anho_anterior: 'Año Anterior',
+    elpr_incremento: 'Incremento',
+    elpr_precio_anterior: 'Precio Anterior',
+    elpr_anho: 'Año Actual'
   },
   unitario: {
-    select: 'Seleccione las Ucap'
+    select: 'Seleccione las Ucap',
+    tabletitle: 'Unitarios',
+    description: 'Descripción',
+    code: 'Código',
+    type: 'Tipo'
   },
   manoobra: {
     tabletitle: 'Mano de Obra',

@@ -8,6 +8,7 @@
             <el-header>
               <el-button size="mini" type="primary" icon="el-icon-plus" circle @click="nuevo" ></el-button>
               <el-button size="mini" type="success" icon="el-icon-refresh" circle @click="actualizar"></el-button>
+              <el-button size="large" type="primary" icon="el-icon-money" circle @click="showPrecioPeriodoDialog = true" title="Precio para Nuevo Año"></el-button>
             </el-header>
             <el-main>
               <el-table
@@ -57,12 +58,32 @@
           </template>
         </el-table-column>
         <el-table-column
-          :label="$t('elemento.date')"
+          :label="$t('elemento.elpr_anho_anterior')"
           width="100"
-          prop="elem_codigo">
+          prop="elpr_anho_anterior">
           <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row._4  | moment('YYYY-MM-DD') }}</span>
+            <span style="margin-left: 10px">{{ scope.row._4 }}</span>
           </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('elemento.elpr_precio_anterior')"
+          width="120"
+          prop="elpr_precio_anterior"
+          align="right"
+           >
+           <template slot-scope="scope">
+            <span>{{ scope.row._5 | toThousandslsFilter }}</span>
+           </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('elemento.elpr_incremento')"
+          width="120"
+          prop="elpr_incremento"
+          align="right"
+           >
+           <template slot-scope="scope">
+            <span>{{ scope.row._6 }}</span>
+           </template>
         </el-table-column>
         <el-table-column
           :label="$t('elemento.elpr_precio')"
@@ -72,7 +93,7 @@
            >
           <template slot-scope="scope">
             <template v-if="scope.row.edit">
-              <el-input v-model="scope.row._5" class="edit-input" size="small" />
+              <el-input v-model="scope.row._9" class="edit-input" size="small" />
               <el-button
                 class="cancel-btn"
                 size="mini"
@@ -82,7 +103,7 @@
                 @click="cancelEdit(scope.row)"
               />
             </template>
-            <span v-else>{{ scope.row._5 | toThousandslsFilter }}</span>
+            <span v-else>{{ scope.row._9 | toThousandslsFilter }}</span>
             <el-button
               v-if="scope.row.edit"
               circle
@@ -100,6 +121,22 @@
             />
           </template>
         </el-table-column>
+        <el-table-column
+          :label="$t('elemento.elpr_anho')"
+          width="100"
+          prop="elpr_anho">
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ scope.row._7 }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('elemento.date')"
+          width="100"
+          prop="elem_codigo">
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ scope.row._8  | moment('YYYY-MM-DD') }}</span>
+          </template>
+        </el-table-column>
       </el-table>
       <el-pagination
         @size-change="handleSizeChange"
@@ -112,13 +149,43 @@
     <img :title="$t('xls')" @click="exportarXls()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
    </el-container>
   </el-main>
+  <el-dialog
+    title="Precios Periodo"
+    :visible.sync="showPrecioPeriodoDialog"
+    width="40%"
+    destroy-on-close
+    center
+    @closed="handlePrecioPeriodoDialogClosed"
+  >
+    <el-container>
+      <el-main>
+        <el-form label-position="left" label-width="200px">
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="Año">
+                <el-input type="number" v-model="precioAnho" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="Incremento">
+                <el-input type="number" v-model="precioIncremento" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </el-main>
+    </el-container>
+    <span slot="footer" class="dialog-footer">
+        <el-button @click="showPrecioPeriodoDialog = false">Cancelar</el-button>
+        <el-button :disabled="!precioAnho || !precioIncremento" type="primary" @click="handlePrecioPeriodo()">Calcular y Guardar</el-button>
+    </span>
+  </el-dialog>
  </el-container>
 </template>
 
 <script>
 import VueQueryBuilder from 'vue-query-builder'
-import { getTodosPrecio, updatePriceElemento, todosPrecioXls } from '@/api/elemento'
-
+import { getTodosPrecio, updatePriceElemento, todosPrecioXls, newPriceElemento } from '@/api/elemento'
 export default {
   components: {
     'query-builder': VueQueryBuilder
@@ -128,8 +195,11 @@ export default {
       tableData: [],
       page_size: 10,
       current_page: 1,
+      precioAnho: new Date().getFullYear(),
+      precioIncremento: null,
       total: 0,
       order: '',
+      showPrecioPeriodoDialog: false,
       qlabels: {
         matchType: this.$i18n.t('qb.matchType'),
         matchTypes: [
@@ -168,6 +238,35 @@ export default {
     }
   },
   methods: {
+    handlePrecioPeriodoDialogClosed () {
+      this.precioAnho = new Date().getFullYear()
+      this.precioIncremento = null
+    },
+    handlePrecioPeriodo () {
+      this.showPrecioPeriodoDialog = false
+      const loading = this.$loading({
+        lock: true
+      })
+      newPriceElemento(parseInt(this.precioAnho), parseFloat(this.precioIncremento)).then(resp => {
+        loading.close()
+        this.getElementos()
+        if (resp.data === 'true') {
+          this.$message({
+            message: 'Precios Cargados con Exito',
+            type: 'success'
+          })
+        } else {
+          this.$message({
+            message: 'No se pudo cargar los nuevos precios',
+            type: 'warning'
+          })
+        }
+      }).catch(err => {
+        loading.close()
+        this.getElementos()
+        this.$message.error('Al procesar nuevos precios, Error al conectar con el servidor:' + err)
+      })
+    },
     handleSizeChange (val) {
       this.page_size = val
       this.getElementos()

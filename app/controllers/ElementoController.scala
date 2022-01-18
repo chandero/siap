@@ -193,6 +193,20 @@ class ElementoController @Inject()(
       }
   }  
 
+  def nuevoPrecioAnho = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val json = request.body.asJson.get
+      val anho = (json \ "anho").as[Int]
+      val tasa = (json \ "tasa").as[Double]
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)
+      if (elementoService.nuevoPrecioAnho(anho, tasa, empr_id.get)) {
+        Future.successful(Ok(Json.toJson("true")))
+      } else {
+        Future.successful(ServiceUnavailable(Json.toJson("false")))
+      }
+  }
+
   def buscarElementoSinPrecio = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
     val empr_id = Utility.extraerEmpresa(request)

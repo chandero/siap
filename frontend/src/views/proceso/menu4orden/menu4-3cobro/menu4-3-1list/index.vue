@@ -13,15 +13,10 @@
           <el-main>
             <el-form>
               <el-row>
-<!--                 <el-col>
-                  <el-form-item label="Tipo de Obra">
-                    <el-select v-model="reti_id">
-                      <el-option v-for="r in tipos_obra" :key="r.reti_id" :value="r.reti_id" :label="r.reti_descripcion"></el-option>
-                    </el-select>
-                  </el-form-item>
-                </el-col> -->
-                <el-col>
-                  <el-button type="primary" icon="el-icon-circle-plus" circle @click="showDialog = true" ></el-button>
+                <el-col span="1">
+                  <el-button type="primary" icon="el-icon-plus" circle @click="showDialog = true" ></el-button>
+                </el-col>
+                <el-col span="1">
                   <el-button type="success" icon="el-icon-refresh" circle @click="obtener()"></el-button>
                 </el-col>
               </el-row>

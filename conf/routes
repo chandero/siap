@@ -229,6 +229,7 @@ GET /api/elem/mat/aspr controllers.ElementoController.alertaElementoSinPrecio
 POST /api/elem/mat/gap controllers.ElementoController.todosPrecio
 GET /api/elem/mat/xls controllers.ElementoController.todosXls
 GET /api/elem/mat/xlsp controllers.ElementoController.todosPrecioXls
+POST /api/elem/npr controllers.ElementoController.nuevoPrecioAnho
 
 # Cuadrilla
 

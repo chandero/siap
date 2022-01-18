@@ -20,7 +20,7 @@
     </el-card>
 </template>
 <script>
-import { saveUnidad } from '@/api/unitario'
+import { saveUnitario } from '@/api/unitario'
 
 export default {
   data () {
@@ -67,7 +67,7 @@ export default {
   },
   methods: {
     aplicar () {
-      saveUnidad(this.unitario).then(response => {
+      saveUnitario(this.unitario).then(response => {
         if (response.status === 201) {
           this.success()
         }

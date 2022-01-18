@@ -109,6 +109,18 @@ export function updatePriceElemento (elem_id, elpr_precio) {
   })
 }
 
+export function newPriceElemento (anho, tasa) {
+  const data = {
+    anho,
+    tasa
+  }
+  return request({
+    url: '/elem/npr',
+    method: 'post',
+    data: data
+  })
+}
+
 export function todosXls () {
   return request({
     url: '/elem/mat/xls',

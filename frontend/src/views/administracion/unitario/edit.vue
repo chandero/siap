@@ -20,7 +20,7 @@
     </el-card>
 </template>
 <script>
-import { updateUnidad, getUnidad } from '@/api/unitario'
+import { updateUnitario, getUnitario } from '@/api/unitario'
 
 export default {
   data () {
@@ -67,7 +67,7 @@ export default {
   },
   methods: {
     aplicar () {
-      updateUnidad(this.unitario).then(response => {
+      updateUnitario(this.unitario).then(response => {
         if (response.status === 201) {
           this.success()
         }
@@ -118,7 +118,7 @@ export default {
     }
   },
   mounted () {
-    getUnidad(this.$route.params.id).then(response => {
+    getUnitario(this.$route.params.id).then(response => {
       this.unitario = response.data
     }).catch(error => {
       console.log(error)

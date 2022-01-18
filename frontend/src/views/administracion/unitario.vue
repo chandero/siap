@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { getTodos, deleteUnidad } from '@/api/unitario'
+import { getUnitarios, deleteUnitario } from '@/api/unitario'
 
 export default {
   data () {
@@ -93,7 +93,7 @@ export default {
         cancelButtonText: this.$i18n.t('general.cancel'),
         type: 'warning'
       }).then(() => {
-        deleteUnidad(row.unid_id).then(response => {
+        deleteUnitario(row.unid_id).then(response => {
           this.$message({
             type: 'success',
             message: this.$i18n.t('general.deletesuccessful')
@@ -115,26 +115,26 @@ export default {
     },
     handleSizeChange (val) {
       this.page_size = val
-      this.getUnidades()
+      this.getUnitarios()
     },
     handleCurrentChange (val) {
       this.current_page = val
-      this.getUnidades()
+      this.getUnitarios()
     },
     nuevo () {
       this.$router.push({ path: '/administracion/unitario/crear' })
     },
-    getUnidades () {
-      getTodos(this.page_size, this.current_page)
+    getUnitarios () {
+      getUnitarios(this.page_size, this.current_page)
         .then(response => {
           this.total = response.data.total
           this.tableData = response.data.unitarioes
-          console.log('total unitarioes:' + this.total)
+          console.log('total unitarios:' + this.total)
         }).catch(() => {})
     }
   },
   mounted () {
-    this.getUnidades()
+    this.getUnitarios()
   }
 }
 </script>
