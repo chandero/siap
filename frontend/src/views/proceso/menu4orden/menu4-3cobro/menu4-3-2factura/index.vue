@@ -17,88 +17,59 @@
                 <el-table-column type="expand">
                   <template slot-scope="props">
                     <el-table
-                      :data="props.row.caracteristicas"
+                      :data="props.row.ordenes"
                       stripe
                       style="width:100%"
                     >
                       <el-table-column
-                        :label="$t('factura.ordenes')"
+                        :label="$t('factura.orden')"
                         width="250"
                       >
                         <template slot-scope="scope">
-                          <span style="margin-left: 10px">{{ caracteristica(scope.row.cara_id) }}</span>
+                          <span style="margin-left: 10px">{{ scope.row.reti_descripcion }} {{ scope.row.cotr_tipo_obra_tipo | arabicToRoman }} </span>
                         </template>
                       </el-table-column>
                       <el-table-column
-                        :label="$t('cobro.consecutivo')"
+                        :label="$t('factura.consecutivo')"
                         width="250">
                         <template slot-scope="scope">
-                          <span style="margin-left: 10px">{{ scope.row.elca_valor }}</span>
+                          <span style="margin-left: 10px">{{ scope.row.cotr_consecutivo }}</span>
                         </template>
                       </el-table-column>
                     </el-table>
                   </template>
                 </el-table-column> -->
         <el-table-column
-          :label="$t('factura.numerodescription')"
-          width="350"
-          prop="elem_descripcion"
+          :label="$t('factura.numero')"
+          width="120"
+          prop="cofa_factura"
         >
           <template slot-scope="scope">
-            <span style="margin-left: 10px" :title="scope.row.elem_descripcion">{{ scope.row.elem_descripcion | fm_truncate(40) }}</span>
+            <span style="margin-left: 10px">{{ scope.row.cofa_factura }}</span>
           </template>
         </el-table-column>
         <el-table-column
-          :label="$t('elemento.code')"
+          :label="$t('factura.anho')"
           width="100"
-          prop="elem_codigo">
+          prop="cofa_anho">
           <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row.elem_codigo }}</span>
+            <span style="margin-left: 10px">{{ scope.row.cofa_anho }}</span>
           </template>
         </el-table-column>
         <el-table-column
-          :label="$t('elemento.type')"
+          :label="$t('factura.periodo')"
           width="180">
           <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ getTipoElementoDescripcion(scope.row.tiel_id) }}</span>
+            <span style="margin-left: 10px">{{ scope.row.cofa_periodo }}</span>
           </template>
         </el-table-column>
-<!--         <el-table-column
-          :label="$t('elemento.elpr_precio')"
-          width="120"
-          prop="precio.elpr_precio"
-          align="right"
-           >
+        <el-table-column
+          :label="$t('factura.fecha')"
+          width="180">
           <template slot-scope="scope">
-            <template v-if="scope.row.edit">
-              <el-input v-model="scope.row.precio.elpr_precio" class="edit-input" size="small" />
-              <el-button
-                class="cancel-btn"
-                size="mini"
-                icon="el-icon-close"
-                type="warning"
-                circle
-                @click="cancelEdit(scope.row)"
-              />
-            </template>
-            <span v-else>{{ scope.row.precio.elpr_precio | toThousandslsFilter }}</span>
-            <el-button
-              v-if="scope.row.edit"
-              circle
-              size="mini"
-              icon="el-icon-check"
-              @click="confirmEdit(scope.row)"
-            />
-            <el-button
-              v-else
-              circle
-              size="mini"
-              icon="el-icon-edit"
-              style="border-style: hidden;"
-              @click="scope.row.edit=!scope.row.edit"
-            />
+            <span style="margin-left: 10px">{{ scope.row.cofa_fecha | moment('YYYY-MM-DD') }}</span>
           </template>
-        </el-table-column> -->
+        </el-table-column>
         <el-table-column
           align="right"
           width="90"
@@ -127,20 +98,101 @@
     </el-main>
    </el-container>
   </el-main>
-  <img :title="$t('xls')" @click="exportarXls()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
+  <img :title="$t('xls')" @click="handleRelacion()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
+  <el-dialog
+    title="Factura"
+    :visible.sync="showFacturaDialog"
+    width="50%"
+    destroy-on-close
+    center
+    @closed="handleFacturaDialogClosed"
+  >
+    <el-container>
+      <el-main>
+        <el-form v-model="factura" label-position="top" label-width="200px">
+          <el-row>
+            <el-col :span="8">
+              <el-form-item label="Prefijo Factura">
+                <el-input type="text" v-model="factura.cofa_prefijo" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="Factura">
+                <el-input type="number" v-model="factura.cofa_factura" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="Sufijo Factura">
+                <el-input type="text" v-model="factura.cofa_sufijo" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="8">
+              <el-form-item label="Año">
+                <el-input type="number" v-model="factura.cofa_anho" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="Periodo">
+                <el-select v-model="factura.cofa_periodo">
+                  <el-option v-for="m in months" :key="m.id" :value="m.id" :label="$t(`months.${m.label}`)"></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="Fecha">
+                <el-date-picker type="date" v-model="factura.cofa_fecha" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+              <DoubleListBox
+                :source="ordenes_disponibles"
+                :destination="ordenes_seleccionadas"
+                @selected-data="handleDoubleListBoxSelection">
+              </DoubleListBox>
+            </el-col>
+          </el-row>
+        </el-form>
+      </el-main>
+    </el-container>
+    <span slot="footer" class="dialog-footer">
+        <el-button @click="showFacturaDialog = false">Cancelar</el-button>
+        <el-button :disabled="!factura.cofa_factura || !factura.cofa_anho || !factura.cofa_periodo || !factura.cofa_fecha" type="primary" @click="guardar()">Confirmar</el-button>
+    </span>
+  </el-dialog>
  </el-container>
 </template>
 
 <script>
 import VueQueryBuilder from 'vue-query-builder'
-import { facturaTodas, facturaEliminar } from '@/api/cobro'
+import { facturaCrear, facturaActualizar, facturaTodas, facturaEliminar, ordenesSinFactura, relacion2 } from '@/api/cobro'
+import { mapGetters } from 'vuex'
+import DoubleListBox from '@/components/DoubleListBox'
 
 export default {
   components: {
-    'query-builder': VueQueryBuilder
+    'query-builder': VueQueryBuilder,
+    DoubleListBox
   },
   data () {
     return {
+      showFacturaDialog: false,
+      ordenes_disponibles: [],
+      ordenes_seleccionadas: [],
+      isEdition: false,
+      factura: {
+        cofa_factura: null,
+        cofa_anho: new Date().getFullYear(),
+        cofa_periodo: new Date().getMonth() + 1,
+        cofa_fecha: new Date(),
+        cofa_prefijo: null,
+        cofa_sufijo: null,
+        cofa_estado: 1,
+        ordenes: []
+      },
       tableData: [],
       page_size: 10,
       current_page: 1,
@@ -192,18 +244,72 @@ export default {
       ]
     }
   },
+  computed: {
+    ...mapGetters(['months'])
+  },
   methods: {
+    guardar () {
+      this.factura.cofa_factura = parseInt(this.factura.cofa_factura)
+      this.factura.cofa_anho = parseInt(this.factura.cofa_anho)
+      this.factura.cofa_periodo = parseInt(this.factura.cofa_periodo)
+      this.factura.ordenes = this.ordenes_seleccionadas
+      if (this.isEdition) {
+        facturaActualizar(this.factura).then(response => {
+          this.showFacturaDialog = false
+          this.$message({
+            type: 'success',
+            message: 'Factura Actualizada con Exito...!'
+          })
+          this.getFacturas()
+        }).catch(e => {
+          this.showFacturaDialog = false
+          this.$message({
+            type: 'error',
+            message: 'No Fué Posible Actualizar la Factura...!' + e
+          })
+          this.getFacturas()
+        })
+      } else {
+        facturaCrear(this.factura).then(response => {
+          this.showFacturaDialog = false
+          this.$message({
+            type: 'success',
+            message: 'Factura Creada con Exito...!'
+          })
+          this.getFacturas()
+        }).catch(e => {
+          this.showFacturaDialog = false
+          this.$message({
+            type: 'error',
+            message: 'No Fué Posible Crear la Factura...!' + e
+          })
+          this.getFacturas()
+        })
+      }
+    },
     handleEdit (index, row) {
-      this.$router.push({ path: '/administracion/elemento/editar/' + row.elem_id })
-      console.log(index, row)
+      this.isEdition = true
+      row.ordenes.forEach(item => {
+        this.ordenes_seleccionadas = row.ordenes.map(item => {
+          return {
+            cotr_id: item.cotr_id,
+            reti_descripcion: item.reti_descripcion,
+            cotr_tipo_obra_tipo: item.cotr_tipo_obra_tipo,
+            cotr_consecutivo: item.cotr_consecutivo,
+            name: item.reti_descripcion + ' ' + this.$options.filters.arabicToRoman(item.cotr_tipo_obra_tipo) + ' ' + item.cotr_consecutivo
+          }
+        })
+      })
+      this.factura = row
+      this.getOrdenesSinFactura()
     },
     handleDelete (index, row) {
-      this.$confirm(this.$i18n.t('elemento.confirmationmsg') + ' "' + row.elem_descripcion + '"', this.$i18n.t('general.warning'), {
+      this.$confirm(this.$i18n.t('factura.confirmationmsg') + ' "' + row.cofa_factura + '"', this.$i18n.t('general.warning'), {
         confirmButtonText: this.$i18n.t('general.ok'),
         cancelButtonText: this.$i18n.t('general.cancel'),
         type: 'warning'
       }).then(() => {
-        facturaEliminar(row.elem_id).then(response => {
+        facturaEliminar(row.cofa_id).then(response => {
           this.$message({
             type: 'success',
             message: this.$i18n.t('general.deletesuccessful')
@@ -214,6 +320,7 @@ export default {
             type: 'error',
             message: this.$i18n.t('general.deletefail') + ' -> ' + err.msg
           })
+          this.getFacturas()
         })
       }).catch(() => {
         this.$message({
@@ -231,16 +338,69 @@ export default {
       this.current_page = val
       this.getFacturas()
     },
+    handleFacturaDialogIsOpen () {
+      this.getOrdenesSinFactura()
+    },
+    handleFacturaDialogClosed () {
+      this.ordenes_disponibles = []
+      this.ordenes_seleccionadas = []
+    },
+    handleDoubleListBoxSelection (selection) {
+      this.ordenes_seleccionadas = selection
+    },
+    handleRelacion () {
+      const loading = this.$loading({
+        lock: true,
+        text: 'Generando Reporte...'
+      })
+      relacion2().then(resp => {
+        loading.close()
+        var blob = resp.data
+        const filename = 'Relacion_Orden_Trabajo_ITAF_Factura' + '.xlsx'
+        if (window.navigator.msSaveOrOpenBlob) {
+          window.navigator.msSaveBlob(blob, filename)
+        } else {
+          var downloadLink = window.document.createElement('a')
+          downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+          downloadLink.download = filename
+          document.body.appendChild(downloadLink)
+          downloadLink.click()
+          document.body.removeChild(downloadLink)
+        }
+      }).catch(() => {
+        loading.close()
+      })
+    },
     actualizar () {
       this.getFacturas()
     },
     nuevo () {
-      this.$router.push({ path: '/administracion/elemento/crear' })
+      this.isEdition = false
+      this.getOrdenesSinFactura()
     },
     buscar (query) {
       this.filter = 'f:' + query.toUpperCase()
       this.current_page = 1
       this.getFacturas()
+    },
+    getOrdenesSinFactura () {
+      ordenesSinFactura().then(response => {
+        this.ordenes_disponibles = response.data.map(item => {
+          return {
+            cotr_id: item._1,
+            reti_descripcion: item._2,
+            cotr_tipo_obra_tipo: item._3,
+            cotr_consecutivo: item._4,
+            name: item._2 + ' ' + this.$options.filters.arabicToRoman(item._3) + ' ' + item._4
+          }
+        })
+        this.showFacturaDialog = true
+      }).catch((err) => {
+        this.$message({
+          type: 'error',
+          message: this.$i18n.t('general.loadfail') + ' -> ' + err.msg
+        })
+      })
     },
     getFacturas () {
       if (this.qbquery_ant !== this.qbquery) {
@@ -250,11 +410,7 @@ export default {
       facturaTodas(this.page_size, this.current_page, this.order, this.qbquery)
         .then(response => {
           this.total = response.data.total
-          this.tableData = response.data.elementos.map(v => {
-            this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
-            this.$set(v, 'precioOriginal', v.precio.elpr_precio)
-            return v
-          })
+          this.tableData = response.data.data
         }).catch(() => {})
     }
     /* exportarXls () {
@@ -298,4 +454,5 @@ td {
 span.el-pagination__total {
   font-size: 16px;
 }
+
 </style>

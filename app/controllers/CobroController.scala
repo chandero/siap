@@ -143,4 +143,17 @@ class CobroController @Inject()(
         .withHeaders("Content-Disposition" -> attach)
       )
   }
+
+  def siap_orden_trabajo_cobro_relacion_factura() = authenticatedUserAction.async { implicit request =>
+      val empr_id = Utility.extraerEmpresa(request)
+      val usua_id = Utility.extraerUsuario(request)
+      val os = cobro6Service.siap_orden_trabajo_cobro_relacion_factura(empr_id.get)
+      val filename = "Relacion_Orden_Trabajo_ITAF_Factura" + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Future.successful(Ok(os)
+        .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        .withHeaders("Content-Disposition" -> attach)
+      )
+  }  
+  
 }

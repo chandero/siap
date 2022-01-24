@@ -55,6 +55,11 @@ import VueClipboard from 'vue-clipboard2'
 
 import { v4 as uuidv4 } from 'uuid'
 
+import vMultiselectListbox from 'vue-multiselect-listbox'
+import 'vue-multiselect-listbox/dist/vue-multi-select-listbox.css'
+
+Vue.component('v-multiselect-listbox', vMultiselectListbox)
+
 Vue.use(VueClipboard)
 Vue.use(VueQueryBuilder)
 Vue.use(VueCookie)

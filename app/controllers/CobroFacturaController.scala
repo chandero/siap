@@ -22,6 +22,7 @@ import pdi.jwt.JwtSession
 
 import utilities._
 import dto.QueryDto
+import dto.ResultDto
 @Singleton
 class CobroFacturaController @Inject()(
     sService: CobroFacturaRepository,
@@ -34,6 +35,32 @@ class CobroFacturaController @Inject()(
   implicit val formats = Serialization.formats(NoTypeHints) ++ List(
     DateTimeSerializer
   )
+
+  def todos(): Action[AnyContent] =
+    authenticatedUserAction.async { implicit request: Request[AnyContent] => 
+      val json = request.body.asJson.get
+      val page_size = ( json \ "page_size").as[Long]
+      val current_page = ( json \ "current_page").as[Long]
+      val orderby = ( json \ "orderby").as[String]
+      val filter = ( json \ "filter").as[QueryDto]
+      val filtro_a = Utility.procesarFiltrado(filter)
+      var filtro = filtro_a.replace("\"", "'")
+      if (filtro == "()") {
+        filtro = ""
+      }
+      val empr_id = Utility.extraerEmpresa(request)    
+      val total = sService.cuenta(empr_id.get, filtro)
+      sService.todos(empr_id.get, page_size, current_page, orderby, filtro).map { facturas =>
+        Ok(write(ResultDto[cobro_factura](facturas.toList, total)))
+      }
+    }  
+
+  def ordenSinFactura() = authenticatedUserAction.async { implicit request: Request[AnyContent] => 
+    val empr_id = Utility.extraerEmpresa(request)
+    sService.ordenSinFactura(empr_id.get).map { ordenes =>
+      Ok(write(ordenes))
+    }  
+  }
 
   def buscarPorNumero(cofa_factura: Long) = 
     authenticatedUserAction.async { implicit request: Request[AnyContent] =>

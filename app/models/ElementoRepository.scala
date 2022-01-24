@@ -1111,7 +1111,7 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
     val sheet1 = Sheet(
       name = "ElementoPrecio",
       rows = {
-        _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("Material", "Codigo", "Descripcion", "Año Anterior", "Precio Anterior", "IPC Año", "Incremento", "Precio Actual", "Año Actual", "Fecha Aplicación")
+        _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("Material", "Codigo", "Descripcion", "Año Anterior", "Precio Anterior", "IPC Año", "Incremento", "Precio Actual", "Año Actual", "Fecha Aplicación", "Unitario")
         val _lista = db.withConnection { implicit connection =>
       val _parser = 
           long("elem_id") ~ 
@@ -1123,9 +1123,10 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
           get[Option[Double]]("elpr_diff") ~
           get[Option[Int]]("elpr_anho") ~
           get[Option[DateTime]]("elpr_fecha") ~
-          get[Option[Double]]("elpr_precio") map {
-        case elem_id ~ elem_codigo ~ elem_descripcion ~ elpr_anho_anterior ~ elpr_precio_anterior ~ elpr_incremento ~ elpr_diff ~ elpr_anho ~ elpr_fecha ~ elpr_precio =>
-          (elem_id, elem_codigo, elem_descripcion, elpr_anho_anterior, elpr_precio_anterior, elpr_incremento, elpr_diff, elpr_anho, elpr_fecha, elpr_precio)
+          get[Option[Double]]("elpr_precio") ~
+          get[Option[String]]("unit_codigo") map {
+        case elem_id ~ elem_codigo ~ elem_descripcion ~ elpr_anho_anterior ~ elpr_precio_anterior ~ elpr_incremento ~ elpr_diff ~ elpr_anho ~ elpr_fecha ~ elpr_precio ~ unit_codigo =>
+          (elem_id, elem_codigo, elem_descripcion, elpr_anho_anterior, elpr_precio_anterior, elpr_incremento, elpr_diff, elpr_anho, elpr_fecha, elpr_precio, unit_codigo)
       }
         var query = """SELECT DISTINCT e1.elem_id, 
 				e1.elem_codigo, 
@@ -1136,11 +1137,14 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
         (select (ep1.elpr_precio - ep1.elpr_precio_anterior) from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0) as elpr_diff,
         (select ep1.elpr_anho from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
 				(select ep1.elpr_fecha from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
-				(select ep1.elpr_precio from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0)
+				(select ep1.elpr_precio from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
+        u1.unit_codigo
            FROM siap.reporte r1
            INNER JOIN siap.reporte_evento re1 ON re1.repo_id = r1.repo_id
            INNER JOIN siap.elemento e1 ON e1.elem_id = re1.elem_id
-           left join siap.elemento_precio elpr1 on elpr1.elem_id = e1.elem_id
+           LEFT join siap.elemento_precio elpr1 on elpr1.elem_id = e1.elem_id
+           LEFT join siap.elemento_unitario eu1 ON eu1.elem_id = e1.elem_id
+           LEFT join siap.unitario u1 ON u1.unit_id = eu1.unit_id
            WHERE r1.reti_id IN (2,6) AND
            		 r1.empr_id = {empr_id} AND
            		 e1.elem_estado = 1"""
@@ -1205,7 +1209,13 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
               Some(9),
               Some(CellStyle(dataFormat = CellDataFormat("@"))),
               CellStyleInheritance.CellThenRowThenColumnThenSheet            
-            )
+            ),
+            StringCell(
+              _m._11 match { case Some(v) => v case None => "" },
+              Some(10),
+              Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet            
+            )            
            )
         }
         _listRow01.toList

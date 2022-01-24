@@ -55,7 +55,7 @@
                   </el-table-column>
                   <el-table-column
                     :label="$t('elemento.reporte')"
-                    width="110"
+                    width="600"
                   >
                     <template slot-scope="scope">
                       <span style="margin-left: 10px">{{ scope.row.repo_consecutivo }}</span>

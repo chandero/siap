@@ -1045,6 +1045,16 @@ export default {
     solicitante: 'Nombre Solicitante',
     telefono: 'Teléfono Solicitante'
   },
+  factura: {
+    tabletitle: 'Factura de Obra',
+    numero: 'Número Factura',
+    anho: 'Año',
+    periodo: 'Periodo',
+    fecha: 'Fecha',
+    orden: 'Orden',
+    consecutivo: 'Número Orden',
+    confirmationmsg: 'Seguro de Eliminar la Factura No.'
+  },
   estado: {
     select: 'Seleccione el Estado',
     title: 'Estado'

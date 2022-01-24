@@ -45,10 +45,25 @@ export function relacion (anho, periodo) {
   })
 }
 
-export function facturaTodas () {
+export function relacion2 () {
+  return request({
+    url: 'cotr/rel2',
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
+export function facturaTodas (page_size, current_page, order, filter) {
+  const data = {
+    page_size: page_size,
+    current_page: current_page,
+    orderby: order,
+    filter: filter
+  }
   return request({
     url: '/cofa/all',
-    method: 'get'
+    method: 'post',
+    data: data
   })
 }
 
@@ -78,6 +93,13 @@ export function facturaActualizar (data) {
 export function facturaEliminar (cofa_id) {
   return request({
     url: `/cofa/del/${cofa_id}`,
+    method: 'get'
+  })
+}
+
+export function ordenesSinFactura () {
+  return request({
+    url: '/cofa/osf',
     method: 'get'
   })
 }
