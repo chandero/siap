@@ -3149,7 +3149,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
       fecha_corte: Long,
       empr_id: Long,
       orderby: String,
-      filter: String
+      filter: String,
+      estado: Int
   ): Array[Byte] = {
     db.withConnection { implicit connection =>
       val dt = new DateTime(fecha_corte)
@@ -3248,7 +3249,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                         LEFT JOIN siap.aap_cuentaap mcu ON mcu.aacu_id = m.aacu_id and mcu.empr_id = m.empr_id                    
                         LEFT JOIN siap.aap_transformador at ON at.aap_id = a.aap_id and at.empr_id = a.empr_id
                         LEFT JOIN siap.transformador t ON t.aap_id = at.aap_id and t.empr_id = at.empr_id
-                        WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and a.esta_id < 9 and a.aap_id <> 9999999
+                        WHERE a.aap_fechatoma <= {fecha_corte} and a.empr_id = {empr_id} and a.esta_id = {esta_id} and a.aap_id <> 9999999
                       """
           println("filtro a aplicar:" + filter)
           if (!filter.isEmpty) {
@@ -3262,7 +3263,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
             SQL(query)
               .on(
                 'fecha_corte -> new DateTime(fecha_corte),
-                'empr_id -> empr_id
+                'empr_id -> empr_id,
+                'esta_id -> estado
               )
               .as(Siap_inventario.Siap_inventario_set *)
           val rows = resultSet.map {

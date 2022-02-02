@@ -355,7 +355,7 @@ export default {
       page_size: 10,
       current_page: 1,
       total: 0,
-      order: '',
+      order: 'a.aap_id',
       filter: ''
     }
   },
@@ -479,7 +479,20 @@ export default {
       }
     },
     exportarXls () {
-      informe_siap_inventario_filtro_xls(new Date().getTime(), btoa(this.order), btoa(JSON.stringify(this.qbquery)), this.empresa.empr_id)
+      informe_siap_inventario_filtro_xls(new Date().getTime(), this.order, this.qbquery, 9).then(response => {
+        var blob = response.data
+        const filename = 'Informe_Luminarias_EnBaja.xlsx'
+        if (window.navigator.msSaveOrOpenBlob) {
+          window.navigator.msSaveBlob(blob, filename)
+        } else {
+          var downloadLink = window.document.createElement('a')
+          downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+          downloadLink.download = filename
+          document.body.appendChild(downloadLink)
+          downloadLink.click()
+          document.body.removeChild(downloadLink)
+        }
+      })
     }
   },
   mounted () {

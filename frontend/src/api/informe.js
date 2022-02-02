@@ -205,15 +205,19 @@ export function informe_siap_control_xls (fecha_corte, empr_id) {
   window.open(url, '_self', 'location=no, menubar=no')
 }
 
-export function informe_siap_inventario_filtro_xls (fecha_corte, orderby, filter, empr_id) {
+export function informe_siap_inventario_filtro_xls (fecha_corte, orderby, filter, estado) {
   const data = {
     fecha_corte,
     orderby,
     filter,
-    empr_id
+    estado
   }
-  const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sifx/' + data.fecha_corte + '/' + data.orderby + '/' + data.filter + '/' + data.empr_id
-  window.open(encodeURI(url), '_self', 'location=no, menubar=no')
+  return request({
+    url: '/info/sifx',
+    method: 'post',
+    data: data,
+    responseType: 'blob'
+  })
 }
 
 export function informe_siap_control_filtro_xls (fecha_corte, orderby, filter, empr_id) {

@@ -191,9 +191,7 @@ class Cobro6Repository @Inject()(
   def buscarPorEmpresaAnhoPeriodo(empr_id: Long, anho: Int, periodo: Int) = {
     db.withConnection { implicit connection =>
 
-      var query = """SELECT cotr1.*, cofa1.cofa_factura FROM siap.cobro_orden_trabajo cotr1 
-                     LEFT JOIN siap.cobro_factura_orden_trabajo cofaot1 ON cofaot1.cotr_id = cotr1.cotr_id
-                     LEFT JOIN siap.cobro_factura cofa1 ON cofa1.cofa_id = cofaot1.cofa_id
+      var query = """SELECT cotr1.* FROM siap.cobro_orden_trabajo cotr1 
                      WHERE cotr1.empr_id = {empr_id} """
       if (anho > 0) { 
         query += "and cotr1.cotr_anho = {cotr_anho} and cotr1.cotr_periodo = {cotr_periodo} "
@@ -11016,17 +11014,80 @@ class Cobro6Repository @Inject()(
                 )
               ),
               CellStyleInheritance.CellThenRowThenColumnThenSheet
-            )                       
+            ),
+            StringCell(
+              "FECHA FACTURA",
+              Some(6),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  wrapText = java.lang.Boolean.TRUE,
+                  horizontalAlignment = HA.Center,
+                  verticalAlignment = VA.Center,
+                  font = Font(bold = true)
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "AÑO FACTURADO",
+              Some(7),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  wrapText = java.lang.Boolean.TRUE,
+                  horizontalAlignment = HA.Center,
+                  verticalAlignment = VA.Center,
+                  font = Font(bold = true)
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "PERIODO FACTURADO",
+              Some(8),
+              style = Some(
+                CellStyle(
+                  dataFormat = CellDataFormat("@"),
+                  wrapText = java.lang.Boolean.TRUE,
+                  horizontalAlignment = HA.Center,
+                  verticalAlignment = VA.Center,
+                  font = Font(bold = true)
+                )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )                        
           ).withHeight(30.points)
           _idx += 1
+          val _parse_factura = get[Option[String]]("factura") ~ get[Option[DateTime]]("cofa_fecha") ~get[Option[Int]]("cofa_anho") ~ get[Option[Int]]("cofa_periodo") map {
+            case factura ~ fecha ~ anho ~ periodo =>
+              (factura, fecha, anho, periodo)
+          }
           ordenes.map { orden =>
-                val _factura = SQL("""SELECT CONCAT(cofa1.cofa_prefijo, cofa1.cofa_factura, cofa1.cofa_sufijo) as factura FROM siap.cobro_orden_trabajo cotr1 
+                
+                val _factura = SQL("""SELECT CONCAT(cofa1.cofa_prefijo, cofa1.cofa_factura, cofa1.cofa_sufijo) as factura, cofa_fecha, cofa_anho, cofa_periodo FROM siap.cobro_orden_trabajo cotr1 
                                       LEFT JOIN siap.cobro_factura_orden_trabajo cofaot1 ON cofaot1.cotr_id = cotr1.cotr_id
                                       LEFT JOIN siap.cobro_factura cofa1 ON cofa1.cofa_id = cofaot1.cofa_id
-                                      WHERE cotr1.empr_id = 1 and cotr1.cotr_id = {cotr_id}""").
+                                      WHERE cotr1.empr_id = 1 and cotr1.cotr_id = {cotr_id} and cofa1.cofa_estado = 1""").
                                       on(
                                         'cotr_id -> orden.cotr_id
-                                      ).as(SqlParser.scalar[String].singleOpt)
+                                      ).as(_parse_factura.singleOpt)
+                var _facno = ""
+                var _facfecha = ""
+                var _facanho = ""
+                var _facperiodo = ""
+                _factura match {
+                  case Some(f) =>
+                    _facno = f._1.getOrElse("")
+                    _facfecha = f._2 match { case Some(f) => f.toString("yyyy-MM-dd") case None => "" }
+                    _facanho = f._3.getOrElse("").toString
+                    _facperiodo = f._4.getOrElse("").toString
+                  case None =>
+                    _facno = ""
+                    _facfecha = ""
+                    _facanho = ""
+                    _facperiodo = ""
+                }
                 val _fecha = orden.cotr_fecha.get
                 val _consecutivo = orden.cotr_consecutivo.get
                 val _descripcion = orden.cotr_tipo_obra match {
@@ -11110,7 +11171,7 @@ class Cobro6Repository @Inject()(
                     CellStyleInheritance.CellThenRowThenColumnThenSheet
                   ),
                   StringCell(
-                    _factura match { case Some(f) => f case None => ""},
+                    _facno,
                     Some(5),
                     style = Some(
                       CellStyle(
@@ -11121,7 +11182,46 @@ class Cobro6Repository @Inject()(
                       )
                     ),
                     CellStyleInheritance.CellThenRowThenColumnThenSheet
-                  )                  
+                  ),
+                  StringCell(
+                    _facfecha,
+                    Some(6),
+                    style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        wrapText = java.lang.Boolean.TRUE,
+                        verticalAlignment = VA.Center,
+                        horizontalAlignment = HA.Right
+                      )
+                    ),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  ),
+                  StringCell(
+                    _facanho,
+                    Some(7),
+                    style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        wrapText = java.lang.Boolean.TRUE,
+                        verticalAlignment = VA.Center,
+                        horizontalAlignment = HA.Right
+                      )
+                    ),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  ),
+                  StringCell(
+                    _facperiodo,
+                    Some(8),
+                    style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        wrapText = java.lang.Boolean.TRUE,
+                        verticalAlignment = VA.Center,
+                        horizontalAlignment = HA.Right
+                      )
+                    ),
+                    CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ).withHeight(40.points)
                 _idx += 1
             }
@@ -11179,7 +11279,7 @@ class Cobro6Repository @Inject()(
               )
             )
           _listRow01.toList
-        },
+        }, 
         mergedRegions = _listMerged01.toList,
         columns = {
           var _listColumn = new ArrayBuffer[com.norbitltd.spoiwo.model.Column]()

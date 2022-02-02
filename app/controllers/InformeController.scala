@@ -382,25 +382,20 @@ class InformeController @Inject()(
       .withHeaders("Content-Disposition" -> attach)
   }
 
-  def siap_inventario_filtro_xls(
-      fecha_corte: Long,
-      orderby: String,
-      filtrado: String,
-      empr_id: Long
-  ) = Action.async { implicit request: Request[AnyContent] =>
-    val dt = new DateTime(fecha_corte)
-    val order = (Base64.getDecoder().decode(orderby).map(_.toChar)).mkString
-    println("orderby: " + order)
-    val filters = (Base64.getDecoder().decode(filtrado).map(_.toChar)).mkString
-    println("filtro: " + filters)
-    val filter = Json.parse(filters).as[QueryDto]
-    val filtro_a = Utility.procesarFiltrado(filter)
-    var filtro = filtro_a.replace("\"", "'")
+  def siap_inventario_filtro_xls() = Action.async { implicit request: Request[AnyContent] =>
+    val json = request.body.asJson.get
+    val fecha_corte = ( json \ "fecha_corte").as[Long]
+    val orderby = ( json \ "orderby").as[String]
+    val filter = ( json \ "filter").as[QueryDto]
+    val estado = (json \ "estado").as[Int]
+    var filtro = Utility.procesarFiltrado(filter)
     if (filtro == "()") {
       filtro = ""
     }
+    val empr_id = Utility.extraerEmpresa(request)
+    val dt = new DateTime(fecha_corte)    
     val os = informeService
-      .siap_inventario_filtro_xls(fecha_corte, empr_id, order, filtro)
+      .siap_inventario_filtro_xls(fecha_corte, empr_id.get, orderby, filtro, estado)
     val fmt = DateTimeFormat.forPattern("yyyyMMdd")
     val filename = "Inventario_Filtrado_" + fmt.print(dt) + ".xlsx"
     val attach = "attachment; filename=" + filename

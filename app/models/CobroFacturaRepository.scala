@@ -155,7 +155,7 @@ class CobroFacturaRepository @Inject()(
       val lista = SQL(
         """SELECT cotr1.cotr_id, rt1.reti_descripcion, cotr1.cotr_tipo_obra_tipo, cotr1.cotr_consecutivo FROM siap.cobro_orden_trabajo cotr1
            LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = cotr1.cotr_tipo_obra
-           WHERE cotr1.cotr_id not in (select cfot1.cotr_id from siap.cobro_factura_orden_trabajo cfot1) and cotr1.empr_id = {empr_id}
+           WHERE cotr1.cotr_id not in (select cfot1.cotr_id from siap.cobro_factura_orden_trabajo cfot1 inner join siap.cobro_factura cofa1 on cofa1.cofa_id = cfot1.cofa_id WHERE cofa1.cofa_estado = 1) and cotr1.empr_id = {empr_id}
            ORDER BY 2,3"""
       ).on(
           'empr_id -> empr_id
