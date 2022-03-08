@@ -475,43 +475,87 @@ class Cobro6Repository @Inject()(
         }
       }
       // Obtener Materiales
-      val _parseMaterial = int("cotr_id") ~ int("elem_id") ~ double(
-        "elpr_precio"
-      ) ~ double("elem_cantidad") map {
-        case a1 ~ a2 ~ a3 ~ a4 => (a1, a2, a3, a4)
+      var _parseOrdenMaterial = int("cotr_id") ~ int("cotr_tipo_obra") ~ str("cotr_tipo_obra_tipo") map {
+        case a1 ~ a2 ~ a3 =>
+          (a1, a2, a3)
       }
+      var _orden = SQL("""SELECT cotr_id, cotr_tipo_obra, cotr_tipo_obra_tipo FROM siap.cobro_orden_trabajo WHERE cotr_anho = {anho} AND cotr_periodo = {mes} AND cotr_tipo_obra = {cotr_tipo_obra}""").on(
+        'anho -> anho,
+        'mes -> mes,
+        'cotr_tipo_obra -> 6
+      ).as(_parseOrdenMaterial *)
+      val _parseMaterial = int("cotr_id") ~ int("elem_id") ~ get[Option[Double]](
+        "elpr_precio"
+      ) ~ double("even_cantidad") ~ get[Option[String]]("elpr_unidad") ~ get[Option[Int]]("aap_id") map {
+        case a1 ~ a2 ~ a3 ~ a4 ~ a5 ~ a6 => (a1, a2, a3, a4, a5, a6)
+      }
+      println("Lista Ordenes a cargar Material: " + _orden.map(x => x._1).mkString(","))
+      // Procesar Material Por Cada Orden
       val _queryMaterial =
-        """select cotr1.cotr_id, e1.elem_id, CASE WHEN ep1.elpr_precio IS NULL THEN 0.0 ELSE ep1.elpr_precio END as elpr_precio, SUM(re1.even_cantidad_instalado) as elem_cantidad
-                                from siap.cobro_orden_trabajo cotr1
-                                inner join siap.cobro_orden_trabajo_reporte cotrr1 on cotrr1.cotr_id = cotr1.cotr_id
-                                inner join siap.reporte r1 on r1.repo_id = cotrr1.repo_id
-                                inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotrr1.aap_id
-                                inner join siap.elemento e1 on e1.elem_id = re1.elem_id 
-                                left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = {anho}
-                                where cotr1.cotr_fecha between {fecha_inicial} and {fecha_final} and cotr1.empr_id = {empr_id} and cotr1.cotr_tipo_obra = {reti_id} and re1.even_estado < 8
-                                group by 1,2,3
-                                order by 1,2"""
-      val _materiales = SQL(_queryMaterial)
-        .on(
-          'empr_id -> empr_id,
-          'anho -> anho,
-          'reti_id -> reti_id,
-          'fecha_inicial -> fi.getTime(),
-          'fecha_final -> ff.getTime()
+        """select
+	          cot1.cotr_id, e1.elem_id, e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, e1.elem_estado, re1.aap_id, sum(re1.even_cantidad_instalado) as even_cantidad
+          from siap.cobro_orden_trabajo cot1
+          inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
+          inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
+          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
+          inner join siap.elemento e1 on e1.elem_id = re1.elem_id
+          inner join siap.unitario u1 on u1.unit_id = re1.unit_id
+          left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
+          where cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id}
+          group by 
+            	GROUPING SETS (
+            		(1,2,3,4,5,6,7),
+            		(1,2,3,4,5,6)
+            	)
+            order by 2"""
+      _orden.map { _o =>      
+        println("Cargar Material Orden: " + _o._1)
+        val _materiales = SQL(_queryMaterial)
+          .on(
+            'empr_id -> empr_id,
+            'cotr_id -> _o._1
         )
         .as(_parseMaterial *)
-
-      val _queryInsertarMaterial =
-        """INSERT INTO siap.cobro_orden_trabajo_material (cotr_id, elem_id, cotrma_valor_unitario, cotrma_cantidad) VALUES ({cotr_id}, {elem_id}, {cotrma_valor_unitario}, {cotrma_cantidad})"""
-      _materiales.map { material =>
-        SQL(_queryInsertarMaterial)
-          .on(
-            'cotr_id -> material._1,
-            'elem_id -> material._2,
-            'cotrma_valor_unitario -> material._3,
-            'cotrma_cantidad -> material._4
-          )
-          .executeInsert()
+        println("Insertando Material Orden: " + _o._1)
+        val _queryInsertarMaterial =
+          """INSERT INTO siap.cobro_orden_trabajo_material (cotr_id, elem_id, cotrma_valor_unitario, cotrma_cantidad, cotrma_unidad, aap_id) 
+              VALUES (
+                    {cotr_id}, 
+                    {elem_id}, 
+                    {cotrma_valor_unitario}, 
+                    {cotrma_cantidad},
+                    {cotrma_unidad},
+                    {aap_id})"""
+        val _queryActualizarMaterial = """UPDATE siap.cobro_orden_trabajo_material SET 
+                        cotrma_cantidad_total = {cotrma_cantidad_total},
+                        unit_id = (select unit_id from siap.elemento_unitario eu1 where eu1.elem_id = {elem_id} and eu1.elun_tipo_obra = {cotr_tipo_obra} and eu1.elun_tipo_obra_tipo = {cotr_tipo_obra_tipo} and {cotrma_cantidad_total} between eu1.elun_entre_min and eu1.elun_entre_max)
+                        WHERE cotr_id = {cotr_id} AND elem_id = {elem_id}"""
+        _materiales.map { material =>
+          println("Insertando Material: " + material + ", cotr_id:" + _o._1)
+          material._6 match {
+            case Some(aap) =>
+              SQL(_queryInsertarMaterial)
+              .on(
+                'cotr_id -> material._1,
+                'elem_id -> material._2,
+                'cotrma_valor_unitario -> material._3,
+                'cotrma_cantidad -> material._4,
+                'cotrma_unidad -> material._5,
+                'aap_id -> material._6
+              )
+              .executeInsert()
+          case None =>
+            val _sql = SQL(_queryActualizarMaterial).on(
+              'cotr_id -> material._1,
+              'elem_id -> material._2,
+              'cotrma_cantidad_total -> material._4,
+              'cotr_tipo_obra -> _o._2,
+              'cotr_tipo_obra_tipo -> _o._3
+            )
+            println("Actualizando Material: " + material + ", cotr_id:" + _o._1)
+              _sql.executeUpdate()
+          }
+        }
       }
 
       //// ACTUALIZAR USO ORDEN DE TRABAJO
@@ -600,6 +644,15 @@ class Cobro6Repository @Inject()(
     )
     println("Escribiendo en el Stream")
     var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+    //set page setup to fit to one page width but multiple pages height
+    val _sheet1Setup = PrintSetup(fitHeight = 1, fitWidth = 1)
+    val _sheet2Setup = PrintSetup(fitHeight = 1, fitWidth = 1)
+    val _sheet3Setup = PrintSetup(scale = 80)
+    val _sheet5Setup = PrintSetup(fitHeight = 1, fitWidth = 1)
+    sheet1.withPrintSetup(_sheet1Setup)
+    sheet2.withPrintSetup(_sheet2Setup)
+    sheet3.withPrintSetup(_sheet3Setup)
+    sheet5.withPrintSetup(_sheet5Setup)    
     Workbook(sheet1, sheet2, sheet3, sheet4, sheet5, sheet98, sheet99)
       .writeToOutputStream(os)
     println("Stream Listo")
@@ -1090,7 +1143,7 @@ class Cobro6Repository @Inject()(
             StringCell(
               "MODERNIZACION DE " + N2T
                 .convertirLetras(orden.cotr_cantidad.get)
-                .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_anterior.get + " DE " + orden.cotr_potencia_anterior.get + "W" + " POR " + N2T
+                .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + (orden.cotr_luminaria_anterior match { case Some(v) => v case None => ""}) + " DE " + orden.cotr_potencia_anterior.get + "W" + " POR " + N2T
                 .convertirLetras(orden.cotr_cantidad.get)
                 .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_nueva.get + " DE " + orden.cotr_potencia_nueva.get + " W",
               Some(5),
@@ -2023,7 +2076,7 @@ class Cobro6Repository @Inject()(
             StringCell(
               "MODERNIZACION DE " + N2T
                 .convertirLetras(orden.cotr_cantidad.get)
-                .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_anterior.get + " DE " + orden.cotr_potencia_anterior.get + "W" + " POR " + N2T
+                .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + (orden.cotr_luminaria_anterior match { case Some(v) => v case None => "" }) + " DE " + orden.cotr_potencia_anterior.get + "W" + " POR " + N2T
                 .convertirLetras(orden.cotr_cantidad.get)
                 .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_nueva.get + " DE " + orden.cotr_potencia_nueva.get + " W",
               Some(6),
@@ -3860,13 +3913,10 @@ class Cobro6Repository @Inject()(
       var _unitarios = SQL(
         """select distinct u1.unit_codigo
                           from siap.cobro_orden_trabajo cot1
-                          inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                          inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-                          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
-                          inner join siap.elemento e1 on e1.elem_id = re1.elem_id
-                          inner join siap.unitario u1 on u1.unit_id = re1.unit_id
-                          left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} and e1.elem_estado = 1
+                          inner join siap.cobro_orden_trabajo_material cotm1 on cotm1.cotr_id = cot1.cotr_id
+                          inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
+                          inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                          where cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id} and e1.elem_estado = 1
           union all
           select '1.04' as unit_codigo
           order by unit_codigo
@@ -3876,7 +3926,7 @@ class Cobro6Repository @Inject()(
           'cotr_id -> orden.cotr_id
         )
         .as(SqlParser.str("unit_codigo").*)
-
+      val _elementParser = int("elem_id") ~ str("elem_descripcion") map { case elem_id ~ elem_descripcion => (elem_id, elem_descripcion) }
       _unitarios.map { unitario =>
         if (unitario == "1.01") {
           /// buscar si existe más de una ucap en el unitario para separar valores
@@ -3896,9 +3946,13 @@ class Cobro6Repository @Inject()(
                 'cotr_id -> orden.cotr_id,
                 'unitario -> "1.01"
               )
-              .as(SqlParser.int("elem_id").*)
+              .as(_elementParser *)
           println("Lista de Elementos de 1.01:" + elements)
           elements.map { e =>
+            var _e: Option[(Int, String)] = Option.empty[(Int, String)]
+            if (e._2.startsWith("LUMINARIA")) {
+                _e = Some(e)
+            }
             _idx = siap_orden_trabajo_cobro_modernizacion_hoja_3_unitarios(
               empresa,
               orden,
@@ -3908,7 +3962,7 @@ class Cobro6Repository @Inject()(
               _listMerged01,
               _idx,
               _listCuadroGeneralUnitario,
-              Some(e)
+              _e
             )
           }
         } else {
@@ -3968,8 +4022,12 @@ class Cobro6Repository @Inject()(
       _listCuadroGeneralUnitario: ListBuffer[
         (String, String, String, Double, String, String, String, String)
       ],
-      elem_id: Option[Int]
+      element: Option[(Int, String)]
   ): Int = {
+    val elem_id = element match {
+      case Some(e) => Some(e._1)
+      case None => None
+    }
     db.withConnection { implicit connection =>
       var _idx = _idx01
       val _unitario = unitarioService.buscarPorCodigo(unit_codigo).get
@@ -3989,8 +4047,14 @@ class Cobro6Repository @Inject()(
       }
       var _descripcion = unit_codigo match {
         case "1.01" => {
-          "SUMINISTRO E INSTALACION DE LUMINARIA " + orden.cotr_luminaria_nueva.get + " " + orden.cotr_tecnologia_nueva.get + " " + orden.cotr_potencia_nueva.get
-            .toString() + "W"
+          "SUMINISTRO E INSTALACION DE " + { element match {
+            case Some(e) => e._2
+            case None => { 
+                  "LUMINARIA " + orden.cotr_luminaria_nueva.get + " " + orden.cotr_tecnologia_nueva.get + " " + orden.cotr_potencia_nueva.get 
+                       .toString() + "W"
+                  }
+            }
+          }
         }
         case "1.02" | "1.03" | "1.08" | "1.09" | "1.10" | "1.11" | "1.12" =>
           "SUMINISTRO E INSTALACION DE " + _unitario.unit_descripcion.get
@@ -4000,6 +4064,7 @@ class Cobro6Repository @Inject()(
         case "1.07" => "INSTALACION " + _unitario.unit_descripcion.get
         case _      => _unitario.unit_descripcion.get
       }
+      println("Descripcion: " + _descripcion)
 
       var _ucap_id = unit_codigo match {
         case "1.01" => 1
@@ -4018,8 +4083,7 @@ class Cobro6Repository @Inject()(
       }
       var _cantidad_item = elem_id match {
         case Some(elem_id) =>
-          SQL(
-            """select SUM(even_cantidad_instalado) AS cantidad FROM
+/*           val _qcant = """select SUM(even_cantidad_instalado) AS cantidad FROM
                 siap.cobro_orden_trabajo cot1
                 inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
                 inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
@@ -4027,19 +4091,24 @@ class Cobro6Repository @Inject()(
                 inner join siap.elemento e1 on e1.elem_id = re1.elem_id
                 inner join siap.unitario u1 on u1.unit_id = re1.unit_id
                 left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo} AND e1.ucap_id = {ucap_id} AND e1.elem_id = {elem_id}"""
+                where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo} AND e1.ucap_id = {ucap_id} AND e1.elem_id = {elem_id}""" */
+          val _qcant = """SELECT SUM(cotrma_cantidad) FROM siap.cobro_orden_trabajo cot1
+                        INNER JOIN siap.cobro_orden_trabajo_material cotrma1 ON cotrma1.cotr_id = cot1.cotr_id
+                        WHERE cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id} and cotrma1.elem_id = {elem_id} AND cotrma1.unit_id = {unit_id}"""
+          SQL(
+            _qcant
           ).on(
               'empr_id -> empresa.empr_id,
               'cotr_id -> orden.cotr_id,
-              'unit_codigo -> unit_codigo,
-              'ucap_id -> _ucap_id,
+              // 'unit_codigo -> unit_codigo,
+              //'ucap_id -> _ucap_id,
+              'unit_id -> _ucap_id,
               'elem_id -> elem_id
             )
             .as(SqlParser.scalar[Double].singleOpt)
 
         case None =>
-          SQL(
-            """select SUM(even_cantidad_instalado) AS cantidad FROM
+/*           val _qcant = """select SUM(even_cantidad_instalado) AS cantidad FROM
                 siap.cobro_orden_trabajo cot1
                 inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
                 inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
@@ -4048,18 +4117,29 @@ class Cobro6Repository @Inject()(
                 inner join siap.unitario u1 on u1.unit_id = re1.unit_id
                 left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
                 where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo} AND e1.ucap_id = {ucap_id}"""
+ */          val _qcant = """SELECT SUM(cotrma_cantidad) FROM siap.cobro_orden_trabajo cot1
+                        INNER JOIN siap.cobro_orden_trabajo_material cotrma1 ON cotrma1.cotr_id = cot1.cotr_id
+                        INNER JOIN siap.elemento e1 ON e1.elem_id = cotrma1.elem_id
+                        WHERE cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id} and e1.ucap_id = {ucap_id} AND cotrma1.aap_id is not null"""
+          SQL(
+            _qcant
           ).on(
               'empr_id -> empresa.empr_id,
               'cotr_id -> orden.cotr_id,
-              'unit_codigo -> unit_codigo,
+              // 'unit_codigo -> unit_codigo,
               'ucap_id -> _ucap_id
             )
             .as(SqlParser.scalar[Double].singleOpt)
+
       }
 
       var _cantidad_xls = _cantidad_item match {
         case Some(v) => v
         case None    => orden.cotr_cantidad.get.toDouble
+      }
+
+      if (unit_codigo == "1.03") {
+        _cantidad_xls = 1.0
       }
 
       var _listSubTotal = new ListBuffer[String]()
@@ -6161,7 +6241,7 @@ class Cobro6Repository @Inject()(
       _idx += 1
       val _parseMaterial = str("elem_descripcion") ~ get[Option[String]](
         "elpr_unidad"
-      ) ~ get[Option[Int]]("elpr_precio") ~ double("cotrma_cantidad") map {
+      ) ~ get[Option[Int]]("elpr_precio") ~ double("even_cantidad") map {
         case a1 ~ a2 ~ a3 ~ a4 => (a1, a2, a3, a4)
       }
       val _materiales = elem_id match {
@@ -6188,7 +6268,7 @@ class Cobro6Repository @Inject()(
               SqlParser.scalar[Int] *
             )
           println("Luminarias: (" + _luminarias.mkString(",") + ")")
-          SQL("""select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, SUM(re1.even_cantidad_instalado) as cotrma_cantidad
+          /* val _qmat = """select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, SUM(re1.even_cantidad_instalado) as cotrma_cantidad
                       from siap.cobro_orden_trabajo cot1
                       inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
                       inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
@@ -6197,7 +6277,14 @@ class Cobro6Repository @Inject()(
                       inner join siap.unitario u1 on u1.unit_id = re1.unit_id
                       left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
                       where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo} and CAST(re1.aap_id as VARCHAR) IN ({luminarias})
-                      group by 1,2,3""")
+                      group by 1,2,3""" */
+          val _qmat = """select e1.elem_descripcion, cotm1.cotrma_unidad AS elpr_unidad, cotm1.cotrma_valor_unitario AS elpr_precio, SUM(cotm1.cotrma_cantidad) as even_cantidad FROM siap.cobro_orden_trabajo cot1
+                         inner join siap.cobro_orden_trabajo_material cotm1 ON cotm1.cotr_id = cot1.cotr_id
+                         inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                         inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
+                         where cot1.empr_id = {empr_id} AND cot1.cotr_id = {cotr_id} and u1.unit_codigo = {unit_codigo} AND e1.elem_estado = 1 AND CAST(cotm1.aap_id as VARCHAR) IN ({luminarias})
+                         group by 1,2,3"""
+          SQL(_qmat)
             .on(
               'cotr_id -> orden.cotr_id,
               'empr_id -> empresa.empr_id.get,
@@ -6206,8 +6293,7 @@ class Cobro6Repository @Inject()(
             )
             .as(_parseMaterial *)
         case None =>
-          SQL(
-            """select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, SUM(re1.even_cantidad_instalado) as cotrma_cantidad
+          /* val _qmat ="""select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, SUM(re1.even_cantidad_instalado) as cotrma_cantidad
                 from siap.cobro_orden_trabajo cot1
                 inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
                 inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
@@ -6216,7 +6302,14 @@ class Cobro6Repository @Inject()(
                 inner join siap.unitario u1 on u1.unit_id = re1.unit_id
                 left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
               where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo}
-              group by 1,2,3"""
+              group by 1,2,3""" */
+          val _qmat = """select e1.elem_descripcion, cotm1.cotrma_unidad AS elpr_unidad, cotm1.cotrma_valor_unitario AS elpr_precio, SUM(cotm1.cotrma_cantidad) AS even_cantidad from siap.cobro_orden_trabajo_material cotm1
+                         inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                         inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
+                         where cotm1.cotr_id = {cotr_id} and u1.unit_codigo = {unit_codigo} AND e1.elem_estado = 1
+                         group by 1,2,3"""
+          SQL(
+            _qmat
           ).on(
               'cotr_id -> orden.cotr_id,
               'empr_id -> empresa.empr_id.get,
@@ -6343,7 +6436,7 @@ class Cobro6Repository @Inject()(
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
           NumericCell(
-            if (_m._1.startsWith("FOTOCELDA")) {
+/*             if (_m._1.startsWith("FOTOCELDA")) {
               if (_m._4 == _cantidad_xls){
                 _m._4 / _cantidad_xls
               } else if ( _m._4 == 1) {
@@ -6353,7 +6446,8 @@ class Cobro6Repository @Inject()(
               }
             } else {
               _m._4 / _cantidad_xls,
-            },
+            } */
+            _m._4 / _cantidad_xls,
             Some(7),
             style = Some(
               CellStyle(
@@ -6461,6 +6555,8 @@ class Cobro6Repository @Inject()(
               borders = CellBorders(
                 rightStyle = CellBorderStyle.Thick,
                 rightColor = Color.Black,
+                topStyle = CellBorderStyle.Thin,
+                topColor = Color.Black,
                 bottomStyle = CellBorderStyle.Thin,
                 bottomColor = Color.Black
               )
@@ -7625,7 +7721,9 @@ class Cobro6Repository @Inject()(
               horizontalAlignment = HA.Center,
               borders = CellBorders(
                 topStyle = CellBorderStyle.Thick,
-                topColor = Color.Black
+                topColor = Color.Black,
+                bottomStyle = CellBorderStyle.Thin,
+                bottomColor = Color.Black
               )
             )
           ),
@@ -7640,7 +7738,9 @@ class Cobro6Repository @Inject()(
               horizontalAlignment = HA.Center,
               borders = CellBorders(
                 topStyle = CellBorderStyle.Thick,
-                topColor = Color.Black
+                topColor = Color.Black,
+                bottomStyle = CellBorderStyle.Thin,
+                bottomColor = Color.Black
               )
             )
           ),
@@ -7726,6 +7826,36 @@ class Cobro6Repository @Inject()(
           ),
           CellStyleInheritance.CellThenRowThenColumnThenSheet
         ),
+        StringCell(
+          "",
+          Some(7),
+          style = Some(
+            CellStyle(
+              dataFormat = CellDataFormat("@"),
+              horizontalAlignment = HA.Center,
+              borders = CellBorders(
+                bottomStyle = CellBorderStyle.Thin,
+                bottomColor = Color.Black
+              )
+            )
+          ),
+          CellStyleInheritance.CellThenRowThenColumnThenSheet
+        ),
+        StringCell(
+          "",
+          Some(8),
+          style = Some(
+            CellStyle(
+              dataFormat = CellDataFormat("@"),
+              horizontalAlignment = HA.Center,
+              borders = CellBorders(
+                bottomStyle = CellBorderStyle.Thin,
+                bottomColor = Color.Black
+              )
+            )
+          ),
+          CellStyleInheritance.CellThenRowThenColumnThenSheet
+        ),                
         StringCell(
           "",
           Some(9),
@@ -7891,7 +8021,9 @@ class Cobro6Repository @Inject()(
                   leftStyle = CellBorderStyle.Thin,
                   leftColor = Color.Black,
                   rightStyle = CellBorderStyle.Thick,
-                  rightColor = Color.Black
+                  rightColor = Color.Black,
+                  bottomStyle = CellBorderStyle.Thin,
+                  bottomColor = Color.Black,
                 )
               )
             ),
@@ -7939,6 +8071,36 @@ class Cobro6Repository @Inject()(
           ),
           CellStyleInheritance.CellThenRowThenColumnThenSheet
         ),
+        StringCell(
+          "",
+          Some(7),
+          style = Some(
+            CellStyle(
+              dataFormat = CellDataFormat("@"),
+              horizontalAlignment = HA.Center,
+              borders = CellBorders(
+                bottomStyle = CellBorderStyle.Thin,
+                bottomColor = Color.Black
+              )
+            )
+          ),
+          CellStyleInheritance.CellThenRowThenColumnThenSheet
+        ), 
+        StringCell(
+          "",
+          Some(8),
+          style = Some(
+            CellStyle(
+              dataFormat = CellDataFormat("@"),
+              horizontalAlignment = HA.Center,
+              borders = CellBorders(
+                bottomStyle = CellBorderStyle.Thin,
+                bottomColor = Color.Black
+              )
+            )
+          ),
+          CellStyleInheritance.CellThenRowThenColumnThenSheet
+        ), 
         StringCell(
           "",
           Some(9),
@@ -8006,6 +8168,36 @@ class Cobro6Repository @Inject()(
               borders = CellBorders(
                 leftStyle = CellBorderStyle.Thin,
                 leftColor = Color.Black,
+                bottomStyle = CellBorderStyle.Thin,
+                bottomColor = Color.Black
+              )
+            )
+          ),
+          CellStyleInheritance.CellThenRowThenColumnThenSheet
+        ),
+        StringCell(
+          "",
+          Some(7),
+          style = Some(
+            CellStyle(
+              dataFormat = CellDataFormat("@"),
+              horizontalAlignment = HA.Center,
+              borders = CellBorders(
+                bottomStyle = CellBorderStyle.Thin,
+                bottomColor = Color.Black
+              )
+            )
+          ),
+          CellStyleInheritance.CellThenRowThenColumnThenSheet
+        ),
+        StringCell(
+          "",
+          Some(8),
+          style = Some(
+            CellStyle(
+              dataFormat = CellDataFormat("@"),
+              horizontalAlignment = HA.Center,
+              borders = CellBorders(
                 bottomStyle = CellBorderStyle.Thin,
                 bottomColor = Color.Black
               )
@@ -8203,6 +8395,34 @@ class Cobro6Repository @Inject()(
         ),
         StringCell(
           "",
+          Some(7),
+          style = Some(
+            CellStyle(
+              dataFormat = CellDataFormat("@"),
+              borders = CellBorders(
+                bottomStyle = CellBorderStyle.Thin,
+                bottomColor = Color.Black
+              )
+            )
+          ),
+          CellStyleInheritance.CellThenRowThenColumnThenSheet
+        ),
+        StringCell(
+          "",
+          Some(8),
+          style = Some(
+            CellStyle(
+              dataFormat = CellDataFormat("@"),
+              borders = CellBorders(
+                bottomStyle = CellBorderStyle.Thin,
+                bottomColor = Color.Black
+              )
+            )
+          ),
+          CellStyleInheritance.CellThenRowThenColumnThenSheet
+        ),                
+        StringCell(
+          "",
           Some(9),
           style = Some(
             CellStyle(
@@ -8304,8 +8524,7 @@ class Cobro6Repository @Inject()(
         ),
         StringCell(
           "",
-          Some(5
-          ),
+          Some(5),
           style = Some(
             CellStyle(
               dataFormat = CellDataFormat("@"),
@@ -8335,6 +8554,34 @@ class Cobro6Repository @Inject()(
           ),
           CellStyleInheritance.CellThenRowThenColumnThenSheet
         ),
+        StringCell(
+          "",
+          Some(7),
+          style = Some(
+            CellStyle(
+              dataFormat = CellDataFormat("@"),
+              borders = CellBorders(
+                bottomStyle = CellBorderStyle.Thick,
+                bottomColor = Color.Black
+              )
+            )
+          ),
+          CellStyleInheritance.CellThenRowThenColumnThenSheet
+        ),  
+        StringCell(
+          "",
+          Some(8),
+          style = Some(
+            CellStyle(
+              dataFormat = CellDataFormat("@"),
+              borders = CellBorders(
+                bottomStyle = CellBorderStyle.Thick,
+                bottomColor = Color.Black
+              )
+            )
+          ),
+          CellStyleInheritance.CellThenRowThenColumnThenSheet
+        ),              
         FormulaCell(
           "SUM(" + _listSubTotal.mkString(",") + ")",
           Some(9),
@@ -8764,6 +9011,8 @@ class Cobro6Repository @Inject()(
               borders = CellBorders(
                 rightStyle = CellBorderStyle.Thick,
                 rightColor = Color.Black,
+                topStyle = CellBorderStyle.Thin,
+                topColor = Color.Black,
                 bottomStyle = CellBorderStyle.Thin,
                 bottomColor = Color.Black
               )
@@ -9705,6 +9954,8 @@ class Cobro6Repository @Inject()(
               borders = CellBorders(
                 rightStyle = CellBorderStyle.Thick,
                 rightColor = Color.Black,
+                topStyle = CellBorderStyle.Thin,
+                topColor = Color.Black,
                 bottomStyle = CellBorderStyle.Thin,
                 bottomColor = Color.Black
               )
@@ -10049,18 +10300,26 @@ class Cobro6Repository @Inject()(
       ) ~ get[Option[String]]("elpr_unidad") ~ get[Option[Double]](
         "elpr_precio"
       ) ~ int("elem_estado") map { case a1 ~ a2 ~ a3 ~ a4 ~ a5 ~ a6 => (a1, a2, a3, a4, a5, a6) }
+/*       val _qmat = """select e1.elem_codigo, e1.elem_descripcion, sum(re1.even_cantidad_instalado) as even_cantidad, ep1.elpr_unidad, ep1.elpr_precio, e1.elem_estado 
+            from siap.cobro_orden_trabajo cot1
+            inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
+            inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
+            inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
+            inner join siap.elemento e1 on e1.elem_id = re1.elem_id
+            inner join siap.unitario u1 on u1.unit_id = re1.unit_id
+            left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
+           where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id}
+           group by 1,2,4,5,6
+           order by 2""" */
+      val _qmat = """select e1.elem_codigo, e1.elem_descripcion, cotm1.cotrma_unidad AS elpr_unidad, cotm1.cotrma_valor_unitario AS elpr_precio, e1.elem_estado, SUM(cotm1.cotrma_cantidad) AS even_cantidad from siap.cobro_orden_trabajo cot1
+                         inner join siap.cobro_orden_trabajo_material cotm1 on cotm1.cotr_id = cot1.cotr_id
+                         inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                         inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
+                         where cot1.empr_id = {empr_id} AND cot1.cotr_id = {cotr_id}
+                         group by 1,2,3,4,5"""
+
       val _materiales = SQL(
-        """select e1.elem_codigo, e1.elem_descripcion, sum(re1.even_cantidad_instalado) as even_cantidad, ep1.elpr_unidad, ep1.elpr_precio, e1.elem_estado 
-                          from siap.cobro_orden_trabajo cot1
-                          inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                          inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-                          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
-                          inner join siap.elemento e1 on e1.elem_id = re1.elem_id
-                          inner join siap.unitario u1 on u1.unit_id = re1.unit_id
-                          left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id}
-                          group by 1,2,4,5,6
-                          order by 2"""
+        _qmat
       ).on(
           'empr_id -> empresa.empr_id,
           'cotr_id -> orden.cotr_id
@@ -10245,7 +10504,7 @@ class Cobro6Repository @Inject()(
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 NumericCell(
-                  if (_m._2.startsWith("FOTOCELDA")) {
+/*                   if (_m._2.startsWith("FOTOCELDA")) {
                     if (_m._3 == _cantidad){
                       _m._3 / _cantidad
                     } else if ( _m._3 == 1) {
@@ -10255,7 +10514,8 @@ class Cobro6Repository @Inject()(
                     }
                   } else {
                     _m._3 / _cantidad,
-                  },
+                  } */
+                  _m._3 / _cantidad,
                   Some(5),
                   style = Some(
                     CellStyle(
@@ -10858,6 +11118,63 @@ class Cobro6Repository @Inject()(
     os.toByteArray
   }
 
+  def siap_orden_trabajo_cobro_anexo_redimensionamiento(empr_id: Long, anho: Int, periodo: Int): (String, String, String, String, Iterable[(String, String, String, String, String)]) = {
+    var _listData = new ListBuffer[(String, String, String, String, String)]
+    val empresa = empresaService.buscarPorId(empr_id) match {
+      case Some(e) => e
+      case None => Empresa(None, "", "", "", "", "", None, 0, 0, 0, 0, None, None)
+    }
+    val ordenes =  buscarPorEmpresaAnhoPeriodo(empresa.empr_id.get, anho, periodo)
+    val formatter = java.text.NumberFormat.getIntegerInstance
+    var _subtotal_expansion = 0.0
+    var _subtotal_modernizacion = 0.0
+    var _subtotal_desmonte = 0.0
+    var _subtotal_total = 0.0
+    ordenes.map { orden =>
+      var _expansion = orden.cotr_tipo_obra match {
+                      case Some(2) => siap_orden_trabajo_cobro_calculo_total(empresa, orden)
+                      case _ => 0.0
+                    }
+      var _modernizacion = orden.cotr_tipo_obra match {
+                      case Some(6) => siap_orden_trabajo_cobro_calculo_total(empresa, orden)
+                      case _ => 0.0
+                    }
+      var _desmonte = orden.cotr_tipo_obra match {
+                      case Some(6) => siap_orden_trabajo_cobro_calculo_desmonte(empresa, orden)
+                      case _ => 0.0
+                    }                                       
+      _expansion = _expansion.round
+      _modernizacion = _modernizacion.round
+      _desmonte = _desmonte.round
+      val _total = _expansion + _modernizacion - _desmonte
+      _subtotal_expansion += _expansion
+      _subtotal_modernizacion += _modernizacion
+      _subtotal_desmonte += _desmonte
+      _subtotal_total += _total
+      _listData += 
+        (
+                   ( 
+                    "Orden de Trabajo ITAF-" + orden.cotr_consecutivo.get,
+                    if (_expansion > 0.0) { "$" + formatter.format(_expansion) } else { "" },
+                    if (_modernizacion > 0.0) { "$" + formatter.format(_modernizacion) } else { "" },
+                    if (_desmonte > 0.0) { "-$" + formatter.format(_desmonte) } else { "" },
+                    "$" + formatter.format(_total)
+                  )
+        )
+      }
+      (
+        if (_subtotal_expansion > 0.0) { "$" + formatter.format(_subtotal_expansion) } else { "" },
+        if (_subtotal_modernizacion > 0.0) { "$" + formatter.format(_subtotal_modernizacion) } else { "" },
+        if (_subtotal_desmonte > 0.0) { "-$" + formatter.format(_subtotal_desmonte) } else { "" },
+        "$" + formatter.format(_subtotal_total),
+        _listData.toList
+      )
+  }
+
+  def siap_orden_trabajo_cobro_calculo_desmonte(empresa: Empresa, orden: orden_trabajo_cobro): Double = {
+    0.0
+  }
+
   def siap_orden_trabajo_cobro_relacion_factura(empr_id: Long): Array[Byte] = {
     var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
     var _listMerged01 = new ListBuffer[CellRange]()
@@ -11094,7 +11411,7 @@ class Cobro6Repository @Inject()(
                    case Some(2) => { "EXPANSION DE " + N2T.convertirLetras(orden.cotr_cantidad.get).toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_nueva.get + " DE " + orden.cotr_potencia_nueva.get + " W" }
                    case Some(6) => { "MODERNIZACION DE " + N2T
                                     .convertirLetras(orden.cotr_cantidad.get)
-                                    .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_anterior.get + " DE " + orden.cotr_potencia_anterior.get + "W" + " POR " + N2T
+                                    .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + (orden.cotr_luminaria_anterior match { case Some(v) => v case None => "" }) + " DE " + orden.cotr_potencia_anterior.get + "W" + " POR " + N2T
                                     .convertirLetras(orden.cotr_cantidad.get)
                                     .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_nueva.get + " DE " + orden.cotr_potencia_nueva.get + " W" }
                   case _ => s""
@@ -11582,7 +11899,7 @@ class Cobro6Repository @Inject()(
       _materiales.map { _m =>
         _m._3 match {
           case Some(precio) =>
-            val _cant = if (_m._1.startsWith("FOTOCELDA")) {
+            val _cant = /* if (_m._1.startsWith("FOTOCELDA")) {
                           if (_m._4 == _cantidad_xls){
                             _m._4 / _cantidad_xls
                           } else if ( _m._4 == 1) {
@@ -11592,7 +11909,8 @@ class Cobro6Repository @Inject()(
                           }
                         } else {
                           _m._4 / _cantidad_xls,
-                        }
+                        } */
+                        _m._4 / _cantidad_xls
             _total += precio * _cant
           case None =>
             _total += 0

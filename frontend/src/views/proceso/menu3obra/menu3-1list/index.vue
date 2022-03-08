@@ -88,7 +88,7 @@
           </template>
         </el-table-column>
         <el-table-column
-          :label="$t('obra.ot')"
+          :label="$t('obra.mot')"
           width="120"
           sortable="custom"
           prop="muot_id"
@@ -96,6 +96,17 @@
            >
           <template slot-scope="scope">
             <span style="margin-left: 10px">{{ scope.row.muot_id }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('obra.ot')"
+          width="120"
+          sortable="custom"
+          prop="muot_id"
+          resizable
+           >
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ ordenes(scope.row.ortr_id) }}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -209,6 +220,7 @@ import { mapGetters } from 'vuex'
 import { getObrasRango, deleteObra, getEstados, printObra } from '@/api/obra'
 import { getBarriosEmpresa } from '@/api/barrio'
 import { getOrigenes } from '@/api/origen'
+import { getOrdenes } from '@/api/ordentrabajo'
 
 export default {
   data () {
@@ -444,9 +456,21 @@ export default {
     },
     getData (anho, mes, data) {
       getObrasRango(anho, mes).then(response => {
-        console.log('Periodo: ' + data.tabName)
         data.tableData = response.data
+        console.log('obras: ' + JSON.stringify(data.tableData))
       })
+    },
+    ordenes (id) {
+      if (id === undefined || id === null) {
+        return ''
+      } else {
+        var orden = this.ordenestrabajo.find((o) => o.ortr_id === id)
+        if (orden) {
+          return orden.ortr_consecutivo + ' - ' + orden.cuad_descripcion
+        } else {
+          return ''
+        }
+      }
     },
     filtrar (data) {
       if (!this.filtro) {
@@ -474,24 +498,28 @@ export default {
     var year = date.getFullYear()
     var month = date.getMonth() + 1
     console.log('Mes Inicial : ' + month)
-    for (var i = 12; i >= 1; i--) {
-      var data = {
-        tabName: this.$i18n.t('months.m' + month) + year,
-        tabRange: {
-          anho: year,
-          mes: month
-        },
-        tableData: []
-      }
-      this.tabsData.push(data)
-      this.getData(data.tabRange.anho, data.tabRange.mes, data)
-      month--
-      if (month < 1) {
-        month = 12
-        year--
-      }
-    }
-    this.activeTab = this.tabsData[0].tabName
+    getOrdenes().then(
+      (response) => {
+        this.ordenestrabajo = response.data
+        for (var i = 12; i >= 1; i--) {
+          var data = {
+            tabName: this.$i18n.t('months.m' + month) + year,
+            tabRange: {
+              anho: year,
+              mes: month
+            },
+            tableData: []
+          }
+          this.tabsData.push(data)
+          this.getData(data.tabRange.anho, data.tabRange.mes, data)
+          month--
+          if (month < 1) {
+            month = 12
+            year--
+          }
+        }
+        this.activeTab = this.tabsData[0].tabName
+      })
   },
   created () {
     getBarriosEmpresa().then(response => {

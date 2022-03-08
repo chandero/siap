@@ -56,6 +56,7 @@ libraryDependencies ++= Seq(
   "com.beachape" %% "enumeratum" % "1.6.1",
   // Pdf Generator
   "com.hhandoko" %% "play28-scala-pdf" % "4.3.0",
+  
   //
   "net.codingwell" %% "scala-guice" % "4.2.11",
   "commons-io" % "commons-io" % "2.4"

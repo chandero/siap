@@ -13,10 +13,10 @@
           <el-main>
             <el-form>
               <el-row>
-                <el-col span="1">
+                <el-col :span="1">
                   <el-button type="primary" icon="el-icon-plus" circle @click="showDialog = true" ></el-button>
                 </el-col>
-                <el-col span="1">
+                <el-col :span="1">
                   <el-button type="success" icon="el-icon-refresh" circle @click="obtener()"></el-button>
                 </el-col>
               </el-row>
@@ -205,7 +205,7 @@
     </el-main>
   </el-container>
         <el-row>
-        <el-col :span='1'>
+        <el-col :span="1">
           <img
             :title="$t('xls')"
             @click='exportarXls()'
@@ -213,12 +213,20 @@
             :src="require('@/assets/xls.png')"
           />
         </el-col>
-        <el-col :span='1'>
+        <el-col :span="1">
           <img
             :title="$t('relacion')"
             @click='showRelacionDialog = true'
             style='width: 32px; height: 36px; cursor: pointer;'
             :src="require('@/assets/prnt.png')"
+          />
+        </el-col>
+        <el-col :span="1">
+          <img
+            :title="$t('cobro.acta_redimensionamiento')"
+            @click='showActaDialog = true'
+            style='width: 32px; height: 36px; cursor: pointer;'
+            :src="require('@/assets/pdf.png')"
           />
         </el-col>
       </el-row>
@@ -305,13 +313,46 @@
         <el-button :disabled="!anho || !mes" type="primary" @click="handleRelacion()">Imprimir</el-button>
     </span>
   </el-dialog>
+  <el-dialog
+    title="Generar Acta Redimensionamiento"
+    :visible.sync="showActaDialog"
+    width="40%"
+    destroy-on-close
+    center
+    @closed="handleActaDialogClosed"
+  >
+    <el-container>
+      <el-main>
+        <el-form label-position="left" label-width="200px">
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="Año">
+                <el-input type="number" v-model="anho" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="Periodo">
+                <el-select v-model="mes">
+                  <el-option v-for="m in months" :key="m.id" :value="m.id" :label="$t(`months.${m.label}`)"></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </el-main>
+    </el-container>
+    <span slot="footer" class="dialog-footer">
+        <el-button @click="showActaDialog = false">Cancelar</el-button>
+        <el-button :disabled="!anho || !mes" type="primary" @click="handleActa()">Generar</el-button>
+    </span>
+  </el-dialog>
   </el-container>
 </template>
 <script>
 import VueQueryBuilder from 'vue-query-builder'
 import { mapGetters } from 'vuex'
 import { getTipos } from '@/api/reporte'
-import { obtener, generar, xls, verificar, consecutivo, relacion } from '@/api/cobro'
+import { obtener, generar, xls, verificar, consecutivo, relacion, actaRedimensionamiento } from '@/api/cobro'
 import { getCaracteristica } from '@/api/caracteristica'
 import { parseTime } from '@/utils'
 export default {
@@ -398,6 +439,7 @@ export default {
       tableData: [],
       showDialog: false,
       showRelacionDialog: false,
+      showActaDialog: false,
       total: 0,
       page_size: 50,
       current_page: 1,
@@ -617,12 +659,38 @@ export default {
         }
       })
     },
+    handleActa () {
+      this.showActaDialog = false
+      const loading = this.$loading({
+        lock: true,
+        text: 'Generando Acta...'
+      })
+      actaRedimensionamiento(this.anho, this.mes).then(resp => {
+        var blob = resp.data
+        const filename = 'Acta_Orden_Trabajo_ITAF_' + this.anho + '_' + this.$i18n.t(this.mes) + '.pdf'
+        if (window.navigator.msSaveOrOpenBlob) {
+          window.navigator.msSaveBlob(blob, filename)
+        } else {
+          var downloadLink = window.document.createElement('a')
+          downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }))
+          downloadLink.download = filename
+          document.body.appendChild(downloadLink)
+          loading.close()
+          downloadLink.click()
+          document.body.removeChild(downloadLink)
+        }
+      }).catch((err) => {
+        loading.close()
+        this.$message.error(err.message)
+      })
+    },
     handleSort () {},
     handleFilter () {},
     handleSizeChange () {},
     handleCurrentChange () {},
     handleClose () {},
     handleRelacionDialogClosed () {},
+    handleActaDialogClosed () {},
     actualizar () {}
   }
 }

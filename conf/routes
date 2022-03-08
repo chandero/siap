@@ -573,6 +573,7 @@ GET /api/ortr/all controllers.OrdenTrabajoController.ordenes
 GET /api/ortr/:id controllers.OrdenTrabajoController.buscarPorId(id: Long)
 GET /api/ortr/del/:id controllers.OrdenTrabajoController.borrarOrden(id: Long)
 GET /api/otar/:ot/:re/:tu controllers.OrdenTrabajoController.agregarReporte(ot: Long, re: Long, tu: Int)
+GET /api/otao/:ot/:ob controllers.OrdenTrabajoController.agregarObra(ot: Long, ob: Long)
 POST /api/ortr/save controllers.OrdenTrabajoController.guardarOrden
 POST /api/ortr/upd controllers.OrdenTrabajoController.actualizarOrden
 GET /api/ortr/st/get controllers.OrdenTrabajoController.getEstados
@@ -695,6 +696,7 @@ GET /api/cotr/chk/:r/:a/:m                            controllers.CobroControlle
 GET /api/cotr/csc/:r                            controllers.CobroController.siap_orden_trabajo_cobro_consecutivo(r:Long)
 GET /api/cotr/rel/:a/:p                         controllers.CobroController.siap_orden_trabajo_cobro_relacion(a:Int, p:Int)
 GET /api/cotr/rel2                         controllers.CobroController.siap_orden_trabajo_cobro_relacion_factura
+GET /api/cotr/acta/:a/:m                        controllers.CobroController.siap_orden_trabajo_cobro_acta_redimensionamiento(a:Int, m:Int)
 
 # Cobro Factura
 POST /api/cofa/all                      controllers.CobroFacturaController.todos

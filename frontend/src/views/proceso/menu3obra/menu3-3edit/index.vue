@@ -8,7 +8,7 @@
               <el-collapse v-model="activePages" @change="handleActivePagesChange">
                 <el-collapse-item name="1" :title="$t('obra.general')" style="font-weight: bold;">
                     <el-row :gutter="4">
-                        <el-col :xs="24" :sm="24" :md="10" :lg="10" :xl="10">
+                        <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
                             <el-form-item prop="obra_fecharecepcion" :label="$t('obra.receptiondate')">
                                 <span style="font-size: 24px;">{{ obra.obra_fecharecepcion | moment('YYYY/MM/DD HH:MM')}}</span>
                             </el-form-item>
@@ -39,11 +39,66 @@
                             <el-input readonly style="font-size: 30px;" v-model="obra.obra_consecutivo"></el-input>
                           </el-form-item>
                         </el-col>
-                        <el-col :xs="24" :sm="24" :md="9" :lg="9" :xl="9">
-                          <el-form-item prop="muot_id" :label="$t('obra.ot')">
+                        <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+                          <el-form-item prop="muot_id" :label="$t('obra.mot')">
                             <el-input type="number" style="font-size: 30px;" v-model="obra.muot_id" @input="obra.muot_id = parseInt($event, 10)"></el-input>
                           </el-form-item>
                         </el-col>
+                        <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6">
+                          <template v-if="ortr_id_state">
+                            <el-form-item
+                              prop="obra.ortr_id"
+                              :label="$t('obra.ot')"
+                              required
+                            >
+                              <el-select
+                                style="width: 100%"
+                                ref="ortr_id"
+                                v-model="obra.ortr_id"
+                                name="ortr_id"
+                                filterable
+                                :placeholder="$t('ortr.select')"
+                                @change="changeFocus('nombre')"
+                              >
+                                <el-option
+                                  v-for="ot in ordenestrabajo"
+                                  :key="ot.ortr_id"
+                                  :label="ordenes(ot.ortr_id)"
+                                  :value="ot.ortr_id"
+                                ></el-option>
+                              </el-select>
+                              <el-button
+                                circle
+                                size="mini"
+                                icon="el-icon-check"
+                                type="success"
+                                @click="confirmOrdenTrabajo(); ortr_id_state = false;"
+                              />
+                              <el-button
+                                class="cancel-btn"
+                                size="mini"
+                                icon="el-icon-close"
+                                type="warning"
+                                circle
+                                @click="obra.ortr_id = ortr_id; ortr_id_state = false;"
+                              />
+                            </el-form-item>
+                          </template>
+                          <template v-else>
+                            <el-form-item :label="$t('obra.ot')">
+                              <span style="400 13.3333px Arial;">{{
+                                ordenes(obra.ortr_id)
+                              }}</span>
+                              <el-button
+                                circle
+                                size="mini"
+                                icon="el-icon-edit"
+                                style="border-style: hidden"
+                                @click="ortr_id_state = !ortr_id_state"
+                              />
+                            </el-form-item>
+                          </template>
+                      </el-col>
                     </el-row>
                     <el-row :gutter="4">
                         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
@@ -464,7 +519,7 @@ import { getActividades } from '@/api/actividad'
 import { getOrigenes } from '@/api/origen'
 import { getBarriosEmpresa } from '@/api/barrio'
 import { getTiposBarrio } from '@/api/tipobarrio'
-import { getObra, updateObra, getEstados, validarCodigo } from '@/api/obra'
+import { getObra, updateObra, getEstados, validarCodigo, addObraAOrden } from '@/api/obra'
 import { getAcciones } from '@/api/accion'
 import { getElementos, getElementoByDescripcion, getElementoByCode } from '@/api/elemento'
 import { getAapEdit, getAapValidar } from '@/api/aap'
@@ -474,6 +529,8 @@ import { getAapMarcas } from '@/api/aap_marca'
 import { getAapModelos } from '@/api/aap_modelo'
 import { getCaracteristica } from '@/api/caracteristica'
 import { getAapConexiones } from '@/api/aap_conexion'
+import { getOrdenes } from '@/api/ordentrabajo'
+
 // component
 
 // import { inspect } from 'util'
@@ -509,6 +566,7 @@ export default {
         obra_modificado: null,
         obra_obratecnico: null,
         obra_descripcion: null,
+        ortr_id: null,
         muot_id: null,
         rees_id: 3,
         orig_id: null,
@@ -589,6 +647,8 @@ export default {
         acti_estado: 1,
         usua_id: 0
       },
+      ortr_id: null,
+      ortr_id_state: false,
       centerDialogVisible: false,
       dirrules: [],
       eventrules: [],
@@ -630,6 +690,27 @@ export default {
     pending: { name: 'pending', time: 30000, autostart: false, repeat: true }
   },
   methods: {
+    confirmOrdenTrabajo () {
+      addObraAOrden(
+        this.obra.ortr_id,
+        this.obra.obra_id
+      )
+        .then((response) => {
+          if (response.data === 'true') {
+            this.$message({
+              message: 'Orden de Trabajo Actualizada',
+              type: 'success'
+            })
+          } else {
+          }
+        })
+        .catch((error) => {
+          this.$message({
+            message: 'Orden de Trabajo NO Actualizada, error:' + error,
+            type: 'warning'
+          })
+        })
+    },
     autosave () {
       localStorage.setItem('currEditObra', JSON.stringify(this.obra))
     },
@@ -979,12 +1060,27 @@ export default {
         this.obra = this.obra_previo
         console.log('Obra cargada: ' + JSON.stringify(this.obra))
         this.obra.tiba_id = this.tiposector(this.obra.barr_id)
+        if (!this.obra.ortr_id) {
+          this.obra.ortr_id = null
+        }
         this.$timer.start('autosave')
         this.$timer.start('pending')
         this.pending()
       }).catch(error => {
         console.log('getObra: ' + error)
       })
+    },
+    ordenes (id) {
+      if (id === undefined || id === null) {
+        return ''
+      } else {
+        var orden = this.ordenestrabajo.find((o) => o.ortr_id === id)
+        if (orden) {
+          return orden.ortr_consecutivo + ' - ' + orden.cuad_descripcion
+        } else {
+          return ''
+        }
+      }
     },
     validarConsecutivo () {
       // var consecutivo = 1
@@ -1099,7 +1195,12 @@ export default {
                                 }
                                 getAapConexiones().then(response => {
                                   this.conexiones = response.data
-                                  this.obtenerObra()
+                                  getOrdenes().then((response) => {
+                                    this.ordenestrabajo = response.data
+                                    this.obtenerObra()
+                                  }).catch(error => {
+                                    console.log('getOrdenes: ', error)
+                                  })
                                 }).catch(error => {
                                   console.log('getConexiones :' + error)
                                 })

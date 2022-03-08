@@ -15,9 +15,11 @@ import org.joda.time.DateTime
 
 import dto._
 import org.joda.time.LocalDate
-import java.util.Date
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.Period
+
+import java.util.Date
+import java.text.SimpleDateFormat
 
 class Utility {
     private val meses = List[String]("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre")
@@ -46,6 +48,46 @@ class Utility {
       }
       texto.toString()
     }
+
+  def fechaastring(fecha: DateTime): String = {
+    val gmtDay = new SimpleDateFormat("yyyy-MM-dd")
+    gmtDay.format(fecha.toDate())
+  }
+
+  def fechaatextosindia(fecha: Option[DateTime]): String = {
+    var texto = new StringBuffer()
+    fecha match {
+      case Some(fecha) =>
+        val anho = fecha.year().get()
+        val mes = fecha.monthOfYear().get() - 1
+        val diasemana = fecha.dayOfWeek().get()
+        val dia = fecha.dayOfMonth().get
+        texto.append(dia.toString)
+        texto.append(" de ")
+        texto.append(meses(mes))
+        texto.append(" de ")
+        texto.append(anho.toString)
+      case None => texto.append("")
+    }
+    texto.toString()
+  }
+
+  def fechaamesanho(fecha: Option[DateTime]): String = {
+    var texto = new StringBuffer()
+    fecha match {
+      case Some(fecha) =>
+        val anho = fecha.year().get()
+        val mes = fecha.monthOfYear().get() - 1
+        val diasemana = fecha.dayOfWeek().get()
+        val dia = fecha.dayOfMonth().get
+        texto.append(meses(mes))
+        texto.append(" de ")
+        texto.append(anho.toString)
+      case None => texto.append("")
+    }
+    texto.toString()
+  }  
+
 
     def validarToken(token: String, secret: String): Boolean = {
       if (token == secret) {

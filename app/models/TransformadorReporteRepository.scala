@@ -1207,6 +1207,7 @@ class TransformadorReporteRepository @Inject()(
           new LocalDateTime(Calendar.getInstance().getTimeInMillis())
         val consec = consecutivo(reporte.reti_id.get)
         if (consec > 0) {
+          println("Insertando Reporte Transformador")
           val id: scala.Long = SQL(
             "INSERT INTO siap.transformador_reporte (repo_fecharecepcion, repo_direccion, repo_nombre, repo_telefono, repo_fechasolucion, repo_horainicio, repo_horafin, repo_reportetecnico, repo_descripcion, rees_id, orig_id, barr_id, empr_id, tiba_id, usua_id, reti_id, repo_consecutivo) VALUES ({repo_fecharecepcion}, {repo_direccion}, {repo_nombre}, {repo_telefono}, {repo_fechasolucion}, {repo_horainicio}, {repo_horafin}, {repo_reportetecnico}, {repo_descripcion}, {rees_id}, {orig_id}, {barr_id}, {empr_id}, {tiba_id}, {usua_id}, {reti_id}, {repo_consecutivo})"
           ).on(
@@ -1230,7 +1231,8 @@ class TransformadorReporteRepository @Inject()(
             )
             .executeInsert()
             .get
-
+          println("Reporte Transformador Creado")
+          println("Insertando Reporte Transformador Adicional")
           reporte.adicional.map { adicional =>
             SQL("""INSERT INTO siap.transformador_reporte_adicional (repo_id, 
                                                                repo_fechadigitacion, 
@@ -1248,7 +1250,7 @@ class TransformadorReporteRepository @Inject()(
                                                                urba_id,
                                                                muot_id,
                                                                medi_id,
-                                                               aap_id,
+                                                               tran_id,
                                                                medi_acta,
                                                                aaco_id_anterior,
                                                                aaco_id_nuevo) VALUES (
@@ -1274,6 +1276,7 @@ class TransformadorReporteRepository @Inject()(
                                                                 {aaco_id_nuevo}
                                                                )""")
               .on(
+                'repo_id -> id,
                 'repo_fechadigitacion -> adicional.repo_fechadigitacion,
                 'repo_tipo_expansion -> adicional.repo_tipo_expansion,
                 'repo_luminaria -> adicional.repo_luminaria,
@@ -1289,15 +1292,14 @@ class TransformadorReporteRepository @Inject()(
                 'urba_id -> adicional.urba_id,
                 'muot_id -> adicional.muot_id,
                 'medi_id -> adicional.medi_id,
-                'aap_id -> adicional.tran_id,
+                'tran_id -> adicional.tran_id,
                 'medi_acta -> adicional.medi_acta,
                 'aaco_id_anterior -> adicional.aaco_id_anterior,
-                'aaco_id_nuevo -> adicional.aaco_id_nuevo,
-                'repo_id -> id
+                'aaco_id_nuevo -> adicional.aaco_id_nuevo
               )
               .executeInsert()
           }
-
+          println("Reporte Transformador Adicional Creado")
           SQL(
             "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
           ).on(

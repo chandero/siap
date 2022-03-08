@@ -74,6 +74,16 @@
     "indexes-of": "^1.0.1",
     "sass-loader": "^10.1.1",
     "script-loader": "^0.7.2",
-    "webpack": "^4.46.0"
+    "webpack": "^4.46.0",
+    "prettier": "^1.19.1",
+    "vue-eslint-parser": "^7.9.0"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "none",
+    "useTabs": false,
+    "vueIndentScriptAndStyle": true,
+    "spaceBeforeFunctionParen": true
   }
 }

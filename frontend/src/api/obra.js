@@ -116,6 +116,13 @@ export function getTipos () {
   })
 }
 
+export function addObraAOrden (obra_id, ortr_id) {
+  return request({
+    url: '/otao/' + obra_id + '/' + ortr_id,
+    method: 'get'
+  })
+}
+
 export function printObra (obra_id, empr_id) {
   const data = {
     obra_id,

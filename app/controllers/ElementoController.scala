@@ -63,14 +63,15 @@ class ElementoController @Inject()(
       val current_page = ( json \ "current_page").as[Long]
       val orderby = ( json \ "orderby").as[String]
       val filter = ( json \ "filter").as[QueryDto]
+      val anho = ( json \ "anho").as[Int]
       val filtro_a = Utility.procesarFiltrado(filter)
       var filtro = filtro_a.replace("\"", "'")
       if (filtro == "()") {
         filtro = ""
       }
       val empr_id = Utility.extraerEmpresa(request)    
-      val total = elementoService.cuentaPrecio(empr_id.get, filtro)
-      elementoService.todosPrecio(empr_id.get, page_size, current_page, orderby, filtro).map { elementos =>
+      val total = elementoService.cuentaPrecio(empr_id.get, filtro, anho)
+      elementoService.todosPrecio(empr_id.get, page_size, current_page, orderby, filtro, anho).map { elementos =>
         Ok(write(ResultDto(elementos.toList, total)))
       }
     }

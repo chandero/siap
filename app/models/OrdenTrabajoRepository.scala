@@ -754,4 +754,38 @@ class OrdenTrabajoRepository @Inject()(dbapi: DBApi, empresaService:EmpresaRepos
 
     }
 
+    /*
+    * Agregar reporte
+    * */
+    def agregarObra(ortr_id: Long, obra_id: Long) : Boolean = {
+        db.withConnection { implicit connection => 
+            var result:Boolean = SQL("""SELECT COUNT(*) AS total FROM siap.ordentrabajo_obra WHERE ortr_id = {ortr_id} AND obra_id = {obra_id}""").
+                                    on(
+                                        'ortr_id -> ortr_id,
+                                        'obra_id -> obra_id
+                                    ).as(SqlParser.scalar[Int].single) > 0
+
+            if (!result) {
+                var even_id = SQL("""SELECT even_id FROM siap.ordentrabajo_obra WHERE ortr_id = {ortr_id} ORDER BY even_id DESC LIMIT 1""").
+                on(
+                  'ortr_id -> ortr_id
+                ).as(SqlParser.scalar[Int].singleOpt)
+                var id = 0
+                even_id match {
+                    case Some(e) => id = e + 1
+                    case None => id = 1
+                }
+                result = SQL("""INSERT INTO siap.ordentrabajo_obra (ortr_id, obra_id, even_id, even_estado) VALUES ({ortr_id}, {obra_id}, {even_id}, {even_estado})""").
+                on(
+                    'ortr_id -> ortr_id,
+                    'obra_id -> obra_id,
+                    'even_id -> id,
+                    'even_estado -> 1
+                ).executeInsert().get > 0
+            }
+            result
+        }
+
+    }    
+
 }

@@ -53,6 +53,14 @@ export function relacion2 () {
   })
 }
 
+export function actaRedimensionamiento (anho, mes) {
+  return request({
+    url: `cotr/acta/${anho}/${mes}`,
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
 export function facturaTodas (page_size, current_page, order, filter) {
   const data = {
     page_size: page_size,

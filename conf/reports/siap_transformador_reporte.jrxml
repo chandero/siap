@@ -17,7 +17,7 @@
 	<queryString language="SQL">
 		<![CDATA[SELECT r.repo_fecharecepcion, r.repo_direccion, r.repo_nombre, r.repo_telefono, r.repo_descripcion, r.repo_consecutivo, r.repo_fechasolucion, r.repo_reportetecnico,
        r.rees_id, r.repo_horainicio, r.repo_horafin,
-       i.tran_direccion as aap_direccion,
+       i.aap_direccion as aap_direccion,
        b2.barr_descripcion as barr_descripcion,
 	   ra.repo_tipo_expansion, ra.repo_codigo, ra.repo_apoyo, ra.repo_email, rt.*, a.*, o.*, b.* FROM siap.transformador_reporte r
 LEFT JOIN siap.transformador_reporte_adicional ra on r.repo_id = ra.repo_id
@@ -25,7 +25,7 @@ LEFT JOIN siap.reporte_tipo rt on r.reti_id = rt.reti_id
 LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
 LEFT JOIN siap.origen o on r.orig_id = o.orig_id
 LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
-LEFT JOIN siap.transformador i on i.tran_id = cast(ra.repo_codigo as int)
+LEFT JOIN siap.transformador i on i.aap_id = cast(ra.repo_codigo as int)
 LEFT JOIN siap.barrio b2 on b2.barr_id = i.barr_id
 WHERE r.repo_id = $P{REPO_ID}]]>
 	</queryString>
@@ -88,6 +88,7 @@ WHERE r.repo_id = $P{REPO_ID}]]>
 		<property name="com.jaspersoft.studio.field.name" value="aap_direccion"/>
 		<property name="com.jaspersoft.studio.field.label" value="aap_direccion"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="transformador"/>
+		<fieldDescription><![CDATA[dirección del transformador]]></fieldDescription>
 	</field>
 	<field name="barr_descripcion" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="barr_descripcion"/>

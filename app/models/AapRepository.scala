@@ -1252,7 +1252,7 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
               """select distinct rd1.aap_id, r1.repo_fechasolucion as aael_fecha, rt1.reti_id, r1.repo_consecutivo from siap.reporte r1
                 inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id 
                 inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
-                inner join siap.reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+                left join siap.reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
                where rd1.aap_id = {aap_id} and rd1.even_estado < 8 and r1.empr_id = {empr_id}
                order by r1.repo_fechasolucion desc"""
         ).on(

@@ -148,4 +148,14 @@ class OrdenTrabajoController @Inject()(
         Future.successful(ServiceUnavailable(Json.toJson("false")))
       }
   }
+
+  def agregarObra(ortr_id: Long, obra_id: Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val usua_id = Utility.extraerUsuario(request)
+      if (ordenService.agregarObra(ortr_id, obra_id)) {
+        Future.successful(Ok(Json.toJson("true")))
+      } else {
+        Future.successful(ServiceUnavailable(Json.toJson("false")))
+      }
+  }  
 }

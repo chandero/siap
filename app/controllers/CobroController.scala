@@ -6,6 +6,7 @@ import models._
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.Configuration
+import play.api.Environment
 
 import com.google.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
@@ -22,19 +23,29 @@ import pdi.jwt.JwtSession
 
 import utilities._
 import dto.QueryDto
+import dto.ActaRedimensionamientoDto
+import java.util.Calendar
+
+import com.hhandoko.play.pdf.PdfGenerator
 @Singleton
 class CobroController @Inject()(
     cobro6Service: Cobro6Repository,
     cobro2Service: Cobro2Repository,
     config: Configuration,
     authenticatedUserAction: AuthenticatedUserAction,
-    cc: ControllerComponents
+    cc: ControllerComponents,
+    env: Environment
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc)
     with ImplicitJsonFormats {
   implicit val formats = Serialization.formats(NoTypeHints) ++ List(
     DateTimeSerializer
   )
+  val FONTS_DEFINITION_PATH = System.getProperty("user.dir") + "/conf/fonts/"
+  val opensans_regular = FONTS_DEFINITION_PATH + "arial.ttf"
+  val pdfGen = new PdfGenerator(env, true)
+  pdfGen.loadLocalFonts(Seq(opensans_regular))
+
 
   def siap_obtener_orden_trabajo_cobro_modernizacion = authenticatedUserAction.async { implicit request => 
       val empr_id = Utility.extraerEmpresa(request)
@@ -156,4 +167,40 @@ class CobroController @Inject()(
       )
   }  
   
+  def siap_orden_trabajo_cobro_acta_redimensionamiento(anho:Int, periodo:Int) = authenticatedUserAction.async { implicit request =>
+      val empr_id = Utility.extraerEmpresa(request)
+      val usua_id = Utility.extraerUsuario(request)
+      val (_subtotal_expansion, _subtotal_modernizacion, _subtotal_desmonte, _subtotal_total, _tablaData) = cobro6Service.siap_orden_trabajo_cobro_anexo_redimensionamiento(empr_id.get , anho, periodo)
+      val _periodo = Calendar.getInstance()
+      _periodo.set(Calendar.YEAR, anho)
+      _periodo.set(Calendar.MONTH, periodo)
+      _periodo.set(Calendar.DAY_OF_MONTH, 1)
+      _periodo.set(Calendar.DATE, _periodo.getActualMaximum(Calendar.DATE))
+
+      var _fecha_corte = _periodo.clone().asInstanceOf[Calendar]
+      _fecha_corte.add(Calendar.MONTH, -1)
+      var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
+      _fecha_corte_anterior.add(Calendar.MONTH, -1)
+
+      val acta = new ActaRedimensionamientoDto(
+        Utility.fechaamesanho(Some(new DateTime(_periodo.getTime()))),
+        Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
+        Utility.fechaatextosindia(Some(new DateTime(_fecha_corte_anterior.getTime()))),
+        Utility.fechaamesanho(Some(new DateTime(_fecha_corte_anterior.getTime()))),
+        Utility.fechaatextosindia(Some(new DateTime())),
+        "0",
+        "0",
+        "0",
+        _subtotal_expansion,
+        _subtotal_modernizacion,
+        _subtotal_desmonte,
+        _subtotal_total,
+        "0",
+        _tablaData.toList
+      )
+      Future.successful(pdfGen.ok(
+          views.html.siap_cobro_acta_redimensionamiento(acta),
+          "conf/fonts/Arial.ttf"      
+      ))
+    }
 }

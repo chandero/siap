@@ -56,6 +56,7 @@ case class Obra(obra_id: Option[scala.Long],
                    obra_horainicio: Option[String],
                    obra_horafin: Option[String],
                    obra_modificado: Option[DateTime],
+                   ortr_id: Option[scala.Long],
                    muot_id: Option[scala.Long],                   
                    orig_id: Option[scala.Long],
                    rees_id: Option[scala.Long], 
@@ -79,6 +80,7 @@ case class ObraConsulta(obra_id: Option[scala.Long],
                    obra_horainicio: Option[String],
                    obra_horafin: Option[String],
                    obra_modificado: Option[DateTime],
+                   ortr_id: Option[scala.Long],
                    muot_id: Option[scala.Long],
                    orig_id: Option[scala.Long],
                    rees_id: Option[scala.Long], 
@@ -179,110 +181,12 @@ object Obra {
     implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
 
-    implicit val obraWrites = new Writes[Obra] {
-        def writes(obra: Obra) = Json.obj(
-            "obra_id" -> obra.obra_id,
-            "obra_consecutivo" -> obra.obra_consecutivo,
-            "obra_nombre" -> obra.obra_nombre,            
-            "obra_fecharecepcion" -> obra.obra_fecharecepcion,
-            "obra_direccion" -> obra.obra_direccion,
-            "obra_solicitante" -> obra.obra_solicitante,
-            "obra_telefono" -> obra.obra_telefono,
-            "obra_email" -> obra.obra_email,
-            "obra_reportetecnico" -> obra.obra_reportetecnico,
-            "obra_fechasolucion" -> obra.obra_fechasolucion,
-            "obra_descripcion" -> obra.obra_descripcion,
-            "obra_horainicio" -> obra.obra_horainicio,
-            "obra_horafin" -> obra.obra_horafin,
-            "obra_modificado" -> obra.obra_modificado,
-            "muot_id" -> obra.muot_id,
-            "rees_id" -> obra.rees_id,
-            "orig_id" -> obra.orig_id,
-            "barr_id" -> obra.barr_id,
-            "empr_id" -> obra.empr_id,
-            "usua_id" -> obra.usua_id,
-            "meams" -> obra.meams,
-            "eventos" -> obra.eventos
-        )
-    }
-
-    implicit val obraReads: Reads[Obra] = (
-        (__ \ "obra_id").readNullable[scala.Long] and
-        (__ \ "obra_consecutivo").readNullable[scala.Long] and
-        (__ \ "obra_nombre").readNullable[String] and        
-        (__ \ "obra_fecharecepcion").readNullable[DateTime] and
-        (__ \ "obra_direccion").readNullable[String] and
-        (__ \ "obra_solicitante").readNullable[String] and
-        (__ \ "obra_telefono").readNullable[String] and
-        (__ \ "obra_email").readNullable[String] and
-        (__ \ "obra_fechasolucion").readNullable[DateTime] and
-        (__ \ "obra_reportetecnico").readNullable[String] and       
-        (__ \ "obra_descripcion").readNullable[String] and
-        (__ \ "obra_horainicio").readNullable[String] and       
-        (__ \ "obra_horafin").readNullable[String] and
-        (__ \ "obra_modificado").readNullable[DateTime] and
-        (__ \ "muot_id").readNullable[scala.Long] and
-        (__ \ "rees_id").readNullable[scala.Long] and
-        (__ \ "orig_id").readNullable[scala.Long] and
-        (__ \ "barr_id").readNullable[scala.Long] and
-        (__ \ "empr_id").readNullable[scala.Long] and
-        (__ \ "usua_id").readNullable[scala.Long] and
-        (__ \ "meams").readNullable[List[scala.Long]] and
-        (__ \ "eventos").readNullable[List[ObraEvento]]
-    )(Obra.apply _)
 }
 
 object ObraConsulta {
     implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
 
-    implicit val rcWrites = new Writes[ObraConsulta] {
-        def writes(a: ObraConsulta) = Json.obj(
-            "obra_id" -> a.obra_id,
-            "obra_consecutivo" -> a.obra_consecutivo,
-            "obra_nombre" -> a.obra_nombre,            
-            "obra_fecharecepcion" -> a.obra_fecharecepcion,
-            "obra_direccion" -> a.obra_direccion,
-            "obra_solicitante" -> a.obra_solicitante,
-            "obra_telefono" -> a.obra_telefono,
-            "obra_email" -> a.obra_email,
-            "obra_reportetecnico" -> a.obra_reportetecnico,
-            "obra_fechasolucion" -> a.obra_fechasolucion,
-            "obra_descripcion" -> a.obra_descripcion,
-            "obra_horainicio" -> a.obra_horainicio,
-            "obra_horafin" -> a.obra_horafin,
-            "obra_modificado" -> a.obra_modificado,
-            "muot_id" -> a.muot_id,
-            "rees_id" -> a.rees_id,
-            "orig_id" -> a.orig_id,
-            "barr_id" -> a.barr_id,
-            "empr_id" -> a.empr_id,
-            "usua_id" -> a.usua_id
-        )
-    }
-
-    implicit val rcReads: Reads[ObraConsulta] = (
-        (__ \ "obra_id").readNullable[scala.Long] and
-        (__ \ "obra_consecutivo").readNullable[scala.Long] and
-        (__ \ "obra_nombre").readNullable[String] and        
-        (__ \ "obra_fecharecepcion").readNullable[DateTime] and
-        (__ \ "obra_direccion").readNullable[String] and
-        (__ \ "obra_solicitante").readNullable[String] and
-        (__ \ "obra_telefono").readNullable[String] and
-        (__ \ "obra_email").readNullable[String] and
-        (__ \ "obra_fechasolucion").readNullable[DateTime] and
-        (__ \ "obra_reportetecnico").readNullable[String] and
-        (__ \ "obra_descripcion").readNullable[String] and
-        (__ \ "obra_horainicio").readNullable[String] and
-        (__ \ "obra_horafin").readNullable[String] and
-        (__ \ "obra_modificado").readNullable[DateTime] and
-        (__ \ "muot_id").readNullable[scala.Long] and
-        (__ \ "rees_id").readNullable[scala.Long] and
-        (__ \ "orig_id").readNullable[scala.Long] and
-        (__ \ "barr_id").readNullable[scala.Long] and
-        (__ \ "empr_id").readNullable[scala.Long] and
-        (__ \ "usua_id").readNullable[scala.Long]
-    )(ObraConsulta.apply _)
 }
 
 class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, elementoService: ElementoRepository, empresaService: EmpresaRepository, usuarioService: UsuarioRepository, aapService: AapRepository)(implicit ec:DatabaseExecutionContext){
@@ -306,6 +210,7 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
         get[Option[String]]("obra_horainicio") ~
         get[Option[String]]("obra_horafin") ~     
         get[Option[DateTime]]("obra_modificado") ~
+        get[Option[scala.Long]]("ortr_id") ~
         get[Option[scala.Long]]("muot_id") ~
         get[Option[scala.Long]]("rees_id") ~
         get[Option[scala.Long]]("orig_id") ~
@@ -326,6 +231,7 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
                  obra_horainicio ~
                  obra_horafin ~
                  obra_modificado ~
+                 ortr_id ~
                  muot_id ~
                  rees_id ~
                  orig_id ~
@@ -346,6 +252,7 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
                  obra_horainicio,
                  obra_horafin,
                  obra_modificado,
+                 ortr_id,
                  muot_id,
                  rees_id,
                  orig_id,
@@ -450,8 +357,9 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
     Future[Iterable[Obra]] {
       db.withConnection { implicit connection =>
         var _list:ListBuffer[Obra] = new ListBuffer[Obra]()
-        var query: String = """SELECT *
+        var query: String = """SELECT r.*, oto1.ortr_id
                                           FROM siap.obra r 
+                                          left join siap.ordentrabajo_obra oto1 on oto1.obra_id = r.obra_id 
                                           LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                                           WHERE r.empr_id = {empr_id}
                                           and r.rees_id <> 9 """
@@ -496,6 +404,7 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
                 r.obra_horainicio,
                 r.obra_horafin,
                 r.obra_modificado,
+                r.ortr_id,
                 r.muot_id,
                 r.rees_id,
                 r.orig_id,
@@ -518,7 +427,8 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
   def obras(empr_id:scala.Long): Future[Iterable[Obra]] = Future[Iterable[Obra]] {
       db.withConnection { implicit connection =>
         var _list:ListBuffer[Obra] = new ListBuffer[Obra]()
-        val reps = SQL("""SELECT * FROM siap.obra r 
+        val reps = SQL("""SELECT r.*, oto1.ortr_id FROM siap.obra r 
+                          left join siap.ordentrabajo_obra oto1 on oto1.obra_id = r.obra_id 
                                           WHERE r.empr_id = {empr_id} 
                                           and r.rees_id <> 9""")
                     .on(
@@ -549,6 +459,7 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
                 r.obra_horainicio,
                 r.obra_horafin,
                 r.obra_modificado,
+                r.ortr_id,
                 r.muot_id,
                 r.rees_id,
                 r.orig_id,
@@ -570,9 +481,10 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
     */
     def buscarPorId(obra_id: scala.Long) : Option[Obra] = {
         db.withConnection { implicit connection => 
-            val r = SQL("""SELECT * FROM siap.obra r
+            val r = SQL("""SELECT r.*, oto1.ortr_id FROM siap.obra r
                             LEFT JOIN siap.origen o on r.orig_id = o.orig_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            left join siap.ordentrabajo_obra oto1 on oto1.obra_id = r.obra_id 
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
                     WHERE r.obra_id = {obra_id}""").
             on(
@@ -603,6 +515,7 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
                 r.obra_horainicio,
                 r.obra_horafin,
                 r.obra_modificado,
+                r.ortr_id,
                 r.muot_id,
                 r.rees_id,
                 r.orig_id,
@@ -625,9 +538,10 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
     */
     def buscarPorConsecutivo(obra_consecutivo: scala.Long, empr_id: scala.Long) : Option[Obra] = {
         db.withConnection { implicit connection => 
-            val r = SQL("""SELECT * FROM siap.obra r
+            val r = SQL("""SELECT r.*, oto1.ortr_id FROM siap.obra r
                             LEFT JOIN siap.origen o on r.orig_id = o.orig_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            left join siap.ordentrabajo_obra oto1 on oto1.obra_id = r.obra_id 
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
                     WHERE r.obra_consecutivo = {obra_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9""").
             on(
@@ -659,6 +573,7 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
                                                                   r.obra_horainicio,
                                                                   r.obra_horafin,
                                                                   r.obra_modificado,
+                                                                  r.ortr_id,
                                                                   r.muot_id,
                                                                   r.rees_id,
                                                                   r.orig_id,
@@ -684,9 +599,10 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
     */
     def buscarPorConsecutivoConsulta(obra_consecutivo: scala.Long, empr_id: scala.Long) : Option[ObraConsulta] = {
         db.withConnection { implicit connection => 
-            val r = SQL("""SELECT * FROM siap.obra r
+            val r = SQL("""SELECT r.*, oto1.ortr_id FROM siap.obra r
                             LEFT JOIN siap.origen o on r.orig_id = o.orig_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            left join siap.ordentrabajo_obra oto1 on oto1.obra_id = r.obra_id 
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
                     WHERE r.obra_consecutivo = {obra_consecutivo} and r.empr_id = {empr_id} and r.rees_id <>9""").
             on(
@@ -710,6 +626,7 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
                                                                   r.obra_horainicio,
                                                                   r.obra_horafin,
                                                                   r.obra_modificado,
+                                                                  r.ortr_id,
                                                                   r.muot_id,
                                                                   r.rees_id,
                                                                   r.orig_id,
@@ -732,9 +649,10 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
     def buscarPorRango(anho: Int, mes: Int, empr_id: scala.Long) : Future[Iterable[Obra]] = Future[Iterable[Obra]] {
         db.withConnection { implicit connection => 
         var _list:ListBuffer[Obra] = new ListBuffer[Obra]()
-        var query: String = """SELECT *
+        var query: String = """SELECT r.*, oto1.ortr_id
                                           FROM siap.obra r 
                                           LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                                          left join siap.ordentrabajo_obra oto1 on oto1.obra_id = r.obra_id 
                                           WHERE r.empr_id = {empr_id} and r.obra_fecharecepcion between {fecha_inicial} and {fecha_final}
                                           and r.rees_id <> 9 ORDER BY r.rees_id, r.obra_fecharecepcion DESC """
                     /*
@@ -782,6 +700,7 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
                 r.obra_horainicio,
                 r.obra_horafin,
                 r.obra_modificado,
+                r.ortr_id,
                 r.muot_id,
                 r.rees_id,
                 r.orig_id,
@@ -805,7 +724,9 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
     */
     def buscarPorRangoFechaSolucion(fecha_inicial: DateTime, fecha_final: DateTime, empr_id: scala.Long) : Future[Iterable[Obra]] = Future[Iterable[Obra]] {
         db.withConnection { implicit connection => 
-            SQL("SELECT * FROM siap.obra WHERE obra_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and empr_id = {empr_id}").
+            SQL("""SELECT o1.*, oto1.ortr_id FROM siap.obra o1
+              left join siap.ordentrabajo_obra oto1 on oto1.obra_id = o1.obra_id 
+              WHERE obra_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and empr_id = {empr_id}""").
             on(
                 'fecha_inicial -> fecha_inicial,
                 'fecha_final -> fecha_final,
@@ -821,7 +742,9 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
     */
     def buscarPorEstado(rees_id: scala.Long, empr_id: scala.Long) : Future[Iterable[Obra]] = Future[Iterable[Obra]] {
         db.withConnection { implicit connection => 
-            SQL("SELECT * FROM siap.obra WHERE rees_id = {rees_id} and empr_id = {empr_id}").
+            SQL("""SELECT o1.*, oto1.ortr_id FROM siap.obra o1
+                left join siap.ordentrabajo_obra oto1 on oto1.obra_id = o1.obra_id 
+              WHERE rees_id = {rees_id} and empr_id = {empr_id}""").
             on(
                 'rees_id -> rees_id,
                 'empr_id -> empr_id
@@ -836,7 +759,9 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
     */
     def buscarPorOrigen(orig_id: scala.Long, empr_id: scala.Long) : Future[Iterable[Obra]] = Future[Iterable[Obra]] {
         db.withConnection { implicit connection => 
-            SQL("SELECT * FROM siap.obra WHERE orig_id = {orig_id} and empr_id = {empr_id}").
+            SQL("""SELECT o1.*, oto1.ortr_id FROM siap.obra o1
+                left join siap.ordentrabajo_obra oto1 on oto1.obra_id = o1.obra_id 
+              WHERE orig_id = {orig_id} and empr_id = {empr_id}""").
             on(
                 'orig_id -> orig_id,
                 'empr_id -> empr_id
@@ -853,7 +778,9 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
     */
     def buscarAvanzado(filtro: scala.collection.mutable.Map[String, Object]) : Future[Iterable[Obra]] = Future[Iterable[Obra]] {
         db.withConnection { implicit connection => 
-            SQL("SELECT * FROM siap.obra")
+            SQL("""SELECT o1.*, oto1.ortr_id FROM siap.obra o1
+            left join siap.ordentrabajo_obra oto1 on oto1.obra_id = o1.obra_id 
+            """)
             .as(simple *)
         }        
     }

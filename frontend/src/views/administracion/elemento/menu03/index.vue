@@ -11,6 +11,15 @@
               <el-button size="large" type="primary" icon="el-icon-money" circle @click="showPrecioPeriodoDialog = true" title="Precio para Nuevo Año"></el-button>
             </el-header>
             <el-main>
+              <el-form>
+                <el-row>
+                  <el-col :span="2">
+                    <el-form-item label="Año">
+                      <el-input type="number" v-model="anho" label="Año" @change="handleChangeAnho"></el-input>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </el-form>
               <el-table
                 :data="tableData"
                 stripe
@@ -192,6 +201,7 @@ export default {
   },
   data () {
     return {
+      anho: new Date().getFullYear(),
       tableData: [],
       page_size: 10,
       current_page: 1,
@@ -238,6 +248,9 @@ export default {
     }
   },
   methods: {
+    handleChangeAnho () {
+      this.getElementos()
+    },
     handlePrecioPeriodoDialogClosed () {
       this.precioAnho = new Date().getFullYear()
       this.precioIncremento = null
@@ -291,7 +304,7 @@ export default {
         this.current_page = 1
         this.qbquery_ant = this.qbquery
       }
-      getTodosPrecio(this.page_size, this.current_page, this.order, this.qbquery)
+      getTodosPrecio(this.page_size, this.current_page, this.order, this.qbquery, parseInt(this.anho))
         .then(response => {
           this.total = response.data.total
           this.tableData = response.data.data.map(v => {

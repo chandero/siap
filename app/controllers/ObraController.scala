@@ -10,6 +10,11 @@ import scala.util.{Success, Failure}
 import java.io.{OutputStream, ByteArrayOutputStream}
 import org.joda.time.LocalDate
 
+import net.liftweb.json._
+import net.liftweb.json.Serialization.write
+import net.liftweb.json.Serialization.read
+import net.liftweb.json.parse
+
 import pdi.jwt.JwtSession
 
 import utilities._
@@ -22,7 +27,9 @@ class ObraController @Inject()(
     cc: ControllerComponents,
     authenticatedUserAction: AuthenticatedUserAction)(
     implicit ec: ExecutionContext)
-    extends AbstractController(cc) {
+    extends AbstractController(cc) with ImplicitJsonFormats {
+  implicit val formats = Serialization.formats(NoTypeHints) ++ List(DateTimeSerializer)                          
+
   def todos(): Action[AnyContent] =
     authenticatedUserAction.async { implicit request: Request[AnyContent] => 
     val json = request.body.asJson.get
@@ -37,7 +44,7 @@ class ObraController @Inject()(
     val empr_id = Utility.extraerEmpresa(request)
     val total = obraService.cuenta(empr_id.get)
     obraService.todos(page_size, current_page, empr_id.get, orderby, filtro).map { obras =>
-        Ok(Json.obj("obras" -> obras, "total" -> total))
+        Ok(write(new ResultDto[Obra](obras.toList, total)))
       }
     }
 
@@ -45,7 +52,7 @@ class ObraController @Inject()(
     implicit request : Request[AnyContent] =>
     val empr_id = Utility.extraerEmpresa(request)
     obraService.obras(empr_id.get).map { obras =>
-      Ok(Json.toJson(obras))
+      Ok(write(obras))
     }
   }
 
@@ -64,7 +71,7 @@ class ObraController @Inject()(
           Future.successful(NotFound(Json.toJson("false")))
         }
         case Some(obra) => {
-          Future.successful(Ok(Json.toJson(obra)))
+          Future.successful(Ok(write(obra)))
         }
       }
   }
@@ -78,7 +85,7 @@ class ObraController @Inject()(
           Future.successful(NotFound(Json.toJson("false")))
         }
         case Some(obra) => {
-          Future.successful(Ok(Json.toJson(obra)))
+          Future.successful(Ok(write(obra)))
         }
       }
   }
@@ -87,7 +94,7 @@ class ObraController @Inject()(
     implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
       obraService.buscarPorRango(anho, mes, empr_id.get).map { obras =>
-        Ok(Json.toJson(obras))
+        Ok(write(obras))
       }
   }
 
@@ -95,7 +102,7 @@ class ObraController @Inject()(
   def guardarObra() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
-      var obra = json.as[Obra]
+      var obra = net.liftweb.json.parse(json.toString).extract[Obra]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
       val obranuevo = new Obra(null,
@@ -112,6 +119,7 @@ class ObraController @Inject()(
                             obra.obra_horainicio,
                             obra.obra_horafin,
                             obra.obra_modificado,
+                            obra.ortr_id,
                             obra.muot_id,
                             obra.rees_id,
                             obra.orig_id,
@@ -133,7 +141,7 @@ class ObraController @Inject()(
   def actualizarObra() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
-      var obra = json.as[Obra]
+      var obra = net.liftweb.json.parse(json.toString).extract[Obra]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)      
       val obranuevo = new Obra(obra.obra_id,
@@ -150,6 +158,7 @@ class ObraController @Inject()(
                             obra.obra_horainicio,
                             obra.obra_horafin,
                             obra.obra_modificado,
+                            obra.ortr_id,
                             obra.muot_id,
                             obra.rees_id,
                             obra.orig_id,

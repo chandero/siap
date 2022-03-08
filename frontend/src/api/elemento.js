@@ -14,12 +14,13 @@ export function getTodos (page_size, current_page, orderby, filter) {
   })
 }
 
-export function getTodosPrecio (page_size, current_page, orderby, filter) {
+export function getTodosPrecio (page_size, current_page, orderby, filter, anho) {
   const data = {
     page_size,
     current_page,
     orderby,
-    filter
+    filter,
+    anho
   }
   return request({
     url: '/elem/mat/gap',

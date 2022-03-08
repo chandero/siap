@@ -16,6 +16,7 @@ export default {
   pdf: 'Exportar a Pdf',
   xls: 'Exportar a Excel',
   relacion: 'Imprimir Relación',
+  acta_redimensionamiento: 'Generar Acta de Redimensionamiento',
   lostserverconnection: 'Se perdión conexión con el servidor. Verificando...',
   ver: 'Ver Detalle',
   anho: 'Año',
@@ -66,6 +67,9 @@ export default {
     cantidad: 'Cantidad',
     tipo_obra: 'Tipo de Obra',
     tipo_obra_tipo: 'Tipo'
+  },
+  cobro: {
+    acta_redimensionamiento: 'Generar Acta de Redimensionamiento'
   },
   route: {
     dashboard: 'Tablero',
@@ -376,6 +380,7 @@ export default {
     menu_proceso_menu2pendiente: 'Reporte Pendiente',
     menu_proceso_menu3obra: 'Obra',
     'menu_proceso_menu3obra_menu3-1list': 'Reporte',
+    'menu_proceso_menu3obra_menu3-3edit': 'Actualizar',
     'menu_proceso_menu3obra_menu3-4pendiente': 'Reporte Obra Pendiente',
     menu_proceso_menu4orden: 'Orden de Trabajo',
     'menu_proceso_menu4orden_menu4-1interna': 'Interna',
@@ -1041,7 +1046,8 @@ export default {
     timestart: 'Hora Inicio',
     timeend: 'Hora Fin',
     name: 'Nombre de la Obra',
-    ot: 'Orden de Trabajo',
+    ot: 'ODT Interna',
+    mot: 'Municipio OT',
     solicitante: 'Nombre Solicitante',
     telefono: 'Teléfono Solicitante'
   },
