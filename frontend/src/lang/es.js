@@ -634,7 +634,8 @@ export default {
     elpr_anho_anterior: 'Año Anterior',
     elpr_incremento: 'Incremento',
     elpr_precio_anterior: 'Precio Anterior',
-    elpr_anho: 'Año Actual'
+    elpr_anho: 'Año Actual',
+    fecha_digitacion: 'Fecha Digitación'
   },
   unitario: {
     select: 'Seleccione las Ucap',

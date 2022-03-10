@@ -47,7 +47,7 @@
                   </el-table-column>
                   <el-table-column
                     :label="$t('elemento.reporte_tipo')"
-                    width="150"
+                    width="250"
                   >
                     <template slot-scope="scope">
                       <span style="margin-left: 10px">{{ tipo_reporte(scope.row.reti_id) }}</span>
@@ -55,10 +55,18 @@
                   </el-table-column>
                   <el-table-column
                     :label="$t('elemento.reporte')"
-                    width="600"
+                    width="110"
                   >
                     <template slot-scope="scope">
                       <span style="margin-left: 10px">{{ scope.row.repo_consecutivo }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    :label="$t('elemento.fecha_digitacion')"
+                    width="150"
+                  >
+                    <template slot-scope="scope">
+                      <span style="margin-left: 10px">{{ scope.row.repo_fechadigitacion | moment('YYYY/MM/DD HH:mm:ss') }}</span>
                     </template>
                   </el-table-column>
 <!--                   <el-table-column
