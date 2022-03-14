@@ -242,7 +242,7 @@ class Cobro2Repository @Inject()(
       empr_id: scala.Long,
       cotr_consecutivo: scala.Long
   ): Future[Boolean] = Future {
-    db.withConnection { implicit connection =>
+    db.withTransaction { implicit connection =>
       var fi = Calendar.getInstance()
       var ff = Calendar.getInstance()
       fi.set(Calendar.YEAR, anho)
@@ -462,7 +462,7 @@ class Cobro2Repository @Inject()(
           inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
           inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
           inner join siap.elemento e1 on e1.elem_id = re1.elem_id
-          inner join siap.unitario u1 on u1.unit_id = re1.unit_id
+          left join siap.unitario u1 on u1.unit_id = re1.unit_id
           left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
           where cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id}
           group by 
@@ -491,7 +491,7 @@ class Cobro2Repository @Inject()(
                     {aap_id})"""
         val _queryActualizarMaterial = """UPDATE siap.cobro_orden_trabajo_material SET 
                         cotrma_cantidad_total = {cotrma_cantidad_total},
-                        unit_id = (select unit_id from siap.elemento_unitario eu1 where eu1.elem_id = {elem_id} and eu1.elun_tipo_obra = {cotr_tipo_obra} and eu1.elun_tipo_obra_tipo = {cotr_tipo_obra_tipo} and {cotrma_cantidad_total} between eu1.elun_entre_min and eu1.elun_entre_max)
+                        unit_id = (select unit_id from siap.elemento_unitario eu1 where eu1.elem_id = {elem_id} and eu1.elun_tipo_obra = {cotr_tipo_obra} and eu1.elun_tipo_obra_tipo = {cotr_tipo_obra_tipo} and {cotrma_cantidad_total} between eu1.elun_entre_min and eu1.elun_entre_max order by eu1.unit_id asc limit 1)
                         WHERE cotr_id = {cotr_id} AND elem_id = {elem_id}"""
         _materiales.map { material =>
           println("Insertando Material: " + material + ", cotr_id:" + _o._1)
@@ -515,9 +515,32 @@ class Cobro2Repository @Inject()(
               'cotr_tipo_obra -> _o._2,
               'cotr_tipo_obra_tipo -> _o._3
             )
-            println("Actualizando Material: " + material + ", cotr_id:" + _o._1)
+            println("Actualizando Material: " + material + ", cotr_id:" + _o._1 + ", query:" + _sql.toString())
               _sql.executeUpdate()
           }
+        }
+        // Validar otros unitarios
+        val _query_si_hay = """select count(*) from siap.cobro_orden_trabajo cot1
+                inner join siap.cobro_orden_trabajo_material cotm1 on cotm1.cotr_id = cot1.cotr_id 
+                where cotm1.unit_id = {unit_id} and cot1.cotr_tipo_obra = 2 and cot1.cotr_tipo_obra_tipo = '3' and cot1.cotr_id = {cotr_id};"""
+        val _query_material_posible = """select distinct cotm1.elem_id from siap.cobro_orden_trabajo_material cotm1 where cotm1.cotr_id = 683 and cotm1.unit_id <> 2 order by cotm1.elem_id;"""
+        val _query_actualizar_posible = """update siap.cobro_orden_trabajo_material set unit_id = {unit_id} where cotr_id = {cotr_id} and elem_id in (select distinct cotm1.elem_id from siap.cobro_orden_trabajo_material cotm1 
+                                           inner join siap.elemento_unitario eu1 on eu1.elem_id = cotm1.elem_id 
+                                           where cotm1.cotr_id = {cotr_id} and cotm1.unit_id = {unit_id} order by cotm1.elem_id);"""
+        //// Validar unitario 1.02
+        if (_o._2 == 2 && _o._3 == "3") {
+          SQL(_query_actualizar_posible).on(
+            'unit_id -> 2,
+            'cotr_id -> _o._1
+          ).executeUpdate()
+          SQL(_query_actualizar_posible).on(
+            'unit_id -> 3,
+            'cotr_id -> _o._1
+          ).executeUpdate()
+          SQL(_query_actualizar_posible).on(
+            'unit_id -> 8,
+            'cotr_id -> _o._1
+          ).executeUpdate()
         }
       }
 
@@ -3912,6 +3935,7 @@ class Cobro2Repository @Inject()(
               inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
               inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
               where cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id} and e1.elem_estado = 1
+              order by u1.unit_codigo asc
           """
       ).on(
           'empr_id -> orden.empr_id,
@@ -3931,13 +3955,10 @@ class Cobro2Repository @Inject()(
           val elements =
             SQL("""select distinct e1.elem_id, e1.elem_descripcion
                           from siap.cobro_orden_trabajo cot1
-                          inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                          inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-                          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
-                          inner join siap.elemento e1 on e1.elem_id = re1.elem_id
-                          inner join siap.unitario u1 on u1.unit_id = re1.unit_id
-                          left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} and u1.unit_codigo = {unitario} and e1.ucap_id = 1
+                          inner join siap.cobro_orden_trabajo_material cotm1 on cotm1.cotr_id = cot1.cotr_id
+                          inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                          inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
+                          where cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id} and u1.unit_codigo = {unitario} and e1.ucap_id = 1
                           order by e1.elem_id""")
               .on(
                 'empr_id -> orden.empr_id,
@@ -5841,16 +5862,13 @@ class Cobro2Repository @Inject()(
         case Some(elem_id) =>
           // Buscar Luminarias Correspondientes para el material correcto
           var _luminarias = SQL(
-            """select re1.aap_id
+            """select cotm1.aap_id
                           from siap.cobro_orden_trabajo cot1
-                          inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                          inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-                          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
-                          inner join siap.elemento e1 on e1.elem_id = re1.elem_id and e1.elem_estado = 1
-                          inner join siap.unitario u1 on u1.unit_id = re1.unit_id
-                          left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} and u1.unit_codigo = {unit_codigo} and e1.ucap_id = 1 and e1.elem_id = {elem_id}
-                          order by re1.aap_id """
+                          inner join siap.cobro_orden_trabajo_material cotm1 on cotm1.cotr_id = cot1.cotr_id 
+                          inner join siap.elemento e1 ON e1.elem_id = cotm1.elem_id
+                          inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
+                          where cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id} and u1.unit_codigo = {unit_codigo} and e1.ucap_id = 1 and e1.elem_id = {elem_id}
+                          order by cotm1.aap_id"""
           ).on(
               'cotr_id -> orden.cotr_id,
               'empr_id -> empresa.empr_id.get,

@@ -1145,8 +1145,8 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
         (select ep1.elpr_anho from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
 				(select ep1.elpr_fecha from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
 				(select ep1.elpr_precio_nuevo from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
-        (select ep1.elpr_precio_cotizado from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0)
-        (select ep1.elpr_precio from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0)
+        (select ep1.elpr_precio_cotizado from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
+        (select ep1.elpr_precio from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
         u1.unit_codigo
            FROM siap.reporte r1
            INNER JOIN siap.reporte_evento re1 ON re1.repo_id = r1.repo_id
@@ -1208,32 +1208,32 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
               Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
               CellStyleInheritance.CellThenRowThenColumnThenSheet),
             NumericCell(
-              _m._8 match { case Some(v) => v case None => 0D }, 
+              _m._11 match { case Some(v) => v case None => 0D }, 
               Some(8),
               Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             NumericCell(
               _m._10 match { case Some(v) => v case None => 0D }, 
-              Some(8),
+              Some(9),
               Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             NumericCell(
-              _m._11 match { case Some(v) => v case None => 0D }, 
-              Some(8),
-              Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+              _m._8 match { case Some(v) => v case None => 0D }, 
+              Some(10),
+              Some(CellStyle(dataFormat = CellDataFormat("###0"))),
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),                        
             StringCell(
               _m._9 match { case Some(v) => v.toString("yyyy/MM/dd") case None => "" },
-              Some(9),
+              Some(11),
               Some(CellStyle(dataFormat = CellDataFormat("@"))),
               CellStyleInheritance.CellThenRowThenColumnThenSheet            
             ),
             StringCell(
               _m._13 match { case Some(v) => v case None => "" },
-              Some(10),
+              Some(12),
               Some(CellStyle(dataFormat = CellDataFormat("@"))),
               CellStyleInheritance.CellThenRowThenColumnThenSheet            
             )            
