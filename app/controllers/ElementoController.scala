@@ -186,8 +186,10 @@ class ElementoController @Inject()(
       val json = request.body.asJson.get
       val elem_id = (json \ "elem_id").as[Long]
       val elpr_precio = (json \ "elpr_precio").as[BigDecimal]
+      val elpr_anho = (json \ "elpr_anho").as[Int]
       val usua_id = Utility.extraerUsuario(request)
-      if (elementoService.agregarPrecio(elem_id, elpr_precio, "UND", usua_id.get)) {
+      // if (elementoService.agregarPrecio(elem_id, elpr_precio, "UND", usua_id.get)) {
+      if (elementoService.actualizarPrecio(elem_id, elpr_anho, elpr_precio, usua_id.get)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
         Future.successful(ServiceUnavailable(Json.toJson("false")))

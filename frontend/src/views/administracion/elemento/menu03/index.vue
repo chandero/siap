@@ -24,35 +24,14 @@
                 :data="tableData"
                 stripe
                 width="100%" height="500">
-<!--                 <el-table-column type="expand">
-                  <template slot-scope="props">
-                    <el-table
-                      :data="props.row.caracteristicas"
-                      stripe
-                      style="width:100%"
-                    >
-                      <el-table-column
-                        :label="$t('elemento.characteristic')"
-                        width="250"
-                      >
-                        <template slot-scope="scope">
-                          <span style="margin-left: 10px">{{ caracteristica(scope.row.cara_id) }}</span>
-                        </template>
-                      </el-table-column>
-                      <el-table-column
-                        :label="$t('caracteristica.value')"
-                        width="250">
-                        <template slot-scope="scope">
-                          <span style="margin-left: 10px">{{ scope.row.elca_valor }}</span>
-                        </template>
-                      </el-table-column>
-                    </el-table>
-                  </template>
-                </el-table-column> -->
+        <el-table-column
+          :label="$t('elemento.id')"
+          width="50"
+          prop="elem_id">
+        </el-table-column>
         <el-table-column
           :label="$t('elemento.description')"
           width="350"
-          prop="elem_descripcion"
         >
           <template slot-scope="scope">
             <span style="margin-left: 10px" :title="scope.row.elem_descripcion">{{ scope.row._3 | fm_truncate(40) }}</span>
@@ -60,8 +39,7 @@
         </el-table-column>
         <el-table-column
           :label="$t('elemento.code')"
-          width="100"
-          prop="elem_codigo">
+          width="100">
           <template slot-scope="scope">
             <span style="margin-left: 10px">{{ scope.row._2 }}</span>
           </template>
@@ -77,7 +55,6 @@
         <el-table-column
           :label="$t('elemento.elpr_precio_anterior')"
           width="120"
-          prop="elpr_precio_anterior"
           align="right"
            >
            <template slot-scope="scope">
@@ -85,9 +62,17 @@
            </template>
         </el-table-column>
         <el-table-column
+          :label="$t('elemento.elpr_ipc')"
+          width="120"
+          align="right"
+           >
+           <template slot-scope="scope">
+            <span>{{ scope.row._8 - scope.row._5 | toThousandslsFilter }}</span>
+           </template>
+        </el-table-column>
+        <el-table-column
           :label="$t('elemento.elpr_incremento')"
           width="120"
-          prop="elpr_incremento"
           align="right"
            >
            <template slot-scope="scope">
@@ -95,14 +80,31 @@
            </template>
         </el-table-column>
         <el-table-column
+          :label="$t('elemento.elpr_precio_nuevo')"
+          width="120"
+          align="right"
+           >
+           <template slot-scope="scope">
+            <span>{{ scope.row._8 }}</span>
+           </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('elemento.elpr_precio_cotizado')"
+          width="120"
+          align="right"
+           >
+           <template slot-scope="scope">
+            <span>{{ scope.row._9 }}</span>
+           </template>
+        </el-table-column>
+        <el-table-column
           :label="$t('elemento.elpr_precio')"
           width="120"
-          prop="elpr_precio"
           align="right"
            >
           <template slot-scope="scope">
             <template v-if="scope.row.edit">
-              <el-input v-model="scope.row._9" class="edit-input" size="small" />
+              <el-input v-model="scope.row._10" class="edit-input" size="small" />
               <el-button
                 class="cancel-btn"
                 size="mini"
@@ -112,7 +114,7 @@
                 @click="cancelEdit(scope.row)"
               />
             </template>
-            <span v-else>{{ scope.row._9 | toThousandslsFilter }}</span>
+            <span v-else>{{ scope.row._10 | toThousandslsFilter }}</span>
             <el-button
               v-if="scope.row.edit"
               circle
@@ -132,18 +134,16 @@
         </el-table-column>
         <el-table-column
           :label="$t('elemento.elpr_anho')"
-          width="100"
-          prop="elpr_anho">
+          width="100">
           <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row._7 }}</span>
+            <span style="margin-left: 10px">{{ scope.row._11 }}</span>
           </template>
         </el-table-column>
         <el-table-column
           :label="$t('elemento.date')"
-          width="100"
-          prop="elem_codigo">
+          width="100">
           <template slot-scope="scope">
-            <span style="margin-left: 10px">{{ scope.row._8  | moment('YYYY-MM-DD') }}</span>
+            <span style="margin-left: 10px">{{ scope.row._12  | moment('YYYY-MM-DD') }}</span>
           </template>
         </el-table-column>
       </el-table>
@@ -234,13 +234,13 @@ export default {
       qrules: [
         {
           type: 'text',
-          id: 'e1.elem_descripcion',
+          id: 'o.elem_descripcion',
           label: this.$i18n.t('elemento.elem_descripcion'),
           operators: ['igual a', 'no igual a', 'contiene a', 'comienza con', 'termina con']
         },
         {
           type: 'text',
-          id: 'cast(e1.elem_codigo as int)',
+          id: 'cast(o.elem_codigo as int)',
           label: this.$i18n.t('elemento.elem_codigo'),
           operators: ['=', '<>', '<=', '>=']
         }
@@ -304,6 +304,9 @@ export default {
         this.current_page = 1
         this.qbquery_ant = this.qbquery
       }
+      const loading = this.$loading({
+        lock: true
+      })
       getTodosPrecio(this.page_size, this.current_page, this.order, this.qbquery, parseInt(this.anho))
         .then(response => {
           this.total = response.data.total
@@ -312,7 +315,10 @@ export default {
             this.$set(v, 'precioOriginal', v._5)
             return v
           })
-        }).catch(() => {})
+          loading.close()
+        }).catch(() => {
+          loading.close()
+        })
     },
     cancelEdit (row) {
       row._5 = row.precioOriginal
@@ -324,8 +330,12 @@ export default {
     },
     confirmEdit (row) {
       row.edit = false
-      updatePriceElemento(row._1, row._5).then(response => {
+      const loading = this.$loading({
+        lock: true
+      })
+      updatePriceElemento(row._1, row._10, row._11).then(response => {
         if (response.data === 'true') {
+          loading.close()
           this.getElementos()
           this.$message({
             message: 'El precio ha sido modificado',
@@ -339,6 +349,7 @@ export default {
           })
         }
       }).catch(() => {
+        loading.close()
         row._5 = row.precioOriginal
         this.$message({
           message: 'El precio se restauró a su valor original',
@@ -347,8 +358,13 @@ export default {
       })
     },
     exportarXls () {
+      const loading = this.$loading({
+        text: 'Exportando a Excel',
+        lock: true
+      })
       todosPrecioXls(this.qbquery)
         .then(response => {
+          loading.close()
           var blob = response.data
           const d = new Date()
           var _datestring = d.getDate() + '-' + (d.getMonth() + 1) + '-' + d.getFullYear() + '_' + d.getHours() + ':' + d.getMinutes()
@@ -364,7 +380,7 @@ export default {
             document.body.removeChild(downloadLink)
           }
         })
-        .catch(() => {})
+        .catch(() => { loading.close() })
     }
   },
   mounted () {

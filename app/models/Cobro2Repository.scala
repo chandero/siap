@@ -5894,7 +5894,8 @@ class Cobro2Repository @Inject()(
                          inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
                          inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
                          where cot1.empr_id = {empr_id} AND cot1.cotr_id = {cotr_id} and u1.unit_codigo = {unit_codigo} AND e1.elem_estado = 1 AND CAST(cotm1.aap_id as VARCHAR) IN ({luminarias})
-                         group by 1,2,3"""
+                         group by 1,2,3
+                         order by 2 DESC"""
           SQL(_qmat)
             .on(
               'cotr_id -> orden.cotr_id,
@@ -5918,7 +5919,8 @@ class Cobro2Repository @Inject()(
                          inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
                          inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
                          where cotm1.cotr_id = {cotr_id} and u1.unit_codigo = {unit_codigo} AND e1.elem_estado = 1
-                         group by 1,2,3"""
+                         group by 1,2,3
+                         order by 2 DESC"""
           SQL(
             _qmat
           ).on(
@@ -14071,8 +14073,14 @@ class Cobro2Repository @Inject()(
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
-          NumericCell(
-            _m._4,
+          FormulaCell(
+            unit_codigo match {
+              case "1.03" => _m._1 match {
+                case 1 => "480/" + "H" + (_idx - (6 + _m._1)) + "* 3"
+                case _ => "480/" + "H" + (_idx - (6 + _m._1))
+              }
+              case _ => _m._4.toString()
+            },
             Some(7),
             style = Some(
               CellStyle(

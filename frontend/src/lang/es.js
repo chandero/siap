@@ -597,6 +597,7 @@ export default {
     confirmationmsg: 'Se procederá a borrar la Empresa seleccionada, continuar?'
   },
   elemento: {
+    id: 'Id',
     title: 'Materiales Disponibles',
     select: 'Seleccione el Material',
     submit: 'Seleccionar',
@@ -626,7 +627,7 @@ export default {
     instalado: 'Instalado',
     reporte: 'Reporte No.',
     reporte_tipo: 'Tipo Reporte',
-    elpr_precio: 'Precio',
+    elpr_precio: 'Precio Favorable',
     elem_descripcion: 'Descripción',
     elem_codigo: 'Código',
     unitario: 'Ucap Unitario',
@@ -635,6 +636,9 @@ export default {
     elpr_incremento: 'Incremento',
     elpr_precio_anterior: 'Precio Anterior',
     elpr_anho: 'Año Actual',
+    elpr_ipc: 'IPC Año',
+    elpr_precio_nuevo: 'Precio Actual',
+    elpr_precio_cotizado: 'Precio Cotizado',
     fecha_digitacion: 'Fecha Digitación'
   },
   unitario: {
