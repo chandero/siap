@@ -5412,7 +5412,7 @@ class ReporteRepository @Inject()(
           reporte match {
             case Some(r) =>
               if ( reporte.get.reti_id.get == 6) {
-                compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_expansion.jasper"
+                compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_modernizacion.jasper"
               }
               if (reporte.get.reti_id.get == 2) {
                 if (reporte.get.adicional.get.repo_tipo_expansion.get.toInt == 3) {

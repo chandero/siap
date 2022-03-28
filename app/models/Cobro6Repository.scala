@@ -11625,15 +11625,13 @@ class Cobro6Repository @Inject()(
     var _total = 0D
     var _listCuadroGeneralUnitario = new ListBuffer[(String, Double, Double, Double, Double)]()
     db.withConnection{ implicit connection =>
-    var _query =  """select distinct u1.unit_codigo
-                          from siap.cobro_orden_trabajo cot1
-                          inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                          inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-                          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
-                          inner join siap.elemento e1 on e1.elem_id = re1.elem_id
-                          inner join siap.unitario u1 on u1.unit_id = re1.unit_id
-                          left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} and e1.elem_estado = 1 """
+    var _query = """select distinct u1.unit_codigo
+                      from siap.cobro_orden_trabajo cot1
+                      inner join siap.cobro_orden_trabajo_material cotm1 on cotm1.cotr_id = cot1.cotr_id
+                      inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
+                      inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                      where cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id} and e1.elem_estado = 1
+          """
     orden.cotr_tipo_obra match {
       case Some(v) => v match {
             case 6 => _query += """ union all
@@ -11656,13 +11654,10 @@ class Cobro6Repository @Inject()(
           val _elements =
             SQL("""select distinct e1.elem_id, e1.elem_descripcion
                           from siap.cobro_orden_trabajo cot1
-                          inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                          inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-                          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
-                          inner join siap.elemento e1 on e1.elem_id = re1.elem_id
-                          inner join siap.unitario u1 on u1.unit_id = re1.unit_id
-                          left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                          where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} and u1.unit_codigo = {unitario} and e1.ucap_id = 1
+                          inner join siap.cobro_orden_trabajo_material cotm1 on cotm1.cotr_id = cot1.cotr_id
+                          inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                          inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
+                          where cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id} and u1.unit_codigo = {unitario} and e1.ucap_id = 1
                           order by e1.elem_id""")
               .on(
                 'empr_id -> orden.empr_id,
@@ -11703,8 +11698,9 @@ class Cobro6Repository @Inject()(
     val _cantidad = util_cobro_orden_trabajo_cantidad(empresa, orden, unit_codigo, elem_id)
     val _herramienta = util_cobro_orden_trabajo_herramienta(empresa, orden, unit_codigo, elem_id)
     val _material = util_cobro_orden_trabajo_material(empresa, orden, unit_codigo, elem_id, _cantidad)
-    val _mano_obra = util_cobro_orden_trabajo_mano_obra(empresa, orden, unit_codigo, elem_id)
-    (unit_codigo, _cantidad, _herramienta, _material, _mano_obra)
+    val _cantidad103 = _material._2
+    val _mano_obra = util_cobro_orden_trabajo_mano_obra(empresa, orden, unit_codigo, elem_id, _cantidad103)
+    (unit_codigo, _cantidad, _herramienta, _material._1, _mano_obra)
   }  
 
   def util_cobro_orden_trabajo_cantidad(empresa: Empresa, orden: orden_trabajo_cobro, unit_codigo: String, elem_id: Option[Int]) = {
@@ -11727,49 +11723,45 @@ class Cobro6Repository @Inject()(
       }      
       var _cantidad_item = elem_id match {
         case Some(elem_id) =>
+          val _qcant = """SELECT SUM(cotrma_cantidad) FROM siap.cobro_orden_trabajo cot1
+                        INNER JOIN siap.cobro_orden_trabajo_material cotrma1 ON cotrma1.cotr_id = cot1.cotr_id
+                        WHERE cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id} and cotrma1.elem_id = {elem_id} AND cotrma1.unit_id = {unit_id}"""
           SQL(
-            """select SUM(even_cantidad_instalado) AS cantidad FROM
-                siap.cobro_orden_trabajo cot1
-                inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-                inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
-                inner join siap.elemento e1 on e1.elem_id = re1.elem_id
-                inner join siap.unitario u1 on u1.unit_id = re1.unit_id
-                left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo} AND e1.ucap_id = {ucap_id} AND e1.elem_id = {elem_id}"""
+            _qcant
           ).on(
               'empr_id -> empresa.empr_id,
               'cotr_id -> orden.cotr_id,
-              'unit_codigo -> unit_codigo,
-              'ucap_id -> _ucap_id,
+              // 'unit_codigo -> unit_codigo,
+              //'ucap_id -> _ucap_id,
+              'unit_id -> _ucap_id,
               'elem_id -> elem_id
             )
             .as(SqlParser.scalar[Double].singleOpt)
 
         case None =>
+          val _qcant = """SELECT SUM(cotrma_cantidad) FROM siap.cobro_orden_trabajo cot1
+                        INNER JOIN siap.cobro_orden_trabajo_material cotrma1 ON cotrma1.cotr_id = cot1.cotr_id
+                        INNER JOIN siap.elemento e1 ON e1.elem_id = cotrma1.elem_id
+                        WHERE cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id} and e1.ucap_id = {ucap_id} AND cotrma1.aap_id is not null"""
           SQL(
-            """select SUM(even_cantidad_instalado) AS cantidad FROM
-                siap.cobro_orden_trabajo cot1
-                inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-                inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
-                inner join siap.elemento e1 on e1.elem_id = re1.elem_id
-                inner join siap.unitario u1 on u1.unit_id = re1.unit_id
-                left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo} AND e1.ucap_id = {ucap_id}"""
+            _qcant
           ).on(
               'empr_id -> empresa.empr_id,
               'cotr_id -> orden.cotr_id,
-              'unit_codigo -> unit_codigo,
+              // 'unit_codigo -> unit_codigo,
               'ucap_id -> _ucap_id
             )
-            .as(SqlParser.scalar[Double].singleOpt)
-      }
+            .as(SqlParser.scalar[Double].singleOpt)      }
 
        var _cantidad_xls = _cantidad_item match {
         case Some(v) => v
         case None  => orden.cotr_cantidad.get.toDouble
        }
+
+      if (unit_codigo == "1.03") {
+        _cantidad_xls = 1.0
+      }
+             
        _cantidad_xls
     }
   }
@@ -11827,7 +11819,7 @@ class Cobro6Repository @Inject()(
     db.withConnection { implicit connection =>
       val _parseMaterial = str("elem_descripcion") ~ get[Option[String]](
         "elpr_unidad"
-      ) ~ get[Option[Int]]("elpr_precio") ~ double("cotrma_cantidad") map {
+      ) ~ get[Option[Int]]("elpr_precio") ~ double("even_cantidad") map {
         case a1 ~ a2 ~ a3 ~ a4 => (a1, a2, a3, a4)
       }
       val _materiales = elem_id match {
@@ -11850,16 +11842,14 @@ class Cobro6Repository @Inject()(
             .as(
               SqlParser.scalar[Int] *
             )
-          SQL("""select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, SUM(re1.even_cantidad_instalado) as cotrma_cantidad
-                      from siap.cobro_orden_trabajo cot1
-                      inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                      inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-                      inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
-                      inner join siap.elemento e1 on e1.elem_id = re1.elem_id and e1.elem_estado = 1
-                      inner join siap.unitario u1 on u1.unit_id = re1.unit_id
-                      left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-                      where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo} and CAST(re1.aap_id as VARCHAR) IN ({luminarias})
-                      group by 1,2,3""")
+          val _qmat = """select e1.elem_descripcion, cotm1.cotrma_unidad AS elpr_unidad, cotm1.cotrma_valor_unitario AS elpr_precio, SUM(cotm1.cotrma_cantidad) as even_cantidad FROM siap.cobro_orden_trabajo cot1
+                         inner join siap.cobro_orden_trabajo_material cotm1 ON cotm1.cotr_id = cot1.cotr_id
+                         inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                         inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
+                         where cot1.empr_id = {empr_id} AND cot1.cotr_id = {cotr_id} and u1.unit_codigo = {unit_codigo} AND e1.elem_estado = 1 AND CAST(cotm1.aap_id as VARCHAR) IN ({luminarias})
+                         group by 1,2,3
+                         order by 2 DESC"""
+          SQL(_qmat)
             .on(
               'cotr_id -> orden.cotr_id,
               'empr_id -> empresa.empr_id.get,
@@ -11868,17 +11858,14 @@ class Cobro6Repository @Inject()(
             )
             .as(_parseMaterial *)
         case None =>
+          val _qmat = """select e1.elem_descripcion, cotm1.cotrma_unidad AS elpr_unidad, cotm1.cotrma_valor_unitario AS elpr_precio, SUM(cotm1.cotrma_cantidad) AS even_cantidad from siap.cobro_orden_trabajo_material cotm1
+                         inner join siap.elemento e1 on e1.elem_id = cotm1.elem_id
+                         inner join siap.unitario u1 on u1.unit_id = cotm1.unit_id
+                         where cotm1.cotr_id = {cotr_id} and u1.unit_codigo = {unit_codigo} AND e1.elem_estado = 1
+                         group by 1,2,3
+                         order by 2 DESC"""
           SQL(
-            """select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, SUM(re1.even_cantidad_instalado) as cotrma_cantidad
-                from siap.cobro_orden_trabajo cot1
-                inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-                inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
-                inner join siap.elemento e1 on e1.elem_id = re1.elem_id and e1.elem_estado = 1
-                inner join siap.unitario u1 on u1.unit_id = re1.unit_id
-                left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
-              where cot1.empr_id = {empr_id} and cotr1.cotr_id = {cotr_id} AND u1.unit_codigo = {unit_codigo}
-              group by 1,2,3"""
+            _qmat
           ).on(
               'cotr_id -> orden.cotr_id,
               'empr_id -> empresa.empr_id.get,
@@ -11892,41 +11879,38 @@ class Cobro6Repository @Inject()(
       ).on('cotr_id -> orden.cotr_id).as(scalar[Int].single)
 
       var _total=0D
+      var _cantidad103 = 0.0
       _materiales.map { _m =>
         _m._3 match {
           case Some(precio) =>
-            val _cant = /* if (_m._1.startsWith("FOTOCELDA")) {
-                          if (_m._4 == _cantidad_xls){
-                            _m._4 / _cantidad_xls
-                          } else if ( _m._4 == 1) {
+            _cantidad103 = _m._4
+            val _cant = unit_codigo match {
+                          case "1.03" =>
                             _m._4
-                          } else {
-                            1.00
-                          }
-                        } else {
-                          _m._4 / _cantidad_xls,
-                        } */
-                        _m._4 / _cantidad_xls
-            _total += precio * _cant
+                          case _ =>
+                            _m._4 / _cantidad_xls
+                        }
+            _total = _total + (precio * _cant)
           case None =>
             _total += 0
         }
       }
-      _total
+      (_total, _cantidad103)
     }
   }
 
-  def util_cobro_orden_trabajo_mano_obra(empresa: Empresa, orden: orden_trabajo_cobro, unit_codigo: String, elem_id: Option[Int]) = {
+  def util_cobro_orden_trabajo_mano_obra(empresa: Empresa, orden: orden_trabajo_cobro, unit_codigo: String, elem_id: Option[Int], _cantidad103: Double) = {
     db.withConnection{ implicit connection =>
-      val _parseManoObra = str("maob_descripcion") ~ get[Option[Int]](
+      val _parseManoObra = int("maob_id") ~ str("maob_descripcion") ~ get[Option[Int]](
         "maobpr_precio"
-      ) ~ double("maobpr_rendimiento") map { case a1 ~ a2 ~ a3 => (a1, a2, a3) }
+      ) ~ double("maobpr_rendimiento") map { case a0 ~ a1 ~ a2 ~ a3 => (a0, a1, a2, a3) }
       val _manoObra = db.withConnection { implicit connection =>
         SQL(
-          """SELECT mob1.maob_descripcion, mop1.maobpr_precio, mop1.maobpr_rendimiento from siap.mano_obra mob1
+          """SELECT mob1.maob_id, mob1.maob_descripcion, mop1.maobpr_precio, mop1.maobpr_rendimiento from siap.mano_obra mob1
                   INNER JOIN siap.mano_obra_precio mop1 ON mop1.maob_id = mob1.maob_id
                   WHERE mop1.maobpr_anho = {anho} and mob1.empr_id = {empr_id} and 
-                  mop1.cotr_tipo_obra = {cotr_tipo_obra} and mop1.cotr_tipo_obra_tipo = {cotr_tipo_obra_tipo}"""
+                  mop1.cotr_tipo_obra = {cotr_tipo_obra} and mop1.cotr_tipo_obra_tipo = {cotr_tipo_obra_tipo}
+                  order by mob1.maob_id"""
         ).on(
           'anho -> orden.cotr_anho.get,
           'empr_id -> empresa.empr_id,
@@ -11937,11 +11921,23 @@ class Cobro6Repository @Inject()(
       }
       var _total=0D
       _manoObra.map { _o =>
-        _o._2 match {
-          case Some(precio) =>
-            _total += (1 * precio) / _o._3
-          case None =>
-            _total += 0
+        if (!((_o._1 == 4 || _o._1 == 5 || _o._1 == 6) && (unit_codigo == "1.03" || unit_codigo == "1.04"))) {
+          _o._3 match {
+            case Some(precio) =>
+              var _rendimiento = unit_codigo match {
+                case "1.03" => _o._1 match {
+                                case 1 => (480/_cantidad103) * 3
+                                case _ => 480/_cantidad103
+                              }
+                case _ => _o._4
+              }
+              if (unit_codigo == "1.03" && orden.cotr_consecutivo.get == 21090091) {
+                println("precios: " + precio + " rendimiento: " + _rendimiento)
+              }
+              _total += (1 * precio) / _rendimiento
+            case None =>
+              _total += 0
+          }
         }
       }
       _total        
