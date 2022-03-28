@@ -10956,10 +10956,10 @@ class Cobro6Repository @Inject()(
                 val _fecha = orden.cotr_fecha.get
                 val _consecutivo = orden.cotr_consecutivo.get
                 val _descripcion = orden.cotr_tipo_obra match {
-                   case Some(2) => { "EXPANSION DE " + N2T.convertirLetras(orden.cotr_cantidad.get).toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_nueva.get + " DE " + orden.cotr_potencia_nueva.get + " W" }
+                   case Some(2) => { "EXPANSION DE " + N2T.convertirLetras(orden.cotr_cantidad.get).toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_nueva.get + " DE " + (orden.cotr_potencia_nueva match { case Some(v) => v case None => "" }) + " W" }
                    case Some(6) => { "MODERNIZACION DE " + N2T
                                     .convertirLetras(orden.cotr_cantidad.get)
-                                    .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_anterior.get + " DE " + orden.cotr_potencia_anterior.get + "W" + " POR " + N2T
+                                    .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + (orden.cotr_luminaria_anterior match { case Some(v) => v case None => "" }) + " DE " + (orden.cotr_potencia_anterior match { case Some(v) => v case None => ""}) + "W" + " POR " + N2T
                                     .convertirLetras(orden.cotr_cantidad.get)
                                     .toUpperCase + " (" + orden.cotr_cantidad.get + ") LUMINARIAS " + orden.cotr_luminaria_nueva.get + " DE " + orden.cotr_potencia_nueva.get + " W" }
                   case _ => s""
