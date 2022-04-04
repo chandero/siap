@@ -417,6 +417,7 @@ GET /api/repo/:id controllers.ReporteController.buscarPorId(id: Long)
 GET /api/repo/del/:id controllers.ReporteController.borrarReporte(id: Long)
 POST /api/repo/save controllers.ReporteController.guardarReporte
 POST /api/repo/upd controllers.ReporteController.actualizarReporte
+POST /api/repo/upde controllers.ReporteController.actualizarElemento
 POST /api/repo/pupd controllers.ReporteController.actualizarReporteParcial
 GET /api/repo/st/get controllers.ReporteController.estados
 GET /api/repo/tp/get controllers.ReporteController.tipos

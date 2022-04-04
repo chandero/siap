@@ -107,8 +107,16 @@ object Elemento_Precio {
       get[Option[Int]]("elpr_anho") ~
       get[Option[BigDecimal]]("elpr_precio") ~
       get[Option[String]]("elpr_unidad") map {
-      case elem_id ~ elpr_anho_anterior ~ elpr_precio_anterior ~elpr_incremento ~ elpr_anho ~ elpr_precio ~ elpr_unidad =>
-        Elemento_Precio(elem_id, elpr_anho_anterior, elpr_precio_anterior, elpr_incremento, elpr_anho, elpr_precio, elpr_unidad)
+      case elem_id ~ elpr_anho_anterior ~ elpr_precio_anterior ~ elpr_incremento ~ elpr_anho ~ elpr_precio ~ elpr_unidad =>
+        Elemento_Precio(
+          elem_id,
+          elpr_anho_anterior,
+          elpr_precio_anterior,
+          elpr_incremento,
+          elpr_anho,
+          elpr_precio,
+          elpr_unidad
+        )
     }
   }
 }
@@ -257,39 +265,56 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
 
       val elem = elemen match {
         case Some(e) =>
-              val caracts: List[ElementoCaracteristica] =
-              SQL("""
+          val caracts: List[ElementoCaracteristica] =
+            SQL("""
                   SELECT * FROM siap.elemento_caracteristica WHERE elem_id = {elem_id} and elca_estado <> 9
-                """).on(
-                  'elem_id -> elem_id
-              ).as(caracteristicamodel *)
+                """)
+              .on(
+                'elem_id -> elem_id
+              )
+              .as(caracteristicamodel *)
 
-              val anho = new DateTime().getYear()
+          val anho = new DateTime().getYear()
 
-              var ep = db.withConnection { implicit connection =>
-                SQL(
-                  "SELECT * FROM siap.elemento_precio ep WHERE ep.elpr_anho = {anho} and ep.elem_id = {elem_id}"
-                ).on(
-                  'anho -> anho,
-                  'elem_id -> elem_id
-                ).as(Elemento_Precio._set.singleOpt)
-              }
+          var ep = db.withConnection { implicit connection =>
+            SQL(
+              "SELECT * FROM siap.elemento_precio ep WHERE ep.elpr_anho = {anho} and ep.elem_id = {elem_id}"
+            ).on(
+                'anho -> anho,
+                'elem_id -> elem_id
+              )
+              .as(Elemento_Precio._set.singleOpt)
+          }
 
-              var eu = db.withConnection { implicit connection =>
-                SQL("""SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
+          var eu = db.withConnection { implicit connection =>
+            SQL(
+              """SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
                        INNER JOIN siap.unitario u1 ON u1.unit_id = eu1.unit_id
                        WHERE elem_id = {elem_id}"""
-                    ).on('elem_id -> elem_id).as(Unitario._set *)
-              }
+            ).on('elem_id -> elem_id).as(Unitario._set *)
+          }
 
-              var nep = ep match {
-                case None     => new Elemento_Precio(None, None, None, None, Some(anho), None, None)
-                case Some(ep) => ep
-              }
-              val elemento = e.copy(caracteristicas = caracts, precio = Some(nep), unitarios = eu)
-    
-              Some(elemento)
-          case None => None
+          var nep = ep match {
+            case None =>
+              new Elemento_Precio(
+                None,
+                None,
+                None,
+                None,
+                Some(anho),
+                None,
+                None
+              )
+            case Some(ep) => ep
+          }
+          val elemento = e.copy(
+            caracteristicas = caracts,
+            precio = Some(nep),
+            unitarios = eu
+          )
+
+          Some(elemento)
+        case None => None
       }
       elem
     }
@@ -314,7 +339,8 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
           .as(ElementoD._set *)
         lista.map { e =>
           var eu = db.withConnection { implicit connection =>
-            SQL("""SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
+            SQL(
+              """SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
                   INNER JOIN siap.unitario u1 ON u1.unit_id = eu1.unit_id
                   WHERE elem_id = {elem_id}"""
             ).on('elem_id -> e.elem_id.get).as(Unitario._set *)
@@ -340,7 +366,8 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
       elemen match {
         case Some(e) =>
           var eu = db.withConnection { implicit connection =>
-            SQL("""SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
+            SQL(
+              """SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
                   INNER JOIN siap.unitario u1 ON u1.unit_id = eu1.unit_id
                   WHERE elem_id = {elem_id}"""
             ).on('elem_id -> e.elem_id.get).as(Unitario._set *)
@@ -358,11 +385,13 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
     */
   def cuenta(empr_id: Long, filter: String): Long = {
     db.withConnection { implicit connection =>
-      var query = "SELECT COUNT(*) AS c FROM siap.elemento e WHERE e.empr_id = {empr_id} and e.elem_estado <> 9 "
-      if (!filter.isEmpty){
+      var query =
+        "SELECT COUNT(*) AS c FROM siap.elemento e WHERE e.empr_id = {empr_id} and e.elem_estado <> 9 "
+      if (!filter.isEmpty) {
         query = query + " and " + filter
       }
-      val result = SQL(query).on(
+      val result = SQL(query)
+        .on(
           'empr_id -> empr_id
         )
         .as(SqlParser.scalar[Long].single)
@@ -374,11 +403,18 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
     Recuperar todos los Elemento de una empresa
     @param empr_id: Long
     */
-  def todos(empr_id: Long, page_size: Long, current_page: Long, orderby: String, filter: String): Future[Iterable[Elemento]] =
+  def todos(
+      empr_id: Long,
+      page_size: Long,
+      current_page: Long,
+      orderby: String,
+      filter: String
+  ): Future[Iterable[Elemento]] =
     Future[Iterable[Elemento]] {
       var lista_result = new ListBuffer[Elemento]
       db.withConnection { implicit connection =>
-        var query = "SELECT * FROM siap.elemento e WHERE empr_id = {empr_id} and elem_estado <> 9" 
+        var query =
+          "SELECT * FROM siap.elemento e WHERE empr_id = {empr_id} and elem_estado <> 9"
         if (!filter.isEmpty) {
           query = query + " and " + filter
         }
@@ -388,7 +424,7 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
           query = query + s" ORDER BY e.elem_descripcion"
         }
         query = query + """
-                LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)"""          
+                LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)"""
         val lista: List[Elemento] = SQL(
           query
         ).on(
@@ -400,37 +436,54 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
           )
           .as(simple *)
         for (e <- lista) {
-              val caracts: List[ElementoCaracteristica] =
-              SQL("""
+          val caracts: List[ElementoCaracteristica] =
+            SQL("""
                   SELECT * FROM siap.elemento_caracteristica WHERE elem_id = {elem_id} and elca_estado <> 9
-                """).on(
-                  'elem_id -> e.elem_id
-              ).as(caracteristicamodel *)
+                """)
+              .on(
+                'elem_id -> e.elem_id
+              )
+              .as(caracteristicamodel *)
 
-              val anho = new DateTime().getYear()
+          val anho = new DateTime().getYear()
 
-              var ep = db.withConnection { implicit connection =>
-                SQL(
-                  "SELECT * FROM siap.elemento_precio ep WHERE ep.elpr_anho = {anho} and ep.elem_id = {elem_id}"
-                ).on(
-                  'anho -> anho,
-                  'elem_id -> e.elem_id
-                ).as(Elemento_Precio._set.singleOpt)
-              }
-              var nep = ep match {
-                case None     => new Elemento_Precio(None, None, None, None, Some(anho), None, None)
-                case Some(ep) => ep
-              }
+          var ep = db.withConnection { implicit connection =>
+            SQL(
+              "SELECT * FROM siap.elemento_precio ep WHERE ep.elpr_anho = {anho} and ep.elem_id = {elem_id}"
+            ).on(
+                'anho -> anho,
+                'elem_id -> e.elem_id
+              )
+              .as(Elemento_Precio._set.singleOpt)
+          }
+          var nep = ep match {
+            case None =>
+              new Elemento_Precio(
+                None,
+                None,
+                None,
+                None,
+                Some(anho),
+                None,
+                None
+              )
+            case Some(ep) => ep
+          }
 
-              var eu = db.withConnection { implicit connection =>
-                SQL("""SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
+          var eu = db.withConnection { implicit connection =>
+            SQL(
+              """SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
                        INNER JOIN siap.unitario u1 ON u1.unit_id = eu1.unit_id
                        WHERE elem_id = {elem_id}"""
-                    ).on('elem_id -> e.elem_id).as(Unitario._set *)
-              }
+            ).on('elem_id -> e.elem_id).as(Unitario._set *)
+          }
 
-              val elemento = e.copy(caracteristicas = caracts, precio = Some(nep), unitarios = eu)
-              lista_result += elemento
+          val elemento = e.copy(
+            caracteristicas = caracts,
+            precio = Some(nep),
+            unitarios = eu
+          )
+          lista_result += elemento
         }
         lista_result.toList
       }
@@ -450,35 +503,53 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
           )
           .as(simple *)
         for (e <- lista) {
-              val caracts: List[ElementoCaracteristica] =
-              SQL("""
+          val caracts: List[ElementoCaracteristica] =
+            SQL("""
                   SELECT * FROM siap.elemento_caracteristica WHERE elem_id = {elem_id} and elca_estado <> 9
-                """).on(
-                  'elem_id -> e.elem_id
-              ).as(caracteristicamodel *)
+                """)
+              .on(
+                'elem_id -> e.elem_id
+              )
+              .as(caracteristicamodel *)
 
-              val anho = new DateTime().getYear()
+          val anho = new DateTime().getYear()
 
-              var ep = db.withConnection { implicit connection =>
-                SQL(
-                  "SELECT * FROM siap.elemento_precio ep WHERE ep.elpr_anho = {anho} and ep.elem_id = {elem_id}"
-                ).on(
-                  'anho -> anho,
-                  'elem_id -> e.elem_id
-                ).as(Elemento_Precio._set.singleOpt)
-              }
-              var nep = ep match {
-                case None     => new Elemento_Precio(None, None, None, None, Some(anho), None, None)
-                case Some(ep) => ep
-              }
-              var eu = db.withConnection { implicit connection =>
-                SQL("""SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
+          var ep = db.withConnection { implicit connection =>
+            SQL(
+              """SELECT * FROM siap.elemento_precio ep WHERE ep.elpr_anho = {anho} and ep.elem_id = {elem_id}
+                    ORDER BY elpr_fecha DESC LIMIT 1"""
+            ).on(
+                'anho -> anho,
+                'elem_id -> e.elem_id
+              )
+              .as(Elemento_Precio._set.singleOpt)
+          }
+          var nep = ep match {
+            case None =>
+              new Elemento_Precio(
+                None,
+                None,
+                None,
+                None,
+                Some(anho),
+                None,
+                None
+              )
+            case Some(ep) => ep
+          }
+          var eu = db.withConnection { implicit connection =>
+            SQL(
+              """SELECT u1.unit_id, u1.unit_codigo, u1.unit_descripcion, u1.empr_id FROM siap.elemento_unitario eu1
                        INNER JOIN siap.unitario u1 ON u1.unit_id = eu1.unit_id
                        WHERE elem_id = {elem_id}"""
-                    ).on('elem_id -> e.elem_id).as(Unitario._set *)
-              }              
-              val elemento = e.copy(caracteristicas = caracts, precio = Some(nep), unitarios = eu)
-              lista_result += elemento
+            ).on('elem_id -> e.elem_id).as(Unitario._set *)
+          }
+          val elemento = e.copy(
+            caracteristicas = caracts,
+            precio = Some(nep),
+            unitarios = eu
+          )
+          lista_result += elemento
         }
         lista_result.toList
       }
@@ -534,7 +605,7 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
             """
         ).on(
             'unit_id -> u.unit_id,
-            'elem_id -> id,
+            'elem_id -> id
           )
           .executeInsert()
       }
@@ -612,8 +683,9 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
         SQL(
           "DELETE FROM siap.elemento_unitario WHERE elem_id = {elem_id}"
         ).on(
-          'elem_id -> elemento.elem_id
-        ).executeUpdate()
+            'elem_id -> elemento.elem_id
+          )
+          .executeUpdate()
 
         for (u <- elemento.unitarios) {
           SQL(
@@ -776,7 +848,7 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
         new LocalDate(Calendar.getInstance().getTimeInMillis())
       val hora: LocalDateTime =
         new LocalDateTime(Calendar.getInstance().getTimeInMillis())
-      
+
       val count: Long =
         SQL(
           "UPDATE siap.elemento SET elem_estado = (8 + elem_estado) WHERE elem_id = {elem_id}"
@@ -804,43 +876,54 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
     }
   }
 
-   def actualizarPrecio(elem_id: Long, elpr_anho: Int, elpr_precio: BigDecimal, usua_id: Long): Boolean = {
-      db.withConnection { implicit connection => 
-      val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
-      val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())        
+  def actualizarPrecio(
+      elem_id: Long,
+      elpr_anho: Int,
+      elpr_precio: BigDecimal,
+      usua_id: Long
+  ): Boolean = {
+    db.withConnection { implicit connection =>
+      val fecha: LocalDate =
+        new LocalDate(Calendar.getInstance().getTimeInMillis())
+      val hora: LocalDateTime =
+        new LocalDateTime(Calendar.getInstance().getTimeInMillis())
       var seActualizo: Boolean = false
       var seInserto: Boolean = false
 
       seActualizo =
-        SQL("UPDATE siap.elemento_precio SET elpr_precio = {elpr_precio} WHERE elem_id = {elem_id} and elpr_anho = {elpr_anho} and elpr_fecha = {elpr_fecha}").
-        on(
+        SQL(
+          "UPDATE siap.elemento_precio SET elpr_precio = {elpr_precio} WHERE elem_id = {elem_id} and elpr_anho = {elpr_anho} and elpr_fecha = {elpr_fecha}"
+        ).on(
             'elem_id -> elem_id,
             'elpr_anho -> elpr_anho,
             'elpr_precio -> elpr_precio,
             'elpr_fecha -> fecha
-        ).executeUpdate() > 0
-      
+          )
+          .executeUpdate() > 0
+
       if (!seActualizo) {
-        seInserto = SQL("""INSERT INTO siap.elemento_precio (
+        seInserto = SQL(
+          """INSERT INTO siap.elemento_precio (
                           elem_id,
                           elpr_anho,
                           elpr_precio,
                           elpr_undiad,
                           elpr_fecha,
                           elpr_precio_nuevo
-                          ) VALUES ({elem_id}, {elpr_anho}, {elpr_precio}, {elpr_unidad}, {elpr_fecha}, {elpr_precio})""").
-        on(
+                          ) VALUES ({elem_id}, {elpr_anho}, {elpr_precio}, {elpr_unidad}, {elpr_fecha}, {elpr_precio})"""
+        ).on(
             'elem_id -> elem_id,
             'elpr_anho -> elpr_anho,
             'elpr_precio -> elpr_precio,
             'elpr_unidad -> "UND"
-        ).executeUpdate() > 0  
+          )
+          .executeUpdate() > 0
       }
 
       if (seActualizo || seInserto) {
         SQL(
-          "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})")
-          .on(
+          "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+        ).on(
             'audi_fecha -> fecha,
             'audi_hora -> hora,
             'usua_id -> usua_id,
@@ -853,38 +936,44 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
           )
           .executeInsert()
       }
-      seActualizo || seInserto        
-     }
-   } 
+      seActualizo || seInserto
+    }
+  }
 
-
-  def nuevoPrecioAnho(anho:Int, tasa:Double, empr_id: Long) = {
+  def nuevoPrecioAnho(anho: Int, tasa: Double, empr_id: Long) = {
     db.withConnection { implicit connection =>
-      val _query = """INSERT INTO siap.elemento_precio (elem_id, elpr_anho_anterior, elpr_anho, elpr_precio_anterior, elpr_incremento, elpr_precio, elpr_unidad, elpr_fecha) select ep1.elem_id, ep1.elpr_anho as elpr_anho_anterior, {anho} as elpr_anho, ep1.elpr_precio as elpr_precio_anterior, {tasa} as elpr_incremento, ROUND(ep1.elpr_precio + ep1.elpr_precio * ({tasa}/100)) as elpr_precio, ep1.elpr_unidad, {fecha} as elpr_fecha from siap.elemento_precio ep1
+      val _query =
+        """INSERT INTO siap.elemento_precio (elem_id, elpr_anho_anterior, elpr_anho, elpr_precio_anterior, elpr_incremento, elpr_precio, elpr_unidad, elpr_fecha) select ep1.elem_id, ep1.elpr_anho as elpr_anho_anterior, {anho} as elpr_anho, ep1.elpr_precio as elpr_precio_anterior, {tasa} as elpr_incremento, ROUND(ep1.elpr_precio + ep1.elpr_precio * ({tasa}/100)) as elpr_precio, ep1.elpr_unidad, {fecha} as elpr_fecha from siap.elemento_precio ep1
                       WHERE ep1.elpr_anho = {anho_anterior}
                       ORDER BY ep1.elem_id asc"""
       var _fecha = Calendar.getInstance().getTime()
       var _anho_anterior = anho - 1
       val _result = SQL(_query)
-      .on(
-        'anho -> anho,
-        'anho_anterior -> _anho_anterior,
-        'tasa -> tasa,
-        'fecha -> _fecha
-      ).executeUpdate > 0
+        .on(
+          'anho -> anho,
+          'anho_anterior -> _anho_anterior,
+          'tasa -> tasa,
+          'fecha -> _fecha
+        )
+        .executeUpdate > 0
       _result
     }
-  }  
+  }
 
-  def buscarElementoSinPrecio(empr_id: Long): Future[List[(Long, String, String, Double)]] = Future[List[(Long, String, String, Double)]] {
-    db.withConnection { implicit connection =>
-      val _parser = (long("elem_id") ~ str("elem_codigo") ~ str("elem_descripcion") ~ double("elpr_precio")).map {
-        case elem_id ~ elem_codigo ~ elem_descripcion ~ elem_precio =>
-          (elem_id, elem_codigo, elem_descripcion, elem_precio)
-      }
-      val _anho = Calendar.getInstance().get(Calendar.YEAR)
-      val result = SQL(
-        """SELECT distinct e1.elem_id, e1.elem_codigo, e1.elem_descripcion, elpr1.elpr_precio 
+  def buscarElementoSinPrecio(
+      empr_id: Long
+  ): Future[List[(Long, String, String, Double)]] =
+    Future[List[(Long, String, String, Double)]] {
+      db.withConnection { implicit connection =>
+        val _parser = (long("elem_id") ~ str("elem_codigo") ~ str(
+          "elem_descripcion"
+        ) ~ double("elpr_precio")).map {
+          case elem_id ~ elem_codigo ~ elem_descripcion ~ elem_precio =>
+            (elem_id, elem_codigo, elem_descripcion, elem_precio)
+        }
+        val _anho = Calendar.getInstance().get(Calendar.YEAR)
+        val result = SQL(
+          """SELECT distinct e1.elem_id, e1.elem_codigo, e1.elem_descripcion, elpr1.elpr_precio 
            FROM siap.reporte r1
            INNER JOIN siap.reporte_evento re1 ON re1.repo_id = r1.repo_id
            INNER JOIN siap.elemento e1 ON e1.elem_id = re1.elem_id
@@ -893,46 +982,56 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
            		 EXTRACT(YEAR FROM r1.repo_fechasolucion) = {anho} AND
            		 e1.elem_estado = 1 AND
            		 elpr1.elpr_precio IS NULL"""
-      ).on(
-          'empr_id -> empr_id,
-          'anho -> _anho
-        ).as(_parser *)
-      result
+        ).on(
+            'empr_id -> empr_id,
+            'anho -> _anho
+          )
+          .as(_parser *)
+        result
+      }
     }
-  }
 
-   def agregarPrecio(elem_id: Long, elpr_precio: BigDecimal, elpr_unidad: String, usua_id: Long): Boolean = {
-      db.withConnection { implicit connection => 
-      val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
-      val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis()) 
-      val _anho = Calendar.getInstance().get(Calendar.YEAR)       
-
-      SQL("""INSERT INTO siap.elemento_precio VALUES ({elem_id}, {elpr_anho}, {elpr_precio}, {elpr_unidad}, {elpr_fecha})""").
-        on(
-            'elem_id -> elem_id,
-            'elpr_anho -> _anho,
-            'elpr_precio -> elpr_precio,
-            'elpr_unidad -> elpr_unidad,
-            'elpr_fecha -> fecha
-        ).executeUpdate() > 0
+  def agregarPrecio(
+      elem_id: Long,
+      elpr_precio: BigDecimal,
+      elpr_unidad: String,
+      usua_id: Long
+  ): Boolean = {
+    db.withConnection { implicit connection =>
+      val fecha: LocalDate =
+        new LocalDate(Calendar.getInstance().getTimeInMillis())
+      val hora: LocalDateTime =
+        new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+      val _anho = Calendar.getInstance().get(Calendar.YEAR)
 
       SQL(
-          "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})")
-          .on(
-            'audi_fecha -> fecha,
-            'audi_hora -> hora,
-            'usua_id -> usua_id,
-            'audi_tabla -> "elemento_precio",
-            'audi_uid -> elem_id,
-            'audi_campo -> "",
-            'audi_valorantiguo -> "",
-            'audi_valornuevo -> elpr_precio.toString(),
-            'audi_evento -> "A"
-          )
-          .executeInsert()
-      }
-      true
-   }  
+        """INSERT INTO siap.elemento_precio VALUES ({elem_id}, {elpr_anho}, {elpr_precio}, {elpr_unidad}, {elpr_fecha})"""
+      ).on(
+          'elem_id -> elem_id,
+          'elpr_anho -> _anho,
+          'elpr_precio -> elpr_precio,
+          'elpr_unidad -> elpr_unidad,
+          'elpr_fecha -> fecha
+        )
+        .executeUpdate() > 0
+
+      SQL(
+        "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+      ).on(
+          'audi_fecha -> fecha,
+          'audi_hora -> hora,
+          'usua_id -> usua_id,
+          'audi_tabla -> "elemento_precio",
+          'audi_uid -> elem_id,
+          'audi_campo -> "",
+          'audi_valorantiguo -> "",
+          'audi_valornuevo -> elpr_precio.toString(),
+          'audi_evento -> "A"
+        )
+        .executeInsert()
+    }
+    true
+  }
 
   /**
     * Recuperar total de registros
@@ -941,7 +1040,8 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
     */
   def cuentaPrecio(empr_id: Long, filter: String, anho: Int): Long = {
     db.withConnection { implicit connection =>
-      var query = """select COUNT(*) AS c from (SELECT DISTINCT e1.elem_id
+      var query =
+        """select COUNT(*) AS c from (SELECT DISTINCT e1.elem_id
            FROM siap.reporte r1
            INNER JOIN siap.reporte_evento re1 ON re1.repo_id = r1.repo_id
            INNER JOIN siap.elemento e1 ON e1.elem_id = re1.elem_id
@@ -950,11 +1050,12 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
            		 r1.empr_id = {empr_id} AND
                elpr1.elpr_anho = {anho} AND
            		 e1.elem_estado = 1"""
-      if (!filter.isEmpty){
+      if (!filter.isEmpty) {
         query = query + " and " + filter
       }
       query = query + ") as o "
-      val result = SQL(query).on(
+      val result = SQL(query)
+        .on(
           'empr_id -> empr_id,
           'anho -> anho
         )
@@ -967,36 +1068,51 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
     Recuperar todos los Elemento de una empresa
     @param empr_id: Long
     */
-  def todosPrecio(empr_id: Long, page_size: Long, current_page: Long, orderby: String, filter: String, anho: Int): Future[List[(Long, 
-                 String, 
-                 String, 
-                 Option[Int], 
-                 Option[Double], 
-                 Option[Double], 
-                 Option[Double],
-                 Option[Double],
-                 Option[Double],
-                 Option[Double],
-                 Option[Int], 
-                 Option[DateTime], 
-                 Option[String])]] =
-    Future[List[(Long, 
-                 String, 
-                 String, 
-                 Option[Int], 
-                 Option[Double], 
-                 Option[Double], 
-                 Option[Double],
-                 Option[Double],
-                 Option[Double],
-                 Option[Double],
-                 Option[Int], 
-                 Option[DateTime], 
-                 Option[String])]] {
-      val _parser = 
-          long("elem_id") ~ 
-          str("elem_codigo") ~ 
-          str("elem_descripcion") ~ 
+  def todosPrecio(
+      empr_id: Long,
+      page_size: Long,
+      current_page: Long,
+      orderby: String,
+      filter: String,
+      anho: Int
+  ): Future[List[
+    (
+        Long,
+        String,
+        String,
+        Option[Int],
+        Option[Double],
+        Option[Double],
+        Option[Double],
+        Option[Double],
+        Option[Double],
+        Option[Double],
+        Option[Int],
+        Option[DateTime],
+        Option[String]
+    )
+  ]] =
+    Future[List[
+      (
+          Long,
+          String,
+          String,
+          Option[Int],
+          Option[Double],
+          Option[Double],
+          Option[Double],
+          Option[Double],
+          Option[Double],
+          Option[Double],
+          Option[Int],
+          Option[DateTime],
+          Option[String]
+      )
+    ]] {
+      val _parser =
+        long("elem_id") ~
+          str("elem_codigo") ~
+          str("elem_descripcion") ~
           get[Option[Int]]("elpr_anho_anterior") ~
           get[Option[Double]]("elpr_precio_anterior") ~
           get[Option[Double]]("elpr_incremento") ~
@@ -1007,12 +1123,27 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
           get[Option[Int]]("elpr_anho") ~
           get[Option[DateTime]]("elpr_fecha") ~
           get[Option[String]]("unit_codigo") map {
-        case elem_id ~ elem_codigo ~ elem_descripcion ~ elpr_anho_anterior ~ elpr_precio_anterior ~ elpr_incremento ~ elpr_diff ~ elpr_precio_nuevo ~ elpr_precio_cotizado ~ elpr_precio ~ elpr_anho ~ elpr_fecha ~ unit_codigo =>
-          (elem_id, elem_codigo, elem_descripcion, elpr_anho_anterior, elpr_precio_anterior, elpr_incremento, elpr_diff, elpr_precio_nuevo, elpr_precio_cotizado, elpr_precio, elpr_anho, elpr_fecha, unit_codigo)
-      }
+          case elem_id ~ elem_codigo ~ elem_descripcion ~ elpr_anho_anterior ~ elpr_precio_anterior ~ elpr_incremento ~ elpr_diff ~ elpr_precio_nuevo ~ elpr_precio_cotizado ~ elpr_precio ~ elpr_anho ~ elpr_fecha ~ unit_codigo =>
+            (
+              elem_id,
+              elem_codigo,
+              elem_descripcion,
+              elpr_anho_anterior,
+              elpr_precio_anterior,
+              elpr_incremento,
+              elpr_diff,
+              elpr_precio_nuevo,
+              elpr_precio_cotizado,
+              elpr_precio,
+              elpr_anho,
+              elpr_fecha,
+              unit_codigo
+            )
+        }
 
       db.withConnection { implicit connection =>
-        var query = """select distinct 
+        var query =
+          """select distinct 
 	o.elem_id, 
 	o.elem_codigo, 
 	o.elem_descripcion, 
@@ -1062,7 +1193,7 @@ from
           query = query + s" ORDER BY o.elem_descripcion"
         }
         query = query + """
-                LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)"""          
+                LIMIT {page_size} OFFSET {page_size} * ({current_page} - 1)"""
         val lista = SQL(
           query
         ).on(
@@ -1074,35 +1205,51 @@ from
             'anho -> anho
           )
           .as(_parser *)
-          lista.toList
-        }
+        lista.toList
+      }
     }
 
   def todosXls(empr_id: Long): Array[Byte] = {
-      var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
-      var _listMerged01 = new ListBuffer[CellRange]()
-      val _fuenteNegrita = Font(
-        height = 10.points,
-        fontName = "Liberation Sans",
-        bold = true,
-        italic = false,
-        strikeout = false
-      )    
+    var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+    var _listMerged01 = new ListBuffer[CellRange]()
+    val _fuenteNegrita = Font(
+      height = 10.points,
+      fontName = "Liberation Sans",
+      bold = true,
+      italic = false,
+      strikeout = false
+    )
     val sheet1 = Sheet(
       name = "Elemento",
       rows = {
-        _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("Material", "Codigo", "Descripcion", "Fecha", "Precio")
-        val _lista = db.withConnection { implicit connection =>
-          val _parser =
-            long("elem_id") ~ 
-            str("elem_codigo") ~ 
-            str("elem_descripcion") ~ 
-            get[Option[DateTime]]("elpr_fecha") ~
-            get[Option[Double]]("elpr_precio") map {
-            case elem_id ~ elem_codigo ~ elem_descripcion ~ elpr_fecha ~ elpr_precio =>
-              (elem_id, elem_codigo, elem_descripcion, elpr_fecha, elpr_precio)
-          }          
-          var query = """SELECT 
+        _listRow01 += com.norbitltd.spoiwo.model
+          .Row()
+          .withCellValues(
+            "Material",
+            "Codigo",
+            "Descripcion",
+            "Fecha",
+            "Precio"
+          )
+        val _lista = db.withConnection {
+          implicit connection =>
+            val _parser =
+              long("elem_id") ~
+                str("elem_codigo") ~
+                str("elem_descripcion") ~
+                get[Option[DateTime]]("elpr_fecha") ~
+                get[Option[Double]]("elpr_precio") map {
+                case elem_id ~ elem_codigo ~ elem_descripcion ~ elpr_fecha ~ elpr_precio =>
+                  (
+                    elem_id,
+                    elem_codigo,
+                    elem_descripcion,
+                    elpr_fecha,
+                    elpr_precio
+                  )
+              }
+            var query =
+              """SELECT 
                             e1.elem_id, 
                             e1.elem_codigo, 
                             e1.elem_descripcion,
@@ -1111,44 +1258,53 @@ from
                          FROM siap.elemento e1 WHERE e1.empr_id = {empr_id} and
                        		 e1.elem_estado < 9
                          ORDER BY e1.elem_descripcion"""
-          SQL(
-            query
-          ).on(
-            'empr_id -> empr_id
-          )
-          .as(_parser *)
+            SQL(
+              query
+            ).on(
+                'empr_id -> empr_id
+              )
+              .as(_parser *)
         }
-        _lista.map { _m =>
-          _listRow01 += com.norbitltd.spoiwo.model.Row(
-            NumericCell(
-              _m._1, 
-              Some(0), 
-              Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet),
-            StringCell(
-              _m._2, 
-              Some(1), 
-              Some(CellStyle(dataFormat = CellDataFormat("@"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet),
-            StringCell(
-              _m._3, 
-              Some(2),
-              Some(CellStyle(dataFormat = CellDataFormat("@"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet
-            ),
-            StringCell(
-              _m._4 match { case Some(v) => v.toString("yyyy/MM/dd") case None => "" },
-              Some(3),
-              Some(CellStyle(dataFormat = CellDataFormat("@"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet            
-            ),
-            NumericCell(
-              _m._5 match { case Some(v) => v case None => 0D }, 
-              Some(4),
-              Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet
+        _lista.map {
+          _m =>
+            _listRow01 += com.norbitltd.spoiwo.model.Row(
+              NumericCell(
+                _m._1,
+                Some(0),
+                Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                _m._2,
+                Some(1),
+                Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                _m._3,
+                Some(2),
+                Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                _m._4 match {
+                  case Some(v) => v.toString("yyyy/MM/dd")
+                  case None    => ""
+                },
+                Some(3),
+                Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                _m._5 match {
+                  case Some(v) => v
+                  case None    => 0d
+                },
+                Some(4),
+                Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
             )
-           )
         }
         _listRow01.toList
       }
@@ -1159,41 +1315,73 @@ from
       .writeToOutputStream(os)
     println("Stream Listo")
     os.toByteArray
-  }    
+  }
 
   def todosPrecioXls(empr_id: Long): Array[Byte] = {
-      var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
-      var _listMerged01 = new ListBuffer[CellRange]()
-      val _fuenteNegrita = Font(
-        height = 10.points,
-        fontName = "Liberation Sans",
-        bold = true,
-        italic = false,
-        strikeout = false
-      )    
+    var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+    var _listMerged01 = new ListBuffer[CellRange]()
+    val _fuenteNegrita = Font(
+      height = 10.points,
+      fontName = "Liberation Sans",
+      bold = true,
+      italic = false,
+      strikeout = false
+    )
     val sheet1 = Sheet(
       name = "ElementoPrecio",
       rows = {
-        _listRow01 += com.norbitltd.spoiwo.model.Row().withCellValues("Material", "Codigo", "Descripcion", "Año Anterior", "Precio Anterior", "IPC Año", "Incremento", "Precio Actual", "Precio Cotizado", "Precio Más Favorable", "Año Actual", "Fecha Aplicación", "Unitario")
-        val _lista = db.withConnection { implicit connection =>
-      val _parser = 
-          long("elem_id") ~ 
-          str("elem_codigo") ~ 
-          str("elem_descripcion") ~ 
-          get[Option[Int]]("elpr_anho_anterior") ~
-          get[Option[Double]]("elpr_precio_anterior") ~
-          get[Option[Double]]("elpr_incremento") ~
-          get[Option[Double]]("elpr_diff") ~
-          get[Option[Double]]("elpr_precio_nuevo") ~
-          get[Option[Double]]("elpr_precio_cotizado") ~
-          get[Option[Double]]("elpr_precio") ~
-          get[Option[Int]]("elpr_anho") ~
-          get[Option[DateTime]]("elpr_fecha") ~
-          get[Option[String]]("unit_codigo") map {
-        case elem_id ~ elem_codigo ~ elem_descripcion ~ elpr_anho_anterior ~ elpr_precio_anterior ~ elpr_incremento ~ elpr_diff ~ elpr_precio_nuevo ~ elpr_precio_cotizado ~ elpr_precio ~ elpr_anho ~ elpr_fecha ~ unit_codigo =>
-          (elem_id, elem_codigo, elem_descripcion, elpr_anho_anterior, elpr_precio_anterior, elpr_incremento, elpr_diff, elpr_precio_nuevo, elpr_precio_cotizado, elpr_precio, elpr_anho, elpr_fecha, unit_codigo)
-      }
-        var query = """select distinct 
+        _listRow01 += com.norbitltd.spoiwo.model
+          .Row()
+          .withCellValues(
+            "Material",
+            "Codigo",
+            "Descripcion",
+            "Año Anterior",
+            "Precio Anterior",
+            "IPC Año",
+            "Incremento",
+            "Precio Actual",
+            "Precio Cotizado",
+            "Precio Más Favorable",
+            "Año Actual",
+            "Fecha Aplicación",
+            "Unitario"
+          )
+        val _lista = db.withConnection {
+          implicit connection =>
+            val _parser =
+              long("elem_id") ~
+                str("elem_codigo") ~
+                str("elem_descripcion") ~
+                get[Option[Int]]("elpr_anho_anterior") ~
+                get[Option[Double]]("elpr_precio_anterior") ~
+                get[Option[Double]]("elpr_incremento") ~
+                get[Option[Double]]("elpr_diff") ~
+                get[Option[Double]]("elpr_precio_nuevo") ~
+                get[Option[Double]]("elpr_precio_cotizado") ~
+                get[Option[Double]]("elpr_precio") ~
+                get[Option[Int]]("elpr_anho") ~
+                get[Option[DateTime]]("elpr_fecha") ~
+                get[Option[String]]("unit_codigo") map {
+                case elem_id ~ elem_codigo ~ elem_descripcion ~ elpr_anho_anterior ~ elpr_precio_anterior ~ elpr_incremento ~ elpr_diff ~ elpr_precio_nuevo ~ elpr_precio_cotizado ~ elpr_precio ~ elpr_anho ~ elpr_fecha ~ unit_codigo =>
+                  (
+                    elem_id,
+                    elem_codigo,
+                    elem_descripcion,
+                    elpr_anho_anterior,
+                    elpr_precio_anterior,
+                    elpr_incremento,
+                    elpr_diff,
+                    elpr_precio_nuevo,
+                    elpr_precio_cotizado,
+                    elpr_precio,
+                    elpr_anho,
+                    elpr_fecha,
+                    unit_codigo
+                  )
+              }
+            var query =
+              """select distinct 
 	o.elem_id, 
 	o.elem_codigo, 
 	o.elem_descripcion, 
@@ -1233,87 +1421,115 @@ from
            		 e1.elem_estado = 1
         ) as o
         group by 1,2,3,4,5,6,7,8,9,10,11,12"""
-          SQL(
-            query
-          ).on(
-            'empr_id -> empr_id
-          )
-          .as(_parser *)
+            SQL(
+              query
+            ).on(
+                'empr_id -> empr_id
+              )
+              .as(_parser *)
         }
-        _lista.map { _m =>
-          _listRow01 += com.norbitltd.spoiwo.model.Row(
-            NumericCell(
-              _m._1, 
-              Some(0), 
-              Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet),
-            StringCell(
-              _m._2, 
-              Some(1), 
-              Some(CellStyle(dataFormat = CellDataFormat("@"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet),
-            StringCell(
-              _m._3, 
-              Some(2),
-              Some(CellStyle(dataFormat = CellDataFormat("@"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet
-            ),
-            NumericCell(
-              _m._4 match { case Some(v) => v case None => 0 },
-              Some(3), 
-              Some(CellStyle(dataFormat = CellDataFormat("###0"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet),
-            NumericCell(
-              _m._5 match { case Some(v) => v case None => 0D }, 
-              Some(4), 
-              Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet),
-            NumericCell(
-              _m._6 match { case Some(v) => v case None => 0D }, 
-              Some(5), 
-              Some(CellStyle(dataFormat = CellDataFormat("#0.00"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet),
-            NumericCell(
-              _m._7 match { case Some(v) => v case None => 0D }, 
-              Some(6), 
-              Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet),              
-            NumericCell(
-              _m._8 match { case Some(v) => v case None => 0 }, 
-              Some(7), 
-              Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet),
-            NumericCell(
-              _m._9 match { case Some(v) => v case None => 0D }, 
-              Some(8),
-              Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet
-            ),
-            NumericCell(
-              _m._10 match { case Some(v) => v case None => 0D }, 
-              Some(9),
-              Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet
-            ),
-            NumericCell(
-              _m._11 match { case Some(v) => v case None => 0D }, 
-              Some(10),
-              Some(CellStyle(dataFormat = CellDataFormat("###0"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet
-            ),                        
-            StringCell(
-              _m._12 match { case Some(v) => v.toString("yyyy/MM/dd") case None => "" },
-              Some(11),
-              Some(CellStyle(dataFormat = CellDataFormat("@"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet            
-            ),
-            StringCell(
-              _m._13 match { case Some(v) => v case None => "" },
-              Some(12),
-              Some(CellStyle(dataFormat = CellDataFormat("@"))),
-              CellStyleInheritance.CellThenRowThenColumnThenSheet            
-            )            
-           )
+        _lista.map {
+          _m =>
+            _listRow01 += com.norbitltd.spoiwo.model.Row(
+              NumericCell(
+                _m._1,
+                Some(0),
+                Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                _m._2,
+                Some(1),
+                Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                _m._3,
+                Some(2),
+                Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(_m._4 match {
+                case Some(v) => v
+                case None    => 0
+              }, Some(3), Some(CellStyle(dataFormat = CellDataFormat("###0"))), CellStyleInheritance.CellThenRowThenColumnThenSheet),
+              NumericCell(
+                _m._5 match {
+                  case Some(v) => v
+                  case None    => 0d
+                },
+                Some(4),
+                Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                _m._6 match {
+                  case Some(v) => v
+                  case None    => 0d
+                },
+                Some(5),
+                Some(CellStyle(dataFormat = CellDataFormat("#0.00"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                _m._7 match {
+                  case Some(v) => v
+                  case None    => 0d
+                },
+                Some(6),
+                Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(_m._8 match {
+                case Some(v) => v
+                case None    => 0
+              }, Some(7), Some(CellStyle(dataFormat = CellDataFormat("#,##0"))), CellStyleInheritance.CellThenRowThenColumnThenSheet),
+              NumericCell(
+                _m._9 match {
+                  case Some(v) => v
+                  case None    => 0d
+                },
+                Some(8),
+                Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                _m._10 match {
+                  case Some(v) => v
+                  case None    => 0d
+                },
+                Some(9),
+                Some(CellStyle(dataFormat = CellDataFormat("#,##0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                _m._11 match {
+                  case Some(v) => v
+                  case None    => 0d
+                },
+                Some(10),
+                Some(CellStyle(dataFormat = CellDataFormat("###0"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                _m._12 match {
+                  case Some(v) => v.toString("yyyy/MM/dd")
+                  case None    => ""
+                },
+                Some(11),
+                Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                _m._13 match {
+                  case Some(v) => v
+                  case None    => ""
+                },
+                Some(12),
+                Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )
         }
         _listRow01.toList
       }

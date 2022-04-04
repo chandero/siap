@@ -6,11 +6,13 @@ export default {
   DateTime: 'Fecha y Hora',
   String: 'Texto',
   Home: 'Ir al Inicio',
-  comingsoon: 'Pronto recibirá un correo con las instrucciones de recuperación de contraseña',
+  comingsoon:
+    'Pronto recibirá un correo con las instrucciones de recuperación de contraseña',
   available: 'Disponible',
   selected: 'Seleccionado',
   selectdate: 'Seleccione una Fecha',
   edit: 'Modificar',
+  edit_element: 'Modificar Material',
   delete: 'Eliminar',
   print: 'Imprimir',
   pdf: 'Exportar a Pdf',
@@ -102,9 +104,12 @@ export default {
     canalizaciongeoposicionamiento: 'Geoposicionamiento',
     canalizacionreporte: 'Reporte Canalización',
     canalizacionreportecreate: 'Reporte Canalización / Nuevo Reporte',
-    canalizacionreporteedit: 'Reporte Canalización/ Modificar Información Reporte',
-    canalizacionreporteedittags: 'Reporte Canalización / Modificar Información Reporte',
-    canalizacionreportereparar: 'Reporte Canalización / Reparar Datos Según Reportes',
+    canalizacionreporteedit:
+      'Reporte Canalización/ Modificar Información Reporte',
+    canalizacionreporteedittags:
+      'Reporte Canalización / Modificar Información Reporte',
+    canalizacionreportereparar:
+      'Reporte Canalización / Reparar Datos Según Reportes',
     poste: 'Inventario Postes',
     postegestion: 'Postes Activos',
     postegestioncreate: 'Crear Nuevo Poste',
@@ -140,9 +145,12 @@ export default {
     transformadorgeoposicionamiento: 'Geoposicionamiento',
     transformadorreporte: 'Reporte Transformador',
     transformadorreportecreate: 'Reporte Transformador / Nuevo Reporte',
-    transformadorreporteedit: 'Reporte Transformador/ Modificar Información Reporte',
-    transformadorreporteedittags: 'Reporte Transformador / Modificar Información Reporte',
-    transformadorreportereparar: 'Reporte Transformador / Reparar Datos Según Reportes',
+    transformadorreporteedit:
+      'Reporte Transformador/ Modificar Información Reporte',
+    transformadorreporteedittags:
+      'Reporte Transformador / Modificar Información Reporte',
+    transformadorreportereparar:
+      'Reporte Transformador / Reparar Datos Según Reportes',
     /*
     medidor: 'Inventario Medidor',
     medidorgestion: 'Medidor Activos',
@@ -357,6 +365,7 @@ export default {
     'menu_proceso_menu1reporte_menu1-1luminaria_menu1-1-1list': 'Lista',
     'menu_proceso_menu1reporte_menu1-1luminaria_menu1-1-2create': 'Crear',
     'menu_proceso_menu1reporte_menu1-1luminaria_menu1-1-3edit': 'Actualizar',
+    'menu_proceso_menu1reporte_menu1-1luminaria_menu1-1-4elemento': 'Ajuste Material',
     'menu_proceso_menu1reporte_menu1-2control': 'Control',
     'menu_proceso_menu1reporte_menu1-2control_menu1-2-1list': 'Lista',
     'menu_proceso_menu1reporte_menu1-2control_menu1-2-2create': 'Crear',
@@ -376,7 +385,8 @@ export default {
     'menu_proceso_menu1reporte_menu1-6transformador': 'Transformador',
     'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-1list': 'Lista',
     'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-2create': 'Crear',
-    'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-3edit': 'Actualizar',
+    'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-3edit':
+      'Actualizar',
     menu_proceso_menu2pendiente: 'Reporte Pendiente',
     menu_proceso_menu3obra: 'Obra',
     'menu_proceso_menu3obra_menu3-1list': 'Reporte',
@@ -416,11 +426,14 @@ export default {
     'menu_informe_menu2detallado_menu2-7repotenciacion': 'Repotenciación',
     'menu_informe_menu2detallado_menu2-8retiro': 'Retiro',
     'menu_informe_menu2detallado_menu2-9cambiomedida': 'Cambio de Medida',
-    'menu_informe_menu2detallado_menu2-10retirovsreubicacion': 'Retiro vs Reubicación',
+    'menu_informe_menu2detallado_menu2-10retirovsreubicacion':
+      'Retiro vs Reubicación',
     'menu_informe_menu2detallado_menu2-11porbarrio': 'Por Barrio',
     'menu_informe_menu2detallado_menu2-12repetido': 'Material Repetido',
-    'menu_informe_menu2detallado_menu2-13cambiodireccion': 'Cambio de Dirección',
-    'menu_informe_menu2detallado_menu2-14luminariareporte': 'Luminarias Por Reporte',
+    'menu_informe_menu2detallado_menu2-13cambiodireccion':
+      'Cambio de Dirección',
+    'menu_informe_menu2detallado_menu2-14luminariareporte':
+      'Luminarias Por Reporte',
     'menu_informe_menu2detallado_menu2-15obracuadrilla': 'Cuadrilla Obra',
     'menu_informe_menu2detallado_menu2-16reportesinot': 'Reporte Sin O.T',
     menu_informe_menu3inventario: 'Inventario',
@@ -463,7 +476,8 @@ export default {
     forgot: '¿Olvidó su Contraseña?',
     any: 'cualquier',
     thirdparty: 'O connectar con',
-    thirdpartyTips: 'No puede ser simulado en local, por favor combine su propia simulacón del negocio! ! !'
+    thirdpartyTips:
+      'No puede ser simulado en local, por favor combine su propia simulacón del negocio! ! !'
   },
   control: {
     gestion: {
@@ -616,7 +630,8 @@ export default {
     notcreated: 'No se pudo crear el nuevo elemento, error =>',
     updated: 'Material actualizado con exito!',
     notupdated: 'Material no fue actualizado, error =>',
-    confirmationmsg: 'Se procederá a borrar el Material seleccionado, continuar?',
+    confirmationmsg:
+      'Se procederá a borrar el Material seleccionado, continuar?',
     fecha: 'Fecha Soporte',
     bombillo: 'Bombillo',
     balasto: 'Balasto',
@@ -661,7 +676,8 @@ export default {
     notcreated: 'No se pudo crear la Mano de Obra, error =>',
     updated: 'Mano de Obra actualizada con exito!',
     notupdated: 'Mano de Obra no fue actualizada, error =>',
-    confirmationmsg: 'Se procederá a borrar la Mano de Obra seleccionada, continuar?'
+    confirmationmsg:
+      'Se procederá a borrar la Mano de Obra seleccionada, continuar?'
   },
   historia: {
     title: 'Historial de Luminarias',
@@ -682,7 +698,8 @@ export default {
     notcreated: 'No se pudo crear el nuevo elemento, error =>',
     updated: 'Material actualizado con exito!',
     notupdated: 'Material no fue actualizado, error =>',
-    confirmationmsg: 'Se procederá a borrar el Material seleccionado, continuar?',
+    confirmationmsg:
+      'Se procederá a borrar el Material seleccionado, continuar?',
     fecha: 'Fecha Soporte',
     bombillo: 'Bombillo',
     balasto: 'Balasto',
@@ -789,7 +806,8 @@ export default {
     notcreated: 'No se pudo crear la nueva urbanizadora, error =>',
     updated: 'Urbanizadora actualizada con exito!',
     notupdated: 'Urbanizadora no fue actualizada, error =>',
-    confirmationmsg: 'Se procederá a borrar la Urbanizadora seleccionada, continuar?',
+    confirmationmsg:
+      'Se procederá a borrar la Urbanizadora seleccionada, continuar?',
     state: 'Estado'
   },
   caracteristica: {
@@ -804,7 +822,8 @@ export default {
     notcreated: 'No se pudo crear la nueva característica, error =>',
     updated: 'Característica actualizada con exito!',
     notupdated: 'Característica no fue actualizada, error =>',
-    confirmationmsg: 'Se procederá a borrar la Característica seleccionada, continuar?',
+    confirmationmsg:
+      'Se procederá a borrar la Característica seleccionada, continuar?',
     unit: 'Unidad',
     state: 'Estado',
     values: 'Posibles Valores',
@@ -824,7 +843,8 @@ export default {
     notcreated: 'No se pudo crear el nuevo tipo de elemento, error =>',
     updated: 'Tipo de Material actualizado con exito!',
     notupdated: 'Tipo de Material no fue actualizado, error =>',
-    confirmationmsg: 'Se procederá a borrar el Tipo de Material seleccionado, continuar?',
+    confirmationmsg:
+      'Se procederá a borrar el Tipo de Material seleccionado, continuar?',
     state: 'Estado',
     values: 'Posibles Valores',
     fmtvalues: 'Por favor agregue los valores separados por coma (,)'
@@ -840,7 +860,8 @@ export default {
     notcreated: 'No se pudo crear la cuadrilla, error =>',
     updated: 'Cuadrilla actualizada con exito!',
     notupdated: 'Cuadrilla no fue actualizada, error =>',
-    confirmationmsg: 'Se procederá a borrar la cuadrilla seleccionada, continuar?',
+    confirmationmsg:
+      'Se procederá a borrar la cuadrilla seleccionada, continuar?',
     state: 'Estado'
   },
   operativo: {
@@ -893,7 +914,8 @@ export default {
     notcreated: 'No se pudo crear la solicitud, error =>',
     updated: 'Solicitud actualizada con exito!',
     notupdated: 'Solicitud no fue actualizada, error =>',
-    confirmationmsg: 'Se procederá a borrar la solicitud seleccionada, continuar?',
+    confirmationmsg:
+      'Se procederá a borrar la solicitud seleccionada, continuar?',
     aprobado: 'Aprobado',
     tipo_expansion: {
       title: 'Tipo de Expansión',
@@ -916,7 +938,8 @@ export default {
     created: 'Nueva Municipio Obra Creada',
     updated: 'Municipio Obra actualizada con exito!',
     notupdated: 'Municipio Obra no fue actualizada, error =>',
-    confirmationmsg: 'Se procederá a borrar la Municipio Obra seleccionada, continuar?'
+    confirmationmsg:
+      'Se procederá a borrar la Municipio Obra seleccionada, continuar?'
   },
   reporte: {
     tipo: {
@@ -974,7 +997,8 @@ export default {
     notcreated: 'No se pudo crear el reporte, error =>',
     updated: 'Reporte actualizado con exito!',
     notupdated: 'Reporte no fue actualizado, error =>',
-    confirmationmsg: 'Se procederá a borrar el reporte seleccionado, continuar?',
+    confirmationmsg:
+      'Se procederá a borrar el reporte seleccionado, continuar?',
     print: 'Imprimir',
     environment: 'Manejo del Medio Ambiente',
     status: 'Estado',
@@ -1082,7 +1106,8 @@ export default {
     recoveredsuccessful: 'Luminaria recuperada con exito!',
     error: 'Error',
     recoveredfail: 'No se pudo recuperar la luminaria, error =>',
-    confirmationmsg: 'Se procederá a recuperar la luminaria seleccionada, continuar?',
+    confirmationmsg:
+      'Se procederá a recuperar la luminaria seleccionada, continuar?',
     recovercancelled: 'Se canceló la recuperación de la luminaria'
   },
   gestion: {
@@ -1241,7 +1266,8 @@ export default {
     notcreated: 'No se pudo crear la nueva orden de trabajo, error =>',
     updated: 'Orden de trabajo actualizada con exito!',
     notupdated: 'Orden de trabajo no fue actualizada, error =>',
-    confirmationmsg: 'Se procederá a borrar la Orden de trabajo seleccionada, continuar?',
+    confirmationmsg:
+      'Se procederá a borrar la Orden de trabajo seleccionada, continuar?',
     reports: 'Reportes',
     obras: 'Obras',
     novedades: 'Novedades',
@@ -1473,11 +1499,16 @@ export default {
   },
   components: {
     documentation: 'Documentación',
-    tinymceTips: 'Editor Rich text es parte del sistema de administración, aún presenta algunos problemas.',
-    dropzoneTips: 'Debido a que el negocio presenta necesidades especiales, y necesita subir archivos, se decidio encapsular localmente. Puede ver código detalle en @/components/Dropzone.',
-    stickyTips: 'cuando la página es desplazada a la posición actual, será pegada a la parte superior.',
-    backToTopTips1: 'Cuando la página es desplazada, el botón atrás arriba aparece en la esquina inferior derecha',
-    backToTopTips2: 'Ud puede personalizar el estilo de los botones, mostrar / ocultar, alto de apariencia, alto de retorno. Si necesita prompt de texto, puede usar element-ui el-tooltip elements externally',
+    tinymceTips:
+      'Editor Rich text es parte del sistema de administración, aún presenta algunos problemas.',
+    dropzoneTips:
+      'Debido a que el negocio presenta necesidades especiales, y necesita subir archivos, se decidio encapsular localmente. Puede ver código detalle en @/components/Dropzone.',
+    stickyTips:
+      'cuando la página es desplazada a la posición actual, será pegada a la parte superior.',
+    backToTopTips1:
+      'Cuando la página es desplazada, el botón atrás arriba aparece en la esquina inferior derecha',
+    backToTopTips2:
+      'Ud puede personalizar el estilo de los botones, mostrar / ocultar, alto de apariencia, alto de retorno. Si necesita prompt de texto, puede usar element-ui el-tooltip elements externally',
     imageUploadTips: 'Subir archivos de imagen.'
   },
   table: {
@@ -1508,7 +1539,8 @@ export default {
     accion: 'Acción'
   },
   errorLog: {
-    tips: 'Por favor de clic en el icono del bicho en la esquina superior derecha',
+    tips:
+      'Por favor de clic en el icono del bicho en la esquina superior derecha',
     description: '...',
     documentation: 'Documento de introducción'
   },

@@ -3,25 +3,26 @@ module.exports = {
   env: {
     node: true
   },
-  extends: ["plugin:vue/essential", "@vue/standard"],
+  extends: ['plugin:vue/essential', '@vue/standard'],
   parserOptions: {
-    parser: "babel-eslint"
+    parser: 'babel-eslint'
   },
-  plugins: ["vue"],
+  plugins: ['vue'],
   rules: {
-    "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
-    "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
-    camelcase: "off",
-    "vue/no-unused-components": [
-      "warn",
+    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    camelcase: 'off',
+    'vue/no-unused-components': [
+      'warn',
       {
         ignoreWhenBindingPresent: true
       }
     ],
-    "no-tabs": "off",
-    "no-mixed-spaces-and-tabs": "off",
-    "no-control-regex": "off",
-    "no-prototype-builtins": "off",
-    "no-unused-vars": "off"
+    'no-tabs': 'off',
+    'no-mixed-spaces-and-tabs': 'off',
+    'no-control-regex': 'off',
+    'no-prototype-builtins': 'off',
+    'no-unused-vars': 'off',
+    'space-before-function-paren': 'off'
   }
-};
+}
