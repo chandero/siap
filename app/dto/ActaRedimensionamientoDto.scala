@@ -1,6 +1,7 @@
 package dto
 
 case class ActaRedimensionamientoDto(
+    numero: Int,
     periodo: String,
     fecha_corte: String,
     fecha_corte_anterior: String,

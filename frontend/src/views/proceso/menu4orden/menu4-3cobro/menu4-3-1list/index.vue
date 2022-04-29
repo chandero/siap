@@ -229,6 +229,14 @@
             :src="require('@/assets/pdf.png')"
           />
         </el-col>
+        <el-col :span="1">
+          <img
+            :title="$t('cobro.anexo_redimensionamiento')"
+            @click='showAnexoDialog = true'
+            style='width: 32px; height: 36px; cursor: pointer;'
+            :src="require('@/assets/xls.png')"
+          />
+        </el-col>
       </el-row>
   </el-main>
   <el-dialog
@@ -346,6 +354,39 @@
         <el-button :disabled="!anho || !mes" type="primary" @click="handleActa()">Generar</el-button>
     </span>
   </el-dialog>
+  <el-dialog
+    title="Generar Anexo Redimensionamiento"
+    :visible.sync="showAnexoDialog"
+    width="40%"
+    destroy-on-close
+    center
+    @closed="handleAnexoDialogClosed"
+  >
+    <el-container>
+      <el-main>
+        <el-form label-position="left" label-width="200px">
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="Año">
+                <el-input type="number" v-model="anho" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="Periodo">
+                <el-select v-model="mes">
+                  <el-option v-for="m in months" :key="m.id" :value="m.id" :label="$t(`months.${m.label}`)"></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </el-main>
+    </el-container>
+    <span slot="footer" class="dialog-footer">
+        <el-button @click="showAnexoDialog = false">Cancelar</el-button>
+        <el-button :disabled="!anho || !mes" type="primary" @click="handleAnexo()">Generar</el-button>
+    </span>
+  </el-dialog>
   </el-container>
 </template>
 <script>
@@ -440,6 +481,7 @@ export default {
       showDialog: false,
       showRelacionDialog: false,
       showActaDialog: false,
+      showAnexoDialog: false,
       total: 0,
       page_size: 50,
       current_page: 1,
@@ -506,9 +548,16 @@ export default {
       this.cotr_consecutivo = null
     },
     obtener () {
+      const loading = this.$loading({
+        lock: true,
+        text: 'Cargando...'
+      })
       this.tableData = []
       obtener(this.order, this.qbquery).then(response => {
         this.tableData = response.data
+        loading.close()
+      }).catch(() => {
+        loading.close()
       })
     },
     generar () {
@@ -686,7 +735,7 @@ export default {
       })
     },
     handleAnexo () {
-      this.showActaDialog = false
+      this.showAnexoDialog = false
       const loading = this.$loading({
         lock: true,
         text: 'Generando Anexo...'

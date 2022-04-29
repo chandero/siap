@@ -171,7 +171,7 @@ class CobroController @Inject()(
       val formatter = java.text.NumberFormat.getIntegerInstance
       val empr_id = Utility.extraerEmpresa(request)
       val usua_id = Utility.extraerUsuario(request)
-      val (_numero_acta, _subtotal_expansion, _subtotal_modernizacion, _subtotal_desmonte, _subtotal_total) = cobro6Service.siap_orden_trabajo_cobro_acta_redimensionamiento(empr_id.get , anho, periodo, usua_id.get)
+      val (_numero_acta, _valor_acumulado_anterior, _subtotal_expansion, _subtotal_modernizacion, _subtotal_desmonte, _subtotal_total) = cobro6Service.siap_orden_trabajo_cobro_acta_redimensionamiento(empr_id.get , anho, periodo, usua_id.get)
       val _periodo = Calendar.getInstance()
       _periodo.set(Calendar.YEAR, anho)
       _periodo.set(Calendar.MONTH, periodo)
@@ -182,8 +182,9 @@ class CobroController @Inject()(
       // _fecha_corte.add(Calendar.MONTH, -1)
       var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
       _fecha_corte_anterior.add(Calendar.MONTH, -1)
-      val _total_anterior = 0
+      val _total_anterior = _valor_acumulado_anterior
       val acta = new ActaRedimensionamientoDto(
+        _numero_acta,
         Utility.fechaamesanho(Some(new DateTime(_periodo.getTime()))),
         Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
         Utility.fechaatextosindia(Some(new DateTime(_fecha_corte_anterior.getTime()))),

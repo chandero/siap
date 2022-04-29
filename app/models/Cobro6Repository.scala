@@ -11121,7 +11121,7 @@ class Cobro6Repository @Inject()(
     os.toByteArray
   }
 
-  def siap_orden_trabajo_cobro_acta_redimensionamiento(empr_id: Long, anho: Int, periodo: Int, usua_id: Long): (Int, Double, Double, Double, Double /*, Iterable[(String, String, String, String, String)]*/) = {
+  def siap_orden_trabajo_cobro_acta_redimensionamiento(empr_id: Long, anho: Int, periodo: Int, usua_id: Long): (Int, Double, Double, Double, Double, Double /*, Iterable[(String, String, String, String, String)]*/) = {
     //var _listData = new ListBuffer[(String, String, String, String, String)]
     val empresa = empresaService.buscarPorId(empr_id) match {
       case Some(e) => e
@@ -11135,6 +11135,32 @@ class Cobro6Repository @Inject()(
     // validar si existe el acta
     var _existe_acta = false
     var _numero_acta = 0
+    val _periodo = Calendar.getInstance()
+    _periodo.set(Calendar.YEAR, anho)
+    _periodo.set(Calendar.MONTH, (periodo-1))
+    _periodo.set(Calendar.DAY_OF_MONTH, 1)
+    _periodo.set(Calendar.DATE, _periodo.getActualMaximum(Calendar.DATE))
+
+    var _fecha_corte = _periodo.clone().asInstanceOf[Calendar]
+    var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
+    _fecha_corte_anterior.add(Calendar.MONTH, -1)    
+
+    val _valor_acumulado_anterior = db.withTransaction { implicit connection =>
+      val _periodo_previo = _fecha_corte_anterior.get(Calendar.MONTH) + 1
+      val _anho_previo = _fecha_corte_anterior.get(Calendar.YEAR)
+      println("anho previo: " + _anho_previo)
+      println("periodo previo: " + _periodo_previo)
+      val _valorOpt = SQL("""SELECT reco_valor FROM siap.redimensionamiento_control rc1 WHERE rc1.reco_anho = {anho} AND rc1.reco_periodo = {periodo} AND rc1.empr_id = {empr_id}""").
+      on(
+        'anho -> _anho_previo,
+        'periodo -> _periodo_previo,
+        'empr_id -> empr_id
+      ).as(SqlParser.scalar[Double].singleOpt)
+      _valorOpt match {
+        case Some(v) => v
+        case None => 0.0
+      }
+    }    
     val _acre = db.withTransaction { implicit connection =>
         val _parseActa = int("acre_id") ~ int("acre_numero") map {
           case acre_id ~ acre_numero => (acre_id, acre_numero)
@@ -11177,13 +11203,12 @@ class Cobro6Repository @Inject()(
                       case Some(6) => siap_orden_trabajo_cobro_calculo_total(empresa, orden)
                       case _ => 0.0
                     }
-      var _desmonte = orden.cotr_tipo_obra match {
+      var _desmonteRet = orden.cotr_tipo_obra match {
                       case Some(6) => siap_orden_trabajo_cobro_calculo_desmonte(empresa, orden, acre_id, _existe_acta)
-                      case _ => 0.0
+                      case _ => (0.0, (new ListBuffer[(String, Double, Double)]).toList)
                     }                                       
-      _expansion = _expansion.round
-      _modernizacion = _modernizacion.round
-      _desmonte = _desmonte.round
+
+      val _desmonte = _desmonteRet._1
       val _total = _expansion + _modernizacion - _desmonte
       _subtotal_expansion += _expansion
       _subtotal_modernizacion += _modernizacion
@@ -11202,6 +11227,7 @@ class Cobro6Repository @Inject()(
       }
       (
         _numero_acta,
+        _valor_acumulado_anterior,
         _subtotal_expansion,
         _subtotal_modernizacion,
         _subtotal_desmonte,
@@ -11252,6 +11278,30 @@ class Cobro6Repository @Inject()(
         case None => 0.0
       }
     }
+
+    val _valor_ipp_base = db.withTransaction { implicit connection =>
+      SQL("""SELECT ucap_ipp_valor FROM siap.ucap_ipp ui1 WHERE ui1.ucap_ipp_anho = {anho} AND ui1.empr_id = {empr_id}""").
+      on(
+        'anho -> 2014,
+        'periodo -> periodo,
+        'empr_id -> empr_id
+      ).as(SqlParser.scalar[Double].singleOpt) match {
+        case Some(v) => v
+        case None => 0.0
+      }
+    }
+
+    val _valor_ipp_anho_anterior = db.withTransaction { implicit connection =>
+      val _valorOpt = SQL("""SELECT ucap_ipp_valor FROM siap.ucap_ipp ui1 WHERE ui1.ucap_ipp_anho = {anho} AND ui1.empr_id = {empr_id}""").
+      on(
+        'anho -> (anho - 1),
+        'empr_id -> empr_id
+      ).as(SqlParser.scalar[Double].singleOpt)
+      _valorOpt match {
+        case Some(v) => v
+        case None => 0.0
+      }
+    }
     val _numero_acta = db.withTransaction { implicit connection => 
       SQL("""SELECT ar.acre_numero FROM siap.acta_redimensionamiento ar 
                             WHERE ar.acre_anho = {anho} AND ar.acre_periodo = {periodo} AND ar.empr_id = {empr_id}""").
@@ -11264,7 +11314,232 @@ class Cobro6Repository @Inject()(
     val _sheet02 = Sheet(
       name = "Anexo 02",
       rows = {
+        var _idx0 = 0
+        _listRow02 += com.norbitltd.spoiwo.model.Row(
+          StringCell(
+            "ANEXO 02 - ACTA DE REDIMENSIONAMIENTO No." + _numero_acta,
+            Some(0),
+            style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        font = Font(bold = true, height = 10.points)
+                      )
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          )
+        )
+        _idx0 += 1
+        _listRow02 += com.norbitltd.spoiwo.model.Row(
+          StringCell(
+            Utility.fechaamesanho(Some(new DateTime(_fecha_corte.getTime()))),
+            Some(0),
+            style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        font = Font(bold = true, height = 10.points)
+                      )
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          )
+        )        
+        _idx0 += 1
+        _listRow02 += com.norbitltd.spoiwo.model.Row(
+          StringCell(
+            "",
+            Some(0),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          )
+        )
+        _idx0 += 1
         ordenes.map { orden =>
+          if (orden.cotr_tipo_obra.get == 6) {
+            _listRow02 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "DESMONTE DE UCAPS MODERNIZADAS ODT ITF-" + orden.cotr_consecutivo.get,
+              Some(0),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          font = Font(bold = true, height = 10.points)
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            )
+            _idx0 += 1
+            _listRow02 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "UCAPS",
+              Some(0),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          font = Font(bold = true, height = 10.points),
+                          verticalAlignment = VA.Center,
+                          horizontalAlignment = HA.Center,
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "UND",
+              Some(1),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          font = Font(bold = true, height = 10.points),
+                          verticalAlignment = VA.Center,
+                          horizontalAlignment = HA.Center,
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )                          
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "VALOR UCAP DICIEMBRE 2014",
+              Some(2),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          font = Font(bold = true, height = 10.points),
+                          wrapText = true,
+                          verticalAlignment = VA.Center,
+                          horizontalAlignment = HA.Center,
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )                          
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "VALOR IPP DICIEMBRE " + (_fecha_corte.get(Calendar.YEAR) - 1),
+              Some(3),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          font = Font(bold = true, height = 10.points),
+                          wrapText = true,
+                          verticalAlignment = VA.Center,
+                          horizontalAlignment = HA.Center,
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )                          
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "VALOR IPP DICIEMBRE 2014",
+              Some(4),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          font = Font(bold = true, height = 10.points),
+                          wrapText = true,
+                          verticalAlignment = VA.Center,
+                          horizontalAlignment = HA.Center,
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )                          
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "VALOR UNITARIO UCAP PARA DESMONTAR",
+              Some(5),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          font = Font(bold = true, height = 10.points),
+                          wrapText = true,
+                          verticalAlignment = VA.Center,
+                          horizontalAlignment = HA.Center,
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )                          
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "TOTAL",
+              Some(6),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          font = Font(bold = true, height = 10.points),
+                          wrapText = true,
+                          verticalAlignment = VA.Center,
+                          horizontalAlignment = HA.Center,
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )                          
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            ).withHeight(55.points)
+            _idx0 += 1
+          }
           var _expansion = orden.cotr_tipo_obra match {
                       case Some(2) => siap_orden_trabajo_cobro_calculo_total(empresa, orden)
                       case _ => 0.0
@@ -11273,13 +11548,324 @@ class Cobro6Repository @Inject()(
                       case Some(6) => siap_orden_trabajo_cobro_calculo_total(empresa, orden)
                       case _ => 0.0
                     }
-          var _desmonte = orden.cotr_tipo_obra match {
+          var _desmonteRet = orden.cotr_tipo_obra match {
                       case Some(6) => siap_orden_trabajo_cobro_calculo_desmonte(empresa, orden, 0, true)
-                      case _ => 0.0
-                    }                                       
-          _expansion = _expansion.round
-          _modernizacion = _modernizacion.round
-          _desmonte = _desmonte.round
+                      case _ => (0.0, (new ListBuffer[(String, Double, Double)]()).toList)
+                    }
+          if (orden.cotr_tipo_obra.get == 6) {                    
+            var _idx01 = _idx0 + 1
+            var _hay = false
+            _desmonteRet._2.map { _m =>
+            _hay = true
+            _listRow02 += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                _m._1,
+                Some(0),
+                style = Some(
+                          CellStyle(
+                            dataFormat = CellDataFormat("@"),
+                            borders = CellBorders(
+                              topStyle = CellBorderStyle.Thin,
+                              topColor = Color.Black,
+                              leftStyle = CellBorderStyle.Thin,
+                              leftColor = Color.Black,
+                              rightStyle = CellBorderStyle.Thin,
+                              rightColor = Color.Black,
+                              bottomStyle = CellBorderStyle.Thin,
+                              bottomColor = Color.Black
+                            )                            
+                          )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                _m._2,
+                Some(1),
+                style = Some(
+                          CellStyle(
+                            dataFormat = CellDataFormat("#,##0"),
+                            borders = CellBorders(
+                              topStyle = CellBorderStyle.Thin,
+                              topColor = Color.Black,
+                              leftStyle = CellBorderStyle.Thin,
+                              leftColor = Color.Black,
+                              rightStyle = CellBorderStyle.Thin,
+                              rightColor = Color.Black,
+                              bottomStyle = CellBorderStyle.Thin,
+                              bottomColor = Color.Black
+                            )                            
+                          )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                _m._3 * _valor_ipp_base / _valor_ipp_anho_anterior,
+                Some(2),
+                style = Some(
+                          CellStyle(
+                            dataFormat = CellDataFormat("#,##0"),
+                            borders = CellBorders(
+                              topStyle = CellBorderStyle.Thin,
+                              topColor = Color.Black,
+                              leftStyle = CellBorderStyle.Thin,
+                              leftColor = Color.Black,
+                              rightStyle = CellBorderStyle.Thin,
+                              rightColor = Color.Black,
+                              bottomStyle = CellBorderStyle.Thin,
+                              bottomColor = Color.Black
+                            )
+                          )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                _valor_ipp_anho_anterior,
+                Some(3),
+                style = Some(
+                          CellStyle(
+                            dataFormat = CellDataFormat("#,##0.00"),
+                            borders = CellBorders(
+                              topStyle = CellBorderStyle.Thin,
+                              topColor = Color.Black,
+                              leftStyle = CellBorderStyle.Thin,
+                              leftColor = Color.Black,
+                              rightStyle = CellBorderStyle.Thin,
+                              rightColor = Color.Black,
+                              bottomStyle = CellBorderStyle.Thin,
+                              bottomColor = Color.Black
+                            )
+                          )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              NumericCell(
+                _valor_ipp_base,
+                Some(4),
+                style = Some(
+                          CellStyle(
+                            dataFormat = CellDataFormat("#,##0.00"),
+                            borders = CellBorders(
+                              topStyle = CellBorderStyle.Thin,
+                              topColor = Color.Black,
+                              leftStyle = CellBorderStyle.Thin,
+                              leftColor = Color.Black,
+                              rightStyle = CellBorderStyle.Thin,
+                              rightColor = Color.Black,
+                              bottomStyle = CellBorderStyle.Thin,
+                              bottomColor = Color.Black
+                            )
+                          )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              FormulaCell(
+                "C" + (_idx0 + 1) + "*D" +(_idx0 + 1) + "/E" + (_idx0 + 1),
+                Some(5),
+                style = Some(
+                          CellStyle(
+                            dataFormat = CellDataFormat("#,##0.00"),
+                            borders = CellBorders(
+                              topStyle = CellBorderStyle.Thin,
+                              topColor = Color.Black,
+                              leftStyle = CellBorderStyle.Thin,
+                              leftColor = Color.Black,
+                              rightStyle = CellBorderStyle.Thin,
+                              rightColor = Color.Black,
+                              bottomStyle = CellBorderStyle.Thin,
+                              bottomColor = Color.Black
+                            )
+                          )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              FormulaCell(
+                "B" + (_idx0 + 1) + "*F" +(_idx0 + 1),
+                Some(6),
+                style = Some(
+                          CellStyle(
+                            dataFormat = CellDataFormat("#,##0.00"),
+                            borders = CellBorders(
+                              topStyle = CellBorderStyle.Thin,
+                              topColor = Color.Black,
+                              leftStyle = CellBorderStyle.Thin,
+                              leftColor = Color.Black,
+                              rightStyle = CellBorderStyle.Thin,
+                              rightColor = Color.Black,
+                              bottomStyle = CellBorderStyle.Thin,
+                              bottomColor = Color.Black
+                            )                            
+                          )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+            )
+            _idx0 += 1
+            }
+            if (_hay) {
+            _listRow02 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "TOTAL",
+              Some(0),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          font = Font(bold = true, height = 10.points),
+                          wrapText = true,
+                          verticalAlignment = VA.Center,
+                          horizontalAlignment = HA.Center,
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )                          
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(1),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )                          
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(2),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(3),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(4),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "",
+              Some(5),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            FormulaCell(
+              "SUM(G"+ (_idx01) +":G" + (_idx0) + ")",
+              Some(6),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("#,##0.00"),
+                          font = Font(bold = true, height = 10.points),
+                          borders = CellBorders(
+                            topStyle = CellBorderStyle.Thin,
+                            topColor = Color.Black,
+                            leftStyle = CellBorderStyle.Thin,
+                            leftColor = Color.Black,
+                            rightStyle = CellBorderStyle.Thin,
+                            rightColor = Color.Black,
+                            bottomStyle = CellBorderStyle.Thin,
+                            bottomColor = Color.Black
+                          )
+                        )
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+            )
+            _idx0 += 1
+            }
+            _listRow02 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "",
+              Some(0),
+              style = Some(
+                        CellStyle(dataFormat = CellDataFormat("@"))
+              ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+              )
+            _idx0 += 1
+          }    
+          _expansion = _expansion
+          _modernizacion = _modernizacion
+          val _desmonte = _desmonteRet._1
           val _total = _expansion + _modernizacion - _desmonte
           _subtotal_expansion += _expansion
           _subtotal_modernizacion += _modernizacion
@@ -11297,6 +11883,25 @@ class Cobro6Repository @Inject()(
             )
         }
         _listRow02.toList
+      },
+      columns = {
+        var _listColumn = new ArrayBuffer[com.norbitltd.spoiwo.model.Column]()
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 0, width = new Width(60, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 1, width = new Width(8, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 2, width = new Width(14, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 3, width = new Width(14, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 4, width = new Width(14, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 5, width = new Width(14, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 6, width = new Width(19, WidthUnit.Character))
+        _listColumn.toList        
+
       }
     )
     val _sheet01 = Sheet(
@@ -11308,7 +11913,10 @@ class Cobro6Repository @Inject()(
             "ANEXO 01 - ACTA DE REDIMENSIONAMIENTO No." + _numero_acta,
             Some(0),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("YYYY-MM-DD"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        font = Font(bold = true)
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           )
@@ -11316,11 +11924,13 @@ class Cobro6Repository @Inject()(
         _idx += 1
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "REDIMENSIONAMIENTO DE LA INFRAESTRUCTURA DEL SISTEMA DE ALUMBRADO PUBLICO DEL " + empresa.muni_descripcion.get,
+            "REDIMENSIONAMIENTO DE LA INFRAESTRUCTURA DEL SISTEMA DE ALUMBRADO PUBLICO DE " + empresa.muni_descripcion.get,
             Some(0),
             style = Some(
                       CellStyle(dataFormat = CellDataFormat("@"),
-                      wrapText = true)
+                      wrapText = true,
+                      verticalAlignment = VA.Center,
+                      horizontalAlignment = HA.Center)
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
@@ -11328,7 +11938,11 @@ class Cobro6Repository @Inject()(
             "Expansión",
             Some(1),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("@"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        verticalAlignment = VA.Center,
+                        horizontalAlignment = HA.Center
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
@@ -11336,7 +11950,11 @@ class Cobro6Repository @Inject()(
             "Obras complementarias de expansión",
             Some(2),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("@"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        verticalAlignment = VA.Center,
+                        horizontalAlignment = HA.Center
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
@@ -11354,7 +11972,9 @@ class Cobro6Repository @Inject()(
             style = Some(
                       CellStyle(
                         dataFormat = CellDataFormat("@"),
-                        wrapText = true
+                        verticalAlignment = VA.Center,
+                        horizontalAlignment = HA.Center,                        
+                        wrapText = true,
                       )                      
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -11388,7 +12008,9 @@ class Cobro6Repository @Inject()(
             style = Some(
                       CellStyle(
                         dataFormat = CellDataFormat("@"),
-                        wrapText = java.lang.Boolean.TRUE
+                        wrapText = true,
+                        verticalAlignment = VA.Center,
+                        horizontalAlignment = HA.Center
                       )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -11399,7 +12021,9 @@ class Cobro6Repository @Inject()(
             style = Some(
                       CellStyle(
                         dataFormat = CellDataFormat("@"),
-                        wrapText = java.lang.Boolean.TRUE
+                        wrapText = true,
+                        verticalAlignment = VA.Center,
+                        horizontalAlignment = HA.Center
                       )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -11414,14 +12038,19 @@ class Cobro6Repository @Inject()(
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           )
-        )
+        ).withHeight(40.points)
         _idx += 1
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
             "Redimensionamiento de la Infraestructura de Alumbrado Público Desde el 1 de Enero de 2015 hasta el " + Utility.fechaamesanho(Some(new DateTime(_periodo.getTime()))),
             Some(0),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("@"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        fillForegroundColor = Color.LightGrey,
+                        fillPattern = CellFill.Solid,
+                        wrapText = true
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
@@ -11429,7 +12058,11 @@ class Cobro6Repository @Inject()(
             "",
             Some(1),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("@"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        fillForegroundColor = Color.LightGrey,
+                        fillPattern = CellFill.Solid
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),            
@@ -11437,7 +12070,11 @@ class Cobro6Repository @Inject()(
             "",
             Some(2),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("@"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        fillForegroundColor = Color.LightGrey,
+                        fillPattern = CellFill.Solid
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
@@ -11445,7 +12082,11 @@ class Cobro6Repository @Inject()(
             "",
             Some(3),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("@"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        fillForegroundColor = Color.LightGrey,
+                        fillPattern = CellFill.Solid
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
@@ -11454,15 +12095,17 @@ class Cobro6Repository @Inject()(
             Some(4),
             style = Some(
                       CellStyle(
-                        dataFormat = CellDataFormat("#,##0"),
+                        dataFormat = CellDataFormat("$#,##0"),
+                        font = Font(bold = true),
+                        fillForegroundColor = Color.LightGrey,
+                        fillPattern = CellFill.Solid,
                       )                      
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           )
-        )
+        ).withHeight(30.points)
         _idx += 1
         _listData.map { _data =>
-          println("_data: " + _data)
           _listRow01 += com.norbitltd.spoiwo.model.Row(
             StringCell(
               _data._1,
@@ -11470,7 +12113,9 @@ class Cobro6Repository @Inject()(
               style = Some(
                         CellStyle(
                           dataFormat = CellDataFormat("@"),
-                          wrapText = java.lang.Boolean.TRUE
+                          wrapText = true,
+                          horizontalAlignment = HA.Left,
+                          verticalAlignment = VA.Top
                         )
                       ),
               CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -11480,7 +12125,7 @@ class Cobro6Repository @Inject()(
               Some(1),
               style = Some(
                         CellStyle(
-                          dataFormat = CellDataFormat("#,##0")
+                          dataFormat = CellDataFormat("$#,##0")
                         )
                       ),
               CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -11490,7 +12135,7 @@ class Cobro6Repository @Inject()(
               Some(2),
               style = Some(
                         CellStyle(
-                          dataFormat = CellDataFormat("#,##0")
+                          dataFormat = CellDataFormat("$#,##0")
                         )
                       ),
               CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -11500,7 +12145,7 @@ class Cobro6Repository @Inject()(
               Some(3),
               style = Some(
                         CellStyle(
-                          dataFormat = CellDataFormat("#,##0")
+                          dataFormat = CellDataFormat("$#,##0")
                         )
                       ),
               CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -11510,7 +12155,7 @@ class Cobro6Repository @Inject()(
               Some(4),
               style = Some(
                         CellStyle(
-                          dataFormat = CellDataFormat("#,##0")
+                          dataFormat = CellDataFormat("$#,##0")
                         )
                       ),
               CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -11523,40 +12168,64 @@ class Cobro6Repository @Inject()(
             "Subtotal Redimensionamiento del Mes de " + Utility.fechaatextosindia(Some(new DateTime(_fecha_corte_anterior.getTime()))),
             Some(0),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("@"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        font = Font(bold = true, height = 9.points),
+                        wrapText = true,
+                        fillForegroundColor = Color.LightGrey,
+                        fillPattern = CellFill.Solid
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
           FormulaCell(
-            "SUM(B4"+ ":B" + (_idx + 1) + ")",
+            "SUM(B5"+ ":B" + (_idx + 1) + ")",
             Some(1),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("#,##0"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("$#,##0"),
+                        font = Font(bold = true, height = 10.points),
+                        fillForegroundColor = Color.LightGrey,
+                        fillPattern = CellFill.Solid                        
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
           FormulaCell(
-            "SUM(C4"+ ":C" + (_idx + 1) + ")",
+            "SUM(C5"+ ":C" + (_idx + 1) + ")",
             Some(2),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("#,##0"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("$#,##0"),
+                        font = Font(bold = true, height = 10.points),
+                        fillForegroundColor = Color.LightGrey,
+                        fillPattern = CellFill.Solid                        
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
           FormulaCell(
-            "SUM(D4"+ ":D" + (_idx + 1) + ")",
+            "SUM(D5"+ ":D" + (_idx + 1) + ")",
             Some(3),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("#,##0"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("$#,##0"),
+                        font = Font(bold = true, height = 10.points),
+                        fillForegroundColor = Color.LightGrey,
+                        fillPattern = CellFill.Solid
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
           FormulaCell(
-            "SUM(E4"+ ":E" + (_idx + 1) + ")",
+            "SUM(E5"+ ":E" + (_idx + 1) + ")",
             Some(4),
             style = Some(
                       CellStyle(
-                        dataFormat = CellDataFormat("#,##0"),
+                        dataFormat = CellDataFormat("$#,##0"),
+                        font = Font(bold = true, height = 10.points),
+                        fillForegroundColor = Color.LightGrey,
+                        fillPattern = CellFill.Solid
                       )                      
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
@@ -11565,10 +12234,16 @@ class Cobro6Repository @Inject()(
         _idx += 1
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "Total Redimensionamiento de la Infraestructura del sistema de Alumbrado Público desde el 1 de Enero de 2015 Hasta el " + Utility.fechaamesanho(Some(new DateTime(_periodo.getTime()))),
+            "Total redimensionamiento de la Infraestructura del sistema de Alumbrado Público desde el 1 de Enero de 2015 Hasta el " + Utility.fechaamesanho(Some(new DateTime(_periodo.getTime()))),
             Some(0),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("@"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        font = Font(bold = true, height = 9.points),
+                        wrapText = true,
+                        fillForegroundColor = Color.Grey,
+                        fillPattern = CellFill.Solid                        
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
@@ -11576,7 +12251,12 @@ class Cobro6Repository @Inject()(
             "",
             Some(1),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("@"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        font = Font(bold = true, height = 9.points),
+                        fillForegroundColor = Color.Grey,
+                        fillPattern = CellFill.Solid
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
@@ -11584,7 +12264,12 @@ class Cobro6Repository @Inject()(
             "",
             Some(2),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("@"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        font = Font(bold = true, height = 9.points),
+                        fillForegroundColor = Color.Grey,
+                        fillPattern = CellFill.Solid                        
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
@@ -11592,7 +12277,12 @@ class Cobro6Repository @Inject()(
             "",
             Some(3),
             style = Some(
-                      CellStyle(dataFormat = CellDataFormat("@"))
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        font = Font(bold = true, height = 9.points),
+                        fillForegroundColor = Color.Grey,
+                        fillPattern = CellFill.Solid
+                      )
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           ),
@@ -11601,15 +12291,32 @@ class Cobro6Repository @Inject()(
             Some(4),
             style = Some(
                       CellStyle(
-                        dataFormat = CellDataFormat("#,##0"),
+                        dataFormat = CellDataFormat("$#,##0"),
+                        font = Font(bold = true, height = 11.points),
+                        fillForegroundColor = Color.Grey,
+                        fillPattern = CellFill.Solid
                       )                      
             ),
             CellStyleInheritance.CellThenRowThenColumnThenSheet
           )
-        )
+        ).withHeight(35.points)
         _listRow01.toList
       },
-      mergedRegions = _listMerged01.toList
+      mergedRegions = _listMerged01.toList,
+      columns = {
+        var _listColumn = new ArrayBuffer[com.norbitltd.spoiwo.model.Column]()
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 0, width = new Width(60, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 1, width = new Width(14, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 2, width = new Width(14, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 3, width = new Width(14, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 4, width = new Width(19, WidthUnit.Character))
+        _listColumn.toList
+      }
     )
     println("Escribiendo en el Stream")
     var os: ByteArrayOutputStream = new ByteArrayOutputStream()
@@ -11619,16 +12326,16 @@ class Cobro6Repository @Inject()(
     (_numero_acta, os.toByteArray())
   }
 
-  def siap_orden_trabajo_cobro_calculo_desmonte(empresa: Empresa, orden: orden_trabajo_cobro, acre_id: Long, _existe_acta: Boolean): Double = {
+  def siap_orden_trabajo_cobro_calculo_desmonte(empresa: Empresa, orden: orden_trabajo_cobro, acre_id: Long, _existe_acta: Boolean): (Double, Iterable[(String, Double, Double)]) = {
     db.withTransaction { implicit connection =>
-      val _parseMaterial = int("cotr_id") ~ int("elem_id") ~ double("cantidad") ~ double("valor") map {
-        case cotr_id ~ elem_id ~ cantidad ~ valor => (cotr_id, elem_id, cantidad, valor)
+      val _parseMaterial = int("cotr_id") ~ int("elem_id") ~ str("elem_descripcion") ~ double("cantidad") ~ double("valor") map {
+        case cotr_id ~ elem_id ~ elem_descripcion ~ cantidad ~ valor => (cotr_id, elem_id, elem_descripcion, cantidad, valor)
       }
       val _anho_anterior = orden.cotr_anho match {
                               case Some(a) => a - 1
                               case None => Calendar.getInstance().get(Calendar.YEAR) - 1
       }
-      val _material = SQL("""select cotr1.cotr_id, re1.elem_id, re1.even_cantidad_retirado as cantidad, uiv.ucap_ipp_valor_valor as valor from siap.cobro_orden_trabajo cot1
+      val _material = SQL("""select cotr1.cotr_id, re1.elem_id, er1.elre_descripcion as elem_descripcion , re1.even_cantidad_retirado as cantidad, uiv.ucap_ipp_valor_valor as valor from siap.cobro_orden_trabajo cot1
                               inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
                               inner join siap.reporte_evento re1 on re1.repo_id = cotr1.repo_id and re1.aap_id = cotr1.aap_id and re1.even_estado < 8 and re1.even_cantidad_retirado > 0
                               inner join siap.elemento_redimensionamiento er1 on er1.elem_id = re1.elem_id
@@ -11641,7 +12348,7 @@ class Cobro6Repository @Inject()(
                               ).as(_parseMaterial *)
       var _desmonte = 0.0
       _material.map { _m =>
-        _desmonte += _m._3 * _m._4
+        _desmonte += _m._4 * _m._5
         if (!_existe_acta) {
           SQL("""INSERT INTO siap.acta_redimensionamiento_detalle (acre_id, cotr_id, elem_id, acrede_cantidad, acrede_valor) 
                  VALUES ({acre_id}, {cotr_id}, {elem_id}, {cantidad}, {valor})""")
@@ -11654,7 +12361,23 @@ class Cobro6Repository @Inject()(
           ).executeUpdate()
         }
       }
-      _desmonte
+
+      // Buscar material para reporte anexo 2
+      val _parseMaterialAnexo = str("elem_descripcion") ~ double("cantidad") ~ double("valor") map {
+        case elem_descripcion ~ cantidad ~ valor => (elem_descripcion, cantidad, valor)
+      }
+      val _listMaterial = SQL("""SELECT er1.elre_descripcion as elem_descripcion, SUM(ard1.acrede_cantidad) as cantidad, uiv.ucap_ipp_valor_valor as valor from siap.acta_redimensionamiento_detalle ard1
+                inner join siap.elemento_redimensionamiento er1 on er1.elem_id = ard1.elem_id
+                inner join siap.ucap_ipp_valor uiv on uiv.elem_id = er1.elem_id and uiv.ucap_ipp_valor_anho = {anho_anterior}
+                where ard1.cotr_id = {cotr_id}
+                group by 1,3
+                order by 1,2""")
+                              .on(
+                                'cotr_id -> orden.cotr_id,
+                                'anho_anterior -> _anho_anterior
+                              ).as(_parseMaterialAnexo *)
+      //
+      (_desmonte, _listMaterial)
     }
   }
 

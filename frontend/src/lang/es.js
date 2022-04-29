@@ -71,7 +71,8 @@ export default {
     tipo_obra_tipo: 'Tipo'
   },
   cobro: {
-    acta_redimensionamiento: 'Generar Acta de Redimensionamiento'
+    acta_redimensionamiento: 'Generar Acta de Redimensionamiento',
+    anexo_redimensionamiento: 'Generar Anexo de Redimensionamiento'
   },
   route: {
     dashboard: 'Tablero',
