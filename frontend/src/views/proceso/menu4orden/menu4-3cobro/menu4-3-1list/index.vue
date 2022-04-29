@@ -352,7 +352,7 @@
 import VueQueryBuilder from 'vue-query-builder'
 import { mapGetters } from 'vuex'
 import { getTipos } from '@/api/reporte'
-import { obtener, generar, xls, verificar, consecutivo, relacion, actaRedimensionamiento } from '@/api/cobro'
+import { obtener, generar, xls, verificar, consecutivo, relacion, actaRedimensionamiento, anexoRedimensionamiento } from '@/api/cobro'
 import { getCaracteristica } from '@/api/caracteristica'
 import { parseTime } from '@/utils'
 export default {
@@ -667,12 +667,38 @@ export default {
       })
       actaRedimensionamiento(this.anho, this.mes).then(resp => {
         var blob = resp.data
-        const filename = 'Acta_Orden_Trabajo_ITAF_' + this.anho + '_' + this.$i18n.t(this.mes) + '.pdf'
+        const filename = resp.headers['content-disposition'].split(';')[1].split('=')[1]
         if (window.navigator.msSaveOrOpenBlob) {
           window.navigator.msSaveBlob(blob, filename)
         } else {
           var downloadLink = window.document.createElement('a')
           downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }))
+          downloadLink.download = filename
+          document.body.appendChild(downloadLink)
+          loading.close()
+          downloadLink.click()
+          document.body.removeChild(downloadLink)
+        }
+        this.handleAnexo(this.anho, this.mes)
+      }).catch((err) => {
+        loading.close()
+        this.$message.error(err.message)
+      })
+    },
+    handleAnexo () {
+      this.showActaDialog = false
+      const loading = this.$loading({
+        lock: true,
+        text: 'Generando Anexo...'
+      })
+      anexoRedimensionamiento(this.anho, this.mes).then(resp => {
+        var blob = resp.data
+        const filename = resp.headers['content-disposition'].split(';')[1].split('=')[1]
+        if (window.navigator.msSaveOrOpenBlob) {
+          window.navigator.msSaveBlob(blob, filename)
+        } else {
+          var downloadLink = window.document.createElement('a')
+          downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
           downloadLink.download = filename
           document.body.appendChild(downloadLink)
           loading.close()

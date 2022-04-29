@@ -61,6 +61,14 @@ export function actaRedimensionamiento (anho, mes) {
   })
 }
 
+export function anexoRedimensionamiento (anho, mes) {
+  return request({
+    url: `cotr/acan/${anho}/${mes}`,
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
 export function facturaTodas (page_size, current_page, order, filter) {
   const data = {
     page_size: page_size,

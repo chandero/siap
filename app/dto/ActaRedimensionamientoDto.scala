@@ -13,6 +13,6 @@ case class ActaRedimensionamientoDto(
     subtotal_modernizacion: String,
     subtotal_desmonte: String,
     subtotal_total: String,
-    total: String,
-    tableData: List[(String, String, String, String, String)]
+    total: String
+    // , tableData: List[(String, String, String, String, String)]
 )

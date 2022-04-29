@@ -168,39 +168,53 @@ class CobroController @Inject()(
   }  
   
   def siap_orden_trabajo_cobro_acta_redimensionamiento(anho:Int, periodo:Int) = authenticatedUserAction.async { implicit request =>
+      val formatter = java.text.NumberFormat.getIntegerInstance
       val empr_id = Utility.extraerEmpresa(request)
       val usua_id = Utility.extraerUsuario(request)
-      val (_subtotal_expansion, _subtotal_modernizacion, _subtotal_desmonte, _subtotal_total, _tablaData) = cobro6Service.siap_orden_trabajo_cobro_anexo_redimensionamiento(empr_id.get , anho, periodo)
+      val (_numero_acta, _subtotal_expansion, _subtotal_modernizacion, _subtotal_desmonte, _subtotal_total) = cobro6Service.siap_orden_trabajo_cobro_acta_redimensionamiento(empr_id.get , anho, periodo, usua_id.get)
       val _periodo = Calendar.getInstance()
       _periodo.set(Calendar.YEAR, anho)
       _periodo.set(Calendar.MONTH, periodo)
       _periodo.set(Calendar.DAY_OF_MONTH, 1)
       _periodo.set(Calendar.DATE, _periodo.getActualMaximum(Calendar.DATE))
-
+      val filename = "Acta_Redimensionamiento_" + _numero_acta + "_" + anho + "_" + periodo + ".pdf"
       var _fecha_corte = _periodo.clone().asInstanceOf[Calendar]
-      _fecha_corte.add(Calendar.MONTH, -1)
+      // _fecha_corte.add(Calendar.MONTH, -1)
       var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
       _fecha_corte_anterior.add(Calendar.MONTH, -1)
-
+      val _total_anterior = 0
       val acta = new ActaRedimensionamientoDto(
         Utility.fechaamesanho(Some(new DateTime(_periodo.getTime()))),
         Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
         Utility.fechaatextosindia(Some(new DateTime(_fecha_corte_anterior.getTime()))),
         Utility.fechaamesanho(Some(new DateTime(_fecha_corte_anterior.getTime()))),
         Utility.fechaatextosindia(Some(new DateTime())),
-        "0",
-        "0",
-        "0",
-        _subtotal_expansion,
-        _subtotal_modernizacion,
-        _subtotal_desmonte,
-        _subtotal_total,
-        "0",
-        _tablaData.toList
+        "$" + formatter.format(_subtotal_total),
+        "$" + formatter.format(_total_anterior + _subtotal_total),
+        "$" + formatter.format(_total_anterior),
+        "$" + formatter.format(_subtotal_expansion),
+        "$" + formatter.format(_subtotal_modernizacion),
+        "$" + formatter.format(_subtotal_desmonte),
+        "$" + formatter.format(_subtotal_total),
+        "$" + formatter.format(_total_anterior + _subtotal_total)
+        /*, _tablaData.toList */
       )
       Future.successful(pdfGen.ok(
           views.html.siap_cobro_acta_redimensionamiento(acta),
           "conf/fonts/Arial.ttf"      
-      ))
+      ).withHeaders("Content-Disposition" -> s"attachment; filename=$filename"))
     }
-}
+    
+  def siap_orden_trabajo_cobro_anexo_redimensionamiento(anho:Int, periodo:Int) = authenticatedUserAction.async { implicit request =>
+      val formatter = java.text.NumberFormat.getIntegerInstance
+      val empr_id = Utility.extraerEmpresa(request)
+      val usua_id = Utility.extraerUsuario(request)
+      val (_numero_acta, os) = cobro6Service.siap_orden_trabajo_cobro_anexo_redimensionamiento(empr_id.get , anho, periodo, usua_id.get)
+      val filename = "Anexos_Acta_Redimensionamiento_" + _numero_acta + "_" + anho + "_" + periodo + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Future.successful(Ok(os)
+        .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        .withHeaders("Content-Disposition" -> attach)
+      )
+    }
+  }

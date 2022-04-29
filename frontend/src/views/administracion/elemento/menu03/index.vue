@@ -333,7 +333,7 @@ export default {
       const loading = this.$loading({
         lock: true
       })
-      updatePriceElemento(row._1, row._10, row._11).then(response => {
+      updatePriceElemento(this.anho, row._1, parseInt(row._10)).then(response => {
         if (response.data === 'true') {
           loading.close()
           this.getElementos()

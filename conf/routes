@@ -434,6 +434,7 @@ GET /api/repo/gbtcw/:c/:e/:t controllers.ReporteController.buscarPorConsecutivoW
 GET /api/repo/conv/:id controllers.ReporteController.convertir(id: Long)
 GET /api/repo/gbaap/:id controllers.ReporteController.buscarPorAap(id: Long)
 GET /api/repo/rsino/:fi/:ff controllers.ReporteController.reporteSinOrdenTrabajo(fi: Long, ff: Long)
+GET /api/repo/acde/:fc/:tr controllers.ReporteController.ActaDesmonteXls(fc: Long, tr: Int)
 
 # ControlReporte
 
@@ -698,6 +699,7 @@ GET /api/cotr/csc/:r                            controllers.CobroController.siap
 GET /api/cotr/rel/:a/:p                         controllers.CobroController.siap_orden_trabajo_cobro_relacion(a:Int, p:Int)
 GET /api/cotr/rel2                         controllers.CobroController.siap_orden_trabajo_cobro_relacion_factura
 GET /api/cotr/acta/:a/:m                        controllers.CobroController.siap_orden_trabajo_cobro_acta_redimensionamiento(a:Int, m:Int)
+GET /api/cotr/acan/:a/:m                        controllers.CobroController.siap_orden_trabajo_cobro_anexo_redimensionamiento(a:Int, m:Int)
 
 # Cobro Factura
 POST /api/cofa/all                      controllers.CobroFacturaController.todos

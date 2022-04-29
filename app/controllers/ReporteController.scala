@@ -527,6 +527,23 @@ class ReporteController @Inject()(
     Ok(os).as("application/pdf")
   }
 
+  def ActaDesmonteXls(fecha_corte: Long, tireuc_id: Int) = authenticatedUserAction.async { implicit request =>
+    val empr_id = Utility.extraerEmpresa(request)
+    val usua_id = Utility.extraerUsuario(request)
+    val response = reporteService.ActaDesmonteXls(fecha_corte, tireuc_id, empr_id.get, usua_id.get)
+    if (response._1 > 0) {
+      val filename = "Acta_de_Desmonte_No." + response._1 + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Future.successful(
+        Ok(response._2)
+          .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+          .withHeaders("Content-Disposition" -> attach)
+      )    
+    } else {
+      Future.successful(NotFound(Json.toJson("false")))
+    }
+  }
+
   def validarReporteDiligenciado(reti_id: scala.Long, repo_consecutivo: Int) =
     authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)

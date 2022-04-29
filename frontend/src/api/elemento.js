@@ -98,8 +98,9 @@ export function deleteElemento (elem_id) {
   })
 }
 
-export function updatePriceElemento (elem_id, elpr_precio) {
+export function updatePriceElemento (elpr_anho, elem_id, elpr_precio) {
   const data = {
+    elpr_anho,
     elem_id,
     elpr_precio
   }

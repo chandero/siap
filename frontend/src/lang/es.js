@@ -407,6 +407,7 @@ export default {
     'menu_proceso_menu4orden_menu4-2externa_menu4-3-2factura': 'Factura',
     menu_proceso_menu5formato: 'Formato en Blanco',
     menu_proceso_menu6recuperar: 'Recuperar Historial',
+    menu_proceso_menu7actadesmonte: 'Acta de Desmonte',
     menu_informe: 'Informe',
     menu_informe_menu1consolidado: 'Consolidado',
     'menu_informe_menu1consolidado_menu1-1material': 'Material Utilizado',
@@ -1015,7 +1016,9 @@ export default {
     aaco_id_nuevo: 'Tipo Medida Nuevo',
     aap_fechatoma: 'Fecha Toma',
     reparar: 'Recuperar',
-    novedades: 'Novedades'
+    novedades: 'Novedades',
+    actadesmonte: 'Acta de Desmonte',
+    fechaCorte: 'Fecha a Procesar'
   },
   ortr: {
     select: 'Seleccione la ODT'

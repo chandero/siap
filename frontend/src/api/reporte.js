@@ -264,3 +264,15 @@ export function printReporteBlanco(reti_id, empr_id) {
     data.empr_id
   window.open(url, '_blank', 'location=no, menubar=no')
 }
+
+export function getActaDesmonteXls(fecha_corte, tireuc_id) {
+  const data = {
+    fecha_corte,
+    tireuc_id
+  }
+  return request({
+    url: '/repo/acde/' + data.fecha_corte + '/' + data.tireuc_id,
+    method: 'get',
+    responseType: 'blob'
+  })
+}

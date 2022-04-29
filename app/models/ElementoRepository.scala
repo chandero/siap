@@ -892,12 +892,11 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
 
       seActualizo =
         SQL(
-          "UPDATE siap.elemento_precio SET elpr_precio = {elpr_precio} WHERE elem_id = {elem_id} and elpr_anho = {elpr_anho} and elpr_fecha = {elpr_fecha}"
+          "UPDATE siap.elemento_precio SET elpr_precio = {elpr_precio} WHERE elem_id = {elem_id} and elpr_anho = {elpr_anho}"
         ).on(
             'elem_id -> elem_id,
             'elpr_anho -> elpr_anho,
-            'elpr_precio -> elpr_precio,
-            'elpr_fecha -> fecha
+            'elpr_precio -> elpr_precio
           )
           .executeUpdate() > 0
 
@@ -907,15 +906,17 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
                           elem_id,
                           elpr_anho,
                           elpr_precio,
-                          elpr_undiad,
+                          elpr_unidad,
                           elpr_fecha,
                           elpr_precio_nuevo
-                          ) VALUES ({elem_id}, {elpr_anho}, {elpr_precio}, {elpr_unidad}, {elpr_fecha}, {elpr_precio})"""
+                          ) VALUES ({elem_id}, {elpr_anho}, {elpr_precio}, {elpr_unidad}, {elpr_fecha}, {elpr_precio_nuevo})"""
         ).on(
             'elem_id -> elem_id,
             'elpr_anho -> elpr_anho,
             'elpr_precio -> elpr_precio,
-            'elpr_unidad -> "UND"
+            'elpr_unidad -> "UND",
+            'elpr_fecha -> fecha,
+            'elpr_precio_nuevo -> elpr_precio            
           )
           .executeUpdate() > 0
       }
@@ -1041,7 +1042,7 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
   def cuentaPrecio(empr_id: Long, filter: String, anho: Int): Long = {
     db.withConnection { implicit connection =>
       var query =
-        """select COUNT(*) AS c from (SELECT DISTINCT e1.elem_id
+        """select COUNT(*) AS c from (SELECT DISTINCT e1.elem_id, e1.elem_codigo, e1.elem_descripcion
            FROM siap.reporte r1
            INNER JOIN siap.reporte_evento re1 ON re1.repo_id = r1.repo_id
            INNER JOIN siap.elemento e1 ON e1.elem_id = re1.elem_id
@@ -1050,10 +1051,10 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
            		 r1.empr_id = {empr_id} AND
                elpr1.elpr_anho = {anho} AND
            		 e1.elem_estado = 1"""
-      if (!filter.isEmpty) {
-        query = query + " and " + filter
-      }
       query = query + ") as o "
+      if (!filter.isEmpty) {
+        query = query + " WHERE " + filter
+      }      
       val result = SQL(query)
         .on(
           'empr_id -> empr_id,

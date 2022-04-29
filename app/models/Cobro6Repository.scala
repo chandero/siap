@@ -63,6 +63,9 @@ import org.apache.poi.common.usermodel.HyperlinkType
 // Utility
 import utilities.Utility
 import utilities.N2T
+
+import utilities.DataUtil
+
 import org.checkerframework.checker.units.qual.s
 import org.apache.poi.ss.usermodel.CellType
 
@@ -169,7 +172,8 @@ class Cobro6Repository @Inject()(
     barrioService: BarrioRepository,
     unitarioService: UnitarioRepository,
     generalService: GeneralRepository,
-    n2l: N2T
+    n2l: N2T,
+    dataUtil: DataUtil
 )(implicit ec: DatabaseExecutionContext) {
 
   private val db = dbapi.database("default")
@@ -498,7 +502,7 @@ class Cobro6Repository @Inject()(
           from siap.cobro_orden_trabajo cot1
           inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
           inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
+          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id AND re1.even_cantidad_instalado > 0 AND re1.even_estado < 8
           inner join siap.elemento e1 on e1.elem_id = re1.elem_id
           left join siap.unitario u1 on u1.unit_id = re1.unit_id
           left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
@@ -11117,18 +11121,53 @@ class Cobro6Repository @Inject()(
     os.toByteArray
   }
 
-  def siap_orden_trabajo_cobro_anexo_redimensionamiento(empr_id: Long, anho: Int, periodo: Int): (String, String, String, String, Iterable[(String, String, String, String, String)]) = {
-    var _listData = new ListBuffer[(String, String, String, String, String)]
+  def siap_orden_trabajo_cobro_acta_redimensionamiento(empr_id: Long, anho: Int, periodo: Int, usua_id: Long): (Int, Double, Double, Double, Double /*, Iterable[(String, String, String, String, String)]*/) = {
+    //var _listData = new ListBuffer[(String, String, String, String, String)]
     val empresa = empresaService.buscarPorId(empr_id) match {
       case Some(e) => e
       case None => Empresa(None, "", "", "", "", "", None, 0, 0, 0, 0, None, None)
     }
     val ordenes =  buscarPorEmpresaAnhoPeriodo(empresa.empr_id.get, anho, periodo)
-    val formatter = java.text.NumberFormat.getIntegerInstance
     var _subtotal_expansion = 0.0
     var _subtotal_modernizacion = 0.0
     var _subtotal_desmonte = 0.0
     var _subtotal_total = 0.0
+    // validar si existe el acta
+    var _existe_acta = false
+    var _numero_acta = 0
+    val _acre = db.withTransaction { implicit connection =>
+        val _parseActa = int("acre_id") ~ int("acre_numero") map {
+          case acre_id ~ acre_numero => (acre_id, acre_numero)
+        }
+        SQL("""SELECT ar.acre_id, ar.acre_numero FROM siap.acta_redimensionamiento ar 
+                            WHERE ar.acre_anho = {anho} AND ar.acre_periodo = {periodo} AND ar.empr_id = {empr_id}""").
+      on(
+        'anho -> anho,
+        'periodo -> periodo,
+        'empr_id -> empr_id
+      ).as(_parseActa.singleOpt)
+    }
+    val acre_id = _acre match {
+      case Some(v) =>  _existe_acta = true 
+                        _numero_acta = v._2
+                        v._1
+      case None =>  _existe_acta = false
+                    val _numero = dataUtil.getConsecutivo(9)
+                    _numero_acta = _numero
+                    db.withTransaction { implicit connection => 
+                      SQL("""INSERT INTO siap.acta_redimensionamiento(acre_numero, acre_anho, acre_periodo, acre_fecha, empr_id, usua_id)
+                            VALUES({numero}, {anho}, {periodo}, {fecha}, {empr_id}, {usua_id})""").
+                      on(
+                        'numero -> _numero,
+                        'anho -> anho,
+                        'periodo -> periodo,
+                        'fecha -> Calendar.getInstance().getTime(),
+                        'empr_id -> empr_id,
+                        'usua_id -> usua_id
+                      ).executeInsert().get
+                    }
+
+    }
     ordenes.map { orden =>
       var _expansion = orden.cotr_tipo_obra match {
                       case Some(2) => siap_orden_trabajo_cobro_calculo_total(empresa, orden)
@@ -11139,7 +11178,7 @@ class Cobro6Repository @Inject()(
                       case _ => 0.0
                     }
       var _desmonte = orden.cotr_tipo_obra match {
-                      case Some(6) => siap_orden_trabajo_cobro_calculo_desmonte(empresa, orden)
+                      case Some(6) => siap_orden_trabajo_cobro_calculo_desmonte(empresa, orden, acre_id, _existe_acta)
                       case _ => 0.0
                     }                                       
       _expansion = _expansion.round
@@ -11150,7 +11189,7 @@ class Cobro6Repository @Inject()(
       _subtotal_modernizacion += _modernizacion
       _subtotal_desmonte += _desmonte
       _subtotal_total += _total
-      _listData += 
+/*       _listData += 
         (
                    ( 
                     "Orden de Trabajo ITAF-" + orden.cotr_consecutivo.get,
@@ -11159,19 +11198,464 @@ class Cobro6Repository @Inject()(
                     if (_desmonte > 0.0) { "-$" + formatter.format(_desmonte) } else { "" },
                     "$" + formatter.format(_total)
                   )
-        )
+        ) */
       }
       (
-        if (_subtotal_expansion > 0.0) { "$" + formatter.format(_subtotal_expansion) } else { "" },
-        if (_subtotal_modernizacion > 0.0) { "$" + formatter.format(_subtotal_modernizacion) } else { "" },
-        if (_subtotal_desmonte > 0.0) { "-$" + formatter.format(_subtotal_desmonte) } else { "" },
-        "$" + formatter.format(_subtotal_total),
-        _listData.toList
+        _numero_acta,
+        _subtotal_expansion,
+        _subtotal_modernizacion,
+        _subtotal_desmonte,
+        _subtotal_total
+        // , _listData.toList
       )
   }
 
-  def siap_orden_trabajo_cobro_calculo_desmonte(empresa: Empresa, orden: orden_trabajo_cobro): Double = {
-    0.0
+  def siap_orden_trabajo_cobro_anexo_redimensionamiento(empr_id: Long, anho: Int, periodo: Int, usua_id: Long): (Int, Array[Byte]) = {
+    var _listData = new ListBuffer[(String, Double, Double, Double, Double)]
+    val empresa = empresaService.buscarPorId(empr_id) match {
+      case Some(e) => e
+      case None => Empresa(None, "", "", "", "", "", None, 0, 0, 0, 0, None, None)
+    }
+    val ordenes =  buscarPorEmpresaAnhoPeriodo(empresa.empr_id.get, anho, periodo)
+    val formatter = java.text.NumberFormat.getIntegerInstance
+    var _subtotal_expansion = 0.0
+    var _subtotal_modernizacion = 0.0
+    var _subtotal_desmonte = 0.0
+    var _subtotal_total = 0.0
+    val _periodo = Calendar.getInstance()
+    _periodo.set(Calendar.YEAR, anho)
+    _periodo.set(Calendar.MONTH, (periodo-1))
+    _periodo.set(Calendar.DAY_OF_MONTH, 1)
+    _periodo.set(Calendar.DATE, _periodo.getActualMaximum(Calendar.DATE))
+
+    var _fecha_corte = _periodo.clone().asInstanceOf[Calendar]
+    var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
+    _fecha_corte_anterior.add(Calendar.MONTH, -1)    
+
+    var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+    var _listRow02 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+    var _listMerged01 = new ListBuffer[CellRange]()
+    var _listMerged02 = new ListBuffer[CellRange]()
+    val _valor_acumulado_anterior = db.withTransaction { implicit connection =>
+      val _periodo_previo = _fecha_corte_anterior.get(Calendar.MONTH) + 1
+      val _anho_previo = _fecha_corte_anterior.get(Calendar.YEAR)
+      println("anho previo: " + _anho_previo)
+      println("periodo previo: " + _periodo_previo)
+      val _valorOpt = SQL("""SELECT reco_valor FROM siap.redimensionamiento_control rc1 WHERE rc1.reco_anho = {anho} AND rc1.reco_periodo = {periodo} AND rc1.empr_id = {empr_id}""").
+      on(
+        'anho -> _anho_previo,
+        'periodo -> _periodo_previo,
+        'empr_id -> empr_id
+      ).as(SqlParser.scalar[Double].singleOpt)
+      _valorOpt match {
+        case Some(v) => v
+        case None => 0.0
+      }
+    }
+    val _numero_acta = db.withTransaction { implicit connection => 
+      SQL("""SELECT ar.acre_numero FROM siap.acta_redimensionamiento ar 
+                            WHERE ar.acre_anho = {anho} AND ar.acre_periodo = {periodo} AND ar.empr_id = {empr_id}""").
+      on(
+        'anho -> anho,
+        'periodo -> periodo,
+        'empr_id -> empr_id
+      ).as(SqlParser.scalar[Int].single)
+    }
+    val _sheet02 = Sheet(
+      name = "Anexo 02",
+      rows = {
+        ordenes.map { orden =>
+          var _expansion = orden.cotr_tipo_obra match {
+                      case Some(2) => siap_orden_trabajo_cobro_calculo_total(empresa, orden)
+                      case _ => 0.0
+                    }
+          var _modernizacion = orden.cotr_tipo_obra match {
+                      case Some(6) => siap_orden_trabajo_cobro_calculo_total(empresa, orden)
+                      case _ => 0.0
+                    }
+          var _desmonte = orden.cotr_tipo_obra match {
+                      case Some(6) => siap_orden_trabajo_cobro_calculo_desmonte(empresa, orden, 0, true)
+                      case _ => 0.0
+                    }                                       
+          _expansion = _expansion.round
+          _modernizacion = _modernizacion.round
+          _desmonte = _desmonte.round
+          val _total = _expansion + _modernizacion - _desmonte
+          _subtotal_expansion += _expansion
+          _subtotal_modernizacion += _modernizacion
+          _subtotal_desmonte += _desmonte
+          _subtotal_total += _total
+          _listData += 
+            (
+                   ( 
+                    "Orden de Trabajo ITAF-" + orden.cotr_consecutivo.get,
+                    _expansion,
+                    _modernizacion,
+                    _desmonte,
+                    _total
+                  )
+            )
+        }
+        _listRow02.toList
+      }
+    )
+    val _sheet01 = Sheet(
+      name = "Anexo 01",
+      rows = {
+        var _idx = -1
+        _listRow01 += com.norbitltd.spoiwo.model.Row(
+          StringCell(
+            "ANEXO 01 - ACTA DE REDIMENSIONAMIENTO No." + _numero_acta,
+            Some(0),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("YYYY-MM-DD"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          )
+        )
+        _idx += 1
+        _listRow01 += com.norbitltd.spoiwo.model.Row(
+          StringCell(
+            "REDIMENSIONAMIENTO DE LA INFRAESTRUCTURA DEL SISTEMA DE ALUMBRADO PUBLICO DEL " + empresa.muni_descripcion.get,
+            Some(0),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"),
+                      wrapText = true)
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "Expansión",
+            Some(1),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "Obras complementarias de expansión",
+            Some(2),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "",
+            Some(3),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "TOTAL REDIMENSIONAMIENTO DEL SISTEMA",
+            Some(4),
+            style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        wrapText = true
+                      )                      
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+        )
+        _idx += 1
+        _listMerged01 += CellRange((_idx, _idx + 1), (0, 0))
+        _listMerged01 += CellRange((_idx, _idx + 1), (1, 1))
+        _listMerged01 += CellRange((_idx, _idx), (2, 3))
+        _listMerged01 += CellRange((_idx, _idx + 1), (4, 4))
+        _listRow01 += com.norbitltd.spoiwo.model.Row(
+          StringCell(
+            "",
+            Some(0),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "",
+            Some(1),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "VR UCAPS Instaladas",
+            Some(2),
+            style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        wrapText = java.lang.Boolean.TRUE
+                      )
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "VR UCAPS Desmontadas",
+            Some(3),
+            style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                        wrapText = java.lang.Boolean.TRUE
+                      )
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "",
+            Some(4),
+            style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("@"),
+                      )                      
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          )
+        )
+        _idx += 1
+        _listRow01 += com.norbitltd.spoiwo.model.Row(
+          StringCell(
+            "Redimensionamiento de la Infraestructura de Alumbrado Público Desde el 1 de Enero de 2015 hasta el " + Utility.fechaamesanho(Some(new DateTime(_periodo.getTime()))),
+            Some(0),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "",
+            Some(1),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),            
+          StringCell(
+            "",
+            Some(2),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "",
+            Some(3),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          NumericCell(
+            _valor_acumulado_anterior,
+            Some(4),
+            style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("#,##0"),
+                      )                      
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          )
+        )
+        _idx += 1
+        _listData.map { _data =>
+          println("_data: " + _data)
+          _listRow01 += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              _data._1,
+              Some(0),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("@"),
+                          wrapText = java.lang.Boolean.TRUE
+                        )
+                      ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            NumericCell(
+              _data._2,
+              Some(1),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("#,##0")
+                        )
+                      ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            NumericCell(
+              _data._3,
+              Some(2),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("#,##0")
+                        )
+                      ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            NumericCell(
+              _data._4,
+              Some(3),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("#,##0")
+                        )
+                      ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            FormulaCell(
+              "SUM(B" + (_idx + 2) + "+C" + (_idx + 2) + "-D" + (_idx + 2) + ")",
+              Some(4),
+              style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("#,##0")
+                        )
+                      ),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            )
+          )
+          _idx += 1
+        }
+        _listRow01 += com.norbitltd.spoiwo.model.Row(
+          StringCell(
+            "Subtotal Redimensionamiento del Mes de " + Utility.fechaatextosindia(Some(new DateTime(_fecha_corte_anterior.getTime()))),
+            Some(0),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          FormulaCell(
+            "SUM(B4"+ ":B" + (_idx + 1) + ")",
+            Some(1),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("#,##0"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          FormulaCell(
+            "SUM(C4"+ ":C" + (_idx + 1) + ")",
+            Some(2),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("#,##0"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          FormulaCell(
+            "SUM(D4"+ ":D" + (_idx + 1) + ")",
+            Some(3),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("#,##0"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          FormulaCell(
+            "SUM(E4"+ ":E" + (_idx + 1) + ")",
+            Some(4),
+            style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("#,##0"),
+                      )                      
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          )
+        )
+        _idx += 1
+        _listRow01 += com.norbitltd.spoiwo.model.Row(
+          StringCell(
+            "Total Redimensionamiento de la Infraestructura del sistema de Alumbrado Público desde el 1 de Enero de 2015 Hasta el " + Utility.fechaamesanho(Some(new DateTime(_periodo.getTime()))),
+            Some(0),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "",
+            Some(1),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "",
+            Some(2),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          StringCell(
+            "",
+            Some(3),
+            style = Some(
+                      CellStyle(dataFormat = CellDataFormat("@"))
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          ),
+          FormulaCell(
+            "E4+"+ "E" + (_idx + 1),
+            Some(4),
+            style = Some(
+                      CellStyle(
+                        dataFormat = CellDataFormat("#,##0"),
+                      )                      
+            ),
+            CellStyleInheritance.CellThenRowThenColumnThenSheet
+          )
+        )
+        _listRow01.toList
+      },
+      mergedRegions = _listMerged01.toList
+    )
+    println("Escribiendo en el Stream")
+    var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+    Workbook(_sheet01, _sheet02)
+      .writeToOutputStream(os)
+    println("Stream Listo")
+    (_numero_acta, os.toByteArray())
+  }
+
+  def siap_orden_trabajo_cobro_calculo_desmonte(empresa: Empresa, orden: orden_trabajo_cobro, acre_id: Long, _existe_acta: Boolean): Double = {
+    db.withTransaction { implicit connection =>
+      val _parseMaterial = int("cotr_id") ~ int("elem_id") ~ double("cantidad") ~ double("valor") map {
+        case cotr_id ~ elem_id ~ cantidad ~ valor => (cotr_id, elem_id, cantidad, valor)
+      }
+      val _anho_anterior = orden.cotr_anho match {
+                              case Some(a) => a - 1
+                              case None => Calendar.getInstance().get(Calendar.YEAR) - 1
+      }
+      val _material = SQL("""select cotr1.cotr_id, re1.elem_id, re1.even_cantidad_retirado as cantidad, uiv.ucap_ipp_valor_valor as valor from siap.cobro_orden_trabajo cot1
+                              inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
+                              inner join siap.reporte_evento re1 on re1.repo_id = cotr1.repo_id and re1.aap_id = cotr1.aap_id and re1.even_estado < 8 and re1.even_cantidad_retirado > 0
+                              inner join siap.elemento_redimensionamiento er1 on er1.elem_id = re1.elem_id
+                              inner join siap.ucap_ipp_valor uiv on uiv.elem_id = er1.elem_id and uiv.ucap_ipp_valor_anho = {anho_anterior}
+                              where cot1.cotr_id = {cotr_id}
+                              order by 1,2""")
+                              .on(
+                                'cotr_id -> orden.cotr_id,
+                                'anho_anterior -> _anho_anterior
+                              ).as(_parseMaterial *)
+      var _desmonte = 0.0
+      _material.map { _m =>
+        _desmonte += _m._3 * _m._4
+        if (!_existe_acta) {
+          SQL("""INSERT INTO siap.acta_redimensionamiento_detalle (acre_id, cotr_id, elem_id, acrede_cantidad, acrede_valor) 
+                 VALUES ({acre_id}, {cotr_id}, {elem_id}, {cantidad}, {valor})""")
+          .on(
+            'acre_id -> acre_id,
+            'cotr_id -> _m._1,
+            'elem_id -> _m._2,
+            'cantidad -> _m._3,
+            'valor -> _m._4
+          ).executeUpdate()
+        }
+      }
+      _desmonte
+    }
   }
 
   def siap_orden_trabajo_cobro_relacion_factura(empr_id: Long): Array[Byte] = {

@@ -460,7 +460,7 @@ class Cobro2Repository @Inject()(
           from siap.cobro_orden_trabajo cot1
           inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
           inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
-          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id
+          inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id  AND re1.even_cantidad_instalado > 0 AND re1.even_estado < 8
           inner join siap.elemento e1 on e1.elem_id = re1.elem_id
           left join siap.unitario u1 on u1.unit_id = re1.unit_id
           left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)

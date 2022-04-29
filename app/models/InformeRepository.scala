@@ -9390,7 +9390,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
   ): Future[Iterable[SolicitudR]] = {
     val result = db.withConnection { implicit connection =>
       var query: String =
-        """SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' END) as soli_estado_descripcion FROM siap.solicitud s
+        """SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' WHEN s.soli_estado = 7 THEN 'RESPONDIDA CONFIRMADA' END) as soli_estado_descripcion FROM siap.solicitud s
                                             LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
                                             LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
                                             WHERE s.empr_id = {empr_id} and s.soli_fecha between {fecha_inicial} and {fecha_final}
@@ -9469,7 +9469,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
   ): Future[Iterable[SolicitudR]] = {
     val result = db.withConnection { implicit connection =>
       var query: String =
-        """SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' END) as soli_estado_descripcion FROM siap.solicitud s
+        """SELECT *, (CASE WHEN s.soli_estado = 1 THEN 'PENDIENTE' WHEN s.soli_estado = 2 THEN 'EN SUPERVISOR' WHEN s.soli_estado = 3 THEN 'EN VISITA' WHEN s.soli_estado = 4 THEN 'EN CRONOGRAMA' WHEN s.soli_estado = 5 THEN 'EN INFORME' WHEN s.soli_estado = 6 THEN 'RESPONDIDA' WHEN s.soli_estado = 7 THEN 'RESPONDIDA CONFIRMADA' END) as soli_estado_descripcion FROM siap.solicitud s
                                             LEFT JOIN siap.barrio b on s.barr_id = b.barr_id
                                             LEFT JOIN siap.solicitud_tipo st ON st.soti_id = s.soti_id
                                             WHERE s.empr_id = {empr_id} and ((s.soli_fechalimite - CURRENT_TIMESTAMP)) <= (4 * '1 day'::interval)

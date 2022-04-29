@@ -634,6 +634,16 @@ const procesoRouter = {
         icon: 'el-icon-refresh-right',
         roles: ['super', 'auxiliar']
       }
+    },
+    {
+      path: 'menu7actadesmonte',
+      component: () => import('@/views/proceso/menu7actadesmonte/index'), // Parent router-view
+      name: 'menu_proceso_menu7actadesmonte',
+      meta: {
+        title: 'menu_proceso_menu7actadesmonte',
+        icon: 'el-icon-refresh-right',
+        roles: ['super', 'auxiliar', 'supervisor', 'admin']
+      }
     }
   ]
 }
