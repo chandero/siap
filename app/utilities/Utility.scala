@@ -72,6 +72,24 @@ class Utility {
     texto.toString()
   }
 
+  def fechaatextofirma(fecha: Option[DateTime]): String = {
+    var texto = new StringBuffer()
+    fecha match {
+      case Some(fecha) =>
+        val anho = fecha.year().get()
+        val mes = fecha.monthOfYear().get() - 1
+        val diasemana = fecha.dayOfWeek().get()
+        val dia = fecha.dayOfMonth().get
+        texto.append(dia.toString)
+        texto.append(" días del mes de ")
+        texto.append(meses(mes))
+        texto.append(" de ")
+        texto.append(anho.toString)
+      case None => texto.append("")
+    }
+    texto.toString()
+  }  
+
   def fechaamesanho(fecha: Option[DateTime]): String = {
     var texto = new StringBuffer()
     fecha match {

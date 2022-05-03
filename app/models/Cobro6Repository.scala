@@ -12042,7 +12042,7 @@ class Cobro6Repository @Inject()(
         _idx += 1
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "Redimensionamiento de la Infraestructura de Alumbrado Público Desde el 1 de Enero de 2015 hasta el " + Utility.fechaamesanho(Some(new DateTime(_periodo.getTime()))),
+            "Redimensionamiento de la Infraestructura de Alumbrado Público Desde el 1 de Enero de 2015 hasta el " + Utility.fechaatextosindia(Some(new DateTime(_fecha_corte_anterior.getTime()))),
             Some(0),
             style = Some(
                       CellStyle(
@@ -12165,7 +12165,7 @@ class Cobro6Repository @Inject()(
         }
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "Subtotal Redimensionamiento del Mes de " + Utility.fechaatextosindia(Some(new DateTime(_fecha_corte_anterior.getTime()))),
+            "Subtotal Redimensionamiento del Mes al " + Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
             Some(0),
             style = Some(
                       CellStyle(
@@ -12234,7 +12234,7 @@ class Cobro6Repository @Inject()(
         _idx += 1
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "Total redimensionamiento de la Infraestructura del sistema de Alumbrado Público desde el 1 de Enero de 2015 Hasta el " + Utility.fechaamesanho(Some(new DateTime(_periodo.getTime()))),
+            "Total redimensionamiento de la Infraestructura del sistema de Alumbrado Público desde el 1 de Enero de 2015 Hasta el " + Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
             Some(0),
             style = Some(
                       CellStyle(
@@ -13128,25 +13128,41 @@ class Cobro6Repository @Inject()(
       }
       var _total=0D
       _manoObra.map { _o =>
-        if (!((_o._1 == 4 || _o._1 == 5 || _o._1 == 6) && (unit_codigo == "1.03" || unit_codigo == "1.04"))) {
-          _o._3 match {
-            case Some(precio) =>
-              var _rendimiento = unit_codigo match {
-                case "1.03" => _o._1 match {
-                                case 1 => (480/_cantidad103) * 3
-                                case _ => 480/_cantidad103
-                              }
-                case _ => _o._4
-              }
-              if (unit_codigo == "1.03" && orden.cotr_consecutivo.get == 21090091) {
-                println("precios: " + precio + " rendimiento: " + _rendimiento)
-              }
-              _total += (1 * precio) / _rendimiento
-            case None =>
-              _total += 0
+        if (orden.cotr_tipo_obra.get == 2) {
+          if (!((_o._1 == 4 || _o._1 == 5 || _o._1 == 6) && (unit_codigo == "1.03" || unit_codigo == "1.04"))) {
+            _o._3 match {
+              case Some(precio) =>
+                var _rendimiento = unit_codigo match {
+                  case "1.03" => _o._1 match {
+                                  case 1 => (480/_cantidad103) * 3
+                                  case _ => 480/_cantidad103
+                                }
+                  case _ => _o._4
+                }
+                println("mano obra unitario: " + unit_codigo + ": cod mano obra" + _o._1 + ": v.unitario" + precio + ": rendimiento:" + _rendimiento)
+                _total += (1 * precio) / _rendimiento
+              case None =>
+                _total += 0
+            }
           }
+        } else {
+            _o._3 match {
+              case Some(precio) =>
+                var _rendimiento = unit_codigo match {
+                  case "1.03" => _o._1 match {
+                                  case 1 => (480/_cantidad103) * 3
+                                  case _ => 480/_cantidad103
+                                }
+                  case _ => _o._4
+                }
+                println("mano obra unitario: " + unit_codigo + ": cod mano obra" + _o._1 + ": v.unitario" + precio + ": rendimiento:" + _rendimiento)
+                _total += (1 * precio) / _rendimiento
+              case None =>
+                _total += 0
+            }          
         }
       }
+      println("mano obra calculado: " + orden.cotr_consecutivo + ":" + _total)
       _total        
     }  
   }
@@ -13172,6 +13188,7 @@ class Cobro6Repository @Inject()(
       _ingLista.map { _i =>
           _total += (_subtotal * _i._2)
       }
+      println("mano ingenieria calculado: " + orden.cotr_consecutivo + ":" + _total)
       _total
     }
   }

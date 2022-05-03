@@ -174,7 +174,7 @@ class CobroController @Inject()(
       val (_numero_acta, _valor_acumulado_anterior, _subtotal_expansion, _subtotal_modernizacion, _subtotal_desmonte, _subtotal_total) = cobro6Service.siap_orden_trabajo_cobro_acta_redimensionamiento(empr_id.get , anho, periodo, usua_id.get)
       val _periodo = Calendar.getInstance()
       _periodo.set(Calendar.YEAR, anho)
-      _periodo.set(Calendar.MONTH, periodo)
+      _periodo.set(Calendar.MONTH, periodo - 1)
       _periodo.set(Calendar.DAY_OF_MONTH, 1)
       _periodo.set(Calendar.DATE, _periodo.getActualMaximum(Calendar.DATE))
       val filename = "Acta_Redimensionamiento_" + _numero_acta + "_" + anho + "_" + periodo + ".pdf"
@@ -182,14 +182,18 @@ class CobroController @Inject()(
       // _fecha_corte.add(Calendar.MONTH, -1)
       var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
       _fecha_corte_anterior.add(Calendar.MONTH, -1)
+      var _fecha_acta = _fecha_corte.clone().asInstanceOf[Calendar]
+      _fecha_acta.add(Calendar.MONTH, 1)
+      _fecha_acta.set(Calendar.DATE, 1)
+      val _fecha_firma = HolidayUtil.getNextBusinessDay(_fecha_acta.getTime(), 7)
       val _total_anterior = _valor_acumulado_anterior
       val acta = new ActaRedimensionamientoDto(
         _numero_acta,
-        Utility.fechaamesanho(Some(new DateTime(_periodo.getTime()))),
+        Utility.fechaamesanho(Some(new DateTime(_fecha_acta.getTime()))),
         Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
         Utility.fechaatextosindia(Some(new DateTime(_fecha_corte_anterior.getTime()))),
-        Utility.fechaamesanho(Some(new DateTime(_fecha_corte_anterior.getTime()))),
-        Utility.fechaatextosindia(Some(new DateTime())),
+        Utility.fechaamesanho(Some(new DateTime(_fecha_corte.getTime()))),
+        Utility.fechaatextofirma(Some(new DateTime(_fecha_firma))),
         "$" + formatter.format(_subtotal_total),
         "$" + formatter.format(_total_anterior + _subtotal_total),
         "$" + formatter.format(_total_anterior),
