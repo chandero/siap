@@ -64,7 +64,7 @@ case class AapHistoria(
     aap_condensador_instalado: Option[String],
     aap_fotocelda_retirado: Option[String],
     aap_fotocelda_instalado: Option[String],
-    */
+     */
     reti_id: Option[scala.Long],
     repo_consecutivo: Option[Int],
     repo_fechadigitacion: Option[DateTime]
@@ -237,7 +237,7 @@ object AapHistoria {
       "aap_condensador_instalado" -> aaelhi.aap_condensador_instalado,
       "aap_fotocelda_retirado" -> aaelhi.aap_fotocelda_retirado,
       "aap_fotocelda_instalado" -> aaelhi.aap_fotocelda_instalado,
-      */
+       */
       "reti_id" -> aaelhi.reti_id,
       "repo_consecutivo" -> aaelhi.repo_consecutivo,
       "repo_fechadigitacion" -> aaelhi.repo_fechadigitacion
@@ -258,7 +258,7 @@ object AapHistoria {
       (__ \ "aap_condensador_instalado").readNullable[String] and
       (__ \ "aap_fotocelda_retirado").readNullable[String] and
       (__ \ "aap_fotocelda_instalado").readNullable[String] and
-      */
+       */
       (__ \ "reti_id").readNullable[scala.Long] and
       (__ \ "repo_consecutivo").readNullable[Int] and
       (__ \ "repo_fechadigitacion").readNullable[DateTime]
@@ -278,8 +278,8 @@ object AapHistoria {
       get[Option[String]]("aap_fotocelda_retirado") ~
       get[Option[String]]("aap_fotocelda_instalado") ~ */
       get[Option[scala.Long]]("reti_id") ~
-      get[Option[Int]]("repo_consecutivo") ~ 
-      get[Option[DateTime]]("repo_fechadigitacion")  map {
+      get[Option[Int]]("repo_consecutivo") ~
+      get[Option[DateTime]]("repo_fechadigitacion") map {
       case aap_id ~
             aael_fecha ~
             /*aap_bombillo_retirado ~
@@ -308,7 +308,7 @@ object AapHistoria {
           aap_condensador_instalado,
           aap_fotocelda_retirado,
           aap_fotocelda_instalado,
-          */
+           */
           reti_id,
           repo_consecutivo,
           repo_fechadigitacion
@@ -340,6 +340,22 @@ case class Aap(
     usua_id: Long,
     aap_elemento: Option[AapElemento],
     historia: Option[List[AapHistoria]]
+)
+
+case class AapMobile(
+    aap_id: Option[Long],
+    aap_apoyo: Option[String],
+    aap_direccion: Option[String],
+    barr_id: Option[Long],
+    aaco_id: Option[Long],
+    aama_id: Option[Long],
+    aamo_id: Option[Long],
+    aacu_id: Option[Long],
+    aaus_id: Option[Long],
+    aatc_id: Option[Long],
+    tipo_id: Option[Long],
+    aap_tecnologia: Option[String],
+    aap_potencia: Option[Long]
 )
 
 case class AapConsulta(
@@ -436,6 +452,41 @@ object Aap {
       (__ \ "aap_elemento").readNullable[AapElemento] and
       (__ \ "historia").readNullable[List[AapHistoria]]
   )(Aap.apply _)
+}
+
+object AapMobile {
+  var _set = {
+    get[Option[Long]]("aap_id") ~
+      get[Option[String]]("aap_apoyo") ~
+      get[Option[String]]("aap_direccion") ~
+      get[Option[Long]]("barr_id") ~
+      get[Option[Long]]("aaco_id") ~
+      get[Option[Long]]("aama_id") ~
+      get[Option[Long]]("aamo_id") ~
+      get[Option[Long]]("aacu_id") ~
+      get[Option[Long]]("aaus_id") ~
+      get[Option[Long]]("aatc_id") ~
+      get[Option[Long]]("tipo_id") ~
+      get[Option[String]]("aap_tecnologia") ~
+      get[Option[Long]]("aap_potencia") map {
+      case aap_id ~ aap_apoyo ~ aap_direccion ~ barr_id ~ aaco_id ~ aama_id ~ aamo_id ~ aacu_id ~ aaus_id ~ aatc_id ~ tipo_id ~ aap_tecnologia ~ aap_potencia =>
+        AapMobile(
+          aap_id,
+          aap_apoyo,
+          aap_direccion,
+          barr_id,
+          aaco_id,
+          aama_id,
+          aamo_id,
+          aacu_id,
+          aaus_id,
+          aatc_id,
+          tipo_id,
+          aap_tecnologia,
+          aap_potencia
+        )
+    }
+  }
 }
 
 object AapConsulta {
@@ -811,11 +862,13 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
           'empr_id -> empr_id
         )
         .as(_reposParser *)
-      _repos.map { repo => 
-                val sdf = new java.text.SimpleDateFormat("yyyy-MM-dd")
-                val fecha = sdf.format(repo._2)
-                val format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm")
-                val time = format.parse(fecha + " " + (if (repo._3 == "") "08:00" else repo._3)).getTime()
+      _repos.map { repo =>
+        val sdf = new java.text.SimpleDateFormat("yyyy-MM-dd")
+        val fecha = sdf.format(repo._2)
+        val format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm")
+        val time = format
+          .parse(fecha + " " + (if (repo._3 == "") "08:00" else repo._3))
+          .getTime()
         lista_result += ((repo._1, time, repo._4, repo._5))
       }
       (result, lista_result.toList)
@@ -1257,7 +1310,7 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
         val aap = e.copy(aap_elemento = c)
 
         val h = SQL(
-              """select distinct rd1.aap_id, r1.repo_fechasolucion as aael_fecha, rt1.reti_id, r1.repo_consecutivo, ra1.repo_fechadigitacion from siap.reporte r1
+          """select distinct rd1.aap_id, r1.repo_fechasolucion as aael_fecha, rt1.reti_id, r1.repo_consecutivo, ra1.repo_fechadigitacion from siap.reporte r1
                 inner join siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                 inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id 
                 inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
@@ -1347,7 +1400,7 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
         val aap = e.copy(aap_elemento = c)
 
         val h = SQL(
-              """select distinct rd1.aap_id, r1.repo_fechasolucion as aael_fecha, rt1.reti_id, r1.repo_consecutivo, ra1.repo_fechadigitacion from siap.reporte r1
+          """select distinct rd1.aap_id, r1.repo_fechasolucion as aael_fecha, rt1.reti_id, r1.repo_consecutivo, ra1.repo_fechadigitacion from siap.reporte r1
                 inner join siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                 inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id 
                 inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
@@ -1433,7 +1486,7 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
 
           val aap = e.copy(aap_elemento = c)
           val h = SQL(
-              """select distinct rd1.aap_id, r1.repo_fechasolucion as aael_fecha, rt1.reti_id, r1.repo_consecutivo, ra1.repo_fechadigitacion from siap.reporte r1
+            """select distinct rd1.aap_id, r1.repo_fechasolucion as aael_fecha, rt1.reti_id, r1.repo_consecutivo, ra1.repo_fechadigitacion from siap.reporte r1
                 inner join siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                 inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id 
                 inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
@@ -1451,6 +1504,34 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
         lista_result.toList
       }
     }
+
+  def aapsMobile(empr_id: Long): Future[Iterable[AapMobile]] = Future {
+    db.withConnection { implicit connection =>
+      var query: String =
+        s"""SELECT a.aap_id, 
+                                a.aap_apoyo, 
+                                a.aap_direccion,
+                                a.barr_id,
+                                a.aaco_id,
+                                a.aama_id,
+                                a.aamo_id,
+                                a.aacu_id,
+                                a.aaus_id,
+                                a.aatc_id,
+                                aa.tipo_id,
+                                aa.aap_tecnologia,
+                                aa.aap_potencia
+                        FROM siap.aap a
+                        LEFT JOIN siap.aap_adicional aa ON aa.aap_id = a.aap_id and aa.empr_id = a.empr_id
+                        WHERE a.empr_id = {empr_id} and a.aap_id <> 9999999""".stripMargin
+      val result = SQL(query)
+        .on(
+          'empr_id -> empr_id
+        )
+        .as(AapMobile._set *)
+      result.toList
+    }
+  }
 
   /**
     * Crear Aap

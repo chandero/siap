@@ -14,27 +14,32 @@ import models.UsuarioRepository
 import models.Usuario
 import dto.UsuarioDto
 
-class AuthenticatedUserAction @Inject() (parser: BodyParsers.Default)(implicit ec: ExecutionContext)
-extends ActionBuilderImpl(parser) {
+class AuthenticatedUserAction @Inject()(parser: BodyParsers.Default)(
+    implicit ec: ExecutionContext
+) extends ActionBuilderImpl(parser) {
 
-    private val logger = play.api.Logger(this.getClass)
+  private val logger = play.api.Logger(this.getClass)
 
-    override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = {
-        logger.debug("ENTERED AuthenticatedUserAction::invokeBlock")
-        val token = request.headers.get("Authorization")
-        token match {
-            case None => {
-                logger.debug("CAME INTO 'NONE'")
-                Future.successful(Forbidden("Dude, you’re not logged in."))
-            }
-            case Some(token) => {
-                logger.debug("CAME INTO 'SOME'")
-                /* 
+  override def invokeBlock[A](
+      request: Request[A],
+      block: (Request[A]) => Future[Result]
+  ) = {
+    //println("ENTERED AuthenticatedUserAction::invokeBlock")
+    //println("request headers: ", request.headers);
+    val token = request.headers.get("Authorization")
+    token match {
+      case None => {
+        logger.debug("CAME INTO 'NONE'")
+        Future.successful(Forbidden("Dude, you’re not logged in."))
+      }
+      case Some(token) => {
+        logger.debug("CAME INTO 'SOME'")
+        /*
                 val res: Future[Result] = block(request)
                 res
-                */
-                block(request)
-            }
-        }
+         */
+        block(request)
+      }
     }
+  }
 }

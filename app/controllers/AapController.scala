@@ -31,8 +31,11 @@ class AapController @Inject()(
     authenticatedUserAction: AuthenticatedUserAction,
     cc: ControllerComponents
 )(implicit ec: ExecutionContext)
-    extends AbstractController(cc) with ImplicitJsonFormats {
-  implicit val formats = Serialization.formats(NoTypeHints) ++ List(DateTimeSerializer)
+    extends AbstractController(cc)
+    with ImplicitJsonFormats {
+  implicit val formats = Serialization.formats(NoTypeHints) ++ List(
+    DateTimeSerializer
+  )
 
   def todos() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
@@ -87,6 +90,14 @@ class AapController @Inject()(
       val empr_id = Utility.extraerEmpresa(request)
       aapService.aaps(empr_id.get, filtro).map { aaps =>
         Ok(Json.toJson(aaps))
+      }
+  }
+
+  def aapsMobile() = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      aapService.aapsMobile(empr_id.get).map { aaps =>
+        Ok(write(aaps))
       }
   }
 
@@ -204,8 +215,8 @@ class AapController @Inject()(
       }
   }
 
-  def buscarPorCodigoWeb(id: Long, empr_id: Long, token: String) = Action.async {
-    implicit request: Request[AnyContent] =>
+  def buscarPorCodigoWeb(id: Long, empr_id: Long, token: String) =
+    Action.async { implicit request: Request[AnyContent] =>
       val secret = config.get[String]("play.http.secret.key")
       if (secret == token) {
         val aap = aapService.buscarPorCodigoWeb(id, empr_id)
@@ -220,6 +231,6 @@ class AapController @Inject()(
       } else {
         Future.successful(NotFound)
       }
-  }
+    }
 
 }

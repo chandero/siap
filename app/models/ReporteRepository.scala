@@ -31,7 +31,7 @@ import play.api.libs.functional.syntax._
 import play.api.db.DBApi
 
 import anorm._
-import anorm.SqlParser.{get, str, scalar, int, double }
+import anorm.SqlParser.{get, str, scalar, int, double}
 import anorm.JodaParameterMetaData._
 
 import scala.util.{Failure, Success}
@@ -60,6 +60,7 @@ import com.norbitltd.spoiwo.model.enums.{
 import utilities.Utility
 
 case class ReporteResult(reportes: Iterable[Reporte], total: scala.Long)
+
 case class ReporteRequest(
     coau_codigo: Option[String],
     coau_tipo: Option[Int],
@@ -2277,6 +2278,180 @@ class ReporteRepository @Inject()(
     * @param repo_consecutivo: scala.Long
     * @param empr_id: scala.Long
     */
+  def buscarPorConsecutivoMovil(
+      reti_id: scala.Long,
+      repo_consecutivo: scala.Long,
+      empr_id: scala.Long
+  ): Option[Reporte] = {
+    db.withConnection { implicit connection =>
+      val r = SQL(
+        """SELECT * FROM siap.reporte r
+                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.reporte_adicional ra on r.repo_id = ra.repo_id
+                            LEFT JOIN siap.actividad a on ra.acti_id = a.acti_id
+                            LEFT JOIN siap.origen o on r.orig_id = o.orig_id
+                            LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id = 1"""
+      ).on(
+          'reti_id -> reti_id,
+          'repo_consecutivo -> repo_consecutivo,
+          'empr_id -> empr_id
+        )
+        .as(Reporte._set.singleOpt)
+
+      r match {
+        case Some(r) =>
+          val eventos = SQL(
+            """SELECT * FROM siap.reporte_evento WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
+          ).on(
+              'repo_id -> r.repo_id
+            )
+            .as(Evento.eventoSet *)
+          val meams = SQL(
+            """SELECT m.meam_id FROM siap.reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
+          ).on(
+              'repo_id -> r.repo_id
+            )
+            .as(scalar[scala.Long].*)
+          val novedades = SQL(
+            """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id} and rn.tireuc_id = {tireuc_id}"""
+          ).on(
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
+            )
+            .as(ReporteNovedad._set *)
+          val adicional = SQL(
+            """SELECT * FROM siap.reporte_adicional ra
+                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+                LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+                WHERE ra.repo_id = {repo_id}
+				        ORDER BY ot.ortr_fecha DESC
+				        LIMIT 1 """
+          ).on(
+              'repo_id -> r.repo_id,
+              'tireuc_id -> r.tireuc_id
+            )
+            .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
+          val direcciones = SQL(
+            """SELECT * FROM siap.reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
+          ).on(
+              'repo_id -> r.repo_id
+            )
+            .as(ReporteDireccion.reporteDireccionSet *)
+          var _listDireccion = new ListBuffer[ReporteDireccion]()
+          direcciones.map { d =>
+            var dat = SQL(
+              """SELECT * FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+            ).on(
+                'repo_id -> d.repo_id,
+                'aap_id -> d.aap_id,
+                'even_id -> d.even_id
+              )
+              .as(ReporteDireccionDato.reporteDireccionDatoSet.singleOpt)
+            dat match {
+              case None =>
+                dat = Some(
+                  new ReporteDireccionDato(
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None
+                  )
+                )
+              case Some(dat) => None
+            }
+            var adi = SQL(
+              """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+            ).on(
+                'repo_id -> d.repo_id,
+                'aap_id -> d.aap_id,
+                'even_id -> d.even_id
+              )
+              .as(ReporteDireccionDatoAdicional._set.singleOpt)
+            adi match {
+              case None =>
+                adi = Some(
+                  new ReporteDireccionDatoAdicional(
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None
+                  )
+                )
+              case Some(adi) => None
+            }
+            val direccion = d.copy(dato = dat, dato_adicional = adi)
+            _listDireccion += direccion
+          }
+          val reporte = new Reporte(
+            r.repo_id,
+            r.tireuc_id,
+            r.reti_id,
+            r.repo_consecutivo,
+            r.repo_fecharecepcion,
+            r.repo_direccion,
+            r.repo_nombre,
+            r.repo_telefono,
+            r.repo_fechasolucion,
+            r.repo_horainicio,
+            r.repo_horafin,
+            r.repo_reportetecnico,
+            r.repo_descripcion,
+            r.repo_subrepoconsecutivo,
+            r.rees_id,
+            r.orig_id,
+            r.barr_id,
+            r.empr_id,
+            r.tiba_id,
+            r.usua_id,
+            adicional,
+            Some(meams),
+            Some(eventos),
+            Some(_listDireccion.toList),
+            Some(novedades)
+          )
+          Some(reporte)
+
+        case None => None
+      }
+    }
+  }
+
+  /**
+    * Recuperar un Reporte dado su repo_consecutivo
+    * @param reti_id: scala.Long
+    * @param repo_consecutivo: scala.Long
+    * @param empr_id: scala.Long
+    */
   def buscarPorConsecutivoConsulta(
       reti_id: scala.Long,
       repo_consecutivo: scala.Long,
@@ -2493,7 +2668,6 @@ class ReporteRepository @Inject()(
     }
   }
 
-
   /**
     * Recuperar todos los Reporte dado su rango de fecha de solucion
     * @param fecha_inicial: DateTime
@@ -2515,7 +2689,6 @@ class ReporteRepository @Inject()(
         .as(Reporte._set *)
     }
   }
-
 
   /**
     * Recuperar un Reporte dado su rees_id
@@ -4711,6 +4884,1321 @@ class ReporteRepository @Inject()(
   }
 
   /**
+    * Actualizar Reporte
+    * @param reporte: Reporte
+    */
+  def actualizarMovil(
+      reporte: Reporte
+  ): Boolean = {
+    val reporte_ant: Option[Reporte] = buscarPorId(reporte.repo_id.get)
+
+    db.withConnection { implicit connection =>
+      val fecha: LocalDate =
+        new LocalDate(Calendar.getInstance().getTimeInMillis())
+      val hora: LocalDateTime =
+        new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+      val result: Boolean = SQL(
+        "UPDATE siap.reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, repo_subrepoconsecutivo = {repo_subrepoconsecutivo}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tiba_id = {tiba_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
+      ).on(
+          'repo_id -> reporte.repo_id,
+          'repo_direccion -> reporte.repo_direccion,
+          'repo_nombre -> reporte.repo_nombre,
+          'repo_telefono -> reporte.repo_telefono,
+          'repo_fechasolucion -> reporte.repo_fechasolucion,
+          'repo_horainicio -> reporte.repo_horainicio,
+          'repo_horafin -> reporte.repo_horafin,
+          'repo_reportetecnico -> reporte.repo_reportetecnico,
+          'repo_descripcion -> reporte.repo_descripcion,
+          'repo_subrepoconsecutivo -> reporte.repo_subrepoconsecutivo,
+          'rees_id -> 3,
+          'orig_id -> reporte.orig_id,
+          'barr_id -> reporte.barr_id,
+          'empr_id -> reporte.empr_id,
+          'tiba_id -> reporte.tiba_id,
+          'usua_id -> reporte.usua_id
+        )
+        .executeUpdate() > 0
+
+      // actualizar reporte adicional
+      reporte.adicional.map { adicional =>
+        val hayAdicional: Boolean = SQL(
+          """UPDATE siap.reporte_adicional SET repo_fechadigitacion = {repo_fechadigitacion}, 
+                    repo_tipo_expansion = {repo_tipo_expansion}, repo_luminaria = {repo_luminaria}, 
+                    repo_redes = {repo_redes}, repo_poste = {repo_poste}, repo_modificado = {repo_modificado}, 
+                    repo_subreporte = {repo_subreporte}, repo_subid = {repo_subid}, repo_email = {repo_email}, 
+                    acti_id = {acti_id}, repo_codigo = {repo_codigo}, repo_apoyo = {repo_apoyo}, 
+                    urba_id = {urba_id}, muot_id = {muot_id}, medi_id = {medi_id}, tran_id = {tran_id}, 
+                    medi_acta = {medi_acta}, aaco_id_anterior = {aaco_id_anterior}, aaco_id_nuevo = {aaco_id_nuevo} WHERE repo_id = {repo_id}"""
+        ).on(
+            'repo_fechadigitacion -> hora,
+            'repo_tipo_expansion -> adicional.repo_tipo_expansion,
+            'repo_luminaria -> adicional.repo_luminaria,
+            'repo_redes -> adicional.repo_redes,
+            'repo_poste -> adicional.repo_poste,
+            'repo_modificado -> adicional.repo_modificado,
+            'repo_subreporte -> adicional.repo_subreporte,
+            'repo_subid -> adicional.repo_subid,
+            'repo_email -> adicional.repo_email,
+            'acti_id -> adicional.acti_id,
+            'repo_codigo -> adicional.repo_codigo,
+            'repo_apoyo -> adicional.repo_apoyo,
+            'urba_id -> adicional.urba_id,
+            'muot_id -> adicional.muot_id,
+            'medi_id -> adicional.medi_id,
+            'tran_id -> adicional.tran_id,
+            'medi_acta -> adicional.medi_acta,
+            'aaco_id_anterior -> adicional.aaco_id_anterior,
+            'aaco_id_nuevo -> adicional.aaco_id_nuevo,
+            'repo_id -> reporte.repo_id
+          )
+          .executeUpdate() > 0
+        if (!hayAdicional) {
+          SQL("""INSERT INTO siap.reporte_adicional (repo_id, 
+                                                               repo_fechadigitacion, 
+                                                               repo_tipo_expansion, 
+                                                               repo_luminaria, 
+                                                               repo_redes, 
+                                                               repo_poste, 
+                                                               repo_modificado, 
+                                                               repo_subreporte, 
+                                                               repo_email,
+                                                               repo_subid, 
+                                                               acti_id,
+                                                               repo_codigo,
+                                                               repo_apoyo,
+                                                               urba_id,
+                                                               muot_id) VALUES (
+                                                                {repo_id}, 
+                                                                {repo_fechadigitacion}, 
+                                                                {repo_tipo_expansion}, 
+                                                                {repo_luminaria}, 
+                                                                {repo_redes}, 
+                                                                {repo_poste}, 
+                                                                {repo_modificado}, 
+                                                                {repo_subreporte}, 
+                                                                {repo_subid}, 
+                                                                {repo_email},
+                                                                {acti_id},
+                                                                {repo_codigo},
+                                                                {repo_apoyo},
+                                                                {urba_id},
+                                                                {muot_id}
+                                                               )""")
+            .on(
+              'repo_fechadigitacion -> adicional.repo_fechadigitacion,
+              'repo_tipo_expansion -> adicional.repo_tipo_expansion,
+              'repo_luminaria -> adicional.repo_luminaria,
+              'repo_redes -> adicional.repo_redes,
+              'repo_poste -> adicional.repo_poste,
+              'repo_modificado -> adicional.repo_modificado,
+              'repo_subreporte -> adicional.repo_subreporte,
+              'repo_subid -> adicional.repo_subid,
+              'repo_email -> adicional.repo_email,
+              'acti_id -> adicional.acti_id,
+              'repo_codigo -> adicional.repo_codigo,
+              'repo_apoyo -> adicional.repo_apoyo,
+              'urba_id -> adicional.urba_id,
+              'muot_id -> adicional.muot_id,
+              'repo_id -> reporte.repo_id
+            )
+            .executeInsert()
+        }
+      }
+      // Creación Actualizacion de Novedades
+      reporte.novedades.map { novedades =>
+        for (n <- novedades) {
+          val novedadActualizado = SQL(
+            """UPDATE siap.reporte_novedad SET 
+                                           nove_id = {nove_id}, 
+                                           reno_horaini = {reno_horaini}, 
+                                           reno_horafin = {reno_horafin}, 
+                                           reno_observacion = {reno_observacion},
+                                           even_estado = {even_estado}
+                                          WHERE tireuc_id = {tireuc_id} AND repo_id = {repo_id} AND even_id = {even_id}"""
+          ).on(
+              'tireuc_id -> reporte.tireuc_id,
+              'repo_id -> reporte.repo_id,
+              'even_id -> n.even_id,
+              'nove_id -> n.nove_id,
+              'reno_horaini -> n.reno_horaini,
+              'reno_horafin -> n.reno_horafin,
+              'reno_observacion -> n.reno_observacion,
+              'even_estado -> n.even_estado
+            )
+            .executeUpdate() > 0
+          if (!novedadActualizado) {
+            if (n.even_estado.get < 8) {
+              val novedadInsertado = SQL(""" INSERT INTO siap.reporte_novedad (
+                                             tireuc_id, 
+                                             repo_id, 
+                                             even_id, 
+                                             nove_id, 
+                                             reno_horaini, 
+                                             reno_horafin, 
+                                             reno_observacion, 
+                                             even_estado
+                                           ) VALUES (
+                                             {tireuc_id},
+                                             {repo_id},
+                                             {even_id},
+                                             {nove_id},
+                                             {reno_horaini},
+                                             {reno_horafin},
+                                             {reno_observacion},
+                                             {even_estado}
+                                           )
+                                    """)
+                .on(
+                  'tireuc_id -> reporte.tireuc_id,
+                  'repo_id -> reporte.repo_id,
+                  'even_id -> n.even_id,
+                  'nove_id -> n.nove_id,
+                  'reno_horaini -> n.reno_horaini,
+                  'reno_horafin -> n.reno_horafin,
+                  'reno_observacion -> n.reno_observacion,
+                  'even_estado -> n.even_estado
+                )
+                .executeUpdate() > 0
+            }
+          }
+        }
+      }
+
+      // Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
+      if (reporte.reti_id.get == 2 && reporte.adicional.get.repo_tipo_expansion.get != 4) {
+        reporte.direcciones.map { direcciones =>
+          for (d <- direcciones) {
+            if (d.aap_id != None) {
+              var aap_elemento: AapElemento = new AapElemento(
+                d.aap_id,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                reporte.reti_id,
+                reporte.repo_consecutivo.map(_.toInt)
+              )
+              var aap: Aap = new Aap(
+                d.aap_id,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                reporte.empr_id.get,
+                reporte.repo_fechasolucion,
+                reporte.repo_fechasolucion,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                reporte.usua_id.get,
+                Some(aap_elemento),
+                None
+              )
+              var aap_adicional: AapAdicional = new AapAdicional(
+                d.aap_id,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None
+              )
+              val aapOption =
+                aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get)
+              var activo = new Activo(
+                Some(aap),
+                None,
+                None,
+                Some(aap_adicional),
+                Some(aap_elemento),
+                None,
+                Some(1)
+              )
+              aapOption match {
+                case None =>
+                  if (d.even_estado.get == 1) {
+                    /* aapService.creardirecto(
+                      activo,
+                      reporte.empr_id.get,
+                      reporte.usua_id.get
+                    ) */
+                  }
+                case (a) => aap = a.get
+              }
+
+              // Fin Proceso de Creación de Luminarias Nuevas por Expansión Tipo I,II,III,V
+            }
+          }
+        }
+      }
+
+      reporte.eventos.map { eventos =>
+        for (e <- eventos) {
+          if (e.aap_id != None) {
+            var elemento: Elemento = null
+            var bombillo_retirado = None: Option[String]
+            var bombillo_instalado = None: Option[String]
+            var balasto_retirado = None: Option[String]
+            var balasto_instalado = None: Option[String]
+            var arrancador_retirado = None: Option[String]
+            var arrancador_instalado = None: Option[String]
+            var condensador_retirado = None: Option[String]
+            var condensador_instalado = None: Option[String]
+            var fotocelda_retirado = None: Option[String]
+            var fotocelda_instalado = None: Option[String]
+
+            e.elem_id match {
+              case None => None
+              case Some(elem_id) =>
+                elemento = elementoService.buscarPorId(elem_id).get
+            }
+            // Actualizar Evento si ya Existe
+            var estado = 0
+            e.even_estado match {
+              case Some(1) => estado = 2
+              case Some(2) => estado = 2
+              case Some(8) => estado = 9
+              case Some(9) => estado = 9
+              case _       => estado = 2
+            }
+            var eventoActualizado: Boolean = false
+            var eventoInsertado: Boolean = false
+            eventoActualizado = SQL(
+              """UPDATE siap.reporte_evento SET 
+                                                                even_fecha = {even_fecha}, 
+                                                                elem_id = {elem_id},
+                                                                even_estado = {even_estado},
+                                                                even_codigo_retirado = {even_codigo_retirado},                                                                 
+                                                                even_cantidad_retirado = {even_cantidad_retirado}, 
+                                                                even_codigo_instalado = {even_codigo_instalado}, 
+                                                                even_cantidad_instalado = {even_cantidad_instalado},
+                                                                usua_id = {usua_id},
+                                                                unit_id = {unit_id}
+                                                            WHERE empr_id = {empr_id} and repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}
+                                                        """
+            ).on(
+                'even_fecha -> hora,
+                'elem_id -> e.elem_id,
+                'even_codigo_retirado -> e.even_codigo_retirado,
+                'even_cantidad_retirado -> e.even_cantidad_retirado,
+                'even_codigo_instalado -> e.even_codigo_instalado,
+                'even_cantidad_instalado -> e.even_cantidad_instalado,
+                'usua_id -> reporte.usua_id,
+                'even_estado -> estado,
+                'empr_id -> reporte.empr_id,
+                'repo_id -> reporte.repo_id,
+                'aap_id -> e.aap_id,
+                'even_id -> e.even_id,
+                'unit_id -> e.unit_id
+              )
+              .executeUpdate() > 0
+            if (!eventoActualizado) {
+              eventoInsertado = SQL(
+                """INSERT INTO siap.reporte_evento (even_fecha, 
+                                    even_codigo_instalado,
+                                    even_cantidad_instalado,
+                                    even_codigo_retirado,
+                                    even_cantidad_retirado, 
+                                    even_estado, 
+                                    aap_id, 
+                                    repo_id, 
+                                    elem_id, 
+                                    usua_id, 
+                                    empr_id,
+                                    even_id,
+                                    unit_id) VALUES (
+                                    {even_fecha}, 
+                                    {even_codigo_instalado},
+                                    {even_cantidad_instalado},
+                                    {even_codigo_retirado},
+                                    {even_cantidad_retirado},
+                                    {even_estado},
+                                    {aap_id}, 
+                                    {repo_id}, 
+                                    {elem_id}, 
+                                    {usua_id}, 
+                                    {empr_id},
+                                    {even_id},
+                                    {unit_id})"""
+              ).on(
+                  "even_fecha" -> hora,
+                  "even_codigo_instalado" -> e.even_codigo_instalado,
+                  "even_cantidad_instalado" -> e.even_cantidad_instalado,
+                  "even_codigo_retirado" -> e.even_codigo_retirado,
+                  "even_cantidad_retirado" -> e.even_cantidad_retirado,
+                  "even_estado" -> estado,
+                  "aap_id" -> e.aap_id,
+                  "repo_id" -> reporte.repo_id,
+                  "elem_id" -> e.elem_id,
+                  "usua_id" -> e.usua_id,
+                  "empr_id" -> reporte.empr_id,
+                  "even_id" -> e.even_id,
+                  "unit_id" -> e.unit_id
+                )
+                .executeUpdate() > 0
+            }
+            if ((eventoActualizado || eventoInsertado) && (estado != 9)) {
+              // validar elemento y actualizar aap_elemento
+              elemento.tiel_id match {
+                case Some(1) =>
+                  SQL(
+                    """UPDATE siap.aap_elemento SET aap_bombillo = {aap_bombillo}, reti_id = {reti_id} , repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_bombillo -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'empr_id -> reporte.empr_id,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo
+                    )
+                    .executeUpdate()
+                  val updated: Boolean = SQL(
+                    """UPDATE siap.aap_elemento_historia SET aap_bombillo_retirado = {aap_bombillo_retirado}, aap_bombillo_instalado = {aap_bombillo_instalado}
+                                                 WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_bombillo_retirado -> e.even_codigo_retirado,
+                      'aap_bombillo_instalado -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'aael_fecha -> reporte.repo_fechasolucion,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo,
+                      'empr_id -> reporte.empr_id
+                    )
+                    .executeUpdate() > 0
+                  if (!updated) {
+                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                                                    aap_id,
+                                                    aael_fecha,
+                                                    aap_bombillo_retirado,
+                                                    aap_bombillo_instalado,
+                                                    aap_balasto_retirado,
+                                                    aap_balasto_instalado,
+                                                    aap_arrancador_retirado,
+                                                    aap_arrancador_instalado,
+                                                    aap_condensador_retirado,
+                                                    aap_condensador_instalado,
+                                                    aap_fotocelda_retirado,
+                                                    aap_fotocelda_instalado,
+                                                    reti_id,
+                                                    repo_consecutivo,
+                                                    empr_id
+                                                    )
+                                                    VALUES (
+                                                    {aap_id},
+                                                    {aael_fecha},
+                                                    {aap_bombillo_retirado},
+                                                    {aap_bombillo_instalado},
+                                                    {aap_balasto_retirado},
+                                                    {aap_balasto_instalado},
+                                                    {aap_arrancador_retirado},
+                                                    {aap_arrancador_instalado},
+                                                    {aap_condensador_retirado},
+                                                    {aap_condensador_instalado},
+                                                    {aap_fotocelda_retirado},
+                                                    {aap_fotocelda_instalado},
+                                                    {reti_id},
+                                                    {repo_consecutivo},
+                                                    {empr_id}
+                                                    )
+                                                """)
+                      .on(
+                        'aap_bombillo_retirado -> e.even_codigo_retirado,
+                        'aap_bombillo_instalado -> e.even_codigo_instalado,
+                        'aap_balasto_retirado -> "",
+                        'aap_balasto_instalado -> "",
+                        'aap_arrancador_retirado -> "",
+                        'aap_arrancador_instalado -> "",
+                        'aap_condensador_retirado -> "",
+                        'aap_condensador_instalado -> "",
+                        'aap_fotocelda_retirado -> "",
+                        'aap_fotocelda_instalado -> "",
+                        'aap_id -> e.aap_id,
+                        'aael_fecha -> reporte.repo_fechasolucion,
+                        'reti_id -> reporte.reti_id,
+                        'repo_consecutivo -> reporte.repo_consecutivo,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate()
+                  }
+                case Some(2) =>
+                  SQL(
+                    """UPDATE siap.aap_elemento SET aap_balasto = {aap_balasto}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_balasto -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'empr_id -> reporte.empr_id,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo
+                    )
+                    .executeUpdate()
+                  val updated: Boolean = SQL(
+                    """UPDATE siap.aap_elemento_historia SET aap_balasto_retirado = {aap_balasto_retirado}, aap_balasto_instalado = {aap_balasto_instalado}
+                                                 WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_balasto_retirado -> e.even_codigo_retirado,
+                      'aap_balasto_instalado -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'aael_fecha -> reporte.repo_fechasolucion,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo,
+                      'empr_id -> reporte.empr_id
+                    )
+                    .executeUpdate() > 0
+                  if (!updated) {
+                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                                                    aap_id,
+                                                    aael_fecha,
+                                                    aap_bombillo_retirado,
+                                                    aap_bombillo_instalado,
+                                                    aap_balasto_retirado,
+                                                    aap_balasto_instalado,
+                                                    aap_arrancador_retirado,
+                                                    aap_arrancador_instalado,
+                                                    aap_condensador_retirado,
+                                                    aap_condensador_instalado,
+                                                    aap_fotocelda_retirado,
+                                                    aap_fotocelda_instalado,
+                                                    reti_id,
+                                                    repo_consecutivo,
+                                                    empr_id
+                                                    )
+                                                    VALUES (
+                                                    {aap_id},
+                                                    {aael_fecha},
+                                                    {aap_bombillo_retirado},
+                                                    {aap_bombillo_instalado},
+                                                    {aap_balasto_retirado},
+                                                    {aap_balasto_instalado},
+                                                    {aap_arrancador_retirado},
+                                                    {aap_arrancador_instalado},
+                                                    {aap_condensador_retirado},
+                                                    {aap_condensador_instalado},
+                                                    {aap_fotocelda_retirado},
+                                                    {aap_fotocelda_instalado},
+                                                    {reti_id},
+                                                    {repo_consecutivo},
+                                                    {empr_id}
+                                                    )                                                    
+                                                """)
+                      .on(
+                        'aap_bombillo_retirado -> "",
+                        'aap_bombillo_instalado -> "",
+                        'aap_balasto_retirado -> e.even_codigo_retirado,
+                        'aap_balasto_instalado -> e.even_codigo_instalado,
+                        'aap_arrancador_retirado -> "",
+                        'aap_arrancador_instalado -> "",
+                        'aap_condensador_retirado -> "",
+                        'aap_condensador_instalado -> "",
+                        'aap_fotocelda_retirado -> "",
+                        'aap_fotocelda_instalado -> "",
+                        'aap_id -> e.aap_id,
+                        'aael_fecha -> reporte.repo_fechasolucion,
+                        'reti_id -> reporte.reti_id,
+                        'repo_consecutivo -> reporte.repo_consecutivo,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate()
+                  }
+                case Some(3) =>
+                  SQL(
+                    """UPDATE siap.aap_elemento SET aap_arrancador = {aap_arrancador}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_arrancador -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'empr_id -> reporte.empr_id,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo
+                    )
+                    .executeUpdate()
+                  val updated: Boolean = SQL(
+                    """UPDATE siap.aap_elemento_historia SET aap_arrancador_retirado = {aap_arrancador_retirado}, aap_arrancador_instalado = {aap_arrancador_instalado}
+                                                 WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_arrancador_retirado -> e.even_codigo_retirado,
+                      'aap_arrancador_instalado -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'aael_fecha -> reporte.repo_fechasolucion,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo,
+                      'empr_id -> reporte.empr_id
+                    )
+                    .executeUpdate() > 0
+                  if (!updated) {
+                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                                                    aap_id,
+                                                    aael_fecha,
+                                                    aap_bombillo_retirado,
+                                                    aap_bombillo_instalado,
+                                                    aap_balasto_retirado,
+                                                    aap_balasto_instalado,
+                                                    aap_arrancador_retirado,
+                                                    aap_arrancador_instalado,
+                                                    aap_condensador_retirado,
+                                                    aap_condensador_instalado,
+                                                    aap_fotocelda_retirado,
+                                                    aap_fotocelda_instalado,
+                                                    reti_id,
+                                                    repo_consecutivo,
+                                                    empr_id
+                                                    )
+                                                    VALUES (
+                                                    {aap_id},
+                                                    {aael_fecha},
+                                                    {aap_bombillo_retirado},
+                                                    {aap_bombillo_instalado},
+                                                    {aap_balasto_retirado},
+                                                    {aap_balasto_instalado},
+                                                    {aap_arrancador_retirado},
+                                                    {aap_arrancador_instalado},
+                                                    {aap_condensador_retirado},
+                                                    {aap_condensador_instalado},
+                                                    {aap_fotocelda_retirado},
+                                                    {aap_fotocelda_instalado},
+                                                    {reti_id},
+                                                    {repo_consecutivo},
+                                                    {empr_id}
+                                                    )                                                    
+                                                """)
+                      .on(
+                        'aap_bombillo_retirado -> "",
+                        'aap_bombillo_instalado -> "",
+                        'aap_balasto_retirado -> "",
+                        'aap_balasto_instalado -> "",
+                        'aap_arrancador_retirado -> e.even_codigo_retirado,
+                        'aap_arrancador_instalado -> e.even_codigo_instalado,
+                        'aap_condensador_retirado -> "",
+                        'aap_condensador_instalado -> "",
+                        'aap_fotocelda_retirado -> "",
+                        'aap_fotocelda_instalado -> "",
+                        'aap_id -> e.aap_id,
+                        'aael_fecha -> reporte.repo_fechasolucion,
+                        'reti_id -> reporte.reti_id,
+                        'repo_consecutivo -> reporte.repo_consecutivo,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate()
+                  }
+                case Some(4) =>
+                  SQL(
+                    """UPDATE siap.aap_elemento SET aap_condensador = {aap_condensador}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_condensador -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'empr_id -> reporte.empr_id,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo
+                    )
+                    .executeUpdate()
+                  val updated: Boolean = SQL(
+                    """UPDATE siap.aap_elemento_historia SET aap_condensador_retirado = {aap_condensador_retirado}, aap_condensador_instalado = {aap_condensador_instalado}
+                                                 WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_condensador_retirado -> e.even_codigo_retirado,
+                      'aap_condensador_instalado -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'aael_fecha -> reporte.repo_fechasolucion,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo,
+                      'empr_id -> reporte.empr_id
+                    )
+                    .executeUpdate() > 0
+                  if (!updated) {
+                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                                                    aap_id,
+                                                    aael_fecha,
+                                                    aap_bombillo_retirado,
+                                                    aap_bombillo_instalado,
+                                                    aap_balasto_retirado,
+                                                    aap_balasto_instalado,
+                                                    aap_arrancador_retirado,
+                                                    aap_arrancador_instalado,
+                                                    aap_condensador_retirado,
+                                                    aap_condensador_instalado,
+                                                    aap_fotocelda_retirado,
+                                                    aap_fotocelda_instalado,
+                                                    reti_id,
+                                                    repo_consecutivo,
+                                                    empr_id
+                                                    )
+                                                    VALUES (
+                                                    {aap_id},
+                                                    {aael_fecha},
+                                                    {aap_bombillo_retirado},
+                                                    {aap_bombillo_instalado},
+                                                    {aap_balasto_retirado},
+                                                    {aap_balasto_instalado},
+                                                    {aap_arrancador_retirado},
+                                                    {aap_arrancador_instalado},
+                                                    {aap_condensador_retirado},
+                                                    {aap_condensador_instalado},
+                                                    {aap_fotocelda_retirado},
+                                                    {aap_fotocelda_instalado},
+                                                    {reti_id},
+                                                    {repo_consecutivo},
+                                                    {empr_id}
+                                                    )                                                    
+                                                """)
+                      .on(
+                        'aap_bombillo_retirado -> "",
+                        'aap_bombillo_instalado -> "",
+                        'aap_balasto_retirado -> "",
+                        'aap_balasto_instalado -> "",
+                        'aap_arrancador_retirado -> "",
+                        'aap_arrancador_instalado -> "",
+                        'aap_condensador_retirado -> e.even_codigo_retirado,
+                        'aap_condensador_instalado -> e.even_codigo_instalado,
+                        'aap_fotocelda_retirado -> "",
+                        'aap_fotocelda_instalado -> "",
+                        'aap_id -> e.aap_id,
+                        'aael_fecha -> reporte.repo_fechasolucion,
+                        'reti_id -> reporte.reti_id,
+                        'repo_consecutivo -> reporte.repo_consecutivo,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate()
+                  }
+                case Some(5) =>
+                  SQL(
+                    """UPDATE siap.aap_elemento SET aap_fotocelda = {aap_fotocelda}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_fotocelda -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'empr_id -> reporte.empr_id,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo
+                    )
+                    .executeUpdate()
+                  val updated: Boolean = SQL(
+                    """UPDATE siap.aap_elemento_historia SET aap_fotocelda_retirado = {aap_fotocelda_retirado}, aap_fotocelda_instalado = {aap_fotocelda_instalado}
+                                                 WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_fotocelda_retirado -> e.even_codigo_retirado,
+                      'aap_fotocelda_instalado -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'aael_fecha -> reporte.repo_fechasolucion,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo,
+                      'empr_id -> reporte.empr_id
+                    )
+                    .executeUpdate() > 0
+                  if (!updated) {
+                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                                                    aap_id,
+                                                    aael_fecha,
+                                                    aap_bombillo_retirado,
+                                                    aap_bombillo_instalado,
+                                                    aap_balasto_retirado,
+                                                    aap_balasto_instalado,
+                                                    aap_arrancador_retirado,
+                                                    aap_arrancador_instalado,
+                                                    aap_condensador_retirado,
+                                                    aap_condensador_instalado,
+                                                    aap_fotocelda_retirado,
+                                                    aap_fotocelda_instalado,
+                                                    reti_id,
+                                                    repo_consecutivo,
+                                                    empr_id
+                                                    )
+                                                    VALUES (
+                                                    {aap_id},
+                                                    {aael_fecha},
+                                                    {aap_bombillo_retirado},
+                                                    {aap_bombillo_instalado},
+                                                    {aap_balasto_retirado},
+                                                    {aap_balasto_instalado},
+                                                    {aap_arrancador_retirado},
+                                                    {aap_arrancador_instalado},
+                                                    {aap_condensador_retirado},
+                                                    {aap_condensador_instalado},
+                                                    {aap_fotocelda_retirado},
+                                                    {aap_fotocelda_instalado},
+                                                    {reti_id},
+                                                    {repo_consecutivo},
+                                                    {empr_id}
+                                                    )                                                    
+                                                """)
+                      .on(
+                        'aap_bombillo_retirado -> "",
+                        'aap_bombillo_instalado -> "",
+                        'aap_balasto_retirado -> "",
+                        'aap_balasto_instalado -> "",
+                        'aap_arrancador_retirado -> "",
+                        'aap_arrancador_instalado -> "",
+                        'aap_condensador_retirado -> "",
+                        'aap_condensador_instalado -> "",
+                        'aap_fotocelda_retirado -> e.even_codigo_retirado,
+                        'aap_fotocelda_instalado -> e.even_codigo_instalado,
+                        'aap_id -> e.aap_id,
+                        'aael_fecha -> reporte.repo_fechasolucion,
+                        'reti_id -> reporte.reti_id,
+                        'repo_consecutivo -> reporte.repo_consecutivo,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate()
+                  }
+                case _ => None
+              }
+            }
+          }
+        }
+      }
+
+      reporte.direcciones.map { direcciones =>
+        for (d <- direcciones) {
+          if (d.aap_id != None) {
+            var dirActualizado: Boolean = false
+            var dirInsertado: Boolean = false
+            var datoActualizado: Boolean = false
+            var datoInsertado: Boolean = false
+            var datoadicionalInsertado: Boolean = false
+            var datoadicionalActualizado: Boolean = false
+            val aap =
+              aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get).get
+
+            var estado = 0
+            d.even_estado match {
+              case Some(1) => estado = 2
+              case Some(2) => estado = 2
+              case Some(8) => estado = 9
+              case Some(9) => estado = 9
+              case _       => estado = 2
+            }
+            // Direccion
+            dirActualizado = SQL(
+              """UPDATE siap.reporte_direccion SET
+                                                even_direccion = {even_direccion},
+                                                barr_id = {barr_id},
+                                                even_direccion_anterior = {even_direccion_anterior},
+                                                barr_id_anterior = {barr_id_anterior},
+                                                even_estado = {even_estado},
+                                                tire_id = {tire_id},
+                                                even_horaini = {even_horaini},
+                                                even_horafin = {even_horafin}
+                                            WHERE
+                                                repo_id = {repo_id} and
+                                                aap_id = {aap_id} and
+                                                even_id = {even_id} """
+            ).on(
+                'even_direccion -> d.even_direccion,
+                'barr_id -> d.barr_id,
+                'even_direccion_anterior -> d.even_direccion_anterior,
+                'barr_id_anterior -> d.barr_id_anterior,
+                'even_estado -> estado,
+                'tire_id -> d.tire_id,
+                'repo_id -> reporte.repo_id,
+                'aap_id -> d.aap_id,
+                'even_id -> d.even_id,
+                'even_horaini -> d.even_horaini,
+                'even_horafin -> d.even_horafin
+              )
+              .executeUpdate() > 0
+
+            if (!dirActualizado) {
+              dirInsertado = SQL(
+                """INSERT INTO siap.reporte_direccion (repo_id, aap_id, even_direccion, barr_id, even_id, even_direccion_anterior, barr_id_anterior, even_estado, tire_id, even_horaini, even_horafin) VALUES ({repo_id}, {aap_id}, {even_direccion}, {barr_id}, {even_id}, {even_direccion_anterior}, {barr_id_anterior}, {even_estado}, {tire_id}, {even_horaini}, {even_horafin})"""
+              ).on(
+                  'repo_id -> reporte.repo_id,
+                  'aap_id -> d.aap_id,
+                  'even_direccion -> d.even_direccion,
+                  'barr_id -> d.barr_id,
+                  'even_id -> d.even_id,
+                  'even_horaini -> d.even_horaini,
+                  'even_horafin -> d.even_horafin,
+                  'tire_id -> d.tire_id,
+                  'even_direccion_anterior -> aap.aap_direccion,
+                  'barr_id_anterior -> aap.barr_id,
+                  'even_estado -> estado
+                )
+                .executeUpdate() > 0
+            }
+            // Fin Direccion
+            // Direccion Dato
+            datoActualizado = SQL(
+              """UPDATE siap.reporte_direccion_dato SET
+                            aatc_id = {aatc_id},
+                            aatc_id_anterior = {aatc_id_anterior},
+                            aama_id = {aama_id},
+                            aama_id_anterior = {aama_id_anterior},
+                            aamo_id = {aamo_id},
+                            aamo_id_anterior = {aamo_id_anterior},
+                            aaco_id = {aaco_id},
+                            aaco_id_anterior = {aaco_id_anterior},
+                            aap_potencia = {aap_potencia},
+                            aap_potencia_anterior = {aap_potencia_anterior},
+                            aap_tecnologia = {aap_tecnologia},
+                            aap_tecnologia_anterior = {aap_tecnologia_anterior},
+                            aap_brazo = {aap_brazo},
+                            aap_brazo_anterior = {aap_brazo_anterior},
+                            aap_collarin = {aap_collarin_anterior},
+                            tipo_id = {tipo_id},
+                            tipo_id_anterior = {tipo_id_anterior},
+                            aap_poste_altura = {aap_poste_altura},
+                            aap_poste_altura_anterior = {aap_poste_altura_anterior},
+                            aap_poste_propietario = {aap_poste_propietario},
+                            aap_poste_propietario_anterior = {aap_poste_propietario_anterior}
+                        WHERE
+                            repo_id = {repo_id} and 
+                            aap_id = {aap_id} and
+                            even_id = {even_id}
+                        """
+            ).on(
+                'aatc_id -> d.dato.get.aatc_id,
+                'aatc_id_anterior -> d.dato.get.aatc_id_anterior,
+                'aama_id -> d.dato.get.aama_id,
+                'aama_id_anterior -> d.dato.get.aama_id_anterior,
+                'aamo_id -> d.dato.get.aamo_id,
+                'aamo_id_anterior -> d.dato.get.aamo_id_anterior,
+                'aaco_id -> d.dato.get.aaco_id,
+                'aaco_id_anterior -> d.dato.get.aaco_id_anterior,
+                'aap_potencia -> d.dato.get.aap_potencia,
+                'aap_potencia_anterior -> d.dato.get.aap_potencia_anterior,
+                'aap_tecnologia -> d.dato.get.aap_tecnologia,
+                'aap_tecnologia_anterior -> d.dato.get.aap_tecnologia_anterior,
+                'aap_brazo -> d.dato.get.aap_brazo,
+                'aap_brazo_anterior -> d.dato.get.aap_brazo_anterior,
+                'aap_collarin -> d.dato.get.aap_collarin,
+                'aap_collarin_anterior -> d.dato.get.aap_collarin_anterior,
+                'tipo_id -> d.dato.get.tipo_id,
+                'tipo_id_anterior -> d.dato.get.tipo_id_anterior,
+                'aap_poste_altura -> d.dato.get.aap_poste_altura,
+                'aap_poste_altura_anterior -> d.dato.get.aap_poste_altura_anterior,
+                'aap_poste_propietario -> d.dato.get.aap_poste_propietario,
+                'aap_poste_propietario_anterior -> d.dato.get.aap_poste_propietario_anterior,
+                'repo_id -> reporte.repo_id,
+                'aap_id -> d.aap_id,
+                'even_id -> d.even_id
+              )
+              .executeUpdate() > 0
+            if (!datoActualizado) {
+              datoInsertado = SQL("""INSERT INTO siap.reporte_direccion_dato (
+                                repo_id,
+                                even_id,
+                                aap_id,
+                                aatc_id,
+                                aatc_id_anterior,
+                                aama_id,
+                                aama_id_anterior,
+                                aamo_id,
+                                aamo_id_anterior,
+                                aaco_id,
+                                aaco_id_anterior,
+                                aap_potencia,
+                                aap_potencia_anterior,
+                                aap_tecnologia,
+                                aap_tecnologia_anterior,
+                                aap_brazo,
+                                aap_brazo_anterior,
+                                aap_collarin,
+                                aap_collarin_anterior,
+                                tipo_id,
+                                tipo_id_anterior,
+                                aap_poste_altura,
+                                aap_poste_altura_anterior,
+                                aap_poste_propietario,
+                                aap_poste_propietario_anterior
+                                ) VALUES (
+                                    {repo_id},
+                                    {even_id},
+                                    {aap_id},
+                                    {aatc_id},
+                                    {aatc_id_anterior},
+                                    {aama_id},
+                                    {aama_id_anterior},
+                                    {aamo_id},
+                                    {aamo_id_anterior},
+                                    {aaco_id},
+                                    {aaco_id_anterior},
+                                    {aap_potencia},
+                                    {aap_potencia_anterior},
+                                    {aap_tecnologia},
+                                    {aap_tecnologia_anterior},
+                                    {aap_brazo},
+                                    {aap_brazo_anterior},
+                                    {aap_collarin},
+                                    {aap_collarin_anterior},
+                                    {tipo_id},
+                                    {tipo_id_anterior},
+                                    {aap_poste_altura},
+                                    {aap_poste_altura_anterior},
+                                    {aap_poste_propietario},
+                                    {aap_poste_propietario_anterior}
+                                )
+                            """)
+                .on(
+                  'aatc_id -> d.dato.get.aatc_id,
+                  'aatc_id_anterior -> d.dato.get.aatc_id_anterior,
+                  'aama_id -> d.dato.get.aama_id,
+                  'aama_id_anterior -> d.dato.get.aama_id_anterior,
+                  'aamo_id -> d.dato.get.aamo_id,
+                  'aamo_id_anterior -> d.dato.get.aamo_id_anterior,
+                  'aaco_id -> d.dato.get.aaco_id,
+                  'aaco_id_anterior -> d.dato.get.aaco_id_anterior,
+                  'aap_potencia -> d.dato.get.aap_potencia,
+                  'aap_potencia_anterior -> d.dato.get.aap_potencia_anterior,
+                  'aap_tecnologia -> d.dato.get.aap_tecnologia,
+                  'aap_tecnologia_anterior -> d.dato.get.aap_tecnologia_anterior,
+                  'aap_brazo -> d.dato.get.aap_brazo,
+                  'aap_brazo_anterior -> d.dato.get.aap_brazo_anterior,
+                  'aap_collarin -> d.dato.get.aap_collarin,
+                  'aap_collarin_anterior -> d.dato.get.aap_collarin_anterior,
+                  'tipo_id -> d.dato.get.tipo_id,
+                  'tipo_id_anterior -> d.dato.get.tipo_id_anterior,
+                  'aap_poste_altura -> d.dato.get.aap_poste_altura,
+                  'aap_poste_altura_anterior -> d.dato.get.aap_poste_altura_anterior,
+                  'aap_poste_propietario -> d.dato.get.aap_poste_propietario,
+                  'aap_poste_propietario_anterior -> d.dato.get.aap_poste_propietario_anterior,
+                  'repo_id -> reporte.repo_id,
+                  'aap_id -> d.aap_id,
+                  'even_id -> d.even_id
+                )
+                .executeUpdate() > 0
+            }
+            // Fin Direccion Dato
+            // Direccion Dato Adicional
+            datoadicionalActualizado = SQL(
+              """UPDATE siap.reporte_direccion_dato_adicional SET 
+                                aacu_id_anterior = {aacu_id_anterior},
+                                aacu_id = {aacu_id},
+                                aaus_id_anterior = {aaus_id_anterior},
+                                aaus_id = {aaus_id},
+                                medi_id_anterior = {medi_id_anterior},
+                                medi_id = {medi_id},
+                                tran_id_anterior = {tran_id_anterior},
+                                tran_id = {tran_id}
+                                WHERE
+                                    repo_id = {repo_id} and
+                                    even_id = {even_id} and
+                                    aap_id = {aap_id}
+                                """
+            ).on(
+                'aacu_id_anterior -> d.dato_adicional.get.aacu_id_anterior,
+                'aacu_id -> d.dato_adicional.get.aacu_id,
+                'aaus_id_anterior -> d.dato_adicional.get.aaus_id_anterior,
+                'aaus_id -> d.dato_adicional.get.aaus_id,
+                'medi_id_anterior -> d.dato_adicional.get.medi_id_anterior,
+                'medi_id -> d.dato_adicional.get.medi_id,
+                'tran_id_anterior -> d.dato_adicional.get.tran_id_anterior,
+                'tran_id -> d.dato_adicional.get.tran_id,
+                'repo_id -> reporte.repo_id,
+                'aap_id -> d.aap_id,
+                'even_id -> d.even_id
+              )
+              .executeUpdate() > 0
+            if (!datoadicionalActualizado) {
+              datoadicionalInsertado = SQL(
+                """INSERT INTO siap.reporte_direccion_dato_adicional (
+                                    repo_id,
+                                    even_id,
+                                    aap_id,
+                                    aacu_id_anterior,
+                                    aacu_id,
+                                    aaus_id_anterior,
+                                    aaus_id,
+                                    medi_id_anterior,
+                                    medi_id,
+                                    tran_id_anterior,
+                                    tran_id) 
+                                VALUES (
+                                    {repo_id},
+                                    {even_id},
+                                    {aap_id},
+                                    {aacu_id_anterior},
+                                    {aacu_id},
+                                    {aaus_id_anterior},
+                                    {aaus_id},
+                                    {medi_id_anterior},
+                                    {medi_id},
+                                    {tran_id_anterior},
+                                    {tran_id}
+                                )
+                                """
+              ).on(
+                  'aacu_id_anterior -> d.dato_adicional.get.aacu_id_anterior,
+                  'aacu_id -> d.dato_adicional.get.aacu_id,
+                  'aaus_id_anterior -> d.dato_adicional.get.aaus_id_anterior,
+                  'aaus_id -> d.dato_adicional.get.aaus_id,
+                  'medi_id_anterior -> d.dato_adicional.get.medi_id_anterior,
+                  'medi_id -> d.dato_adicional.get.medi_id,
+                  'tran_id_anterior -> d.dato_adicional.get.tran_id_anterior,
+                  'tran_id -> d.dato_adicional.get.tran_id,
+                  'repo_id -> reporte.repo_id,
+                  'aap_id -> d.aap_id,
+                  'even_id -> d.even_id
+                )
+                .executeUpdate() > 0
+            }
+            // Fin Direccion Dato Adicional
+            // actualizar direccion de la luminaria y datos adicionales
+            // Actualizar direccion sin importar el tipo de reporte
+            // if (reporte.reti_id.get == 1 || reporte.reti_id.get == 2 || reporte.reti_id.get == 3) {
+          } // Fin d.aap_id != null
+        } // Fin for direcciones
+      } // Fin direcciones map
+
+      //
+      // guardar medio ambiente
+      SQL(
+        """DELETE FROM siap.reporte_medioambiente WHERE repo_id = {repo_id}"""
+      ).on(
+          'repo_id -> reporte.repo_id
+        )
+        .execute()
+
+      reporte.meams.map { meams =>
+        for (m <- meams) {
+          SQL(
+            """INSERT INTO siap.reporte_medioambiente (repo_id, meam_id) VALUES ({repo_id}, {meam_id})"""
+          ).on(
+              'repo_id -> reporte.repo_id.get,
+              'meam_id -> m
+            )
+            .executeInsert()
+        }
+      }
+      //
+
+      if (reporte_ant != None) {
+        if (reporte_ant.get.repo_fecharecepcion != reporte.repo_fecharecepcion) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "repo_fecharecepcion",
+              'audi_valorantiguo -> reporte_ant.get.repo_fecharecepcion,
+              'audi_valornuevo -> reporte.repo_fecharecepcion,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+
+        if (reporte_ant.get.repo_direccion != reporte.repo_direccion) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "repo_direccion",
+              'audi_valorantiguo -> reporte_ant.get.repo_direccion,
+              'audi_valornuevo -> reporte.repo_direccion,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+
+        if (reporte_ant.get.repo_nombre != reporte.repo_nombre) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "repo_nombre",
+              'audi_valorantiguo -> reporte_ant.get.repo_nombre,
+              'audi_valornuevo -> reporte.repo_nombre,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+
+        if (reporte_ant.get.repo_telefono != reporte.repo_telefono) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "repo_telefono",
+              'audi_valorantiguo -> reporte_ant.get.repo_telefono,
+              'audi_valornuevo -> reporte.repo_telefono,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+
+        if (reporte_ant.get.repo_fechasolucion != reporte.repo_fechasolucion) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "repo_fechasolucion",
+              'audi_valorantiguo -> reporte_ant.get.repo_fechasolucion,
+              'audi_valornuevo -> reporte.repo_fechasolucion,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+
+        if (reporte_ant.get.repo_horainicio != reporte.repo_horainicio) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "repo_horainicio",
+              'audi_valorantiguo -> reporte_ant.get.repo_horainicio,
+              'audi_valornuevo -> reporte.repo_horainicio,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+
+        if (reporte_ant.get.repo_horafin != reporte.repo_horafin) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "repo_horafin",
+              'audi_valorantiguo -> reporte_ant.get.repo_horafin,
+              'audi_valornuevo -> reporte.repo_horafin,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+
+        if (reporte_ant.get.repo_reportetecnico != reporte.repo_reportetecnico) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "repo_reportetecnico",
+              'audi_valorantiguo -> reporte_ant.get.repo_reportetecnico,
+              'audi_valornuevo -> reporte.repo_reportetecnico,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+
+        if (reporte_ant.get.rees_id != reporte.rees_id) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.rees_id,
+              'audi_campo -> "rees_id",
+              'audi_valorantiguo -> reporte_ant.get.rees_id,
+              'audi_valornuevo -> reporte.rees_id,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+
+        if (reporte_ant.get.orig_id != reporte.orig_id) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "orig_id",
+              'audi_valorantiguo -> reporte_ant.get.orig_id,
+              'audi_valornuevo -> reporte.orig_id,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+
+        if (reporte_ant.get.barr_id != reporte.barr_id) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "barr_id",
+              'audi_valorantiguo -> reporte_ant.get.barr_id,
+              'audi_valornuevo -> reporte.barr_id,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+
+        if (reporte_ant.get.empr_id != reporte.empr_id) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "empr_id",
+              'audi_valorantiguo -> reporte_ant.get.empr_id,
+              'audi_valornuevo -> reporte.empr_id,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+
+        if (reporte_ant.get.usua_id != reporte.usua_id) {
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> reporte.repo_id,
+              'audi_campo -> "usua_id",
+              'audi_valorantiguo -> reporte_ant.get.usua_id,
+              'audi_valornuevo -> reporte.usua_id,
+              'audi_evento -> "A"
+            )
+            .executeInsert()
+        }
+      }
+
+      result
+    }
+  }
+
+  /**
     *
     *
     *
@@ -6495,7 +7983,12 @@ class ReporteRepository @Inject()(
     }
   }
 
-  def ActaDesmonteXls(fecha_corte: Long, tireuc_id: Int, empr_id: Long, usua_id: Long):(Int, Array[Byte]) = {
+  def ActaDesmonteXls(
+      fecha_corte: Long,
+      tireuc_id: Int,
+      empr_id: Long,
+      usua_id: Long
+  ): (Int, Array[Byte]) = {
     val empresa = empresaService.buscarPorId(empr_id).get
     val municipio_nombre = empresa.muni_descripcion.get
     val usuario = usuarioService.buscarPorId(usua_id).get
@@ -6504,7 +7997,9 @@ class ReporteRepository @Inject()(
     db.withTransaction { implicit connection =>
       // revisar si existe acta o crearla
       val _fecha_corte = new DateTime(fecha_corte)
-      val _actaOpt = SQL("SELECT acde_numero FROM siap.acta_desmonte WHERE acde_fecha = {fecha_corte} AND empr_id = {empr_id}").on(
+      val _actaOpt = SQL(
+        "SELECT acde_numero FROM siap.acta_desmonte WHERE acde_fecha = {fecha_corte} AND empr_id = {empr_id}"
+      ).on(
           'fecha_corte -> _fecha_corte,
           'empr_id -> empr_id
         )
@@ -6516,7 +8011,8 @@ class ReporteRepository @Inject()(
         double("cantidad_retirado") map {
         case a ~ b ~ c ~ d ~ e => (a, b, c, d, e)
       }
-      val _material = SQL("""SELECT 
+      val _material = SQL(
+        """SELECT 
           e1.elem_id, 
           e1.elem_codigo, 
           e1.elem_unidad, 
@@ -6529,44 +8025,54 @@ class ReporteRepository @Inject()(
             AND r1.reti_id = {reti_id}
             AND r1.empr_id = {empr_id}
             AND r1.tireuc_id = {tireuc_id}
-          GROUP BY 1,2,3,4""")
-          .on(
-              'fecha_corte -> _fecha_corte,
-              'empr_id -> empr_id,
-              'reti_id -> 6,
-              'tireuc_id -> tireuc_id
-            ).as(_parseMaterial *)
+          GROUP BY 1,2,3,4"""
+      ).on(
+          'fecha_corte -> _fecha_corte,
+          'empr_id -> empr_id,
+          'reti_id -> 6,
+          'tireuc_id -> tireuc_id
+        )
+        .as(_parseMaterial *)
       if (_material.length > 0) {
-      _actaNumero = _actaOpt match {
-        case Some(a) => a
-        case None => {
-          // Siguiente consecutivo
-          var _siguiente = SQL("SELECT gene_numero FROM siap.general WHERE gene_id = {gene_id}").on(
-              'gene_id -> 8
-            )
-            .as(SqlParser.scalar[Int].single)
-          _siguiente += 1
-          SQL("UPDATE siap.general SET gene_numero = {gene_numero} WHERE gene_id = {gene_id}").on(
-              'gene_numero -> _siguiente,
-              'gene_id -> 8
-            ).executeUpdate()
-          SQL("INSERT INTO siap.acta_desmonte (acde_numero, acde_fecha, empr_id, usua_id) VALUES ({acde_numero}, {acde_fecha}, {empr_id}, {usua_id})").on(
-              'acde_numero -> _siguiente,
-              'acde_fecha -> _fecha_corte,
-              'empr_id -> empr_id,
-              'usua_id -> usua_id
-            ).executeInsert()
-          _siguiente
-        }
-      }            
-          // Busco firmantes
-          val fecha_firma = Utility.fechaatextosindia(Some(_fecha_corte))
-          val _parseFirma = str("firm_nombre") ~ str("firm_titulo") map {
-            case a ~ b =>
-              (a, b)
+        _actaNumero = _actaOpt match {
+          case Some(a) => a
+          case None => {
+            // Siguiente consecutivo
+            var _siguiente = SQL(
+              "SELECT gene_numero FROM siap.general WHERE gene_id = {gene_id}"
+            ).on(
+                'gene_id -> 8
+              )
+              .as(SqlParser.scalar[Int].single)
+            _siguiente += 1
+            SQL(
+              "UPDATE siap.general SET gene_numero = {gene_numero} WHERE gene_id = {gene_id}"
+            ).on(
+                'gene_numero -> _siguiente,
+                'gene_id -> 8
+              )
+              .executeUpdate()
+            SQL(
+              "INSERT INTO siap.acta_desmonte (acde_numero, acde_fecha, empr_id, usua_id) VALUES ({acde_numero}, {acde_fecha}, {empr_id}, {usua_id})"
+            ).on(
+                'acde_numero -> _siguiente,
+                'acde_fecha -> _fecha_corte,
+                'empr_id -> empr_id,
+                'usua_id -> usua_id
+              )
+              .executeInsert()
+            _siguiente
           }
-          val _firmaGerente = SQL("SELECT * FROM siap.firma WHERE firm_id = {firm_id} and empr_id = {empr_id}")
-          .on(
+        }
+        // Busco firmantes
+        val fecha_firma = Utility.fechaatextosindia(Some(_fecha_corte))
+        val _parseFirma = str("firm_nombre") ~ str("firm_titulo") map {
+          case a ~ b =>
+            (a, b)
+        }
+        val _firmaGerente = SQL(
+          "SELECT * FROM siap.firma WHERE firm_id = {firm_id} and empr_id = {empr_id}"
+        ).on(
             'firm_id -> 1,
             'empr_id -> empr_id
           )
@@ -6574,8 +8080,9 @@ class ReporteRepository @Inject()(
             _parseFirma.single
           )
 
-          val _firmaInterventor = SQL("SELECT * FROM siap.firma WHERE firm_id = {firm_id} and empr_id = {empr_id}")
-          .on(
+        val _firmaInterventor = SQL(
+          "SELECT * FROM siap.firma WHERE firm_id = {firm_id} and empr_id = {empr_id}"
+        ).on(
             'firm_id -> 2,
             'empr_id -> empr_id
           )
@@ -6583,8 +8090,9 @@ class ReporteRepository @Inject()(
             _parseFirma.single
           )
 
-          val _firmaAlmacen = SQL("SELECT * FROM siap.firma WHERE firm_id = {firm_id} and empr_id = {empr_id}")
-          .on(
+        val _firmaAlmacen = SQL(
+          "SELECT * FROM siap.firma WHERE firm_id = {firm_id} and empr_id = {empr_id}"
+        ).on(
             'firm_id -> 5,
             'empr_id -> empr_id
           )
@@ -6592,464 +8100,573 @@ class ReporteRepository @Inject()(
             _parseFirma.single
           )
 
-          val interventor_nombre = _firmaInterventor._1
-          val interventor_cargo = _firmaInterventor._2
+        val interventor_nombre = _firmaInterventor._1
+        val interventor_cargo = _firmaInterventor._2
 
-          val gerente_nombre = _firmaGerente._1
-          val gerente_cargo = _firmaGerente._2
+        val gerente_nombre = _firmaGerente._1
+        val gerente_cargo = _firmaGerente._2
 
-          val almacen_nombre = _firmaAlmacen._1
-          val almacen_cargo = _firmaAlmacen._2
+        val almacen_nombre = _firmaAlmacen._1
+        val almacen_cargo = _firmaAlmacen._2
 
-          var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
-          var _listMerged = new ListBuffer[CellRange]()
+        var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
+        var _listMerged = new ListBuffer[CellRange]()
 
-          val sheet1 = Sheet(
-            name = "Acta",
-            rows = {
-              var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
-              _listRow += com.norbitltd.spoiwo.model
-                .Row(
-                  style = CellStyle(
-                    font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                    horizontalAlignment = HA.Center
-                  )
-                )
-                .withCellValues("CONCESIÓN ALUMBRADO PÚBLICO")
-              _listRow += com.norbitltd.spoiwo.model
-                .Row(
-                  style = CellStyle(
-                    font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                    horizontalAlignment = HA.Center
-                  )
-                )
-                .withCellValues(empresa.empr_descripcion)
-              _listRow += com.norbitltd.spoiwo.model
-                .Row(
-                  style = CellStyle(
-                    font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                    horizontalAlignment = HA.Center
-                  )
-                )
-                .withCellValues("CONTROL ENTREGA DE MATERIALES DESMONTADOS")  
-              _listRow += com.norbitltd.spoiwo.model.Row().withCellValues("","","","","","","","","")                
-              _listRow += com.norbitltd.spoiwo.model
-                .Row(
-                  style = CellStyle(
-                    font = Font(bold = true, height = new Height(12, HeightUnit.Point), fontName = "Arial"),
-                    horizontalAlignment = HA.Left
-                  )
-                )
-                .withCellValues("ACTA DE ENTREGA No." + _actaNumero)
-              _listRow += com.norbitltd.spoiwo.model.Row().withCellValues("","","","","","","","","")
-
-              val _texto01 = s"EN LAS INSTALACIONES DE ${empresa.empr_descripcion} SE REUNIERON LOS INGENIEROS ${interventor_nombre} ${interventor_cargo},  ${gerente_nombre} ${gerente_cargo} Y ${almacen_nombre} ${almacen_cargo}, PARA HACER ENTREGA DE LOS MATERIALES DESMONTADOS DE LOS TRABAJOS DE MODERNIZACION DEL SISTEMA ALUMBRADO PUBLICO DEL MUNICIPIO DE ${municipio_nombre}"
-
-              _listRow += com.norbitltd.spoiwo.model.Row(
+        val sheet1 = Sheet(
+          name = "Acta",
+          rows = {
+            var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+            _listRow += com.norbitltd.spoiwo.model
+              .Row(
                 style = CellStyle(
-                  font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
+                  font = Font(
+                    bold = true,
+                    height = new Height(10, HeightUnit.Point),
+                    fontName = "Arial"
+                  ),
+                  horizontalAlignment = HA.Center
+                )
+              )
+              .withCellValues("CONCESIÓN ALUMBRADO PÚBLICO")
+            _listRow += com.norbitltd.spoiwo.model
+              .Row(
+                style = CellStyle(
+                  font = Font(
+                    bold = true,
+                    height = new Height(10, HeightUnit.Point),
+                    fontName = "Arial"
+                  ),
+                  horizontalAlignment = HA.Center
+                )
+              )
+              .withCellValues(empresa.empr_descripcion)
+            _listRow += com.norbitltd.spoiwo.model
+              .Row(
+                style = CellStyle(
+                  font = Font(
+                    bold = true,
+                    height = new Height(10, HeightUnit.Point),
+                    fontName = "Arial"
+                  ),
+                  horizontalAlignment = HA.Center
+                )
+              )
+              .withCellValues("CONTROL ENTREGA DE MATERIALES DESMONTADOS")
+            _listRow += com.norbitltd.spoiwo.model
+              .Row()
+              .withCellValues("", "", "", "", "", "", "", "", "")
+            _listRow += com.norbitltd.spoiwo.model
+              .Row(
+                style = CellStyle(
+                  font = Font(
+                    bold = true,
+                    height = new Height(12, HeightUnit.Point),
+                    fontName = "Arial"
+                  ),
+                  horizontalAlignment = HA.Left
+                )
+              )
+              .withCellValues("ACTA DE ENTREGA No." + _actaNumero)
+            _listRow += com.norbitltd.spoiwo.model
+              .Row()
+              .withCellValues("", "", "", "", "", "", "", "", "")
+
+            val _texto01 =
+              s"EN LAS INSTALACIONES DE ${empresa.empr_descripcion} SE REUNIERON LOS INGENIEROS ${interventor_nombre} ${interventor_cargo},  ${gerente_nombre} ${gerente_cargo} Y ${almacen_nombre} ${almacen_cargo}, PARA HACER ENTREGA DE LOS MATERIALES DESMONTADOS DE LOS TRABAJOS DE MODERNIZACION DEL SISTEMA ALUMBRADO PUBLICO DEL MUNICIPIO DE ${municipio_nombre}"
+
+            _listRow += com.norbitltd.spoiwo.model
+              .Row(
+                style = CellStyle(
+                  font = Font(
+                    bold = false,
+                    height = new Height(10, HeightUnit.Point),
+                    fontName = "Arial"
+                  ),
                   wrapText = java.lang.Boolean.TRUE,
                   horizontalAlignment = HA.Left
                 )
-              ).withCellValues(_texto01).withHeight(new Height(40, HeightUnit.Point))
-
-              _listRow += com.norbitltd.spoiwo.model.Row().withCellValues("","","","","","","","","")
-              _listRow += com.norbitltd.spoiwo.model.Row().withCellValues("","","","","","","","","")
-
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  "ITEM",
-                  Some(0),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),                      
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "DESCRIPCION DEL MATERIAL",
-                  Some(1),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                      
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(2),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                       
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "UNIDAD",
-                  Some(3),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                       
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),             
-                StringCell(
-                  "CANTIDAD",
-                  Some(4),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                       
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "ESTADO",
-                  Some(5),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                       
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                       
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                      
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "VALOR",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                       
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                                        
               )
-              _listMerged += CellRange((9, 9), (5, 7))
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  "",
-                  Some(0),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      ),                       
+              .withCellValues(_texto01)
+              .withHeight(new Height(40, HeightUnit.Point))
+
+            _listRow += com.norbitltd.spoiwo.model
+              .Row()
+              .withCellValues("", "", "", "", "", "", "", "", "")
+            _listRow += com.norbitltd.spoiwo.model
+              .Row()
+              .withCellValues("", "", "", "", "", "", "", "", "")
+
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "ITEM",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
                     ),
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      ),                       
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "DESCRIPCION DEL MATERIAL",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(2),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      ),                       
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ), 
-                StringCell(
-                  "",
-                  Some(3),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      ),                       
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      ),                       
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),  
-                StringCell(
-                  "OBSOLETO",
-                  Some(5),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thin,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thin,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thin,
-                        rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      ),                       
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ), 
-                StringCell(
-                  "INNECESARIO",
-                  Some(6),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thin,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thin,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thin,
-                        rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      ),                       
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ), 
-                StringCell(
-                  "INSERVIBLE",
-                  Some(7),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thin,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thin,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      ),                       
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thin,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thin,
-                        leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      ),                       
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "UNIDAD",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                                                                                                             
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "CANTIDAD",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "ESTADO",
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      // rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "VALOR",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-              
-              // Aqui van los materiales
-              var _idx = 12
-              _material.map { m =>
+            )
+            _listMerged += CellRange((9, 9), (5, 7))
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "OBSOLETO",
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = false,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "INNECESARIO",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = false,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "INSERVIBLE",
+                Some(7),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = false,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thin,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thin,
+                      leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )
+
+            // Aqui van los materiales
+            var _idx = 12
+            _material.map {
+              m =>
                 _listRow += com.norbitltd.spoiwo.model.Row(
                   NumericCell(
                     _idx - 11,
                     Some(0),
                     style = Some(
                       CellStyle(
-                        font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
+                        font = Font(
+                          bold = false,
+                          height = new Height(10, HeightUnit.Point),
+                          fontName = "Arial"
+                        ),
                         borders = CellBorders(
                           topStyle = CellBorderStyle.Thin,
                           topColor = Color.Black,
@@ -7070,7 +8687,11 @@ class ReporteRepository @Inject()(
                     Some(1),
                     style = Some(
                       CellStyle(
-                        font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
+                        font = Font(
+                          bold = false,
+                          height = new Height(10, HeightUnit.Point),
+                          fontName = "Arial"
+                        ),
                         borders = CellBorders(
                           topStyle = CellBorderStyle.Thin,
                           topColor = Color.Black,
@@ -7080,7 +8701,7 @@ class ReporteRepository @Inject()(
                           rightColor = Color.Black,
                           bottomStyle = CellBorderStyle.Thin,
                           bottomColor = Color.Black
-                        ),                        
+                        ),
                         horizontalAlignment = HA.Left
                       )
                     ),
@@ -7091,7 +8712,11 @@ class ReporteRepository @Inject()(
                     Some(2),
                     style = Some(
                       CellStyle(
-                        font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
+                        font = Font(
+                          bold = false,
+                          height = new Height(10, HeightUnit.Point),
+                          fontName = "Arial"
+                        ),
                         borders = CellBorders(
                           topStyle = CellBorderStyle.Thin,
                           topColor = Color.Black,
@@ -7101,7 +8726,7 @@ class ReporteRepository @Inject()(
                           rightColor = Color.Black,
                           bottomStyle = CellBorderStyle.Thin,
                           bottomColor = Color.Black
-                        ),                        
+                        ),
                         horizontalAlignment = HA.Center
                       )
                     ),
@@ -7112,7 +8737,11 @@ class ReporteRepository @Inject()(
                     Some(3),
                     style = Some(
                       CellStyle(
-                        font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
+                        font = Font(
+                          bold = false,
+                          height = new Height(10, HeightUnit.Point),
+                          fontName = "Arial"
+                        ),
                         borders = CellBorders(
                           topStyle = CellBorderStyle.Thin,
                           topColor = Color.Black,
@@ -7122,7 +8751,7 @@ class ReporteRepository @Inject()(
                           rightColor = Color.Black,
                           bottomStyle = CellBorderStyle.Thin,
                           bottomColor = Color.Black
-                        ),                        
+                        ),
                         horizontalAlignment = HA.Center
                       )
                     ),
@@ -7133,7 +8762,11 @@ class ReporteRepository @Inject()(
                     Some(4),
                     style = Some(
                       CellStyle(
-                        font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
+                        font = Font(
+                          bold = false,
+                          height = new Height(10, HeightUnit.Point),
+                          fontName = "Arial"
+                        ),
                         borders = CellBorders(
                           topStyle = CellBorderStyle.Thin,
                           topColor = Color.Black,
@@ -7143,7 +8776,7 @@ class ReporteRepository @Inject()(
                           rightColor = Color.Black,
                           bottomStyle = CellBorderStyle.Thin,
                           bottomColor = Color.Black
-                        ),                        
+                        ),
                         horizontalAlignment = HA.Center
                       )
                     ),
@@ -7154,7 +8787,11 @@ class ReporteRepository @Inject()(
                     Some(5),
                     style = Some(
                       CellStyle(
-                        font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
+                        font = Font(
+                          bold = false,
+                          height = new Height(10, HeightUnit.Point),
+                          fontName = "Arial"
+                        ),
                         borders = CellBorders(
                           topStyle = CellBorderStyle.Thin,
                           topColor = Color.Black,
@@ -7164,7 +8801,7 @@ class ReporteRepository @Inject()(
                           rightColor = Color.Black,
                           bottomStyle = CellBorderStyle.Thin,
                           bottomColor = Color.Black
-                        ),                        
+                        ),
                         horizontalAlignment = HA.Center
                       )
                     ),
@@ -7175,7 +8812,11 @@ class ReporteRepository @Inject()(
                     Some(6),
                     style = Some(
                       CellStyle(
-                        font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
+                        font = Font(
+                          bold = false,
+                          height = new Height(10, HeightUnit.Point),
+                          fontName = "Arial"
+                        ),
                         borders = CellBorders(
                           topStyle = CellBorderStyle.Thin,
                           topColor = Color.Black,
@@ -7185,7 +8826,7 @@ class ReporteRepository @Inject()(
                           rightColor = Color.Black,
                           bottomStyle = CellBorderStyle.Thin,
                           bottomColor = Color.Black
-                        ),                        
+                        ),
                         horizontalAlignment = HA.Center
                       )
                     ),
@@ -7196,7 +8837,11 @@ class ReporteRepository @Inject()(
                     Some(7),
                     style = Some(
                       CellStyle(
-                        font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
+                        font = Font(
+                          bold = false,
+                          height = new Height(10, HeightUnit.Point),
+                          fontName = "Arial"
+                        ),
                         borders = CellBorders(
                           topStyle = CellBorderStyle.Thin,
                           topColor = Color.Black,
@@ -7206,7 +8851,7 @@ class ReporteRepository @Inject()(
                           rightColor = Color.Black,
                           bottomStyle = CellBorderStyle.Thin,
                           bottomColor = Color.Black
-                        ),                        
+                        ),
                         horizontalAlignment = HA.Center
                       )
                     ),
@@ -7217,7 +8862,11 @@ class ReporteRepository @Inject()(
                     Some(8),
                     style = Some(
                       CellStyle(
-                        font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
+                        font = Font(
+                          bold = false,
+                          height = new Height(10, HeightUnit.Point),
+                          fontName = "Arial"
+                        ),
                         borders = CellBorders(
                           topStyle = CellBorderStyle.Thin,
                           topColor = Color.Black,
@@ -7227,1358 +8876,1431 @@ class ReporteRepository @Inject()(
                           rightColor = Color.Black,
                           bottomStyle = CellBorderStyle.Thin,
                           bottomColor = Color.Black
-                        ),                        
+                        ),
                         horizontalAlignment = HA.Center
                       )
                     ),
                     CellStyleInheritance.CellThenRowThenColumnThenSheet
-                  )                                                                       
+                  )
                 )
                 _listMerged += CellRange((_idx - 1, _idx - 1), (1, 2))
                 _idx += 1
-              }              
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  "",
-                  Some(0),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),                      
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),
+            }
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                      
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(2),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                       
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(3),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                       
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),             
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                       
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(5),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                       
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                       
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                      
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      font = Font(bold = true, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      ),                       
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                                        
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    font = Font(
+                      bold = true,
+                      height = new Height(10, HeightUnit.Point),
+                      fontName = "Arial"
+                    ),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-              
-              _idx += 1              
-              _listRow += com.norbitltd.spoiwo.model.Row(
+            )
+
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model
+              .Row(
                 style = CellStyle(
-                  font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
+                  font = Font(
+                    bold = false,
+                    height = new Height(10, HeightUnit.Point),
+                    fontName = "Arial"
+                  ),
                   wrapText = java.lang.Boolean.TRUE,
                   horizontalAlignment = HA.Left
                 )
-              ).withCellValues("DAMOS POR RECIBIDO EL MATERIAL DESMONTADO QUE PERMANECERA BAJO CUIDADO, CUSTODIA Y RESPONSABILIDAD  DEL CONCESIONARIO HASTA TANTO EL MUNICIPIO ORDENE LO CONTRARIO, TODA VEZ QUE ÉSTE NO CUENTA CON ESPACIO ADECUADO Y SUFICIENTE PARA SU ALMACENAMIENTO")
+              )
+              .withCellValues(
+                "DAMOS POR RECIBIDO EL MATERIAL DESMONTADO QUE PERMANECERA BAJO CUIDADO, CUSTODIA Y RESPONSABILIDAD  DEL CONCESIONARIO HASTA TANTO EL MUNICIPIO ORDENE LO CONTRARIO, TODA VEZ QUE ÉSTE NO CUENTA CON ESPACIO ADECUADO Y SUFICIENTE PARA SU ALMACENAMIENTO"
+              )
               .withHeight(new Height(30, HeightUnit.Point))
-              _listMerged += CellRange((_idx - 1, _idx - 1), (0, 8))
-              _idx += 1
-              _listRow += com.norbitltd.spoiwo.model.Row().withCellValues("","","","","","","","","","")
-              _idx += 1
-              _listRow += com.norbitltd.spoiwo.model.Row(
+            _listMerged += CellRange((_idx - 1, _idx - 1), (0, 8))
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model
+              .Row()
+              .withCellValues("", "", "", "", "", "", "", "", "", "")
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model
+              .Row(
                 style = CellStyle(
-                  font = Font(bold = false, height = new Height(10, HeightUnit.Point), fontName = "Arial"),
+                  font = Font(
+                    bold = false,
+                    height = new Height(10, HeightUnit.Point),
+                    fontName = "Arial"
+                  ),
                   horizontalAlignment = HA.Left
                 )
-              ).withCellValues(s"EN CONSTANCIA FIRMAN LOS INTERESADOS EL DIA ${fecha_firma}")
-              _listMerged += CellRange((_idx, _idx), (0, 8))
-              _idx += 1
-              _listRow += com.norbitltd.spoiwo.model.Row().withCellValues("","","","","","","","","","")
-              _idx += 1
-              _listRow += com.norbitltd.spoiwo.model.Row().withCellValues("","","","","","","","","","")
-              _idx += 1
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  "",
-                  Some(0),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(2),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(3),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(5),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                )                                                            
               )
-              _idx += 1
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  "",
-                  Some(0),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(2),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(3),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(5),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                )                                                            
-              )              
-              _idx += 1
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  "",
-                  Some(0),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(2),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(3),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(5),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                )                                                            
+              .withCellValues(
+                s"EN CONSTANCIA FIRMAN LOS INTERESADOS EL DIA ${fecha_firma}"
               )
-              _idx += 1
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  "",
-                  Some(0),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
+            _listMerged += CellRange((_idx, _idx), (0, 8))
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model
+              .Row()
+              .withCellValues("", "", "", "", "", "", "", "", "", "")
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model
+              .Row()
+              .withCellValues("", "", "", "", "", "", "", "", "", "")
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(2),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(3),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(5),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                )                                                            
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-              _idx += 1
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  gerente_nombre,
-                  Some(0),
-                  style = Some(CellStyle(
+            )
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                gerente_nombre,
+                Some(0),
+                style = Some(
+                  CellStyle(
                     dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Center,
                     font = Font(
                       bold = java.lang.Boolean.TRUE
                     ),
                     borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        //rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      //rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),              
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"),
-                   )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),               
-                StringCell(
-                  almacen_nombre,
-                  Some(2),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"),
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                almacen_nombre,
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Center,
                     font = Font(
                       bold = java.lang.Boolean.TRUE
                     )
-                  )),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(3),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"),
-                   )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                 
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  interventor_nombre,
-                  Some(5),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                interventor_nombre,
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Center,
                     font = Font(
                       bold = java.lang.Boolean.TRUE
-                    ))),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      dataFormat = CellDataFormat("@"),
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                           rightStyle = CellBorderStyle.Thick,
-                           rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@"),
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-              _listMerged += CellRange((_idx - 1, _idx - 1), (0, 1))
-              _listMerged += CellRange((_idx - 1, _idx - 1), (2, 4))
-              _listMerged += CellRange((_idx - 1, _idx - 1), (5, 8))
-              _idx += 1
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  gerente_cargo,
-                  Some(0),
-                  style = Some(CellStyle(
-                      dataFormat = CellDataFormat("@"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thick,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
+            )
+            _listMerged += CellRange((_idx - 1, _idx - 1), (0, 1))
+            _listMerged += CellRange((_idx - 1, _idx - 1), (2, 4))
+            _listMerged += CellRange((_idx - 1, _idx - 1), (5, 8))
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                gerente_cargo,
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@"),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      // rightStyle = CellBorderStyle.Thick,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),              
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  almacen_cargo,
-                  Some(2),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"),
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                almacen_cargo,
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Center
-                  )),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(3),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  interventor_cargo,
-                  Some(5),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                interventor_cargo,
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@"),
                     horizontalAlignment = HA.Center
-                  )),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@"),
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thin,
+                      // bottomColor = Color.Black
+                    )
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      dataFormat = CellDataFormat("@"),
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                           rightStyle = CellBorderStyle.Thick,
-                           rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thin,
-                        // bottomColor = Color.Black
-                      )
-                    )),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-              )   
-              _listMerged += CellRange((_idx - 1, _idx - 1), (0, 1))
-              _listMerged += CellRange((_idx - 1, _idx - 1), (2, 4))
-              _listMerged += CellRange((_idx - 1, _idx - 1), (5, 8))              
-              _idx += 1
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  "",
-                  Some(0),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(2),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(3),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(5),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                )                                                            
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-              _idx += 1 
+            )
+            _listMerged += CellRange((_idx - 1, _idx - 1), (0, 1))
+            _listMerged += CellRange((_idx - 1, _idx - 1), (2, 4))
+            _listMerged += CellRange((_idx - 1, _idx - 1), (5, 8))
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              )
+            )
+            _idx += 1
 
-              val _observacion = SQL("""SELECT STRING_AGG(distinct r1.repo_direccion,  ', ') as direccion
+            val _observacion =
+              SQL("""SELECT STRING_AGG(distinct r1.repo_direccion,  ', ') as direccion
                   FROM siap.reporte r1
                   inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 8
                   WHERE r1.repo_fechasolucion = {fecha_corte}
                   AND r1.reti_id = {reti_id}
                   AND r1.empr_id = {empr_id}
-                  AND r1.tireuc_id = {tireuc_id}""").
-                  on(
-                    'fecha_corte -> _fecha_corte,
-                    'empr_id -> empr_id,
-                    'reti_id -> 6,
-                    'tireuc_id -> tireuc_id                    
-                  ).as(SqlParser.str("direccion").single)
-              _listRow += com.norbitltd.spoiwo.model.Row(
+                  AND r1.tireuc_id = {tireuc_id}""")
+                .on(
+                  'fecha_corte -> _fecha_corte,
+                  'empr_id -> empr_id,
+                  'reti_id -> 6,
+                  'tireuc_id -> tireuc_id
+                )
+                .as(SqlParser.str("direccion").single)
+            _listRow += com.norbitltd.spoiwo.model
+              .Row(
                 StringCell(
                   "OBSERVACIONES: MATERIAL DESMONTADO DE: " + _observacion,
                   Some(0),
@@ -8638,7 +10360,7 @@ class ReporteRepository @Inject()(
                     )
                   ),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),   
+                ),
                 StringCell(
                   "",
                   Some(3),
@@ -8718,7 +10440,7 @@ class ReporteRepository @Inject()(
                     )
                   ),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),  
+                ),
                 StringCell(
                   "",
                   Some(7),
@@ -8758,789 +10480,790 @@ class ReporteRepository @Inject()(
                     )
                   ),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-              ).withHeight(new Height(30, HeightUnit.Point))
+                )
+              )
+              .withHeight(new Height(30, HeightUnit.Point))
               .withStyle(
                 CellStyle(
                   wrapText = java.lang.Boolean.TRUE,
                   horizontalAlignment = HA.Left,
-                  verticalAlignment = VA.Top,
+                  verticalAlignment = VA.Top
                 )
               )
-              _listMerged += CellRange((_idx - 1, _idx - 1), (0, 8))
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  "",
-                  Some(0),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        //bottomStyle = CellBorderStyle.Thick,
-                        //bottomColor = Color.Black
-                      )
+            _listMerged += CellRange((_idx - 1, _idx - 1), (0, 8))
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      //bottomStyle = CellBorderStyle.Thick,
+                      //bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(2),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thin,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ), 
-                StringCell(
-                  "",
-                  Some(3),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),   
-                StringCell(
-                  "",
-                  Some(5),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),  
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        topStyle = CellBorderStyle.Thick,
-                        topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ), 
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      topStyle = CellBorderStyle.Thick,
+                      topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-              _idx += 1  
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  "",
-                  Some(0),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        //bottomStyle = CellBorderStyle.Thick,
-                        //bottomColor = Color.Black
-                      )
+            )
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      //bottomStyle = CellBorderStyle.Thick,
+                      //bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(2),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thin,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ), 
-                StringCell(
-                  "",
-                  Some(3),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),   
-                StringCell(
-                  "",
-                  Some(5),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),  
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ), 
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-              _idx += 1                                                                          
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  "",
-                  Some(0),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        //bottomStyle = CellBorderStyle.Thick,
-                        //bottomColor = Color.Black
-                      )
+            )
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      //bottomStyle = CellBorderStyle.Thick,
+                      //bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(2),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thin,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ), 
-                StringCell(
-                  "",
-                  Some(3),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thin,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),   
-                StringCell(
-                  "",
-                  Some(5),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),  
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        // bottomStyle = CellBorderStyle.Thick,
-                        // bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ), 
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black
+                      // bottomStyle = CellBorderStyle.Thick,
+                      // bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-              _idx += 1                                                                          
-              _listRow += com.norbitltd.spoiwo.model.Row(
-                StringCell(
-                  "Entrega",
-                  Some(0),
-                  style = Some(
-                    CellStyle(
-                      dataFormat = CellDataFormat("@"),
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
+            )
+            _idx += 1
+            _listRow += com.norbitltd.spoiwo.model.Row(
+              StringCell(
+                "Entrega",
+                Some(0),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@"),
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(1),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(1),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),                
-                StringCell(
-                  "",
-                  Some(2),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ), 
-                StringCell(
-                  "Recibe",
-                  Some(3),
-                  style = Some(
-                    CellStyle(
-                      dataFormat = CellDataFormat("@"),
-                      wrapText = java.lang.Boolean.TRUE,                      
-                      horizontalAlignment = HA.Center,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        leftStyle = CellBorderStyle.Thick,
-                        leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(4),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(2),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),   
-                StringCell(
-                  "",
-                  Some(5),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(6),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "Recibe",
+                Some(3),
+                style = Some(
+                  CellStyle(
+                    dataFormat = CellDataFormat("@"),
+                    wrapText = java.lang.Boolean.TRUE,
+                    horizontalAlignment = HA.Center,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      leftStyle = CellBorderStyle.Thick,
+                      leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ),  
-                StringCell(
-                  "",
-                  Some(7),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        // rightStyle = CellBorderStyle.Thin,
-                        // rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
-                    )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
+                  )
                 ),
-                StringCell(
-                  "",
-                  Some(8),
-                  style = Some(
-                    CellStyle(
-                      wrapText = java.lang.Boolean.TRUE,
-                      borders = CellBorders(
-                        // topStyle = CellBorderStyle.Thick,
-                        // topColor = Color.Black,
-                        // leftStyle = CellBorderStyle.Thick,
-                        // leftColor = Color.Black,
-                        rightStyle = CellBorderStyle.Thick,
-                        rightColor = Color.Black,
-                        bottomStyle = CellBorderStyle.Thick,
-                        bottomColor = Color.Black
-                      )
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(4),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
                     )
-                  ),
-                  CellStyleInheritance.CellThenRowThenColumnThenSheet
-                ), 
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(5),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(6),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(7),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      // rightStyle = CellBorderStyle.Thin,
+                      // rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              ),
+              StringCell(
+                "",
+                Some(8),
+                style = Some(
+                  CellStyle(
+                    wrapText = java.lang.Boolean.TRUE,
+                    borders = CellBorders(
+                      // topStyle = CellBorderStyle.Thick,
+                      // topColor = Color.Black,
+                      // leftStyle = CellBorderStyle.Thick,
+                      // leftColor = Color.Black,
+                      rightStyle = CellBorderStyle.Thick,
+                      rightColor = Color.Black,
+                      bottomStyle = CellBorderStyle.Thick,
+                      bottomColor = Color.Black
+                    )
+                  )
+                ),
+                CellStyleInheritance.CellThenRowThenColumnThenSheet
               )
-              _listMerged += CellRange((_idx, _idx), (0, 2))
-              _listMerged += CellRange((_idx, _idx), (3, 8))
-              _idx += 1
-              _listRow.toList   
-            },
-            mergedRegions = {
-              _listMerged += CellRange((0, 0), (0, 7))
-              _listMerged += CellRange((1, 1), (0, 7))
-              _listMerged += CellRange((2, 2), (0, 7))
-              _listMerged += CellRange((4, 4), (0, 2))
-              _listMerged += CellRange((6, 6), (0, 7))
+            )
+            _listMerged += CellRange((_idx, _idx), (0, 2))
+            _listMerged += CellRange((_idx, _idx), (3, 8))
+            _idx += 1
+            _listRow.toList
+          },
+          mergedRegions = {
+            _listMerged += CellRange((0, 0), (0, 7))
+            _listMerged += CellRange((1, 1), (0, 7))
+            _listMerged += CellRange((2, 2), (0, 7))
+            _listMerged += CellRange((4, 4), (0, 2))
+            _listMerged += CellRange((6, 6), (0, 7))
 
-              _listMerged.toList
-            },
-            columns = {
-              _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 0, width = new Width(8, WidthUnit.Character))
-              _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 1, width = new Width(40, WidthUnit.Character))
-              _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 2, width = new Width(30, WidthUnit.Character))
-              _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 3, width = new Width(10, WidthUnit.Character))
-              _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 4, width = new Width(12, WidthUnit.Character))
-              _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 5, width = new Width(12, WidthUnit.Character))
-              _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 6, width = new Width(12, WidthUnit.Character))
-              _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 7, width = new Width(12, WidthUnit.Character))
-              _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 8, width = new Width(12, WidthUnit.Character))
-              _listColumn.toList
-            }                          
-          )
-          var sos: ByteArrayOutputStream = new ByteArrayOutputStream()
-          Workbook(sheet1).writeToOutputStream(sos)
-          os = sos.toByteArray
+            _listMerged.toList
+          },
+          columns = {
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 0, width = new Width(8, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 1, width = new Width(40, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 2, width = new Width(30, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 3, width = new Width(10, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 4, width = new Width(12, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 5, width = new Width(12, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 6, width = new Width(12, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 7, width = new Width(12, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 8, width = new Width(12, WidthUnit.Character))
+            _listColumn.toList
+          }
+        )
+        var sos: ByteArrayOutputStream = new ByteArrayOutputStream()
+        Workbook(sheet1).writeToOutputStream(sos)
+        os = sos.toByteArray
       }
     }
     (_actaNumero, os)

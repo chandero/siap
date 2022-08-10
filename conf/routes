@@ -189,6 +189,7 @@ POST /api/tireuc/upd controllers.TipoReporteUcapController.actualizar
 # Novedad
 
 GET /api/nove/get/:p/:c/:t controllers.NovedadController.todos(p:Long, c:Long, t:Int)
+GET /api/nove/all controllers.NovedadController.novedades(t: Int = 0)
 GET /api/nove/all/:t controllers.NovedadController.novedades(t: Int)
 GET /api/nove/:id controllers.NovedadController.buscarPorId(id: Long)
 GET /api/nove/del/:id controllers.NovedadController.borrar(id: Long)
@@ -245,6 +246,7 @@ POST /api/cuad/upd controllers.CuadrillaController.actualizarCuadrilla
 POST /api/aap/get controllers.AapController.todos
 POST /api/aap/gte controllers.AapController.todosEliminados
 POST /api/aap/all controllers.AapController.aaps
+GET /api/aap/mobi/all controllers.AapController.aapsMobile
 GET /api/aap/next controllers.AapController.buscarSiguienteACrear()
 GET /api/aap/:id controllers.AapController.buscarPorId(id: Long)
 GET /api/aap/vali/:id controllers.AapController.buscarParaVerificar(id: Long)
@@ -417,6 +419,7 @@ GET /api/repo/:id controllers.ReporteController.buscarPorId(id: Long)
 GET /api/repo/del/:id controllers.ReporteController.borrarReporte(id: Long)
 POST /api/repo/save controllers.ReporteController.guardarReporte
 POST /api/repo/upd controllers.ReporteController.actualizarReporte
+POST /api/repo/updm controllers.ReporteController.actualizarReporteMovil
 POST /api/repo/upde controllers.ReporteController.actualizarElemento
 POST /api/repo/pupd controllers.ReporteController.actualizarReporteParcial
 GET /api/repo/st/get controllers.ReporteController.estados
@@ -426,6 +429,7 @@ GET /api/repo/prn/rela/:fi/:ff/:e/:u/:f/:t controllers.ReporteController.imprimi
 GET /api/repo/prn/form/:i/:e controllers.ReporteController.imprimirFormato(i:Long, e:Long)
 GET /api/repo/rang/:y/:m/:t controllers.ReporteController.buscarPorRango(y: Int, m: Int, t:Int)
 GET /api/repo/gbtc/:t/:n controllers.ReporteController.buscarPorConsecutivo(t: Long, n:Int)
+GET /api/repo/gbtcm/:t/:n controllers.ReporteController.buscarPorConsecutivoMovil(t: Long, n:Int)
 GET /api/repo/vali/:e/:c controllers.ReporteController.validarCodigo(e: Long, c: String)
 GET /api/repo/venc/get controllers.ReporteController.siap_reporte_vencido
 GET /api/repo/vadi/:t/:n controllers.ReporteController.validarReporteDiligenciado(t: Long, n: Int)
@@ -580,7 +584,8 @@ POST /api/ortr/save controllers.OrdenTrabajoController.guardarOrden
 POST /api/ortr/upd controllers.OrdenTrabajoController.actualizarOrden
 GET /api/ortr/st/get controllers.OrdenTrabajoController.getEstados
 GET /api/ortr/prn/ortr/:id/:em controllers.OrdenTrabajoController.imprimirOrden(id: Long, em: Long)
-
+GET /api/ortr/obc/:id controllers.OrdenTrabajoController.obtenerReporteObraPorCuadrilla(id: Long)
+GET /api/ortr/obcm/:id controllers.OrdenTrabajoController.obtenerReporteObraPorCuadrillaMobile(id: Long)
 # Medioambiente
 
 GET /api/meam/get controllers.MedioAmbienteController.todos

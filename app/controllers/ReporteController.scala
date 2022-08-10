@@ -115,6 +115,25 @@ class ReporteController @Inject()(
       }
     }
 
+  def buscarPorConsecutivoMovil(reti_id: Long, repo_consecutivo: Int) =
+    authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+      println("por consecutivo")
+      val empr_id = Utility.extraerEmpresa(request)
+      val reporte = reporteService.buscarPorConsecutivoMovil(
+        reti_id,
+        repo_consecutivo,
+        empr_id.get
+      )
+      reporte match {
+        case None => {
+          Future.successful(NotFound(Json.toJson("false")))
+        }
+        case Some(reporte) => {
+          Future.successful(Ok(write(reporte)))
+        }
+      }
+    }
+
   def buscarPorRango(anho: Int, mes: Int, tireuc_id: Int) =
     authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
@@ -340,6 +359,49 @@ class ReporteController @Inject()(
       }
   }
 
+  def actualizarReporteMovil() = Action.async {
+    implicit request: Request[AnyContent] =>
+      val json = request.body.asJson.get
+      println("json: " + json)
+      var reporte =
+        net.liftweb.json.parse(json.toString).extract[Reporte]
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)
+      val reportenuevo = new Reporte(
+        reporte.repo_id,
+        reporte.tireuc_id,
+        reporte.reti_id,
+        reporte.repo_consecutivo,
+        reporte.repo_fecharecepcion,
+        reporte.repo_direccion,
+        reporte.repo_nombre,
+        reporte.repo_telefono,
+        reporte.repo_fechasolucion,
+        reporte.repo_horainicio,
+        reporte.repo_horafin,
+        reporte.repo_reportetecnico,
+        reporte.repo_descripcion,
+        reporte.repo_subrepoconsecutivo,
+        reporte.rees_id,
+        reporte.orig_id,
+        reporte.barr_id,
+        empr_id,
+        reporte.tiba_id,
+        usua_id,
+        reporte.adicional,
+        reporte.meams,
+        reporte.eventos,
+        reporte.direcciones,
+        reporte.novedades
+      )
+      println("reporte nuevo: " + reportenuevo)
+      if (reporteService.actualizarMovil(reportenuevo)) {
+        Future.successful(Ok(Json.toJson("true")))
+      } else {
+        Future.successful(NotAcceptable(Json.toJson("true")))
+      }
+  }
+
   def actualizarElemento() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
@@ -527,22 +589,30 @@ class ReporteController @Inject()(
     Ok(os).as("application/pdf")
   }
 
-  def ActaDesmonteXls(fecha_corte: Long, tireuc_id: Int) = authenticatedUserAction.async { implicit request =>
-    val empr_id = Utility.extraerEmpresa(request)
-    val usua_id = Utility.extraerUsuario(request)
-    val response = reporteService.ActaDesmonteXls(fecha_corte, tireuc_id, empr_id.get, usua_id.get)
-    if (response._1 > 0) {
-      val filename = "Acta_de_Desmonte_No." + response._1 + ".xlsx"
-      val attach = "attachment; filename=" + filename
-      Future.successful(
-        Ok(response._2)
-          .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-          .withHeaders("Content-Disposition" -> attach)
-      )    
-    } else {
-      Future.successful(NotFound(Json.toJson("false")))
+  def ActaDesmonteXls(fecha_corte: Long, tireuc_id: Int) =
+    authenticatedUserAction.async { implicit request =>
+      val empr_id = Utility.extraerEmpresa(request)
+      val usua_id = Utility.extraerUsuario(request)
+      val response = reporteService.ActaDesmonteXls(
+        fecha_corte,
+        tireuc_id,
+        empr_id.get,
+        usua_id.get
+      )
+      if (response._1 > 0) {
+        val filename = "Acta_de_Desmonte_No." + response._1 + ".xlsx"
+        val attach = "attachment; filename=" + filename
+        Future.successful(
+          Ok(response._2)
+            .as(
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            .withHeaders("Content-Disposition" -> attach)
+        )
+      } else {
+        Future.successful(NotFound(Json.toJson("false")))
+      }
     }
-  }
 
   def validarReporteDiligenciado(reti_id: scala.Long, repo_consecutivo: Int) =
     authenticatedUserAction.async { implicit request: Request[AnyContent] =>
