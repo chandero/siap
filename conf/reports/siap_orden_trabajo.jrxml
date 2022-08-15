@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_orden_trabajo" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="5ffc0055-3ee3-4d28-927a-92f48ac0fd7e">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Siap_Adapter"/>
+	<parameter name="ORTR_ID" class="java.lang.Long"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT o.*, r.*, b.*, c.* FROM siap.ordentrabajo o
+INNER JOIN siap.cuadrilla c ON o.cuad_id = c.cuad_id
+INNER JOIN siap.ordentrabajo_reporte t ON o.ortr_id = t.ortr_id
+INNER JOIN siap.reporte r ON t.repo_id = r.repo_id
+INNER JOIN siap.tipobarrio b ON o.tiba_id = b.tiba_id
+WHERE o.ortr_id = $P{ORTR_ID}]]>
+	</queryString>
+	<field name="ortr_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="ortr_id"/>
+	</field>
+	<field name="ortr_fecha" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.label" value="ortr_fecha"/>
+	</field>
+	<field name="ortr_observacion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ortr_observacion"/>
+	</field>
+	<field name="ortr_consecutivo" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="ortr_consecutivo"/>
+	</field>
+	<field name="cuad_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="cuad_id"/>
+	</field>
+	<field name="ortr_estado" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="ortr_estado"/>
+	</field>
+	<field name="usua_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
+	</field>
+	<field name="empr_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
+	</field>
+	<field name="tiba_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="tiba_id"/>
+	</field>
+	<field name="repo_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="repo_id"/>
+	</field>
+	<field name="repo_fecharecepcion" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.label" value="repo_fecharecepcion"/>
+	</field>
+	<field name="repo_direccion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="repo_direccion"/>
+	</field>
+	<field name="repo_nombre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="repo_nombre"/>
+	</field>
+	<field name="repo_telefono" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="repo_telefono"/>
+	</field>
+	<field name="repo_fechasolucion" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.label" value="repo_fechasolucion"/>
+	</field>
+	<field name="repo_reportetecnico" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="repo_reportetecnico"/>
+	</field>
+	<field name="acti_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="acti_id"/>
+	</field>
+	<field name="orig_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="orig_id"/>
+	</field>
+	<field name="barr_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="barr_id"/>
+	</field>
+	<field name="COLUMN_20" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
+	</field>
+	<field name="COLUMN_21" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
+	</field>
+	<field name="rees_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="rees_id"/>
+	</field>
+	<field name="repo_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="repo_descripcion"/>
+	</field>
+	<field name="repo_horainicio" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="repo_horainicio"/>
+	</field>
+	<field name="repo_horafin" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="repo_horafin"/>
+	</field>
+	<field name="COLUMN_26" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="tiba_id"/>
+	</field>
+	<field name="tiba_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tiba_descripcion"/>
+	</field>
+	<field name="tiba_estado" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="tiba_estado"/>
+	</field>
+	<field name="COLUMN_29" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
+	</field>
+	<field name="COLUMN_30" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="cuad_id"/>
+	</field>
+	<field name="cuad_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cuad_descripcion"/>
+	</field>
+	<field name="cuad_estado" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="cuad_estado"/>
+	</field>
+	<field name="COLUMN_33" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="usua_id"/>
+	</field>
+	<field name="COLUMN_34" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="empr_id"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="41" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="130" height="20" uuid="7add1fb3-46fa-4a9f-affe-a53679dbaa82"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[ORDEN DE TRABAJO No.]]></text>
+			</staticText>
+			<textField pattern="00000">
+				<reportElement x="130" y="0" width="50" height="20" uuid="d762f833-de77-47ab-92c1-f06bf15e8985"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ortr_id}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="20" width="50" height="20" uuid="7ea98070-da57-40d9-ac5c-85f2d6544515"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[FECHA]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="20" width="130" height="20" uuid="753308cb-53b2-4697-b4bd-0dd5b87e63b1"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ortr_fecha}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="190" y="0" width="70" height="20" uuid="cc1abc50-f4bc-4ad0-8367-f52fc51258bb"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[SECTOR]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="260" y="0" width="120" height="20" uuid="2be1bbb7-886c-4168-a266-8a9312b9ed4a"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{tiba_descripcion}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="190" y="20" width="70" height="20" uuid="53ce31f7-b641-46c6-95e0-af933ef55fa1"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[CUADRILLA]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="260" y="20" width="220" height="20" uuid="a90ef53a-111b-4e49-b9fc-51c2e076a927"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{cuad_descripcion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="16" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="570" height="14" uuid="09fca78a-8f36-43e5-9fa7-b30e3f4e8ff3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a6d6d845-8522-4a67-9cc6-ce4ca932233e"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[TAREA  A REALIZAR]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="480" height="14" uuid="409ac51b-7622-4318-b1a1-14373fcf50ea">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a6d6d845-8522-4a67-9cc6-ce4ca932233e"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{repo_descripcion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="181">
+			<staticText>
+				<reportElement x="0" y="10" width="280" height="14" uuid="af129458-1dd7-431f-9214-fd3bf8e78dba"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top"/>
+				<text><![CDATA[AUTORIZA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="280" y="10" width="290" height="14" uuid="be46e11a-0433-4cd3-995d-74c0a6c3686b"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[RECIBE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="50" width="280" height="14" uuid="5d2f296b-1ff8-4651-8f3d-1e9de69e22b8"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[FIRMA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="280" y="50" width="290" height="14" uuid="e6cb00a4-ca69-4701-a8f7-1150d7d852e7"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[FIRMA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="120" width="570" height="14" uuid="12340118-c364-492e-b4f2-d212bbd57e86"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<text><![CDATA[COORDINADOR DE ALTURAS RESPONSABLE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="160" width="570" height="21" uuid="a2494600-f353-47cb-91c9-4e677ea33ad7"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement verticalAlignment="Bottom"/>
+				<text><![CDATA[FIRMA]]></text>
+			</staticText>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>
