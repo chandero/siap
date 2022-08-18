@@ -366,7 +366,7 @@ class ReporteController @Inject()(
   def actualizarReporteMovil() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
-      println("Reporte Movil json: " + json)
+      println("Guardar Reporte Movil json: " + json)
       var reporte =
         net.liftweb.json.parse(json.toString).extract[Reporte]
       val usua_id = Utility.extraerUsuario(request)

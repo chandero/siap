@@ -144,6 +144,48 @@ case class ReporteDireccionDatoAdicional(
     aap_lng: Option[String]
 )
 
+case class ReporteDireccionFoto(
+  tireuc_id: Option[scala.Long],
+  repo_id: Option[scala.Long],
+  aap_id: Option[scala.Long],
+  refo_id: Option[Int],
+  refo_tipo: Option[Int],
+  refo_data: Option[String]
+)
+
+object ReporteDireccionFoto {
+  implicit val fotoWrites = new Writes[ReporteDireccionFoto] {
+    def writes(foto: ReporteDireccionFoto) = Json.obj(
+      "tireuc_id" -> foto.tireuc_id,
+      "repo_id" -> foto.repo_id,
+      "aap_id" -> foto.aap_id,
+      "refo_id" -> foto.refo_id,
+      "refo_tipo" -> foto.refo_tipo,
+      "refo_data" -> foto.refo_data
+    )
+  }
+
+  implicit val datoRead: Reads[ReporteDireccionFoto] = (
+    (__ \ "tireuc_id").readNullable[scala.Long] and
+      (__ \ "repo_id").readNullable[scala.Long] and
+      (__ \ "aap_id").readNullable[scala.Long] and
+      (__ \ "refo_id").readNullable[Int] and
+      (__ \ "refo_tipo").readNullable[Int] and
+      (__ \ "refo_data").readNullable[String]
+  )(ReporteDireccionFoto.apply _)  
+
+  val _set = {
+    get[Option[scala.Long]]("tireuc_id") ~
+    get[Option[scala.Long]]("repo_id") ~
+    get[Option[scala.Long]]("aap_id") ~
+    get[Option[Int]]("refo_id") ~
+    get[Option[Int]]("refo_tipo") ~
+    get[Option[String]]("refo_data") map {
+      case tireuc_id ~ repo_id ~ aap_id ~ refo_id ~ refo_tipo ~ refo_data =>
+        ReporteDireccionFoto(tireuc_id, repo_id, aap_id, refo_id, refo_tipo, refo_data)
+    }
+  }
+}
 case class ReporteDireccion(
     repo_id: Option[scala.Long],
     aap_id: Option[scala.Long],
@@ -159,7 +201,8 @@ case class ReporteDireccion(
     coau_codigo: Option[String],
     aap_fechatoma: Option[DateTime],
     dato: Option[ReporteDireccionDato],
-    dato_adicional: Option[ReporteDireccionDatoAdicional]
+    dato_adicional: Option[ReporteDireccionDatoAdicional],
+    fotos: Option[List[ReporteDireccionFoto]]
 )
 
 // ya tiene los 22 elementos
@@ -789,7 +832,8 @@ object ReporteDireccion {
       "coau_codigo" -> direccion.coau_codigo,
       "aap_fechatoma" -> direccion.aap_fechatoma,
       "dato" -> direccion.dato,
-      "dato_adicional" -> direccion.dato_adicional
+      "dato_adicional" -> direccion.dato_adicional,
+      "fotos" -> direccion.fotos
     )
   }
 
@@ -808,7 +852,8 @@ object ReporteDireccion {
       (__ \ "coau_codigo").readNullable[String] and
       (__ \ "aap_fechatoma").readNullable[DateTime] and
       (__ \ "dato").readNullable[ReporteDireccionDato] and
-      (__ \ "dato_adicional").readNullable[ReporteDireccionDatoAdicional]
+      (__ \ "dato_adicional").readNullable[ReporteDireccionDatoAdicional] and
+      (__ \ "foto").readNullable[List[ReporteDireccionFoto]]
   )(ReporteDireccion.apply _)
 
   val reporteDireccionSet = {
@@ -840,8 +885,9 @@ object ReporteDireccion {
           tire_id,
           coau_codigo,
           aap_fechatoma,
-          null,
-          null
+          None,
+          None,
+          None
         )
     }
   }
@@ -1581,7 +1627,20 @@ class ReporteRepository @Inject()(
                 )
               case Some(adi) => None
             }
-            val direccion = d.copy(dato = dat, dato_adicional = adi)
+            var fotos = SQL("""
+                SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
+                """)
+              .on(
+                'repo_id -> r.repo_id,
+                'aap_id -> d.aap_id,
+                'tireuc_id -> r.tireuc_id
+              )
+              .as(ReporteDireccionFoto._set *)
+            var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+            fotos.map { f =>
+              _listFoto += f
+            }
+            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
             _listDireccion += direccion
           }
           val reporte = new Reporte(
@@ -1710,7 +1769,50 @@ class ReporteRepository @Inject()(
                 )
               case Some(dat) => None
             }
-            val direccion = d.copy(dato = dat)
+            var adi = SQL(
+              """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+            ).on(
+                'repo_id -> d.repo_id,
+                'aap_id -> d.aap_id,
+                'even_id -> d.even_id
+              )
+              .as(ReporteDireccionDatoAdicional._set.singleOpt)
+            adi match {
+              case None =>
+                adi = Some(
+                  new ReporteDireccionDatoAdicional(
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None
+                  )
+                )
+              case Some(adi) => None
+            }
+            var fotos = SQL("""
+                SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
+                """)
+              .on(
+                'repo_id -> r.repo_id,
+                'aap_id -> d.aap_id,
+                'tireuc_id -> r.tireuc_id
+              )
+              .as(ReporteDireccionFoto._set *)
+            var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+            fotos.map { f =>
+              _listFoto += f
+            }
+            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
             _listDireccion += direccion
           }
           val reporte = new Reporte(
@@ -1844,7 +1946,50 @@ class ReporteRepository @Inject()(
                 )
               case Some(dat) => None
             }
-            val direccion = d.copy(dato = dat)
+            var adi = SQL(
+              """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+            ).on(
+                'repo_id -> d.repo_id,
+                'aap_id -> d.aap_id,
+                'even_id -> d.even_id
+              )
+              .as(ReporteDireccionDatoAdicional._set.singleOpt)
+            adi match {
+              case None =>
+                adi = Some(
+                  new ReporteDireccionDatoAdicional(
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None
+                  )
+                )
+              case Some(adi) => None
+            }
+            var fotos = SQL("""
+                SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
+                """)
+              .on(
+                'repo_id -> r.repo_id,
+                'aap_id -> d.aap_id,
+                'tireuc_id -> r.tireuc_id
+              )
+              .as(ReporteDireccionFoto._set *)
+            var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+            fotos.map { f =>
+              _listFoto += f
+            }
+            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
             _listDireccion += direccion
           }
           val reporte = new Reporte(
@@ -2060,7 +2205,20 @@ class ReporteRepository @Inject()(
                 )
               case Some(adi) => None
             }
-            val direccion = d.copy(dato = dat, dato_adicional = adi)
+            var fotos = SQL("""
+                SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
+                """)
+              .on(
+                'repo_id -> r.repo_id,
+                'aap_id -> d.aap_id,
+                'tireuc_id -> r.tireuc_id
+              )
+              .as(ReporteDireccionFoto._set *)
+            var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+            fotos.map { f =>
+              _listFoto += f
+            }
+            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
             _listDireccion += direccion
           }
           val reporte = new Reporte(
@@ -2235,7 +2393,20 @@ class ReporteRepository @Inject()(
                 )
               case Some(adi) => None
             }
-            val direccion = d.copy(dato = dat, dato_adicional = adi)
+            var fotos = SQL("""
+                SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
+                """)
+              .on(
+                'repo_id -> r.repo_id,
+                'aap_id -> d.aap_id,
+                'tireuc_id -> r.tireuc_id
+              )
+              .as(ReporteDireccionFoto._set *)
+            var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+            fotos.map { f =>
+              _listFoto += f
+            }
+            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
             _listDireccion += direccion
           }
           val reporte = new Reporte(
@@ -2409,7 +2580,20 @@ class ReporteRepository @Inject()(
                 )
               case Some(adi) => None
             }
-            val direccion = d.copy(dato = dat, dato_adicional = adi)
+            var fotos = SQL("""
+                SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
+                """)
+              .on(
+                'repo_id -> r.repo_id,
+                'aap_id -> d.aap_id,
+                'tireuc_id -> r.tireuc_id
+              )
+              .as(ReporteDireccionFoto._set *)
+            var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+            fotos.map { f =>
+              _listFoto += f
+            }
+            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
             _listDireccion += direccion
           }
           val reporte = new Reporte(
@@ -2592,26 +2776,91 @@ class ReporteRepository @Inject()(
           )
           .as(ReporteDireccion.reporteDireccionSet *)
         var _listDireccion = new ListBuffer[ReporteDireccion]()
-        direcciones.map { d =>
-          val dat = SQL(
-            """SELECT * FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
-          ).on(
-              'repo_id -> d.repo_id,
-              'aap_id -> d.aap_id,
-              'even_id -> d.even_id
-            )
-            .as(ReporteDireccionDato.reporteDireccionDatoSet.singleOpt)
-          val adi = SQL(
-            """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
-          ).on(
-              'repo_id -> d.repo_id,
-              'aap_id -> d.aap_id,
-              'even_id -> d.even_id
-            )
-            .as(ReporteDireccionDatoAdicional._set.singleOpt)
-          val direccion = d.copy(dato = dat, dato_adicional = adi)
-          _listDireccion += direccion
-        }
+          direcciones.map { d =>
+            var dat = SQL(
+              """SELECT * FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+            ).on(
+                'repo_id -> d.repo_id,
+                'aap_id -> d.aap_id,
+                'even_id -> d.even_id
+              )
+              .as(ReporteDireccionDato.reporteDireccionDatoSet.singleOpt)
+            dat match {
+              case None =>
+                dat = Some(
+                  new ReporteDireccionDato(
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None
+                  )
+                )
+              case Some(dat) => None
+            }
+            var adi = SQL(
+              """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+            ).on(
+                'repo_id -> d.repo_id,
+                'aap_id -> d.aap_id,
+                'even_id -> d.even_id
+              )
+              .as(ReporteDireccionDatoAdicional._set.singleOpt)
+            adi match {
+              case None =>
+                adi = Some(
+                  new ReporteDireccionDatoAdicional(
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None
+                  )
+                )
+              case Some(adi) => None
+            }
+            var fotos = SQL("""
+                SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
+                """)
+              .on(
+                'repo_id -> r.repo_id,
+                'aap_id -> d.aap_id,
+                'tireuc_id -> r.tireuc_id
+              )
+              .as(ReporteDireccionFoto._set *)
+            var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+            fotos.map { f =>
+              _listFoto += f
+            }
+            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
+            _listDireccion += direccion
+          }
         val reporte = new Reporte(
           r.repo_id,
           r.tireuc_id,
@@ -4201,7 +4450,13 @@ class ReporteRepository @Inject()(
                                 medi_id_anterior = {medi_id_anterior},
                                 medi_id = {medi_id},
                                 tran_id_anterior = {tran_id_anterior},
-                                tran_id = {tran_id}
+                                tran_id = {tran_id},
+                                aap_apoyo = {aap_apoyo},
+                                aap_apoyo_anterior = {aap_apoyo_anterior},
+                                aap_lat = {aap_lat},
+                                aap_lat_anterior = {aap_lat_anterior},
+                                aap_lng = {aap_lng},
+                                aap_lng_anterior = {aap_lng_anterior}
                                 WHERE
                                     repo_id = {repo_id} and
                                     even_id = {even_id} and
@@ -4216,6 +4471,12 @@ class ReporteRepository @Inject()(
                 'medi_id -> d.dato_adicional.get.medi_id,
                 'tran_id_anterior -> d.dato_adicional.get.tran_id_anterior,
                 'tran_id -> d.dato_adicional.get.tran_id,
+                'aap_apoyo -> d.dato_adicional.get.aap_apoyo,
+                'aap_apoyo_anterior -> d.dato_adicional.get.aap_apoyo,
+                'aap_lat -> d.dato_adicional.get.aap_lat,
+                'aap_lat_anterior -> d.dato_adicional.get.aap_lat_anterior,
+                'aap_lng -> d.dato_adicional.get.aap_lng,
+                'aap_lng_anterior -> d.dato_adicional.get.aap_lng_anterior,
                 'repo_id -> reporte.repo_id,
                 'aap_id -> d.aap_id,
                 'even_id -> d.even_id
@@ -4234,7 +4495,13 @@ class ReporteRepository @Inject()(
                                     medi_id_anterior,
                                     medi_id,
                                     tran_id_anterior,
-                                    tran_id) 
+                                    tran_id,
+                                    aap_apoyo,
+                                    aap_apoyo_anterior,
+                                    aap_lat,
+                                    aap_lat_anterior,
+                                    aap_lng,
+                                    aap_lng_anterior) 
                                 VALUES (
                                     {repo_id},
                                     {even_id},
@@ -4246,7 +4513,13 @@ class ReporteRepository @Inject()(
                                     {medi_id_anterior},
                                     {medi_id},
                                     {tran_id_anterior},
-                                    {tran_id}
+                                    {tran_id},
+                                    {aap_apoyo},
+                                    {aap_apoyo_anterior},
+                                    {aap_lat},
+                                    {aap_lat_anterior},
+                                    {aap_lng},
+                                    {aap_lng_anterior}
                                 )
                                 """
               ).on(
@@ -4258,6 +4531,12 @@ class ReporteRepository @Inject()(
                   'medi_id -> d.dato_adicional.get.medi_id,
                   'tran_id_anterior -> d.dato_adicional.get.tran_id_anterior,
                   'tran_id -> d.dato_adicional.get.tran_id,
+                  'aap_apoyo -> d.dato_adicional.get.aap_apoyo,
+                  'aap_apoyo_anterior -> d.dato_adicional.get.aap_apoyo,
+                  'aap_lat -> d.dato_adicional.get.aap_lat,
+                  'aap_lat_anterior -> d.dato_adicional.get.aap_lat_anterior,
+                  'aap_lng -> d.dato_adicional.get.aap_lng,
+                  'aap_lng_anterior -> d.dato_adicional.get.aap_lng_anterior,
                   'repo_id -> reporte.repo_id,
                   'aap_id -> d.aap_id,
                   'even_id -> d.even_id
@@ -5004,6 +5283,37 @@ class ReporteRepository @Inject()(
             .executeInsert()
         }
       }
+      // Borrar Datos Anteriores del Reporte Antes de Actualizar
+      SQL("""DELETE FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id}""")
+        .on(
+          'repo_id -> reporte.repo_id
+        )
+        .executeUpdate()
+      SQL("""DELETE FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id}""")
+        .on(
+          'repo_id -> reporte.repo_id
+        )
+        .executeUpdate()
+      SQL("""DELETE FROM siap.reporte_direccion WHERE repo_id = {repo_id}""")
+        .on(
+          'repo_id -> reporte.repo_id
+        )
+        .executeUpdate()
+      SQL("""DELETE FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id}""")
+        .on(
+          'repo_id -> reporte.repo_id
+        )
+        .executeUpdate()
+      SQL("""DELETE FROM siap.reporte_novedad WHERE repo_id = {repo_id}""")
+        .on(
+          'repo_id -> reporte.repo_id
+        )
+        .executeUpdate()
+      SQL("""DELETE FROM siap.reporte_evento WHERE repo_id = {repo_id}""")
+        .on(
+          'repo_id -> reporte.repo_id
+        )
+        .executeUpdate()
       // Creación Actualizacion de Novedades
       reporte.novedades.map { novedades =>
         for (n <- novedades) {
@@ -5878,7 +6188,13 @@ class ReporteRepository @Inject()(
                                 medi_id_anterior = {medi_id_anterior},
                                 medi_id = {medi_id},
                                 tran_id_anterior = {tran_id_anterior},
-                                tran_id = {tran_id}
+                                tran_id = {tran_id},
+                                aap_apoyo = {aap_apoyo},
+                                aap_lat = {aap_lat},
+                                aap_lng = {aap_lng},
+                                aap_apoyo_anterior = {aap_apoyo_anterior},
+                                aap_lat_anterior = {aap_lat_anterior},
+                                aap_lng_anterior = {aap_lng_anterior}
                                 WHERE
                                     repo_id = {repo_id} and
                                     even_id = {even_id} and
@@ -5893,6 +6209,12 @@ class ReporteRepository @Inject()(
                 'medi_id -> d.dato_adicional.get.medi_id,
                 'tran_id_anterior -> d.dato_adicional.get.tran_id_anterior,
                 'tran_id -> d.dato_adicional.get.tran_id,
+                'aap_apoyo -> d.dato_adicional.get.aap_apoyo,
+                'aap_apoyo_anterior -> d.dato_adicional.get.aap_apoyo,
+                'aap_lat -> d.dato_adicional.get.aap_lat,
+                'aap_lat_anterior -> d.dato_adicional.get.aap_lat_anterior,
+                'aap_lng -> d.dato_adicional.get.aap_lng,
+                'aap_lng_anterior -> d.dato_adicional.get.aap_lng_anterior,
                 'repo_id -> reporte.repo_id,
                 'aap_id -> d.aap_id,
                 'even_id -> d.even_id
@@ -5911,7 +6233,13 @@ class ReporteRepository @Inject()(
                                     medi_id_anterior,
                                     medi_id,
                                     tran_id_anterior,
-                                    tran_id) 
+                                    tran_id,
+                                    aap_apoyo,
+                                    aap_apoyo_adicional,
+                                    aap_lat,
+                                    aap_lat_anterior,
+                                    aap_lng,
+                                    aap_lng_anterior) 
                                 VALUES (
                                     {repo_id},
                                     {even_id},
@@ -5923,7 +6251,13 @@ class ReporteRepository @Inject()(
                                     {medi_id_anterior},
                                     {medi_id},
                                     {tran_id_anterior},
-                                    {tran_id}
+                                    {tran_id},
+                                    {aap_apoyo},
+                                    {aap_apoyo_anterior},
+                                    {aap_lat},
+                                    {aap_lat_anterior},
+                                    {aap_lng},
+                                    {aap_lng_anterior}
                                 )
                                 """
               ).on(
@@ -5941,6 +6275,56 @@ class ReporteRepository @Inject()(
                 )
                 .executeUpdate() > 0
             }
+            // Procesando Fotos
+            d.fotos.map { fotos =>
+             for (f <- fotos) {
+              val fotoActualizada = SQL(
+                """UPDATE siap.reporte_direccion_foto SET 
+                                    refo_data = {refo_data}
+                                WHERE
+                                    repo_id = {repo_id} and
+                                    tireuc_id = {tireuc_id} and
+                                    aap_id = {aap_id} and
+                                    refo_id = {refo_id} and
+                                    refo_tipo = {refo_tipo}
+                                """
+              ).on(
+                  'repo_id -> reporte.repo_id,
+                  'tireuc_id -> reporte.tireuc_id,
+                  'aap_id -> d.aap_id,
+                  'refo_id -> f.refo_id,
+                  'refo_tipo -> f.refo_tipo,
+                  'refo_data -> f.refo_data,
+              ).executeUpdate() > 0
+              if (!fotoActualizada) {
+                val fotoInsertada = SQL("""
+                    INSERT INTO siap.reporte_direccion_foto (
+                        repo_id,
+                        tireuc_id,
+                        aap_id,
+                        refo_id,
+                        refo_tipo,
+                        refo_data
+                    ) VALUES (
+                        {repo_id},
+                        {tireuc_id},
+                        {aap_id},
+                        {refo_id},
+                        {refo_tipo},
+                        {refo_data}
+                    )
+                """).on(
+                    'repo_id -> reporte.repo_id,
+                    'tireuc_id -> reporte.tireuc_id,
+                    'aap_id -> d.aap_id,
+                    'refo_id -> f.refo_id,
+                    'refo_tipo -> f.refo_tipo,
+                    'refo_data -> f.refo_data,
+                ).executeUpdate() > 0
+              }
+             }
+            }
+
             // Fin Direccion Dato Adicional
             // actualizar direccion de la luminaria y datos adicionales
             // Actualizar direccion sin importar el tipo de reporte

@@ -21,6 +21,7 @@ class UsuarioController @Inject()(
     usuarioService: UsuarioRepository,
     empresaService: EmpresaRepository,
     perfilService: PerfilRepository,
+    cuadrillaService: CuadrillaRepository,
     cc: ControllerComponents,
     authenticatedUserAction: AuthenticatedUserAction,
     config: Configuration)(
@@ -114,6 +115,52 @@ class UsuarioController @Inject()(
             }
           }
       }
+
+  def userinfoMobile(): Action[AnyContent] = Action.async {
+    implicit request: Request[AnyContent] =>
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)
+      val uep = perfilService.buscarPorUsuarioEmpresa(usua_id.get, empr_id.get)
+      val usuario = usuarioService.buscarPorId(usua_id.get)
+      usuario match {
+          case None => {
+           Future.successful(Forbidden("Amigo, no estas registrado"))
+          }
+          case Some(usuario) => {
+            val empresa = empresaService.buscarPorId(empr_id.get)
+              empresa match {
+                case None => {
+                  Future.successful(Forbidden("Amigo, no estas registrado"))
+                }
+                case Some(empresa) => {
+                  var cuadrilla = cuadrillaService.buscarPorUsuario(usuario.usua_id.get)
+                  cuadrilla match {
+                    case Some(cuad) => 
+                      var newsession = request.session
+                      newsession = newsession + ("usua_id" -> usuario.usua_id.get.toString())
+                      newsession = newsession + ("empr_id" -> empresa.empr_id.get.toString())
+                      var newtoken = newsession.toString
+                      var userinfo = new UserInfoMobileDto(
+                        usuario.usua_id.get,
+                        usuario.usua_email,
+                        usuario.usua_nombre,
+                        usuario.usua_apellido,
+                        empresa.empr_id.get,
+                        empresa.empr_descripcion,
+                        "",
+                        cuad.cuad_id.get,
+                        uep
+                      )
+                      Future.successful(Ok(Json.toJson(userinfo)).withSession(newsession))
+                    case None =>  {
+                      Future.successful(Forbidden("Amigo, no estas registrado"))
+                    }
+                  }
+                }
+              }
+            }
+          }
+      }      
 
   def guardarUsuario() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
     val json = request.body.asJson.get

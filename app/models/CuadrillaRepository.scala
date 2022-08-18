@@ -100,6 +100,18 @@ class CuadrillaRepository @Inject()(dbapi: DBApi)(
     }
   }
 
+    /**
+        Recuperar una cuadrilla por su usua_id
+    */
+  def buscarPorUsuario(usua_id: Long): Option[Cuadrilla] = {
+    db.withConnection { implicit connection =>
+      SQL("SELECT * FROM siap.cuadrilla c LEFT JOIN siap.cuadrilla_usuario cu ON c.cuad_id = cu.cuad_id LEFT JOIN siap.usuario u ON cu.usua_id = u.usua_id WHERE cu.usua_id={usua_id}")
+        .on(
+          'usua_id -> usua_id
+        )
+        .asRelational(relationalParser.singleOpt)
+    }
+  }
   /**
         Recuperar cuadrilla por su cuad_descripcion
     */
