@@ -248,6 +248,52 @@ export function printReporteRelacion(
   window.open(url, target, 'location=no, menubar=no')
 }
 
+export function printReporteRelacionFiltrado(
+  cuad_id,
+  fecha_inicial,
+  fecha_final,
+  empr_id,
+  usua_id,
+  formato,
+  tipo
+) {
+  const data = {
+    cuad_id,
+    fecha_inicial,
+    fecha_final,
+    empr_id,
+    usua_id,
+    formato,
+    tipo
+  }
+  var target
+  if (data.tipo === 'pdf') {
+    target = '_blank'
+  } else {
+    target = '_blank'
+  }
+  const url =
+    window.location.protocol +
+    '//' +
+    window.location.host.split('/')[0] +
+    '/api' +
+    '/repo/prn/relaf/' +
+    data.cuad_id +
+    '/' +
+    data.fecha_inicial +
+    '/' +
+    data.fecha_final +
+    '/' +
+    data.empr_id +
+    '/' +
+    usua_id +
+    '/' +
+    formato +
+    '/' +
+    tipo
+  window.open(url, target, 'location=no, menubar=no')
+}
+
 export function printReporteBlanco(reti_id, empr_id) {
   const data = {
     reti_id,

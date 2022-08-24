@@ -23,6 +23,7 @@ import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 
 import utilities.Convert
+import java.time.format.DateTimeFormatter
 
 case class AapAdicional(
     aap_id: Option[scala.Long],
@@ -345,6 +346,7 @@ case class Aap(
 case class AapMobile(
     aap_id: Option[Long],
     aap_apoyo: Option[String],
+    aap_fechatoma: Option[String],
     aap_direccion: Option[String],
     barr_id: Option[Long],
     aaco_id: Option[Long],
@@ -355,7 +357,9 @@ case class AapMobile(
     aatc_id: Option[Long],
     tipo_id: Option[Long],
     aap_tecnologia: Option[String],
-    aap_potencia: Option[Long]
+    aap_potencia: Option[Long],
+    aap_lat: Option[String],
+    aap_lng: Option[String]
 )
 
 case class AapConsulta(
@@ -452,12 +456,39 @@ object Aap {
       (__ \ "aap_elemento").readNullable[AapElemento] and
       (__ \ "historia").readNullable[List[AapHistoria]]
   )(Aap.apply _)
+
+  val empty = {
+  Aap(
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    0,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    0,
+    None,
+    None
+  )}
 }
 
 object AapMobile {
   var _set = {
     get[Option[Long]]("aap_id") ~
       get[Option[String]]("aap_apoyo") ~
+      get[Option[String]]("aap_fechatoma") ~
       get[Option[String]]("aap_direccion") ~
       get[Option[Long]]("barr_id") ~
       get[Option[Long]]("aaco_id") ~
@@ -468,11 +499,14 @@ object AapMobile {
       get[Option[Long]]("aatc_id") ~
       get[Option[Long]]("tipo_id") ~
       get[Option[String]]("aap_tecnologia") ~
-      get[Option[Long]]("aap_potencia") map {
-      case aap_id ~ aap_apoyo ~ aap_direccion ~ barr_id ~ aaco_id ~ aama_id ~ aamo_id ~ aacu_id ~ aaus_id ~ aatc_id ~ tipo_id ~ aap_tecnologia ~ aap_potencia =>
+      get[Option[Long]]("aap_potencia") ~
+      get[Option[String]]("aap_lat") ~
+      get[Option[String]]("aap_lng") map {
+      case aap_id ~ aap_apoyo ~ aap_fechatoma ~ aap_direccion ~ barr_id ~ aaco_id ~ aama_id ~ aamo_id ~ aacu_id ~ aaus_id ~ aatc_id ~ tipo_id ~ aap_tecnologia ~ aap_potencia ~ aap_lat ~ aap_lng =>
         AapMobile(
           aap_id,
           aap_apoyo,
+          aap_fechatoma,
           aap_direccion,
           barr_id,
           aaco_id,
@@ -483,7 +517,9 @@ object AapMobile {
           aatc_id,
           tipo_id,
           aap_tecnologia,
-          aap_potencia
+          aap_potencia,
+          aap_lat,
+          aap_lng
         )
     }
   }
@@ -846,15 +882,16 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
       }
       // Buscar ultimo reporte de afectación
       var _query =
-        """select distinct on (r1.reti_id) r1.repo_id, r1.repo_fechasolucion, rd1.even_horaini, rt1.reti_id, rt1.reti_descripcion from siap.reporte r1
+        """select distinct on (r1.reti_id) r1.repo_id, ra1.repo_fechadigitacion, r1.repo_fechasolucion, rd1.even_horaini, rt1.reti_id, rt1.reti_descripcion from siap.reporte r1
+                      inner join siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                       inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
                       inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id
                       where r1.empr_id = {empr_id} and rd1.aap_id = {aap_id} and rd1.even_estado < 9
                       order by r1.reti_id, r1.repo_fechasolucion  desc """
-      val _reposParser = int("repo_id") ~ date("repo_fechasolucion") ~ str(
+      val _reposParser = int("repo_id") ~ get[DateTime]("repo_fechadigitacion") ~ get[Option[DateTime]]("repo_fechasolucion") ~ str(
         "even_horaini"
       ) ~ int("reti_id") ~ str("reti_descripcion") map {
-        case a1 ~ a2 ~ a3 ~ a4 ~ a5 => (a1, a2, a3, a4, a5)
+        case a1 ~ a22 ~ a2 ~ a3 ~ a4 ~ a5 => (a1, a22, a2, a3, a4, a5)
       }
       val _repos = SQL(_query)
         .on(
@@ -863,13 +900,18 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
         )
         .as(_reposParser *)
       _repos.map { repo =>
+        println("Repo_3: " + repo._3)
+        println("Repo_2: " + repo._2)
         val sdf = new java.text.SimpleDateFormat("yyyy-MM-dd")
-        val fecha = sdf.format(repo._2)
+        var fecha = repo._3 match { 
+          case Some(v) => v.toString("yyyy-MM-dd")
+          case None => repo._2.toString("yyyy-MM-dd")
+        }
         val format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm")
         val time = format
-          .parse(fecha + " " + (if (repo._3 == "") "08:00" else repo._3))
+          .parse(fecha + " " + (if (repo._4 == "") "08:00" else (repo._4) ))
           .getTime()
-        lista_result += ((repo._1, time, repo._4, repo._5))
+        lista_result += ((repo._1, time, repo._5, repo._6))
       }
       (result, lista_result.toList)
     }
@@ -1510,6 +1552,7 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
       var query: String =
         s"""SELECT a.aap_id, 
                                 a.aap_apoyo, 
+                                cast (a.aap_fechatoma as TEXT) as aap_fechatoma,
                                 a.aap_direccion,
                                 a.barr_id,
                                 a.aaco_id,
@@ -1520,7 +1563,9 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
                                 a.aatc_id,
                                 aa.tipo_id,
                                 aa.aap_tecnologia,
-                                aa.aap_potencia
+                                aa.aap_potencia,
+                                a.aap_lat,
+                                a.aap_lng
                         FROM siap.aap a
                         LEFT JOIN siap.aap_adicional aa ON aa.aap_id = a.aap_id and aa.empr_id = a.empr_id
                         WHERE a.empr_id = {empr_id} and a.aap_id <> 9999999""".stripMargin

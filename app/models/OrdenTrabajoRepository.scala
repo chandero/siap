@@ -14,8 +14,8 @@ import net.sf.jasperreports.engine.JRExporter
 import net.sf.jasperreports.engine.JRExporterParameter
 import net.sf.jasperreports.engine.JasperCompileManager
 //import net.sf.jasperreports.engine.export.JRPdfExporter
-import net.sf.jasperreports.export.SimpleExporterInput
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput
+//import net.sf.jasperreports.export.SimpleExporterInput
+//import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput
 //
 
 import play.api.libs.json._
@@ -1000,13 +1000,13 @@ class OrdenTrabajoRepository @Inject()(
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
                     inner join siap.reporte r1 on r1.repo_id = or1.repo_id 
-                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND r1.rees_id = 1
+                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND r1.rees_id in (1,2)
                    union all 
                    select ot1.ortr_id, o1.obra_id as repo_id, 99 as reti_id, o1.obra_consecutivo as repo_consecutivo from siap.ordentrabajo ot1
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_obra oo1 on oo1.ortr_id = ot1.ortr_id 
                     inner join siap.obra o1 on o1.obra_id = oo1.obra_id  
-                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND o1.rees_id = 1"""
+                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND o1.rees_id in (1,2)"""
       ).on(
           'cuad_id -> cuad_id,
           'fecha_corte -> fecha_corte

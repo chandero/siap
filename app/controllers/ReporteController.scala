@@ -371,6 +371,8 @@ class ReporteController @Inject()(
         net.liftweb.json.parse(json.toString).extract[Reporte]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
+      val dateFormatter = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+      
       val reportenuevo = new Reporte(
         reporte.repo_id,
         reporte.tireuc_id,
@@ -563,6 +565,42 @@ class ReporteController @Inject()(
       tipo: String
   ) = Action {
     val os = reporteService.imprimirRelacion(
+      fecha_inicial,
+      fecha_final,
+      empr_id,
+      usua_id,
+      formato,
+      tipo
+    )
+    val fi = new DateTime(fecha_inicial)
+    val ff = new DateTime(fecha_final)
+    val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+    val filename = "OyMPendientes_Entre" + fmt.print(fi) + "_y_" + fmt
+      .print(ff) + ".xlsx"
+    val attach = "attachment; filename=" + filename
+    formato match {
+      case "pdf" => Ok(os).as("application/pdf")
+      case "xls" =>
+        Ok(os)
+          .as(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          )
+          .withHeaders("Content-Disposition" -> attach)
+    }
+
+  }
+
+  def imprimirRelacionFiltrado(
+      cuad_id: Long,
+      fecha_inicial: Long,
+      fecha_final: Long,
+      empr_id: Long,
+      usua_id: Long,
+      formato: String,
+      tipo: String
+  ) = Action {
+    val os = reporteService.imprimirRelacionFiltrado(
+      cuad_id,
       fecha_inicial,
       fecha_final,
       empr_id,

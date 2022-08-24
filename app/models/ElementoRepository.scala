@@ -330,10 +330,12 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
     Future[Iterable[ElementoD]] {
       db.withConnection { implicit connection =>
         var lista_result = new ListBuffer[ElementoD]
+        val _descripcion = s"%${elem_descripcion}"
+        println("Descrip: " + _descripcion)
         val lista: List[ElementoD] = SQL(
           "SELECT * FROM siap.elemento WHERE elem_descripcion LIKE {elem_descripcion} and empr_id = {empr_id} and elem_estado <> 9"
         ).on(
-            'elem_descripcion -> elem_descripcion.toUpperCase,
+            'elem_descripcion -> _descripcion.toUpperCase,
             'empr_id -> empr_id
           )
           .as(ElementoD._set *)

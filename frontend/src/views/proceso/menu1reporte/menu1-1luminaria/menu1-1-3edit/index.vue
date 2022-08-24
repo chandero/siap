@@ -2066,6 +2066,9 @@
                   >
                 </el-col>
               </el-row>
+
+              <el-tabs v-model="materialFotoTabActive">
+              <el-tab-pane label="Material" name="material">
               <el-row>
                 <el-col :span="24">
                   <span
@@ -2331,6 +2334,15 @@
                   />
                 </el-col>
               </el-row>
+               </el-tab-pane>
+               <el-tab-pane label="Fotos" name="fotos">
+                  <el-carousel :interval="5000" :autoplay="false" arrow="always">
+                    <el-carousel-item v-for="foto in reporte.direcciones[didx].fotos" :key="foto.refo_id">
+                      <img :src="`data:image/jpeg;base64,${foto.refo_data}`" style="width: 100%; height: 100%; object-fit: contain">
+                    </el-carousel-item>
+                  </el-carousel>
+               </el-tab-pane>
+              </el-tabs>
             </el-card>
           </el-collapse-item>
         </el-collapse>
@@ -3149,7 +3161,8 @@ export default {
       ],
       datePickerOptions: {
         disabledDate: this.validarFecha
-      }
+      },
+      materialFotoTabActive: 'material'
     }
   },
   timers: {
@@ -4653,7 +4666,7 @@ export default {
       this.validarTipo()
       this.pending()
       this.didx = 0
-      if (this.reporte_previo.rees_id !== 3) {
+      if (this.reporte_previo.rees_id === 1) {
         localStorage.setItem(
           'currEditRepFecha',
           JSON.stringify({ fecha: Date.now(), data: this.reporte })

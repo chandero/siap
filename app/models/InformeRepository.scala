@@ -10175,6 +10175,174 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
       }
     }
 
+  def siap_informe_por_cuadrilla_filtrado_xls(
+      cuad_id: scala.Long,
+      fecha_inicial: scala.Long,
+      fecha_final: scala.Long,
+      empr_id: scala.Long
+  ): Future[Iterable[Siap_informe_por_cuadrilla]] =
+    Future[Iterable[Siap_informe_por_cuadrilla]] {
+      var _result = new ListBuffer[Siap_informe_por_cuadrilla]()
+      db.withConnection { implicit connection =>
+        var fi = Calendar.getInstance()
+        var ff = Calendar.getInstance()
+        fi.setTimeInMillis(fecha_inicial)
+        ff.setTimeInMillis(fecha_final)
+        fi.set(Calendar.MILLISECOND, 0)
+        fi.set(Calendar.SECOND, 0)
+        fi.set(Calendar.MINUTE, 0)
+        fi.set(Calendar.HOUR, 0)
+
+        ff.set(Calendar.MILLISECOND, 59)
+        ff.set(Calendar.SECOND, 59)
+        ff.set(Calendar.MINUTE, 59)
+        ff.set(Calendar.HOUR, 23)
+
+        val _listResult =
+          SQL("""
+              SELECT ot.ortr_id, ot.ortr_fecha, c.cuad_descripcion, CONCAT(u.usua_nombre, ' ', u.usua_apellido) as cuad_responsable, ot.ortr_tipo, c.cuad_vehiculo, ot.ortr_consecutivo, count(r.*) as reportes, ob.obras as obras, 0 as urbano, 0 as rural, 0 as operaciones FROM siap.cuadrilla c 
+              INNER JOIN siap.ordentrabajo ot ON ot.cuad_id = c.cuad_id
+              LEFT JOIN siap.ordentrabajo_reporte otr ON otr.ortr_id = ot.ortr_id
+              LEFT JOIN siap.reporte r ON r.repo_id = otr.repo_id
+              LEFT JOIN siap.cuadrilla_usuario cu ON cu.cuad_id = c.cuad_id AND cu.cuus_esresponsable = true
+              LEFT JOIN siap.usuario u ON u.usua_id = cu.usua_id 
+              LEFT JOIN (SELECT ot.ortr_id, count(o.*) as obras FROM siap.cuadrilla c 
+   	   	                 INNER JOIN siap.ordentrabajo ot ON ot.cuad_id = c.cuad_id
+                         INNER JOIN siap.ordentrabajo_obra oto ON oto.ortr_id = ot.ortr_id
+                         INNER JOIN siap.obra o ON o.obra_id = oto.obra_id
+		                     WHERE ot.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and ot.empr_id = {empr_id}
+		                     GROUP BY ot.ortr_id) ob ON ob.ortr_id = ot.ortr_id
+              WHERE ot.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and ot.empr_id = {empr_id}
+              GROUP BY ot.ortr_id, ot.ortr_fecha, ot.ortr_consecutivo, ot.ortr_tipo, ob.obras, c.cuad_descripcion, c.cuad_vehiculo, u.usua_nombre, u.usua_apellido
+              ORDER BY obras ASC
+            """)
+            .on(
+              'fecha_inicial -> fi.getTime(),
+              'fecha_final -> ff.getTime(),
+              'empr_id -> empr_id
+            )
+            .as(Siap_informe_por_cuadrilla._set *)
+
+        val _parse01 = int("cuad_id") ~
+          int("ortr_id") ~
+          int("tiba_id") ~
+          str("tiba_descripcion") ~
+          int("sector") map {
+          case a ~ b ~ c ~ d ~ e => (a, b, c, d, e)
+        }
+
+        _listResult.map { o =>
+          var _reportes = 0
+          var _urbano = 0
+          var _rural = 0
+          var _operaciones = 0
+          val _dia = o.ortr_fecha match {
+            case Some(f) => WeekDays.apply(f.getDayOfWeek() - 1)
+            case None    => ""
+          }
+          val _list01 =
+            SQL("""SELECT o.cuad_id, o.ortr_id, o.tiba_id, o.tiba_descripcion, SUM(o.sector) AS sector FROM 
+                (SELECT c.cuad_id, ot.ortr_id, tb.tiba_id, tb.tiba_descripcion, count(*) as sector FROM siap.cuadrilla c 
+                 INNER JOIN siap.ordentrabajo ot ON ot.cuad_id = c.cuad_id
+                 INNER JOIN siap.ordentrabajo_reporte otr ON otr.ortr_id = ot.ortr_id
+                 INNER JOIN siap.reporte r ON r.repo_id = otr.repo_id
+                 INNER JOIN siap.barrio b ON b.barr_id = r.barr_id
+                 INNER JOIN siap.tipobarrio tb ON tb.tiba_id = ot.tiba_id
+                 WHERE ot.empr_id = {empr_id} and ot.ortr_id = {ortr_id} ANC c.cuad_id = {cuad_id}
+                 GROUP BY c.cuad_id, ot.ortr_id, tb.tiba_id, tb.tiba_descripcion
+                UNION ALL
+                SELECT c.cuad_id, ot.ortr_id, tb.tiba_id, tb.tiba_descripcion, count(*) as sector FROM siap.cuadrilla c 
+                 INNER JOIN siap.ordentrabajo ot ON ot.cuad_id = c.cuad_id
+                 INNER JOIN siap.ordentrabajo_obra oto ON oto.ortr_id = ot.ortr_id
+                 INNER JOIN siap.obra o ON o.obra_id = oto.obra_id
+                 INNER JOIN siap.barrio b ON b.barr_id = o.barr_id
+                 INNER JOIN siap.tipobarrio tb ON tb.tiba_id = ot.tiba_id
+                 WHERE ot.empr_id = {empr_id} and ot.ortr_id = {ortr_id} AND c.cuad_id = {cuad_id}
+                 GROUP BY c.cuad_id, ot.ortr_id, tb.tiba_id, tb.tiba_descripcion) o
+                GROUP BY o.cuad_id, o.ortr_id, o.tiba_id, o.tiba_descripcion
+                ORDER BY o.cuad_id, o.ortr_id, o.tiba_id""")
+              .on(
+                'empr_id -> empr_id,
+                'ortr_id -> o.ortr_id,
+                'cuad_id -> cuad_id
+              )
+              .as(_parse01 *)
+          _list01.map { s =>
+            if (s._3 == 1) {
+              _urbano = s._5
+            } else {
+              _rural = s._5
+            }
+          }
+
+          val _parse02 = int("cuad_id") ~
+            int("ortr_id") ~
+            int("operaciones") map {
+            case a ~ b ~ c => (a, b, c)
+          }
+
+          var _list02 =
+            SQL("""SELECT c.cuad_id, ot.ortr_id, count(rd.*) as operaciones FROM siap.cuadrilla c 
+                               INNER JOIN siap.ordentrabajo ot ON ot.cuad_id = c.cuad_id
+                               INNER JOIN siap.ordentrabajo_reporte otr ON otr.ortr_id = ot.ortr_id
+                               INNER JOIN siap.reporte r ON r.repo_id = otr.repo_id
+                               INNER JOIN siap.reporte_direccion rd ON rd.repo_id = r.repo_id
+                               WHERE ot.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and ot.empr_id = {empr_id} and ot.ortr_id = {ortr_id} AND c.cuad_id = {cuad_id}
+                               GROUP BY c.cuad_id, ot.ortr_id""")
+              .on(
+                'fecha_inicial -> fi.getTime(),
+                'fecha_final -> ff.getTime(),
+                'empr_id -> empr_id,
+                'ortr_id -> o.ortr_id,
+                'cuad_id -> cuad_id
+              )
+              .as(_parse02.singleOpt)
+          _operaciones = _list02 match {
+            case Some(o) => o._3
+            case None    => 0
+          }
+
+          val _parse03 = int("cuad_id") ~
+            int("ortr_id") ~
+            int("reportes") map {
+            case a ~ b ~ c => (a, b, c)
+          }
+
+          var _list03 =
+            SQL("""SELECT c.cuad_id, ot.ortr_id, SUM(1 + CASE 
+									WHEN (array_length(string_to_array(r.repo_subrepoconsecutivo, ','),1) IS NULL ) THEN 0 
+									ELSE array_length(string_to_array(r.repo_subrepoconsecutivo, ','),1) 
+								  END) as reportes FROM siap.cuadrilla c 
+                               INNER JOIN siap.ordentrabajo ot ON ot.cuad_id = c.cuad_id
+                               INNER JOIN siap.ordentrabajo_reporte otr ON otr.ortr_id = ot.ortr_id
+                               INNER JOIN siap.reporte r ON r.repo_id = otr.repo_id
+                               WHERE ot.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and ot.empr_id = {empr_id} and ot.ortr_id = {ortr_id} AND cuad_id = {cuad_id}
+                               GROUP BY c.cuad_id, ot.ortr_id""")
+              .on(
+                'fecha_inicial -> fi.getTime(),
+                'fecha_final -> ff.getTime(),
+                'empr_id -> empr_id,
+                'ortr_id -> o.ortr_id,
+                'cuad_id -> cuad_id
+              )
+              .as(_parse03.singleOpt)
+          _reportes = _list03 match {
+            case Some(o) => o._3
+            case None    => 0
+          }
+
+          _result += o.copy(
+            ortr_dia = Some(_dia.toString()),
+            reportes = Some(_reportes),
+            urbano = Some(_urbano),
+            rural = Some(_rural),
+            operaciones = Some(_operaciones)
+          )
+        }
+        _result.toList
+      }
+    }
+
   def siap_informe_general_operaciones_xls(
       fecha_inicial: Long,
       fecha_final: Long,

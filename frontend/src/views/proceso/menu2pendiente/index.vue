@@ -31,20 +31,39 @@
                     <img :title="$t('xls')" @click="imprimir('xls')" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
                   </el-col>
                 </el-row>
+                <el-row>
+                  <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+                    <el-form-item :label="$t('ordentrabajo.crew')">
+                      <el-select clearable ref="crew" v-model="cuad_id" name="crew" :placeholder="$t('cuadrilla.select')"  style="width:250px;">
+                        <el-option v-for="c in cuadrillas" :key="c.cuad_id" :label="c.cuad_descripcion" :value="c.cuad_id" >
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="24">
+                    <img :title="$t('pdf')" @click="imprimirFiltrado('pdf')" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/prnt.png')"/>
+                    <img :title="$t('xls')" @click="imprimirFiltrado('xls')" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
+                  </el-col>
+                </el-row>
             </el-form>
         </el-main>
     </el-container>
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import { printReporteRelacion } from '@/api/reporte'
+import { getCuadrillas } from '@/api/cuadrilla'
+import { printReporteRelacion, printReporteRelacionFiltrado } from '@/api/reporte'
 export default {
   data () {
     return {
+      cuad_id: 6,
       tipo: 1,
       fecha_inicial: null,
       fecha_final: null,
-      labelPosition: 'top'
+      labelPosition: 'top',
+      cuadrillas: null
     }
   },
   computed: {
@@ -57,15 +76,22 @@ export default {
   methods: {
     imprimir (formato) {
       printReporteRelacion(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.empresa.empr_id, this.usuario.usua_id, formato, this.tipo)
+    },
+    imprimirFiltrado (formato) {
+      printReporteRelacionFiltrado(this.cuad_id, this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.empresa.empr_id, this.usuario.usua_id, formato, this.tipo)
     }
   },
   beforeMount () {
-    this.fecha_inicial = new Date()
-    this.fecha_inicial.setHours(0)
-    this.fecha_inicial.setMinutes(0)
-    this.fecha_inicial.setSeconds(0)
-    this.fecha_inicial.setMilliseconds(0)
-    this.fecha_final = this.fecha_inicial
+    getCuadrillas().then(response => {
+      console.log('Cuadrillas: ', response.data)
+      this.cuadrillas = response.data
+      this.fecha_inicial = new Date()
+      this.fecha_inicial.setHours(0)
+      this.fecha_inicial.setMinutes(0)
+      this.fecha_inicial.setSeconds(0)
+      this.fecha_inicial.setMilliseconds(0)
+      this.fecha_final = this.fecha_inicial
+    })
   }
 }
 </script>

@@ -396,6 +396,18 @@ export function informe_siap_por_cuadrilla_xls (fecha_inicial, fecha_final) {
   })
 }
 
+export function informe_siap_por_cuadrilla_filtrado_xls (cuad_id, fecha_inicial, fecha_final) {
+  const data = {
+    cuad_id,
+    fecha_inicial,
+    fecha_final
+  }
+  return request({
+    url: '/info/sipcfx/' + data.cuad_id + '/' + data.fecha_inicial + '/' + data.fecha_final,
+    method: 'get'
+  })
+}
+
 export function informe_siap_obra_cuadrilla_xls (fecha_inicial, fecha_final) {
   const data = {
     fecha_inicial,
