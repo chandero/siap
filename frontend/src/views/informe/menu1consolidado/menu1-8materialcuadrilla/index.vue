@@ -19,15 +19,15 @@
                     </el-row>
   <el-row :gutter="4">
     <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-      <el-form-item :label="$t('informe.initialDate')">
+      <el-form-item :label="$t('informe.dueDate')">
         <el-date-picker v-model="fecha_inicial" format="yyyy/MM/dd"></el-date-picker>
       </el-form-item>
     </el-col>
-    <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+<!--     <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
       <el-form-item :label="$t('informe.endDate')">
         <el-date-picker v-model="fecha_final" format="yyyy/MM/dd"></el-date-picker>
       </el-form-item>
-    </el-col>
+    </el-col> -->
   </el-row>
   <el-row>
     <el-col :span="24">
@@ -47,40 +47,49 @@
       :label="$t('informe.ortr_fecha')"
       prop="ortr_fecha"
       width="90"
+      align="left"
+      header-align="center"
     >
+    <template slot-scope="scope">
+      {{ scope.row.ortr_fecha | moment('YYYY-MM-DD') }}
+    </template>
     </el-table-column>
     <el-table-column
       :label="$t('informe.cuad_descripcion')"
       prop="cuad_descripcion"
-      width="300"
+      width="150"
+      align="left"
+      header-align="center"
     >
     </el-table-column>
     <el-table-column
       :label="$t('informe.reti_descripcion')"
       prop="reti_descripcion"
-      width="300">
+      width="300"
+      align="left"
+      header-align="center">
     </el-table-column>
     <el-table-column
       :label="$t('informe.elem_codigo')"
       prop="elem_codigo"
-      width="90">
+      width="120"
+      align="left"
+      header-align="center">
     </el-table-column>
     <el-table-column
       :label="$t('informe.elem_descripcion')"
       prop="elem_descripcion"
-      width="300">
-    </el-table-column>
-    <el-table-column
-      :label="$t('informe.ortr_fecha')"
-      prop="ortr_fecha"
-      width="90"
-    >
+      width="300"
+      align="left"
+      header-align="center"
+      >
     </el-table-column>
     <el-table-column
       :label="$t('informe.even_cantidad_retirado')"
       prop="even_cantidad_retirado"
       width="90"
       align="right"
+      header-align="center"
     >
     </el-table-column>
     <el-table-column
@@ -88,6 +97,7 @@
       prop="even_cantidad_instalado"
       width="90"
       align="right"
+      header-align="center"
     >
     </el-table-column>
   </el-table>
@@ -132,6 +142,7 @@ export default {
   },
   methods: {
     obtenerDatos () {
+      this.fecha_final = this.fecha_inicial
       informe_siap_cuadrilla_consolidado_material_xls(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.cuad_id).then(response => {
         this.tableData = response.data
       })
@@ -149,8 +160,8 @@ export default {
     },
     formatJson (filterVal, jsonData) {
       return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
+        if (j === 'ortr_fecha') {
+          return parseTime(v[j], '{y}-{m}-{d}')
         } else {
           return v[j]
         }

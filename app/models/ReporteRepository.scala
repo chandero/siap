@@ -5214,7 +5214,7 @@ class ReporteRepository @Inject()(
             'repo_poste -> adicional.repo_poste,
             'repo_modificado -> adicional.repo_modificado,
             'repo_subreporte -> adicional.repo_subreporte,
-            'repo_subid -> adicional.repo_subid,
+            'repo_subid -> Option.empty[scala.Long],
             'repo_email -> adicional.repo_email,
             'acti_id -> adicional.acti_id,
             'repo_codigo -> adicional.repo_codigo,
@@ -5253,8 +5253,8 @@ class ReporteRepository @Inject()(
                                                                 {repo_poste}, 
                                                                 {repo_modificado}, 
                                                                 {repo_subreporte}, 
-                                                                {repo_subid}, 
                                                                 {repo_email},
+                                                                {repo_subid}, 
                                                                 {acti_id},
                                                                 {repo_codigo},
                                                                 {repo_apoyo},
@@ -5269,7 +5269,7 @@ class ReporteRepository @Inject()(
               'repo_poste -> adicional.repo_poste,
               'repo_modificado -> adicional.repo_modificado,
               'repo_subreporte -> adicional.repo_subreporte,
-              'repo_subid -> adicional.repo_subid,
+              'repo_subid -> Option.empty[scala.Long],
               'repo_email -> adicional.repo_email,
               'acti_id -> adicional.acti_id,
               'repo_codigo -> adicional.repo_codigo,
@@ -5358,39 +5358,39 @@ class ReporteRepository @Inject()(
               )
               var aap: Aap = new Aap(
                 d.aap_id,
+                d.dato_adicional match { case Some(d) => d.aap_apoyo case None => None },
                 None,
-                None,
-                None,
-                None,
-                None,
-                None,
+                d.even_direccion,
+                d.dato_adicional match { case Some(d) => d.aap_lat case None => None },
+                d.dato_adicional match { case Some(d) => d.aap_lng case None => None },
+                d.barr_id,
                 None,
                 reporte.empr_id.get,
                 reporte.repo_fechasolucion,
                 reporte.repo_fechasolucion,
                 None,
+                d.dato match { case Some(d) => d.aama_id case None => None },
+                d.dato_adicional match { case Some(d) => d.aacu_id case None => None },
                 None,
-                None,
-                None,
-                None,
-                None,
-                None,
-                None,
+                d.dato match { case Some(d) => d.aatc_id case None => None },
+                d.dato match { case Some(d) => d.aamo_id case None => None },
+                d.dato_adicional match { case Some(d) => d.aaus_id case None => None },
+                d.dato match { case Some(d) => d.aaco_id case None => None },
                 reporte.usua_id.get,
                 Some(aap_elemento),
                 None
               )
               var aap_adicional: AapAdicional = new AapAdicional(
                 d.aap_id,
+                d.dato match { case Some(d) => d.tipo_id case None => None },
+                d.dato match { case Some(d) => d.aap_poste_altura case None => None },
+                d.dato match { case Some(d) => d.aap_brazo case None => None },
+                d.dato match { case Some(d) => d.aap_collarin case None => None },
+                d.dato match { case Some(d) => d.aap_potencia case None => None },
+                d.dato match { case Some(d) => d.aap_tecnologia case None => None },
                 None,
                 None,
-                None,
-                None,
-                None,
-                None,
-                None,
-                None,
-                None,
+                d.dato match { case Some(d) => d.aap_poste_propietario case None => None },
                 None,
                 None
               )
@@ -5408,13 +5408,16 @@ class ReporteRepository @Inject()(
               aapOption match {
                 case None =>
                   if (d.even_estado.get == 1) {
-                    /* aapService.creardirecto(
+                    println("Creando Luminaria: " + d.aap_id)
+                    aapService.creardirecto(
                       activo,
                       reporte.empr_id.get,
                       reporte.usua_id.get
-                    ) */
+                    )
                   }
-                case (a) => aap = a.get
+                case (a) => {
+                  // aapService.actualizarDirecto(activo, reporte.empr_id.get, reporte.usua_id.get)
+                }
               }
 
               // Fin Proceso de Creación de Luminarias Nuevas por Expansión Tipo I,II,III,V

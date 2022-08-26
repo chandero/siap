@@ -2,6 +2,9 @@ package controllers
 
 import javax.inject.Inject
 import java.io.{OutputStream, ByteArrayOutputStream, FileWriter}
+import java.nio.file.Paths
+import java.io.File
+import java.io.FileReader
 
 import models._
 
@@ -112,5 +115,30 @@ class ReporteMobileController @Inject()(
         Future.successful(NotAcceptable(Json.toJson("true")))
       }
   }
+
+  def uploadFotoMovil() = authenticatedUserAction(parse.multipartFormData) { request =>
+      request.body
+        .file("photo")
+        .map { f =>
+          // only get the last part of the filename
+          // otherwise someone can send a path like ../../home/foo/bar.txt to write to other files on the system
+          val filename = Paths.get(f.filename).getFileName // Paths.get(f.filename).getFileName
+          val fileSize = f.fileSize
+          val contentType = f.contentType
+          val path = "/opt/siap/fotos/" //System.getProperty("java.io.tmpdir")
+          println("tmp path:" + path)
+          val newTempDir = new File(path)
+          if (!newTempDir.exists()) {
+            newTempDir.mkdirs()
+          }
+          val file = newTempDir + "/" + filename
+          println("path file: " + file)
+          f.ref.copyTo(Paths.get(s"$file"), replace = true)
+          Ok("Archivo Cargado")
+        }
+        .getOrElse {
+          NotFound("Archivo No Cargado")
+        }
+    }
 
 }
