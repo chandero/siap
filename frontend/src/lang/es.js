@@ -1490,7 +1490,8 @@ export default {
     obras: 'Obras',
     obra_consecutivo: 'Nro. Obra',
     obra_fecharecepcion: 'Fecha Obra',
-    repo_tipo_expansion: 'Tipo'
+    repo_tipo_expansion: 'Tipo',
+    siccmx: 'Consolidado de Material por Cuadrilla'
   },
   grafica: {
     cantidad: 'Cantidad',

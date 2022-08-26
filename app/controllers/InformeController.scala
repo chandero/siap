@@ -28,6 +28,11 @@ import java.io.BufferedOutputStream
 import java.io.FileOutputStream
 import java.io.File
 
+import net.liftweb.json._
+import net.liftweb.json.Serialization.write
+import net.liftweb.json.Serialization.read
+import net.liftweb.json.parse
+
 @Singleton
 class InformeController @Inject()(
     informeService: InformeRepository,
@@ -35,7 +40,10 @@ class InformeController @Inject()(
     config: Configuration,
     authenticatedUserAction: AuthenticatedUserAction
 )(implicit ec: ExecutionContext)
-    extends AbstractController(cc) {
+    extends AbstractController(cc) with ImplicitJsonFormats {
+  implicit val formats = Serialization.formats(NoTypeHints) ++ List(
+    DateTimeSerializer
+  )
 
   def siap_detallado_material(
       fecha_inicial: scala.Long,
@@ -131,6 +139,20 @@ class InformeController @Inject()(
         Ok(Json.toJson(data))
       }
   }
+
+  def siap_cuadrilla_consolidado_material_xls (
+      fecha_inicial: scala.Long,
+      fecha_final: scala.Long,
+      cuad_id: scala.Long
+  ) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+    val usua_id = Utility.extraerUsuario(request)
+    val empr_id = Utility.extraerEmpresa(request)
+    informeService
+      .siap_cuadrilla_consolidado_material_xls(fecha_inicial, fecha_final, cuad_id, empr_id.get)
+      .map { data =>
+        Ok(write(data))
+      }
+    }
 
   def siap_informe_detallado_material_muob_xls(muob_consecutivo: Int) =
     authenticatedUserAction.async { implicit request: Request[AnyContent] =>

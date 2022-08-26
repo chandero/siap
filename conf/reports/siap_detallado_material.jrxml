@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_detallado_material" pageWidth="792" pageHeight="612" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="5" bottomMargin="5" uuid="8a825f10-1b82-406c-81fa-1d0ed3643678">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Siap_Adapter"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SiapDataAdapter"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,8 +12,8 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="777"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="210"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="616"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="370"/>
 	<parameter name="FECHA_INICIAL" class="java.sql.Timestamp"/>
 	<parameter name="FECHA_FINAL" class="java.sql.Timestamp"/>
 	<parameter name="EMPRESA" class="java.lang.String"/>
@@ -21,8 +21,8 @@
 	<parameter name="EMPR_ID" class="java.lang.Long"/>
 	<queryString>
 		<![CDATA[SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
-                          r.repo_consecutivo as repo_numero, 
-                          r.repo_fechasolucion, 
+                          r.repo_consecutivo, 
+                          r.repo_fechasolucion,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
                           t.even_codigo_instalado, t.even_cantidad_instalado 
                     FROM siap.reporte r
@@ -30,8 +30,32 @@
                     LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
                     LEFT JOIN siap.reporte_evento t on t.repo_id = r.repo_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
-                    WHERE r.repo_fechasolucion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id <> 9 and r.empr_id = $P{EMPR_ID}
+                    WHERE r.repo_fechasolucion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id < 9 and t.even_estado <> 9 and r.empr_id = $P{EMPR_ID}
                     UNION ALL
+                    SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
+                          r.repo_consecutivo, 
+                          r.repo_fechasolucion, 
+                          t.even_codigo_retirado, t.even_cantidad_retirado, 
+                          t.even_codigo_instalado, t.even_cantidad_instalado 
+                    FROM siap.control_reporte r
+                    LEFT JOIN siap.control_reporte_adicional a on a.repo_id = r.repo_id
+                    LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
+                    LEFT JOIN siap.control_reporte_evento t on t.repo_id = r.repo_id
+                    INNER JOIN siap.elemento e on e.elem_id = t.elem_id
+                    WHERE r.repo_fechasolucion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id < 9 and t.even_estado <> 9 and r.empr_id = $P{EMPR_ID}
+                    UNION ALL
+                    SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
+                          r.repo_consecutivo, 
+                          r.repo_fechasolucion, 
+                          t.even_codigo_retirado, t.even_cantidad_retirado, 
+                          t.even_codigo_instalado, t.even_cantidad_instalado 
+                    FROM siap.transformador_reporte r
+                    LEFT JOIN siap.transformador_reporte_adicional a on a.repo_id = r.repo_id
+                    LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
+                    LEFT JOIN siap.transformador_reporte_evento t on t.repo_id = r.repo_id
+                    INNER JOIN siap.elemento e on e.elem_id = t.elem_id
+                    WHERE r.repo_fechasolucion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id < 9 and t.even_estado <> 9 and r.empr_id = $P{EMPR_ID}
+                    UNION ALL                    
                     SELECT e.elem_codigo, e.elem_descripcion,  CONCAT('OBRA', ' ', r.obra_nombre) as reti_descripcion, 
                           r.obra_consecutivo as repo_consecutivo, 
                           r.obra_fechasolucion, 
@@ -40,34 +64,43 @@
                     FROM siap.obra r
                     LEFT JOIN siap.obra_evento t on t.obra_id = r.obra_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
-                    WHERE r.obra_fechasolucion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id <> 9 and r.empr_id = $P{EMPR_ID}
+                    WHERE r.obra_fechasolucion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = $P{EMPR_ID}
                     ORDER BY reti_descripcion, elem_codigo]]>
 	</queryString>
 	<field name="elem_codigo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="elem_codigo"/>
 		<property name="com.jaspersoft.studio.field.label" value="elem_codigo"/>
 	</field>
 	<field name="elem_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="elem_descripcion"/>
 		<property name="com.jaspersoft.studio.field.label" value="elem_descripcion"/>
 	</field>
 	<field name="reti_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="reti_descripcion"/>
 		<property name="com.jaspersoft.studio.field.label" value="reti_descripcion"/>
 	</field>
-	<field name="repo_numero" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="repo_numero"/>
+	<field name="repo_consecutivo" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="repo_consecutivo"/>
+		<property name="com.jaspersoft.studio.field.label" value="repo_consecutivo"/>
 	</field>
 	<field name="repo_fechasolucion" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="repo_fechasolucion"/>
 		<property name="com.jaspersoft.studio.field.label" value="repo_fechasolucion"/>
 	</field>
 	<field name="even_codigo_retirado" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="even_codigo_retirado"/>
 		<property name="com.jaspersoft.studio.field.label" value="even_codigo_retirado"/>
 	</field>
 	<field name="even_cantidad_retirado" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="even_cantidad_retirado"/>
 		<property name="com.jaspersoft.studio.field.label" value="even_cantidad_retirado"/>
 	</field>
 	<field name="even_codigo_instalado" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="even_codigo_instalado"/>
 		<property name="com.jaspersoft.studio.field.label" value="even_codigo_instalado"/>
 	</field>
 	<field name="even_cantidad_instalado" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="even_cantidad_instalado"/>
 		<property name="com.jaspersoft.studio.field.label" value="even_cantidad_instalado"/>
 	</field>
 	<pageHeader>
@@ -220,7 +253,7 @@
 					<rightPen lineWidth="0.0"/>
 				</box>
 				<textElement textAlignment="Center"/>
-				<textFieldExpression><![CDATA[$F{repo_numero}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{repo_consecutivo}]]></textFieldExpression>
 			</textField>
 			<textField pattern="yyyy/MM/dd" isBlankWhenNull="true">
 				<reportElement x="530" y="0" width="54" height="13" uuid="124512ce-0ad0-4e11-af34-91272653545e">

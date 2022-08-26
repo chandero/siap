@@ -40,6 +40,12 @@ const informeRouter = {
           meta: { title: 'menu_informe_menu1consolidado_menu1-3reporte', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
         },
         {
+          path: 'menu1-8materialcuadrilla',
+          component: () => import('@/views/informe/menu1consolidado/menu1-8materialcuadrilla'),
+          name: 'menu_informe_menu1consolidado_menu1-8materialcuadrilla',
+          meta: { title: 'menu_informe_menu1consolidado_menu1-8materialcuadrilla', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
+        },
+        {
           path: 'menu1-4cuadrilla',
           component: () => import('@/views/informe/menu1consolidado/menu1-4cuadrilla'),
           name: 'menu_informe_menu1consolidado_menu1-4cuadrilla',

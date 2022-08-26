@@ -641,6 +641,7 @@ GET /api/info/sdm/:fi/:ff/:uid/:eid controllers.InformeController.siap_detallado
 GET /api/info/srm/:fi/:ff/:uid/:eid controllers.InformeController.siap_resumen_material(fi: Long, ff: Long, uid: Long, eid: Long)
 GET /api/info/srmr/:fi/:ff/:uid/:eid controllers.InformeController.siap_resumen_material_reporte(fi: Long, ff: Long, uid: Long, eid: Long)
 GET /api/info/sdmx/:fi/:ff controllers.InformeController.siap_detallado_material_xls(fi: Long, ff: Long)
+GET /api/info/sccmx/:fi/:ff/:ci controllers.InformeController.siap_cuadrilla_consolidado_material_xls(fi: Long, ff: Long, ci: Long)
 GET /api/info/srmx/:fi/:ff controllers.InformeController.siap_resumen_material_xls(fi: Long, ff: Long)
 GET /api/info/srpu/:ft/:uid/:eid controllers.InformeController.siap_reporte_por_uso_xls(ft: Long, uid: Long, eid: Long)
 GET /api/info/smrx/:fi/:ff/:te controllers.InformeController.siap_material_repetido_xls(fi: Long, ff: Long, te: Long)

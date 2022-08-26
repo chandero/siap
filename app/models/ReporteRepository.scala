@@ -5181,13 +5181,13 @@ class ReporteRepository @Inject()(
           'repo_direccion -> reporte.repo_direccion,
           'repo_nombre -> reporte.repo_nombre,
           'repo_telefono -> reporte.repo_telefono,
-          'repo_fechasolucion -> fecha, //reporte.repo_fechasolucion,
+          'repo_fechasolucion -> reporte.repo_fechasolucion,
           'repo_horainicio -> reporte.repo_horainicio,
           'repo_horafin -> reporte.repo_horafin,
           'repo_reportetecnico -> reporte.repo_reportetecnico,
           'repo_descripcion -> reporte.repo_descripcion,
           'repo_subrepoconsecutivo -> reporte.repo_subrepoconsecutivo,
-          'rees_id -> 2,
+          'rees_id -> reporte.rees_id,
           'orig_id -> reporte.orig_id,
           'barr_id -> reporte.barr_id,
           'empr_id -> reporte.empr_id,
@@ -5281,39 +5281,6 @@ class ReporteRepository @Inject()(
             .executeInsert()
         }
       }
-      /*
-      // Borrar Datos Anteriores del Reporte Antes de Actualizar
-      SQL("""DELETE FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id}""")
-        .on(
-          'repo_id -> reporte.repo_id
-        )
-        .executeUpdate()
-      SQL("""DELETE FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id}""")
-        .on(
-          'repo_id -> reporte.repo_id
-        )
-        .executeUpdate()
-      SQL("""DELETE FROM siap.reporte_direccion WHERE repo_id = {repo_id}""")
-        .on(
-          'repo_id -> reporte.repo_id
-        )
-        .executeUpdate()
-      SQL("""DELETE FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id}""")
-        .on(
-          'repo_id -> reporte.repo_id
-        )
-        .executeUpdate()
-      SQL("""DELETE FROM siap.reporte_novedad WHERE repo_id = {repo_id}""")
-        .on(
-          'repo_id -> reporte.repo_id
-        )
-        .executeUpdate()
-      SQL("""DELETE FROM siap.reporte_evento WHERE repo_id = {repo_id}""")
-        .on(
-          'repo_id -> reporte.repo_id
-        )
-        .executeUpdate()
-    */
       // Creación Actualizacion de Novedades
       reporte.novedades.map { novedades =>
         for (n <- novedades) {
@@ -5497,7 +5464,7 @@ class ReporteRepository @Inject()(
                                                                 even_cantidad_instalado = {even_cantidad_instalado},
                                                                 usua_id = {usua_id},
                                                                 unit_id = {unit_id}
-                                                            WHERE repo_id = {repo_id} and aap_id = {aap_id} and elem_id = {elem_id}
+                                                            WHERE repo_id = {repo_id} and aap_id = {aap_id} and elem_id = {elem_id} AND even_id = {even_id}
                                                         """
             ).on(
                 'even_fecha -> hora,
@@ -5511,7 +5478,8 @@ class ReporteRepository @Inject()(
                 'empr_id -> reporte.empr_id,
                 'repo_id -> reporte.repo_id,
                 'aap_id -> e.aap_id,
-                'unit_id -> e.unit_id
+                'unit_id -> e.unit_id,
+                'even_id -> e.even_id
               )
               .executeUpdate() > 0
             if (!eventoActualizado) {
