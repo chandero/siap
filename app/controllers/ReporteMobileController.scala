@@ -117,8 +117,9 @@ class ReporteMobileController @Inject()(
   }
 
   def uploadFotoMovil() = authenticatedUserAction(parse.multipartFormData) { request =>
+    println("Guardando Foto:" + request.toString)
       request.body
-        .file("photo")
+        .file("file")
         .map { f =>
           // only get the last part of the filename
           // otherwise someone can send a path like ../../home/foo/bar.txt to write to other files on the system
