@@ -2337,8 +2337,9 @@
                </el-tab-pane>
                <el-tab-pane label="Fotos" name="fotos">
                   <el-carousel :interval="5000" :autoplay="false" arrow="always">
-                    <el-carousel-item v-for="foto in reporte.direcciones[didx].fotos" :key="foto.refo_id">
-                      <img :src="`data:image/jpeg;base64,${foto.refo_data}`" style="width: 100%; height: 100%; object-fit: contain">
+                    <el-carousel-item v-for="(foto, index) in reporte.direcciones[didx].fotos" :key="foto.refo_id">
+                      <img :src="getFotoData(index)" style="width: 100%; height: 100%; object-fit: contain">
+
                     </el-carousel-item>
                   </el-carousel>
                </el-tab-pane>
@@ -2473,7 +2474,8 @@ import {
   validarCodigo,
   validarReporteDiligenciado,
   convertirReporte,
-  updateReporteParcial
+  updateReporteParcial,
+  getFoto
 } from '@/api/reporte'
 import { getAcciones } from '@/api/accion'
 import {
@@ -2608,6 +2610,7 @@ export default {
       }
     }
     return {
+      foto: ['', '', '', ''],
       repo_fecharecepcion_state: false,
       repo_direccion_state: false,
       repo_nombre_state: false,
@@ -3337,6 +3340,7 @@ export default {
             this.completarMaterial()
             resolve()
           })
+          this.getFotoString()
         } else {
           d.type = 'info'
         }
@@ -5115,6 +5119,18 @@ export default {
         }
       }
       console.info('DEBUG: Saliendo de completarMaterial')
+    },
+    getFotoString() {
+      this.reporte.direcciones[this.didx].fotos.forEach((f) => {
+        if (f.refo_data !== '') {
+          var response = getFoto(f.refo_data).then((response) => {
+            var data = `data:image/jpeg;base64,${response.data.trim()}`
+            this.foto[f.refo_id - 1] = data
+            console.log('Fotos: ', JSON.stringify(this.foto))
+            this.$forceUpdate()
+          })
+        }
+      })
     }
   },
   beforeMount () {
@@ -5461,6 +5477,11 @@ export default {
       .catch((error) => {
         console.log('Origenes: ' + error)
       })
+  },
+  computed: {
+    getFotoData() {
+      return index => { return this.foto[index] }
+    }
   }
 }
 </script>

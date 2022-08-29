@@ -5341,7 +5341,7 @@ class ReporteRepository @Inject()(
       }
 
       // Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
-      if (reporte.reti_id.get == 2 && reporte.adicional.get.repo_tipo_expansion.get != 4) {
+      if (reporte.reti_id.get == 2 && reporte.adicional.get.repo_tipo_expansion.get != 4 && reporte.rees_id.get == 4) {
         reporte.direcciones.map { direcciones =>
           for (d <- direcciones) {
             if (d.aap_id != None) {

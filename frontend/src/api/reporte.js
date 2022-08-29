@@ -322,3 +322,10 @@ export function getActaDesmonteXls(fecha_corte, tireuc_id) {
     responseType: 'blob'
   })
 }
+
+export function getFoto(path) {
+  return request({
+    url: '/repo/gfd/' + path,
+    method: 'get'
+  })
+}

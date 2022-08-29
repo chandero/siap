@@ -135,6 +135,12 @@ class ReporteMobileController @Inject()(
           val file = newTempDir + "/" + filename
           println("path file: " + file)
           f.ref.copyTo(Paths.get(s"$file"), replace = true)
+/*           val txtFile = new File(filename)
+          val bw = new BufferedWriter(new FileWriter(file))
+          for (line <- lines) {
+            bw.write(line)
+          }
+          bw.close() */
           Ok("Archivo Cargado")
         }
         .getOrElse {

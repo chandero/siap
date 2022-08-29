@@ -2,6 +2,8 @@ package controllers
 
 import javax.inject.Inject
 import java.io.{OutputStream, ByteArrayOutputStream}
+import java.nio.file.{Files, Path, Paths}
+import java.util.Base64
 
 import models._
 
@@ -676,4 +678,14 @@ class ReporteController @Inject()(
           Ok(write(datos))
         }
     }
+
+  def getFotoData(fileName: String) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      var filePath = "/opt/siap/fotos/" + fileName
+      var pathToImage = Paths.get(filePath);
+      var bytes = Files.readAllBytes(pathToImage);
+      var encondedString = Base64.getEncoder().encodeToString(bytes);
+      Future.successful(Ok(encondedString))
+  }
 }
