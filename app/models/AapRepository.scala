@@ -358,6 +358,10 @@ case class AapMobile(
     tipo_id: Option[Long],
     aap_tecnologia: Option[String],
     aap_potencia: Option[Long],
+    aap_brazo: Option[String],
+    aap_collarin: Option[String],
+    aap_poste_propietario: Option[String],
+    aap_poste_altura: Option[Double],
     aap_lat: Option[String],
     aap_lng: Option[String]
 )
@@ -500,9 +504,13 @@ object AapMobile {
       get[Option[Long]]("tipo_id") ~
       get[Option[String]]("aap_tecnologia") ~
       get[Option[Long]]("aap_potencia") ~
+      get[Option[String]]("aap_brazo") ~
+      get[Option[String]]("aap_collarin") ~
+      get[Option[String]]("aap_poste_propietario") ~ 
+      get[Option[Double]]("aap_poste_altura") ~
       get[Option[String]]("aap_lat") ~
       get[Option[String]]("aap_lng") map {
-      case aap_id ~ aap_apoyo ~ aap_fechatoma ~ aap_direccion ~ barr_id ~ aaco_id ~ aama_id ~ aamo_id ~ aacu_id ~ aaus_id ~ aatc_id ~ tipo_id ~ aap_tecnologia ~ aap_potencia ~ aap_lat ~ aap_lng =>
+      case aap_id ~ aap_apoyo ~ aap_fechatoma ~ aap_direccion ~ barr_id ~ aaco_id ~ aama_id ~ aamo_id ~ aacu_id ~ aaus_id ~ aatc_id ~ tipo_id ~ aap_tecnologia ~ aap_potencia ~ aap_brazo ~ aap_collarin ~ aap_poste_propietario ~ aap_poste_altura ~ aap_lat ~ aap_lng =>
         AapMobile(
           aap_id,
           aap_apoyo,
@@ -518,6 +526,10 @@ object AapMobile {
           tipo_id,
           aap_tecnologia,
           aap_potencia,
+          aap_brazo,
+          aap_collarin,
+          aap_poste_propietario,
+          aap_poste_altura,
           aap_lat,
           aap_lng
         )
@@ -1564,6 +1576,10 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
                                 aa.tipo_id,
                                 aa.aap_tecnologia,
                                 aa.aap_potencia,
+                                aa.aap_brazo,
+                                aa.aap_collarin,
+                                aa.aap_poste_propietario,
+                                aa.aap_poste_altura,
                                 a.aap_lat,
                                 a.aap_lng
                         FROM siap.aap a

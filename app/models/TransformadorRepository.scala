@@ -254,13 +254,14 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
     */
     def crear(transformador: Transformador) : Future[Long] = Future {
         val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
-        val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())        
+        val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis()) 
+        val aap_id = transformador.aap_numero match { case Some(aap_id) => aap_id.toInt case None => 0 }       
         db.withConnection { implicit connection =>
             val id: Long = SQL("""INSERT INTO siap.transformador
                     (aap_id, empr_id, aap_numero, aap_direccion, barr_id, usua_id, aap_estado, aap_codigo_apoyo, aap_propietario, aap_marca, aap_serial, aap_kva, tipo_id, aap_fases, aap_tension_p, aap_tension_s, aap_referencia)
                     VALUES({aap_id}, {empr_id}, {aap_numero}, {aap_direccion}, {barr_id}, {usua_id}, {aap_estado}, {aap_codigo_apoyo}, {aap_propietario}, {aap_marca}, {aap_serial}, {aap_kva}, {tipo_id}, {aap_fases}, {aap_tension_p}, {aap_tension_s}, {aap_referencia});""").
             on(
-              'aap_id -> transformador.aap_numero,
+              'aap_id -> aap_id,
               'aap_numero -> transformador.aap_numero,
               'empr_id -> transformador.empr_id,
               'usua_id -> transformador.usua_id,

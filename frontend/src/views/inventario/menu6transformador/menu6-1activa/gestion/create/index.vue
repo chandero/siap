@@ -109,6 +109,7 @@ export default {
   },
   methods: {
     aplicar () {
+      this.transformador.aap_id = parseInt(this.transformador.aap_numero)
       this.transformador.aap_kva = parseFloat(this.transformador.aap_kva)
       this.transformador.aap_tension_p = parseFloat(this.transformador.aap_tension_p)
       this.transformador.aap_tension_s = parseFloat(this.transformador.aap_tension_s)

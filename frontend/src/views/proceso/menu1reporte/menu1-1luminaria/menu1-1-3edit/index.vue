@@ -1438,6 +1438,17 @@
                     :lg="16"
                     :xl="16"
                   >
+                  <el-form-item prop="even_direccion_anterior" label="Dirección Anterior">
+                      <el-input
+                        :disabled="true"
+                        :name="'even_direccion_anterior' + didx"
+                        v-model="reporte.direcciones[didx].even_direccion_anterior"
+                        @input="
+                          reporte.direcciones[didx].even_direccion_anterior =
+                            $event.toUpperCase()
+                        "
+                      ></el-input>
+                    </el-form-item>
                     <el-form-item prop="even_direccion" label="Nueva Dirección">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1458,6 +1469,24 @@
                     :lg="8"
                     :xl="8"
                   >
+                  <el-form-item prop="barr_id_anterior" label="Barrio/Vereda Anterior">
+                      <el-select
+                        :disabled="true"
+                        style="width: 100%"
+                        filterable
+                        clearable
+                        v-model="reporte.direcciones[didx].barr_id_anterior"
+                        name="barrio_anterior"
+                        :placeholder="$t('barrio.select')"
+                      >
+                        <el-option
+                          v-for="barrio in barrios"
+                          :key="barrio.barr_id"
+                          :label="barrio.barr_descripcion"
+                          :value="barrio.barr_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
                     <el-form-item prop="barr_id" label="Barrio/Vereda">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1487,6 +1516,15 @@
                     :lg="12"
                     :xl="12"
                   >
+                  <el-form-item prop="dato_adicional.aap_lat_anterior" label="Latitud Anterior">
+                      <el-input
+                        :disabled="true"
+                        :name="'aap_lat_anterior_' + didx"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.aap_lat_anterior
+                        "
+                      />
+                    </el-form-item>
                     <el-form-item prop="dato_adicional.aap_lat" label="Latitud">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1505,6 +1543,18 @@
                     :lg="12"
                     :xl="12"
                   >
+                  <el-form-item
+                      prop="dato_adicional.aap_lng_anterior"
+                      label="Longitud Anterior"
+                    >
+                      <el-input
+                        :disabled="true"
+                        :name="'aap_lng_anterior' + didx"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.aap_lng_anterior
+                        "
+                      />
+                    </el-form-item>
                     <el-form-item
                       prop="dato_adicional.aap_lng"
                       label="Longitud"
@@ -1526,6 +1576,24 @@
                     :lg="8"
                     :xl="8"
                   >
+                  <el-form-item prop="dato.aatc_id_anterior" label="Tipo Luminaria Anterior">
+                      <el-select
+                        :disabled="true"
+                        style="width: 100%"
+                        filterable
+                        clearable
+                        v-model="reporte.direcciones[didx].dato.aatc_id_anterior"
+                        :name="'aatc_id_anterior' + didx"
+                        :placeholder="$t('cover.select')"
+                      >
+                        <el-option
+                          v-for="carcasa in carcasas"
+                          :key="carcasa.aatc_id"
+                          :label="carcasa.aatc_descripcion"
+                          :value="parseInt(carcasa.aatc_id)"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
                     <el-form-item prop="dato.aatc_id" label="Tipo Luminaria">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1553,6 +1621,24 @@
                     :lg="8"
                     :xl="8"
                   >
+                  <el-form-item prop="dato.aama_id_anterior" label="Marca Anterior">
+                      <el-select
+                        :disabled="true"
+                        style="width: 100%"
+                        filterable
+                        clearable
+                        v-model="reporte.direcciones[didx].dato.aama_id"
+                        name="marca"
+                        :placeholder="$t('brand.select')"
+                      >
+                        <el-option
+                          v-for="marca in marcas"
+                          :key="marca.aama_id"
+                          :label="marca.aama_descripcion"
+                          :value="marca.aama_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
                     <el-form-item prop="dato.aama_id" label="Marca">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1580,6 +1666,24 @@
                     :lg="8"
                     :xl="8"
                   >
+                  <el-form-item prop="dato.aamo_id_anterior" label="Modelo Anterior">
+                      <el-select
+                        :disabled="true"
+                        style="width: 100%"
+                        filterable
+                        clearable
+                        v-model="reporte.direcciones[didx].dato.aamo_id_anterior"
+                        name="modelo"
+                        :placeholder="$t('model.select')"
+                      >
+                        <el-option
+                          v-for="modelo in modelos"
+                          :key="modelo.aamo_id"
+                          :label="modelo.aamo_descripcion"
+                          :value="modelo.aamo_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
                     <el-form-item prop="dato.aamo_id" label="Modelo">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
