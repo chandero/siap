@@ -1,41 +1,28 @@
 <template>
-    <el-card class="box-card">
-     <div slot="header" class="clearfix">
+    <el-container class="box-card">
+     <el-header>
       <span>{{ $t('route.cuadrillaedit') }}</span>
-     </div>
-     <span>{{ $t('cuadrilla.description')}}</span>
-     <el-input name="descripcion" v-model="cuadrilla.cuad_descripcion" v-validate="'required'"></el-input>
-     <span>{{ errors.first('descripcion') }}</span>
-     <p/>
-     <el-transfer
-       style="text-align: left; display: inline-block"
-       v-model="cuadrilla.usuarios" :data="selectables"
-       :format="{
-        noChecked: '${total}',
-        hasChecked: '${checked}/${total}'
-       }"
-      :titles="[$t('available'), $t('selected')]"
-     >
-     </el-transfer>
-     <p/>
+     </el-header>
+     <el-main>
+     <el-form>
+       <el-form-item :label="$t('cuadrilla.description')">
+         <el-input name="descripcion" v-model="cuadrilla.cuad_descripcion" v-validate="'required'"></el-input>
+       </el-form-item>
      <el-button :disabled="!validate()" size="medium" type="primary" icon="el-icon-check" @click="aplicar"></el-button>
-    </el-card>
+    </el-form>
+    </el-main>
+    </el-container>
 </template>
 <script>
 import { getCuadrilla, updateCuadrilla } from '@/api/cuadrilla'
-import { getParaCuadrilla } from '@/api/usuario'
 
 export default {
   data () {
     return {
       cuadrilla: {
         cuad_descripcion: '',
-        cuad_estado: 1,
-        usua_id: 0,
-        usuarios: []
+        cuad_estado: 1
       },
-      usuarios: [],
-      selectables: [],
       message: '',
       loading: false,
       page_size: 10,
@@ -66,9 +53,7 @@ export default {
     limpiar () {
       this.cuadrilla = {
         cuad_descripcion: '',
-        cuad_estado: 1,
-        usua_id: 0,
-        usuarios: []
+        cuad_estado: 1
       }
     },
     success () {
@@ -85,21 +70,9 @@ export default {
         message: this.$i18n.t('cuadrilla.notupdated') + ' ' + e,
         onClose: this.limpiar()
       })
-    },
-    getUsuarios () {
-      getParaCuadrilla().then(response => {
-        response.data.forEach(usuario => {
-          this.selectables.push({
-            key: usuario.usua_id,
-            label: usuario.usua_nombre + ' ' + usuario.usua_apellido,
-            disabled: false
-          })
-        })
-      }).catch(() => {})
     }
   },
   mounted () {
-    this.getUsuarios()
     getCuadrilla(this.$route.params.id).then(response => {
       this.cuadrilla = response.data
     }).catch(() => {})

@@ -413,6 +413,36 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
   }  
 
   /**
+    * Recuperar un Medidor dado su medi_comenergia
+    * @param aap_id: Long
+    */
+  def buscarPorAap(aap_id: Long, empr_id: Long): Option[Medidor] = {
+    db.withConnection { implicit connection =>
+      val m = SQL("""SELECT m1.* FROM siap.aap_medidor am1 
+                      INNER JOIN siap.medidor m1 ON m1.medi_id = am1.medi_id
+                      WHERE am1.aap_id = {aap_id} and am1.empr_id = {empr_id}""")
+        .on(
+          'aap_id -> aap_id,
+          'empr_id -> empr_id
+        )
+        .as(Medidor._set.singleOpt)
+
+      m match {
+        case Some(m) => val datos = SQL(
+            """SELECT * FROM siap.medidor_dato md WHERE md.medi_id = {medi_id}"""
+            ).on(
+              'medi_id -> m.medi_id
+            )
+            .as(Medidor_Dato._set *)
+
+            val medidor = m.copy(datos = Some(datos))
+            Some(medidor)
+        case None => m
+      }
+    }
+  }
+
+  /**
     * Recuperar total de registros
     * @return total
     */

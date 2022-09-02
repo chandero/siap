@@ -70,17 +70,12 @@ class CuadrillaController @Inject()(
       var cuadrilla = json.as[CuadrillaDto]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
-      var lista = MutableList[Usuario]()
-      cuadrilla.usuarios.foreach { id =>
-        val usuario = new Usuario(Some(id), "", Some(""), "", "", true, None, None)
-        lista += usuario
-      }
       val cuadrillanuevo = new Cuadrilla(Some(0),
                                    cuadrilla.cuad_descripcion,
                                    cuadrilla.cuad_estado,
                                    usua_id.get,
                                    empr_id.get,
-                                   lista.toList
+                                   List()
                                    )
       cuadrillaService.crear(cuadrillanuevo).map { result =>
         if (result > 0) {

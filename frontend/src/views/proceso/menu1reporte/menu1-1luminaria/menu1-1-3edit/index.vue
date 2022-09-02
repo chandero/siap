@@ -1359,10 +1359,23 @@
                     :md="7"
                     :lg="7"
                     :xl="7"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
+                  <el-form-item
+                      prop="dato_adicional.aap_apoyo_anterior"
+                      :label="$t('reporte.apoyo') + ' Anterior / Nuevo'"
+                    >
+                      <el-input
+                        :disabled="true"
+                        ref="aap_apoyo_anterior"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.aap_apoyo_anterior
+                        "
+                        name="aap_apoyo_anterior"
+                      />
+                    </el-form-item>
                     <el-form-item
                       prop="dato_adicional.aap_apoyo"
-                      :label="$t('reporte.apoyo')"
                     >
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1373,6 +1386,7 @@
                         name="aap_apoyo"
                       />
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].even_direccion_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -1437,8 +1451,9 @@
                     :md="16"
                     :lg="16"
                     :xl="16"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
-                  <el-form-item prop="even_direccion_anterior" label="Dirección Anterior">
+                  <el-form-item prop="even_direccion_anterior" label="Dirección Anterior / Nueva">
                       <el-input
                         :disabled="true"
                         :name="'even_direccion_anterior' + didx"
@@ -1449,7 +1464,7 @@
                         "
                       ></el-input>
                     </el-form-item>
-                    <el-form-item prop="even_direccion" label="Nueva Dirección">
+                    <el-form-item prop="even_direccion">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         :name="'even_direccion_' + didx"
@@ -1460,6 +1475,7 @@
                         "
                       ></el-input>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].even_direccion_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -1468,8 +1484,9 @@
                     :md="8"
                     :lg="8"
                     :xl="8"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
-                  <el-form-item prop="barr_id_anterior" label="Barrio/Vereda Anterior">
+                  <el-form-item prop="barr_id_anterior" label="Barrio/Vereda Anterior / Nuevo">
                       <el-select
                         :disabled="true"
                         style="width: 100%"
@@ -1487,7 +1504,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
-                    <el-form-item prop="barr_id" label="Barrio/Vereda">
+                    <el-form-item prop="barr_id">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         style="width: 100%"
@@ -1505,6 +1522,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].barr_id_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                 </el-row>
                 <el-row>
@@ -1515,8 +1533,9 @@
                     :md="12"
                     :lg="12"
                     :xl="12"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
-                  <el-form-item prop="dato_adicional.aap_lat_anterior" label="Latitud Anterior">
+                  <el-form-item prop="dato_adicional.aap_lat_anterior" label="Latitud Anterior / Nueva">
                       <el-input
                         :disabled="true"
                         :name="'aap_lat_anterior_' + didx"
@@ -1525,7 +1544,7 @@
                         "
                       />
                     </el-form-item>
-                    <el-form-item prop="dato_adicional.aap_lat" label="Latitud">
+                    <el-form-item prop="dato_adicional.aap_lat">
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         :name="'aap_lat_' + didx"
@@ -1534,6 +1553,7 @@
                         "
                       />
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato_adicional.aap_lat_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -1542,10 +1562,11 @@
                     :md="12"
                     :lg="12"
                     :xl="12"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
                   <el-form-item
                       prop="dato_adicional.aap_lng_anterior"
-                      label="Longitud Anterior"
+                      label="Longitud Anterior / Nueva"
                     >
                       <el-input
                         :disabled="true"
@@ -1557,7 +1578,6 @@
                     </el-form-item>
                     <el-form-item
                       prop="dato_adicional.aap_lng"
-                      label="Longitud"
                     >
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1567,6 +1587,7 @@
                         "
                       />
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato_adicional.aap_lng_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -1575,8 +1596,9 @@
                     :md="8"
                     :lg="8"
                     :xl="8"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
-                  <el-form-item prop="dato.aatc_id_anterior" label="Tipo Luminaria Anterior">
+                  <el-form-item prop="dato.aatc_id_anterior" label="Tipo Luminaria Anterior / Nueva">
                       <el-select
                         :disabled="true"
                         style="width: 100%"
@@ -1594,7 +1616,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
-                    <el-form-item prop="dato.aatc_id" label="Tipo Luminaria">
+                    <el-form-item prop="dato.aatc_id">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         style="width: 100%"
@@ -1612,6 +1634,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato.aatc_id_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -1620,8 +1643,9 @@
                     :md="8"
                     :lg="8"
                     :xl="8"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
-                  <el-form-item prop="dato.aama_id_anterior" label="Marca Anterior">
+                  <el-form-item prop="dato.aama_id_anterior" label="Marca Anterior / Nueva">
                       <el-select
                         :disabled="true"
                         style="width: 100%"
@@ -1639,7 +1663,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
-                    <el-form-item prop="dato.aama_id" label="Marca">
+                    <el-form-item prop="dato.aama_id">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         style="width: 100%"
@@ -1657,6 +1681,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato.aama_id_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -1665,8 +1690,9 @@
                     :md="8"
                     :lg="8"
                     :xl="8"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
-                  <el-form-item prop="dato.aamo_id_anterior" label="Modelo Anterior">
+                  <el-form-item prop="dato.aamo_id_anterior" label="Modelo Anterior / Nuevo">
                       <el-select
                         :disabled="true"
                         style="width: 100%"
@@ -1684,7 +1710,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
-                    <el-form-item prop="dato.aamo_id" label="Modelo">
+                    <el-form-item prop="dato.aamo_id">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         style="width: 100%"
@@ -1702,6 +1728,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato.aamo_id_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                 </el-row>
                 <el-row :gutter="4">
@@ -1709,11 +1736,30 @@
                     v-if="reporte.reti_id !== 0"
                     :xs="24"
                     :sm="24"
-                    :md="4"
-                    :lg="4"
-                    :xl="4"
+                    :md="5"
+                    :lg="5"
+                    :xl="5"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
-                    <el-form-item prop="dato.aap_tecnologia" label="Tecnología">
+                    <el-form-item prop="dato.aap_tecnologia_anterior" label="Tecnología Anterior / Nueva">
+                      <el-select
+                        :disabled="true"
+                        style="width: 100%"
+                        filterable
+                        clearable
+                        v-model="reporte.direcciones[didx].dato.aap_tecnologia_anterior"
+                        name="tecnologia_anterior"
+                        :placeholder="$t('gestion.tecnology.select')"
+                      >
+                        <el-option
+                          v-for="tec in tecnologias"
+                          :key="tec"
+                          :label="tec"
+                          :value="tec"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item prop="dato.aap_tecnologia">
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
                         style="width: 100%"
@@ -1731,18 +1777,40 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato.aap_tecnologia_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
                     :xs="24"
                     :sm="6"
-                    :md="4"
-                    :lg="4"
-                    :xl="4"
+                    :md="5"
+                    :lg="5"
+                    :xl="5"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
                     <el-form-item
+                      prop="dato.aap_potencia_anterior"
+                      :label="'Potencia Anterior / Nueva'"
+                    >
+                      <el-select
+                        :disabled="true"
+                        clearable
+                        filterable
+                        ref="power"
+                        v-model="reporte.direcciones[didx].dato.aap_potencia_anterior"
+                        name="potencia_anterior"
+                        :placeholder="$t('gestion.power.select')"
+                      >
+                        <el-option
+                          v-for="power in potencias"
+                          :key="power"
+                          :label="power"
+                          :value="parseFloat(power)"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item
                       prop="dato.aap_potencia"
-                      :label="$t('gestion.power.title')"
                     >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1761,6 +1829,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato.aap_potencia_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -1769,10 +1838,31 @@
                     :md="4"
                     :lg="4"
                     :xl="4"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
+                  <el-form-item
+                      prop="dato.aaco_id_anterior"
+                      :label="'Tipo Conexiòn Anterior / Nueva'"
+                    >
+                      <el-select
+                        :disabled="true"
+                        clearable
+                        filterable
+                        ref="conexion_anterior"
+                        v-model="reporte.direcciones[didx].dato.aaco_id_anterior"
+                        name="conexion_anterior"
+                        :placeholder="$t('gestion.connection.select')"
+                      >
+                        <el-option
+                          v-for="conexion in conexiones"
+                          :key="conexion.aaco_id"
+                          :label="conexion.aaco_descripcion"
+                          :value="parseInt(conexion.aaco_id)"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
                     <el-form-item
                       prop="dato.aaco_id"
-                      :label="$t('gestion.connection.title')"
                     >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1791,6 +1881,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato.aaco_id_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="
@@ -1802,10 +1893,33 @@
                     :md="4"
                     :lg="4"
                     :xl="4"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
                     <el-form-item
+                      prop="dato_adicional.medi_id_anterior"
+                      :label="'Medidor Anterior / Nuevo'"
+                    >
+                      <el-select
+                        :disabled="true"
+                        clearable
+                        filterable
+                        ref="medidor_anterior"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.medi_id_anterior
+                        "
+                        name="medidor_anterior"
+                        :placeholder="$t('gestion.medidor.select')"
+                      >
+                        <el-option
+                          v-for="m in medidores"
+                          :key="m.medi_id"
+                          :label="m.medi_id | fillZeros(4)"
+                          :value="m.medi_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item
                       prop="dato_adicional.medi_id"
-                      :label="$t('gestion.medidor.title')"
                     >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1826,6 +1940,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato_adicional.medi_id_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -1834,10 +1949,45 @@
                     :md="4"
                     :lg="4"
                     :xl="4"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
                     <el-form-item
+                      prop="dato_adicional.tran_id_anterior"
+                      :label="$t('gestion.transformador.title') + ' Anterior / Nuevo'"
+                    >
+                      <el-select
+                        :disabled="true"
+                        clearable
+                        filterable
+                        ref="transformador_anterior"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.tran_id_anterior
+                        "
+                        name="transformador_anterior"
+                        :placeholder="$t('gestion.transformador.select')"
+                        :change="
+                          reporte.direcciones[didx].dato_adicional.tran_id == ''
+                            ? (reporte.direcciones[
+                                didx
+                              ].dato_adicional.tran_id = null)
+                            : (reporte.direcciones[
+                                didx
+                              ].dato_adicional.tran_id =
+                                reporte.direcciones[
+                                  didx
+                                ].dato_adicional.tran_id)
+                        "
+                      >
+                        <el-option
+                          v-for="t in transformadores"
+                          :key="t.tran_id"
+                          :label="t.tran_id | fillZeros(4)"
+                          :value="t.tran_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item
                       prop="dato_adicional.tran_id"
-                      :label="$t('gestion.transformador.title')"
                     >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1870,6 +2020,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato_adicional.tran_id_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                 </el-row>
                 <el-row>
@@ -1880,10 +2031,31 @@
                     :md="8"
                     :lg="8"
                     :xl="8"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
+                  <el-form-item
+                      prop="dato.tipo_id_anterior"
+                      :label="$t('gestion.post.title') + ' Anterior / Nuevo'"
+                    >
+                      <el-select
+                        :disabled="true"
+                        clearable
+                        filterable
+                        ref="post_anterior"
+                        v-model="reporte.direcciones[didx].dato.tipo_id_anterior"
+                        name="post_anterior"
+                        :placeholder="$t('gestion.post.select')"
+                      >
+                        <el-option
+                          v-for="post in postes"
+                          :key="post.tipo_id"
+                          :label="post.tipo_descripcion"
+                          :value="post.tipo_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
                     <el-form-item
                       prop="dato.tipo_id"
-                      :label="$t('gestion.post.title')"
                     >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1902,6 +2074,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato.tipo_id_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -1910,10 +2083,27 @@
                     :md="8"
                     :lg="8"
                     :xl="8"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
                     <el-form-item
+                      prop="dato.aap_poste_altura_anterior"
+                      :label="$t('gestion.post.size') + ' Anterior / Nueva'"
+                    >
+                      <el-input
+                        :disabled="true"
+                        ref="postsize_anterior"
+                        v-model="
+                          reporte.direcciones[didx].dato.aap_poste_altura_anterior
+                        "
+                        @input="
+                          reporte.direcciones[didx].dato.aap_poste_altura_anterior =
+                            parseInt($event)
+                        "
+                        name="postsize"
+                      />
+                    </el-form-item>
+                    <el-form-item
                       prop="dato.aap_poste_altura"
-                      :label="$t('gestion.post.size')"
                     >
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1928,6 +2118,7 @@
                         name="postsize"
                       />
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato.aap_poste_altura_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -1936,10 +2127,33 @@
                     :md="8"
                     :lg="8"
                     :xl="8"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
+                  <el-form-item
+                      prop="dato.aap_poste_propietario_anterior"
+                      :label="$t('gestion.post.own') + ' Anterior / Nuevo'"
+                    >
+                      <el-select
+                        :disabled="true"
+                        clearable
+                        filterable
+                        ref="postowner_anterior"
+                        v-model="
+                          reporte.direcciones[didx].dato.aap_poste_propietario_anterior
+                        "
+                        name="postowner_anterior"
+                        :placeholder="$t('gestion.post.selectown')"
+                      >
+                        <el-option
+                          v-for="own in owns"
+                          :key="own"
+                          :label="own"
+                          :value="own"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
                     <el-form-item
                       prop="dato.aap_poste_propietario"
-                      :label="$t('gestion.post.own')"
                     >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1960,6 +2174,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato.aap_poste_propietario_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                 </el-row>
                 <el-row>
@@ -1970,10 +2185,21 @@
                     :md="6"
                     :lg="6"
                     :xl="6"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
+                  <el-form-item
+                      prop="dato.aap_brazo_anterior"
+                      :label="$t('gestion.arm') + ' Anterior / Nuevo'"
+                    >
+                      <el-input
+                        :disabled="true"
+                        ref="arm_anterior"
+                        v-model="reporte.direcciones[didx].dato.aap_brazo_anterior"
+                        name="arm_anterior"
+                      />
+                    </el-form-item>
                     <el-form-item
                       prop="dato.aap_brazo"
-                      :label="$t('gestion.arm')"
                     >
                       <el-input
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -1982,6 +2208,7 @@
                         name="arm"
                       />
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato.aap_brazo_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -1990,7 +2217,19 @@
                     :md="6"
                     :lg="6"
                     :xl="6"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
+                  <el-form-item
+                      prop="dato.aap_collarin_anterior"
+                      :label="$t('gestion.collar' + ' Anterior / Nuevo')"
+                    >
+                      <el-input
+                        :disabled="true"
+                        ref="collar_anterior"
+                        v-model="reporte.direcciones[didx].dato.aap_collarin_anterior"
+                        name="collar_anterior"
+                      />
+                    </el-form-item>
                     <el-form-item
                       prop="dato.aap_collarin"
                       :label="$t('gestion.collar')"
@@ -2002,6 +2241,7 @@
                         name="collar"
                       />
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato.aap_collarin_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -2010,10 +2250,33 @@
                     :md="6"
                     :lg="6"
                     :xl="6"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
+                  <el-form-item
+                      prop="dato_adicional.aaus_id_anterior"
+                      :label="$t('gestion.use') + ' Anterior / Nuevo'"
+                    >
+                      <el-select
+                        :disabled="true"
+                        clearable
+                        filterable
+                        ref="use"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.aaus_id_anterior
+                        "
+                        name="use"
+                        :placeholder="$t('use.select')"
+                      >
+                        <el-option
+                          v-for="aapuso in aap_usos"
+                          :key="aapuso.aaus_id"
+                          :label="aapuso.aaus_descripcion"
+                          :value="aapuso.aaus_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
                     <el-form-item
                       prop="dato_adicional.aaus_id"
-                      :label="$t('gestion.use')"
                     >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -2034,6 +2297,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato_adicional.aaus_id_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                   <el-col
                     v-if="reporte.reti_id !== 0"
@@ -2042,10 +2306,33 @@
                     :md="6"
                     :lg="6"
                     :xl="6"
+                    style="border: 1px solid lightskyblue; border-radius: 10px;"
                   >
+                  <el-form-item
+                      prop="dato_adicional.aacu_id_anterior"
+                      :label="$t('gestion.account') + ' Anterior / Nueva'"
+                    >
+                      <el-select
+                        :disabled="true"
+                        clearable
+                        filterable
+                        ref="account_anterior"
+                        v-model="
+                          reporte.direcciones[didx].dato_adicional.aacu_id_anterior
+                        "
+                        name="account_anterior"
+                        :placeholder="$t('account.select')"
+                      >
+                        <el-option
+                          v-for="aapcuentaap in aap_cuentasap"
+                          :key="aapcuentaap.aacu_id"
+                          :label="aapcuentaap.aacu_descripcion"
+                          :value="aapcuentaap.aacu_id"
+                        ></el-option>
+                      </el-select>
+                    </el-form-item>
                     <el-form-item
                       prop="dato_adicional.aacu_id"
-                      :label="$t('gestion.account')"
                     >
                       <el-select
                         :disabled="reporte.direcciones[didx].even_estado > 7"
@@ -2066,6 +2353,7 @@
                         ></el-option>
                       </el-select>
                     </el-form-item>
+                    <el-checkbox v-model="reporte.direcciones[didx].dato_adicional.aacu_id_accepted">Aceptar cambio</el-checkbox>
                   </el-col>
                 </el-row>
                 <el-row>
@@ -2866,7 +3154,9 @@ export default {
         even_direccion: null,
         barr_id: null,
         even_direccion_anterior: null,
+        even_direccion_accepted: true,
         barr_id_anterior: null,
+        barr_id_accepted: true,
         even_estado: null,
         even_horaini: null,
         even_horafin: null,
@@ -2890,42 +3180,60 @@ export default {
         dato: {
           aatc_id: null,
           aatc_id_anterior: null,
+          aatc_id_accepted: true,
           aama_id: null,
           aama_id_anterior: null,
+          aama_id_accepted: true,
           aamo_id: null,
           aamo_id_anterior: null,
+          aamo_id_accepted: true,
           aaco_id: null,
           aaco_id_anterior: null,
+          aaco_id_accepted: true,
           aap_potencia: null,
           aap_potencia_anterior: null,
+          aap_potencia_accepted: true,
           aap_tecnologia: null,
           aap_tecnologia_anterior: null,
+          aap_tecnologia_accepted: true,
           aap_brazo: null,
           aap_brazo_anterior: null,
+          aap_brazo_accepted: true,
           aap_collarin: null,
           aap_collarin_anterior: null,
+          aap_collarin_accepted: true,
           tipo_id: null,
           tipo_id_anterior: null,
+          tipo_id_accepted: true,
           aap_poste_altura: null,
           aap_poste_altura_anterior: null,
+          aap_poste_altura_accepted: true,
           aap_poste_propietario: null,
-          aap_poste_propietario_anterior: null
+          aap_poste_propietario_anterior: null,
+          aap_poste_propietario_accepted: true
         },
         dato_adicional: {
           aacu_id_anterior: null,
           aacu_id: null,
+          aacu_id_accepted: true,
           aaus_id_anterior: null,
           aaus_id: null,
+          aaus_id_accepted: true,
           medi_id_anterior: null,
           medi_id: null,
+          medi_id_accepted: true,
           tran_id_anterior: null,
           tran_id: null,
+          tran_id_accepted: true,
           aap_apoyo_anterior: null,
           aap_apoyo: null,
+          aap_apoyo_accepted: true,
           aap_lat_anterior: null,
           aap_lat: null,
+          aap_lat_accepted: true,
           aap_lng_anterior: null,
-          aap_lng: null
+          aap_lng: null,
+          aap_lng_accepted: true
         }
       },
       rules: {
@@ -3592,24 +3900,37 @@ export default {
         if (direccion.aap_id) {
           // Limpiar Datos Direccion
           direccion.even_direccion_anterior = null
+          direccion.even_direccion_accepted = true
           direccion.barr_id_anterior = null
+          direccion.barr_id_accepted = true
           direccion.dato.aatc_id_anterior = null
+          direccion.dato.aatc_id_accepted = true
           direccion.dato.aama_id_anterior = null
+          direccion.dato.aama_id_accepted = true
           direccion.dato.aamo_id_anterior = null
+          direccion.dato.aamo_id_accepted = true
           direccion.dato.aaco_id_anterior = null
+          direccion.dato.aaco_id = null
+          direccion.dato.aaco_id_accepted = true
           direccion.dato.aap_potencia_anterior = null
+          direccion.dato.aap_potencia_accepted = true
           direccion.dato.aap_tecnologia_anterior = null
+          direccion.dato.aap_tecnologia_accepted = true
           direccion.dato_adicional.aacu_id_anterior = null
+          direccion.dato_adicional.aacu_id_accepted = true
           direccion.dato_adicional.aaus_id_anterior = null
+          direccion.dato_adicional.aaus_id_accepted = true
           direccion.dato_adicional.aap_apoyo_anterior = null
+          direccion.dato_adicional.aap_apoyo_accepted = true
           direccion.dato_adicional.aap_lat_anterior = null
+          direccion.dato_adicional.aap_lat_accepted = true
           direccion.dato_adicional.aap_lng_anterior = null
+          direccion.dato_adicional.aap_lng_accepted = true
           direccion.even_direccion = null
           direccion.barr_id = null
           direccion.dato.aatc_id = null
           direccion.dato.aama_id = null
           direccion.dato.aamo_id = null
-          direccion.dato.aaco_id = null
           direccion.dato.aap_potencia = null
           direccion.dato.aap_tecnologia = null
           direccion.dato_adicional.aacu_id = null
@@ -3618,15 +3939,20 @@ export default {
           direccion.dato_adicional.aap_lat = null
           direccion.dato_adicional.aap_lng = null
           direccion.dato.aap_brazo_anterior = null
+          direccion.dato.aap_brazo_accepted = true
           direccion.dato.aap_brazo = null
           direccion.dato.aap_collarin_anterior = null
+          direccion.dato.aap_collarin_accepted = true
           direccion.dato.tipo_id_anterior = null
+          direccion.dato.tipo_id_accepted = null
           direccion.dato.aap_poste_altura_anterior = null
+          direccion.dato.aap_poste_altura_accepted = null
           direccion.dato.aap_collarin = null
           direccion.dato.tipo_id = null
           direccion.dato.aap_poste_altura = null
           direccion.dato.aap_poste_propietario = null
           direccion.dato.aap_poste_propietario_anterior = null
+          direccion.dato.aap_poste_propietario_accepted = true
           // Fin Limpiar Datos Direccion
           getAapEdit(direccion.aap_id)
             .then((response) => {
@@ -3650,25 +3976,38 @@ export default {
                   if (direccion.even_estado === 1) {
                     direccion.even_direccion_anterior =
                       activo.aap.aap_direccion
+                    direccion.even_direccion_accepted = true
                     direccion.barr_id_anterior = activo.aap.barr_id
+                    direccion.barr_id_accepted = true
                     direccion.dato.aatc_id_anterior = activo.aap.aatc_id
+                    direccion.dato.aatc_id_accepted = true
                     direccion.dato.aama_id_anterior = activo.aap.aama_id
+                    direccion.dato.aama_id_accepted = true
                     direccion.dato.aamo_id_anterior = activo.aap.aamo_id
+                    direccion.dato.aamo_id_accepted = true
                     direccion.dato.aaco_id_anterior = activo.aap.aaco_id
+                    direccion.dato.aaco_id_accepted = true
                     direccion.dato.aap_potencia_anterior =
                       activo.aap_adicional.aap_potencia
+                    direccion.dato.aap_potencia_accepted = true
                     direccion.dato.aap_tecnologia_anterior =
                       activo.aap_adicional.aap_tecnologia
+                    direccion.dato.aap_tecnologia_accepted = true
                     direccion.dato_adicional.aacu_id_anterior =
                       activo.aap.aacu_id
+                    direccion.dato_adicional.aacu_id_accepted = true
                     direccion.dato_adicional.aaus_id_anterior =
                       activo.aap.aaus_id
+                    direccion.dato_adicional.aaus_id_accepted = true
                     direccion.dato_adicional.aap_apoyo_anterior =
                       activo.aap.aap_apoyo
+                    direccion.dato_adicional.aap_apoyo_accepted = true
                     direccion.dato_adicional.aap_lat_anterior =
                       activo.aap.aap_lat
+                    direccion.dato_adicional.aap_lat_accepted = true
                     direccion.dato_adicional.aap_lng_anterior =
                       activo.aap.aap_lng
+                    direccion.dato_adicional.aap_lng_accepted = true
                     direccion.even_direccion = activo.aap.aap_direccion
                     direccion.barr_id = activo.aap.barr_id
                     direccion.dato.aatc_id = activo.aap.aatc_id
@@ -3696,12 +4035,16 @@ export default {
                       direccion.dato.aap_brazo_anterior = ''
                       direccion.dato.aap_brazo = ''
                     }
+                    direccion.dato.aap_brazo_accepted = true
                     direccion.dato.aap_collarin_anterior =
                       activo.aap_adicional.aap_collarin
+                    direccion.dato.aap_collarin_acepted = true
                     direccion.dato.tipo_id_anterior =
                       activo.aap_adicional.tipo_id
+                    direccion.dato.tipo_id_accepted = true
                     direccion.dato.aap_poste_altura_anterior =
                       activo.aap_adicional.aap_poste_altura
+                    direccion.dato.aap_poste_altura_accepted = true
                     direccion.dato.aap_collarin =
                       activo.aap_adicional.aap_collarin
                     direccion.dato.tipo_id = activo.aap_adicional.tipo_id
@@ -3719,6 +4062,7 @@ export default {
                       direccion.dato.aap_poste_propietario = null
                       direccion.dato.aap_poste_propietario_anterior = null
                     }
+                    direccion.dato.aap_poste_propietario_accepted = true
                     // validar si es reubicación y no es retirada
                     if (
                       this.reporte.reti_id === 3 ||
@@ -3762,6 +4106,7 @@ export default {
                         direccion.dato_adicional.tran_id = null
                       }
                     }
+                    direccion.dato_adicional.tran_id_accepted = true
                     if (this.reporte.reti_id === 8) {
                       direccion.dato.aaco_id = 3
                     }
@@ -4826,7 +5171,7 @@ export default {
     cargarEventos () {
       // validar si existe un reporte previo
       var stringReporteAnterior = null
-      if (this.reporte_previo.rees_id < 3) {
+      if (this.reporte_previo.rees_id === 1) {
         stringReporteAnterior = localStorage.getItem('currEditRepFecha')
       }
       if (
@@ -5136,6 +5481,10 @@ export default {
         } else {
           d.type = 'info'
         }
+        d.even_direccion_accepted = true
+        d.barr_id_accepted = true
+        d.dato.aatc_id_accepted = true
+        // VOY AQUI
         if (d.even_id === undefined || d.even_id === null || d.even_id < 1) {
           d.even_id = dire_length + 1
           dire_length = dire_length + 1

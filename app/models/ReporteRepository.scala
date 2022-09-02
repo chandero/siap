@@ -1315,6 +1315,8 @@ class ReporteRepository @Inject()(
     elementoService: ElementoRepository,
     empresaService: EmpresaRepository,
     usuarioService: UsuarioRepository,
+    medidorService: MedidorRepository,
+    transformadorService: TransformadorRepository,
     aapService: AapRepository
 )(implicit ec: DatabaseExecutionContext) {
   private val db = dbapi.database("default")
@@ -5168,13 +5170,16 @@ class ReporteRepository @Inject()(
       reporte: Reporte
   ): Boolean = {
     val reporte_ant: Option[Reporte] = buscarPorId(reporte.repo_id.get)
+    // val valida = validarOrdenDeTrabajo(reporte.repo_id.get)
+    var result = false
+    // if (true) {
     println("Actualizando Reporte Movil")
     db.withConnection { implicit connection =>
       val fecha: LocalDate =
         new LocalDate(Calendar.getInstance().getTimeInMillis())
       val hora: LocalDateTime =
         new LocalDateTime(Calendar.getInstance().getTimeInMillis())
-      val result: Boolean = SQL(
+      result = SQL(
         "UPDATE siap.reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, repo_subrepoconsecutivo = {repo_subrepoconsecutivo}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tiba_id = {tiba_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
       ).on(
           'repo_id -> reporte.repo_id,
@@ -5937,7 +5942,7 @@ class ReporteRepository @Inject()(
 
       reporte.direcciones.map { direcciones =>
         for (d <- direcciones) {
-          if (d.aap_id != None && d.aap_id.get != "" && d.aap_id.get.toInt > 0) {
+          if (d.aap_id != None && d.aap_id.get != "" && d.aap_id.get.toInt > 0) {            
             var dirActualizado: Boolean = false
             var dirInsertado: Boolean = false
             var datoActualizado: Boolean = false
@@ -6149,6 +6154,14 @@ class ReporteRepository @Inject()(
             }
             // Fin Direccion Dato
             // Direccion Dato Adicional
+            var medi_id = medidorService.buscarPorAap(aap.aap_id.get, aap.empr_id) match { 
+              case Some(m) => m.medi_id
+              case None => None
+            }
+            var tran_id = transformadorService.buscarPorId(aap.aap_id.get, aap.empr_id) match {
+              case Some(t) => t.aap_id
+              case None => None
+            }
             datoadicionalActualizado = SQL(
               """UPDATE siap.reporte_direccion_dato_adicional SET 
                                 aacu_id_anterior = {aacu_id_anterior},
@@ -6174,10 +6187,10 @@ class ReporteRepository @Inject()(
                 'aacu_id -> d.dato_adicional.get.aacu_id,
                 'aaus_id_anterior -> d.dato_adicional.get.aaus_id_anterior,
                 'aaus_id -> d.dato_adicional.get.aaus_id,
-                'medi_id_anterior -> d.dato_adicional.get.medi_id_anterior,
-                'medi_id -> d.dato_adicional.get.medi_id,
-                'tran_id_anterior -> d.dato_adicional.get.tran_id_anterior,
-                'tran_id -> d.dato_adicional.get.tran_id,
+                'medi_id_anterior -> medi_id, //d.dato_adicional.get.medi_id_anterior,
+                'medi_id -> medi_id, //d.dato_adicional.get.medi_id,
+                'tran_id_anterior -> tran_id, //d.dato_adicional.get.tran_id_anterior,
+                'tran_id -> tran_id, //d.dato_adicional.get.tran_id,
                 'aap_apoyo -> d.dato_adicional.get.aap_apoyo,
                 'aap_apoyo_anterior -> d.dato_adicional.get.aap_apoyo,
                 'aap_lat -> d.dato_adicional.get.aap_lat,
@@ -6233,10 +6246,10 @@ class ReporteRepository @Inject()(
                   'aacu_id -> d.dato_adicional.get.aacu_id,
                   'aaus_id_anterior -> d.dato_adicional.get.aaus_id_anterior,
                   'aaus_id -> d.dato_adicional.get.aaus_id,
-                  'medi_id_anterior -> d.dato_adicional.get.medi_id_anterior,
-                  'medi_id -> d.dato_adicional.get.medi_id,
-                  'tran_id_anterior -> d.dato_adicional.get.tran_id_anterior,
-                  'tran_id -> d.dato_adicional.get.tran_id,
+                  'medi_id_anterior -> medi_id, // d.dato_adicional.get.medi_id_anterior,
+                  'medi_id -> medi_id, //d.dato_adicional.get.medi_id,
+                  'tran_id_anterior -> tran_id, //d.dato_adicional.get.tran_id_anterior,
+                  'tran_id -> tran_id, // d.dato_adicional.get.tran_id,
                   'aap_apoyo -> d.dato_adicional.get.aap_apoyo,
                   'aap_apoyo_anterior -> d.dato_adicional.get.aap_apoyo,
                   'aap_lat -> d.dato_adicional.get.aap_lat,
@@ -6306,7 +6319,7 @@ class ReporteRepository @Inject()(
           } // Fin d.aap_id != null
         } // Fin for direcciones
       } // Fin direcciones map
-
+     
       //
       // guardar medio ambiente
       SQL(
@@ -6327,8 +6340,37 @@ class ReporteRepository @Inject()(
             .executeInsert()
         }
       }
-      //
 
+      val operaciones = reporte.direcciones match {
+        case Some(d) => d.length
+        case None => 0
+      }
+
+      val materiales = reporte.eventos match {
+        case Some(e) => e.length
+        case None => 0
+      }
+      //
+      val repoSyncUpdated = SQL("""UPDATE siap.reporte_sincronizacion SET resi_operaciones = {resi_operaciones}, resi_material = {resi_material}, resi_ultimo_sync = {resi_ultimo_sync} WHERE tireuc_id = {tireuc_id} and repo_id = {repo_id}""").on(
+          'resi_ultimo_sync -> new DateTime(),
+          'resi_operaciones -> operaciones,
+          'resi_material -> materiales,
+          'tireuc_id -> reporte.tireuc_id,
+          'repo_id -> reporte.repo_id.get
+        ).executeUpdate() > 0
+
+      if (!repoSyncUpdated) {
+         SQL("""INSERT INTO siap.reporte_sincronizacion VALUES ({tireuc_id}, {repo_id}, {reti_id}, {repo_consecutivo}, {resi_ultimo_sync}, {resi_operaciones}, {resi_material})""").
+      on(
+          'tireuc_id -> reporte.tireuc_id,
+          'repo_id -> reporte.repo_id,
+          'reti_id -> reporte.reti_id,
+          'repo_consecutivo -> reporte.repo_consecutivo,
+          'resi_ultimo_sync -> DateTime.now(),
+          'resi_operaciones -> operaciones,
+          'resi_material -> materiales,
+        ).executeInsert()
+      }
       if (reporte_ant != None) {
         if (reporte_ant.get.repo_fecharecepcion != reporte.repo_fecharecepcion) {
           SQL(
@@ -6551,6 +6593,7 @@ class ReporteRepository @Inject()(
             .executeInsert()
         }
       }
+    //}
 
       result
     }
