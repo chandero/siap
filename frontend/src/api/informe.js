@@ -88,6 +88,19 @@ export function informe_siap_cuadrilla_consolidado_material_xls (fecha_inicial, 
   })
 }
 
+export function siap_cuadrilla_consolidado_material_xlsx(fecha_inicial, fecha_final, cuad_id) {
+  const data = {
+    fecha_inicial,
+    fecha_final,
+    cuad_id
+  }
+  return request({
+    url: '/info/sccmxlx/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.cuad_id,
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
 export function informe_siap_detallado_expansion_xls (fecha_inicial, fecha_final) {
   const data = {
     fecha_inicial,

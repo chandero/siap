@@ -59,3 +59,10 @@ export function deleteCuadrilla (cuad_id) {
     method: 'get'
   })
 }
+
+export function getUsuariosCuadrilla() {
+  return request({
+    url: 'cuad/uscu',
+    method: 'post'
+  })
+}

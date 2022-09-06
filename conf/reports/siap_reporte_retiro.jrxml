@@ -13,7 +13,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="mm"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="siap_da"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SiapDataAdapter"/>
 	<subDataset name="Dataset1" uuid="dbc9354d-619c-4173-8573-a3f7cee7dbff">
 		<queryString>
 			<![CDATA[]]>

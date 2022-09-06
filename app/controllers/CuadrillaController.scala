@@ -19,6 +19,7 @@ import dto.CuadrillaDto
 @Singleton
 class CuadrillaController @Inject()(
     cuadrillaService: CuadrillaRepository,
+    cuadrillaUsuarioService: CuadrillaUsuarioRepository,
     cc: ControllerComponents,
     authenticatedUserAction: AuthenticatedUserAction)(
     implicit ec: ExecutionContext)
@@ -117,6 +118,24 @@ class CuadrillaController @Inject()(
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
       if (cuadrillaService.borrar(empr_id.get, cuad_id, usua_id.get)) {
+        Future.successful(Ok(Json.toJson("true")))
+      } else {
+        Future.successful(ServiceUnavailable(Json.toJson("false")))
+      }
+  }
+
+  def getUsuariosCuadrilla() = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      cuadrillaUsuarioService.getUsuariosCuadrilla(empr_id.get).map { usuarios =>
+        Ok(Json.toJson(usuarios))
+      }
+  }
+
+  def actualizarUsuarioCuadrilla(usua_id: Long, cuad_id: Long, cuus_esreponsable: Boolean) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      if (cuadrillaUsuarioService.actualizarUsuarioCuadrilla(empr_id.get, cuad_id, usua_id, cuus_esreponsable)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
         Future.successful(ServiceUnavailable(Json.toJson("false")))

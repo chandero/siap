@@ -260,6 +260,8 @@ GET /api/cuad/get/all controllers.CuadrillaController.cuadrillas
 GET /api/cuad/m/get/all controllers.CuadrillaController.cuadrillas
 POST /api/cuad/save controllers.CuadrillaController.guardarCuadrilla
 POST /api/cuad/upd controllers.CuadrillaController.actualizarCuadrilla
+POST /api/cuad/uscu controllers.CuadrillaController.getUsuariosCuadrilla
+GET /api/cuad/upduser/:u/:c/:e controllers.CuadrillaController.actualizarUsuarioCuadrilla(u:Long, c:Long, e:Boolean)
 
 # Aap
 
@@ -687,6 +689,7 @@ GET /api/info/sigox/:fi/:ff/:ft/:e/:t controllers.InformeController.siap_informe
 GET /api/info/sigex/:fi/:ff/:ft/:e/:t controllers.InformeController.siap_informe_general_estadistica_xls(fi: Long, ff:Long, ft:String, e: Long, t:String)
 GET /api/info/sirax/:ff/:e/:t controllers.InformeController.siap_informe_resumen_aforo_xls(ff: Long, e: Long, t: String)
 GET /api/info/sicax/:ff/:e/:t controllers.InformeController.siap_informe_carga_aforo_xls(ff: Long, e: Long, t: String)
+GET /api/info/sccmxlx/:fi/:ff/:c controllers.InformeController.siap_cuadrilla_consolidado_material_xlsx(fi: Long, ff: Long, c: Long)
 
 # Graficas
 

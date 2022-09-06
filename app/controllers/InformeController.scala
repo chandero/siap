@@ -36,6 +36,7 @@ import net.liftweb.json.parse
 @Singleton
 class InformeController @Inject()(
     informeService: InformeRepository,
+    cuadrillaService: CuadrillaRepository,
     cc: ControllerComponents,
     config: Configuration,
     authenticatedUserAction: AuthenticatedUserAction
@@ -673,6 +674,23 @@ class InformeController @Inject()(
       informeService.siap_informe_por_cuadrilla_xls(fecha_inicial: Long, fecha_final: Long, empr_id.get).map {
         reportes =>
           Ok(Json.toJson(reportes))
+      }
+  }
+
+  def siap_cuadrilla_consolidado_material_xlsx(fecha_inicial: Long, fecha_final: Long, cuad_id: Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      val usua_id = Utility.extraerUsuario(request)
+      cuadrillaService.buscarPorId(cuad_id) match { 
+        case Some(cuadrilla) => 
+          val os = informeService.siap_cuadrilla_consolidado_material_xlsx(fecha_inicial, fecha_final, cuad_id, empr_id.get, usua_id.get)
+          val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+          val filename = "Informe_Material_Cuadrilla_" + fmt.print(fecha_final) + "_" + cuadrilla.cuad_descripcion + ".xlsx"
+          val attach = "attachment; filename=" + filename
+          Future.successful(Ok(os)
+            .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            .withHeaders("Content-Disposition" -> attach))
+        case None => Future.successful(NotFound(Json.toJson("No se encontró la cuadrilla")))
       }
   }
 

@@ -5179,6 +5179,19 @@ class ReporteRepository @Inject()(
         new LocalDate(Calendar.getInstance().getTimeInMillis())
       val hora: LocalDateTime =
         new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+      val fecha_solucion: Option[DateTime] = reporte_ant match {
+        case Some(r) => r.repo_fechasolucion match {
+          case Some(f) => Some(f)
+          case None => { 
+            if (reporte.direcciones.get.length > 0) {
+              Some(DateTime.now()) 
+            } else {
+              None
+            }
+          }
+        }
+        case None => None
+      }
       result = SQL(
         "UPDATE siap.reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, repo_subrepoconsecutivo = {repo_subrepoconsecutivo}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tiba_id = {tiba_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
       ).on(
@@ -5186,7 +5199,7 @@ class ReporteRepository @Inject()(
           'repo_direccion -> reporte.repo_direccion,
           'repo_nombre -> reporte.repo_nombre,
           'repo_telefono -> reporte.repo_telefono,
-          'repo_fechasolucion -> reporte.repo_fechasolucion,
+          'repo_fechasolucion -> fecha_solucion,
           'repo_horainicio -> reporte.repo_horainicio,
           'repo_horafin -> reporte.repo_horafin,
           'repo_reportetecnico -> reporte.repo_reportetecnico,

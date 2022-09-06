@@ -105,7 +105,7 @@
   </el-row>
   <el-row>
     <el-col :span="24">
-      <img :title="$t('xls')" @click="exportarXls()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
+      <img :title="$t('xls')" @click="generarXlsx()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
     </el-col>
   </el-row>
   </el-main>
@@ -115,7 +115,7 @@
 import { mapGetters } from 'vuex'
 import { parseTime } from '@/utils'
 import { getCuadrillas } from '@/api/cuadrilla'
-import { informe_siap_cuadrilla_consolidado_material_xls } from '@/api/informe'
+import { informe_siap_cuadrilla_consolidado_material_xls, siap_cuadrilla_consolidado_material_xlsx } from '@/api/informe'
 export default {
   data () {
     return {
@@ -145,6 +145,28 @@ export default {
       this.fecha_final = this.fecha_inicial
       informe_siap_cuadrilla_consolidado_material_xls(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.cuad_id).then(response => {
         this.tableData = response.data
+      })
+    },
+    generarXlsx () {
+      this.fecha_final = this.fecha_inicial
+      siap_cuadrilla_consolidado_material_xlsx(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.cuad_id).then(response => {
+        var blob = response.data
+        const filename = response.headers['content-disposition'].split('filename=')[1]
+        if (window.navigator.msSaveOrOpenBlob) {
+          window.navigator.msSaveBlob(blob, filename)
+        } else {
+          var downloadLink = window.document.createElement('a')
+          downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+          downloadLink.download = filename
+          document.body.appendChild(downloadLink)
+          downloadLink.click()
+          document.body.removeChild(downloadLink)
+        }
+      }).catch(error => {
+        this.$message({
+          message: 'Error al generar el archivo: ' + error,
+          type: 'error'
+        })
       })
     },
     exportarXls () {
