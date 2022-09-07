@@ -289,6 +289,8 @@ class OrdenTrabajoRepository @Inject()(
     dbapi: DBApi,
     empresaService: EmpresaRepository,
     reporteService: ReporteRepository,
+    controlReporteService: ControlReporteRepository,
+    transformadorReporteService: TransformadorReporteRepository,
     obraService: ObraRepository
 )(implicit ec: DatabaseExecutionContext) {
   private val db = dbapi.database("default")
@@ -477,16 +479,33 @@ class OrdenTrabajoRepository @Inject()(
         for (r <- reportes) {
           r.repo_consecutivo match {
             case Some(consec) =>
-              SQL(
-                """INSERT INTO siap.ordentrabajo_reporte (ortr_id, repo_id, even_id, even_estado, tireuc_id) VALUES ({ortr_id}, {repo_id}, {even_id}, {even_estado}, {tireuc_id})"""
-              ).on(
-                  'ortr_id -> id,
-                  'repo_id -> r.repo_id,
-                  'even_id -> r.even_id,
-                  'even_estado -> r.even_estado,
-                  'tireuc_id -> r.tireuc_id
-                )
-                .executeInsert()
+              val reporte = r.tireuc_id match { 
+                case Some(1) => reporteService.buscarPorId(r.repo_id.get)
+                case Some(2) => controlReporteService.buscarPorId(r.repo_id.get)
+                case Some(3) => transformadorReporteService.buscarPorId(r.repo_id.get)
+              }
+              reporte match {
+                case Some(rep) =>
+                  if (rep.rees_id.get < 3) {
+                    SQL(
+                      """INSERT INTO siap.ordentrabajo_reporte (ortr_id, repo_id, even_id, even_estado, tireuc_id) VALUES ({ortr_id}, {repo_id}, {even_id}, {even_estado}, {tireuc_id})"""
+                    ).on(
+                      'ortr_id -> id,
+                      'repo_id -> r.repo_id,
+                      'even_id -> r.even_id,
+                      'even_estado -> r.even_estado,
+                      'tireuc_id -> r.tireuc_id
+                    )
+                    .executeInsert()
+                    SQL("""UPDATE siap.reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}""").
+                    on(
+                      'repo_fechasolucion -> Option.empty[DateTime],
+                      'tireuc_id -> r.tireuc_id,
+                      'repo_id -> r.repo_id
+                    ).executeUpdate()
+                  }
+                case None => None
+              }
             case None => None
           }
         }
@@ -582,27 +601,44 @@ class OrdenTrabajoRepository @Inject()(
         for (r <- reportes) {
           r.repo_consecutivo match {
             case Some(consec) =>
-              val esactualizado: Boolean = SQL(
-                """UPDATE siap.ordentrabajo_reporte SET repo_id = {repo_id}, even_estado = {even_estado}, tireuc_id = {tireuc_id} where ortr_id = {ortr_id} and even_id = {even_id}"""
-              ).on(
-                  'ortr_id -> ortr.ortr_id,
-                  'even_id -> r.even_id,
-                  'repo_id -> r.repo_id,
-                  'even_estado -> r.even_estado,
-                  'tireuc_id -> r.tireuc_id
-                )
-                .executeUpdate() > 0
-              if (!esactualizado) {
-                SQL(
-                  """INSERT INTO siap.ordentrabajo_reporte (ortr_id, repo_id, even_id, even_estado, tireuc_id) VALUES ({ortr_id}, {repo_id}, {even_id}, {even_estado}, {tireuc_id})"""
-                ).on(
-                    'ortr_id -> ortr.ortr_id,
-                    'repo_id -> r.repo_id,
-                    'even_id -> r.even_id,
-                    'even_estado -> r.even_estado,
-                    'tireuc_id -> r.tireuc_id
-                  )
-                  .executeInsert()
+              val reporte = r.tireuc_id match { 
+                case Some(1) => reporteService.buscarPorId(r.repo_id.get)
+                case Some(2) => controlReporteService.buscarPorId(r.repo_id.get)
+                case Some(3) => transformadorReporteService.buscarPorId(r.repo_id.get)
+              }
+              reporte match {
+                case Some(rep) =>
+                  if (rep.rees_id.get < 3) {
+                    val esactualizado: Boolean = SQL(
+                      """UPDATE siap.ordentrabajo_reporte SET repo_id = {repo_id}, even_estado = {even_estado}, tireuc_id = {tireuc_id} where ortr_id = {ortr_id} and even_id = {even_id}"""
+                    ).on(
+                      'ortr_id -> ortr.ortr_id,
+                      'even_id -> r.even_id,
+                      'repo_id -> r.repo_id,
+                      'even_estado -> r.even_estado,
+                      'tireuc_id -> r.tireuc_id
+                    )
+                   .executeUpdate() > 0
+                    if (!esactualizado) {
+                      SQL(
+                        """INSERT INTO siap.ordentrabajo_reporte (ortr_id, repo_id, even_id, even_estado, tireuc_id) VALUES ({ortr_id}, {repo_id}, {even_id}, {even_estado}, {tireuc_id})"""
+                      ).on(
+                       'ortr_id -> ortr.ortr_id,
+                       'repo_id -> r.repo_id,
+                       'even_id -> r.even_id,
+                        'even_estado -> r.even_estado,
+                       'tireuc_id -> r.tireuc_id
+                     )
+                      .executeInsert()
+                    }
+                    SQL("""UPDATE siap.reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}""").
+                    on(
+                     'repo_fechasolucion -> Option.empty[DateTime],
+                     'tireuc_id -> r.tireuc_id,
+                    'repo_id -> r.repo_id
+                    ).executeUpdate()
+                  }
+                case None => None
               }
             case None => None
           }
@@ -805,7 +841,7 @@ class OrdenTrabajoRepository @Inject()(
         new LocalDateTime(Calendar.getInstance().getTimeInMillis())
 
       val count: scala.Long = SQL(
-        "UPDATE siap.ordentrabajo SET otes_id = 99 WHERE ortr_id = {ortr_id}"
+        "UPDATE siap.ordentrabajo SET otes_id = 9 WHERE ortr_id = {ortr_id}"
       ).on(
           'ortr_id -> ortr_id
         )
@@ -904,6 +940,13 @@ class OrdenTrabajoRepository @Inject()(
           )
           .executeInsert()
           .get > 0
+
+          SQL("""UPDATE siap.reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}""").
+               on(
+                 'repo_fechasolucion -> Option.empty[DateTime],
+                 'tireuc_id -> tireuc_id,
+                 'repo_id -> repo_id
+               ).executeUpdate()
       }
       result
     }
