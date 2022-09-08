@@ -26,6 +26,7 @@ GET /api/u/ui controllers.UsuarioController.userinfo()
 +nocsrf
 GET /api/u/m/ui controllers.UsuarioController.userinfoMobile()
 GET /api/usua/get/:p/:c controllers.UsuarioController.todos(p: Long, c: Long)
+GET /api/usua/get/all controllers.UsuarioController.all
 GET /api/usua/get/cuad controllers.UsuarioController.paraCuadrilla()
 GET /api/usua/del/:id controllers.UsuarioController.borrarUsuario(id: Long)
 POST /api/usua/save controllers.UsuarioController.guardarUsuario
@@ -634,6 +635,7 @@ GET /api/ortr/prn/ortr/:id/:em controllers.OrdenTrabajoController.imprimirOrden(
 GET /api/ortr/obc/:id controllers.OrdenTrabajoController.obtenerReporteObraPorCuadrilla(id: Long)
 +nocsrf
 GET /api/ortr/obcm/:id controllers.OrdenTrabajoController.obtenerReporteObraPorCuadrillaMobile(id: Long)
+GET /api/ortr/incb/:fi/:ff controllers.OrdenTrabajoController.siap_informe_cambios_en_reporte(fi: Long, ff: Long)
 # Medioambiente
 
 GET /api/meam/get controllers.MedioAmbienteController.todos

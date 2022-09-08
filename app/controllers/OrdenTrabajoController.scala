@@ -14,6 +14,8 @@ import net.liftweb.json.Serialization.write
 import net.liftweb.json.Serialization.read
 import net.liftweb.json.parse
 
+import org.joda.time.format.DateTimeFormat
+
 import utilities._
 
 import dto._
@@ -187,4 +189,18 @@ class OrdenTrabajoController @Inject()(
           Ok(write(reportes))
       }
     }
+
+  def siap_informe_cambios_en_reporte(fecha_inicial: scala.Long, fecha_final: scala.Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)
+      val os = ordenService.siap_informe_cambios_en_reporte(fecha_inicial, fecha_final, empr_id.get)
+      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+      val filename = "Informe_Cambios_En_Reportes_" + fmt.print(fecha_inicial) + "_" + fmt.print(fecha_final) + ".xlsx"
+      val attach = "attachment; filename=" + filename
+          Future.successful(Ok(os)
+            .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            .withHeaders("Content-Disposition" -> attach))
+
+  }
 }

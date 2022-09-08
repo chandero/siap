@@ -406,6 +406,15 @@ class UsuarioRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
                 }   
     }
 
+    def all(empr_id: Long): Future[Iterable[Usuario]] = Future[Iterable[Usuario]] {
+                db.withConnection { implicit connection => 
+                    SQL("SELECT * FROM siap.usuario u INNER JOIN siap.usuario_empresa_perfil uep ON uep.usua_id = u.usua_id WHERE uep.empr_id = {empr_id} AND u.usua_activo is true ORDER BY usua_nombre").
+                    on(
+                       'empr_id -> empr_id
+                    ).as(Usuario.simple *)
+                }   
+    }    
+
     def paraCuadrilla(empr_id: Long): Future[Iterable[Usuario]] = Future[Iterable[Usuario]] {
                 db.withConnection { implicit connection => 
                     SQL("SELECT * FROM siap.usuario u INNER JOIN siap.usuario_empresa_perfil e ON u.usua_id = e.usua_id WHERE e.empr_id = {empr_id} and e.perf_id = {perf_id} ORDER BY usua_apellido").

@@ -2410,7 +2410,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_instalado, re1.even_cantidad_instalado
                     FROM siap.ordentrabajo ot1
                     inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
-                    inner join siap.reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = otr1.ortr_fecha
+                    inner join siap.reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
                     left join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
@@ -2426,7 +2426,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_instalado, re1.even_cantidad_instalado 
                     FROM siap.ordentrabajo ot1
                     inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
-                    inner join siap.control_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = otr1.ortr_fecha
+                    inner join siap.control_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.control_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
                     left join siap.control_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
@@ -2441,8 +2441,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_retirado, re1.even_cantidad_retirado, 
                           re1.even_codigo_instalado, re1.even_cantidad_instalado 
                     FROM siap.ordentrabajo ot1
-				    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
-                    inner join siap.transformador_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = otr1.ortr_fecha
+				            inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.transformador_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.transformador_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
                     left join siap.transformador_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
@@ -2506,8 +2506,19 @@ ORDER BY e.reti_id, e.elem_codigo""")
           case 0 => None
           case _ => cuadrillaService.buscarPorId(cuad_id)
         }
+        val last_sync = SQL("""select cast(rs1.resi_ultimo_sync as varchar) from siap.ordentrabajo ot1
+                                inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id 
+                                inner join siap.reporte_sincronizacion rs1 on rs1.tireuc_id = otr1.tireuc_id and rs1.repo_id = otr1.repo_id
+                                where ot1.ortr_fecha = {fecha_corte} and ot1.cuad_id = {cuad_id}
+                                order by rs1.resi_ultimo_sync desc 
+                                limit 1""").
+                          on(
+                            'fecha_corte -> ff.getTime(),
+                            'cuad_id -> cuad_id
+                          ).as(SqlParser.scalar[String].singleOpt)
         val empresa = empresaService.buscarPorId(empr_id)
         val usuario = usuarioService.buscarPorId(usua_id)
+        println("Leyendo Datos...")
         val resultSet = SQL("""
           select 
             o.ortr_fecha, o.cuad_descripcion, o.reti_descripcion, o.elem_codigo, o.elem_descripcion,  
@@ -2520,7 +2531,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_instalado, re1.even_cantidad_instalado
                     FROM siap.ordentrabajo ot1
                     inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
-                    inner join siap.reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = otr1.ortr_fecha
+                    inner join siap.reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
                     left join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
@@ -2536,7 +2547,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_instalado, re1.even_cantidad_instalado 
                     FROM siap.ordentrabajo ot1
                     inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
-                    inner join siap.control_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = otr1.ortr_fecha
+                    inner join siap.control_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.control_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
                     left join siap.control_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
@@ -2552,7 +2563,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_instalado, re1.even_cantidad_instalado 
                     FROM siap.ordentrabajo ot1
 				    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
-                    inner join siap.transformador_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = otr1.ortr_fecha
+                    inner join siap.transformador_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.transformador_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
                     left join siap.transformador_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
@@ -2584,6 +2595,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
             'cuad_id -> cuad_id
           )
           .as(Siap_cuadrilla_consolidado_material._set *)
+        println("Datos Obtenidos...")
         var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
         var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
         var _listMerged = new ListBuffer[CellRange]()  
@@ -2603,7 +2615,13 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 })
             _listRow += com.norbitltd.spoiwo.model
                 .Row()
-                .withCellValues("Fecha del Material:", df.print(ff.getTimeInMillis()))
+                .withCellValues("Fecha de Operación:", df.print(ff.getTimeInMillis()))
+            _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Ultima Sincronización:", last_sync match { 
+                  case Some(l) => l
+                  case None => ""
+                })
             _listRow += com.norbitltd.spoiwo.model
                 .Row()
                 .withCellValues("Fecha del Informe:", dtf.print(DateTime.now()))

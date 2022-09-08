@@ -397,6 +397,21 @@ const procesoRouter = {
       }
     },
     {
+      path: 'menu9informecambios',
+      component: () => import('@/views/proceso/menu9informecambios/index'), // Parent router-view
+      name: 'menu_proceso_menu9informecambios',
+      meta: {
+        title: 'menu_proceso_menu9informecambios',
+        icon: 'el-icon-s-unfold',
+        roles: [
+          'super',
+          'admin',
+          'auxiliar',
+          'supervisor'
+        ]
+      }
+    },
+    {
       path: 'menu8cuadrilla',
       component: () => import('@/views/proceso/menu8cuadrilla/index'), // Parent router-view
       name: 'menu_proceso_menu8cuadrilla',

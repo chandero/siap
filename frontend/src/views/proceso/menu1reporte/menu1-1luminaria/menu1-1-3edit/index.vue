@@ -5484,7 +5484,23 @@ export default {
         d.even_direccion_accepted = true
         d.barr_id_accepted = true
         d.dato.aatc_id_accepted = true
-        // VOY AQUI
+        d.dato.aama_id_accepted = true
+        d.dato.aamo_id_accepted = true
+        d.dato.aaco_id_accepted = true
+        d.dato.aap_potencia_accepted = true
+        d.dato.aap_tecnologia_accepted = true
+        d.dato.aap_brazo_accepted = true
+        d.dato.aap_collarin_accepted = true
+        d.dato.tipo_id_accepted = true
+        d.dato.aap_poste_altura_accepted = true
+        d.dato.aap_poste_propietario_accepted = true
+        d.dato_adicional.aacu_id_accepted = true
+        d.dato_adicional.aaus_id_accepted = true
+        d.dato_adicional.medi_id_accepted = true
+        d.dato_adicional.tran_id_accepted = true
+        d.dato_adicional.aap_apoyo_accepted = true
+        d.dato_adicional.aap_lat_accepted = true
+        d.dato_adicional.aap_lng_accepted = true
         if (d.even_id === undefined || d.even_id === null || d.even_id < 1) {
           d.even_id = dire_length + 1
           dire_length = dire_length + 1

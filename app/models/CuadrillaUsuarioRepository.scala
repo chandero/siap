@@ -121,10 +121,11 @@ class CuadrillaUsuarioRepository @Inject()(dbapi: DBApi)(
       implicit connection =>
         val result = SQL(
           """
-          SELECT cu1.cuad_id, cu1.usua_id, cu1.cuus_esresponsable FROM siap.usuario u1
+          SELECT cu1.cuad_id, u1.usua_id, cu1.cuus_esresponsable FROM siap.usuario u1
           LEFT JOIN siap.cuadrilla_usuario cu1 ON cu1.usua_id = u1.usua_id
           LEFT JOIN siap.usuario_empresa_perfil uep1 ON uep1.usua_id = u1.usua_id and uep1.empr_id = {empr_id}
           WHERE uep1.empr_id = {empr_id} and uep1.perf_id = {perf_id}
+          ORDER BY u1.usua_nombre ASC
           """
         ).on(
             'empr_id -> empr_id,

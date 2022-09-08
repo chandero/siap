@@ -66,3 +66,10 @@ export function getUsuariosCuadrilla() {
     method: 'post'
   })
 }
+
+export function actualizarUsuarioCuadrilla(usua_id, cuad_id, cuus_esresponsable) {
+  return request({
+    url: `cuad/upduser/${usua_id}/${cuad_id}/${cuus_esresponsable}`,
+    method: 'get'
+  })
+}

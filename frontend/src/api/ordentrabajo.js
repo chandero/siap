@@ -90,3 +90,11 @@ export function printOrden (ortr_id, empr_id) {
   const url = process.env.BASE_API + '/ortr/prn/ortr/' + data.ortr_id + '/' + data.empr_id
   window.open(url, '_blank', 'location=no')
 }
+
+export function siap_informe_cambios_en_reporte(fecha_inicial, fecha_final) {
+  return request({
+    url: `/ortr/incb/${fecha_inicial}/${fecha_final}`,
+    method: 'get',
+    responseType: 'blob'
+  })
+}

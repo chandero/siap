@@ -409,6 +409,8 @@ export default {
     menu_proceso_menu5formato: 'Formato en Blanco',
     menu_proceso_menu6recuperar: 'Recuperar Historial',
     menu_proceso_menu7actadesmonte: 'Acta de Desmonte',
+    menu_proceso_menu8cuadrilla: 'Gestión Cuadrilla',
+    menu_proceso_menu9informecambios: 'Informe de Cambios',
     menu_informe: 'Informe',
     menu_informe_menu1consolidado: 'Consolidado',
     'menu_informe_menu1consolidado_menu1-1material': 'Material Utilizado',

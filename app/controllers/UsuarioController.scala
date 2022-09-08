@@ -36,6 +36,13 @@ class UsuarioController @Inject()(
     }
   }
 
+  def all() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+    val empr_id = Utility.extraerEmpresa(request);
+    usuarioService.all(empr_id.get).map { usuarios =>
+     Ok(Json.toJson(usuarios))
+    }
+  }  
+
   def paraCuadrilla() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
     val empr_id = Utility.extraerEmpresa(request);
     usuarioService.paraCuadrilla(empr_id.get).map { usuarios =>

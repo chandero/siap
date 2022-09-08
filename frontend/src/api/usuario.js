@@ -11,6 +11,13 @@ export function getTodos (page_size, current_page) {
   })
 }
 
+export function getAll () {
+  return request({
+    url: '/usua/get/all',
+    method: 'get'
+  })
+}
+
 export function getParaCuadrilla () {
   return request({
     url: '/usua/get/cuad',
