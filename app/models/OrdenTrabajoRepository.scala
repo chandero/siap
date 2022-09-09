@@ -2173,7 +2173,7 @@ order by ot1.ortr_consecutivo, c1.cuad_descripcion
               _listMerged += CellRange((1, 1), (0, 5))
               _listMerged.toList
             },
-            columns = {
+          columns = {
                _listColumn += com.norbitltd.spoiwo.model
                 .Column(index = 1, width = new Width(15, WidthUnit.Character))
                _listColumn += com.norbitltd.spoiwo.model

@@ -5162,11 +5162,29 @@ class ReporteRepository @Inject()(
     }
   }
 
+  def actualizarMovil(
+    reporte: Reporte
+  ): Boolean = {
+    reporte.tireuc_id match {
+      case Some(1) => actualizarMovilLuminaria(reporte)
+      case Some(2) => actualizarMovilControl(reporte)
+      case Some(3) => actualizarMovilTransformador(reporte)
+      case _ => false
+    }
+  }
+
+  def actualizarMovilControl(reporte: Reporte): Boolean = {
+    true
+  }
+
+  def actualizarMovilTransformador(reporte: Reporte): Boolean = {
+    true
+  }  
   /**
     * Actualizar Reporte
     * @param reporte: Reporte
     */
-  def actualizarMovil(
+  def actualizarMovilLuminaria(
       reporte: Reporte
   ): Boolean = {
     val reporte_ant: Option[Reporte] = buscarPorId(reporte.repo_id.get)
@@ -5300,6 +5318,10 @@ class ReporteRepository @Inject()(
         }
       }
       // Creación Actualizacion de Novedades
+      SQL("""DELETE FROM siap.reporte_novedad rn1 WHERE rn1.repo_id = {repo_id}""").
+      on(
+        'repo_id -> reporte.repo_id
+      ).executeUpdate()
       reporte.novedades.map { novedades =>
         for (n <- novedades) {
           val novedadActualizado = SQL(
@@ -5358,8 +5380,9 @@ class ReporteRepository @Inject()(
         }
       }
 
+      /// Proceso Suspendido
       // Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
-      if (reporte.reti_id.get == 2 && reporte.adicional.get.repo_tipo_expansion.get != 4 && reporte.rees_id.get == 4) {
+/*       if (reporte.reti_id.get == 2 && reporte.adicional.get.repo_tipo_expansion.get != 4 && reporte.rees_id.get == 4) {
         reporte.direcciones.map { direcciones =>
           for (d <- direcciones) {
             if (d.aap_id != None) {
@@ -5443,7 +5466,12 @@ class ReporteRepository @Inject()(
           }
         }
       }
+ */      /// Fin Proceso Suspendido
 
+      SQL("""DELETE FROM siap.reporte_evento re1 WHERE re1.repo_id = {repo_id}""").
+      on(
+        'repo_id -> reporte.repo_id
+      ).executeUpdate()
       reporte.eventos.map { eventos =>
         for (e <- eventos) {
           if (e.aap_id != None) {
@@ -5953,6 +5981,22 @@ class ReporteRepository @Inject()(
         }
       }
 
+      SQL("""DELETE FROM siap.reporte_direccion rd1 WHERE rd1.repo_id = {repo_id}""").
+      on(
+        'repo_id -> reporte.repo_id
+      ).executeUpdate()
+      SQL("""DELETE FROM siap.reporte_direccion_dato rdd1 WHERE rdd1.repo_id = {repo_id}""").
+      on(
+        'repo_id -> reporte.repo_id
+      ).executeUpdate()
+      SQL("""DELETE FROM siap.reporte_direccion_dato_adicional rdda1 WHERE rdda1.repo_id = {repo_id}""").
+      on(
+        'repo_id -> reporte.repo_id
+      ).executeUpdate()
+      SQL("""DELETE FROM siap.reporte_direccion_foto rdf1 WHERE rdf1.repo_id = {repo_id}""").
+      on(
+        'repo_id -> reporte.repo_id
+      ).executeUpdate()      
       reporte.direcciones.map { direcciones =>
         for (d <- direcciones) {
           if (d.aap_id != None && d.aap_id.get != "" && d.aap_id.get.toInt > 0) {            

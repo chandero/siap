@@ -2506,14 +2506,17 @@ ORDER BY e.reti_id, e.elem_codigo""")
           case 0 => None
           case _ => cuadrillaService.buscarPorId(cuad_id)
         }
-        val last_sync = SQL("""select cast(rs1.resi_ultimo_sync as varchar) from siap.ordentrabajo ot1
+        val last_sync = SQL("""select to_char(rs1.resi_ultimo_sync, 'yyyy-MM-dd HH24:mm:ss') from siap.ordentrabajo ot1
                                 inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id 
                                 inner join siap.reporte_sincronizacion rs1 on rs1.tireuc_id = otr1.tireuc_id and rs1.repo_id = otr1.repo_id
                                 where ot1.ortr_fecha = {fecha_corte} and ot1.cuad_id = {cuad_id}
+                                     and rs1.resi_ultimo_sync between {fecha_inicial} and {fecha_final}
                                 order by rs1.resi_ultimo_sync desc 
                                 limit 1""").
                           on(
                             'fecha_corte -> ff.getTime(),
+                            'fecha_inicial -> fi.getTime(),
+                            'fecha_final -> ff.getTime(),
                             'cuad_id -> cuad_id
                           ).as(SqlParser.scalar[String].singleOpt)
         val empresa = empresaService.buscarPorId(empr_id)
@@ -2646,7 +2649,25 @@ ORDER BY e.reti_id, e.elem_codigo""")
                 )
           }
           _listRow.toList
-        }
+        },
+        mergedRegions = {
+              _listMerged += CellRange((0, 0), (0, 6))
+              _listMerged += CellRange((1, 1), (0, 5))
+              _listMerged.toList
+            },
+        columns = {
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 0, width = new Width(30, WidthUnit.Character))
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 1, width = new Width(30, WidthUnit.Character))
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 2, width = new Width(40, WidthUnit.Character))
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 3, width = new Width(15, WidthUnit.Character))
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 4, width = new Width(40, WidthUnit.Character))                
+              _listColumn.toList
+            }        
       )
       println("Escribiendo en el Stream")
       var os: ByteArrayOutputStream = new ByteArrayOutputStream()
@@ -4105,7 +4126,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                         case when co.aaco_id = 1 then 'X' else ' ' end as aforo,
                         co.aaco_descripcion
                     FROM siap.reporte r
-                    LEFT JOIN siap.reporte_direccion rd on rd.repo_id = r.repo_id
+                    LEFT JOIN siap.reporte_direccion rd on rd.repo_id = r.repo_id and rd.even_estado < 9
                     LEFT JOIN siap.reporte_direccion_dato d on d.repo_id = rd.repo_id and d.even_id = rd.even_id
                     LEFT JOIN siap.reporte_direccion_dato_adicional da on da.repo_id = d.repo_id and da.even_id = d.even_id
                     LEFT JOIN siap.aap a on a.aap_id = d.aap_id
