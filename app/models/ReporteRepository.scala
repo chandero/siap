@@ -333,6 +333,8 @@ case class ElementoHistoria(
 )
 
 case class Pendiente(
+    tire_descripcion: Option[String],
+    reti_descripcion: Option[String],
     repo_consecutivo: Option[Int],
     repo_fecharecepcion: Option[DateTime],
     fecha_limite: Option[DateTime],
@@ -353,6 +355,8 @@ object Pendiente {
 
   implicit val pWrites = new Writes[Pendiente] {
     def writes(p: Pendiente) = Json.obj(
+      "tire_descripcion" -> p.tire_descripcion,
+      "reti_descripcion" -> p.reti_descripcion,
       "repo_consecutivo" -> p.repo_consecutivo,
       "repo_fecharecepcion" -> p.repo_fecharecepcion,
       "fecha_limite" -> p.fecha_limite,
@@ -367,6 +371,8 @@ object Pendiente {
   }
 
   implicit val adicionalRead: Reads[Pendiente] = (
+    (__ \ "tire_descripcion").readNullable[String] and
+    (__ \ "reti_descripcion").readNullable[String] and
     (__ \ "repo_consecutivo").readNullable[Int] and
       (__ \ "repo_fecharecepcion").readNullable[DateTime] and
       (__ \ "fecha_limite").readNullable[DateTime] and
@@ -380,6 +386,8 @@ object Pendiente {
   )(Pendiente.apply _)
 
   val _set = {
+    get[Option[String]]("tire_descripcion") ~
+    get[Option[String]]("reti_descripcion") ~
     get[Option[Int]]("repo_consecutivo") ~
       get[Option[DateTime]]("repo_fecharecepcion") ~
       get[Option[DateTime]]("fecha_limite") ~
@@ -390,7 +398,9 @@ object Pendiente {
       get[Option[String]]("orig_descripcion") ~
       get[Option[String]]("acti_descripcion") ~
       get[Option[String]]("cuad_descripcion") map {
-      case repo_consecutivo ~
+      case  tire_descripcion ~
+            reti_descripcion ~
+            repo_consecutivo ~
             repo_fecharecepcion ~
             fecha_limite ~
             repo_nombre ~
@@ -401,6 +411,8 @@ object Pendiente {
             acti_descripcion ~
             cuad_descripcion =>
         Pendiente(
+          tire_descripcion,
+          reti_descripcion,
           repo_consecutivo,
           repo_fecharecepcion,
           fecha_limite,
@@ -1317,6 +1329,7 @@ class ReporteRepository @Inject()(
     usuarioService: UsuarioRepository,
     medidorService: MedidorRepository,
     transformadorService: TransformadorRepository,
+    cuadrillaService: CuadrillaRepository,
     aapService: AapRepository
 )(implicit ec: DatabaseExecutionContext) {
   private val db = dbapi.database("default")
@@ -8564,15 +8577,7 @@ class ReporteRepository @Inject()(
 
       val format = new SimpleDateFormat("yyyy-MM-dd")
       var os = Array[Byte]()
-      val compiledFile = REPORT_DEFINITION_PATH + (tipo match {
-        case "1" => "siap_reporte_relacion.jasper"
-        case "2" => "siap_reporte_relacion_control.jasper"
-        case "3" => "siap_reporte_relacion_canalizacion.jasper"
-        case "4" => "siap_reporte_relacion_postes.jasper"
-        case "5" => "siap_reporte_relacion_redes.jasper"
-        case "6" => "siap_reporte_relacion_transformador.jasper"
-        case "7" => "siap_reporte_relacion_medidor.jasper"
-      })
+      val compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_relacion.jasper"
 
       val reportParams = new HashMap[String, java.lang.Object]()
       reportParams.put(
@@ -8652,7 +8657,7 @@ class ReporteRepository @Inject()(
                   )
                 )
                 .withCellValues(
-                  "OPERACION Y MANTENIMIENTO PENDIENTE - " + (tipo match {
+                  "OPERACION Y MANTENIMIENTO PENDIENTE" /*  - " + (tipo match {
                     case "1" => "LUMINARIA"
                     case "2" => "CONTROL"
                     case "3" => "CANALIZACION"
@@ -8660,123 +8665,74 @@ class ReporteRepository @Inject()(
                     case "5" => "REDES"
                     case "6" => "TRANSFORMADOR"
                     case "7" => "MEDIDOR"
-                  })
+                  }) */
                 )
               val headerRow = com.norbitltd.spoiwo.model
                 .Row(style = CellStyle(font = Font(bold = true)))
                 .withCellValues(
                   "Número de Reporte",
-                  "Fecha y Hora",
-                  "Fecha Límite",
+                  "Tipo de Reporte",
+                  "Tipo de Elemento",
+                  "Fecha Recepción",
+                  "Fecha Solución",
                   "Persona/Entidad Usuario",
-                  "Teléfono",
                   "Dirección",
                   "Barrio",
+                  "Teléfono",
                   "Medio",
                   "Daño Reportado",
                   "Cuadrilla"
                 )
               var j = 2
-              var query = tipo match {
-                case "1" =>
-                  """ select r.* from (select DISTINCT ON (r.repo_consecutivo) r.*, o.orig_descripcion, rt.reti_descripcion, t.*, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.reporte r 
+              var query = """
+                	select r.* from 
+				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion as fecha_limite,  c.cuad_descripcion 
+				           from siap.reporte r 
                         left join siap.reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
-                        left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and r.empr_id = {empr_id} 
-                        order by r.repo_consecutivo, ot.ortr_fecha DESC) r
-                        ORDER BY r.reti_id, r.repo_id"""
-
-                case "2" =>
-                  """ select r.* from (select DISTINCT ON (r.repo_consecutivo) r.*, o.orig_descripcion, rt.reti_descripcion, t.*, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.control_reporte r 
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (2,3) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = {empr_id}
+                   union all
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'CONTROL' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion as fecha_limite,  c.cuad_descripcion 
+                   from siap.control_reporte r 
                         left join siap.control_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
-                        left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} 
-                        order by r.repo_consecutivo, ot.ortr_fecha DESC) r
-                        ORDER BY r.reti_id, r.repo_id"""
-
-                case "3" =>
-                  """ select r.* from (select DISTINCT ON (r.repo_consecutivo) r.*, o.orig_descripcion, rt.reti_descripcion, t.*, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.canalizacion_reporte r 
-                        left join siap.canalizacion_reporte_adicional a on r.repo_id = a.repo_id
-                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
-                        left join siap.actividad t on a.acti_id = t.acti_id
-                        left join siap.barrio b on r.barr_id = b.barr_id
-                        left join siap.origen o on r.orig_id = o.orig_id
-                        left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
-                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} 
-                        order by r.repo_consecutivo, ot.ortr_fecha DESC) r
-                        ORDER BY r.reti_id, r.repo_id"""
-
-                case "4" =>
-                  """ select r.* from (select DISTINCT ON (r.repo_consecutivo) r.*, o.orig_descripcion, rt.reti_descripcion, t.*, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.poste_reporte r 
-                        left join siap.poste_reporte_adicional a on r.repo_id = a.repo_id
-                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
-                        left join siap.actividad t on a.acti_id = t.acti_id
-                        left join siap.barrio b on r.barr_id = b.barr_id
-                        left join siap.origen o on r.orig_id = o.orig_id
-                        left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
-                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} 
-                        order by r.repo_consecutivo, ot.ortr_fecha DESC ) r
-                        ORDER BY r.reti_id, r.repo_id"""
-
-                case "5" =>
-                  """ select r.* from (select DISTINCT ON (r.repo_consecutivo) r.*, o.orig_descripcion, rt.reti_descripcion, t.*, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.redes_reporte r 
-                        left join siap.redes_reporte_adicional a on r.repo_id = a.repo_id
-                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
-                        left join siap.actividad t on a.acti_id = t.acti_id
-                        left join siap.barrio b on r.barr_id = b.barr_id
-                        left join siap.origen o on r.orig_id = o.orig_id
-                        left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
-                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} 
-                        order by r.repo_consecutivo, ot.ortr_fecha DESC ) r
-                        ORDER BY r.reti_id, r.repo_id"""
-
-                case "6" =>
-                  """ select r.* from (select DISTINCT ON (r.repo_consecutivo) r.*, o.orig_descripcion, rt.reti_descripcion, t.*, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.transformador_reporte r 
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (2,3) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE  and r.empr_id = {empr_id}
+				           union all
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion  as fecha_limite,  c.cuad_descripcion 
+                   from siap.transformador_reporte r 
                         left join siap.transformador_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
-                        left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} 
-                        order by r.repo_consecutivo, ot.ortr_fecha DESC) r
-                        ORDER BY r.reti_id, r.repo_id"""
-
-                case "7" =>
-                  """ select r.* from (select DISTINCT ON (r.repo_consecutivo) r.*, o.orig_descripcion, rt.reti_descripcion, t.*, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion from siap.medidor_reporte r 
-                        left join siap.medidor_reporte_adicional a on r.repo_id = a.repo_id
-                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
-                        left join siap.actividad t on a.acti_id = t.acti_id
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (2,3) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE  and r.empr_id = {empr_id}
+                   union all
+                   select DISTINCT ON (r.obra_consecutivo) r.obra_consecutivo, r.obra_fecharecepcion, r.obra_direccion, r.barr_id, r.obra_telefono, r.obra_nombre, 'OBRA' as tipo_inventario, o.orig_descripcion, 'OBRA' as reti_descripcion, r.obra_descripcion as acti_descripcion, b.barr_descripcion, r.obra_fechasolucion as repo_fechasolucion,  c.cuad_descripcion 
+                   from siap.obra r 
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
-                        left join siap.ordentrabajo_reporte otr on otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo_obra otr on otr.obra_id = r.obra_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id = 1 and r.empr_id = {empr_id} 
-                        order by r.repo_consecutivo, ot.ortr_fecha DESC) r
-                        ORDER BY r.reti_id, r.repo_id"""
-
-              }
+                        where r.obra_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (2,3) and (coalesce(trim(r.obra_reportetecnico), '') = '') IS NOT TRUE  and r.empr_id = {empr_id}				 	                                                
+                    ) r
+                  ORDER BY r.reti_descripcion ASC, r.repo_consecutivo ASC              
+              """
               val resultSet =
                 SQL(query)
                   .on(
@@ -8798,12 +8754,30 @@ class ReporteRepository @Inject()(
                       style = Some(CellStyle(dataFormat = CellDataFormat("#0"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
+                    StringCell(
+                      i.reti_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(1),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.tire_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(2),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
                     DateCell(
                       i.repo_fecharecepcion match {
                         case Some(v) => new java.util.Date(v.getMillis)
                         case None    => new java.util.Date(0)
                       },
-                      Some(1),
+                      Some(3),
                       style = Some(
                         CellStyle(
                           dataFormat = CellDataFormat("YYYY-MM-DD HH:mm")
@@ -8816,7 +8790,7 @@ class ReporteRepository @Inject()(
                         case Some(v) => new java.util.Date(v.getMillis)
                         case None    => new java.util.Date(0)
                       },
-                      Some(2),
+                      Some(4),
                       style = Some(
                         CellStyle(
                           dataFormat = CellDataFormat("YYYY-MM-DD HH:mm")
@@ -8829,16 +8803,7 @@ class ReporteRepository @Inject()(
                         case Some(value) => value
                         case None        => ""
                       },
-                      Some(3),
-                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                      CellStyleInheritance.CellThenRowThenColumnThenSheet
-                    ),
-                    StringCell(
-                      i.repo_telefono match {
-                        case Some(value) => value
-                        case None        => ""
-                      },
-                      Some(4),
+                      Some(5),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
@@ -8847,7 +8812,7 @@ class ReporteRepository @Inject()(
                         case Some(value) => value
                         case None        => ""
                       },
-                      Some(5),
+                      Some(6),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
@@ -8856,16 +8821,25 @@ class ReporteRepository @Inject()(
                         case Some(value) => value
                         case None        => ""
                       },
-                      Some(6),
+                      Some(7),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
+                    StringCell(
+                      i.repo_telefono match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(8),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),                    
                     StringCell(
                       i.orig_descripcion match {
                         case Some(value) => value
                         case None        => ""
                       },
-                      Some(7),
+                      Some(9),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
@@ -8874,7 +8848,7 @@ class ReporteRepository @Inject()(
                         case Some(value) => value
                         case None        => ""
                       },
-                      Some(8),
+                      Some(10),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     ),
@@ -8883,7 +8857,7 @@ class ReporteRepository @Inject()(
                         case Some(value) => value
                         case None        => ""
                       },
-                      Some(9),
+                      Some(11),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     )
@@ -9261,6 +9235,673 @@ class ReporteRepository @Inject()(
               }
 
               title1Row :: title2Row :: title3Row :: title4Row :: headerRow :: rows.toList
+            },
+            mergedRegions = mergedColumns
+          )
+          var sos: ByteArrayOutputStream = new ByteArrayOutputStream()
+          Workbook(sheet1).writeToOutputStream(sos)
+          os = sos.toByteArray
+        }
+      }
+
+      os
+    }
+  }
+
+    def imprimirEjecutado(
+      fecha_inicial: Long,
+      fecha_final: Long,
+      empr_id: scala.Long,
+      usua_id: scala.Long,
+      formato: String
+  ): Array[Byte] = {
+    val empresa = empresaService.buscarPorId(empr_id).get
+    val usuario = usuarioService.buscarPorId(usua_id).get
+    db.withConnection { implicit connection =>
+      var fi = Calendar.getInstance()
+      var ff = Calendar.getInstance()
+      fi.setTimeInMillis(fecha_inicial)
+      ff.setTimeInMillis(fecha_final)
+      fi.set(Calendar.MILLISECOND, 0)
+      fi.set(Calendar.SECOND, 0)
+      fi.set(Calendar.MINUTE, 0)
+      fi.set(Calendar.HOUR, 0)
+
+      ff.set(Calendar.MILLISECOND, 999)
+      ff.set(Calendar.SECOND, 59)
+      ff.set(Calendar.MINUTE, 59)
+      ff.set(Calendar.HOUR, 23)
+
+      val format = new SimpleDateFormat("yyyy-MM-dd")
+      var os = Array[Byte]()
+      val compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_ejecutado.jasper"
+
+      val reportParams = new HashMap[String, java.lang.Object]()
+      reportParams.put(
+        "FECHA_INICIAL",
+        new java.sql.Timestamp(fi.getTimeInMillis())
+      )
+      reportParams.put(
+        "FECHA_FINAL",
+        new java.sql.Timestamp(ff.getTimeInMillis())
+      )
+      reportParams.put("EMPRESA", empresa.empr_descripcion)
+      reportParams.put(
+        "USUARIO",
+        usuario.usua_nombre + " " + usuario.usua_apellido
+      )
+      reportParams.put("EMPR_ID", new java.lang.Long(empr_id.longValue()))
+      formato match {
+        case "pdf" =>
+          os = JasperRunManager.runReportToPdf(
+            compiledFile,
+            reportParams,
+            connection
+          )
+        case "xls" => {
+          var _listMerged = new ListBuffer[CellRange]()
+          var mergedColumns = {
+            _listMerged += CellRange((0, 0), (0, 9))
+            _listMerged += CellRange((1, 1), (0, 9))
+            _listMerged += CellRange((2, 2), (0, 9))
+            _listMerged += CellRange((3, 3), (0, 9))
+            _listMerged.toList
+          }
+          var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
+          var columnstyle = {
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 0, width = new Width(50, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 1, width = new Width(50, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 2, width = new Width(50, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 3, width = new Width(50, WidthUnit.Character))
+            _listColumn.toList
+          }
+          val sheet1 = Sheet(
+            name = "HojaT",
+            rows = {
+              val title1Row = com.norbitltd.spoiwo.model
+                .Row(
+                  style = CellStyle(
+                    font = Font(bold = true),
+                    horizontalAlignment = HA.Center
+                  )
+                )
+                .withCellValues("CONCESIÓN ALUMBRADO PÚBLICO")
+              val title2Row = com.norbitltd.spoiwo.model
+                .Row(
+                  style = CellStyle(
+                    font = Font(bold = true),
+                    horizontalAlignment = HA.Center
+                  )
+                )
+                .withCellValues(empresa.empr_descripcion)
+              val title3Row = com.norbitltd.spoiwo.model
+                .Row(
+                  style = CellStyle(
+                    font = Font(bold = true),
+                    horizontalAlignment = HA.Center
+                  )
+                )
+                .withCellValues("CONTROL ATENCIÓN A USUARIOS")
+              val title4Row = com.norbitltd.spoiwo.model
+                .Row(
+                  style = CellStyle(
+                    font = Font(bold = true),
+                    horizontalAlignment = HA.Center
+                  )
+                )
+                .withCellValues(
+                  "OPERACION Y MANTENIMIENTO EJECUTADO" /*  - " + (tipo match {
+                    case "1" => "LUMINARIA"
+                    case "2" => "CONTROL"
+                    case "3" => "CANALIZACION"
+                    case "4" => "POSTES"
+                    case "5" => "REDES"
+                    case "6" => "TRANSFORMADOR"
+                    case "7" => "MEDIDOR"
+                  }) */
+                )
+              val headerRow = com.norbitltd.spoiwo.model
+                .Row(style = CellStyle(font = Font(bold = true)))
+                .withCellValues(
+                  "Número de Reporte",
+                  "Tipo de Reporte",
+                  "Tipo de Elemento",
+                  "Fecha Recepción",
+                  "Fecha Solución",
+                  "Persona/Entidad Usuario",
+                  "Dirección",
+                  "Barrio",
+                  "Teléfono",
+                  "Medio",
+                  "Daño Reportado",
+                  "Cuadrilla"
+                )
+              var j = 2
+              var query = """
+                	select r.* from 
+				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion as fecha_limite,  c.cuad_descripcion 
+				           from siap.reporte r 
+                        left join siap.reporte_adicional a on r.repo_id = a.repo_id
+                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
+                        left join siap.actividad t on a.acti_id = t.acti_id
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.rees_id in (2,3) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT TRUE  and r.empr_id = {empr_id}
+                   union all
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'CONTROL' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion as fecha_limite,  c.cuad_descripcion 
+                   from siap.control_reporte r 
+                        left join siap.control_reporte_adicional a on r.repo_id = a.repo_id
+                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
+                        left join siap.actividad t on a.acti_id = t.acti_id
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.rees_id in (2,3) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT TRUE  and r.empr_id = {empr_id}
+				           union all
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion  as fecha_limite,  c.cuad_descripcion 
+                   from siap.transformador_reporte r 
+                        left join siap.transformador_reporte_adicional a on r.repo_id = a.repo_id
+                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
+                        left join siap.actividad t on a.acti_id = t.acti_id
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.rees_id in (2,3) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT TRUE  and r.empr_id = {empr_id}
+                   union all
+                   select DISTINCT ON (r.obra_consecutivo) r.obra_consecutivo, r.obra_fecharecepcion, r.obra_direccion, r.barr_id, r.obra_telefono, r.obra_nombre, 'OBRA' as tipo_inventario, o.orig_descripcion, 'OBRA' as reti_descripcion, r.obra_descripcion as acti_descripcion, b.barr_descripcion, r.obra_fechasolucion as repo_fechasolucion,  c.cuad_descripcion 
+                   from siap.obra r 
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_obra otr on otr.obra_id = r.obra_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where r.obra_fechasolucion between {fecha_inicial} and {fecha_final} and r.rees_id in (2,3) and (coalesce(trim(r.obra_reportetecnico), '') = '') IS NOT TRUE  and r.empr_id = {empr_id}				 	                                                
+                    ) r
+                  ORDER BY r.reti_descripcion ASC, r.repo_consecutivo ASC              
+              """
+              val resultSet =
+                SQL(query)
+                  .on(
+                    'fecha_inicial -> new DateTime(fi.getTimeInMillis),
+                    'fecha_final -> new DateTime(ff.getTimeInMillis),
+                    'empr_id -> empr_id
+                  )
+                  .as(Pendiente._set *)
+              val rows = resultSet.map {
+                i =>
+                  j += 1
+                  com.norbitltd.spoiwo.model.Row(
+                    NumericCell(
+                      i.repo_consecutivo match {
+                        case Some(value) => value
+                        case None        => 0
+                      },
+                      Some(0),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("#0"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.reti_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(1),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.tire_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(2),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    DateCell(
+                      i.repo_fecharecepcion match {
+                        case Some(v) => new java.util.Date(v.getMillis)
+                        case None    => new java.util.Date(0)
+                      },
+                      Some(3),
+                      style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("YYYY-MM-DD HH:mm")
+                        )
+                      ),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    DateCell(
+                      i.fecha_limite match {
+                        case Some(v) => new java.util.Date(v.getMillis)
+                        case None    => new java.util.Date(0)
+                      },
+                      Some(4),
+                      style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("YYYY-MM-DD HH:mm")
+                        )
+                      ),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.repo_nombre match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(5),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.repo_direccion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(6),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.barr_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(7),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.repo_telefono match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(8),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),                    
+                    StringCell(
+                      i.orig_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(9),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.acti_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(10),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.cuad_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(11),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    )
+                  )
+              }
+
+              title1Row :: title2Row :: title3Row :: title4Row :: headerRow :: rows.toList
+            },
+            mergedRegions = mergedColumns
+          )
+          var sos: ByteArrayOutputStream = new ByteArrayOutputStream()
+          Workbook(sheet1).writeToOutputStream(sos)
+          os = sos.toByteArray
+        }
+      }
+
+      os
+    }
+  }
+
+  def imprimirEjecutadoFiltrado(
+      cuad_id: Long,
+      fecha_inicial: Long,
+      fecha_final: Long,
+      empr_id: scala.Long,
+      usua_id: scala.Long,
+      formato: String
+  ): Array[Byte] = {
+    val empresa = empresaService.buscarPorId(empr_id).get
+    val usuario = usuarioService.buscarPorId(usua_id).get
+    val cuadrilla = cuadrillaService.buscarPorId(cuad_id).get
+    db.withConnection { implicit connection =>
+      var fi = Calendar.getInstance()
+      var ff = Calendar.getInstance()
+      fi.setTimeInMillis(fecha_inicial)
+      ff.setTimeInMillis(fecha_final)
+      fi.set(Calendar.MILLISECOND, 0)
+      fi.set(Calendar.SECOND, 0)
+      fi.set(Calendar.MINUTE, 0)
+      fi.set(Calendar.HOUR, 0)
+
+      ff.set(Calendar.MILLISECOND, 999)
+      ff.set(Calendar.SECOND, 59)
+      ff.set(Calendar.MINUTE, 59)
+      ff.set(Calendar.HOUR, 23)
+
+      val format = new SimpleDateFormat("yyyy-MM-dd")
+      var os = Array[Byte]()
+      val compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_ejecutado.jasper"
+
+      val reportParams = new HashMap[String, java.lang.Object]()
+      reportParams.put(
+        "FECHA_INICIAL",
+        new java.sql.Timestamp(fi.getTimeInMillis())
+      )
+      reportParams.put(
+        "FECHA_FINAL",
+        new java.sql.Timestamp(ff.getTimeInMillis())
+      )
+      reportParams.put("EMPRESA", empresa.empr_descripcion)
+      reportParams.put(
+        "USUARIO",
+        usuario.usua_nombre + " " + usuario.usua_apellido
+      )
+      reportParams.put("EMPR_ID", new java.lang.Long(empr_id.longValue()))
+      formato match {
+        case "pdf" =>
+          os = JasperRunManager.runReportToPdf(
+            compiledFile,
+            reportParams,
+            connection
+          )
+        case "xls" => {
+          var _listMerged = new ListBuffer[CellRange]()
+          var mergedColumns = {
+            _listMerged += CellRange((0, 0), (0, 9))
+            _listMerged += CellRange((1, 1), (0, 9))
+            _listMerged += CellRange((2, 2), (0, 9))
+            _listMerged += CellRange((3, 3), (0, 9))
+            _listMerged += CellRange((4, 4), (0, 9))
+            _listMerged.toList
+          }
+          var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
+          var columnstyle = {
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 0, width = new Width(50, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 1, width = new Width(50, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 2, width = new Width(50, WidthUnit.Character))
+            _listColumn += com.norbitltd.spoiwo.model
+              .Column(index = 3, width = new Width(50, WidthUnit.Character))
+            _listColumn.toList
+          }
+          val sheet1 = Sheet(
+            name = "HojaT",
+            rows = {
+              val title1Row = com.norbitltd.spoiwo.model
+                .Row(
+                  style = CellStyle(
+                    font = Font(bold = true),
+                    horizontalAlignment = HA.Center
+                  )
+                )
+                .withCellValues("CONCESIÓN ALUMBRADO PÚBLICO")
+              val title2Row = com.norbitltd.spoiwo.model
+                .Row(
+                  style = CellStyle(
+                    font = Font(bold = true),
+                    horizontalAlignment = HA.Center
+                  )
+                )
+                .withCellValues(empresa.empr_descripcion)
+              val title3Row = com.norbitltd.spoiwo.model
+                .Row(
+                  style = CellStyle(
+                    font = Font(bold = true),
+                    horizontalAlignment = HA.Center
+                  )
+                )
+                .withCellValues("CONTROL ATENCIÓN A USUARIOS")
+              val title4Row = com.norbitltd.spoiwo.model
+                .Row(
+                  style = CellStyle(
+                    font = Font(bold = true),
+                    horizontalAlignment = HA.Center
+                  )
+                )
+                .withCellValues(
+                  "OPERACION Y MANTENIMIENTO EJECUTADO" /*  - " + (tipo match {
+                    case "1" => "LUMINARIA"
+                    case "2" => "CONTROL"
+                    case "3" => "CANALIZACION"
+                    case "4" => "POSTES"
+                    case "5" => "REDES"
+                    case "6" => "TRANSFORMADOR"
+                    case "7" => "MEDIDOR"
+                  }) */
+                )
+              val title5row = com.norbitltd.spoiwo.model
+                .Row(
+                  style = CellStyle(
+                    font = Font(bold = true),
+                    horizontalAlignment = HA.Center
+                  )
+                )
+                .withCellValues(
+                  cuadrilla.cuad_descripcion)
+              val headerRow = com.norbitltd.spoiwo.model
+                .Row(style = CellStyle(font = Font(bold = true)))
+                .withCellValues(
+                  "Número de Reporte",
+                  "Tipo de Reporte",
+                  "Tipo de Elemento",
+                  "Fecha Recepción",
+                  "Fecha Solución",
+                  "Persona/Entidad Usuario",
+                  "Dirección",
+                  "Barrio",
+                  "Teléfono",
+                  "Medio",
+                  "Daño Reportado",
+                  "Cuadrilla"
+                )
+              var j = 2
+              var query = """
+                	select r.* from 
+				          (select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion as fecha_limite,  c.cuad_descripcion 
+				           from siap.reporte r 
+                        left join siap.reporte_adicional a on r.repo_id = a.repo_id
+                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
+                        left join siap.actividad t on a.acti_id = t.acti_id
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.rees_id in (2,3) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT TRUE  and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
+                   union all
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'CONTROL' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion as fecha_limite,  c.cuad_descripcion 
+                   from siap.control_reporte r 
+                        left join siap.control_reporte_adicional a on r.repo_id = a.repo_id
+                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
+                        left join siap.actividad t on a.acti_id = t.acti_id
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.rees_id in (2,3) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT TRUE  and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
+				           union all
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion  as fecha_limite,  c.cuad_descripcion 
+                   from siap.transformador_reporte r 
+                        left join siap.transformador_reporte_adicional a on r.repo_id = a.repo_id
+                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
+                        left join siap.actividad t on a.acti_id = t.acti_id
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.rees_id in (2,3) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT TRUE  and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
+                   union all
+                   select DISTINCT ON (r.obra_consecutivo) r.obra_consecutivo, r.obra_fecharecepcion, r.obra_direccion, r.barr_id, r.obra_telefono, r.obra_nombre, 'OBRA' as tipo_inventario, o.orig_descripcion, 'OBRA' as reti_descripcion, r.obra_descripcion as acti_descripcion, b.barr_descripcion, r.obra_fechasolucion as repo_fechasolucion,  c.cuad_descripcion 
+                   from siap.obra r 
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_obra otr on otr.obra_id = r.obra_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where r.obra_fechasolucion between {fecha_inicial} and {fecha_final} and r.rees_id in (2,3) and (coalesce(trim(r.obra_reportetecnico), '') = '') IS NOT TRUE  and r.empr_id = {empr_id}	and c.cuad_id = {cuad_id}			 	                                                
+                    ) r
+                  ORDER BY r.reti_descripcion ASC, r.repo_consecutivo ASC            
+              """
+              val resultSet =
+                SQL(query)
+                  .on(
+                    'fecha_inicial -> new DateTime(fi.getTimeInMillis),
+                    'fecha_final -> new DateTime(ff.getTimeInMillis),
+                    'empr_id -> empr_id,
+                    'cuad_id -> cuad_id
+                  )
+                  .as(Pendiente._set *)
+              val rows = resultSet.map {
+                i =>
+                  j += 1
+                  com.norbitltd.spoiwo.model.Row(
+                    NumericCell(
+                      i.repo_consecutivo match {
+                        case Some(value) => value
+                        case None        => 0
+                      },
+                      Some(0),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("#0"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.reti_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(1),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.tire_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(2),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    DateCell(
+                      i.repo_fecharecepcion match {
+                        case Some(v) => new java.util.Date(v.getMillis)
+                        case None    => new java.util.Date(0)
+                      },
+                      Some(3),
+                      style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("YYYY-MM-DD HH:mm")
+                        )
+                      ),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    DateCell(
+                      i.fecha_limite match {
+                        case Some(v) => new java.util.Date(v.getMillis)
+                        case None    => new java.util.Date(0)
+                      },
+                      Some(4),
+                      style = Some(
+                        CellStyle(
+                          dataFormat = CellDataFormat("YYYY-MM-DD HH:mm")
+                        )
+                      ),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.repo_nombre match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(5),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.repo_direccion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(6),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.barr_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(7),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.repo_telefono match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(8),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),                    
+                    StringCell(
+                      i.orig_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(9),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.acti_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(10),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.cuad_descripcion match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(11),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    )
+                  )
+              }
+
+              title1Row :: title2Row :: title3Row :: title4Row :: title5row :: headerRow :: rows.toList
             },
             mergedRegions = mergedColumns
           )

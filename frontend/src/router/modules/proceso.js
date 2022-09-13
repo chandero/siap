@@ -394,22 +394,46 @@ const procesoRouter = {
           'ingeniero',
           'supervisor'
         ]
-      }
-    },
-    {
-      path: 'menu9informecambios',
-      component: () => import('@/views/proceso/menu9informecambios/index'), // Parent router-view
-      name: 'menu_proceso_menu9informecambios',
-      meta: {
-        title: 'menu_proceso_menu9informecambios',
-        icon: 'el-icon-s-unfold',
-        roles: [
-          'super',
-          'admin',
-          'auxiliar',
-          'supervisor'
-        ]
-      }
+      },
+      children: [
+        {
+          path: 'menu2-1pendiente',
+          component: () =>
+            import('@/views/proceso/menu2pendiente/menu2-1pendiente'),
+          name: 'menu_proceso_menu2pendiente_menu2-1pendiente',
+          meta: {
+            title: 'menu_proceso_menu2pendiente_menu2-1pendiente',
+            icon: 'el-icon-edit-outline',
+            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+          }
+        },
+        {
+          path: 'menu2-2ejecutado',
+          component: () =>
+            import('@/views/proceso/menu2pendiente/menu2-2ejecutado'),
+          name: 'menu_proceso_menu2pendiente_menu2-2ejecutado',
+          meta: {
+            title: 'menu_proceso_menu2pendiente_menu2-2ejecutado',
+            icon: 'el-icon-document-checked',
+            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+          }
+        },
+        {
+          path: 'menu2-3informecambios',
+          component: () => import('@/views/proceso/menu2pendiente/menu2-3informecambios/index'), // Parent router-view
+          name: 'menu_proceso_menu2pendiente_menu2-3informecambios',
+          meta: {
+            title: 'menu_proceso_menu2pendiente_menu2-3informecambios',
+            icon: 'el-icon-document-copy',
+            roles: [
+              'super',
+              'admin',
+              'auxiliar',
+              'supervisor'
+            ]
+          }
+        }
+      ]
     },
     {
       path: 'menu8cuadrilla',

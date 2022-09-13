@@ -388,7 +388,10 @@ export default {
     'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-2create': 'Crear',
     'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-3edit':
       'Actualizar',
-    menu_proceso_menu2pendiente: 'Reporte Pendiente',
+    menu_proceso_menu2pendiente: 'Informe de Reportes',
+    'menu_proceso_menu2pendiente_menu2-1pendiente': 'Pendientes',
+    'menu_proceso_menu2pendiente_menu2-2ejecutado': 'Ejecutados',
+    'menu_proceso_menu2pendiente_menu2-3informecambios': 'Cambios',
     menu_proceso_menu3obra: 'Obra',
     'menu_proceso_menu3obra_menu3-1list': 'Reporte',
     'menu_proceso_menu3obra_menu3-3edit': 'Actualizar',
@@ -410,7 +413,6 @@ export default {
     menu_proceso_menu6recuperar: 'Recuperar Historial',
     menu_proceso_menu7actadesmonte: 'Acta de Desmonte',
     menu_proceso_menu8cuadrilla: 'Gestión Cuadrilla',
-    menu_proceso_menu9informecambios: 'Informe de Cambios',
     menu_informe: 'Informe',
     menu_informe_menu1consolidado: 'Consolidado',
     'menu_informe_menu1consolidado_menu1-1material': 'Material Utilizado',
@@ -1022,7 +1024,8 @@ export default {
     reparar: 'Recuperar',
     novedades: 'Novedades',
     actadesmonte: 'Acta de Desmonte',
-    fechaCorte: 'Fecha a Procesar'
+    fechaCorte: 'Fecha a Procesar',
+    ejecutado: 'Informe de Reportes Ejecutados'
   },
   ortr: {
     select: 'Seleccione la ODT'

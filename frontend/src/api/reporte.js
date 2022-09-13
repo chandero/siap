@@ -294,6 +294,71 @@ export function printReporteRelacionFiltrado(
   window.open(url, target, 'location=no, menubar=no')
 }
 
+export function printReporteEjecutado(
+  fecha_inicial,
+  fecha_final,
+  empr_id,
+  usua_id,
+  formato
+) {
+  const data = {
+    fecha_inicial,
+    fecha_final,
+    empr_id,
+    usua_id,
+    formato
+  }
+  return request({
+    url:
+      '/repo/prn/ejec/' +
+      data.fecha_inicial +
+      '/' +
+      data.fecha_final +
+      '/' +
+      data.empr_id +
+      '/' +
+      usua_id +
+      '/' +
+      formato,
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
+export function printReporteEjecutadoFiltrado(
+  cuad_id,
+  fecha_inicial,
+  fecha_final,
+  empr_id,
+  usua_id,
+  formato
+) {
+  const data = {
+    cuad_id,
+    fecha_inicial,
+    fecha_final,
+    empr_id,
+    usua_id,
+    formato
+  }
+  return request({
+    url:
+      '/repo/prn/ejecf/' +
+      data.cuad_id + '/' +
+      data.fecha_inicial +
+      '/' +
+      data.fecha_final +
+      '/' +
+      data.empr_id +
+      '/' +
+      usua_id +
+      '/' +
+      formato,
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
 export function printReporteBlanco(reti_id, empr_id) {
   const data = {
     reti_id,

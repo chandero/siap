@@ -2728,11 +2728,11 @@
               </el-row>
                </el-tab-pane>
                <el-tab-pane label="Fotos" name="fotos">
-                  <el-carousel :interval="5000" :autoplay="false" arrow="always">
-                    <el-carousel-item v-for="(foto, index) in reporte.direcciones[didx].fotos" :key="foto.refo_id">
-                      <img :src="getFotoData(index)" style="width: 100%; height: 100%; object-fit: contain">
-
-                    </el-carousel-item>
+                <el-carousel :interval="5000" :autoplay="false" arrow="always">
+                  <el-carousel-item v-for="(foto, index) in reporte.direcciones[didx].fotos" :key="foto.refo_id">
+                    <img :src="getFotoData(index)" style="width: 100%; height: 100%; object-fit: contain">
+                    <el-button type="primary" icon="el-icon-download" circle style="position: absolute; bottom: 0px; right: 40px;" @click="downloadFotoData(index)"></el-button>
+                  </el-carousel-item>
                   </el-carousel>
                </el-tab-pane>
               </el-tabs>
@@ -5600,6 +5600,13 @@ export default {
           })
         }
       })
+    },
+    downloadFotoData(index) {
+      var data = this.getFotoData(index)
+      var link = document.createElement('a')
+      link.href = data
+      link.download = 'foto_reporte_' + this.reporte.repo_consecutivo + '_luminaria_' + this.reporte.direcciones[this.didx].aap_id + '_foto_' + (index + 1) + '.jpg'
+      link.click()
     }
   },
   beforeMount () {
