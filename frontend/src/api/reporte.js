@@ -211,24 +211,17 @@ export function printReporteRelacion(
   fecha_final,
   empr_id,
   usua_id,
-  formato,
-  tipo
+  formato
 ) {
   const data = {
     fecha_inicial,
     fecha_final,
     empr_id,
     usua_id,
-    formato,
-    tipo
+    formato
   }
-  var target
-  if (data.tipo === 'pdf') {
-    target = '_blank'
-  } else {
-    target = '_blank'
-  }
-  const url =
+  return request({
+    url:
     window.location.protocol +
     '//' +
     window.location.host.split('/')[0] +
@@ -242,10 +235,10 @@ export function printReporteRelacion(
     '/' +
     usua_id +
     '/' +
-    formato +
-    '/' +
-    tipo
-  window.open(url, target, 'location=no, menubar=no')
+    formato,
+    method: 'get',
+    responseType: 'blob'
+  })
 }
 
 export function printReporteRelacionFiltrado(
@@ -254,8 +247,7 @@ export function printReporteRelacionFiltrado(
   fecha_final,
   empr_id,
   usua_id,
-  formato,
-  tipo
+  formato
 ) {
   const data = {
     cuad_id,
@@ -263,16 +255,10 @@ export function printReporteRelacionFiltrado(
     fecha_final,
     empr_id,
     usua_id,
-    formato,
-    tipo
+    formato
   }
-  var target
-  if (data.tipo === 'pdf') {
-    target = '_blank'
-  } else {
-    target = '_blank'
-  }
-  const url =
+  return request({
+    url:
     window.location.protocol +
     '//' +
     window.location.host.split('/')[0] +
@@ -288,10 +274,10 @@ export function printReporteRelacionFiltrado(
     '/' +
     usua_id +
     '/' +
-    formato +
-    '/' +
-    tipo
-  window.open(url, target, 'location=no, menubar=no')
+    formato,
+    method: 'get',
+    responseType: 'blob'
+  })
 }
 
 export function printReporteEjecutado(

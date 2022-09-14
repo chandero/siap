@@ -563,33 +563,33 @@ class ReporteController @Inject()(
       fecha_final: Long,
       empr_id: Long,
       usua_id: Long,
-      formato: String,
-      tipo: String
-  ) = Action {
+      formato: String
+  ) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
     val os = reporteService.imprimirRelacion(
       fecha_inicial,
       fecha_final,
       empr_id,
       usua_id,
-      formato,
-      tipo
+      formato
     )
     val fi = new DateTime(fecha_inicial)
     val ff = new DateTime(fecha_final)
     val fmt = DateTimeFormat.forPattern("yyyyMMdd")
-    val filename = "OyMPendientes_Entre" + fmt.print(fi) + "_y_" + fmt
-      .print(ff) + ".xlsx"
+    val filename = "OyM_Pendientes_Entre" + fmt.print(fi) + "_y_" + fmt
+      .print(ff) + (formato match {
+      case "pdf" => ".pdf"
+      case "xls" => ".xlsx"
+    })
     val attach = "attachment; filename=" + filename
-    formato match {
-      case "pdf" => Ok(os).as("application/pdf")
+    Future.successful(formato match {
+      case "pdf" => Ok(os).as("application/pdf").withHeaders("Content-Disposition" -> attach)
       case "xls" =>
         Ok(os)
           .as(
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           )
           .withHeaders("Content-Disposition" -> attach)
-    }
-
+    })
   }
 
   def imprimirRelacionFiltrado(
@@ -598,34 +598,34 @@ class ReporteController @Inject()(
       fecha_final: Long,
       empr_id: Long,
       usua_id: Long,
-      formato: String,
-      tipo: String
-  ) = Action {
+      formato: String
+  ) = authenticatedUserAction.async {
     val os = reporteService.imprimirRelacionFiltrado(
       cuad_id,
       fecha_inicial,
       fecha_final,
       empr_id,
       usua_id,
-      formato,
-      tipo
+      formato
     )
     val fi = new DateTime(fecha_inicial)
     val ff = new DateTime(fecha_final)
     val fmt = DateTimeFormat.forPattern("yyyyMMdd")
-    val filename = "OyMPendientes_Entre" + fmt.print(fi) + "_y_" + fmt
-      .print(ff) + ".xlsx"
+    val filename = "OyM_Pendientes_Entre" + fmt.print(fi) + "_y_" + fmt
+      .print(ff) + (formato match {
+      case "pdf" => ".pdf"
+      case "xls" => ".xlsx"
+    })
     val attach = "attachment; filename=" + filename
-    formato match {
-      case "pdf" => Ok(os).as("application/pdf")
+    Future.successful(formato match {
+      case "pdf" => Ok(os).as("application/pdf").withHeaders("Content-Disposition" -> attach)
       case "xls" =>
         Ok(os)
           .as(
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           )
           .withHeaders("Content-Disposition" -> attach)
-    }
-
+    })
   }
 
   def imprimirEjecutado(

@@ -5,14 +5,14 @@
         </el-header>
         <el-main>
             <el-form ref="relacionForm" :label-position="labelPosition">
-                <el-row :gutter="4">
+<!--                 <el-row :gutter="4">
                   <el-col :span="24">
                     <el-select autofocus :title="$t('reporte.tipo.select')" style="width: 80%" ref="tipo" v-model="tipo" name="tipo" :placeholder="$t('reporte.tipo.select')">
                       <el-option v-for="t in tipo_inventario" :key="t.id" :label="t.descripcion.toUpperCase()" :value="t.id" >
                       </el-option>
                     </el-select>
                   </el-col>
-                </el-row>
+                </el-row> -->
                 <el-row :gutter="4">
                     <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
                         <el-form-item :label="$t('informe.initialDate')">
@@ -75,10 +75,26 @@ export default {
   },
   methods: {
     imprimir (formato) {
-      printReporteRelacion(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.empresa.empr_id, this.usuario.usua_id, formato, this.tipo)
+      printReporteRelacion(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.empresa.empr_id, this.usuario.usua_id, formato).then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        const filename = response.headers['content-disposition'].split('filename=')[1]
+        link.href = url
+        link.setAttribute('download', filename)
+        document.body.appendChild(link)
+        link.click()
+      })
     },
     imprimirFiltrado (formato) {
-      printReporteRelacionFiltrado(this.cuad_id, this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.empresa.empr_id, this.usuario.usua_id, formato, this.tipo)
+      printReporteRelacionFiltrado(this.cuad_id, this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.empresa.empr_id, this.usuario.usua_id, formato).then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        const filename = response.headers['content-disposition'].split('filename=')[1]
+        link.href = url
+        link.setAttribute('download', filename)
+        document.body.appendChild(link)
+        link.click()
+      })
     }
   },
   beforeMount () {

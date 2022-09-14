@@ -269,6 +269,7 @@
   </el-container>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 import { getTiposBarrio } from '@/api/tipobarrio'
 import { getCuadrillas } from '@/api/cuadrilla'
 import { saveOrden, printOrden } from '@/api/ordentrabajo'
@@ -344,6 +345,13 @@ export default {
       obra_siguiente_consecutivo: 0,
       novedad_siguiente_consecutivo: 0
     }
+  },
+  computed: {
+    ...mapGetters([
+      'empresa',
+      'usuario',
+      'tipo_inventario'
+    ])
   },
   methods: {
     changeFocus (next) {

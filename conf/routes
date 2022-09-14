@@ -471,8 +471,8 @@ GET /api/repo/tp/get controllers.ReporteController.tipos
 +nocsrf
 GET /api/repo/m/tp/get controllers.ReporteController.tipos
 GET /api/repo/prn/repo/:id/:em controllers.ReporteController.imprimirReporte(id: Long, em: Long)
-GET /api/repo/prn/rela/:fi/:ff/:e/:u/:f/:t controllers.ReporteController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long, f:String, t:String)
-GET /api/repo/prn/relaf/:id/:fi/:ff/:e/:u/:f/:t controllers.ReporteController.imprimirRelacionFiltrado(id:Long, fi: Long, ff:Long, e:Long, u:Long, f:String, t:String)
+GET /api/repo/prn/rela/:fi/:ff/:e/:u/:f controllers.ReporteController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long, f:String)
+GET /api/repo/prn/relaf/:id/:fi/:ff/:e/:u/:f controllers.ReporteController.imprimirRelacionFiltrado(id:Long, fi: Long, ff:Long, e:Long, u:Long, f:String)
 GET /api/repo/prn/ejec/:fi/:ff/:e/:u/:f controllers.ReporteController.imprimirEjecutado(fi: Long, ff:Long, e:Long, u:Long, f:String)
 GET /api/repo/prn/ejecf/:id/:fi/:ff/:e/:u/:f controllers.ReporteController.imprimirEjecutadoFiltrado(id:Long, fi: Long, ff:Long, e:Long, u:Long, f:String)
 GET /api/repo/prn/form/:i/:e controllers.ReporteController.imprimirFormato(i:Long, e:Long)

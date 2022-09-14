@@ -11,15 +11,14 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SiapDataAdapter"/>
-	<parameter name="FECHA_INICIAL" class="java.sql.Date"/>
-	<parameter name="FECHA_FINAL" class="java.sql.Date"/>
+	<parameter name="FECHA_INICIAL" class="java.sql.Timestamp"/>
+	<parameter name="FECHA_FINAL" class="java.sql.Timestamp"/>
 	<parameter name="EMPRESA" class="java.lang.String"/>
 	<parameter name="USUARIO" class="java.lang.String"/>
 	<parameter name="EMPR_ID" class="java.lang.Long"/>
-	<parameter name="CUAD_ID" class="java.lang.Long"/>
 	<queryString language="SQL">
-		<![CDATA[select r.* from
-				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion, ot.ortr_consecutivo, ot.ortr_fecha
+		<![CDATA[select r.* from 
+				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion as fecha_limite,  c.cuad_descripcion 
 				           from siap.reporte r 
                         left join siap.reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
@@ -29,9 +28,9 @@
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID} and c.cuad_id = $P{CUAD_ID}
+                        where r.repo_fechasolucion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (2,3) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT TRUE   and r.empr_id = $P{EMPR_ID}
                    union all
-                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'CONTROL' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion, ot.ortr_consecutivo, ot.ortr_fecha 
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'CONTROL' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion as fecha_limite,  c.cuad_descripcion 
                    from siap.control_reporte r 
                         left join siap.control_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
@@ -41,9 +40,9 @@
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID} and c.cuad_id = $P{CUAD_ID}
+                        where r.repo_fechasolucion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (2,3) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT TRUE   and r.empr_id = $P{EMPR_ID}
 				           union all
-                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion , ot.ortr_consecutivo, ot.ortr_fecha
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion  as fecha_limite,  c.cuad_descripcion 
                    from siap.transformador_reporte r 
                         left join siap.transformador_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
@@ -53,18 +52,18 @@
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID} and c.cuad_id = $P{CUAD_ID}
+                        where r.repo_fechasolucion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (2,3) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT TRUE   and r.empr_id = $P{EMPR_ID}
                    union all
-                   select DISTINCT ON (r.obra_consecutivo) r.obra_consecutivo, r.obra_fecharecepcion, r.obra_direccion, r.barr_id, r.obra_telefono, r.obra_nombre, 'OBRA' as tipo_inventario, o.orig_descripcion, 'OBRA' as reti_descripcion, r.obra_descripcion as acti_descripcion, b.barr_descripcion,((r.obra_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.obra_fecharecepcion and (r.obra_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion , ot.ortr_consecutivo, ot.ortr_fecha 
+                   select DISTINCT ON (r.obra_consecutivo) r.obra_consecutivo, r.obra_fecharecepcion, r.obra_direccion, r.barr_id, r.obra_telefono, r.obra_nombre, 'OBRA' as tipo_inventario, o.orig_descripcion, 'OBRA' as reti_descripcion, r.obra_descripcion as acti_descripcion, b.barr_descripcion, r.obra_fechasolucion as repo_fechasolucion,  c.cuad_descripcion 
                    from siap.obra r 
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
                         left join siap.ordentrabajo_obra otr on otr.obra_id = r.obra_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.obra_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.obra_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID} and c.cuad_id = $P{CUAD_ID}
+                        where r.obra_fechasolucion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (2,3) and (coalesce(trim(r.obra_reportetecnico), '') = '') IS NOT TRUE   and r.empr_id = $P{EMPR_ID}
                     ) r
-                  ORDER BY r.reti_descripcion ASC, r.repo_consecutivo ASC]]>
+                  ORDER BY r.tire_descripcion, r.reti_descripcion ASC, r.repo_consecutivo ASC]]>
 	</queryString>
 	<field name="repo_consecutivo" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="repo_consecutivo"/>
@@ -110,7 +109,7 @@
 		<property name="com.jaspersoft.studio.field.name" value="barr_descripcion"/>
 		<property name="com.jaspersoft.studio.field.label" value="barr_descripcion"/>
 	</field>
-	<field name="fecha_limite" class="java.sql.Timestamp">
+	<field name="fecha_limite" class="java.sql.Date">
 		<property name="com.jaspersoft.studio.field.name" value="fecha_limite"/>
 		<property name="com.jaspersoft.studio.field.label" value="fecha_limite"/>
 	</field>
@@ -118,18 +117,10 @@
 		<property name="com.jaspersoft.studio.field.name" value="cuad_descripcion"/>
 		<property name="com.jaspersoft.studio.field.label" value="cuad_descripcion"/>
 	</field>
-	<field name="ortr_consecutivo" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="ortr_consecutivo"/>
-		<property name="com.jaspersoft.studio.field.label" value="ortr_consecutivo"/>
-	</field>
-	<field name="ortr_fecha" class="java.sql.Date">
-		<property name="com.jaspersoft.studio.field.name" value="ortr_fecha"/>
-		<property name="com.jaspersoft.studio.field.label" value="ortr_fecha"/>
-	</field>
-	<group name="GroupTipoReporte">
+	<group name="GroupTipoReporte" isReprintHeaderOnEachPage="true">
 		<groupExpression><![CDATA[$F{tire_descripcion}]]></groupExpression>
 		<groupHeader>
-			<band height="50">
+			<band height="49">
 				<staticText>
 					<reportElement x="0" y="10" width="770" height="9" uuid="a29ef0dc-8084-475d-b087-2d2b8df8036b"/>
 					<textElement textAlignment="Center">
@@ -148,7 +139,7 @@
 					<textElement textAlignment="Center">
 						<font size="9"/>
 					</textElement>
-					<textFieldExpression><![CDATA[CONCATENATE("REPORTES PENDIENTES", " - OTI " , TEXT($F{ortr_consecutivo},"####0"),", Fecha: " ,DATEFORMAT($F{ortr_fecha}, "YYYY-MM-dd" ))]]></textFieldExpression>
+					<textFieldExpression><![CDATA[CONCATENATE(T("REPORTES EJECUTADOS DE "),$F{tire_descripcion})]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement x="0" y="32" width="50" height="16" uuid="30aeb481-2a9f-44fd-9113-62c5e7eba641"/>
@@ -269,7 +260,7 @@
 					<textElement textAlignment="Center">
 						<font size="6"/>
 					</textElement>
-					<text><![CDATA[FECHA LIMITE]]></text>
+					<text><![CDATA[FECHA SOLUCION]]></text>
 				</staticText>
 			</band>
 		</groupHeader>
@@ -290,7 +281,7 @@
 					<text><![CDATA[CANTIDAD DE REPORTES :]]></text>
 				</staticText>
 				<textField isBlankWhenNull="true">
-					<reportElement x="107" y="0" width="36" height="17" uuid="d151525e-fd54-4940-95f0-6f7fab37312c"/>
+					<reportElement x="107" y="0" width="43" height="18" uuid="d151525e-fd54-4940-95f0-6f7fab37312c"/>
 					<box>
 						<pen lineWidth="1.0" lineStyle="Dotted"/>
 						<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -304,15 +295,13 @@
 			</band>
 		</groupFooter>
 	</group>
-	<group name="Group1">
+	<group name="GrupoReporteTipo" isReprintHeaderOnEachPage="true">
 		<groupExpression><![CDATA[$F{reti_descripcion}]]></groupExpression>
 		<groupHeader>
-			<band height="14">
-				<textField isBlankWhenNull="true">
-					<reportElement x="0" y="0" width="770" height="14" uuid="f7422d43-c9d1-4523-a198-40d98f0a80f8"/>
-					<textElement textAlignment="Center">
-						<font size="9"/>
-					</textElement>
+			<band height="15">
+				<textField>
+					<reportElement x="0" y="0" width="770" height="14" uuid="10fe9ca7-1daa-4a38-86e0-20fb731c1a9c"/>
+					<textElement textAlignment="Center"/>
 					<textFieldExpression><![CDATA[$F{reti_descripcion}]]></textFieldExpression>
 				</textField>
 			</band>
@@ -461,7 +450,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{cuad_descripcion}]]></textFieldExpression>
 			</textField>
-			<textField pattern="yyyy/MM/dd HH:mm" isBlankWhenNull="true">
+			<textField pattern="yyyy/MM/dd" isBlankWhenNull="true">
 				<reportElement x="120" y="0" width="60" height="13" uuid="4745485f-dbfd-4e69-84ac-e7fdb99cc823">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1699b944-406b-494a-8ec2-8f6ad883d595"/>
 				</reportElement>
@@ -479,24 +468,49 @@
 			</textField>
 		</band>
 	</detail>
-	<summary>
-		<band height="67">
+	<pageFooter>
+		<band height="14">
 			<textField pattern="yyyy/MM/dd hh:mm a">
-				<reportElement x="705" y="54" width="70" height="13" uuid="8770d646-c8da-4775-9642-854a6af6e3f5"/>
+				<reportElement x="710" y="0" width="70" height="13" uuid="9212c841-ad6d-4124-a636-6a0d18e049cf"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="645" y="54" width="60" height="13" uuid="f2356b9a-40dd-462c-aa5a-109e7cc7d96a"/>
+				<reportElement x="650" y="0" width="60" height="13" uuid="7c073f0f-61c1-486a-9e54-58faac0cdef4"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="6"/>
 				</textElement>
 				<text><![CDATA[Impreso:  ]]></text>
 			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="67">
+			<staticText>
+				<reportElement x="240" y="36" width="228" height="13" uuid="42605263-35d9-4ef8-b716-438f2fecc6ae"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="330" y="50" width="40" height="13" uuid="f163803d-936d-4da6-a89e-5d260e425aa2"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[REVISO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="582" y="50" width="40" height="13" uuid="eabdf06e-908e-49a9-8b9b-35445bb11944"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[APROBO]]></text>
+			</staticText>
 			<textField>
-				<reportElement x="0" y="37" width="150" height="13" uuid="227ea2b0-90ac-45bd-8c34-e4037bd0c64f"/>
+				<reportElement x="0" y="37" width="150" height="13" uuid="2c34ae6d-c8b3-4d02-bfe0-1d3c06c6efba"/>
 				<box>
 					<bottomPen lineWidth="1.0"/>
 				</box>
@@ -506,7 +520,14 @@
 				<textFieldExpression><![CDATA[$P{USUARIO}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="57" y="51" width="50" height="13" uuid="258c0d62-20f7-4b74-aa7d-33f966033830"/>
+				<reportElement x="492" y="36" width="228" height="13" uuid="95209ceb-3c2a-45b4-b6fc-596a1a8ca6b8"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="57" y="51" width="50" height="13" uuid="ba30b4f3-d14f-41b5-9388-2389c4992d0c"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -517,34 +538,6 @@
 					<font size="8"/>
 				</textElement>
 				<text><![CDATA[ELABORO]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="330" y="50" width="40" height="13" uuid="3558f1e8-c828-48de-b1e2-108d23a5e9e3"/>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<text><![CDATA[REVISO]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="240" y="36" width="228" height="13" uuid="476c3ebc-2ad3-4c1f-81e2-e963ef819133"/>
-				<box>
-					<bottomPen lineWidth="1.0"/>
-				</box>
-				<text><![CDATA[]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="492" y="36" width="228" height="13" uuid="e2d6ff41-4a84-422a-a140-db0b8ff509f3"/>
-				<box>
-					<bottomPen lineWidth="1.0"/>
-				</box>
-				<text><![CDATA[]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="582" y="50" width="40" height="13" uuid="614b2b3d-bd17-4720-8a37-fbb768c9ed7d"/>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<text><![CDATA[APROBO]]></text>
 			</staticText>
 		</band>
 	</summary>
