@@ -80,6 +80,15 @@ class OrdenTrabajoController @Inject()(
 
   }
 
+  def buscarPorCuadrillaFecha(
+    cuad_id: Long,
+    fecha: Long
+  ) = authenticatedUserAction.async { implicit request =>
+    ordenService.buscarPorCuadrillaFecha(cuad_id, fecha).map { orden => 
+      Ok(Json.toJson(orden))
+    }
+  }
+
   def guardarOrden() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get

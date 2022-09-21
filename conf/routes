@@ -638,6 +638,7 @@ GET /api/ortr/obc/:id controllers.OrdenTrabajoController.obtenerReporteObraPorCu
 +nocsrf
 GET /api/ortr/obcm/:id controllers.OrdenTrabajoController.obtenerReporteObraPorCuadrillaMobile(id: Long)
 GET /api/ortr/incb/:fi/:ff controllers.OrdenTrabajoController.siap_informe_cambios_en_reporte(fi: Long, ff: Long)
+GET /api/ortr/gbycf/:c/:f controllers.OrdenTrabajoController.buscarPorCuadrillaFecha(c: Long, f: Long)
 # Medioambiente
 
 GET /api/meam/get controllers.MedioAmbienteController.todos
@@ -694,6 +695,7 @@ GET /api/info/sigex/:fi/:ff/:ft/:e/:t controllers.InformeController.siap_informe
 GET /api/info/sirax/:ff/:e/:t controllers.InformeController.siap_informe_resumen_aforo_xls(ff: Long, e: Long, t: String)
 GET /api/info/sicax/:ff/:e/:t controllers.InformeController.siap_informe_carga_aforo_xls(ff: Long, e: Long, t: String)
 GET /api/info/sccmxlx/:fi/:ff/:c controllers.InformeController.siap_cuadrilla_consolidado_material_xlsx(fi: Long, ff: Long, c: Long)
+GET /api/info/srf/:fi/:ff/:rt   controllers.InformeController.siap_reporte_foto(fi: Long, ff: Long, rt: Long)
 
 # Graficas
 

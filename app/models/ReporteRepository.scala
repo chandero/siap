@@ -2478,7 +2478,7 @@ class ReporteRepository @Inject()(
                             LEFT JOIN siap.origen o on r.orig_id = o.orig_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
-                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.rees_id in (1,2)"""
+                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.rees_id in (1,2) AND (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE"""
       ).on(
           'reti_id -> reti_id, 
           'repo_consecutivo -> repo_consecutivo

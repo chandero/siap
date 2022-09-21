@@ -274,6 +274,12 @@ const informeRouter = {
           meta: { title: 'menu_informe_menu5grafica_menu5-1operativa', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
         }
       ]
+    },
+    {
+      path: 'menu6foto',
+      component: () => import('@/views/informe/menu6foto/index'), // Parent router-view
+      name: 'menu_informe_menu6foto',
+      meta: { title: 'menu_informe_menu6foto', icon: 'el-icon-camera', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
     }
   ]
 }

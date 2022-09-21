@@ -66,6 +66,8 @@ import utilities.Utility
 import org.checkerframework.checker.units.qual.s
 import org.apache.poi.ss.usermodel.CellType
 
+import jrds.ReporteFotoDS
+
 case class Siap_resumen_material(
     elem_codigo: Option[String],
     elem_descripcion: Option[String],
@@ -16002,5 +16004,63 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
         _listRow04.toList
       }
     )
+  }
+
+  def siap_reporte_foto(fecha_inicial: Long, fecha_final: Long, reti_id: Long, empr_id: Long): (String, Array[Byte]) = {
+    val fi = new DateTime(fecha_inicial)
+    val ff = new DateTime(fecha_final)
+    var os = Array[Byte]()
+    val empresa = empresaService.buscarPorId(empr_id).get
+    var reti_descripcion = ""
+    val resultSet = db.withConnection { implicit connection =>
+      reti_descripcion = SQL("SELECT reti_descripcion FROM siap.reporte_tipo WHERE reti_id = {reti_id}").
+      on(
+        "reti_id" -> reti_id
+      ).as(SqlParser.scalar[String].single)
+      val _parser = int("tireuc_id") ~ str("reti_descripcion") ~ int("repo_consecutivo") ~
+                    int("repo_tipo_expansion") ~ int("aap_id") ~ str("barr_descripcion") ~
+                    int("refo_id") ~ str("refo_data") map {
+                      case tireuc_id ~ reti_descripcion ~ repo_consecutivo ~ repo_tipo_expansion ~
+                           aap_id ~ barr_descripcion ~ refo_id ~ refo_data =>
+                        (tireuc_id, reti_descripcion, repo_consecutivo, repo_tipo_expansion, aap_id,
+                         barr_descripcion, refo_id, refo_data)
+                    }
+      val query = """
+      SELECT r1.tireuc_id, rt1.reti_descripcion, r1.repo_consecutivo, ra1.repo_tipo_expansion, rd1.aap_id, b1.barr_descripcion, rdf1.refo_id, rdf1.refo_data from siap.reporte r1
+        inner join siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id 
+        inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+        inner join siap.reporte_direccion rd1 ON rd1.tire_id = r1.tireuc_id and rd1.repo_id = r1.repo_id and rd1.even_estado < 9
+        inner join siap.reporte_direccion_foto rdf1 on rdf1.tireuc_id = rd1.tire_id and rdf1.repo_id = rd1.repo_id and rdf1.aap_id = rd1.aap_id
+        left join siap.barrio b1 on b1.barr_id = rd1.barr_id
+      where r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} AND r1.reti_id = {reti_id} AND r1.empr_id = {empr_id}
+      order by 1,2,3,4,5
+      """
+      SQL(query).
+      on(
+        "fecha_inicial" -> fi,
+        "fecha_final" -> ff,
+        "reti_id" -> reti_id,
+        "empr_id" -> empr_id
+      ).as(_parser *)
+    }
+
+    println("resultSet: " + resultSet + "")
+
+    var compiledFile = REPORT_DEFINITION_PATH + "siap_reporte_foto.jasper"
+    try {
+          var reportParams = new HashMap[String, java.lang.Object]()
+          reportParams.put("EMPRESA", empresa.empr_descripcion)
+          reportParams.put("DIRECCION", empresa.empr_direccion)
+          reportParams.put("CONCESION", empresa.empr_concesion.get)
+          reportParams.put("FECHA_INICIAL", new java.util.Date(fecha_inicial))
+          reportParams.put("FECHA_FINAL", new java.util.Date(fecha_final))
+          reportParams.put("RETI_DESCRIPCION", reti_descripcion)
+          var _ds = new ReporteFotoDS(resultSet)
+          os = JasperRunManager
+            .runReportToPdf(compiledFile, reportParams, _ds)
+        } catch {
+          case e: Exception => e.printStackTrace();
+        }
+    (reti_descripcion, os)
   }
 }

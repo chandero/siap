@@ -22,7 +22,7 @@
                     <el-row :gutter="4">
                         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
                             <el-form-item :label="$t('ordentrabajo.crew')">
-                             <el-select filterable clearable ref="crew" v-model="ordentrabajo.cuad_id" name="crew" :placeholder="$t('cuadrilla.select')"  style="width:250px;" @change="changeFocus('type')">
+                             <el-select filterable clearable ref="crew" v-model="ordentrabajo.cuad_id" name="crew" :placeholder="$t('cuadrilla.select')"  style="width:250px;" @change="validarCuadrilla(ordentrabajo.cuad_id)">
                               <el-option v-for="cuadrilla in cuadrillas" :key="cuadrilla.cuad_id" :label="cuadrilla.cuad_descripcion" :value="cuadrilla.cuad_id" >
                               </el-option>
                              </el-select>
@@ -53,13 +53,13 @@
                             <span style="font-weight: bold;">Descripción del Reporte</span>
                           </el-col>
                         </el-row>
-                        <div v-for="(evento, id) in ordentrabajo.reportes" v-bind:key="id">
+                        <div v-for="(evento, id, index) in ordentrabajo.reportes" v-bind:key="id">
                           <el-form :model="evento" ref="reporteform">
                           <el-row :gutter="4">
                             <el-col class="hidden-md-and-up" :xs="1" :sm="1">
                               <span style="font-weight: bold;">No.</span>
                             </el-col>
-                            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ evento.even_id }}</el-col>
+                            <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">{{ id + 1 }}</el-col>
                             <el-col class="hidden-md-and-up" :xs="9" :sm="9">
                               <span style="font-weight: bold;">Tipo de Reporte</span>
                             </el-col>
@@ -77,7 +77,7 @@
                             <el-col :xs="13" :sm="13" :md="5" :lg="5" :xl="5">
                                 <el-form-item>
                                   <div style="display: table;">
-                                    <el-input :disabled="evento.even_estado === 2 || evento.even_estado > 7" type="number" class="sinpadding" style="display: table-cell;" v-model="evento.repo_consecutivo" @input="evento.repo_consecutivo = parseInt($event,10)"  @blur="validateRepoEvento(evento, id)">
+                                    <el-input :disabled="evento.even_estado === 2 || evento.even_estado > 7" type="number" class="sinpadding" style="display: table-cell;" v-model="evento.repo_consecutivo" @input="evento.repo_consecutivo = parseInt($event,10)" @blur="validateRepoEvento(evento, id)">
                                     </el-input>
                                   </div>
                                 </el-form-item>
@@ -91,8 +91,7 @@
                                 </el-form-item>
                             </el-col>
                             <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
-                              <el-button v-if="evento.even_estado < 8" size="mini" type="danger" circle icon="el-icon-minus" title="Quitar Fila" @click="evento.even_estado === 1? evento.even_estado = 8 : evento.even_estado = 9"></el-button>
-                              <el-button v-if="evento.even_estado > 7" size="mini" type="success" circle icon="el-icon-success" title="Restaurar Fila" @click="evento.even_estado === 9? evento.even_estado = 2 : evento.even_estado = 1"></el-button>
+                              <el-button v-if="evento.even_estado < 8" size="mini" type="danger" circle icon="el-icon-minus" title="Quitar Fila" @click="handleDelete(index, evento)"></el-button>
                             </el-col>
                          </el-row>
                          </el-form>
@@ -272,7 +271,7 @@
 import { mapGetters } from 'vuex'
 import { getTiposBarrio } from '@/api/tipobarrio'
 import { getCuadrillas } from '@/api/cuadrilla'
-import { saveOrden, printOrden } from '@/api/ordentrabajo'
+import { saveOrden, printOrden, getOrdenByCuadrillaFecha } from '@/api/ordentrabajo'
 import { getReporte, getTipos, getReportePorConsecutivo } from '@/api/reporte'
 import { getObra, getObraPorConsecutivo } from '@/api/obra'
 import { getNovedades } from '@/api/novedad'
@@ -320,14 +319,16 @@ export default {
         barr_id: null,
         barr_descripcion: null,
         empr_id: 0,
-        usua_id: 0
+        usua_id: 0,
+        es_valido: false
       },
       obra: {
         obra_id: null,
         obra_consecutivo: null,
         obra_nombre: null,
         even_id: null,
-        even_estado: null
+        even_estado: null,
+        es_valido: false
       },
       novedad: {
         nove_id: null,
@@ -343,7 +344,9 @@ export default {
       novedades: [],
       reporte_siguiente_consecutivo: 0,
       obra_siguiente_consecutivo: 0,
-      novedad_siguiente_consecutivo: 0
+      novedad_siguiente_consecutivo: 0,
+      isNotSaving: true,
+      noValid: false
     }
   },
   computed: {
@@ -405,10 +408,13 @@ export default {
             if (response.status === 200) {
               evento.repo_descripcion = response.data.repo_descripcion
               evento.repo_id = response.data.repo_id
+              evento.es_valido = true
             } else {
+              evento.es_valido = false
               this.reportdoesnotexist()
             }
           }).catch(error => {
+            evento.es_valido = false
             this.reportdoesnotexist(error)
           })
         }
@@ -431,11 +437,25 @@ export default {
       }
     },
     validate () {
-      if (this.ordentrabajo.ortr_fecha && this.ordentrabajo.cuad_id && this.ordentrabajo.tiba_id && this.ordentrabajo.reportes.length > 0) {
+      if (!this.noValid && this.isNotSaving && this.ordentrabajo.ortr_fecha && this.ordentrabajo.cuad_id && this.ordentrabajo.tiba_id && this.ordentrabajo.reportes.length > 0) {
         return true
       } else {
         return false
       }
+    },
+    validarCuadrilla(cuad_id) {
+      getOrdenByCuadrillaFecha(cuad_id, this.ordentrabajo.ortr_fecha.getTime()).then(response => {
+        const orden = response.data
+        if (orden) {
+          this.$message('Ya existe una orden para la cuadrilla con esta fecha')
+          this.noValid = true
+        } else {
+          this.noValid = false
+        }
+      }).catch(e => {
+        this.noValid = false
+        console.log('Error buscando orden: ', e)
+      })
     },
     buscarReporte () {
       if (this.reporte.repo_id) {
@@ -459,19 +479,39 @@ export default {
       this.ordentrabajo.reportes.splice(index, 1)
       this.$refs.report.focus()
     },
+    limpiar() {
+      this.ordentrabajo = {
+        ortr_id: null,
+        ortr_fecha: new Date(),
+        ortr_observacion: '',
+        ortr_consecutivo: null,
+        otes_id: 1,
+        cuad_id: null,
+        tiba_id: null,
+        usua_id: 0,
+        empr_id: 0,
+        reportes: [],
+        obras: [],
+        novedades: []
+      }
+    },
     aplicar () {
+      this.isNotSaving = false
       saveOrden(this.ordentrabajo)
         .then(response => {
+          this.isNotSaving = true
           if (response.status === 201) {
             this.ordentrabajo.ortr_id = response.data
             this.success()
           }
         })
         .catch(error => {
+          this.isNotSaving = true
           this.error(error)
         })
     },
     success () {
+      this.limpiar()
       this.$notify({
         title: this.$i18n.t('ordentrabajo.success'),
         message:

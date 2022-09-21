@@ -493,6 +493,21 @@ class OrdenTrabajoRepository @Inject()(
     }
   }
 
+  def buscarPorCuadrillaFecha(
+    cuad_id: Long,
+    fecha: Long
+  ): Future[Option[OrdenTrabajo]] = Future {
+    db.withConnection { implicit connection => 
+        SQL("""SELECT * FROM siap.ordentrabajo ot1 
+        LEFT JOIN siap.cuadrilla c1 ON c1.cuad_id = ot1.cuad_id
+        WHERE ot1.cuad_id = {cuad_id} and ot1.ortr_fecha = {fecha}""").
+        on(
+          'cuad_id -> cuad_id,
+          'fecha -> new DateTime(fecha)
+        ).as(OrdenTrabajo.simple.singleOpt)
+    }
+  }
+
   /**
     * Recuperar el último OrdenTrabajo por su empr_id
     * @param empr_id: scala.Long
@@ -1140,13 +1155,25 @@ class OrdenTrabajoRepository @Inject()(
         case a1 ~ a2 ~ a3 ~ a4 => (a1, a2, a3, a4)
       }
       SQL(
-        """select ot1.ortr_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
+        """select ot1.ortr_id, r1.tireuc_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
-                    inner join siap.reporte r1 on r1.repo_id = or1.repo_id 
+                    inner join siap.reporte r1 on r1.tireuc_id = or1.tireuc_id  and r1.repo_id = or1.repo_id 
+                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8
+                   union all
+            select ot1.ortr_id, r1.tireuc_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
+                    inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
+                    inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
+                    inner join siap.control_reporte r1 on r1.tireuc_id = or1.tireuc_id  and r1.repo_id = or1.repo_id 
+                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8
+                   union all
+            select ot1.ortr_id, r1.tireuc_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
+                    inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
+                    inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
+                    inner join siap.transformador_reporte r1 on r1.tireuc_id = or1.tireuc_id  and r1.repo_id = or1.repo_id 
                    where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8
                    union all 
-                   select ot1.ortr_id, o1.obra_id as repo_id, 99 as reti_id, o1.obra_consecutivo as repo_consecutivo from siap.ordentrabajo ot1
+            select ot1.ortr_id, 99 as tireuc_id, o1.obra_id as repo_id, 99 as reti_id, o1.obra_consecutivo as repo_consecutivo from siap.ordentrabajo ot1
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_obra oo1 on oo1.ortr_id = ot1.ortr_id 
                     inner join siap.obra o1 on o1.obra_id = oo1.obra_id  
@@ -1178,13 +1205,13 @@ class OrdenTrabajoRepository @Inject()(
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
                     inner join siap.reporte r1 on r1.repo_id = or1.repo_id 
-                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND r1.rees_id in (1,2)
+                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND r1.rees_id in (1,2) AND (coalesce(r1.repo_reportetecnico, '') = '') IS NOT FALSE
                    union all 
                    select ot1.ortr_id, o1.obra_id as repo_id, 99 as reti_id, o1.obra_consecutivo as repo_consecutivo from siap.ordentrabajo ot1
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_obra oo1 on oo1.ortr_id = ot1.ortr_id 
                     inner join siap.obra o1 on o1.obra_id = oo1.obra_id  
-                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND o1.rees_id in (1,2)"""
+                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND o1.rees_id in (1,2) AND (coalesce(o1.obra_reportetecnico, '') = '') IS NOT FALSE"""
       ).on(
           'cuad_id -> cuad_id,
           'fecha_corte -> fecha_corte

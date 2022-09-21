@@ -31,6 +31,13 @@ export function getOrden (ortr_id) {
   })
 }
 
+export function getOrdenByCuadrillaFecha(cuad_id, fecha) {
+  return request({
+    url: `/ortr/gbycf/${cuad_id}/${fecha}`,
+    method: 'get'
+  })
+}
+
 export function addReporteAOrden (ot, rp, tu) {
   const data = {
     ot,
