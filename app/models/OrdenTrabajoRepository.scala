@@ -781,12 +781,12 @@ class OrdenTrabajoRepository @Inject()(
                      )
                       .executeInsert()
                     }
-                    SQL("""UPDATE siap.reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}""").
+/*                     SQL("""UPDATE siap.reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}""").
                     on(
                      'repo_fechasolucion -> Option.empty[DateTime],
                      'tireuc_id -> r.tireuc_id,
                     'repo_id -> r.repo_id
-                    ).executeUpdate()
+                    ).executeUpdate() */
                   }
                 case None => None
               }
