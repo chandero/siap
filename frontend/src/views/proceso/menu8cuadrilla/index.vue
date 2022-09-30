@@ -10,7 +10,7 @@
       <el-table
         :data="usuario_cuadrilla"
         style="width: 100%"
-        height="600"
+        height="400"
       >
       <el-table-column
         label="Usuario"

@@ -20,8 +20,9 @@ import net.liftweb.json.parse
 
 import com.google.inject.Singleton
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Success, Failure}
+import scala.concurrent.{ExecutionContext, Await, Future}
+import scala.concurrent.duration._
+import scala.util.{Try, Success, Failure}
 
 import org.joda.time.LocalDate
 import org.joda.time.DateTime
@@ -359,6 +360,49 @@ class ReporteController @Inject()(
         reporte.novedades
       )
       if (reporteService.actualizar(reportenuevo, coau_tipo, coau_codigo)) {
+        Future.successful(Ok(Json.toJson("true")))
+      } else {
+        Future.successful(NotAcceptable(Json.toJson("true")))
+      }
+  }
+
+  def actualizarMaterial() = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val json = request.body.asJson.get
+      println("json: " + json)
+      var reporteRequest =
+        net.liftweb.json.parse(json.toString).extract[ReporteRequest]
+      val reporte = reporteRequest.reporte
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)
+      val reportenuevo = new Reporte(
+        reporte.repo_id,
+        reporte.tireuc_id,
+        reporte.reti_id,
+        reporte.repo_consecutivo,
+        reporte.repo_fecharecepcion,
+        reporte.repo_direccion,
+        reporte.repo_nombre,
+        reporte.repo_telefono,
+        reporte.repo_fechasolucion,
+        reporte.repo_horainicio,
+        reporte.repo_horafin,
+        reporte.repo_reportetecnico,
+        reporte.repo_descripcion,
+        reporte.repo_subrepoconsecutivo,
+        reporte.rees_id,
+        reporte.orig_id,
+        reporte.barr_id,
+        empr_id,
+        reporte.tiba_id,
+        usua_id,
+        reporte.adicional,
+        reporte.meams,
+        reporte.eventos,
+        reporte.direcciones,
+        reporte.novedades
+      )
+      if (reporteService.actualizarMaterial(reportenuevo)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
         Future.successful(NotAcceptable(Json.toJson("true")))
@@ -758,5 +802,31 @@ class ReporteController @Inject()(
       var bytes = Files.readAllBytes(pathToImage);
       var encondedString = Base64.getEncoder().encodeToString(bytes);
       Future.successful(Ok(encondedString))
+  }
+
+  def getReportesParaCierreDirecto(fecha_inicial: Long, fecha_final: Long) = authenticatedUserAction.async { implicit request =>
+    val empr_id = Utility.extraerEmpresa(request)
+    reporteService.getReportesParaCierreDirecto(fecha_inicial, fecha_final, empr_id.get).map { datos =>
+      println("Datos: " + datos)
+      Ok(write(datos))
+    }
+  }
+
+  def cerrarReporte(tireuc_id: Long, repo_id: Long) = authenticatedUserAction.async { implicit request =>
+    val empr_id = Utility.extraerEmpresa(request)
+    val usua_id = Utility.extraerUsuario(request)
+    val result = reporteService.cerrarReporte(tireuc_id, repo_id, empr_id.get, usua_id.get)
+    Future.successful(Ok(write(result)))
+  }
+
+  def cerrarReportes = authenticatedUserAction.async {
+    implicit request =>
+      val empr_id = Utility.extraerEmpresa(request)
+      val usua_id = Utility.extraerUsuario(request)
+      val _lista = request.body.asJson.get.as[List[(Long, Long)]]
+      for (item <- _lista){ 
+        reporteService.cerrarReporte(item._1, item._2, empr_id.get, usua_id.get)
+      }
+      Future.successful(Ok(write("true")))
   }
 }

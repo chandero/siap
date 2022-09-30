@@ -380,3 +380,25 @@ export function getFoto(path) {
     method: 'get'
   })
 }
+
+export function getReportesParaCierreDirecto(fi, ff) {
+  return request({
+    url: '/repo/grcd/' + fi + '/' + ff,
+    method: 'get'
+  })
+}
+
+export function cerrarReporte(tireuc_id, repo_id) {
+  return request({
+    url: '/repo/cr/' + tireuc_id + '/' + repo_id,
+    method: 'get'
+  })
+}
+
+export function cerrarReportes(lista) {
+  return request({
+    url: '/repo/crs',
+    method: 'post',
+    data: lista
+  })
+}

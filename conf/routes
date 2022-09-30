@@ -489,7 +489,9 @@ GET /api/repo/conv/:id controllers.ReporteController.convertir(id: Long)
 GET /api/repo/gbaap/:id controllers.ReporteController.buscarPorAap(id: Long)
 GET /api/repo/rsino/:fi/:ff controllers.ReporteController.reporteSinOrdenTrabajo(fi: Long, ff: Long)
 GET /api/repo/acde/:fc/:tr controllers.ReporteController.ActaDesmonteXls(fc: Long, tr: Int)
-
+GET /api/repo/grcd/:fi/:ff controllers.ReporteController.getReportesParaCierreDirecto(fi: Long, ff: Long)
+GET /api/repo/cr/:ti/:ri  controllers.ReporteController.cerrarReporte(ti: Long, ri: Long)
+POST /api/repo/crs  controllers.ReporteController.cerrarReportes
 # ControlReporte
 
 POST /api/core/get controllers.ControlReporteController.todos

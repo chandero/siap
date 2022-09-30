@@ -436,6 +436,34 @@ const procesoRouter = {
       ]
     },
     {
+      path: 'menu9cierre',
+      component: () => import('@/views/proceso/menu9cierre/index'), // Parent router-view
+      name: 'menu_proceso_menu9cierre',
+      meta: {
+        title: 'menu_proceso_menu9cierre',
+        icon: 'el-icon-s-unfold',
+        roles: [
+          'super',
+          'admin',
+          'auxiliar',
+          'supervisor'
+        ]
+      },
+      children: [
+        {
+          path: 'menu9-1directo',
+          component: () =>
+            import('@/views/proceso/menu9cierre/menu9-1directo'),
+          name: 'menu_proceso_menu9cierre_menu9-1directo',
+          meta: {
+            title: 'menu_proceso_menu9cierre_menu9-1directo',
+            icon: 'el-icon-edit-outline',
+            roles: ['super', 'admin', 'auxiliar', 'supervisor']
+          }
+        }
+      ]
+    },
+    {
       path: 'menu8cuadrilla',
       component: () => import('@/views/proceso/menu8cuadrilla/index'), // Parent router-view
       name: 'menu_proceso_menu8cuadrilla',

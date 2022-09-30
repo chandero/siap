@@ -4125,22 +4125,8 @@ export default {
       })
       //
       const start = async () => {
-        for (let index = 0; index < this.reporte.direcciones.length; index++) {
-          var result = await this.validatForm('dirform_' + (index + 1))
-          console.log('validación result: ' + result)
-          validacion = validacion && result
-          console.log('validación: ' + validacion)
-        }
-        /*
         validacion = true
-        for (let index = 0; index < this.reporte.eventos.length; index++) {
-          result = await this.validatForm('matform_' + this.reporte.eventos[index].even_id)
-          console.log('validación result: ' + result)
-          validacion = validacion && result
-          console.log('validación: ' + validacion)
-        }
-        */
-        valido = validacion && (await this.validatForm('reporteForm'))
+        valido = validacion
         if (!valido) {
           this.$notify.info({
             title: 'Atención',
@@ -4149,18 +4135,6 @@ export default {
           })
           return false
         }
-        /*
-        for (var i = 0; i < this.reporte.direcciones.length; i++) {
-          if (this.reporte.direcciones[i].even_valido.aap_id === false && this.reporte.direcciones[i].even_estado < 8) {
-            console.log('aap_id no valido: ' + this.reporte.direcciones[i].aap_id)
-            this.$alert('Código de luminaria no válido: ' + this.reporte.direcciones[i].aap_id, 'Error', {
-              confirmationButtonText: 'Cerrar'
-            })
-            this.error('2. error en información, por favor verifique')
-            return false
-          }
-        }
-        */
         for (var i = 0; i < this.reporte.eventos.length; i++) {
           if (this.reporte.eventos[i].elem_id === '') {
             this.reporte.eventos[i].elem_id = null

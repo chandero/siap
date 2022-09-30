@@ -31,7 +31,7 @@ import play.api.libs.functional.syntax._
 import play.api.db.DBApi
 
 import anorm._
-import anorm.SqlParser.{get, str, scalar, int, double}
+import anorm.SqlParser.{get, str, scalar, int, double, date}
 import anorm.JodaParameterMetaData._
 
 import scala.util.{Failure, Success}
@@ -1329,6 +1329,8 @@ class ReporteRepository @Inject()(
     usuarioService: UsuarioRepository,
     medidorService: MedidorRepository,
     transformadorService: TransformadorRepository,
+    controlReporteService: ControlReporteRepository,
+    transformadorReporteService: TransformadorReporteRepository,
     cuadrillaService: CuadrillaRepository,
     aapService: AapRepository
 )(implicit ec: DatabaseExecutionContext) {
@@ -3629,7 +3631,7 @@ class ReporteRepository @Inject()(
               )
               aapOption match {
                 case None =>
-                  if (d.even_estado.get == 1) {
+                  if (d.even_estado.get < 9) {
                     aapService.creardirecto(
                       activo,
                       reporte.empr_id.get,
@@ -3644,6 +3646,11 @@ class ReporteRepository @Inject()(
           }
         }
       }
+
+
+      SQL("""DELETE FROM siap.reporte_evento WHERE repo_id = {repo_id}""")
+        .on('repo_id -> reporte.repo_id)
+        .executeUpdate()
 
       reporte.eventos.map { eventos =>
         for (e <- eventos) {
@@ -5172,6 +5179,546 @@ class ReporteRepository @Inject()(
       }
 
       result
+    }
+  }
+
+    /**
+    * Actualizar Reporte
+    * @param reporte: Reporte
+    */
+  def actualizarMaterial(
+      reporte: Reporte
+  ): Boolean = {
+    val reporte_ant: Option[Reporte] = buscarPorId(reporte.repo_id.get)
+
+    db.withConnection { implicit connection =>
+      val fecha: LocalDate =
+        new LocalDate(Calendar.getInstance().getTimeInMillis())
+      val hora: LocalDateTime =
+        new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+      var historia =
+        scala.collection.mutable.Map[scala.Long, ElementoHistoria]()
+
+      SQL("""DELETE FROM siap.reporte_evento WHERE repo_id = {repo_id}""")
+        .on('repo_id -> reporte.repo_id)
+        .executeUpdate()
+
+      
+      reporte.eventos.map { eventos =>
+        for (e <- eventos) {
+          if (e.aap_id != None) {
+            var elemento: Elemento = null
+            var bombillo_retirado = None: Option[String]
+            var bombillo_instalado = None: Option[String]
+            var balasto_retirado = None: Option[String]
+            var balasto_instalado = None: Option[String]
+            var arrancador_retirado = None: Option[String]
+            var arrancador_instalado = None: Option[String]
+            var condensador_retirado = None: Option[String]
+            var condensador_instalado = None: Option[String]
+            var fotocelda_retirado = None: Option[String]
+            var fotocelda_instalado = None: Option[String]
+
+            e.elem_id match {
+              case None => None
+              case Some(elem_id) =>
+                elemento = elementoService.buscarPorId(elem_id).get
+            }
+            // Actualizar Evento si ya Existe
+            var estado = 0
+            e.even_estado match {
+              case Some(1) => estado = 2
+              case Some(2) => estado = 2
+              case Some(8) => estado = 9
+              case Some(9) => estado = 9
+              case _       => estado = 2
+            }
+            var eventoActualizado: Boolean = false
+            var eventoInsertado: Boolean = false
+            /*println("empr_id: " + reporte.empr_id)
+            println("repo_id: " + reporte.repo_id)
+            println("aap_id: " + e.aap_id)
+            println("even_id: " + e.even_id)*/
+            eventoActualizado = SQL(
+              """UPDATE siap.reporte_evento SET 
+                                                                even_fecha = {even_fecha}, 
+                                                                elem_id = {elem_id},
+                                                                even_estado = {even_estado},
+                                                                even_codigo_retirado = {even_codigo_retirado},                                                                 
+                                                                even_cantidad_retirado = {even_cantidad_retirado}, 
+                                                                even_codigo_instalado = {even_codigo_instalado}, 
+                                                                even_cantidad_instalado = {even_cantidad_instalado},
+                                                                usua_id = {usua_id},
+                                                                unit_id = {unit_id}
+                                                            WHERE empr_id = {empr_id} and repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}
+                                                        """
+            ).on(
+                'even_fecha -> hora,
+                'elem_id -> e.elem_id,
+                'even_codigo_retirado -> e.even_codigo_retirado,
+                'even_cantidad_retirado -> e.even_cantidad_retirado,
+                'even_codigo_instalado -> e.even_codigo_instalado,
+                'even_cantidad_instalado -> e.even_cantidad_instalado,
+                'usua_id -> reporte.usua_id,
+                'even_estado -> estado,
+                'empr_id -> reporte.empr_id,
+                'repo_id -> reporte.repo_id,
+                'aap_id -> e.aap_id,
+                'even_id -> e.even_id,
+                'unit_id -> e.unit_id
+              )
+              .executeUpdate() > 0
+            if (!eventoActualizado) {
+              eventoInsertado = SQL(
+                """INSERT INTO siap.reporte_evento (even_fecha, 
+                                    even_codigo_instalado,
+                                    even_cantidad_instalado,
+                                    even_codigo_retirado,
+                                    even_cantidad_retirado, 
+                                    even_estado, 
+                                    aap_id, 
+                                    repo_id, 
+                                    elem_id, 
+                                    usua_id, 
+                                    empr_id,
+                                    even_id,
+                                    unit_id) VALUES (
+                                    {even_fecha}, 
+                                    {even_codigo_instalado},
+                                    {even_cantidad_instalado},
+                                    {even_codigo_retirado},
+                                    {even_cantidad_retirado},
+                                    {even_estado},
+                                    {aap_id}, 
+                                    {repo_id}, 
+                                    {elem_id}, 
+                                    {usua_id}, 
+                                    {empr_id},
+                                    {even_id},
+                                    {unit_id})"""
+              ).on(
+                  "even_fecha" -> hora,
+                  "even_codigo_instalado" -> e.even_codigo_instalado,
+                  "even_cantidad_instalado" -> e.even_cantidad_instalado,
+                  "even_codigo_retirado" -> e.even_codigo_retirado,
+                  "even_cantidad_retirado" -> e.even_cantidad_retirado,
+                  "even_estado" -> estado,
+                  "aap_id" -> e.aap_id,
+                  "repo_id" -> reporte.repo_id,
+                  "elem_id" -> e.elem_id,
+                  "usua_id" -> e.usua_id,
+                  "empr_id" -> reporte.empr_id,
+                  "even_id" -> e.even_id,
+                  "unit_id" -> e.unit_id
+                )
+                .executeUpdate() > 0
+            }
+            if ((eventoActualizado || eventoInsertado) && (estado != 9)) {
+              // validar elemento y actualizar aap_elemento
+              elemento.tiel_id match {
+                case Some(1) =>
+                  SQL(
+                    """UPDATE siap.aap_elemento SET aap_bombillo = {aap_bombillo}, reti_id = {reti_id} , repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_bombillo -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'empr_id -> reporte.empr_id,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo
+                    )
+                    .executeUpdate()
+                  val updated: Boolean = SQL(
+                    """UPDATE siap.aap_elemento_historia SET aap_bombillo_retirado = {aap_bombillo_retirado}, aap_bombillo_instalado = {aap_bombillo_instalado}
+                                                 WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_bombillo_retirado -> e.even_codigo_retirado,
+                      'aap_bombillo_instalado -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'aael_fecha -> reporte.repo_fechasolucion,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo,
+                      'empr_id -> reporte.empr_id
+                    )
+                    .executeUpdate() > 0
+                  if (!updated) {
+                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                                                    aap_id,
+                                                    aael_fecha,
+                                                    aap_bombillo_retirado,
+                                                    aap_bombillo_instalado,
+                                                    aap_balasto_retirado,
+                                                    aap_balasto_instalado,
+                                                    aap_arrancador_retirado,
+                                                    aap_arrancador_instalado,
+                                                    aap_condensador_retirado,
+                                                    aap_condensador_instalado,
+                                                    aap_fotocelda_retirado,
+                                                    aap_fotocelda_instalado,
+                                                    reti_id,
+                                                    repo_consecutivo,
+                                                    empr_id
+                                                    )
+                                                    VALUES (
+                                                    {aap_id},
+                                                    {aael_fecha},
+                                                    {aap_bombillo_retirado},
+                                                    {aap_bombillo_instalado},
+                                                    {aap_balasto_retirado},
+                                                    {aap_balasto_instalado},
+                                                    {aap_arrancador_retirado},
+                                                    {aap_arrancador_instalado},
+                                                    {aap_condensador_retirado},
+                                                    {aap_condensador_instalado},
+                                                    {aap_fotocelda_retirado},
+                                                    {aap_fotocelda_instalado},
+                                                    {reti_id},
+                                                    {repo_consecutivo},
+                                                    {empr_id}
+                                                    )
+                                                """)
+                      .on(
+                        'aap_bombillo_retirado -> e.even_codigo_retirado,
+                        'aap_bombillo_instalado -> e.even_codigo_instalado,
+                        'aap_balasto_retirado -> "",
+                        'aap_balasto_instalado -> "",
+                        'aap_arrancador_retirado -> "",
+                        'aap_arrancador_instalado -> "",
+                        'aap_condensador_retirado -> "",
+                        'aap_condensador_instalado -> "",
+                        'aap_fotocelda_retirado -> "",
+                        'aap_fotocelda_instalado -> "",
+                        'aap_id -> e.aap_id,
+                        'aael_fecha -> reporte.repo_fechasolucion,
+                        'reti_id -> reporte.reti_id,
+                        'repo_consecutivo -> reporte.repo_consecutivo,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate()
+                  }
+                case Some(2) =>
+                  SQL(
+                    """UPDATE siap.aap_elemento SET aap_balasto = {aap_balasto}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_balasto -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'empr_id -> reporte.empr_id,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo
+                    )
+                    .executeUpdate()
+                  val updated: Boolean = SQL(
+                    """UPDATE siap.aap_elemento_historia SET aap_balasto_retirado = {aap_balasto_retirado}, aap_balasto_instalado = {aap_balasto_instalado}
+                                                 WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_balasto_retirado -> e.even_codigo_retirado,
+                      'aap_balasto_instalado -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'aael_fecha -> reporte.repo_fechasolucion,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo,
+                      'empr_id -> reporte.empr_id
+                    )
+                    .executeUpdate() > 0
+                  if (!updated) {
+                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                                                    aap_id,
+                                                    aael_fecha,
+                                                    aap_bombillo_retirado,
+                                                    aap_bombillo_instalado,
+                                                    aap_balasto_retirado,
+                                                    aap_balasto_instalado,
+                                                    aap_arrancador_retirado,
+                                                    aap_arrancador_instalado,
+                                                    aap_condensador_retirado,
+                                                    aap_condensador_instalado,
+                                                    aap_fotocelda_retirado,
+                                                    aap_fotocelda_instalado,
+                                                    reti_id,
+                                                    repo_consecutivo,
+                                                    empr_id
+                                                    )
+                                                    VALUES (
+                                                    {aap_id},
+                                                    {aael_fecha},
+                                                    {aap_bombillo_retirado},
+                                                    {aap_bombillo_instalado},
+                                                    {aap_balasto_retirado},
+                                                    {aap_balasto_instalado},
+                                                    {aap_arrancador_retirado},
+                                                    {aap_arrancador_instalado},
+                                                    {aap_condensador_retirado},
+                                                    {aap_condensador_instalado},
+                                                    {aap_fotocelda_retirado},
+                                                    {aap_fotocelda_instalado},
+                                                    {reti_id},
+                                                    {repo_consecutivo},
+                                                    {empr_id}
+                                                    )                                                    
+                                                """)
+                      .on(
+                        'aap_bombillo_retirado -> "",
+                        'aap_bombillo_instalado -> "",
+                        'aap_balasto_retirado -> e.even_codigo_retirado,
+                        'aap_balasto_instalado -> e.even_codigo_instalado,
+                        'aap_arrancador_retirado -> "",
+                        'aap_arrancador_instalado -> "",
+                        'aap_condensador_retirado -> "",
+                        'aap_condensador_instalado -> "",
+                        'aap_fotocelda_retirado -> "",
+                        'aap_fotocelda_instalado -> "",
+                        'aap_id -> e.aap_id,
+                        'aael_fecha -> reporte.repo_fechasolucion,
+                        'reti_id -> reporte.reti_id,
+                        'repo_consecutivo -> reporte.repo_consecutivo,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate()
+                  }
+                case Some(3) =>
+                  SQL(
+                    """UPDATE siap.aap_elemento SET aap_arrancador = {aap_arrancador}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_arrancador -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'empr_id -> reporte.empr_id,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo
+                    )
+                    .executeUpdate()
+                  val updated: Boolean = SQL(
+                    """UPDATE siap.aap_elemento_historia SET aap_arrancador_retirado = {aap_arrancador_retirado}, aap_arrancador_instalado = {aap_arrancador_instalado}
+                                                 WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_arrancador_retirado -> e.even_codigo_retirado,
+                      'aap_arrancador_instalado -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'aael_fecha -> reporte.repo_fechasolucion,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo,
+                      'empr_id -> reporte.empr_id
+                    )
+                    .executeUpdate() > 0
+                  if (!updated) {
+                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                                                    aap_id,
+                                                    aael_fecha,
+                                                    aap_bombillo_retirado,
+                                                    aap_bombillo_instalado,
+                                                    aap_balasto_retirado,
+                                                    aap_balasto_instalado,
+                                                    aap_arrancador_retirado,
+                                                    aap_arrancador_instalado,
+                                                    aap_condensador_retirado,
+                                                    aap_condensador_instalado,
+                                                    aap_fotocelda_retirado,
+                                                    aap_fotocelda_instalado,
+                                                    reti_id,
+                                                    repo_consecutivo,
+                                                    empr_id
+                                                    )
+                                                    VALUES (
+                                                    {aap_id},
+                                                    {aael_fecha},
+                                                    {aap_bombillo_retirado},
+                                                    {aap_bombillo_instalado},
+                                                    {aap_balasto_retirado},
+                                                    {aap_balasto_instalado},
+                                                    {aap_arrancador_retirado},
+                                                    {aap_arrancador_instalado},
+                                                    {aap_condensador_retirado},
+                                                    {aap_condensador_instalado},
+                                                    {aap_fotocelda_retirado},
+                                                    {aap_fotocelda_instalado},
+                                                    {reti_id},
+                                                    {repo_consecutivo},
+                                                    {empr_id}
+                                                    )                                                    
+                                                """)
+                      .on(
+                        'aap_bombillo_retirado -> "",
+                        'aap_bombillo_instalado -> "",
+                        'aap_balasto_retirado -> "",
+                        'aap_balasto_instalado -> "",
+                        'aap_arrancador_retirado -> e.even_codigo_retirado,
+                        'aap_arrancador_instalado -> e.even_codigo_instalado,
+                        'aap_condensador_retirado -> "",
+                        'aap_condensador_instalado -> "",
+                        'aap_fotocelda_retirado -> "",
+                        'aap_fotocelda_instalado -> "",
+                        'aap_id -> e.aap_id,
+                        'aael_fecha -> reporte.repo_fechasolucion,
+                        'reti_id -> reporte.reti_id,
+                        'repo_consecutivo -> reporte.repo_consecutivo,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate()
+                  }
+                case Some(4) =>
+                  SQL(
+                    """UPDATE siap.aap_elemento SET aap_condensador = {aap_condensador}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_condensador -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'empr_id -> reporte.empr_id,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo
+                    )
+                    .executeUpdate()
+                  val updated: Boolean = SQL(
+                    """UPDATE siap.aap_elemento_historia SET aap_condensador_retirado = {aap_condensador_retirado}, aap_condensador_instalado = {aap_condensador_instalado}
+                                                 WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_condensador_retirado -> e.even_codigo_retirado,
+                      'aap_condensador_instalado -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'aael_fecha -> reporte.repo_fechasolucion,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo,
+                      'empr_id -> reporte.empr_id
+                    )
+                    .executeUpdate() > 0
+                  if (!updated) {
+                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                                                    aap_id,
+                                                    aael_fecha,
+                                                    aap_bombillo_retirado,
+                                                    aap_bombillo_instalado,
+                                                    aap_balasto_retirado,
+                                                    aap_balasto_instalado,
+                                                    aap_arrancador_retirado,
+                                                    aap_arrancador_instalado,
+                                                    aap_condensador_retirado,
+                                                    aap_condensador_instalado,
+                                                    aap_fotocelda_retirado,
+                                                    aap_fotocelda_instalado,
+                                                    reti_id,
+                                                    repo_consecutivo,
+                                                    empr_id
+                                                    )
+                                                    VALUES (
+                                                    {aap_id},
+                                                    {aael_fecha},
+                                                    {aap_bombillo_retirado},
+                                                    {aap_bombillo_instalado},
+                                                    {aap_balasto_retirado},
+                                                    {aap_balasto_instalado},
+                                                    {aap_arrancador_retirado},
+                                                    {aap_arrancador_instalado},
+                                                    {aap_condensador_retirado},
+                                                    {aap_condensador_instalado},
+                                                    {aap_fotocelda_retirado},
+                                                    {aap_fotocelda_instalado},
+                                                    {reti_id},
+                                                    {repo_consecutivo},
+                                                    {empr_id}
+                                                    )                                                    
+                                                """)
+                      .on(
+                        'aap_bombillo_retirado -> "",
+                        'aap_bombillo_instalado -> "",
+                        'aap_balasto_retirado -> "",
+                        'aap_balasto_instalado -> "",
+                        'aap_arrancador_retirado -> "",
+                        'aap_arrancador_instalado -> "",
+                        'aap_condensador_retirado -> e.even_codigo_retirado,
+                        'aap_condensador_instalado -> e.even_codigo_instalado,
+                        'aap_fotocelda_retirado -> "",
+                        'aap_fotocelda_instalado -> "",
+                        'aap_id -> e.aap_id,
+                        'aael_fecha -> reporte.repo_fechasolucion,
+                        'reti_id -> reporte.reti_id,
+                        'repo_consecutivo -> reporte.repo_consecutivo,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate()
+                  }
+                case Some(5) =>
+                  SQL(
+                    """UPDATE siap.aap_elemento SET aap_fotocelda = {aap_fotocelda}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_fotocelda -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'empr_id -> reporte.empr_id,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo
+                    )
+                    .executeUpdate()
+                  val updated: Boolean = SQL(
+                    """UPDATE siap.aap_elemento_historia SET aap_fotocelda_retirado = {aap_fotocelda_retirado}, aap_fotocelda_instalado = {aap_fotocelda_instalado}
+                                                 WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
+                  ).on(
+                      'aap_fotocelda_retirado -> e.even_codigo_retirado,
+                      'aap_fotocelda_instalado -> e.even_codigo_instalado,
+                      'aap_id -> e.aap_id,
+                      'aael_fecha -> reporte.repo_fechasolucion,
+                      'reti_id -> reporte.reti_id,
+                      'repo_consecutivo -> reporte.repo_consecutivo,
+                      'empr_id -> reporte.empr_id
+                    )
+                    .executeUpdate() > 0
+                  if (!updated) {
+                    SQL("""INSERT INTO siap.aap_elemento_historia (
+                                                    aap_id,
+                                                    aael_fecha,
+                                                    aap_bombillo_retirado,
+                                                    aap_bombillo_instalado,
+                                                    aap_balasto_retirado,
+                                                    aap_balasto_instalado,
+                                                    aap_arrancador_retirado,
+                                                    aap_arrancador_instalado,
+                                                    aap_condensador_retirado,
+                                                    aap_condensador_instalado,
+                                                    aap_fotocelda_retirado,
+                                                    aap_fotocelda_instalado,
+                                                    reti_id,
+                                                    repo_consecutivo,
+                                                    empr_id
+                                                    )
+                                                    VALUES (
+                                                    {aap_id},
+                                                    {aael_fecha},
+                                                    {aap_bombillo_retirado},
+                                                    {aap_bombillo_instalado},
+                                                    {aap_balasto_retirado},
+                                                    {aap_balasto_instalado},
+                                                    {aap_arrancador_retirado},
+                                                    {aap_arrancador_instalado},
+                                                    {aap_condensador_retirado},
+                                                    {aap_condensador_instalado},
+                                                    {aap_fotocelda_retirado},
+                                                    {aap_fotocelda_instalado},
+                                                    {reti_id},
+                                                    {repo_consecutivo},
+                                                    {empr_id}
+                                                    )                                                    
+                                                """)
+                      .on(
+                        'aap_bombillo_retirado -> "",
+                        'aap_bombillo_instalado -> "",
+                        'aap_balasto_retirado -> "",
+                        'aap_balasto_instalado -> "",
+                        'aap_arrancador_retirado -> "",
+                        'aap_arrancador_instalado -> "",
+                        'aap_condensador_retirado -> "",
+                        'aap_condensador_instalado -> "",
+                        'aap_fotocelda_retirado -> e.even_codigo_retirado,
+                        'aap_fotocelda_instalado -> e.even_codigo_instalado,
+                        'aap_id -> e.aap_id,
+                        'aael_fecha -> reporte.repo_fechasolucion,
+                        'reti_id -> reporte.reti_id,
+                        'repo_consecutivo -> reporte.repo_consecutivo,
+                        'empr_id -> reporte.empr_id
+                      )
+                      .executeUpdate()
+                  }
+                case _ => None
+              }
+            }
+          }
+        }
+      }
+
+      true
     }
   }
 
@@ -7232,6 +7779,10 @@ class ReporteRepository @Inject()(
         new LocalDate(Calendar.getInstance().getTimeInMillis())
       val hora: LocalDateTime =
         new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+
+      SQL("""DELETE FROM siap.reporte_evento WHERE repo_id = {repo_id}""")
+        .on('repo_id -> reporte.repo_id)
+        .executeUpdate()
 
       reporte.eventos.map { eventos =>
         for (e <- eventos) {
@@ -13225,4 +13776,108 @@ class ReporteRepository @Inject()(
     (_actaNumero, os)
   }
 
+  def getReportesParaCierreDirecto(fecha_inicial:Long, fecha_final:Long, empr_id: Long): Future[List[(Int, Int, Int, String, Int, java.util.Date, String)]] = Future {
+    val resultSet = db.withConnection { implicit connection => 
+      val _parser = int("tireuc_id") ~ int("repo_id") ~ int("reti_id") ~ 
+                    str("reti_descripcion") ~ int("repo_consecutivo") ~ date("repo_fecharecepcion") ~
+                    str("repo_fechasolucion") map {
+                      case tireuc_id ~ repo_id ~ reti_id ~ reti_descripcion ~ repo_consecutivo ~ repo_fecharecepcion ~ repo_fechasolucion =>
+                        (tireuc_id, repo_id, reti_id, reti_descripcion, repo_consecutivo, repo_fecharecepcion, repo_fechasolucion)
+                    }
+      val _query = """
+select * from (
+select distinct
+  r1.tireuc_id,
+  r1.repo_id,
+  r1.reti_id,
+  rt1.reti_descripcion,
+  r1.repo_consecutivo,
+  r1.repo_fecharecepcion,
+  cast(r1.repo_fechasolucion as varchar)
+from siap.reporte r1
+inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
+inner join siap.reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
+left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
+left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
+left join siap.aap_conexion ac1 on ac1.aaco_id = rdd1.aaco_id_anterior
+left join siap.aap_conexion ac2 on ac2.aaco_id = rdd1.aaco_id
+left join siap.aap_tipo_carcasa atcrdd1 on atcrdd1.aatc_id = rdd1.aatc_id_anterior 
+left join siap.aap_tipo_carcasa atcrdd2 on atcrdd2.aatc_id = rdd1.aatc_id
+left join siap.aap_marca amardd1 on amardd1.aama_id = rdd1.aama_id_anterior  
+left join siap.aap_marca amardd2 on amardd2.aama_id = rdd1.aama_id
+left join siap.aap_modelo amordd1 on amordd1.aamo_id = rdd1.aamo_id_anterior  
+left join siap.aap_modelo amordd2 on amordd2.aamo_id = rdd1.aamo_id
+left join siap.aap_cuentaap acu1 on acu1.aacu_id = rdda1.aacu_id_anterior 
+left join siap.aap_cuentaap acu2 on acu2.aacu_id = rdda1.aacu_id
+left join siap.aap_uso aus1 on aus1.aaus_id = rdda1.aaus_id_anterior 
+left join siap.aap_uso aus2 on aus2.aaus_id = rdda1.aaus_id
+left join siap.medidor m1 on m1.medi_id = rdda1.medi_id_anterior 
+left join siap.medidor m2 on m2.medi_id = rdda1.medi_id 
+left join siap.transformador t1 on t1.aap_id = rdda1.tran_id_anterior 
+left join siap.transformador t2 on t2.aap_id = rdda1.tran_id
+left join siap.tipo_poste tp1 on tp1.tipo_id = rdd1.tipo_id_anterior
+left join siap.tipo_poste tp2 on tp2.tipo_id = rdd1.tipo_id
+where r1.empr_id = {empr_id} and
+r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id = 1 and r1.rees_id = 2 and
+((rd1.even_direccion = rd1.even_direccion_anterior or rd1.even_direccion_anterior is null or rd1.even_direccion_anterior = '') and
+(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and
+(rdda1.aap_apoyo = rdda1.aap_apoyo_anterior or rdda1.aap_apoyo_anterior is null or rdda1.aap_apoyo_anterior = '') and
+(rdd1.aaco_id = rdd1.aaco_id_anterior or rdd1.aaco_id_anterior is null) and
+(rdd1.aatc_id = rdd1.aatc_id_anterior or rdd1.aatc_id_anterior is null) and
+(rdd1.aama_id = rdd1.aama_id_anterior or rdd1.aama_id_anterior is null) and
+(rdd1.aamo_id = rdd1.aamo_id_anterior or rdd1.aamo_id_anterior is null) and
+(rdd1.aap_potencia = rdd1.aap_potencia_anterior or rdd1.aap_potencia_anterior is null) and
+(rdd1.aap_tecnologia = rdd1.aap_tecnologia_anterior or rdd1.aap_tecnologia_anterior is null) and
+(rdd1.aap_brazo = rdd1.aap_brazo_anterior or rdd1.aap_brazo_anterior is null) and
+(rdd1.aap_collarin = rdd1.aap_collarin_anterior or rdd1.aap_collarin_anterior is null) and
+(rdd1.aap_poste_altura = rdd1.aap_poste_altura_anterior or rdd1.aap_poste_altura_anterior is null) and
+(rdd1.aap_poste_propietario = rdd1.aap_poste_propietario_anterior or rdd1.aap_poste_propietario_anterior is null) and
+(rdda1.aacu_id = rdda1.aacu_id_anterior or rdda1.aacu_id_anterior is null) and
+(rdda1.aaus_id = rdda1.aaus_id_anterior or rdda1.aaus_id_anterior is null) and
+(rdda1.medi_id = rdda1.medi_id_anterior or rdda1.medi_id_anterior = -1 or rdda1.medi_id_anterior is null) and
+(rdda1.tran_id = rdda1.tran_id_anterior or rdda1.tran_id_anterior = -1 or rdda1.tran_id_anterior is null) and
+(rdda1.aap_lat = rdda1.aap_lat_anterior or rdda1.aap_lat_anterior = '' or rdda1.aap_lat_anterior is null) and
+(rdda1.aap_lng = rdda1.aap_lng_anterior or rdda1.aap_lng_anterior = '' or rdda1.aap_lng_anterior is null) and
+(rdd1.tipo_id = rdd1.tipo_id_anterior or rdd1.tipo_id_anterior is null)
+)
+) o
+order by o.reti_descripcion, o.repo_consecutivo      
+      """
+
+        SQL(_query).
+        on(
+          "fecha_inicial" -> new DateTime(fecha_inicial),
+          "fecha_final" -> new DateTime(fecha_final),
+          "empr_id" -> empr_id
+        ).as(_parser *)
+      }
+      println("ResultSet:" + resultSet)
+      resultSet
+    }
+
+    def cerrarReporte(tireuc_id: scala.Long, repo_id: scala.Long, empr_id: scala.Long, user_id: scala.Long) = {
+      val result = tireuc_id match {
+        case 1L => val reporte = buscarPorId(repo_id)
+                  reporte match {
+                    case Some(r) => actualizar(r, 0, "")
+                    case None => false
+                  }
+                  
+        case 2L => val reporte = controlReporteService.buscarPorId(repo_id)
+                  reporte match {
+                    case Some(r) => controlReporteService.actualizar(r, 0, "")
+                    case None => false
+                  }
+                  
+        case 3L => val reporte = transformadorReporteService.buscarPorId(repo_id)
+                  reporte match {
+                    case Some(r) => transformadorReporteService.actualizar(r, 0, "")
+                    case None => false
+                  }
+                  
+      }
+      result
+    }
 }
