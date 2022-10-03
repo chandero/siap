@@ -677,6 +677,15 @@ class InformeController @Inject()(
       }
   }
 
+  def siap_consolidado_material_bodega_xls(fecha_inicial: Long, fecha_final: Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      var empr_id = Utility.extraerEmpresa(request)
+      informeService.siap_consolidado_material_por_bodega_xls(fecha_inicial: Long, fecha_final: Long, empr_id.get).map {
+        reportes =>
+          Ok(Json.toJson(reportes))
+      }
+  }  
+
   def siap_cuadrilla_consolidado_material_xlsx(fecha_inicial: Long, fecha_final: Long, cuad_id: Long) = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
@@ -692,6 +701,19 @@ class InformeController @Inject()(
             .withHeaders("Content-Disposition" -> attach))
         case None => Future.successful(NotFound(Json.toJson("No se encontró la cuadrilla")))
       }
+  }
+
+    def siap_consolidado_material_por_bodega_xlsx(fecha_inicial: Long, fecha_final: Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      val usua_id = Utility.extraerUsuario(request)
+      val os = informeService.siap_consolidado_material_por_bodega_xlsx(fecha_inicial, fecha_final, empr_id.get, usua_id.get)
+      val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+      val filename = "Informe_Material_Tipo_Reporte_" + fmt.print(fecha_inicial) + "_" + fmt.print(fecha_final) + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Future.successful(Ok(os)
+        .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        .withHeaders("Content-Disposition" -> attach))
   }
 
   def siap_informe_por_cuadrilla_filtrado_xls(cuad_id: Long, fecha_inicial: Long, fecha_final: Long) = authenticatedUserAction.async {
@@ -802,5 +824,4 @@ class InformeController @Inject()(
         .as("application/pdf")
         .withHeaders("Content-Disposition" -> attach))
   }
-
 }

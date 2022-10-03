@@ -6968,13 +6968,14 @@ class ReporteRepository @Inject()(
         case None => 0
       }
       //
-      val repoSyncUpdated = SQL("""UPDATE siap.reporte_sincronizacion SET resi_operaciones = {resi_operaciones}, resi_material = {resi_material}, resi_ultimo_sync = {resi_ultimo_sync} WHERE tireuc_id = {tireuc_id} and repo_id = {repo_id}""").on(
+     /*  val repoSyncUpdated = SQL("""UPDATE siap.reporte_sincronizacion SET resi_operaciones = {resi_operaciones}, resi_material = {resi_material}, resi_ultimo_sync = {resi_ultimo_sync} WHERE tireuc_id = {tireuc_id} and repo_id = {repo_id}""").on(
           'resi_ultimo_sync -> new DateTime(),
           'resi_operaciones -> operaciones,
           'resi_material -> materiales,
           'tireuc_id -> reporte.tireuc_id,
           'repo_id -> reporte.repo_id.get
-        ).executeUpdate() > 0
+        ).executeUpdate() > 0 */
+      val repoSyncUpdated = false
 
       if (!repoSyncUpdated) {
          SQL("""INSERT INTO siap.reporte_sincronizacion VALUES ({tireuc_id}, {repo_id}, {reti_id}, {repo_consecutivo}, {resi_ultimo_sync}, {resi_operaciones}, {resi_material})""").

@@ -2478,6 +2478,114 @@ ORDER BY e.reti_id, e.elem_codigo""")
           .as(Siap_cuadrilla_consolidado_material._set *)
       }
     }
+
+  /**
+    * return sql response to excel export
+    * resumen material reporte bodega
+    */
+  def siap_consolidado_material_por_bodega_xls(
+      fecha_inicial: scala.Long,
+      fecha_final: scala.Long,
+      empr_id: scala.Long
+  ): Future[Iterable[(String, String, String, Int, Int)]] =
+    Future[Iterable[(String, String, String, Int, Int)]] {
+      db.withConnection { implicit connection =>
+        var fi = Calendar.getInstance()
+        var ff = Calendar.getInstance()
+        fi.setTimeInMillis(fecha_inicial)
+        ff.setTimeInMillis(fecha_final)
+        fi.set(Calendar.MILLISECOND, 0)
+        fi.set(Calendar.SECOND, 0)
+        fi.set(Calendar.MINUTE, 0)
+        fi.set(Calendar.HOUR, 0)
+
+        ff.set(Calendar.MILLISECOND, 59)
+        ff.set(Calendar.SECOND, 59)
+        ff.set(Calendar.MINUTE, 59)
+        ff.set(Calendar.HOUR, 23)
+        val parser = str("reti_descripcion") ~ str("elem_codigo") ~ str("elem_descripcion") ~ int("even_cantidad_retirado") ~ int("even_cantidad_instalado") map {
+          case reti_descripcion ~ elem_codigo ~ elem_descripcion ~ even_cantidad_retirado ~ even_cantidad_instalado =>
+            (reti_descripcion, elem_codigo, elem_descripcion, even_cantidad_retirado, even_cantidad_instalado)
+        }
+
+        SQL("""
+          select 
+            o.reti_descripcion, o.elem_codigo, o.elem_descripcion,  
+                          SUM(o.even_cantidad_retirado) as even_cantidad_retirado, 
+                          SUM(o.even_cantidad_instalado) as even_cantidad_instalado
+            from (SELECT ot1.ortr_fecha, c1.cuad_descripcion, e1.elem_codigo, e1.elem_descripcion,rt1.reti_descripcion, 
+                          r1.repo_consecutivo, 
+                          r1.repo_fechasolucion, 
+                          re1.even_codigo_retirado, re1.even_cantidad_retirado, 
+                          re1.even_codigo_instalado, re1.even_cantidad_instalado
+                    FROM siap.ordentrabajo ot1
+                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
+                    LEFT JOIN siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
+                    LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+                    left join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
+                    LEFT JOIN siap.reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+                    left JOIN siap.elemento e1 on e1.elem_id = re1.elem_id
+                    left join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
+                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 9 and re1.even_estado <> 9 and r1.empr_id = {empr_id}
+                    UNION ALL
+                    SELECT ot1.ortr_fecha, c1.cuad_descripcion, e1.elem_codigo, e1.elem_descripcion,rt1.reti_descripcion, 
+                          r1.repo_consecutivo, 
+                          r1.repo_fechasolucion, 
+                          re1.even_codigo_retirado, re1.even_cantidad_retirado, 
+                          re1.even_codigo_instalado, re1.even_cantidad_instalado 
+                    FROM siap.ordentrabajo ot1
+                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.control_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
+                    LEFT JOIN siap.control_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
+                    LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+                    left join siap.control_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
+                    LEFT JOIN siap.control_reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+                    left JOIN siap.elemento e1 on e1.elem_id = re1.elem_id
+                    left join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
+                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 9 and re1.even_estado <> 9 and r1.empr_id = {empr_id}
+                   UNION ALL
+                    SELECT ot1.ortr_fecha, c1.cuad_descripcion, e1.elem_codigo, e1.elem_descripcion,rt1.reti_descripcion, 
+                          r1.repo_consecutivo, 
+                          r1.repo_fechasolucion, 
+                          re1.even_codigo_retirado, re1.even_cantidad_retirado, 
+                          re1.even_codigo_instalado, re1.even_cantidad_instalado 
+                    FROM siap.ordentrabajo ot1
+				            inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.transformador_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
+                    LEFT JOIN siap.transformador_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
+                    LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+                    left join siap.transformador_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
+                    LEFT JOIN siap.transformador_reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+                    left JOIN siap.elemento e1 on e1.elem_id = re1.elem_id
+                    left join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
+                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 9 and re1.even_estado <> 9 and r1.empr_id = {empr_id}
+                    UNION ALL                    
+                    SELECT ot.ortr_fecha, c.cuad_descripcion, e.elem_codigo, e.elem_descripcion,  CONCAT('OBRA', ' ', r.obra_nombre) as reti_descripcion, 
+                          r.obra_consecutivo as repo_consecutivo, 
+                          r.obra_fechasolucion, 
+                          t.even_codigo_retirado, t.even_cantidad_retirado, 
+                          t.even_codigo_instalado, t.even_cantidad_instalado 
+                    FROM siap.obra r
+                    LEFT JOIN siap.obra_evento t on t.obra_id = r.obra_id
+                    INNER JOIN siap.elemento e on e.elem_id = t.elem_id
+                    left join siap.ordentrabajo_obra oto on oto.obra_id = r.obra_id
+                    left join siap.ordentrabajo ot on ot.ortr_id = oto.ortr_id and ot.ortr_fecha = r.obra_fechasolucion
+                    left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                    WHERE ot.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = {empr_id}
+                    ORDER BY reti_descripcion, elem_codigo) o
+                group by 1,2,3
+                order by 1,2,3
+        """)
+          .on(
+            'fecha_inicial -> fi.getTime(),
+            'fecha_final -> ff.getTime(),
+            'empr_id -> empr_id
+          )
+          .as(parser *)
+      }
+    }
+
   /**
     * return sql response to excel export
     * resumen material por cuadrilla reporte
@@ -2677,7 +2785,180 @@ ORDER BY e.reti_id, e.elem_codigo""")
       println("Stream Listo")
       os.toByteArray
     }
-  }    
+  }
+
+  /**
+    * return sql response to excel export
+    * resumen material por cuadrilla reporte
+    */
+  def siap_consolidado_material_por_bodega_xlsx(
+      fecha_inicial: scala.Long,
+      fecha_final: scala.Long,
+      empr_id: scala.Long,
+      usua_id: scala.Long
+  ): Array[Byte] =
+     {
+      db.withConnection { implicit connection =>
+        var fi = Calendar.getInstance()
+        var ff = Calendar.getInstance()
+        fi.setTimeInMillis(fecha_inicial)
+        ff.setTimeInMillis(fecha_final)
+        fi.set(Calendar.MILLISECOND, 0)
+        fi.set(Calendar.SECOND, 0)
+        fi.set(Calendar.MINUTE, 0)
+        fi.set(Calendar.HOUR, 0)
+
+        ff.set(Calendar.MILLISECOND, 59)
+        ff.set(Calendar.SECOND, 59)
+        ff.set(Calendar.MINUTE, 59)
+        ff.set(Calendar.HOUR, 23)
+        val empresa = empresaService.buscarPorId(empr_id)
+        val usuario = usuarioService.buscarPorId(usua_id)
+        println("Leyendo Datos...")
+        val parser = get[Option[String]]("reti_descripcion") ~ get[Option[String]]("elem_codigo") ~ get[Option[String]]("elem_descripcion") ~ get[Option[Double]]("even_cantidad_retirado") ~ get[Option[Double]]("even_cantidad_instalado") map {
+          case reti_descripcion ~ elem_codigo ~ elem_descripcion ~ even_cantidad_retirado ~ even_cantidad_instalado =>
+            (reti_descripcion, elem_codigo, elem_descripcion, even_cantidad_retirado, even_cantidad_instalado)
+        }
+        val resultSet = SQL("""
+          select 
+            o.reti_descripcion, o.elem_codigo, o.elem_descripcion,  
+                          SUM(o.even_cantidad_retirado) as even_cantidad_retirado, 
+                          SUM(o.even_cantidad_instalado) as even_cantidad_instalado
+            from (SELECT ot1.ortr_fecha, c1.cuad_descripcion, e1.elem_codigo, e1.elem_descripcion,rt1.reti_descripcion, 
+                          r1.repo_consecutivo, 
+                          r1.repo_fechasolucion, 
+                          re1.even_codigo_retirado, re1.even_cantidad_retirado, 
+                          re1.even_codigo_instalado, re1.even_cantidad_instalado
+                    FROM siap.ordentrabajo ot1
+                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
+                    LEFT JOIN siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
+                    LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+                    left join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
+                    LEFT JOIN siap.reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+                    left JOIN siap.elemento e1 on e1.elem_id = re1.elem_id
+                    left join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
+                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 9 and re1.even_estado <> 9 and r1.empr_id = {empr_id}
+                    UNION ALL
+                    SELECT ot1.ortr_fecha, c1.cuad_descripcion, e1.elem_codigo, e1.elem_descripcion,rt1.reti_descripcion, 
+                          r1.repo_consecutivo, 
+                          r1.repo_fechasolucion, 
+                          re1.even_codigo_retirado, re1.even_cantidad_retirado, 
+                          re1.even_codigo_instalado, re1.even_cantidad_instalado 
+                    FROM siap.ordentrabajo ot1
+                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.control_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
+                    LEFT JOIN siap.control_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
+                    LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+                    left join siap.control_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
+                    LEFT JOIN siap.control_reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+                    left JOIN siap.elemento e1 on e1.elem_id = re1.elem_id
+                    left join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
+                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 9 and re1.even_estado <> 9 and r1.empr_id = {empr_id}
+                   UNION ALL
+                    SELECT ot1.ortr_fecha, c1.cuad_descripcion, e1.elem_codigo, e1.elem_descripcion,rt1.reti_descripcion, 
+                          r1.repo_consecutivo, 
+                          r1.repo_fechasolucion, 
+                          re1.even_codigo_retirado, re1.even_cantidad_retirado, 
+                          re1.even_codigo_instalado, re1.even_cantidad_instalado 
+                    FROM siap.ordentrabajo ot1
+				    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.transformador_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
+                    LEFT JOIN siap.transformador_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
+                    LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+                    left join siap.transformador_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
+                    LEFT JOIN siap.transformador_reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+                    left JOIN siap.elemento e1 on e1.elem_id = re1.elem_id
+                    left join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
+                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 9 and re1.even_estado <> 9 and r1.empr_id = {empr_id}
+                    UNION ALL                    
+                    SELECT ot.ortr_fecha, c.cuad_descripcion, e.elem_codigo, e.elem_descripcion,  CONCAT('OBRA', ' ', r.obra_nombre) as reti_descripcion, 
+                          r.obra_consecutivo as repo_consecutivo, 
+                          r.obra_fechasolucion, 
+                          t.even_codigo_retirado, t.even_cantidad_retirado, 
+                          t.even_codigo_instalado, t.even_cantidad_instalado 
+                    FROM siap.obra r
+                    LEFT JOIN siap.obra_evento t on t.obra_id = r.obra_id
+                    INNER JOIN siap.elemento e on e.elem_id = t.elem_id
+                    left join siap.ordentrabajo_obra oto on oto.obra_id = r.obra_id
+                    left join siap.ordentrabajo ot on ot.ortr_id = oto.ortr_id and ot.ortr_fecha = r.obra_fechasolucion
+                    left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                    WHERE ot.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = {empr_id}
+                    ORDER BY reti_descripcion, elem_codigo) o
+                group by 1,2,3
+                order by 1,2,3
+        """)
+          .on(
+            'fecha_inicial -> fi.getTime(),
+            'fecha_final -> ff.getTime(),
+            'empr_id -> empr_id
+          )
+          .as(parser *)
+        println("Datos Obtenidos...")
+        var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
+        var _listMerged = new ListBuffer[CellRange]()  
+        val df = DateTimeFormat.forPattern("yyyy-MM-dd")
+        val dtf = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
+        val sheet = Sheet(
+          name = "Material Por Tipo de Reporte",
+          rows = {
+            _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(empresa match { case Some(e) => e.empr_descripcion case None => ""})
+            _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Fecha Inicial:" + df.print(fi.getTimeInMillis()) + " Fecha Final:" + df.print(ff.getTimeInMillis()))
+            _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Fecha del Informe:", dtf.print(DateTime.now()))
+            _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Usuario:", usuario match { case Some(u) => u.usua_nombre +" " + u.usua_apellido case None => ""})            
+            _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Tipo de Reporte","Código Material","Descripción Material","Cantidad Retirado", "Cantidad Instalado")
+            resultSet.map {
+            i =>
+              _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(
+                  i._1 match { case Some(r) => r case None => "" },
+                  i._2 match { case Some(e) => e case None => "" },
+                  i._3 match { case Some(e) => e case None => "" },
+                  i._4 match { case Some(e) => e case None => 0D },
+                  i._5 match { case Some(e) => e case None => 0D }
+                )
+          }
+          _listRow.toList
+        },
+        mergedRegions = {
+              _listMerged += CellRange((0, 0), (0, 6))
+              _listMerged += CellRange((1, 1), (0, 5))
+              _listMerged.toList
+            },
+        columns = {
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 0, width = new Width(50, WidthUnit.Character))
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 1, width = new Width(20, WidthUnit.Character))
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 2, width = new Width(50, WidthUnit.Character))
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 3, width = new Width(15, WidthUnit.Character))
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 4, width = new Width(15, WidthUnit.Character))                
+              _listColumn.toList
+            }        
+      )
+      println("Escribiendo en el Stream")
+      var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+      Workbook(sheet).writeToOutputStream(os)
+      println("Stream Listo")
+      os.toByteArray
+    }
+  }
+
   /**
     * return sql response to excel export
     * resumen material municipio obra reporte

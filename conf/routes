@@ -187,6 +187,8 @@ POST /api/orig/upd controllers.OrigenController.actualizarOrigen
 
 GET /api/tire/get/:p/:c controllers.TipoRetiroController.todos(p:Long, c:Long)
 GET /api/tire/all controllers.TipoRetiroController.tiposretiro
++nocsrf
+GET /api/tire/m/all controllers.TipoRetiroController.tiposretiro
 GET /api/tire/:id controllers.TipoRetiroController.buscarPorId(id: Long)
 GET /api/tire/del/:id controllers.TipoRetiroController.borrar(id: Long)
 POST /api/tire/save controllers.TipoRetiroController.guardar
@@ -698,6 +700,7 @@ GET /api/info/sirax/:ff/:e/:t controllers.InformeController.siap_informe_resumen
 GET /api/info/sicax/:ff/:e/:t controllers.InformeController.siap_informe_carga_aforo_xls(ff: Long, e: Long, t: String)
 GET /api/info/sccmxlx/:fi/:ff/:c controllers.InformeController.siap_cuadrilla_consolidado_material_xlsx(fi: Long, ff: Long, c: Long)
 GET /api/info/srf/:fi/:ff/:rt   controllers.InformeController.siap_reporte_foto(fi: Long, ff: Long, rt: Long)
+GET /api/info/strmxlsx/:fi/:ff controllers.InformeController.siap_consolidado_material_por_bodega_xlsx(fi: Long, ff: Long)
 
 # Graficas
 

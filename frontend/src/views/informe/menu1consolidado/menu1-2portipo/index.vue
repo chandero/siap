@@ -68,7 +68,6 @@
   </el-row>
   <el-row>
     <el-col :span="24">
-      <img :title="$t('pdf')" @click="exportarPdf()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/pdf.png')"/>
       <img :title="$t('xls')" @click="exportarXls()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
     </el-col>
   </el-row>
@@ -78,7 +77,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { parseTime } from '@/utils'
-import { informe_siap_resumen_material_reporte_xls, informe_siap_resumen_material_reporte } from '@/api/informe'
+import { siap_consolidado_material_bodega_xlsx, informe_siap_resumen_material_reporte_xls, informe_siap_resumen_material_reporte } from '@/api/informe'
 export default {
   data () {
     return {
@@ -100,28 +99,18 @@ export default {
         this.tableData = response.data
       })
     },
-    exportarPdf () {
-      informe_siap_resumen_material_reporte(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.usuario.usua_id, this.empresa.empr_id)
-    },
     exportarXls () {
       this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['Código Material', 'Nombre Material', 'Tipo de Reporte', 'Cantidad Retirado', 'Cantidad Instalado']
-        const filterVal = ['elem_codigo', 'elem_descripcion', 'reti_descripcion', 'even_cantidad_retirado', 'even_cantidad_instalado']
-        const list = this.tableData
-        const data = this.formatJson(filterVal, list)
-        excel.export_json_to_excel(tHeader, data, 'consolidado_materiales_reporte' + this.fecha_final)
+      siap_consolidado_material_bodega_xlsx(this.fecha_inicial.getTime(), this.fecha_final.getTime(), this.usuario.usua_id, this.empresa.empr_id).then(response => {
+        const filename = response.headers['content-disposition'].split('filename=')[1]
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', filename)
+        document.body.appendChild(link)
+        link.click()
         this.downloadLoading = false
       })
-    },
-    formatJson (filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
     }
   }
 }

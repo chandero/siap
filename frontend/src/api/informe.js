@@ -101,6 +101,18 @@ export function siap_cuadrilla_consolidado_material_xlsx(fecha_inicial, fecha_fi
   })
 }
 
+export function siap_consolidado_material_bodega_xlsx(fecha_inicial, fecha_final, cuad_id) {
+  const data = {
+    fecha_inicial,
+    fecha_final
+  }
+  return request({
+    url: '/info/strmxlsx/' + data.fecha_inicial + '/' + data.fecha_final,
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
 export function informe_siap_detallado_expansion_xls (fecha_inicial, fecha_final) {
   const data = {
     fecha_inicial,
