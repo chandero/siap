@@ -2076,14 +2076,33 @@ class ReporteRepository @Inject()(
       empr_id: scala.Long
   ): Option[ReporteWeb] = {
     db.withConnection { implicit connection =>
-      val r = SQL(
-        """SELECT * FROM siap.reporte r
+      val r = SQL(        
+        """SELECT DISTINCT * FROM (
+            SELECT * FROM siap.reporte r
                             INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
                             LEFT JOIN siap.reporte_adicional ra on r.repo_id = ra.repo_id
                             LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
-                    WHERE r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id}"""
+                    WHERE r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
+            UNION ALL
+            SELECT * FROM siap.control_reporte r
+                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.control_reporte_adicional ra on r.repo_id = ra.repo_id
+                            LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
+                            LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                    WHERE r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
+            UNION ALL
+            SELECT * FROM siap.transformador_reporte r
+                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.transformador_reporte_adicional ra on r.repo_id = ra.repo_id
+                            LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
+                            LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                    WHERE r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
+        ) as reporte
+        """
       ).on(
           'repo_consecutivo -> repo_consecutivo,
           'empr_id -> empr_id
@@ -2286,14 +2305,31 @@ class ReporteRepository @Inject()(
   ): Option[Reporte] = {
     db.withConnection { implicit connection =>
       val r = SQL(
-        """SELECT * FROM siap.reporte r
+        """SELECT DISTINCT * FROM (
+            SELECT * FROM siap.reporte r
                             INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
                             LEFT JOIN siap.reporte_adicional ra on r.repo_id = ra.repo_id
-                            LEFT JOIN siap.actividad a on ra.acti_id = a.acti_id
-                            LEFT JOIN siap.origen o on r.orig_id = o.orig_id
+                            LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
-                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id < 9"""
+                    WHERE r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
+            UNION ALL
+            SELECT * FROM siap.control_reporte r
+                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.control_reporte_adicional ra on r.repo_id = ra.repo_id
+                            LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
+                            LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                    WHERE r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
+            UNION ALL
+            SELECT * FROM siap.transformador_reporte r
+                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.transformador_reporte_adicional ra on r.repo_id = ra.repo_id
+                            LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
+                            LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                    WHERE r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
+        ) as reporte"""
       ).on(
           'reti_id -> reti_id,
           'repo_consecutivo -> repo_consecutivo,
@@ -13821,31 +13857,128 @@ left join siap.transformador t2 on t2.aap_id = rdda1.tran_id
 left join siap.tipo_poste tp1 on tp1.tipo_id = rdd1.tipo_id_anterior
 left join siap.tipo_poste tp2 on tp2.tipo_id = rdd1.tipo_id
 where r1.empr_id = {empr_id} and
-r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id = 1 and r1.rees_id = 2 and
-((rd1.even_direccion = rd1.even_direccion_anterior or rd1.even_direccion_anterior is null or rd1.even_direccion_anterior = '') and
-(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and
-(rdda1.aap_apoyo = rdda1.aap_apoyo_anterior or rdda1.aap_apoyo_anterior is null or rdda1.aap_apoyo_anterior = '') and
-(rdd1.aaco_id = rdd1.aaco_id_anterior or rdd1.aaco_id_anterior is null) and
-(rdd1.aatc_id = rdd1.aatc_id_anterior or rdd1.aatc_id_anterior is null) and
-(rdd1.aama_id = rdd1.aama_id_anterior or rdd1.aama_id_anterior is null) and
-(rdd1.aamo_id = rdd1.aamo_id_anterior or rdd1.aamo_id_anterior is null) and
-(rdd1.aap_potencia = rdd1.aap_potencia_anterior or rdd1.aap_potencia_anterior is null) and
-(rdd1.aap_tecnologia = rdd1.aap_tecnologia_anterior or rdd1.aap_tecnologia_anterior is null) and
-(rdd1.aap_brazo = rdd1.aap_brazo_anterior or rdd1.aap_brazo_anterior is null) and
-(rdd1.aap_collarin = rdd1.aap_collarin_anterior or rdd1.aap_collarin_anterior is null) and
-(rdd1.aap_poste_altura = rdd1.aap_poste_altura_anterior or rdd1.aap_poste_altura_anterior is null) and
-(rdd1.aap_poste_propietario = rdd1.aap_poste_propietario_anterior or rdd1.aap_poste_propietario_anterior is null) and
-(rdda1.aacu_id = rdda1.aacu_id_anterior or rdda1.aacu_id_anterior is null) and
-(rdda1.aaus_id = rdda1.aaus_id_anterior or rdda1.aaus_id_anterior is null) and
-(rdda1.medi_id = rdda1.medi_id_anterior or rdda1.medi_id_anterior = -1 or rdda1.medi_id_anterior is null) and
-(rdda1.tran_id = rdda1.tran_id_anterior or rdda1.tran_id_anterior = -1 or rdda1.tran_id_anterior is null) and
-(rdda1.aap_lat = rdda1.aap_lat_anterior or rdda1.aap_lat_anterior = '' or rdda1.aap_lat_anterior is null) and
-(rdda1.aap_lng = rdda1.aap_lng_anterior or rdda1.aap_lng_anterior = '' or rdda1.aap_lng_anterior is null) and
-(rdd1.tipo_id = rdd1.tipo_id_anterior or rdd1.tipo_id_anterior is null)
-)
+	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id = 1 and r1.rees_id = 2 and
+	((rd1.even_direccion = rd1.even_direccion_anterior or rd1.even_direccion_anterior is null or rd1.even_direccion_anterior = '') and
+	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and
+	(rdda1.aap_apoyo = rdda1.aap_apoyo_anterior or rdda1.aap_apoyo_anterior is null or rdda1.aap_apoyo_anterior = '') and
+	(rdd1.aaco_id = rdd1.aaco_id_anterior or rdd1.aaco_id_anterior is null) and
+	(rdd1.aatc_id = rdd1.aatc_id_anterior or rdd1.aatc_id_anterior is null) and
+	(rdd1.aama_id = rdd1.aama_id_anterior or rdd1.aama_id_anterior is null) and
+	(rdd1.aamo_id = rdd1.aamo_id_anterior or rdd1.aamo_id_anterior is null) and
+	(rdd1.aap_potencia = rdd1.aap_potencia_anterior or rdd1.aap_potencia_anterior is null) and
+	(rdd1.aap_tecnologia = rdd1.aap_tecnologia_anterior or rdd1.aap_tecnologia_anterior is null) and
+	(rdd1.aap_brazo = rdd1.aap_brazo_anterior or rdd1.aap_brazo_anterior is null) and
+	(rdd1.aap_collarin = rdd1.aap_collarin_anterior or rdd1.aap_collarin_anterior is null) and
+	(rdd1.aap_poste_altura = rdd1.aap_poste_altura_anterior or rdd1.aap_poste_altura_anterior is null) and
+	(rdd1.aap_poste_propietario = rdd1.aap_poste_propietario_anterior or rdd1.aap_poste_propietario_anterior is null) and
+	(rdda1.aacu_id = rdda1.aacu_id_anterior or rdda1.aacu_id_anterior is null) and
+	(rdda1.aaus_id = rdda1.aaus_id_anterior or rdda1.aaus_id_anterior is null) and
+	(rdda1.medi_id = rdda1.medi_id_anterior or rdda1.medi_id_anterior = -1 or rdda1.medi_id_anterior is null) and
+	(rdda1.tran_id = rdda1.tran_id_anterior or rdda1.tran_id_anterior = -1 or rdda1.tran_id_anterior is null) and
+	(rdd1.tipo_id = rdd1.tipo_id_anterior or rdd1.tipo_id_anterior is null)
+	)
+union all 
+select distinct
+  r1.tireuc_id,
+  r1.repo_id,
+  r1.reti_id,
+  rt1.reti_descripcion,
+  r1.repo_consecutivo,
+  r1.repo_fecharecepcion,
+  cast(r1.repo_fechasolucion as varchar)
+from siap.reporte r1
+inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
+inner join siap.reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
+left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
+left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
+left join siap.aap_conexion ac1 on ac1.aaco_id = rdd1.aaco_id_anterior
+left join siap.aap_conexion ac2 on ac2.aaco_id = rdd1.aaco_id
+left join siap.aap_tipo_carcasa atcrdd1 on atcrdd1.aatc_id = rdd1.aatc_id_anterior 
+left join siap.aap_tipo_carcasa atcrdd2 on atcrdd2.aatc_id = rdd1.aatc_id
+left join siap.aap_marca amardd1 on amardd1.aama_id = rdd1.aama_id_anterior  
+left join siap.aap_marca amardd2 on amardd2.aama_id = rdd1.aama_id
+left join siap.aap_modelo amordd1 on amordd1.aamo_id = rdd1.aamo_id_anterior  
+left join siap.aap_modelo amordd2 on amordd2.aamo_id = rdd1.aamo_id
+left join siap.aap_cuentaap acu1 on acu1.aacu_id = rdda1.aacu_id_anterior 
+left join siap.aap_cuentaap acu2 on acu2.aacu_id = rdda1.aacu_id
+left join siap.aap_uso aus1 on aus1.aaus_id = rdda1.aaus_id_anterior 
+left join siap.aap_uso aus2 on aus2.aaus_id = rdda1.aaus_id
+left join siap.medidor m1 on m1.medi_id = rdda1.medi_id_anterior 
+left join siap.medidor m2 on m2.medi_id = rdda1.medi_id 
+left join siap.transformador t1 on t1.aap_id = rdda1.tran_id_anterior 
+left join siap.transformador t2 on t2.aap_id = rdda1.tran_id
+left join siap.tipo_poste tp1 on tp1.tipo_id = rdd1.tipo_id_anterior
+left join siap.tipo_poste tp2 on tp2.tipo_id = rdd1.tipo_id
+where r1.empr_id = {empr_id} and
+	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id = 6 and r1.rees_id = 2 and
+	((rd1.even_direccion = rd1.even_direccion_anterior or rd1.even_direccion_anterior is null or rd1.even_direccion_anterior = '') and
+	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and
+	(rdda1.aap_apoyo = rdda1.aap_apoyo_anterior or rdda1.aap_apoyo_anterior is null or rdda1.aap_apoyo_anterior = '') and
+	(rdd1.aaco_id = rdd1.aaco_id_anterior or rdd1.aaco_id_anterior is null) and
+	(rdd1.aatc_id <> rdd1.aatc_id_anterior or rdd1.aatc_id_anterior is null) and
+	(rdd1.aama_id <> rdd1.aama_id_anterior or rdd1.aama_id_anterior is null) and
+	(rdd1.aamo_id <> rdd1.aamo_id_anterior or rdd1.aamo_id_anterior is null) and
+	(rdd1.aap_tecnologia <> rdd1.aap_tecnologia_anterior or rdd1.aap_tecnologia_anterior is null) and
+	(rdd1.aap_brazo = rdd1.aap_brazo_anterior or rdd1.aap_brazo_anterior is null) and
+	(rdd1.aap_collarin = rdd1.aap_collarin_anterior or rdd1.aap_collarin_anterior is null) and
+	(rdd1.aap_poste_altura = rdd1.aap_poste_altura_anterior or rdd1.aap_poste_altura_anterior is null) and
+	(rdd1.aap_poste_propietario = rdd1.aap_poste_propietario_anterior or rdd1.aap_poste_propietario_anterior is null) and
+	(rdda1.aacu_id = rdda1.aacu_id_anterior or rdda1.aacu_id_anterior is null) and
+	(rdda1.aaus_id = rdda1.aaus_id_anterior or rdda1.aaus_id_anterior is null) and
+	(rdda1.medi_id = rdda1.medi_id_anterior or rdda1.medi_id_anterior = -1 or rdda1.medi_id_anterior is null) and
+	(rdda1.tran_id = rdda1.tran_id_anterior or rdda1.tran_id_anterior = -1 or rdda1.tran_id_anterior is null) and
+	(rdd1.tipo_id = rdd1.tipo_id_anterior or rdd1.tipo_id_anterior is null)
+	)
+union all
+select distinct
+  r1.tireuc_id,
+  r1.repo_id,
+  r1.reti_id,
+  rt1.reti_descripcion,
+  r1.repo_consecutivo,
+  r1.repo_fecharecepcion,
+  cast(r1.repo_fechasolucion as varchar)
+from siap.control_reporte r1
+inner join siap.control_reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+left join siap.control_reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
+left join siap.control_reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
+left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
+left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
+where r1.empr_id = {empr_id} and
+	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id = 1 and r1.rees_id = 2 and
+	((rd1.even_direccion = rd1.even_direccion_anterior or rd1.even_direccion_anterior is null or rd1.even_direccion_anterior = '') and
+	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and 
+	(rdda1.aap_lat = rdda1.aap_lat_anterior or rdda1.aap_lat_anterior = '' or rdda1.aap_lat_anterior is null) and
+	(rdda1.aap_lng = rdda1.aap_lng_anterior or rdda1.aap_lng_anterior = '' or rdda1.aap_lng_anterior is null)
+	)
+union all 
+select distinct
+  r1.tireuc_id,
+  r1.repo_id,
+  r1.reti_id,
+  rt1.reti_descripcion,
+  r1.repo_consecutivo,
+  r1.repo_fecharecepcion,
+  cast(r1.repo_fechasolucion as varchar)
+from siap.transformador_reporte r1
+inner join siap.transformador_reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+left join siap.transformador_reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
+left join siap.transformador_reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
+left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
+left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
+where r1.empr_id = {empr_id} and
+	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id = 1 and r1.rees_id = 2 and
+	((rd1.even_direccion = rd1.even_direccion_anterior or rd1.even_direccion_anterior is null or rd1.even_direccion_anterior = '') and
+	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and 
+	(rdda1.aap_lat = rdda1.aap_lat_anterior or rdda1.aap_lat_anterior = '' or rdda1.aap_lat_anterior is null) and
+	(rdda1.aap_lng = rdda1.aap_lng_anterior or rdda1.aap_lng_anterior = '' or rdda1.aap_lng_anterior is null)
+	)
 ) o
-order by o.reti_descripcion, o.repo_consecutivo      
-      """
+order by o.reti_descripcion, o.repo_consecutivo"""
 
         SQL(_query).
         on(

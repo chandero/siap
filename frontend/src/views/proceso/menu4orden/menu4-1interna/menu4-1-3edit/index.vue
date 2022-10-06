@@ -378,7 +378,7 @@ export default {
         reti_descripcion: null,
         repo_consecutivo: null,
         repo_descripcion: null,
-        tireuc_id: 1
+        tireuc_id: null
       }
       this.ordentrabajo.reportes.push(evento)
     },
@@ -412,6 +412,7 @@ export default {
             if (response.status === 200) {
               evento.repo_descripcion = response.data.repo_descripcion
               evento.repo_id = response.data.repo_id
+              evento.tireuc_id = response.data.tireuc_id
             } else {
               this.reportdoesnotexist()
             }

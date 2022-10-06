@@ -227,7 +227,7 @@ export default {
       confirmacionGuardar: false,
       nuevoReporte: false,
       inactivo: false,
-      tireuc_id: null,
+      tireuc_id: 3,
       rules: {
         repo_fecharecepcion: [
           { required: true, message: 'Debe diligencia la Fecha de Recepción del Reporte', trigger: 'change' }

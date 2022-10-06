@@ -58,7 +58,7 @@
                         </el-table-column>
                         <el-table-column
                           :label="$t('reporte.type')"
-                          width="230"
+                          width="300"
                           prop="_4"
                           resizable
                         >

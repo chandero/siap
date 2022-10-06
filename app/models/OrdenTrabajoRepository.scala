@@ -446,8 +446,17 @@ class OrdenTrabajoRepository @Inject()(
         .as(OrdenTrabajo.simple.single)
       val e = SQL(
         """SELECT e.even_id, e.even_estado, e.repo_id, r.reti_id, r.repo_consecutivo, r.repo_descripcion, e.tireuc_id FROM siap.ordentrabajo_reporte e 
-                           LEFT JOIN siap.reporte r ON r.repo_id = e.repo_id
-                           WHERE e.ortr_id = {ortr_id}"""
+                           INNER JOIN siap.reporte r ON r.tireuc_id = e.tireuc_id and r.repo_id = e.repo_id
+                           WHERE e.ortr_id = {ortr_id}
+           UNION ALL
+           SELECT e.even_id, e.even_estado, e.repo_id, r.reti_id, r.repo_consecutivo, r.repo_descripcion, e.tireuc_id FROM siap.ordentrabajo_reporte e 
+                           INNER JOIN siap.control_reporte r ON r.tireuc_id = e.tireuc_id and r.repo_id = e.repo_id
+                           WHERE e.ortr_id = {ortr_id}
+           UNION ALL
+           SELECT e.even_id, e.even_estado, e.repo_id, r.reti_id, r.repo_consecutivo, r.repo_descripcion, e.tireuc_id FROM siap.ordentrabajo_reporte e 
+                           INNER JOIN siap.transformador_reporte r ON r.tireuc_id = e.tireuc_id and r.repo_id = e.repo_id
+                           WHERE e.ortr_id = {ortr_id}                           
+        """
       ).on(
           'ortr_id -> ortr_id
         )
@@ -749,6 +758,8 @@ class OrdenTrabajoRepository @Inject()(
       // Guardar relacion de reportes
       ortr.reportes.map { reportes =>
         for (r <- reportes) {
+          println("")
+          println("Reporte tipo a buscar: " + r.tireuc_id)
           r.repo_consecutivo match {
             case Some(consec) =>
               val reporte = r.tireuc_id match { 
@@ -756,9 +767,11 @@ class OrdenTrabajoRepository @Inject()(
                 case Some(2) => controlReporteService.buscarPorId(r.repo_id.get)
                 case Some(3) => transformadorReporteService.buscarPorId(r.repo_id.get)
               }
+              println("")
+              println("Reporte encontrado: " + reporte)
               reporte match {
                 case Some(rep) =>
-                  if (rep.rees_id.get < 3) {
+                  if (rep.rees_id.get < 9) {
                     val esactualizado: Boolean = SQL(
                       """UPDATE siap.ordentrabajo_reporte SET repo_id = {repo_id}, even_estado = {even_estado}, tireuc_id = {tireuc_id} where ortr_id = {ortr_id} and even_id = {even_id}"""
                     ).on(
@@ -776,7 +789,7 @@ class OrdenTrabajoRepository @Inject()(
                        'ortr_id -> ortr.ortr_id,
                        'repo_id -> r.repo_id,
                        'even_id -> r.even_id,
-                        'even_estado -> r.even_estado,
+                       'even_estado -> r.even_estado,
                        'tireuc_id -> r.tireuc_id
                      )
                       .executeInsert()
