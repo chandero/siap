@@ -2312,7 +2312,7 @@ class ReporteRepository @Inject()(
                             LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
-                    WHERE r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
+                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
             UNION ALL
             SELECT * FROM siap.control_reporte r
                             INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
@@ -2320,7 +2320,7 @@ class ReporteRepository @Inject()(
                             LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
-                    WHERE r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
+                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
             UNION ALL
             SELECT * FROM siap.transformador_reporte r
                             INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
@@ -2328,7 +2328,7 @@ class ReporteRepository @Inject()(
                             LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
-                    WHERE r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
+                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
         ) as reporte"""
       ).on(
           'reti_id -> reti_id,
