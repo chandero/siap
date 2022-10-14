@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_foto" columnCount="2" printOrder="Horizontal" pageWidth="612" pageHeight="792" columnWidth="285" columnSpacing="2" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="90b504c3-4eed-4611-a455-9968a4e16b11">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="NO_DATA_ADAPTER"/>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_foto" columnCount="2" printOrder="Horizontal" pageWidth="612" pageHeight="792" columnWidth="300" columnSpacing="2" leftMargin="10" rightMargin="20" topMargin="20" bottomMargin="10" uuid="90b504c3-4eed-4611-a455-9968a4e16b11">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SiapDataAdapter"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -64,6 +64,7 @@
 		<property name="com.jaspersoft.studio.field.label" value="refo_data"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="reporte_direccion_foto"/>
 	</field>
+	<field name="repo_fechasolucion" class="java.lang.String"/>
 	<group name="Group1">
 		<groupExpression><![CDATA[$F{tireuc_id}]]></groupExpression>
 	</group>
@@ -113,39 +114,39 @@
 		</band>
 	</pageHeader>
 	<detail>
-		<band height="623" splitType="Stretch">
+		<band height="332" splitType="Stretch">
 			<textField>
-				<reportElement x="0" y="568" width="273" height="15" uuid="0414d2e9-8af7-42d8-8991-56b6bed24785"/>
+				<reportElement x="0" y="275" width="273" height="15" uuid="0414d2e9-8af7-42d8-8991-56b6bed24785"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[CONCATENATE(T("LUMINARIA No.: "), TEXT($F{aap_id}, "000000"))]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="583" width="273" height="13" uuid="e269bdb0-f677-4f22-abe0-69aa1b032056">
+				<reportElement x="0" y="290" width="273" height="13" uuid="e269bdb0-f677-4f22-abe0-69aa1b032056">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[CONCATENATE($F{reti_descripcion},": ", TEXT($F{repo_consecutivo},"000000"))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[CONCATENATE($F{reti_descripcion},": ",TEXT($F{repo_consecutivo},"000000"),", FECHA: ",T($F{repo_fechasolucion}))]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="610" width="143" height="13" uuid="a2d237b5-1d80-44d3-b0b3-e7a2a2061c5f"/>
+				<reportElement x="0" y="317" width="143" height="13" uuid="a2d237b5-1d80-44d3-b0b3-e7a2a2061c5f"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[IF($F{repo_tipo_expansion} == "0",CONCATENATE(T("TIPO DE EXPANSION: "), $F{repo_tipo_expansion}),"")]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="597" width="143" height="13" uuid="55a94eb5-5a1c-4c0b-889c-14d96256a0e0"/>
+				<reportElement x="0" y="304" width="143" height="13" uuid="55a94eb5-5a1c-4c0b-889c-14d96256a0e0"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[CONCATENATE(T("BARRIO"),": ",$F{barr_descripcion})]]></textFieldExpression>
 			</textField>
 			<image scaleImage="FillFrame" rotation="None" hAlign="Center" vAlign="Middle" onErrorType="Blank">
-				<reportElement x="0" y="0" width="280" height="550" uuid="53742448-81b1-45a5-ab0a-8e04f3468a2c"/>
+				<reportElement x="0" y="0" width="280" height="270" uuid="53742448-81b1-45a5-ab0a-8e04f3468a2c"/>
 				<imageExpression><![CDATA[$F{refo_data}]]></imageExpression>
 			</image>
 		</band>

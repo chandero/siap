@@ -11,6 +11,8 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SiapDataAdapter"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="276"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="718"/>
 	<parameter name="FECHA_INICIAL" class="java.sql.Date"/>
 	<parameter name="FECHA_FINAL" class="java.sql.Date"/>
 	<parameter name="EMPRESA" class="java.lang.String"/>
@@ -29,7 +31,7 @@
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID} and c.cuad_id = $P{CUAD_ID}
+                        where ot.ortr_fecha  between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2)  /* and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE */  and r.empr_id = $P{EMPR_ID} and c.cuad_id = $P{CUAD_ID}
                    union all
                    select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'CONTROL' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion, ot.ortr_consecutivo, ot.ortr_fecha 
                    from siap.control_reporte r 
@@ -41,7 +43,7 @@
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID} and c.cuad_id = $P{CUAD_ID}
+                        where ot.ortr_fecha  between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2)  /* and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE */  and r.empr_id = $P{EMPR_ID} and c.cuad_id = $P{CUAD_ID}
 				           union all
                    select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion , ot.ortr_consecutivo, ot.ortr_fecha
                    from siap.transformador_reporte r 
@@ -53,7 +55,7 @@
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID} and c.cuad_id = $P{CUAD_ID}
+                        where ot.ortr_fecha  between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2)  /* and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE  */ and r.empr_id = $P{EMPR_ID} and c.cuad_id = $P{CUAD_ID}
                    union all
                    select DISTINCT ON (r.obra_consecutivo) r.obra_consecutivo, r.obra_fecharecepcion, r.obra_direccion, r.barr_id, r.obra_telefono, r.obra_nombre, 'OBRA' as tipo_inventario, o.orig_descripcion, 'OBRA' as reti_descripcion, r.obra_descripcion as acti_descripcion, b.barr_descripcion,((r.obra_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.obra_fecharecepcion and (r.obra_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion , ot.ortr_consecutivo, ot.ortr_fecha 
                    from siap.obra r 
@@ -62,7 +64,7 @@
                         left join siap.ordentrabajo_obra otr on otr.obra_id = r.obra_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.obra_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.obra_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID} and c.cuad_id = $P{CUAD_ID}
+                        where ot.ortr_fecha  between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) /* and (coalesce(trim(r.obra_reportetecnico), '') = '') IS NOT FALSE   */ and r.empr_id = $P{EMPR_ID} and c.cuad_id = $P{CUAD_ID}
                     ) r
                   ORDER BY r.reti_descripcion ASC, r.repo_consecutivo ASC]]>
 	</queryString>

@@ -9594,7 +9594,7 @@ class ReporteRepository @Inject()(
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
+                        where ot.ortr_fecha between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) /* and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE */ and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
                    union all
                    select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'CONTROL' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
                    from siap.control_reporte r 
@@ -9606,7 +9606,7 @@ class ReporteRepository @Inject()(
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
+                        where ot.ortr_fecha between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) /* and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE */ and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
 				           union all
                    select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
                    from siap.transformador_reporte r 
@@ -9618,7 +9618,7 @@ class ReporteRepository @Inject()(
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
+                        where ot.ortr_fecha between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) /* and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE */ and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
                    union all
                    select DISTINCT ON (r.obra_consecutivo) r.obra_consecutivo, r.obra_fecharecepcion, r.obra_direccion, r.barr_id, r.obra_telefono, r.obra_nombre, 'OBRA' as tipo_inventario, o.orig_descripcion, 'OBRA' as reti_descripcion, r.obra_descripcion as acti_descripcion, b.barr_descripcion, ((r.obra_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.obra_fecharecepcion and (r.obra_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
                    from siap.obra r 
@@ -9627,7 +9627,7 @@ class ReporteRepository @Inject()(
                         left join siap.ordentrabajo_obra otr on otr.obra_id = r.obra_id
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
-                        where r.obra_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and (coalesce(trim(r.obra_reportetecnico), '') = '') IS NOT FALSE and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
+                        where ot.ortr_fecha between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) /* and (coalesce(trim(r.obra_reportetecnico), '') = '') IS NOT FALSE */ and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
                     ) r
                   ORDER BY r.reti_descripcion ASC, r.repo_consecutivo ASC              
               """

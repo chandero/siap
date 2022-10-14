@@ -4,12 +4,17 @@ import scala.collection.mutable.ListBuffer
 import net.sf.jasperreports.engine.JRDataSource
 import net.sf.jasperreports.engine.JRField
 
+import org.joda.time.DateTime 
+
+import java.text.SimpleDateFormat
 import java.util.{ HashMap, Map }
+import java.util.Date
 
 
-class ReporteFotoDS(listData: List[(Int, String, Int, Int, Int, String, Int, String)]) extends JRDataSource {
+class ReporteFotoDS(listData: List[(Int, String, Int, Int, Int, String, Int, String, Date)]) extends JRDataSource {
 
     var i = -1
+    val dateFormat = new SimpleDateFormat("yyyy-MM-dd")
 
     override def next(): Boolean = {
         i += 1
@@ -42,6 +47,7 @@ class ReporteFotoDS(listData: List[(Int, String, Int, Int, Int, String, Int, Str
                       }
             case _ => new java.lang.String("/opt/siap/fotos/empty.jpg")
           }
+          case "repo_fechasolucion" => dateFormat.format(listData(i)._9)
           case _ => None
         }
         println("Retornando: " + retorno)
