@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_foto" columnCount="2" printOrder="Horizontal" pageWidth="612" pageHeight="792" columnWidth="300" columnSpacing="2" leftMargin="10" rightMargin="20" topMargin="20" bottomMargin="10" uuid="90b504c3-4eed-4611-a455-9968a4e16b11">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_foto" columnCount="2" printOrder="Horizontal" pageWidth="612" pageHeight="792" columnWidth="292" columnSpacing="2" leftMargin="6" rightMargin="20" topMargin="6" bottomMargin="10" uuid="90b504c3-4eed-4611-a455-9968a4e16b11">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SiapDataAdapter"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -78,29 +78,31 @@
 		<band splitType="Stretch"/>
 	</background>
 	<pageHeader>
-		<band height="65" splitType="Stretch">
+		<band height="55" splitType="Stretch">
 			<textField>
-				<reportElement x="0" y="15" width="570" height="16" uuid="aa88a9de-8244-4e44-9f4d-03450a3b1d76"/>
+				<reportElement x="0" y="13" width="570" height="13" uuid="aa88a9de-8244-4e44-9f4d-03450a3b1d76">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center">
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA["ACTA FOTOGRAFICA"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="29" width="570" height="16" uuid="2bf6365b-2409-45ab-9195-6c269aa63ce3">
+				<reportElement x="0" y="26" width="570" height="13" uuid="2bf6365b-2409-45ab-9195-6c269aa63ce3">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center">
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{RETI_DESCRIPCION}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="47" width="570" height="16" uuid="7ed0bbea-f57e-4df1-81a8-b42993c17cff">
+				<reportElement x="0" y="41" width="570" height="13" uuid="7ed0bbea-f57e-4df1-81a8-b42993c17cff">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center">
-					<font size="11"/>
+					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[CONCATENATE(DATEFORMAT($P{FECHA_INICIAL},"yyyy/MM/dd")," al ", DATEFORMAT($P{FECHA_FINAL},"yyyy/MM/dd"))]]></textFieldExpression>
 			</textField>
@@ -114,16 +116,26 @@
 		</band>
 	</pageHeader>
 	<detail>
-		<band height="332" splitType="Stretch">
+		<band height="308" splitType="Stretch">
+			<image scaleImage="FillFrame" rotation="None" hAlign="Center" vAlign="Middle" onErrorType="Blank">
+				<reportElement x="50" y="1" width="190" height="307" uuid="53742448-81b1-45a5-ab0a-8e04f3468a2c"/>
+				<imageExpression><![CDATA[$F{refo_data}]]></imageExpression>
+			</image>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="50" splitType="Stretch">
 			<textField>
-				<reportElement x="0" y="275" width="273" height="15" uuid="0414d2e9-8af7-42d8-8991-56b6bed24785"/>
+				<reportElement x="310" y="0" width="273" height="11" uuid="7970ebc2-a509-4f81-9482-5456c159c251">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[CONCATENATE(T("LUMINARIA No.: "), TEXT($F{aap_id}, "000000"))]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="290" width="273" height="13" uuid="e269bdb0-f677-4f22-abe0-69aa1b032056">
+				<reportElement x="310" y="12" width="273" height="11" uuid="952a9476-babc-42cf-9519-f629698ac59e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -132,26 +144,23 @@
 				<textFieldExpression><![CDATA[CONCATENATE($F{reti_descripcion},": ",TEXT($F{repo_consecutivo},"000000"),", FECHA: ",T($F{repo_fechasolucion}))]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="317" width="143" height="13" uuid="a2d237b5-1d80-44d3-b0b3-e7a2a2061c5f"/>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[IF($F{repo_tipo_expansion} == "0",CONCATENATE(T("TIPO DE EXPANSION: "), $F{repo_tipo_expansion}),"")]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="0" y="304" width="143" height="13" uuid="55a94eb5-5a1c-4c0b-889c-14d96256a0e0"/>
+				<reportElement x="310" y="24" width="143" height="11" uuid="471a42de-4451-4867-ac36-e64d49a45251">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
 				<textElement>
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[CONCATENATE(T("BARRIO"),": ",$F{barr_descripcion})]]></textFieldExpression>
 			</textField>
-			<image scaleImage="FillFrame" rotation="None" hAlign="Center" vAlign="Middle" onErrorType="Blank">
-				<reportElement x="0" y="0" width="280" height="270" uuid="53742448-81b1-45a5-ab0a-8e04f3468a2c"/>
-				<imageExpression><![CDATA[$F{refo_data}]]></imageExpression>
-			</image>
+			<textField>
+				<reportElement x="310" y="36" width="143" height="11" uuid="b48a0cf0-01c1-421c-bf83-256725e3e07a">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[IF($F{repo_tipo_expansion} == "0",CONCATENATE(T("TIPO DE EXPANSION: "), $F{repo_tipo_expansion}),"")]]></textFieldExpression>
+			</textField>
 		</band>
-	</detail>
-	<pageFooter>
-		<band height="21" splitType="Stretch"/>
 	</pageFooter>
 </jasperReport>

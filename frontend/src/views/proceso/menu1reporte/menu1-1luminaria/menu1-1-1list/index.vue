@@ -297,7 +297,7 @@
                               ><i class="el-icon-edit"></i>
                             </el-button>
                             <el-button
-                              :disabled="scope.row.rees_id != 1"
+                              :disabled="scope.row.rees_id > 2"
                               size="mini"
                               circle
                               type="success"

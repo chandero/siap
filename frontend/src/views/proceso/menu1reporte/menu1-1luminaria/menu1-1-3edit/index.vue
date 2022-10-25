@@ -4834,6 +4834,40 @@ export default {
             aap_lng: null
           },
           materiales: [],
+          fotos: [
+            {
+              repo_id: this.reporte.repo_id,
+	            tireuc_id: 1,
+	            aap_id: parseInt(inputValue),
+	            refo_id: 1,
+	            refo_tipo: 1,
+	            refo_data: ''
+            },
+            {
+              repo_id: this.reporte.repo_id,
+	            tireuc_id: 1,
+	            aap_id: parseInt(inputValue),
+	            refo_id: 2,
+	            refo_tipo: 1,
+	            refo_data: ''
+            },
+            {
+              repo_id: this.reporte.repo_id,
+	            tireuc_id: 1,
+	            aap_id: parseInt(inputValue),
+	            refo_id: 3,
+	            refo_tipo: 1,
+	            refo_data: ''
+            },
+            {
+              repo_id: this.reporte.repo_id,
+	            tireuc_id: 1,
+	            aap_id: parseInt(inputValue),
+	            refo_id: 4,
+	            refo_tipo: 1,
+	            refo_data: ''
+            }
+          ],
           esnueva: null,
           codigoautorizacion: null,
           aap_fechatoma: null,
