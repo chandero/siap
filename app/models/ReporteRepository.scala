@@ -6639,7 +6639,7 @@ class ReporteRepository @Inject()(
                 'even_direccion_anterior -> d.even_direccion_anterior,
                 'barr_id_anterior -> d.barr_id_anterior,
                 'even_estado -> estado,
-                'tire_id -> d.tire_id,
+                'tire_id -> reporte.tireuc_id,
                 'repo_id -> reporte.repo_id,
                 'aap_id -> d.aap_id,
                 'even_horaini -> d.even_horaini,
@@ -6658,7 +6658,7 @@ class ReporteRepository @Inject()(
                   'even_id -> d.even_id,
                   'even_horaini -> d.even_horaini,
                   'even_horafin -> d.even_horafin,
-                  'tire_id -> d.tire_id,
+                  'tire_id -> reporte.tireuc_id,
                   'even_direccion_anterior -> aap.aap_direccion,
                   'barr_id_anterior -> aap.barr_id,
                   'even_estado -> estado
@@ -6815,6 +6815,13 @@ class ReporteRepository @Inject()(
               case Some(t) => t.aap_id
               case None => None
             }
+            val aacu_id = SQL("""
+              select acu1.aacu_id from siap.aap a1
+              left join siap.aap_cuentaap acu1 on
+	            acu1.aacu_aaco = a1.aaco_id and cast(a1.aaus_id as char) in (select regexp_split_to_table(acu1.aacu_aaus,',') from siap.aap_cuentaap acu2
+              where acu2.aacu_id = acu1.aacu_id)
+              where a1.aap_id = {aap_id}
+            """).on('aap_id -> aap.aap_id.get).as(SqlParser.long("aacu_id").singleOpt)
             datoadicionalActualizado = SQL(
               """UPDATE siap.reporte_direccion_dato_adicional SET 
                                 aacu_id_anterior = {aacu_id_anterior},
@@ -6837,7 +6844,7 @@ class ReporteRepository @Inject()(
                                 """
             ).on(
                 'aacu_id_anterior -> d.dato_adicional.get.aacu_id_anterior,
-                'aacu_id -> d.dato_adicional.get.aacu_id,
+                'aacu_id -> aacu_id,
                 'aaus_id_anterior -> d.dato_adicional.get.aaus_id_anterior,
                 'aaus_id -> d.dato_adicional.get.aaus_id,
                 'medi_id_anterior -> medi_id, //d.dato_adicional.get.medi_id_anterior,
@@ -13823,6 +13830,23 @@ class ReporteRepository @Inject()(
                     }
       val _query = """
 select * from (
+select distinct 
+  r1.tireuc_id,
+  r1.repo_id,
+  r1.reti_id,
+  rt1.reti_descripcion,
+  r1.repo_consecutivo,
+  r1.repo_fecharecepcion,
+  cast(r1.repo_fechasolucion as varchar)
+from 
+  siap.reporte r1
+  left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+  left join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+where
+  r1.rees_id in (1,2) and (coalesce(r1.repo_reportetecnico, '') = '') IS FALSE 
+group by 1,2,3,4,5,6,7
+having count(rd1.*) < 1
+union all   
 select distinct
   r1.tireuc_id,
   r1.repo_id,

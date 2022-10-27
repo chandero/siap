@@ -1162,11 +1162,11 @@ class ElementoRepository @Inject()(dbapi: DBApi)(
 	string_agg(o.unit_codigo, ',') as unit_codigo
 from 
 (SELECT  DISTINCT
-        e1.elem_id, 
+    e1.elem_id, 
 		e1.elem_codigo, 
 		e1.elem_descripcion, 
-        (select ep1.elpr_anho_anterior from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
-        (select ep1.elpr_precio_anterior from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),        
+    (select ep1.elpr_anho_anterior from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
+    (select ep1.elpr_precio_anterior from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),        
         (select ep1.elpr_incremento from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
         (select (ep1.elpr_precio_nuevo - ep1.elpr_precio_anterior) from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0) as elpr_diff,
         (select ep1.elpr_anho from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
