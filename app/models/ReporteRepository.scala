@@ -6815,13 +6815,17 @@ class ReporteRepository @Inject()(
               case Some(t) => t.aap_id
               case None => None
             }
-            val aacu_id = SQL("""
+            var aacu_id:Option[Int] = SQL("""
               select acu1.aacu_id from siap.aap a1
               left join siap.aap_cuentaap acu1 on
 	            acu1.aacu_aaco = a1.aaco_id and cast(a1.aaus_id as char) in (select regexp_split_to_table(acu1.aacu_aaus,',') from siap.aap_cuentaap acu2
               where acu2.aacu_id = acu1.aacu_id)
               where a1.aap_id = {aap_id}
-            """).on('aap_id -> aap.aap_id.get).as(SqlParser.long("aacu_id").singleOpt)
+            """).on('aap_id -> aap.aap_id.get).as(SqlParser.scalar[Int].singleOpt)
+               match {
+                case Some(a) => Some(a)
+                case None => Some(-1)
+            }
             datoadicionalActualizado = SQL(
               """UPDATE siap.reporte_direccion_dato_adicional SET 
                                 aacu_id_anterior = {aacu_id_anterior},
