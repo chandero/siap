@@ -3639,7 +3639,7 @@ class TransformadorReporteRepository @Inject()(
         "USUARIO",
         usuario.usua_nombre + " " + usuario.usua_apellido
       )
-      reportParams.put("EMPR_ID", new java.lang.Long(empr_id.longValue()))
+      reportParams.put("EMPR_ID", java.lang.Long.valueOf(empr_id.longValue))
       tipo match {
         case "pdf" =>
           os = JasperRunManager.runReportToPdf(

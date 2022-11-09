@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_relacion" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="781" leftMargin="56" rightMargin="5" topMargin="5" bottomMargin="5" uuid="05a69750-b169-4a0d-b037-910a744e89b1">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_relacion" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="817" leftMargin="20" rightMargin="5" topMargin="5" bottomMargin="5" uuid="05a69750-b169-4a0d-b037-910a744e89b1">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -11,6 +11,8 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SiapDataAdapter"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="325"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="661"/>
 	<parameter name="FECHA_INICIAL" class="java.sql.Timestamp"/>
 	<parameter name="FECHA_FINAL" class="java.sql.Timestamp"/>
 	<parameter name="EMPRESA" class="java.lang.String"/>
@@ -18,7 +20,11 @@
 	<parameter name="EMPR_ID" class="java.lang.Long"/>
 	<queryString language="SQL">
 		<![CDATA[select r.* from 
-				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
+				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
+					case 
+						when (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE THEN 'X'
+						else ''
+					end as estado
 				           from siap.reporte r 
                         left join siap.reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
@@ -30,7 +36,11 @@
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID}
                    union all
-                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'CONTROL' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'CONTROL' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
+                   	case 
+						when (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE THEN 'X'
+						else ''
+					end as estado 
                    from siap.control_reporte r 
                         left join siap.control_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
@@ -42,8 +52,12 @@
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID}
 				           union all
-                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
-                   from siap.transformador_reporte r 
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion ,
+					case 
+						when (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE THEN 'X'
+						else ''
+					end as estado
+					 from siap.transformador_reporte r 
                         left join siap.transformador_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
@@ -54,7 +68,11 @@
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID}
                    union all
-                   select DISTINCT ON (r.obra_consecutivo) r.obra_consecutivo, r.obra_fecharecepcion, r.obra_direccion, r.barr_id, r.obra_telefono, r.obra_nombre, 'OBRA' as tipo_inventario, o.orig_descripcion, 'OBRA' as reti_descripcion, r.obra_descripcion as acti_descripcion, b.barr_descripcion,((r.obra_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.obra_fecharecepcion and (r.obra_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
+                   select DISTINCT ON (r.obra_consecutivo) r.obra_consecutivo, r.obra_fecharecepcion, r.obra_direccion, r.barr_id, r.obra_telefono, r.obra_nombre, 'OBRA' as tipo_inventario, o.orig_descripcion, 'OBRA' as reti_descripcion, r.obra_descripcion as acti_descripcion, b.barr_descripcion,((r.obra_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.obra_fecharecepcion and (r.obra_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
+                   	case 
+						when (coalesce(r.obra_reportetecnico, '') = '') IS NOT FALSE THEN 'X'
+						else ''
+					end as estado 
                    from siap.obra r 
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
@@ -109,13 +127,17 @@
 		<property name="com.jaspersoft.studio.field.name" value="barr_descripcion"/>
 		<property name="com.jaspersoft.studio.field.label" value="barr_descripcion"/>
 	</field>
-	<field name="fecha_limite" class="java.sql.Date">
+	<field name="fecha_limite" class="java.sql.Timestamp">
 		<property name="com.jaspersoft.studio.field.name" value="fecha_limite"/>
 		<property name="com.jaspersoft.studio.field.label" value="fecha_limite"/>
 	</field>
 	<field name="cuad_descripcion" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="cuad_descripcion"/>
 		<property name="com.jaspersoft.studio.field.label" value="cuad_descripcion"/>
+	</field>
+	<field name="estado" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="estado"/>
+		<property name="com.jaspersoft.studio.field.label" value="estado"/>
 	</field>
 	<group name="GroupTipoReporte" isReprintHeaderOnEachPage="true">
 		<groupExpression><![CDATA[$F{tire_descripcion}]]></groupExpression>
@@ -465,6 +487,15 @@
 					<font size="6"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{fecha_limite}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="770" y="-2" width="10" height="15" uuid="1f84f313-7a0c-4ea9-8299-204cdb724840">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{estado}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

@@ -344,7 +344,8 @@ case class Pendiente(
     barr_descripcion: Option[String],
     orig_descripcion: Option[String],
     acti_descripcion: Option[String],
-    cuad_descripcion: Option[String]
+    cuad_descripcion: Option[String],
+    estado: Option[String]
 )
 object Pendiente {
 
@@ -366,7 +367,8 @@ object Pendiente {
       "barr_descripcion" -> p.barr_descripcion,
       "orig_descripcion" -> p.orig_descripcion,
       "acti_descripcion" -> p.acti_descripcion,
-      "cuad_descripcion" -> p.cuad_descripcion
+      "cuad_descripcion" -> p.cuad_descripcion,
+      "estado" -> p.estado
     )
   }
 
@@ -382,7 +384,8 @@ object Pendiente {
       (__ \ "barr_descripcion").readNullable[String] and
       (__ \ "orig_descripcion").readNullable[String] and
       (__ \ "acti_descripcion").readNullable[String] and
-      (__ \ "cuad_descripcion").readNullable[String]
+      (__ \ "cuad_descripcion").readNullable[String] and
+      (__ \ "estado").readNullable[String]
   )(Pendiente.apply _)
 
   val _set = {
@@ -397,7 +400,8 @@ object Pendiente {
       get[Option[String]]("barr_descripcion") ~
       get[Option[String]]("orig_descripcion") ~
       get[Option[String]]("acti_descripcion") ~
-      get[Option[String]]("cuad_descripcion") map {
+      get[Option[String]]("cuad_descripcion") ~ 
+      get[Option[String]]("estado") map {
       case  tire_descripcion ~
             reti_descripcion ~
             repo_consecutivo ~
@@ -409,7 +413,8 @@ object Pendiente {
             barr_descripcion ~
             orig_descripcion ~
             acti_descripcion ~
-            cuad_descripcion =>
+            cuad_descripcion ~ 
+            estado =>
         Pendiente(
           tire_descripcion,
           reti_descripcion,
@@ -422,7 +427,8 @@ object Pendiente {
           barr_descripcion,
           orig_descripcion,
           acti_descripcion,
-          cuad_descripcion
+          cuad_descripcion,
+          estado
         )
     }
   }
@@ -9270,12 +9276,17 @@ class ReporteRepository @Inject()(
                   "Teléfono",
                   "Medio",
                   "Daño Reportado",
-                  "Cuadrilla"
+                  "Cuadrilla",
+                  "Pendiente"
                 )
               var j = 2
               var query = """
                 	select r.* from 
-				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
+				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
+        case 
+						when (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE THEN 'X'
+						else ''
+					end as estado 
 				           from siap.reporte r 
                         left join siap.reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
@@ -9287,7 +9298,11 @@ class ReporteRepository @Inject()(
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE and r.empr_id = {empr_id}
                    union all
-                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'CONTROL' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'CONTROL' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
+                   case 
+						        when (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE THEN 'X'
+						        else ''
+					         end as estado 
                    from siap.control_reporte r 
                         left join siap.control_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
@@ -9299,7 +9314,11 @@ class ReporteRepository @Inject()(
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE and r.empr_id = {empr_id}
 				           union all
-                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
+                   case 
+						        when (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE THEN 'X'
+						        else ''
+					         end as estado 
                    from siap.transformador_reporte r 
                         left join siap.transformador_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
@@ -9311,7 +9330,11 @@ class ReporteRepository @Inject()(
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE and r.empr_id = {empr_id}
                    union all
-                   select DISTINCT ON (r.obra_consecutivo) r.obra_consecutivo, r.obra_fecharecepcion, r.obra_direccion, r.barr_id, r.obra_telefono, r.obra_nombre, 'OBRA' as tipo_inventario, o.orig_descripcion, 'OBRA' as reti_descripcion, r.obra_descripcion as acti_descripcion, b.barr_descripcion, ((r.obra_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.obra_fecharecepcion and (r.obra_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
+                   select DISTINCT ON (r.obra_consecutivo) r.obra_consecutivo, r.obra_fecharecepcion, r.obra_direccion, r.barr_id, r.obra_telefono, r.obra_nombre, 'OBRA' as tipo_inventario, o.orig_descripcion, 'OBRA' as reti_descripcion, r.obra_descripcion as acti_descripcion, b.barr_descripcion, ((r.obra_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.obra_fecharecepcion and (r.obra_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
+                   case 
+						        when (coalesce(r.obra_reportetecnico, '') = '') IS NOT FALSE THEN 'X'
+						        else ''
+					         end as estado 
                    from siap.obra r 
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
@@ -9447,6 +9470,15 @@ class ReporteRepository @Inject()(
                         case None        => ""
                       },
                       Some(11),
+                      style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+                      CellStyleInheritance.CellThenRowThenColumnThenSheet
+                    ),
+                    StringCell(
+                      i.estado match {
+                        case Some(value) => value
+                        case None        => ""
+                      },
+                      Some(12),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
                     )
