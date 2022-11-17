@@ -25,11 +25,27 @@
                       </el-popconfirm>
                     </el-col>
                 </el-row>
+                <el-card witdh="400px">
+                <el-row>
+                  <span>Filtrar por el Rango</span>
+                </el-row>
+                <el-row :gutter="4">
+                    <el-col :xs="24" :sm="4" :md="4" :lg="4" :xl="4">
+                        <el-form-item :label="$t('reporte.fechaInicio')">
+                            <el-date-picker v-model="fecha_finicio" format="yyyy/MM/dd"></el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="6" :md="6" :lg="6" :xl="6">
+                        <el-form-item :label="$t('reporte.fechaFinal')">
+                            <el-date-picker v-model="fecha_ffin" format="yyyy/MM/dd"></el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
                 <el-row>
                   <el-col>
                     <el-table
                       :data="actas"
-                      style="width: 100%"
+                      style="width: 40%"
                       max-height="400"
                       stripe
                       @selection-change="handleSelectionChange"
@@ -61,6 +77,7 @@
                     <img :title="$t('xls')" @click="imprimir('xls')" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
                   </el-col>
                 </el-row>
+              </el-card>
             </el-form>
         </el-main>
     </el-container>
@@ -74,6 +91,8 @@ export default {
       tipo: 1,
       fecha_inicio: null,
       fecha_fin: null,
+      fecha_finicio: null,
+      fecha_ffin: null,
       labelPosition: 'top',
       actas: [],
       multipleSelection: []
@@ -121,7 +140,7 @@ export default {
       }
     },
     getActas() {
-      getTodos().then(resp => {
+      getTodos(this.fecha_finicio.getTime(), this.fecha_ffin.getTime()).then(resp => {
         this.actas = resp.data.data
         console.log('Actas: ', this.actas)
       })
@@ -151,7 +170,19 @@ export default {
   beforeMount () {
     this.fecha_inicio = new Date()
     this.fecha_fin = this.fecha_inicio
+    this.fecha_finicio = new Date()
+    this.fecha_ffin = this.fecha_finicio
     this.getActas()
+  },
+  watch: {
+    fecha_finicio (val) {
+      this.fecha_finicio = val
+      this.getActas()
+    },
+    fecha_ffin (val) {
+      this.fecha_ffin = val
+      this.getActas()
+    }
   }
 }
 </script>

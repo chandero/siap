@@ -47,7 +47,7 @@ class ActaDesmonteController @Inject()(
   implicit val formats = Serialization.formats(NoTypeHints) ++ List(
     DateTimeSerializer
   )
-  def todos(): Action[AnyContent] =
+  def todos(fi: Long, ff:Long): Action[AnyContent] =
     authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       // val json = request.body.asJson.get
       // val page_size = (json \ "page_size").as[Long]
@@ -59,19 +59,19 @@ class ActaDesmonteController @Inject()(
       //  filtro = ""
       // }
       val empr_id = Utility.extraerEmpresa(request)
-      val total = actaService.cuenta(empr_id.get)
+      val total = actaService.cuenta(fi, ff, empr_id.get)
       actaService
         // .todos(page_size, current_page, empr_id.get, orderby, filtro)
-        .todos(empr_id.get)
+        .todos(fi, ff, empr_id.get)
         .map { actas =>
           Ok(write(new ResultDto[ActaDesmonte](actas, total)))
         }
     }
 
-  def actas(): Action[AnyContent] = authenticatedUserAction.async {
+  def actas(fi: Long, ff: Long): Action[AnyContent] = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
-      actaService.todos(empr_id.get).map { actas =>
+      actaService.todos(fi, ff, empr_id.get).map { actas =>
         Ok(write(actas))
       }
   }

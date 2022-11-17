@@ -86,22 +86,26 @@ class ActaDesmonteRepository @Inject()(empresaService: EmpresaRepository, usuari
     implicit ec: DatabaseExecutionContext) {
   private val db = dbapi.database("default")
 
-  def cuenta(empr_id: Long) = {
+  def cuenta(fi:Long, ff:Long, empr_id: Long) = {
     db.withConnection { implicit connection =>
-      val sql = SQL("SELECT COUNT(*) FROM siap.acta_desmonte WHERE empr_id = {empr_id}")
+      val sql = SQL("SELECT COUNT(*) FROM siap.acta_desmonte WHERE empr_id = {empr_id} and acde_fecha between {fi} and {ff}")
         .on(
-          'empr_id -> empr_id
+          'empr_id -> empr_id,
+          'fi -> new DateTime(fi),
+          'ff -> new DateTime(ff)
         )
       sql.as(scalar[scala.Long].single)
     }
   }
 
-  def todos(empr_id: Long):Future[List[ActaDesmonte]] = Future[List[ActaDesmonte]] {
+  def todos(fi:Long, ff: Long, empr_id: Long):Future[List[ActaDesmonte]] = Future[List[ActaDesmonte]] {
     db.withConnection { implicit connection =>
-      val sql = SQL("""SELECT * FROM siap.acta_desmonte WHERE empr_id = {empr_id} 
+      val sql = SQL("""SELECT * FROM siap.acta_desmonte WHERE empr_id = {empr_id} AND acde_fecha BETWEEN {fi} AND {ff}
         ORDER BY acde_fecha ASC""")
         .on(
-          'empr_id -> empr_id
+          'empr_id -> empr_id,
+          'fi -> new DateTime(fi),
+          'ff -> new DateTime(ff)
         )
       val result = sql.as(ActaDesmonte._set *)
       result.toList
@@ -3413,7 +3417,7 @@ class ActaDesmonteRepository @Inject()(empresaService: EmpresaRepository, usuari
         val _acta = SQL(
           """SELECT acde_numero FROM siap.acta_desmonte WHERE acde_fecha = {fecha_corte} AND empr_id = {empr_id}"""
         ).on(
-            'fecha_corte -> _fecha_corte,
+            'fecha_corte -> new DateTime(_fecha_corte),
             'empr_id -> empr_id,
           )
           .as(SqlParser.scalar[Long].singleOpt)
@@ -3421,7 +3425,7 @@ class ActaDesmonteRepository @Inject()(empresaService: EmpresaRepository, usuari
           case None => 
                 val _material = SQL(_queryMaterial)
                   .on(
-                    "fecha_corte" -> _fecha_corte,
+                    "fecha_corte" -> new DateTime(_fecha_corte),
                     "empr_id" -> empr_id,
                     "reti_id" -> 6,
                     "tireuc_id" -> tireuc_id
@@ -3444,7 +3448,7 @@ class ActaDesmonteRepository @Inject()(empresaService: EmpresaRepository, usuari
                     "INSERT INTO siap.acta_desmonte (acde_numero, acde_fecha, acde_fechagenerado, empr_id, usua_id) VALUES ({acde_numero}, {acde_fecha}, {acde_fechagenerado}, {empr_id}, {usua_id})"
                   ).on(
                     'acde_numero -> _siguiente,
-                    'acde_fecha -> _fecha_corte,
+                    'acde_fecha -> new DateTime(_fecha_corte),
                     'acde_fechagenerado -> new DateTime(),
                     'empr_id -> empr_id,
                     'usua_id -> usua_id
