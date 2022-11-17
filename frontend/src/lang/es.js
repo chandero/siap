@@ -1030,7 +1030,9 @@ export default {
     novedades: 'Novedades',
     actadesmonte: 'Acta de Desmonte',
     fechaCorte: 'Fecha a Procesar',
-    ejecutado: 'Informe de Reportes Ejecutados'
+    ejecutado: 'Informe de Reportes Ejecutados',
+    fechaInicio: 'Fecha Inicial',
+    fechaFinal: 'Fecha Final'
   },
   ortr: {
     select: 'Seleccione la ODT'

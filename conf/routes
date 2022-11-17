@@ -490,7 +490,6 @@ GET /api/repo/gbtcw/:c/:e/:t controllers.ReporteController.buscarPorConsecutivoW
 GET /api/repo/conv/:id controllers.ReporteController.convertir(id: Long)
 GET /api/repo/gbaap/:id controllers.ReporteController.buscarPorAap(id: Long)
 GET /api/repo/rsino/:fi/:ff controllers.ReporteController.reporteSinOrdenTrabajo(fi: Long, ff: Long)
-GET /api/repo/acde/:fc/:tr controllers.ReporteController.ActaDesmonteXls(fc: Long, tr: Int)
 GET /api/repo/grcd/:fi/:ff controllers.ReporteController.getReportesParaCierreDirecto(fi: Long, ff: Long)
 GET /api/repo/cr/:ti/:ri  controllers.ReporteController.cerrarReporte(ti: Long, ri: Long)
 POST /api/repo/crs  controllers.ReporteController.cerrarReportes
@@ -780,6 +779,11 @@ GET /api/cofa/del/:id                 controllers.CobroFacturaController.borrar(
 # Unitarios
 GET /api/unit/all                               controllers.UnitarioController.unitarios
 GET /api/unit/elems                             controllers.UnitarioController.material
+
+# Acta Desmonte
+GET /api/acde/get                      controllers.ActaDesmonteController.todos
+GET /api/acde/get/:id                  controllers.ActaDesmonteController.ActaDesmonteXls(id: Long)
+GET /api/acde/gen/:fi/:ff/:tu          controllers.ActaDesmonteController.crearActas(fi: Long, ff: Long, tu: Int)
 # SSE - Server Send Event
 
 GET /api/progressStatuses/:uuid controllers.ProcessingProgressController.getProgressStatuses(uuid: String)
