@@ -8,6 +8,7 @@ import java.lang.Long
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.util.UUID.randomUUID
 
 // Jasper
@@ -16328,5 +16329,41 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
           case e: Exception => e.printStackTrace();
         }
     (reti_descripcion, os)
+  }
+
+  def siap_reporte_sin_foto(fecha_inicial: Long, fecha_final: Long, empr_id: Long): Future[List[(Int, Int, Int, Long, Int, Int)]] = Future {
+    var _list = new ListBuffer[(Int, Int, Int, Long, Int, Int)]
+    db.withConnection { implicit connection =>
+    val _query = """select r1.repo_id, r1.reti_id, r1.repo_consecutivo, r1.repo_fechasolucion, rd1.aap_id from siap.reporte r1
+          left join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id
+          where r1.empr_id = {empr_id} and r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id in (2,6) and rd1.even_estado < 8
+          order by r1.reti_id, r1.repo_consecutivo, rd1.aap_id"""
+    val _parser = int("repo_id") ~ int("reti_id") ~ int("repo_consecutivo") ~ date("repo_fechasolucion") ~ int("aap_id") map {
+      case repo_id ~ reti_id ~ repo_consecutivo ~ repo_fechasolucion ~ aap_id =>
+        (repo_id, reti_id, repo_consecutivo, repo_fechasolucion, aap_id)
+    }
+    val _resultSet = SQL(_query).on(
+      "fecha_inicial" -> new DateTime(fecha_inicial),
+      "fecha_final" -> new DateTime(fecha_final),
+      "empr_id" -> empr_id
+    ).as(_parser *)
+    _resultSet.map { row =>
+      var conteo = 0
+      for (i <- 1 to 4) {
+        val _fileName = "reporte_*_"+ row._1 + "_aap_" + row._5 + "_image_"+ i +".jpg"
+        val _path = "/opt/siap/fotos/" + _fileName
+        println("Validando archivo de foto: " + _path)
+        val _file = new File(_path)
+        val _exists = _file.exists()
+        if (_exists) {
+          conteo += 1
+        }
+      }
+      if (conteo < 2) {
+        _list += ((row._1, row._2, row._3, row._4.getTime(), row._5, conteo))
+      }
+      }
+    }
+    _list.toList
   }
 }

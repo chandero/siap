@@ -427,6 +427,7 @@ export default {
     'menu_informe_menu1consolidado_menu1-6estadistica': 'Estadística',
     'menu_informe_menu1consolidado_menu1-7aforo': 'Resumen Aforo',
     'menu_informe_menu1consolidado_menu1-8materialcuadrilla': 'Material Por Cuadrilla',
+    'menu_informe_menu1consolidado_menu1-9reportesinfoto': 'Reportes Sin Foto',
     menu_informe_menu2detallado: 'Detallado',
     'menu_informe_menu2detallado_menu2-1material': 'Material',
     'menu_informe_menu2detallado_menu2-2expansion': 'Expansión',
@@ -1506,7 +1507,9 @@ export default {
     obra_consecutivo: 'Nro. Obra',
     obra_fecharecepcion: 'Fecha Obra',
     repo_tipo_expansion: 'Tipo',
-    siccmx: 'Consolidado de Material por Cuadrilla'
+    siccmx: 'Consolidado de Material por Cuadrilla',
+    srsf: 'Reportes Sin Registro Fotográfico',
+    fotos: 'Fotos'
   },
   grafica: {
     cantidad: 'Cantidad',

@@ -513,6 +513,7 @@ export function informe_siap_resumen_aforo_xls (fecha_final, empr_id) {
     fecha_final,
     empr_id
   }
+  // trunk-ignore(gitleaks/generic-api-key)
   const token = '43f44388-5cd1-4657-9f7e-ea4e014e9333'
   const url = window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/sirax/' + data.fecha_final + '/' + data.empr_id + '/' + token
   window.open(url, '_self', 'location=no, menubar=no')
@@ -528,5 +529,16 @@ export function siap_reporte_foto(fecha_inicial, fecha_final, reti_id) {
     url: '/info/srf/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.reti_id,
     method: 'get',
     responseType: 'blob'
+  })
+}
+
+export function informe_siap_reporte_sin_foto(fecha_inicial, fecha_final) {
+  const data = {
+    fecha_inicial,
+    fecha_final
+  }
+  return request({
+    url: '/info/srsf/' + data.fecha_inicial + '/' + data.fecha_final,
+    method: 'get'
   })
 }

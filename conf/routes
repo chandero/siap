@@ -700,7 +700,7 @@ GET /api/info/sicax/:ff/:e/:t controllers.InformeController.siap_informe_carga_a
 GET /api/info/sccmxlx/:fi/:ff/:c controllers.InformeController.siap_cuadrilla_consolidado_material_xlsx(fi: Long, ff: Long, c: Long)
 GET /api/info/srf/:fi/:ff/:rt   controllers.InformeController.siap_reporte_foto(fi: Long, ff: Long, rt: Long)
 GET /api/info/strmxlsx/:fi/:ff controllers.InformeController.siap_consolidado_material_por_bodega_xlsx(fi: Long, ff: Long)
-
+GET /api/info/srsf/:fi/:ff  controllers.InformeController.siap_reporte_sin_foto(fi: Long, ff: Long)
 # Graficas
 
 GET /api/graf/sgrp controllers.GraficaController.siap_grafica_reporte_pendiente()

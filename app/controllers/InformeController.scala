@@ -824,4 +824,14 @@ class InformeController @Inject()(
         .as("application/pdf")
         .withHeaders("Content-Disposition" -> attach))
   }
+
+  def siap_reporte_sin_foto(fecha_inicial: Long, fecha_final: Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      var empr_id = Utility.extraerEmpresa(request)
+      informeService.siap_reporte_sin_foto(fecha_inicial: Long, fecha_final: Long, empr_id.get).map {
+        reportes =>
+          Ok(write(reportes))
+      }
+
+  }
 }
