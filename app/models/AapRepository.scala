@@ -900,7 +900,7 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
                       inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id
                       where r1.empr_id = {empr_id} and rd1.aap_id = {aap_id} and rd1.even_estado < 9
                       order by r1.reti_id, r1.repo_fechasolucion  desc """
-      val _reposParser = int("repo_id") ~ get[DateTime]("repo_fechadigitacion") ~ get[Option[DateTime]]("repo_fechasolucion") ~ str(
+      val _reposParser = int("repo_id") ~ get[Option[DateTime]]("repo_fechadigitacion") ~ get[Option[DateTime]]("repo_fechasolucion") ~ str(
         "even_horaini"
       ) ~ int("reti_id") ~ str("reti_descripcion") map {
         case a1 ~ a22 ~ a2 ~ a3 ~ a4 ~ a5 => (a1, a22, a2, a3, a4, a5)
@@ -917,7 +917,10 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
         val sdf = new java.text.SimpleDateFormat("yyyy-MM-dd")
         var fecha = repo._3 match { 
           case Some(v) => v.toString("yyyy-MM-dd")
-          case None => repo._2.toString("yyyy-MM-dd")
+          case None => repo._2 match {
+            case Some(v) => v.toString("yyyy-MM-dd")
+            case None => "1970-01-01"
+          }
         }
         val format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm")
         val time = format

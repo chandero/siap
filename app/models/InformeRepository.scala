@@ -2411,7 +2411,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_retirado, re1.even_cantidad_retirado, 
                           re1.even_codigo_instalado, re1.even_cantidad_instalado
                     FROM siap.ordentrabajo ot1
-                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id and otr1.even_estado < 8
                     inner join siap.reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
@@ -2427,7 +2427,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_retirado, re1.even_cantidad_retirado, 
                           re1.even_codigo_instalado, re1.even_cantidad_instalado 
                     FROM siap.ordentrabajo ot1
-                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id and otr1.even_estado < 8
                     inner join siap.control_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.control_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
@@ -2443,7 +2443,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_retirado, re1.even_cantidad_retirado, 
                           re1.even_codigo_instalado, re1.even_cantidad_instalado 
                     FROM siap.ordentrabajo ot1
-				            inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+				            inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id and otr1.even_estado < 8
                     inner join siap.transformador_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.transformador_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
@@ -2461,7 +2461,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     FROM siap.obra r
                     LEFT JOIN siap.obra_evento t on t.obra_id = r.obra_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
-                    left join siap.ordentrabajo_obra oto on oto.obra_id = r.obra_id
+                    left join siap.ordentrabajo_obra oto on oto.obra_id = r.obra_id and oto.even_estado < 8
                     left join siap.ordentrabajo ot on ot.ortr_id = oto.ortr_id and ot.ortr_fecha = r.obra_fechasolucion
                     left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                     WHERE ot.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
@@ -2519,7 +2519,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_retirado, re1.even_cantidad_retirado, 
                           re1.even_codigo_instalado, re1.even_cantidad_instalado
                     FROM siap.ordentrabajo ot1
-                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id AND otr1.even_estado < 8
                     inner join siap.reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
@@ -2535,7 +2535,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_retirado, re1.even_cantidad_retirado, 
                           re1.even_codigo_instalado, re1.even_cantidad_instalado 
                     FROM siap.ordentrabajo ot1
-                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id AND otr1.even_estado < 8
                     inner join siap.control_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.control_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
@@ -2551,7 +2551,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_retirado, re1.even_cantidad_retirado, 
                           re1.even_codigo_instalado, re1.even_cantidad_instalado 
                     FROM siap.ordentrabajo ot1
-				            inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+				            inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id AND otr1.even_estado < 8
                     inner join siap.transformador_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.transformador_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
@@ -2569,7 +2569,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     FROM siap.obra r
                     LEFT JOIN siap.obra_evento t on t.obra_id = r.obra_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
-                    left join siap.ordentrabajo_obra oto on oto.obra_id = r.obra_id
+                    left join siap.ordentrabajo_obra oto on oto.obra_id = r.obra_id and oto.even_estado < 8
                     left join siap.ordentrabajo ot on ot.ortr_id = oto.ortr_id and ot.ortr_fecha = r.obra_fechasolucion
                     left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                     WHERE ot.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = {empr_id}
@@ -2617,7 +2617,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
           case _ => cuadrillaService.buscarPorId(cuad_id)
         }
         val last_sync = SQL("""select to_char(rs1.resi_ultimo_sync, 'yyyy-MM-dd HH24:mm:ss') from siap.ordentrabajo ot1
-                                inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id 
+                                inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id AND otr1.even_estado < 8
                                 inner join siap.reporte_sincronizacion rs1 on rs1.tireuc_id = otr1.tireuc_id and rs1.repo_id = otr1.repo_id
                                 where ot1.ortr_fecha = {fecha_corte} and ot1.cuad_id = {cuad_id}
                                      and rs1.resi_ultimo_sync between {fecha_inicial} and {fecha_final}
@@ -2643,7 +2643,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_retirado, re1.even_cantidad_retirado, 
                           re1.even_codigo_instalado, re1.even_cantidad_instalado
                     FROM siap.ordentrabajo ot1
-                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id AND otr1.even_estado < 8
                     inner join siap.reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
@@ -2659,7 +2659,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_retirado, re1.even_cantidad_retirado, 
                           re1.even_codigo_instalado, re1.even_cantidad_instalado 
                     FROM siap.ordentrabajo ot1
-                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+                    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id AND otr1.even_estado < 8
                     inner join siap.control_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.control_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
@@ -2675,7 +2675,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           re1.even_codigo_retirado, re1.even_cantidad_retirado, 
                           re1.even_codigo_instalado, re1.even_cantidad_instalado 
                     FROM siap.ordentrabajo ot1
-				    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id
+				    inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id AND otr1.even_estado < 8
                     inner join siap.transformador_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.transformador_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
@@ -2693,7 +2693,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     FROM siap.obra r
                     LEFT JOIN siap.obra_evento t on t.obra_id = r.obra_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
-                    left join siap.ordentrabajo_obra oto on oto.obra_id = r.obra_id
+                    left join siap.ordentrabajo_obra oto on oto.obra_id = r.obra_id and oto.even_estado < 8
                     left join siap.ordentrabajo ot on ot.ortr_id = oto.ortr_id and ot.ortr_fecha = r.obra_fechasolucion
                     left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                     WHERE ot.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}

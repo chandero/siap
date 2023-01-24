@@ -150,10 +150,10 @@
                 "-deprecation"
             ],
             "jars": [
-                "/home/chandero/.sbt/boot/scala-2.12.10/lib/scala-compiler.jar",
-                "/home/chandero/.sbt/boot/scala-2.12.10/lib/scala-xml_2.12-1.0.6.jar",
                 "/home/chandero/.sbt/boot/scala-2.12.10/lib/scala-reflect.jar",
-                "/home/chandero/.sbt/boot/scala-2.12.10/lib/scala-library.jar"
+                "/home/chandero/.sbt/boot/scala-2.12.10/lib/scala-compiler.jar",
+                "/home/chandero/.sbt/boot/scala-2.12.10/lib/scala-library.jar",
+                "/home/chandero/.sbt/boot/scala-2.12.10/lib/scala-xml_2.12-1.0.6.jar"
             ],
             "setup": {
                 "order": "mixed",
@@ -222,7 +222,7 @@
         "platform": {
             "name": "jvm",
             "config": {
-                "home": "/usr/lib/jvm/java-11-openjdk",
+                "home": "/home/chandero/.sdkman/candidates/java/11.0.17-tem",
                 "options": [
                     "-Duser.dir=/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/project"
                 ]

@@ -43,10 +43,10 @@
               v-for="(tab, index) in tabsData"
               :key="index"
               :label="tab.tabName"
-              :name="tab.tabName"
+              :name="tab.tabPeriodo"
             >
               <el-table
-                :data="tab.tableData.filter(d => filtrar(d))"
+                :data="tableData.filter(d => filtrar(d))"
                 stripe
                 :default-sort = "{prop: 'obra_consecutivo', order: 'descending'}"
                 style="width: 100%"
@@ -349,6 +349,54 @@ export default {
     ])
   },
   methods: {
+    handleUp() {
+      this.mes_inicial += 1
+      if (this.mes_inicial > 12) {
+        this.mes_inicial = 1
+        this.anho_inicial += 1
+      }
+      this.createTabs()
+      var data = { name: this.tabsData[0].tabPeriodo }
+      this.changeTab(data)
+      this.activeTab = this.tabsData[0].tabPeriodo
+    },
+    handleDown() {
+      this.mes_inicial -= 1
+      if (this.mes_inicial < 1) {
+        this.mes_inicial = 12
+        this.anho_inicial -= 1
+      }
+      this.createTabs()
+      var data = { name: this.tabsData[11].tabPeriodo }
+      this.changeTab(data)
+      this.activeTab = this.tabsData[11].tabPeriodo
+    },
+    createTabs() {
+      var year = this.anho_inicial
+      var month = this.mes_inicial
+      this.anho = year
+      this.mes = month
+      this.tabsData = []
+      console.log('Mes Inicial : ' + month)
+      for (var i = 12; i >= 1; i--) {
+        var data = {
+          tabName: this.$i18n.t('months.m' + month) + year,
+          tabRange: {
+            anho: year,
+            mes: month
+          },
+          tabPeriodo: month + ':' + year + ':' + (12 - i),
+          tableData: []
+        }
+        this.tabsData.push(data)
+        // this.getData(data.tabRange.anho, data.tabRange.mes, data)
+        month--
+        if (month < 1) {
+          month = 12
+          year--
+        }
+      }
+    },
     handlePrint (index, row) {
       printObra(row.obra_id, this.empresa.empr_id)
     },
@@ -418,7 +466,11 @@ export default {
     getObras () {
     },
     changeTab (data) {
-      console.log('TabChange')
+      console.log('changeTab: ' + JSON.stringify(data.name))
+      const mes = data.name.split(':')[0]
+      const anho = data.name.split(':')[1]
+      const index = data.name.split(':')[2]
+      this.getData(anho, mes, index, data.name)
     },
     actualizar () {
       this.filtro = this.fconsec
@@ -427,10 +479,17 @@ export default {
       this.$router.push({ path: '/proceso/menu3obra/menu3-2create' })
     },
     estado (id) {
+      console.log('Estado: Ingresado a Buscar Estado: ' + id)
       if (id === null) {
         return ''
       } else {
-        return this.estados.find(e => e.rees_id === id, { rees_descripcion: '' }).rees_descripcion
+        console.log('Estados: ', JSON.stringify(this.estados))
+        var estado = this.estados.find(e => e.rees_id === id)
+        if (estado) {
+          return estado.rees_descripcion
+        } else {
+          return ''
+        }
       }
     },
     tipo (id) {
@@ -454,11 +513,19 @@ export default {
         return this.barrios.find(e => e.barr_id === id, { barr_descripcion: '' }).barr_descripcion
       }
     },
-    getData (anho, mes, data) {
-      getObrasRango(anho, mes).then(response => {
-        data.tableData = response.data
-        console.log('obras: ' + JSON.stringify(data.tableData))
-      })
+    getData (anho, mes, index, name) {
+      this.loading = true
+      getObrasRango(anho, mes, 1)
+        .then((response) => {
+          console.log('Periodo: ' + name)
+          console.log('Data: ' + JSON.stringify(response.data))
+          this.tableData = response.data
+          this.loading = false
+          // data.tableData = response.data
+        })
+        .catch(() => {
+          this.loading = false
+        })
     },
     ordenes (id) {
       if (id === undefined || id === null) {
@@ -494,32 +561,14 @@ export default {
     }
   },
   beforeMount () {
+    console.log('Entrando a beforeMount')
+    this.qrules[0].choices = this.qtipos
+    this.qrules[1].choices = this.qbarrios
+    this.qrules[2].choices = this.qestados
     const date = new Date()
-    var year = date.getFullYear()
-    var month = date.getMonth() + 1
-    console.log('Mes Inicial : ' + month)
-    getOrdenes().then(
-      (response) => {
-        this.ordenestrabajo = response.data
-        for (var i = 12; i >= 1; i--) {
-          var data = {
-            tabName: this.$i18n.t('months.m' + month) + year,
-            tabRange: {
-              anho: year,
-              mes: month
-            },
-            tableData: []
-          }
-          this.tabsData.push(data)
-          this.getData(data.tabRange.anho, data.tabRange.mes, data)
-          month--
-          if (month < 1) {
-            month = 12
-            year--
-          }
-        }
-        this.activeTab = this.tabsData[0].tabName
-      })
+    this.anho_inicial = date.getFullYear()
+    this.mes_inicial = date.getMonth() + 1
+    this.createTabs()
   },
   created () {
     getBarriosEmpresa().then(response => {
@@ -552,8 +601,15 @@ export default {
         this.qorigenes.push({ label: e.orig_descripcion, value: e.orig_id })
       })
     }).catch(error => {
-      console.log('getEstados: ' + error)
+      console.log('getOrigenes: ' + error)
     })
+  },
+  mounted() {
+    const start = async () => {
+      this.getData(this.anho, this.mes, 0, this.tabsData[0].tabPeriodo)
+      this.activeTab = this.tabsData[0].tabPeriodo
+    }
+    start()
   }
 }
 </script>
