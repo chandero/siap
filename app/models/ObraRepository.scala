@@ -789,6 +789,7 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
     * Crear Obra
     */
     def crear(obra: Obra): Future[(scala.Long, scala.Long)] = Future[(scala.Long, scala.Long)] {
+      println("Obra Nueva: " + obra)
         db.withConnection { implicit connection => 
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())

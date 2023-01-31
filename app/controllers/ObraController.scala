@@ -121,14 +121,15 @@ class ObraController @Inject()(
                             obra.obra_modificado,
                             obra.ortr_id,
                             obra.muot_id,
-                            obra.rees_id,
                             obra.orig_id,
+                            obra.rees_id,
                             obra.barr_id,
                             empr_id,
                             usua_id,
                             obra.meams,
                             obra.eventos
                  )
+      println("Obra Recibida: " + obranuevo)
       obraService.crear(obranuevo).map { case (id, consec) =>
         if (id > 0) {
           Created(Json.obj("id" ->id, "consec" -> consec))

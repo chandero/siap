@@ -87,6 +87,7 @@ case class Siap_detallado_material(
     reti_descripcion: Option[String],
     repo_numero: Option[scala.Long],
     repo_fechasolucion: Option[DateTime],
+    aap_id: Option[scala.Long],
     even_codigo_retirado: Option[String],
     even_cantidad_retirado: Option[Double],
     even_codigo_instalado: Option[String],
@@ -593,6 +594,7 @@ object Siap_detallado_material {
       "reti_descripcion" -> srm.reti_descripcion,
       "repo_numero" -> srm.repo_numero,
       "repo_fechasolucion" -> srm.repo_fechasolucion,
+      "aap_id" -> srm.aap_id,
       "even_codigo_retirado" -> srm.even_codigo_retirado,
       "even_cantidad_retirado" -> srm.even_cantidad_retirado,
       "even_codigo_instalado" -> srm.even_codigo_instalado,
@@ -2068,6 +2070,7 @@ class InformeRepository @Inject()(
       get[Option[String]]("reti_descripcion") ~
       get[Option[scala.Long]]("repo_consecutivo") ~
       get[Option[DateTime]]("repo_fechasolucion") ~
+      get[Option[scala.Long]]("aap_id") ~
       get[Option[String]]("even_codigo_retirado") ~
       get[Option[Double]]("even_cantidad_retirado") ~
       get[Option[String]]("even_codigo_instalado") ~
@@ -2077,6 +2080,7 @@ class InformeRepository @Inject()(
             reti_descripcion ~
             repo_consecutivo ~
             repo_fechasolucion ~
+            aap_id ~
             even_codigo_retirado ~
             even_cantidad_retirado ~
             even_codigo_instalado ~
@@ -2087,6 +2091,7 @@ class InformeRepository @Inject()(
           reti_descripcion,
           repo_consecutivo,
           repo_fechasolucion,
+          aap_id,
           even_codigo_retirado,
           even_cantidad_retirado,
           even_codigo_instalado,
@@ -2314,7 +2319,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
         ff.set(Calendar.HOUR, 23)
         SQL("""SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
                           r.repo_consecutivo, 
-                          r.repo_fechasolucion, 
+                          r.repo_fechasolucion,
+                          t.aap_id,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
                           t.even_codigo_instalado, t.even_cantidad_instalado 
                     FROM siap.reporte r
@@ -2328,6 +2334,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
                           r.repo_consecutivo, 
                           r.repo_fechasolucion, 
+                          t.aap_id,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
                           t.even_codigo_instalado, t.even_cantidad_instalado 
                     FROM siap.control_reporte r
@@ -2341,6 +2348,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
                           r.repo_consecutivo, 
                           r.repo_fechasolucion, 
+                          t.aap_id,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
                           t.even_codigo_instalado, t.even_cantidad_instalado 
                     FROM siap.transformador_reporte r
@@ -2353,7 +2361,8 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     UNION ALL                    
                     SELECT e.elem_codigo, e.elem_descripcion,  CONCAT('OBRA', ' ', r.obra_nombre) as reti_descripcion, 
                           r.obra_consecutivo as repo_consecutivo, 
-                          r.obra_fechasolucion, 
+                          r.obra_fechasolucion,
+                          0 as aap_id,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
                           t.even_codigo_instalado, t.even_cantidad_instalado 
                     FROM siap.obra r

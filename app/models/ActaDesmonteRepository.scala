@@ -3411,7 +3411,7 @@ class ActaDesmonteRepository @Inject()(empresaService: EmpresaRepository, usuari
             AND r1.tireuc_id = {tireuc_id}
           GROUP BY 1,2,3,4"""
 
-      val daysCount = Days.daysBetween(fi, ff).getDays()
+      val daysCount = Days.daysBetween(fi, ff).getDays() + 1
       (0 until daysCount).map(fi.plusDays(_)).foreach { fecha_corte =>
         val _fecha_corte = fecha_corte.getMillis()
         val _acta = SQL(

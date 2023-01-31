@@ -66,6 +66,15 @@
        <span>{{ scope.row.repo_fechasolucion }}</span>
      </template>
     </el-table-column>
+    <el-table-column
+      :label="$t('informe.aap_id')"
+      prop="aap_id"
+      width="80"
+    >
+     <template  slot-scope="scope">
+       <span>{{ scope.row.aap_id }}</span>
+     </template>
+    </el-table-column>
     <el-table-column :label="$t('informe.retirado')">
     <el-table-column
       :label="$t('informe.codigo')"
@@ -133,8 +142,8 @@ export default {
     exportarXls () {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['Código Material', 'Nombre Material', 'Tipo de Reporte', 'Número Reporte', 'Fecha Solución', 'Código Retirado', 'Cantidad Retirado', 'Código Instalado', 'Cantidad Instalado']
-        const filterVal = ['elem_codigo', 'elem_descripcion', 'reti_descripcion', 'repo_numero', 'repo_fechasolucion', 'even_codigo_retirado', 'even_cantidad_retirado', 'even_codigo_instalado', 'even_cantidad_instalado']
+        const tHeader = ['Código Material', 'Nombre Material', 'Tipo de Reporte', 'Número Reporte', 'Fecha Solución', 'Luminaria', 'Código Retirado', 'Cantidad Retirado', 'Código Instalado', 'Cantidad Instalado']
+        const filterVal = ['elem_codigo', 'elem_descripcion', 'reti_descripcion', 'repo_numero', 'repo_fechasolucion', 'aap_id', 'even_codigo_retirado', 'even_cantidad_retirado', 'even_codigo_instalado', 'even_cantidad_instalado']
         const list = this.tableData
         const data = this.formatJson(filterVal, list)
         excel.export_json_to_excel(tHeader, data, 'detallado_materiales_' + this.$moment(this.fecha_final).format('YYYYMMDD'))

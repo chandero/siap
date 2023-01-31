@@ -395,6 +395,7 @@ export default {
     'menu_proceso_menu2pendiente_menu2-3informecambios': 'Cambios',
     menu_proceso_menu3obra: 'Obra',
     'menu_proceso_menu3obra_menu3-1list': 'Reporte',
+    'menu_proceso_menu3obra_menu3-2create': 'Crear',
     'menu_proceso_menu3obra_menu3-3edit': 'Actualizar',
     'menu_proceso_menu3obra_menu3-4pendiente': 'Reporte Obra Pendiente',
     menu_proceso_menu4orden: 'Orden de Trabajo',

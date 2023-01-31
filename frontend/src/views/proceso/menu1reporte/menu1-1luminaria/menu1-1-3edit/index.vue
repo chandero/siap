@@ -2499,11 +2499,11 @@
                     >Cantidad Material Instalado</span
                   >
                 </el-col>
-                <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
+<!--                 <el-col :xs="24" :sm="24" :md="2" :lg="2" :xl="2">
                   <span style="font-weight: bold"
                     >Ucap</span
                   >
-                </el-col>
+                </el-col> -->
               </el-row>
               <div style="max-height: 600px; overflow: auto">
                 <el-form
@@ -2657,12 +2657,12 @@
                         ></el-input>
                       </el-form-item>
                     </el-col>
-                    <el-col class="hidden-md-and-up" :xs="8" :sm="8">
+<!--                     <el-col class="hidden-md-and-up" :xs="8" :sm="8">
                       <span style="font-weight: bold"
                         >Ucap</span
                       >
-                    </el-col>
-                    <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
+                    </el-col> -->
+<!--                     <el-col :xs="16" :sm="16" :md="2" :lg="2" :xl="2">
                       <el-form-item prop="unit_id">
                         <el-select
                           :disabled="evento.even_estado === 9"
@@ -2672,7 +2672,7 @@
                           <el-option v-for="unitario in unitarios[evento.elem_id]" :key="unitario.unit_id" :label="unitario.unit_codigo + '-' + unitario.unit_descripcion" :value="unitario.unit_id" />
                         </el-select>
                       </el-form-item>
-                    </el-col>
+                    </el-col> -->
                     <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
                       <el-button
                         v-if="evento.even_estado < 8"
@@ -3135,8 +3135,8 @@ export default {
       evento: {
         even_codigo_instalado: null,
         even_codigo_retirado: null,
-        even_cantidad_instalado: 1,
-        even_cantidad_retirado: 1,
+        even_cantidad_instalado: 0.0,
+        even_cantidad_retirado: 0.0,
         even_estado: 1,
         aap_id: null,
         repo_id: null,
@@ -3329,8 +3329,8 @@ export default {
         ]
       },
       matrules: {
-        'evento.aap_id': [{ validator: validateAapEventoRule, trigger: 'blur' }],
-        'evento.unit_id': [{ validator: validateUnitEventoRule, trigger: 'change' }]
+        'evento.aap_id': [{ validator: validateAapEventoRule, trigger: 'blur' }]
+        /* 'evento.unit_id': [{ validator: validateUnitEventoRule, trigger: 'change' }] */
       },
       dirrules: {
         aap_id: [
@@ -4739,8 +4739,8 @@ export default {
           even_fecha: null,
           even_codigo_instalado: null,
           even_codigo_retirado: null,
-          even_cantidad_instalado: 1.0,
-          even_cantidad_retirado: 1.0,
+          even_cantidad_instalado: 0.0,
+          even_cantidad_retirado: 0.0,
           even_estado: 1,
           aap_id: this.reporte.direcciones[this.didx].aap_id,
           repo_id: this.reporte.repo_id,
@@ -5545,8 +5545,8 @@ export default {
               even_fecha: null,
               even_codigo_instalado: null,
               even_codigo_retirado: null,
-              even_cantidad_instalado: 1.0,
-              even_cantidad_retirado: 1.0,
+              even_cantidad_instalado: 0.0,
+              even_cantidad_retirado: 0.0,
               even_estado: 1,
               aap_id: d.aap_id,
               repo_id: this.reporte_previo.repo_id,
