@@ -363,7 +363,8 @@ case class AapMobile(
     aap_poste_propietario: Option[String],
     aap_poste_altura: Option[Double],
     aap_lat: Option[String],
-    aap_lng: Option[String]
+    aap_lng: Option[String],
+    medi_id: Option[Int]
 )
 
 case class AapConsulta(
@@ -509,8 +510,9 @@ object AapMobile {
       get[Option[String]]("aap_poste_propietario") ~ 
       get[Option[Double]]("aap_poste_altura") ~
       get[Option[String]]("aap_lat") ~
-      get[Option[String]]("aap_lng") map {
-      case aap_id ~ aap_apoyo ~ aap_fechatoma ~ aap_direccion ~ barr_id ~ aaco_id ~ aama_id ~ aamo_id ~ aacu_id ~ aaus_id ~ aatc_id ~ tipo_id ~ aap_tecnologia ~ aap_potencia ~ aap_brazo ~ aap_collarin ~ aap_poste_propietario ~ aap_poste_altura ~ aap_lat ~ aap_lng =>
+      get[Option[String]]("aap_lng") ~ 
+      get[Option[Int]]("medi_id") map {
+      case aap_id ~ aap_apoyo ~ aap_fechatoma ~ aap_direccion ~ barr_id ~ aaco_id ~ aama_id ~ aamo_id ~ aacu_id ~ aaus_id ~ aatc_id ~ tipo_id ~ aap_tecnologia ~ aap_potencia ~ aap_brazo ~ aap_collarin ~ aap_poste_propietario ~ aap_poste_altura ~ aap_lat ~ aap_lng ~ medi_id=>
         AapMobile(
           aap_id,
           aap_apoyo,
@@ -531,7 +533,8 @@ object AapMobile {
           aap_poste_propietario,
           aap_poste_altura,
           aap_lat,
-          aap_lng
+          aap_lng,
+          medi_id
         )
     }
   }
@@ -1566,33 +1569,38 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
     db.withConnection { implicit connection =>
       var query: String =
         s"""SELECT a.aap_id, 
-                                a.aap_apoyo, 
-                                cast (a.aap_fechatoma as TEXT) as aap_fechatoma,
-                                a.aap_direccion,
-                                a.barr_id,
-                                a.aaco_id,
-                                a.aama_id,
-                                a.aamo_id,
-                                a.aacu_id,
-                                a.aaus_id,
-                                a.aatc_id,
-                                aa.tipo_id,
-                                aa.aap_tecnologia,
-                                aa.aap_potencia,
-                                aa.aap_brazo,
-                                aa.aap_collarin,
-                                aa.aap_poste_propietario,
-                                aa.aap_poste_altura,
-                                a.aap_lat,
-                                a.aap_lng
-                        FROM siap.aap a
-                        LEFT JOIN siap.aap_adicional aa ON aa.aap_id = a.aap_id and aa.empr_id = a.empr_id
-                        WHERE a.empr_id = {empr_id} and a.aap_id <> 9999999""".stripMargin
+                a.aap_apoyo, 
+                cast (a.aap_fechatoma as TEXT) as aap_fechatoma,
+                a.aap_direccion,
+                a.barr_id,
+                a.aaco_id,
+                a.aama_id,
+                a.aamo_id,
+                a.aacu_id,
+                a.aaus_id,
+                a.aatc_id,
+                aa.tipo_id,
+                aa.aap_tecnologia,
+                aa.aap_potencia,
+                aa.aap_brazo,
+                aa.aap_collarin,
+                aa.aap_poste_propietario,
+                aa.aap_poste_altura,
+                a.aap_lat,
+                a.aap_lng,
+                m.medi_id
+              FROM siap.aap a
+              LEFT JOIN siap.aap_adicional aa ON aa.aap_id = a.aap_id and aa.empr_id = a.empr_id
+              LEFT JOIN siap.aap_medidor am ON am.aap_id = a.aap_id and am.empr_id = a.empr_id
+              LEFT JOIN siap.medidor m ON m.medi_id = am.medi_id
+              WHERE a.empr_id = {empr_id} and a.aap_id <> 9999999""".stripMargin
       val result = SQL(query)
         .on(
           'empr_id -> empr_id
         )
         .as(AapMobile._set *)
+      val test_aap = result.toList.filter(_.aap_id.get == 2382)
+      println("test_aap: " + test_aap.toString())
       result.toList
     }
   }

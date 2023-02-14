@@ -834,7 +834,7 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
     val hoy: LocalDateTime = new LocalDateTime(
       Calendar.getInstance().getTimeInMillis()
     )
-    val path = System.getProperty("java.io.tmpdir")
+    val path = "/opt/tmp/" // System.getProperty("java.io.tmpdir")
     val newTempDir = new File(path, "cargasiap")
     val filenameone =
       "file_medidor_lectura_" + a + "_" + m + "_" + empr_id + ".xlsx"

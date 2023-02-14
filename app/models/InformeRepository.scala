@@ -9,6 +9,9 @@ import java.sql.Date
 import java.text.SimpleDateFormat
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
+
 import java.util.UUID.randomUUID
 
 // Jasper
@@ -16349,21 +16352,22 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
     ).as(_parser *)
     _resultSet.map { row =>
       var conteo = 0
-      for (i <- 1 to 4) {
-        val _fileName = "reporte_*_"+ row._1 + "_aap_" + row._5 + "_image_"+ i +".jpg"
-        val _path = "/opt/siap/fotos/" + _fileName
-        println("Validando archivo de foto: " + _path)
-        val _file = new File(_path)
-        val _exists = _file.exists()
-        if (_exists) {
-          conteo += 1
-        }
-      }
-      if (conteo < 2) {
+      val directory = new File("/opt/siap/fotos/");
+      var _fileList = findFilenamesWithId(row._1.toString(), directory)
+      conteo = _fileList.length
+      if (conteo < 3) {
         _list += ((row._1, row._2, row._3, row._4.getTime(), row._5, conteo))
       }
-      }
     }
+  }
     _list.toList
+  }
+
+  def findFilenamesWithId(ID: String, dir: File): List[File] = {
+      findFilenamesMatchingRegex("^reporte_[0-9]{1,2}_" + ID + "_aap_[0-9]{1,6}_image_[0-9]\\.jpg$", dir);
+  }
+
+  def findFilenamesMatchingRegex(regex: String, dir:File) = {
+      dir.listFiles.filter(_.getName().matches(regex)).toList;
   }
 }
