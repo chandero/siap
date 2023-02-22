@@ -1252,7 +1252,7 @@ class PosteReporteRepository @Inject()(
                 'repo_luminaria -> adicional.repo_luminaria,
                 'repo_redes -> adicional.repo_redes,
                 'repo_poste -> adicional.repo_poste,
-                'repo_modificado -> adicional.repo_modificado,
+                'repo_modificado -> hora,
                 'repo_subreporte -> adicional.repo_subreporte,
                 'repo_subid -> adicional.repo_subid,
                 'repo_email -> adicional.repo_email,
@@ -1301,7 +1301,8 @@ class PosteReporteRepository @Inject()(
     */
   def convertir(id: scala.Long): scala.Long = {
     db.withConnection { implicit connection =>
-
+      val hora: LocalDateTime =
+        new LocalDateTime(Calendar.getInstance().getTimeInMillis())
       var _id : scala.Long = 0
       val poste = SQL("SELECT * FROM siap.poste_reporte WHERE repo_id = {repo_id}").on('repo_id -> id).as(Reporte._set.single)
       // Validar si previamente fue convertido
@@ -1413,7 +1414,7 @@ class PosteReporteRepository @Inject()(
                       'repo_luminaria -> r.repo_luminaria,
                       'repo_redes -> r.repo_redes,
                       'repo_poste -> r.repo_poste,
-                      'repo_modificado -> r.repo_modificado,
+                      'repo_modificado -> hora,
                       'repo_subreporte -> r.repo_subreporte,
                       'acti_id -> r.acti_id,
                       'repo_subid -> r.repo_subid,
@@ -1497,12 +1498,12 @@ class PosteReporteRepository @Inject()(
                     urba_id = {urba_id}, muot_id = {muot_id}, medi_id = {medi_id}, tran_id = {tran_id}, 
                     medi_acta = {medi_acta}, aaco_id_anterior = {aaco_id_anterior}, aaco_id_nuevo = {aaco_id_nuevo} WHERE repo_id = {repo_id}"""
         ).on(
-            'repo_fechadigitacion -> hora,
+            'repo_fechadigitacion -> adicional.repo_fechadigitacion,
             'repo_tipo_expansion -> adicional.repo_tipo_expansion,
             'repo_luminaria -> adicional.repo_luminaria,
             'repo_redes -> adicional.repo_redes,
             'repo_poste -> adicional.repo_poste,
-            'repo_modificado -> adicional.repo_modificado,
+            'repo_modificado -> hora,
             'repo_subreporte -> adicional.repo_subreporte,
             'repo_subid -> adicional.repo_subid,
             'repo_email -> adicional.repo_email,
@@ -1557,7 +1558,7 @@ class PosteReporteRepository @Inject()(
               'repo_luminaria -> adicional.repo_luminaria,
               'repo_redes -> adicional.repo_redes,
               'repo_poste -> adicional.repo_poste,
-              'repo_modificado -> adicional.repo_modificado,
+              'repo_modificado -> hora,
               'repo_subreporte -> adicional.repo_subreporte,
               'repo_subid -> adicional.repo_subid,
               'repo_email -> adicional.repo_email,

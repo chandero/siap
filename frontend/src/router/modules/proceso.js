@@ -699,7 +699,20 @@ const procesoRouter = {
               name: 'menu_proceso_menu4orden_menu4-3cobro_menu4-3-2factura',
               meta: {
                 title:
-                  'menu_proceso_menu4orden_menu4-2externa_menu4-3-2factura',
+                  'menu_proceso_menu4orden_menu4-3cobro_menu4-3-2factura',
+                roles: ['super', 'admin', 'auxiliar', 'supervisor']
+              }
+            },
+            {
+              path: 'menu4-3-3acta',
+              component: () =>
+                import(
+                  '@/views/proceso/menu4orden/menu4-3cobro/menu4-3-3acta'
+                ),
+              name: 'menu_proceso_menu4orden_menu4-3cobro_menu4-3-3acta',
+              meta: {
+                title:
+                  'menu_proceso_menu4orden_menu4-3cobro_menu4-3-3acta',
                 roles: ['super', 'admin', 'auxiliar', 'supervisor']
               }
             }
