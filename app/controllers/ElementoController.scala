@@ -26,6 +26,8 @@ import org.joda.time.format.DateTimeFormat
 
 import java.io.BufferedOutputStream
 import java.io.FileOutputStream
+import java.nio.file.Paths
+import java.io.File
 
 @Singleton
 class ElementoController @Inject()(
@@ -259,4 +261,30 @@ class ElementoController @Inject()(
       )
   }  
 
+  def uploadFileCotizado(anho: Int, empr_id: Long) =
+    Action(parse.multipartFormData) { request =>
+      request.body
+        .file("precio_cotizado")
+        .map { f =>
+          // only get the last part of the filename
+          // otherwise someone can send a path like ../../home/foo/bar.txt to write to other files on the system
+          val filename =
+            "precio_cotizado_" + anho + "_" + empr_id + ".xlsx" // Paths.get(f.filename).getFileName
+          val fileSize = f.fileSize
+          val contentType = f.contentType
+          val path = System.getProperty("java.io.tmpdir")
+          println("tmp path:" + path)
+          val newTempDir = new File(path, "cargasiap")
+          if (!newTempDir.exists()) {
+            newTempDir.mkdirs()
+          }
+          val file = newTempDir + "/" + filename
+          println("tmp file: " + file)
+          f.ref.copyTo(Paths.get(s"$file"), replace = true)
+          Ok("Archivo Cargado")
+        }
+        .getOrElse {
+          NotFound("Archivo No Cargado")
+        }
+    }
 }

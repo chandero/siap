@@ -8,7 +8,8 @@
             <el-header>
               <el-button size="mini" type="primary" icon="el-icon-plus" circle @click="nuevo" ></el-button>
               <el-button size="mini" type="success" icon="el-icon-refresh" circle @click="actualizar"></el-button>
-              <el-button size="large" type="primary" icon="el-icon-money" circle @click="showPrecioPeriodoDialog = true" title="Precio para Nuevo Año"></el-button>
+              <el-button size="large" type="primary" icon="el-icon-money" circle @click="showPrecioPeriodoDialog = true" title="Calcular Precio para Nuevo Año"></el-button>
+              <el-button size="large" type="primary" icon="el-icon-upload" circle @click="showCotizadoPeriodoDialog = true" title="Subir Valores Cotizados para Nuevo Año"></el-button>
             </el-header>
             <el-main>
               <el-form>
@@ -67,7 +68,7 @@
           align="right"
            >
            <template slot-scope="scope">
-            <span>{{ scope.row._8 - scope.row._5 | toThousandslsFilter }}</span>
+            <span>{{ scope.row._6 }}</span>
            </template>
         </el-table-column>
         <el-table-column
@@ -76,7 +77,7 @@
           align="right"
            >
            <template slot-scope="scope">
-            <span>{{ scope.row._6 }}</span>
+            <span>{{ scope.row._8 - scope.row._5 | toThousandslsFilter }}</span>
            </template>
         </el-table-column>
         <el-table-column
@@ -189,6 +190,48 @@
         <el-button :disabled="!precioAnho || !precioIncremento" type="primary" @click="handlePrecioPeriodo()">Calcular y Guardar</el-button>
     </span>
   </el-dialog>
+  <el-dialog
+    title="Precios Cotizados Periodo"
+    :visible.sync="showCotizadoPeriodoDialog"
+    width="40%"
+    destroy-on-close
+    center
+    @closed="handleCotizadoPeriodoDialogClosed"
+  >
+    <el-container>
+      <el-main>
+        <el-form label-position="left" label-width="200px">
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="Año">
+                <el-input type="number" v-model="cotizadoAnho" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="Archivo">
+                <el-upload
+                                class="upload-demo"
+                                ref="uploadFile"
+                                name="precio_cotizado"
+                                :action="uploadFileUrl()"
+                                :auto-upload="true"
+                                :on-success="uploadOk"
+                                :on-error="uploadError"
+                                >
+                                <el-button size="small" type="warning">Clic para subir archivo</el-button>
+                                <div slot="tip" class="el-upload__tip">Solo archivo excel xlsx</div>
+                            </el-upload>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </el-main>
+    </el-container>
+    <span slot="footer" class="dialog-footer">
+        <el-button @click="showCotizadoPeriodoDialog = false">Cancelar</el-button>
+        <el-button :disabled="!cotizadoAnho" type="primary" @click="uploadFileAction()">Subir y Calcular</el-button>
+    </span>
+  </el-dialog>
  </el-container>
 </template>
 
@@ -206,10 +249,12 @@ export default {
       page_size: 10,
       current_page: 1,
       precioAnho: new Date().getFullYear(),
+      cotizadoAnho: new Date().getFullYear(),
       precioIncremento: null,
       total: 0,
       order: '',
       showPrecioPeriodoDialog: false,
+      showCotizadoPeriodoDialog: false,
       qlabels: {
         matchType: this.$i18n.t('qb.matchType'),
         matchTypes: [
@@ -248,6 +293,47 @@ export default {
     }
   },
   methods: {
+    uploadOk(response, file, list) {
+      this.uno_ok = true
+      console.log('respons: ' + JSON.stringify(response))
+      console.log('file: ' + JSON.stringify(file))
+      console.log('list: ' + JSON.stringify(list))
+      if (response && file) {
+        this.nofile = false
+        this.$message({
+          message: 'Archivo subido al servidor',
+          type: 'success'
+        })
+      }
+    },
+    uploadError(err, file) {
+      this.uno_ok = false
+      if (err && file) {
+        this.$message({
+          message: 'Error al cargar el archivo al servidor.',
+          type: 'warning'
+        })
+      }
+    },
+    handleFileChange (file, fileList) {
+      console.log(file, fileList)
+    },
+    handleFileRemove (file, fileList) {
+      console.log(file, fileList)
+    },
+    handleFileExceed (files, fileList) {
+      console.log(files, fileList)
+    },
+    uploadFileUrl() {
+      return '/api/elem/uploadFile?anho=' + this.cotizadoAnho
+    },
+    uploadFileAction () {
+      this.$refs.uploadFile.submit()
+    },
+    handleCotizadoPeriodoDialogClosed () {
+      this.precioAnho = new Date().getFullYear()
+      this.precioIncremento = null
+    },
     handleChangeAnho () {
       this.getElementos()
     },

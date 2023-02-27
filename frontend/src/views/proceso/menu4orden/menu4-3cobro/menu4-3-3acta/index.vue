@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-header class="factura_header">{{ $t('factura.tabletitle') }}</el-header>
+    <el-header class="acta_header">{{ $t('acre.tabletitle') }}</el-header>
     <el-main>
       <query-builder :labels="qlabels" :rules="qrules" :styled="qstyled" :maxDepth="3" v-model="qbquery"></query-builder>
       <el-button type="warning" icon="el-icon-search" circle @click="actualizar"
@@ -15,7 +15,7 @@
             <el-table-column type="expand">
               <template slot-scope="props">
                 <el-table :data="props.row.ordenes" stripe style="width:100%">
-                  <el-table-column :label="$t('factura.orden')" width="250">
+                  <el-table-column :label="$t('acre.numero')" width="250">
                     <template slot-scope="scope">
                       <span style="margin-left: 10px">{{ scope.row.reti_descripcion }} {{ scope.row.cotr_tipo_obra_tipo |
                         arabicToRoman }} </span>
