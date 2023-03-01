@@ -1182,7 +1182,8 @@ from
            LEFT join siap.elemento_unitario eu1 ON eu1.elem_id = e1.elem_id
            LEFT join siap.unitario u1 ON u1.unit_id = eu1.unit_id
            WHERE r1.reti_id IN (2,6) AND
-           		 r1.empr_id = 1 AND
+               elpr1.elpr_anho = {anho} AND
+           		 r1.empr_id = {empr_id} AND
            		 e1.elem_estado = 1
       ) as o
       """
@@ -1320,7 +1321,7 @@ from
     os.toByteArray
   }
 
-  def todosPrecioXls(empr_id: Long): Array[Byte] = {
+  def todosPrecioXls(empr_id: Long, anho: Int): Array[Byte] = {
     var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
     var _listMerged01 = new ListBuffer[CellRange]()
     val _fuenteNegrita = Font(
@@ -1420,6 +1421,7 @@ from
            LEFT join siap.elemento_unitario eu1 ON eu1.elem_id = e1.elem_id
            LEFT join siap.unitario u1 ON u1.unit_id = eu1.unit_id
            WHERE r1.reti_id IN (2,6) AND
+               elpr1.elpr_anho = {anho} AND
            		 r1.empr_id = {empr_id} AND
            		 e1.elem_estado = 1
         ) as o
@@ -1427,7 +1429,8 @@ from
             SQL(
               query
             ).on(
-                'empr_id -> empr_id
+                'empr_id -> empr_id,
+                'anho    -> anho
               )
               .as(_parser *)
         }

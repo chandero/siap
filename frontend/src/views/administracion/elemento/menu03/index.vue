@@ -448,7 +448,7 @@ export default {
         text: 'Exportando a Excel',
         lock: true
       })
-      todosPrecioXls(this.qbquery)
+      todosPrecioXls(parseInt(this.anho))
         .then(response => {
           loading.close()
           var blob = response.data

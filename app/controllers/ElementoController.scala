@@ -245,16 +245,13 @@ class ElementoController @Inject()(
       )
   }
 
-  def todosPrecioXls() = authenticatedUserAction.async { implicit request =>
+  def todosPrecioXls(anho: Int) = authenticatedUserAction.async { implicit request =>
       val empr_id = Utility.extraerEmpresa(request)
-      val os = elementoService.todosPrecioXls(empr_id.get)
+      val os = elementoService.todosPrecioXls(empr_id.get, anho)
       val _fecha = Calendar.getInstance().getTimeInMillis()
       val fmt = DateTimeFormat.forPattern("yyyyMMdd")
       val filename = "Informe_Material_Precio" + fmt.print(_fecha) +".xlsx"
       val attach = "attachment; filename=" + filename
-      val bos = new BufferedOutputStream(new FileOutputStream("/opt/tmp/" + filename))
-          bos.write(os)
-          bos.close()
       Future.successful(Ok(os)
         .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         .withHeaders("Content-Disposition" -> attach)

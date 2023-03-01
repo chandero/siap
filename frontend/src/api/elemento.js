@@ -131,9 +131,9 @@ export function todosXls () {
   })
 }
 
-export function todosPrecioXls () {
+export function todosPrecioXls (anho) {
   return request({
-    url: '/elem/mat/xlsp',
+    url: `/elem/mat/xlsp/${anho}`,
     method: 'get',
     responseType: 'blob'
   })
