@@ -1325,7 +1325,6 @@
                             reporte.direcciones[didx].even_estado === 3 ||
                             reporte.direcciones[didx].even_estado > 7
                           "
-                          autofocus
                           :ref="'aap_id_' + didx"
                           type="number"
                           class="sinpadding"
@@ -2901,6 +2900,7 @@ export default {
         this.aap.aap_id = value
         getAapValidar(value)
           .then((response) => {
+            console.log('Reporte: Llegue en Ok')
             var result = response.data._1
             var reports = response.data._2
             this.luminaria_reportes.set(value, { status: result, reports: reports })
@@ -2941,24 +2941,29 @@ export default {
               }
             } else if (result === 204) {
               if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
-                const l_fecha_reporte_retiro = reports[this.reportIndex(reports, 8)]._2
-                console.log('fecha solucion:', this.reporte.repo_fechasolucion)
-                if (this.reporte.repo_fechasolucion === undefined || this.reporte.repo_fechasolucion.is_null) {
-                  this.$alert('Por favor ingrese la fecha de solución', 'Atención', {
-                    callback: action => { this.$refs.i_repo_fechasolucion.focus() }
-                  })
-                  callback(new Error('Por favor ingrese la fecha de solución'))
-                }
-                const d_fecha_reporte = new Date(this.reporte.repo_fechasolucion)
-                const d_now = new Date()
-                d_fecha_reporte.setHours(d_now.getHours())
-                d_fecha_reporte.setMinutes(d_now.getMinutes())
-                d_fecha_reporte.setSeconds(d_now.getSeconds())
-                if (d_fecha_reporte.getTime() < l_fecha_reporte_retiro) {
-                  this.$alert('La fecha de solución de la reubicación es previa a la fecha del reporte de retiro. Por favor verifique la fecha de solución', 'Atención', {
-                    callback: action => { this.$refs.i_repo_fechasolucion.focus() }
-                  })
-                  callback(new Error('Por favor revise la fecha de solución'))
+                const reporte_retiro = reports[this.reportIndex(reports, 8)]
+                if (reporte_retiro) {
+                  const l_fecha_reporte_retiro = reporte_retiro._2
+                  console.log('fecha solucion:', this.reporte.repo_fechasolucion)
+                  if (this.reporte.repo_fechasolucion === undefined || this.reporte.repo_fechasolucion.is_null) {
+                    this.$alert('Por favor ingrese la fecha de solución', 'Atención', {
+                      callback: action => { this.$refs.i_repo_fechasolucion.focus() }
+                    })
+                    callback(new Error('Por favor ingrese la fecha de solución'))
+                  }
+                  const d_fecha_reporte = new Date(this.reporte.repo_fechasolucion)
+                  const d_now = new Date()
+                  d_fecha_reporte.setHours(d_now.getHours())
+                  d_fecha_reporte.setMinutes(d_now.getMinutes())
+                  d_fecha_reporte.setSeconds(d_now.getSeconds())
+                  if (d_fecha_reporte.getTime() < l_fecha_reporte_retiro) {
+                    this.$alert('La fecha de solución de la reubicación es previa a la fecha del reporte de retiro. Por favor verifique la fecha de solución', 'Atención', {
+                      callback: action => { this.$refs.i_repo_fechasolucion.focus() }
+                    })
+                    callback(new Error('Por favor revise la fecha de solución'))
+                  } else {
+                    callback()
+                  }
                 } else {
                   callback()
                 }
@@ -2978,7 +2983,8 @@ export default {
               }
             }
           })
-          .catch(() => {
+          .catch((err) => {
+            console.log('Reporte: Llegue en Error: ', err)
             this.existe = false
             callback(new Error('Error consultando código'))
           })
