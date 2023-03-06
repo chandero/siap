@@ -12356,7 +12356,7 @@ class Cobro6Repository @Inject()(
             'acre_id -> acre_id,
             'cotr_id -> _m._1,
             'elem_id -> _m._2,
-            'cantidad -> _m._3,
+            'cantidad -> _m._4,
             'valor -> _m._4
           ).executeUpdate()
         }

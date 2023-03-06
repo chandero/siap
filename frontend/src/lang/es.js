@@ -55,6 +55,13 @@ export default {
   buscar: {
     pormaterial: 'Busqueda por Código de Material'
   },
+  acre: {
+    tabletitle: 'Acta de Redimensionamiento',
+    acre_numero: 'Número',
+    acre_fecha: 'Fecha',
+    acre_anho: 'Año',
+    acre_periodo: 'Periodo'
+  },
   cotr: {
     anho: 'Año',
     mes: 'Periodo',

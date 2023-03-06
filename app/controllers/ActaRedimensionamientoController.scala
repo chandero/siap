@@ -6,6 +6,7 @@ import models._
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.Configuration
+import play.api.Environment
 import play.filters.csrf._
 import play.filters.csrf.CSRF.Token
 
@@ -24,17 +25,22 @@ import pdi.jwt.JwtSession
 
 import models.ActaRedimensionamientoRepository
 
+import java.util.Calendar
+import com.hhandoko.play.pdf.PdfGenerator
+
 import utilities._
 
 import dto.QueryDto
 import dto.ResultDto
+import dto.ActaRedimensionamientoDto
 
 @Singleton
 class ActaRedimensionamientoController @Inject()(
     aService: ActaRedimensionamientoRepository,
     config: Configuration,
     authenticatedUserAction: AuthenticatedUserAction,
-    cc: ControllerComponents
+    cc: ControllerComponents,
+    env: Environment
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc)
     with ImplicitJsonFormats {
@@ -42,7 +48,12 @@ class ActaRedimensionamientoController @Inject()(
     DateTimeSerializer
   )
 
-        def getActasRedimensionamiento = authenticatedUserAction.async {
+  val FONTS_DEFINITION_PATH = System.getProperty("user.dir") + "/conf/fonts/"
+  val opensans_regular = FONTS_DEFINITION_PATH + "arial.ttf"
+  val pdfGen = new PdfGenerator(env, true)
+  pdfGen.loadLocalFonts(Seq(opensans_regular))
+
+    def getActasRedimensionamiento = authenticatedUserAction.async {
             implicit request: Request[AnyContent] =>
                 val json = request.body.asJson.get
                 val page_size = (json \ "page_size").as[Long]
@@ -63,4 +74,59 @@ class ActaRedimensionamientoController @Inject()(
                     }
         }
 
+    def getActaRedimensionamiento(anho:Int, periodo:Int) = authenticatedUserAction.async { implicit request =>
+      val formatter = java.text.NumberFormat.getIntegerInstance
+      val empr_id = Utility.extraerEmpresa(request)
+      val usua_id = Utility.extraerUsuario(request)
+      val (_numero_acta, _valor_acumulado_anterior, _subtotal_expansion, _subtotal_modernizacion, _subtotal_desmonte, _subtotal_total) = aService.getActaRedimensionamiento(empr_id.get , anho, periodo, usua_id.get)
+      val _periodo = Calendar.getInstance()
+      _periodo.set(Calendar.YEAR, anho)
+      _periodo.set(Calendar.MONTH, periodo - 1)
+      _periodo.set(Calendar.DAY_OF_MONTH, 1)
+      _periodo.set(Calendar.DATE, _periodo.getActualMaximum(Calendar.DATE))
+      val filename = "Acta_Redimensionamiento_" + _numero_acta + "_" + anho + "_" + periodo + ".pdf"
+      var _fecha_corte = _periodo.clone().asInstanceOf[Calendar]
+      // _fecha_corte.add(Calendar.MONTH, -1)
+      var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
+      _fecha_corte_anterior.add(Calendar.MONTH, -1)
+      var _fecha_acta = _fecha_corte.clone().asInstanceOf[Calendar]
+      _fecha_acta.add(Calendar.MONTH, 1)
+      _fecha_acta.set(Calendar.DATE, 1)
+      val _fecha_firma = HolidayUtil.getNextBusinessDay(_fecha_acta.getTime(), 7)
+      val _total_anterior = _valor_acumulado_anterior
+      val acta = new ActaRedimensionamientoDto(
+        _numero_acta,
+        Utility.fechaamesanho(Some(new DateTime(_fecha_acta.getTime()))),
+        Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
+        Utility.fechaatextosindia(Some(new DateTime(_fecha_corte_anterior.getTime()))),
+        Utility.fechaamesanho(Some(new DateTime(_fecha_corte.getTime()))),
+        Utility.fechaatextofirma(Some(new DateTime(_fecha_firma))),
+        "$" + formatter.format(_subtotal_total),
+        "$" + formatter.format(_total_anterior + _subtotal_total),
+        "$" + formatter.format(_total_anterior),
+        "$" + formatter.format(_subtotal_expansion),
+        "$" + formatter.format(_subtotal_modernizacion),
+        "$" + formatter.format(_subtotal_desmonte),
+        "$" + formatter.format(_subtotal_total),
+        "$" + formatter.format(_total_anterior + _subtotal_total)
+        /*, _tablaData.toList */
+      )
+      Future.successful(pdfGen.ok(
+          views.html.siap_cobro_acta_redimensionamiento(acta),
+          "conf/fonts/Arial.ttf"      
+      ).withHeaders("Content-Disposition" -> s"attachment; filename=$filename"))
+    }
+    
+    def getAnexoRedimensionamiento(anho:Int, periodo:Int) = authenticatedUserAction.async { implicit request =>
+      val formatter = java.text.NumberFormat.getIntegerInstance
+      val empr_id = Utility.extraerEmpresa(request)
+      val usua_id = Utility.extraerUsuario(request)
+      val (_numero_acta, os) = aService.getAnexoRedimensionamiento(empr_id.get , anho, periodo, usua_id.get)
+      val filename = "Anexos_Acta_Redimensionamiento_" + _numero_acta + "_" + anho + "_" + periodo + ".xlsx"
+      val attach = "attachment; filename=" + filename
+      Future.successful(Ok(os)
+        .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        .withHeaders("Content-Disposition" -> attach)
+      )
+    }
 }

@@ -766,8 +766,10 @@ GET /api/cotr/chk/:r/:a/:m                            controllers.CobroControlle
 GET /api/cotr/csc/:r                            controllers.CobroController.siap_orden_trabajo_cobro_consecutivo(r:Long)
 GET /api/cotr/rel/:a/:p                         controllers.CobroController.siap_orden_trabajo_cobro_relacion(a:Int, p:Int)
 GET /api/cotr/rel2                         controllers.CobroController.siap_orden_trabajo_cobro_relacion_factura
-GET /api/cotr/acta/:a/:m                        controllers.CobroController.siap_orden_trabajo_cobro_acta_redimensionamiento(a:Int, m:Int)
-GET /api/cotr/acan/:a/:m                        controllers.CobroController.siap_orden_trabajo_cobro_anexo_redimensionamiento(a:Int, m:Int)
+# Acta Redimensionamiento
+POST /api/acre/all                             controllers.ActaRedimensionamientoController.getActasRedimensionamiento
+GET /api/acre/acta/:a/:m                        controllers.ActaRedimensionamientoController.getActaRedimensionamiento(a:Int, m:Int)
+GET /api/acre/acan/:a/:m                        controllers.ActaRedimensionamientoController.getAnexoRedimensionamiento(a:Int, m:Int)
 
 # Cobro Factura
 POST /api/cofa/all                      controllers.CobroFacturaController.todos
