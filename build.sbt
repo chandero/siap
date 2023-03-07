@@ -59,7 +59,19 @@ libraryDependencies ++= Seq(
   
   //
   "net.codingwell" %% "scala-guice" % "4.2.11",
-  "commons-io" % "commons-io" % "2.4"
+  "commons-io" % "commons-io" % "2.4",
+  // Docx Files
+  "org.docx4j" % "docx4j-core" % "11.3.2",
+  "org.docx4j" % "docx4j-JAXB-ReferenceImpl" % "11.3.2",
+  "org.docx4j" % "docx4j-JAXB-MOXy" % "11.3.2",
+  "org.docx4j" % "docx4j-export-fo" % "11.3.2",
+  "org.docx4j" % "docx4j-conversion-via-microsoft-graph" % "11.3.2",
+  "org.plutext.graph-convert" % "graph-convert-base" % "1.0.3",
+  "org.plutext.graph-convert" % "using-graph-sdk" % "1.0.3",
+  "fr.opensagres.xdocreport" % "fr.opensagres.poi.xwpf.converter.pdf" % "2.0.3",  
+  "org.apache.poi" % "poi" % "5.2.0",
+  "org.apache.poi" % "poi-ooxml" % "5.2.0",
+  "com.deepoove" % "poi-tl" % "1.12.0",
 )
 
 // Play framework hooks for development

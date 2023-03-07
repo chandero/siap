@@ -263,6 +263,26 @@ class ActaRedimensionamientoRepository @Inject()(
                   )
         ) */
       }
+      // Actualizar redimensionamiento control
+      db.withTransaction { implicit connection =>
+        val _actualizado = SQL("""UPDATE siap.redimensionamiento_control SET reco_valor = {valor} WHERE reco_anho = {anho} AND reco_periodo = {periodo} AND empr_id = {empr_id}""").
+        on(
+          'valor -> (_valor_acumulado_anterior + _subtotal_total),
+          'anho -> anho,
+          'periodo -> periodo,
+          'empr_id -> empr_id
+        ).executeUpdate() > 0
+
+        if (!_actualizado) {
+          SQL("""INSERT INTO siap.redimensionamiento_control(reco_valor, reco_anho, reco_periodo, empr_id) VALUES({valor}, {anho}, {periodo}, {empr_id})""").
+          on(
+            'valor -> (_valor_acumulado_anterior + _subtotal_total),
+            'anho -> anho,
+            'periodo -> periodo,
+            'empr_id -> empr_id
+          ).executeInsert()
+        }
+      }
       (
         _numero_acta,
         _valor_acumulado_anterior,

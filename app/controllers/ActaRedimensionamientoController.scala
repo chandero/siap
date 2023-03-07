@@ -26,6 +26,7 @@ import pdi.jwt.JwtSession
 import models.ActaRedimensionamientoRepository
 
 import java.util.Calendar
+import java.util.HashMap
 import com.hhandoko.play.pdf.PdfGenerator
 
 import utilities._
@@ -84,19 +85,21 @@ class ActaRedimensionamientoController @Inject()(
       _periodo.set(Calendar.MONTH, periodo - 1)
       _periodo.set(Calendar.DAY_OF_MONTH, 1)
       _periodo.set(Calendar.DATE, _periodo.getActualMaximum(Calendar.DATE))
-      val filename = "Acta_Redimensionamiento_" + _numero_acta + "_" + anho + "_" + periodo + ".pdf"
+      val filename = "Acta_Redimensionamiento_" + _numero_acta + "_" + anho + "_" + periodo + ".docx"
       var _fecha_corte = _periodo.clone().asInstanceOf[Calendar]
       // _fecha_corte.add(Calendar.MONTH, -1)
       var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
       _fecha_corte_anterior.add(Calendar.MONTH, -1)
+      val _lastday = _fecha_corte_anterior.getActualMaximum(Calendar.DAY_OF_MONTH)
+      _fecha_corte_anterior.set(Calendar.DAY_OF_MONTH, _lastday)
       var _fecha_acta = _fecha_corte.clone().asInstanceOf[Calendar]
       _fecha_acta.add(Calendar.MONTH, 1)
       _fecha_acta.set(Calendar.DATE, 1)
       val _fecha_firma = HolidayUtil.getNextBusinessDay(_fecha_acta.getTime(), 7)
       val _total_anterior = _valor_acumulado_anterior
       val acta = new ActaRedimensionamientoDto(
-        _numero_acta,
-        Utility.fechaamesanho(Some(new DateTime(_fecha_acta.getTime()))),
+        "%05d".format(_numero_acta),
+        Utility.fechaamesanho(Some(new DateTime(_fecha_corte.getTime()))),
         Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
         Utility.fechaatextosindia(Some(new DateTime(_fecha_corte_anterior.getTime()))),
         Utility.fechaamesanho(Some(new DateTime(_fecha_corte.getTime()))),
@@ -111,10 +114,31 @@ class ActaRedimensionamientoController @Inject()(
         "$" + formatter.format(_total_anterior + _subtotal_total)
         /*, _tablaData.toList */
       )
-      Future.successful(pdfGen.ok(
-          views.html.siap_cobro_acta_redimensionamiento(acta),
-          "conf/fonts/Arial.ttf"      
-      ).withHeaders("Content-Disposition" -> s"attachment; filename=$filename"))
+
+        var template_data: HashMap[String, Object] =
+          new HashMap[String, Object]()
+        template_data.put("ACTA_NUMERO", acta.numero)
+        template_data.put("PERIODO", acta.periodo)
+        template_data.put("PERIODO_CON_DE", acta.periodo_corte)
+        template_data.put("PERIODO_ANTERIOR_LETRAS", acta.fecha_corte_anterior)
+        template_data.put("PERIODO_ANTERIOR_CON_DE", acta.periodo_corte)
+        template_data.put("VALOR_ACUMULADO_ANTERIOR", acta.valor_acumulado_anterior)
+        template_data.put("PERIODO_LETRAS", acta.fecha_corte)
+        template_data.put("VALOR_ACUMULADO", acta.valor_acumulado)
+        template_data.put("FECHA_FIRMA", acta.fecha_firma)
+
+        val os = DocxGenerator.generateDocxFileFromTemplate2(
+          "siap_0101_template_acta_redimensionamiento.dotx",
+          template_data
+        )
+        val attach = "attachment; filename=" + filename
+        Future.successful(
+          Ok(os)
+            .as(
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+            .withHeaders("Content-Disposition" -> attach)
+        )
     }
     
     def getAnexoRedimensionamiento(anho:Int, periodo:Int) = authenticatedUserAction.async { implicit request =>

@@ -30,7 +30,8 @@ export function acreAnexo(anho, periodo) {
 export function acreCrear(anho, periodo) {
   return request({
     url: `/acre/acta/${anho}/${periodo}`,
-    method: 'get'
+    method: 'get',
+    responseType: 'blob'
   })
 }
 

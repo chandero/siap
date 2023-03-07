@@ -39,13 +39,14 @@ class ReporteFotoDS(listData: List[(Int, String, Int, Int, Int, String, Int, Str
           case "barr_descripcion" => new java.lang.String(listData(i)._6)
           case "refo_id" => new java.lang.Integer(listData(i)._7)
           case "refo_data" => listData(i)._8.trim() match {
+            case v if (v.isBlank || v.isEmpty()) => new java.lang.String("/opt/siap/fotos/empty.jpg")
             case v => println("validando v: " + v)
                       if (v.isBlank() || v.isEmpty()) {
                         new java.lang.String("/opt/siap/fotos/empty.jpg")  
                       } else {
                         new java.lang.String("/opt/siap/fotos/" + v)
                       }
-            case _ => new java.lang.String("/opt/siap/fotos/empty.jpg")
+            
           }
           case "repo_fechasolucion" => dateFormat.format(listData(i)._9)
           case _ => None
@@ -53,4 +54,5 @@ class ReporteFotoDS(listData: List[(Int, String, Int, Int, Int, String, Int, Str
         println("Retornando: " + retorno)
         retorno
       }
+
 }

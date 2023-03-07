@@ -35,7 +35,7 @@
             <el-table-column align="right" width="90">
               <template slot-scope="scope">
                 <el-button size="mini" circle type="primary" @click="handlePrint(scope.row)"><i
-                    class="el-icon-printer"></i></el-button>
+                    class="el-icon-docx"></i></el-button>
                 <el-button size="mini" circle type="danger" @click="handleDelete(scope.$index, scope.row)"><i
                     class="el-icon-delete"></i></el-button>
               </template>
@@ -182,7 +182,7 @@ export default {
           window.navigator.msSaveBlob(blob, filename)
         } else {
           var downloadLink = window.document.createElement('a')
-          downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+          downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }))
           downloadLink.download = filename
           document.body.appendChild(downloadLink)
           downloadLink.click()
@@ -306,7 +306,7 @@ export default {
 }
 </script>
 
-<style rel="stylesheet/scss" lang="scss">
+<style rel="stylesheet/scss" lang="scss" scoped>
 .header {
   .el-header {
     .empresa_header {
@@ -321,5 +321,13 @@ td {
 
 span.el-pagination__total {
   font-size: 16px;
+}
+
+.el-icon-docx {
+  background-image: url('~@/assets/icons8-docx-64.png')
+}
+
+.el-icon-xlsx {
+  background-image: url('~@/assets/icons8-xlsx-64.png')
 }
 </style>
