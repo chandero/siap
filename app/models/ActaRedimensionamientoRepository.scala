@@ -375,7 +375,7 @@ class ActaRedimensionamientoRepository @Inject()(
         var _idx0 = 0
         _listRow02 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "ANEXO 02 - ACTA DE REDIMENSIONAMIENTO No." + _numero_acta,
+            "ANEXO 02 - ACTA DE REDIMENSIONAMIENTO No." + "%02d-%03d".format(anho - 2000, _numero_acta),
             Some(0),
             style = Some(
                       CellStyle(
@@ -968,7 +968,7 @@ class ActaRedimensionamientoRepository @Inject()(
         var _idx = -1
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "ANEXO 01 - ACTA DE REDIMENSIONAMIENTO No." + _numero_acta,
+            "ANEXO 01 - ACTA DE REDIMENSIONAMIENTO No." + "%02d-%03d".format(anho - 2000, _numero_acta),
             Some(0),
             style = Some(
                       CellStyle(

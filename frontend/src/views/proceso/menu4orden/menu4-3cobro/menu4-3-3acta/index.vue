@@ -34,11 +34,11 @@
             </el-table-column>
             <el-table-column align="right" width="90">
               <template slot-scope="scope">
-                <el-button size="mini" circle type="primary" @click="handlePrint(scope.row)"><i
-                    class="el-icon-docx"></i></el-button>
-                <el-button size="mini" circle type="danger" @click="handleDelete(scope.$index, scope.row)"><i
-                    class="el-icon-delete"></i></el-button>
-              </template>
+                <el-button size="mini" circle type="primary" title="Descargar" @click="handlePrint(scope.row)"><i
+                    class="el-icon-printer"></i></el-button>
+<!--                 <el-button size="mini" circle type="success" title="Reprocesar" @click="handleDelete(scope.$index, scope.row)"><i
+                    class="el-icon-refresh"></i></el-button>
+ -->              </template>
             </el-table-column>
           </el-table>
           <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :page-size="page_size"
@@ -87,7 +87,7 @@
 
 <script>
 import VueQueryBuilder from 'vue-query-builder'
-import { acreCrear, acreTodas, acreReprocesar } from '@/api/acta_redimensionamiento'
+import { acreCrear, acreAnexo, acreTodas, acreReprocesar } from '@/api/acta_redimensionamiento'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -161,7 +161,6 @@ export default {
       this.showActaRedimensionamientoDialog = true
     },
     handlePrint(row) {
-      console.log('handlePrint', row)
       const loading = this.$loading({
         lock: true,
         text: 'Generando Acta de Redimensionamiento...',
@@ -188,6 +187,25 @@ export default {
           downloadLink.click()
           document.body.removeChild(downloadLink)
         }
+        acreAnexo(row.acre_anho, row.acre_periodo).then(resp => {
+          var blob = resp.data
+          const filename = resp.headers['content-disposition'].split('filename=')[1]
+          if (window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveBlob(blob, filename)
+          } else {
+            var downloadLink = window.document.createElement('a')
+            downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+            downloadLink.download = filename
+            document.body.appendChild(downloadLink)
+            downloadLink.click()
+            document.body.removeChild(downloadLink)
+          }
+        }).catch(e => {
+          this.$message({
+            type: 'error',
+            message: 'No Fué Posible Crear el Anexo al Acta de Redimensionamiento...!' + e
+          })
+        })
       }).catch(e => {
         loading.close()
         this.showActaRedimensionamientoDialog = false
@@ -226,6 +244,25 @@ export default {
           downloadLink.click()
           document.body.removeChild(downloadLink)
         }
+        acreAnexo(this.acre.acre_anho, this.acre.acre_periodo).then(resp => {
+          var blob = resp.data
+          const filename = resp.headers['content-disposition'].split('filename=')[1]
+          if (window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveBlob(blob, filename)
+          } else {
+            var downloadLink = window.document.createElement('a')
+            downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+            downloadLink.download = filename
+            document.body.appendChild(downloadLink)
+            downloadLink.click()
+            document.body.removeChild(downloadLink)
+          }
+        }).catch(e => {
+          this.$message({
+            type: 'error',
+            message: 'No Fué Posible Crear el Anexo al Acta de Redimensionamiento...!' + e
+          })
+        })
       }).catch(e => {
         loading.close()
         this.showActaRedimensionamientoDialog = false
@@ -264,7 +301,6 @@ export default {
           message: this.$i18n.t('general.deletecancelled')
         })
       })
-      console.log(index, row)
     },
     handleSizeChange(val) {
       this.page_size = val

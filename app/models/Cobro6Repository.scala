@@ -11659,11 +11659,11 @@ class Cobro6Repository @Inject()(
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               FormulaCell(
-                "C" + (_idx0 + 1) + "*D" +(_idx0 + 1) + "/E" + (_idx0 + 1),
+                "ROUND(C" + (_idx0 + 1) + "*D" +(_idx0 + 1) + "/E" + (_idx0 + 1) +",0)",
                 Some(5),
                 style = Some(
                           CellStyle(
-                            dataFormat = CellDataFormat("#,##0.00"),
+                            dataFormat = CellDataFormat("#,##0"),
                             borders = CellBorders(
                               topStyle = CellBorderStyle.Thin,
                               topColor = Color.Black,
@@ -11679,11 +11679,11 @@ class Cobro6Repository @Inject()(
                 CellStyleInheritance.CellThenRowThenColumnThenSheet
               ),
               FormulaCell(
-                "B" + (_idx0 + 1) + "*F" +(_idx0 + 1),
+                "ROUND(B" + (_idx0 + 1) + "*F" +(_idx0 + 1)+",0)",
                 Some(6),
                 style = Some(
                           CellStyle(
-                            dataFormat = CellDataFormat("#,##0.00"),
+                            dataFormat = CellDataFormat("#,##0"),
                             borders = CellBorders(
                               topStyle = CellBorderStyle.Thin,
                               topColor = Color.Black,
@@ -11828,11 +11828,11 @@ class Cobro6Repository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             FormulaCell(
-              "SUM(G"+ (_idx01) +":G" + (_idx0) + ")",
+              "ROUND(SUM(G"+ (_idx01) +":G" + (_idx0) + "),0)",
               Some(6),
               style = Some(
                         CellStyle(
-                          dataFormat = CellDataFormat("#,##0.00"),
+                          dataFormat = CellDataFormat("#,##0"),
                           font = Font(bold = true, height = 10.points),
                           borders = CellBorders(
                             topStyle = CellBorderStyle.Thin,
@@ -12335,7 +12335,7 @@ class Cobro6Repository @Inject()(
                               case Some(a) => a - 1
                               case None => Calendar.getInstance().get(Calendar.YEAR) - 1
       }
-      val _material = SQL("""select cotr1.cotr_id, re1.elem_id, er1.elre_descripcion as elem_descripcion , re1.even_cantidad_retirado as cantidad, uiv.ucap_ipp_valor_valor as valor from siap.cobro_orden_trabajo cot1
+/*       val _material = SQL("""select cotr1.cotr_id, re1.elem_id, er1.elre_descripcion as elem_descripcion , re1.even_cantidad_retirado as cantidad, uiv.ucap_ipp_valor_valor as valor from siap.cobro_orden_trabajo cot1
                               inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
                               inner join siap.reporte_evento re1 on re1.repo_id = cotr1.repo_id and re1.aap_id = cotr1.aap_id and re1.even_estado < 8 and re1.even_cantidad_retirado > 0
                               inner join siap.elemento_redimensionamiento er1 on er1.elem_id = re1.elem_id
@@ -12345,7 +12345,18 @@ class Cobro6Repository @Inject()(
                               .on(
                                 'cotr_id -> orden.cotr_id,
                                 'anho_anterior -> _anho_anterior
-                              ).as(_parseMaterial *)
+                              ).as(_parseMaterial *) */
+        val _material = SQL("""select cotr1.cotr_id, re1.elem_id, er1.elre_descripcion as elem_descripcion , re1.even_cantidad_retirado as cantidad, ep1.elpr_precio as valor from siap.cobro_orden_trabajo cot1
+                              inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
+                              inner join siap.reporte_evento re1 on re1.repo_id = cotr1.repo_id and re1.aap_id = cotr1.aap_id and re1.even_estado < 8 and re1.even_cantidad_retirado > 0
+                              inner join siap.elemento_redimensionamiento er1 on er1.elem_id = re1.elem_id
+                              inner join siap.elemento_precio ep1 on ep1.elem_id = er1.elem_id and ep1.elpr_anho = {anho_anterior}
+                              where cot1.cotr_id = {cotr_id}
+                              order by 1,2""")
+                              .on(
+                                'cotr_id -> orden.cotr_id,
+                                'anho_anterior -> _anho_anterior
+                              ).as(_parseMaterial *)                              
       var _desmonte = 0.0
       _material.map { _m =>
         _desmonte += _m._4 * _m._5

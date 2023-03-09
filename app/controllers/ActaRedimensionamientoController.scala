@@ -98,7 +98,7 @@ class ActaRedimensionamientoController @Inject()(
       val _fecha_firma = HolidayUtil.getNextBusinessDay(_fecha_acta.getTime(), 7)
       val _total_anterior = _valor_acumulado_anterior
       val acta = new ActaRedimensionamientoDto(
-        "%05d".format(_numero_acta),
+        "%02d-%03d".format(_fecha_acta.get(Calendar.YEAR) - 2000, _numero_acta),
         Utility.fechaamesanho(Some(new DateTime(_fecha_corte.getTime()))),
         Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
         Utility.fechaatextosindia(Some(new DateTime(_fecha_corte_anterior.getTime()))),
