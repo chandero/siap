@@ -137,7 +137,38 @@
                 </el-form-item>
               </el-col>
               <el-col
-                v-if="reporte.adicional.repo_tipo_expansion === 5"
+                v-if="reporte.reti_id === 6"
+                :xs="24"
+                :sm="24"
+                :md="4"
+                :lg="4"
+                :xl="4"
+              >
+                <el-form-item
+                  prop="adicional.repo_tipo_expansion"
+                  :label="$t('reporte.tipo_modernizacion.title')"
+                >
+                  <el-select
+                    :disabled="reporte.rees_id == 3"
+                    clearable
+                    :title="$t('reporte.tipo_modernizacion.select')"
+                    style="width: 80%"
+                    v-model="reporte.adicional.repo_tipo_expansion"
+                    name="tipo_modernizacion"
+                    :placeholder="$t('reporte.tipo_modernizacion.select')"
+                    @change="validarModernizacion()"
+                  >
+                    <el-option
+                      v-for="te in tipos_modernizacion"
+                      :key="te.timo_id"
+                      :label="te.timo_descripcion"
+                      :value="te.timo_id"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col
+                v-if="reporte.reti_id === 2 && reporte.adicional.repo_tipo_expansion === 5"
                 :xs="24"
                 :sm="24"
                 :md="5"
@@ -2916,7 +2947,7 @@ export default {
               this.existe = false
               callback(new Error('Dada de Baja'))
             } else if (result === 200) {
-              if (this.reporte.reti_id === 3) {
+              if (this.reporte.reti_id === 3 || (this.reporte.reti_id === 6 && this.reporte.adicional.repo_tipo_expansion > 1)) {
                 callback(new Error('No Retirada'))
               } else if (this.reporte.reti_id === 2) {
                 this.existe = true
@@ -2940,7 +2971,7 @@ export default {
                 callback()
               }
             } else if (result === 204) {
-              if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7) {
+              if (this.reporte.reti_id === 3 || this.reporte.reti_id === 7 || (this.reporte.reti_id === 6 && this.reporte.adicional.repo_tipo_expansion > 1)) {
                 const reporte_retiro = reports[this.reportIndex(reports, 8)]
                 if (reporte_retiro) {
                   const l_fecha_reporte_retiro = reporte_retiro._2
@@ -3543,6 +3574,26 @@ export default {
       didx: 0,
       eidx: 0,
       idx: 1,
+      tipos_modernizacion: [
+        {
+          timo_id: 1,
+          timo_descripcion: 'NORMAL',
+          timo_esreubicacion: false,
+          timo_esreposicion: false
+        },
+        {
+          timo_id: 2,
+          timo_descripcion: 'REUBICACIÓN',
+          timo_esreubicacion: true,
+          timo_esreposicion: false
+        },
+        {
+          timo_id: 3,
+          timo_descripcion: 'REPOSICIÓN',
+          timo_esreubicacion: false,
+          timo_esreposicion: true
+        }
+      ],
       tipos_expansion: [
         {
           tiex_id: 1,
@@ -3785,6 +3836,11 @@ export default {
       } else if (this.reporte.reti_id === 1) {
         this.rules.adicional.acti_id[0].required = true
         this.rules.adicional.repo_tipo_expansion[0].required = false
+      } else if (this.reporte.reti_id === 6) {
+        this.rules.adicional.repo_tipo_expansion[0].required = true
+        if (!this.reporte.adicional.repo_tipo_expansion) {
+          this.reporte.adicional.repo_tipo_expansion = 1
+        }
       } else {
         this.rules.adicional.acti_id[0].required = false
         this.rules.adicional.repo_tipo_expansion[0].required = false
@@ -3795,6 +3851,13 @@ export default {
         this.rules.adicional.urba_id[0].required = true
       } else {
         this.rules.adicional.urba_id[0].required = false
+      }
+    },
+    validarModernizacion () {
+      if (this.reporte.reti_id === 6 || this.reporte.reti_id === 2) {
+        this.rules.adicional.reporte_tipo_expansion.required = true
+      } else {
+        this.rules.adicional.reporte_tipo_expansion.required = true
       }
     },
     validarFecha (date) {
@@ -4072,7 +4135,9 @@ export default {
                     // validar si es reubicación y no es retirada
                     if (
                       this.reporte.reti_id === 3 ||
-                      this.reporte.reti_id === 7
+                      this.reporte.reti_id === 7 ||
+                      (this.reporte.reti_id === 6 &&
+                        this.reporte.adicional.repo_tipo_expansion > 1)
                     ) {
                       if (activo.aap.aaco_id !== 3) {
                         this.retiradoDialogVisible = true

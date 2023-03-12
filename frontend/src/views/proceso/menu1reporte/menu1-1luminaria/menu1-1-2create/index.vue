@@ -29,12 +29,20 @@
                                 </el-select>
                               </el-form-item>
                         </el-col>
+                        <el-col v-if="reporte.reti_id===6" :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+                              <el-form-item prop="adicional.repo_tipo_expansion" :label="$t('reporte.tipo_modernizacion.title')">
+                                <el-select clearable :title="$t('reporte.tipo_modernizacion.select')" style="width: 80%" ref="tipo" v-model="reporte.adicional.repo_tipo_expansion" name="tipo_modernizacion" :placeholder="$t('reporte.tipo_modernizacion.select')" @change="validarModernizacion()">
+                                    <el-option v-for="te in tipos_modernizacion" :key="te.timo_id" :label="te.timo_descripcion" :value="te.timo_id" >
+                                    </el-option>
+                                </el-select>
+                              </el-form-item>
+                        </el-col>
                         <el-col v-if="reporte.reti_id===2 || reporte.reti_id===9" :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
                           <el-form-item prop="muot_id" :label="$t('reporte.ot')">
                             <el-input type="number" style="font-size: 30px;" v-model="reporte.adicional.muot_id" @input="reporte.adicional.muot_id = parseInt($event)"></el-input>
                           </el-form-item>
                         </el-col>
-                        <el-col v-if="reporte.adicional.repo_tipo_expansion === 5" :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
+                        <el-col v-if="reporte.reti_id == 2 && reporte.adicional.repo_tipo_expansion === 5" :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
                               <el-form-item :label="$t('reporte.urba.title')" prop="adicional.urba_id">
                                 <el-select clearable :title="$t('reporte.urba.select')" style="width: 80%" ref="tipo" v-model="reporte.adicional.urba_id" name="urbanizadora" :placeholder="$t('reporte.urba.select')">
                                     <el-option v-for="u in urbanizadoras" :key="u.urba_id" :label="u.urba_descripcion" :value="u.urba_id" >
@@ -257,7 +265,7 @@ export default {
         ],
         adicional: {
           repo_tipo_expansion: [
-            { required: false, message: 'Debe Seleccionar el Tipo de Expansión', trigger: 'change' }
+            { required: false, message: 'Debe Seleccionar el Tipo', trigger: 'change' }
           ],
           muot_id: [
             { required: true, message: 'Debe digitar el número de Orden de Trabajo', trigger: 'blur' }
@@ -342,6 +350,26 @@ export default {
         acti_estado: 1,
         usua_id: 0
       },
+      tipos_modernizacion: [
+        {
+          timo_id: 1,
+          timo_descripcion: 'NORMAL',
+          timo_esreubicacion: false,
+          timo_esreposicion: false
+        },
+        {
+          timo_id: 2,
+          timo_descripcion: 'REUBICACIÓN',
+          timo_esreubicacion: true,
+          timo_esreposicion: false
+        },
+        {
+          timo_id: 3,
+          timo_descripcion: 'REPOSICIÓN',
+          timo_esreubicacion: false,
+          timo_esreposicion: true
+        }
+      ],
       tipos_expansion: [
         {
           tiex_id: 1,
@@ -403,16 +431,28 @@ export default {
       } else if (this.reporte.reti_id === 1) {
         this.rules.adicional.acti_id[0].required = true
         this.rules.adicional.repo_tipo_expansion[0].required = false
+      } else if (this.reporte.reti_id === 6) {
+        this.rules.adicional.repo_tipo_expansion[0].required = true
+        this.reporte.adicional.repo_tipo_expansion = 1
       } else {
         this.rules.adicional.acti_id[0].required = false
         this.rules.adicional.repo_tipo_expansion[0].required = false
       }
     },
     validarExpansion () {
-      if (this.reporte.adicional.repo_tipo_expansion === 5) {
-        this.rules.adicional.urba_id[0].required = true
+      if (this.reporte.reti_id === 2) {
+        if (this.reporte.adicional.repo_tipo_expansion === 5) {
+          this.rules.adicional.urba_id[0].required = true
+        } else {
+          this.rules.adicional.urba_id[0].required = false
+        }
+      }
+    },
+    validarModernizacion () {
+      if (this.reporte.reti_id === 6 || this.reporte.reti_id === 2) {
+        this.rules.adicional.repo_tipo_expansion.required = true
       } else {
-        this.rules.adicional.urba_id[0].required = false
+        this.rules.adicional.repo_tipo_expansion.required = true
       }
     },
     changeFocus (next) {

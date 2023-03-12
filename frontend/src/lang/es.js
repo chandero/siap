@@ -942,6 +942,10 @@ export default {
       title: 'Tipo de Expansión',
       select: 'Seleccione el Tipo de Expansión'
     },
+    tipo_modernizacion: {
+      title: 'Tipo de Modernización',
+      select: 'Seleccione el Tipo de Modernización'
+    },
     numero_luminarias: 'Cantidad de Luminarias',
     puntos: 'Total Puntos'
   },
@@ -976,6 +980,10 @@ export default {
     tipo_expansion: {
       title: 'Tipo de Expansión',
       select: 'Seleccione el Tipo de Expansión'
+    },
+    tipo_modernizacion: {
+      title: 'Tipo Modernización',
+      select: 'Seleccione el Tipo de Modernización'
     },
     duedate: {
       title: 'Fecha de los Reportes',
