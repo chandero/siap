@@ -497,7 +497,7 @@ class Cobro6Repository @Inject()(
       println("Lista Ordenes a cargar Material: " + _orden.map(x => x._1).mkString(","))
       // Procesar Material Por Cada Orden
       val _queryMaterial =
-        """select
+/*         """select
 	          cot1.cotr_id, e1.elem_id, e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, e1.elem_estado, re1.aap_id, sum(re1.even_cantidad_instalado) as even_cantidad
           from siap.cobro_orden_trabajo cot1
           inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
@@ -512,7 +512,35 @@ class Cobro6Repository @Inject()(
             		(1,2,3,4,5,6,7),
             		(1,2,3,4,5,6)
             	)
-            order by 2"""
+            order by 2""" */
+           """
+            select * from (select
+	              cot1.cotr_id, e1.elem_id, e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, e1.elem_estado, re1.aap_id, sum(re1.even_cantidad_instalado) as even_cantidad
+              from siap.cobro_orden_trabajo cot1
+              inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
+              inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
+              inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id  AND re1.even_cantidad_instalado > 0 AND re1.even_estado < 8
+              inner join siap.elemento e1 on e1.elem_id = re1.elem_id
+              left join siap.unitario u1 on u1.unit_id = re1.unit_id
+              left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
+              where cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id}
+              group by 
+             		1,2,3,4,5,6,7
+            union all 
+            select
+	              cot1.cotr_id, e1.elem_id, e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, e1.elem_estado, NULL, sum(re1.even_cantidad_instalado) as even_cantidad
+              from siap.cobro_orden_trabajo cot1
+              inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
+              inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id
+              inner join siap.reporte_evento re1 on re1.repo_id = r1.repo_id and re1.aap_id = cotr1.aap_id  AND re1.even_cantidad_instalado > 0 AND re1.even_estado < 8
+              inner join siap.elemento e1 on e1.elem_id = re1.elem_id
+              left join siap.unitario u1 on u1.unit_id = re1.unit_id
+              left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = extract(year from cot1.cotr_fecha)
+              where cot1.empr_id = {empr_id} and cot1.cotr_id = {cotr_id}
+              group by 
+            		  1,2,3,4,5,6
+            ) as o
+              order by o.elem_id, o.aap_id ASC"""            
       _orden.map { _o =>      
         println("Cargar Material Orden: " + _o._1)
         val _materiales = SQL(_queryMaterial)

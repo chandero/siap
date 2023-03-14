@@ -91,6 +91,7 @@ export default {
     update(usua_id, cuad_id, cuus_esresponsable) {
       if (usua_id === null) usua_id = 0
       if (cuad_id === null) cuad_id = 0
+      if (cuus_esresponsable === null) cuus_esresponsable = false
       actualizarUsuarioCuadrilla(usua_id, cuad_id, cuus_esresponsable).then(response => {
         this.$message({
           message: 'Información Actualizada al usuario',

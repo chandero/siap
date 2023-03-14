@@ -88,7 +88,7 @@ class CuadrillaUsuarioRepository @Inject()(dbapi: DBApi)(
         var count: Int = 0
         for (usua_id <- usuarios) {
           val result: Boolean = SQL(
-            "INSERT INTO siap.cuadrillausuario (cuad_id, usua_id) VALUES ({cuad_id},{usua_id}")
+            "INSERT INTO siap.cuadrilla_usuario (cuad_id, usua_id) VALUES ({cuad_id},{usua_id}")
             .on(
               'cuad_id -> cuad_id,
               'usua_id -> usua_id
@@ -124,7 +124,7 @@ class CuadrillaUsuarioRepository @Inject()(dbapi: DBApi)(
           SELECT cu1.cuad_id, u1.usua_id, cu1.cuus_esresponsable FROM siap.usuario u1
           LEFT JOIN siap.cuadrilla_usuario cu1 ON cu1.usua_id = u1.usua_id
           LEFT JOIN siap.usuario_empresa_perfil uep1 ON uep1.usua_id = u1.usua_id and uep1.empr_id = {empr_id}
-          WHERE uep1.empr_id = {empr_id} and uep1.perf_id = {perf_id}
+          WHERE uep1.empr_id = {empr_id} and u1.usua_activo is true
           ORDER BY u1.usua_nombre ASC
           """
         ).on(

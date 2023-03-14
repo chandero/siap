@@ -10578,7 +10578,96 @@ class ReporteRepository @Inject()(
                       case tireuc_id ~ repo_id ~ reti_id ~ reti_descripcion ~ repo_consecutivo ~ repo_fecharecepcion ~ repo_fechasolucion =>
                         (tireuc_id, repo_id, reti_id, reti_descripcion, repo_consecutivo, repo_fecharecepcion, repo_fechasolucion)
                     }
-      val _query = """
+      val _query = """select * from (
+select distinct
+  r1.tireuc_id,
+  r1.repo_id,
+  r1.reti_id,
+  rt1.reti_descripcion,
+  r1.repo_consecutivo,
+  r1.repo_fecharecepcion,
+  cast(r1.repo_fechasolucion as varchar)
+from siap.reporte r1
+left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id
+inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id  
+where r1.empr_id = {empr_id} and
+	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id <> 2 and r1.rees_id = 2 and
+	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and
+	(rdd1.aap_potencia = rdd1.aap_potencia_anterior or rdd1.aap_potencia_anterior is null) and
+	(rdd1.aap_tecnologia = rdd1.aap_tecnologia_anterior or rdd1.aap_tecnologia_anterior is null)	
+union all 
+select distinct
+  r1.tireuc_id,
+  r1.repo_id,
+  r1.reti_id,
+  rt1.reti_descripcion,
+  r1.repo_consecutivo,
+  r1.repo_fecharecepcion,
+  cast(r1.repo_fechasolucion as varchar)
+from siap.reporte r1
+inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
+inner join siap.reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
+left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
+left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
+left join siap.aap_conexion ac1 on ac1.aaco_id = rdd1.aaco_id_anterior
+left join siap.aap_conexion ac2 on ac2.aaco_id = rdd1.aaco_id
+left join siap.aap_cuentaap acu1 on acu1.aacu_id = rdda1.aacu_id_anterior 
+left join siap.aap_cuentaap acu2 on acu2.aacu_id = rdda1.aacu_id
+where r1.empr_id = {empr_id} and
+	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id = 2 and r1.rees_id = 2 and
+	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and
+	(rdd1.aaco_id = rdd1.aaco_id_anterior or rdd1.aaco_id_anterior is null) and
+	(rdd1.aap_tecnologia <> rdd1.aap_tecnologia_anterior or rdd1.aap_tecnologia_anterior is null) and
+	(rdd1.aap_potencia = rdd1.aap_potencia_anterior or rdd1.aap_potencia_anterior is null)
+union all
+select distinct
+  r1.tireuc_id,
+  r1.repo_id,
+  r1.reti_id,
+  rt1.reti_descripcion,
+  r1.repo_consecutivo,
+  r1.repo_fecharecepcion,
+  cast(r1.repo_fechasolucion as varchar)
+from siap.control_reporte r1
+inner join siap.control_reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+left join siap.control_reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
+left join siap.control_reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
+left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
+left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
+where r1.empr_id = {empr_id} and
+	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.rees_id = 2 and
+	((rd1.even_direccion = rd1.even_direccion_anterior or rd1.even_direccion_anterior is null or rd1.even_direccion_anterior = '') and
+	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null)
+	)
+union all 
+select distinct
+  r1.tireuc_id,
+  r1.repo_id,
+  r1.reti_id,
+  rt1.reti_descripcion,
+  r1.repo_consecutivo,
+  r1.repo_fecharecepcion,
+  cast(r1.repo_fechasolucion as varchar)
+from siap.transformador_reporte r1
+left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+inner join siap.transformador_reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+left join siap.transformador_reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
+left join siap.transformador_reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
+left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
+left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
+where r1.empr_id = {empr_id} and
+	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.rees_id = 2 and
+	((rd1.even_direccion = rd1.even_direccion_anterior or rd1.even_direccion_anterior is null or rd1.even_direccion_anterior = '') and
+	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null)
+	)
+) o
+order by o.reti_descripcion, o.repo_consecutivo
+      """
+        /* """
 select * from (
 select distinct 
   r1.tireuc_id,
@@ -10752,7 +10841,7 @@ where r1.empr_id = {empr_id} and
 	(rdda1.aap_lng = rdda1.aap_lng_anterior or rdda1.aap_lng_anterior = '' or rdda1.aap_lng_anterior is null)
 	)
 ) o
-order by o.reti_descripcion, o.repo_consecutivo"""
+order by o.reti_descripcion, o.repo_consecutivo""" */
 
         SQL(_query).
         on(
