@@ -26,7 +26,9 @@ libraryDependencies ++= Seq(
   jdbc,
   cacheApi,
   ws,
-  specs2 % Test,
+  "org.slf4j" % "log4j-over-slf4j" % "2.0.0-alpha7",
+  "org.slf4j" % "slf4j-simple" % "2.0.0-alpha7",  
+//  "com.typesafe" %% "jse" % "1.2.4" exclude("org.slf4j", "slf4j-simple"),
   "com.typesafe.play" %% "anorm" % "2.5.3",
   "org.postgresql" % "postgresql" % "42.2.2",
   "com.typesafe.play" %% "play-json" % "2.6.10",
@@ -59,7 +61,7 @@ libraryDependencies ++= Seq(
   
   //
   "net.codingwell" %% "scala-guice" % "4.2.11",
-  "commons-io" % "commons-io" % "2.4",
+  "commons-io" % "commons-io" % "2.11.0",
   // Docx Files
   "org.docx4j" % "docx4j-core" % "11.3.2",
   "org.docx4j" % "docx4j-JAXB-ReferenceImpl" % "11.3.2",
@@ -72,6 +74,9 @@ libraryDependencies ++= Seq(
   "org.apache.poi" % "poi" % "5.2.0",
   "org.apache.poi" % "poi-ooxml" % "5.2.0",
   "com.deepoove" % "poi-tl" % "1.12.0",
+  // "org.slf4j" % "slf4j-api" % "2.0.7",
+  // "org.slf4j" % "slf4j-simple" % "1.7.36",
+  // "ch.qos.logback" % "logback-classic" % "1.4.4",
 )
 
 // Play framework hooks for development
@@ -86,6 +91,8 @@ resolvers += ("Typesafe repository" at "https://repo.typesafe.com/typesafe/relea
 resolvers += ("Typesafe Releases" at "https://repo.typesafe.com/typesafe/releases/")
   .withAllowInsecureProtocol(true)
 */
+resolvers +=
+  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 resolvers += "Jasper" at "https://jaspersoft.artifactoryonline.com/jaspersoft/jr-ce-releases/"
 resolvers += "Jasper2" at "https://jaspersoft.jfrog.io/jaspersoft/jaspersoft-repo/"

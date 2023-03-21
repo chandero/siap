@@ -272,7 +272,9 @@ class TransformadorReporteRepository @Inject()(
             """SELECT * FROM siap.transformador_reporte_adicional 
                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
-               WHERE repo_id = {repo_id}"""
+               WHERE repo_id = {repo_id}
+               ORDER BY ot.ortr_fecha DESC
+				      LIMIT 1 """
           ).on(
               'repo_id -> r.repo_id,
               'tireuc_id -> r.tireuc_id
@@ -437,7 +439,9 @@ class TransformadorReporteRepository @Inject()(
             """SELECT * FROM siap.transformador_reporte_adicional 
                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
-               WHERE repo_id = {repo_id}"""
+               WHERE repo_id = {repo_id}
+               ORDER BY ot.ortr_fecha DESC
+               LIMIT 1"""
           ).on(
               'repo_id -> r.repo_id,
               'tireuc_id -> r.tireuc_id
@@ -615,7 +619,9 @@ class TransformadorReporteRepository @Inject()(
         """SELECT * FROM siap.transformador_reporte_adicional ra
                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
-           WHERE ra.repo_id = {repo_id}"""
+           WHERE ra.repo_id = {repo_id}
+           ORDER BY ot.ortr_fecha DESC
+           LIMIT 1"""
       ).on(
           'repo_id -> repo_id,
           'tireuc_id -> r.get.tireuc_id
@@ -783,7 +789,9 @@ class TransformadorReporteRepository @Inject()(
             """SELECT * FROM siap.transformador_reporte_adicional 
                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
-               WHERE repo_id = {repo_id}"""
+               WHERE repo_id = {repo_id}
+               ORDER BY ot.ortr_fecha DESC
+               LIMIT 1"""
           ).on(
               'repo_id -> r.repo_id,
               'tireuc_id -> r.tireuc_id
@@ -940,7 +948,9 @@ class TransformadorReporteRepository @Inject()(
             """SELECT * FROM siap.transformador_reporte_adicional 
                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
-               WHERE repo_id = {repo_id}"""
+               WHERE repo_id = {repo_id}
+               ORDER BY ot.ortr_fecha DESC
+               LIMIT 1"""
           ).on(
               'repo_id -> r.repo_id,
               'tireuc_id -> r.tireuc_id
@@ -1014,7 +1024,9 @@ class TransformadorReporteRepository @Inject()(
           """SELECT * FROM siap.transformador_reporte_adicional  ra
                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
                LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
-            WHERE ra.repo_id = {repo_id}"""
+            WHERE ra.repo_id = {repo_id}
+            ORDER BY ot.ortr_fecha DESC
+            LIMIT 1"""
         ).on(
             'repo_id -> r.repo_id,
             'tireuc_id -> r.tireuc_id

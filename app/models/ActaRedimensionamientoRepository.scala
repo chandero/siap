@@ -179,6 +179,7 @@ class ActaRedimensionamientoRepository @Inject()(
     _periodo.set(Calendar.DATE, _periodo.getActualMaximum(Calendar.DATE))
 
     var _fecha_corte = _periodo.clone().asInstanceOf[Calendar]
+    println("Acta Red Fecha Corte:" + _fecha_corte.getTime())
     var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
     _fecha_corte_anterior.add(Calendar.MONTH, -1)    
 
@@ -416,7 +417,7 @@ class ActaRedimensionamientoRepository @Inject()(
           if (orden.cotr_tipo_obra.get == 6) {
             _listRow02 += com.norbitltd.spoiwo.model.Row(
             StringCell(
-              "DESMONTE DE UCAPS MODERNIZADAS ODT ITF-" + orden.cotr_consecutivo.get,
+              "DESMONTE DE UCAPS MODERNIZADAS ODT ITAF-" + orden.cotr_consecutivo.get,
               Some(0),
               style = Some(
                         CellStyle(
@@ -1100,7 +1101,7 @@ class ActaRedimensionamientoRepository @Inject()(
         _idx += 1
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "Redimensionamiento de la Infraestructura de Alumbrado Público Desde el 1 de Enero de 2015 hasta el " + Utility.fechaatextosindia(Some(new DateTime(_fecha_corte_anterior.getTime()))),
+            "Redimensionamiento de la Infraestructura de Alumbrado Público Desde el 1 de Enero de 2015 hasta el " + Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
             Some(0),
             style = Some(
                       CellStyle(

@@ -258,6 +258,7 @@ export default {
       estados: [],
       tipos: [],
       origenes: [],
+      ordenestrabajo: [],
       qbquery: {},
       qbarrios: [{ label: this.$i18n.t('barrio.select'), value: '' }],
       qestados: [{ label: this.$i18n.t('obra.estado.select'), value: '' }],

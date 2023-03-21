@@ -60,6 +60,8 @@
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/plutext/graph-convert/using-graph-sdk/1.0.3/using-graph-sdk-1.0.3.jar",
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/fr/opensagres/xdocreport/fr.opensagres.poi.xwpf.converter.pdf/2.0.3/fr.opensagres.poi.xwpf.converter.pdf-2.0.3.jar",
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/com/deepoove/poi-tl/1.12.0/poi-tl-1.12.0.jar",
+            "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/slf4j/slf4j-api/1.8.0-beta4/slf4j-api-1.8.0-beta4.jar",
+            "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/slf4j/log4j-over-slf4j/1.7.22/log4j-over-slf4j-1.7.22.jar",
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.12/1.2.0/scala-xml_2.12-1.2.0.jar",
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/com/typesafe/play/play_2.12/2.8.2/play_2.12-2.8.2.jar",
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.jar",
@@ -136,7 +138,6 @@
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/apache/pdfbox/fontbox/2.0.24/fontbox-2.0.24.jar",
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/com/thoughtworks/qdox/qdox/1.12/qdox-1.12.jar",
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api/2.3.3/jakarta.xml.bind-api-2.3.3.jar",
-            "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/slf4j/slf4j-api/1.8.0-beta4/slf4j-api-1.8.0-beta4.jar",
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/glassfish/jaxb/jaxb-runtime/2.3.2/jaxb-runtime-2.3.2.jar",
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/eclipse/persistence/org.eclipse.persistence.moxy/2.7.4/org.eclipse.persistence.moxy-2.7.4.jar",
             "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/javax/mail/javax.mail-api/1.6.2/javax.mail-api-1.6.2.jar",
@@ -1080,6 +1081,40 @@
                             "name": "poi-tl",
                             "classifier": "sources",
                             "path": "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/com/deepoove/poi-tl/1.12.0/poi-tl-1.12.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.slf4j",
+                    "name": "slf4j-api",
+                    "version": "1.8.0-beta4",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "slf4j-api",
+                            "path": "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/slf4j/slf4j-api/1.8.0-beta4/slf4j-api-1.8.0-beta4.jar"
+                        },
+                        {
+                            "name": "slf4j-api",
+                            "classifier": "sources",
+                            "path": "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/slf4j/slf4j-api/1.8.0-beta4/slf4j-api-1.8.0-beta4-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.slf4j",
+                    "name": "log4j-over-slf4j",
+                    "version": "1.7.22",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "log4j-over-slf4j",
+                            "path": "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/slf4j/log4j-over-slf4j/1.7.22/log4j-over-slf4j-1.7.22.jar"
+                        },
+                        {
+                            "name": "log4j-over-slf4j",
+                            "classifier": "sources",
+                            "path": "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/slf4j/log4j-over-slf4j/1.7.22/log4j-over-slf4j-1.7.22-sources.jar"
                         }
                     ]
                 },
@@ -2357,23 +2392,6 @@
                             "name": "jakarta.xml.bind-api",
                             "classifier": "sources",
                             "path": "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api/2.3.3/jakarta.xml.bind-api-2.3.3-sources.jar"
-                        }
-                    ]
-                },
-                {
-                    "organization": "org.slf4j",
-                    "name": "slf4j-api",
-                    "version": "1.8.0-beta4",
-                    "configurations": "default",
-                    "artifacts": [
-                        {
-                            "name": "slf4j-api",
-                            "path": "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/slf4j/slf4j-api/1.8.0-beta4/slf4j-api-1.8.0-beta4.jar"
-                        },
-                        {
-                            "name": "slf4j-api",
-                            "classifier": "sources",
-                            "path": "/home/chandero/.cache/coursier/v1/https/repo1.maven.org/maven2/org/slf4j/slf4j-api/1.8.0-beta4/slf4j-api-1.8.0-beta4-sources.jar"
                         }
                     ]
                 },
