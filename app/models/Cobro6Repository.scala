@@ -12385,7 +12385,7 @@ class Cobro6Repository @Inject()(
                               inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
                               inner join siap.reporte_evento re1 on re1.repo_id = cotr1.repo_id and re1.aap_id = cotr1.aap_id and re1.even_estado < 8 and re1.even_cantidad_retirado > 0
                               inner join siap.elemento e1 on e1.elem_id = re1.elem_id and e1.tiel_id in (1,6,9)
-                              inner join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = {anho_anterior}
+                              left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = {anho_anterior}
                               where cot1.cotr_id = {cotr_id}
                               order by 1,2""")
                               .on(
@@ -12412,15 +12412,10 @@ class Cobro6Repository @Inject()(
       val _parseMaterialAnexo = str("elem_descripcion") ~ double("cantidad") ~ double("valor") map {
         case elem_descripcion ~ cantidad ~ valor => (elem_descripcion, cantidad, valor)
       }
-      val _listMaterial = SQL(/* """SELECT er1.elre_descripcion as elem_descripcion, SUM(ard1.acrede_cantidad) as cantidad, uiv.ucap_ipp_valor_valor as valor from siap.acta_redimensionamiento_detalle ard1
-                inner join siap.elemento_redimensionamiento er1 on er1.elem_id = ard1.elem_id
-                inner join siap.ucap_ipp_valor uiv on uiv.elem_id = er1.elem_id and uiv.ucap_ipp_valor_anho = {anho_anterior}
-                where ard1.cotr_id = {cotr_id}
-                group by 1,3
-                order by 1,2""" */
-                """SELECT e1.elem_descripcion as elem_descripcion, SUM(ard1.acrede_cantidad) as cantidad, uiv.ucap_ipp_valor_valor as valor from siap.acta_redimensionamiento_detalle ard1
+      val _listMaterial = SQL(
+                """SELECT e1.elem_descripcion as elem_descripcion, SUM(ard1.acrede_cantidad) as cantidad, ep1.elpr_precio as valor from siap.acta_redimensionamiento_detalle ard1
                 inner join siap.elemento e1 on e1.elem_id = ard1.elem_id and e1.tiel_id in (1,6,9)
-                inner join siap.ucap_ipp_valor uiv on uiv.elem_id = e1.elem_id and uiv.ucap_ipp_valor_anho = {anho_anterior}
+                left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = {anho_anterior}
                 where ard1.cotr_id = {cotr_id}
                 group by 1,3
                 order by 1,2""")

@@ -2574,7 +2574,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     left join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 9 and re1.even_estado <> 9 and r1.empr_id = {empr_id}
                     UNION ALL                    
-                    SELECT distinct ot.ortr_fecha, c.cuad_descripcion, e.elem_codigo, e.elem_descripcion,  CONCAT('OBRA', ' ', r.obra_nombre) as reti_descripcion, 
+                    SELECT distinct ot.ortr_fecha, c.cuad_descripcion, e.elem_codigo, e.elem_descripcion,  TRIM(CONCAT('OBRA', ' ', r.obra_nombre)) as reti_descripcion, 
                           r.obra_consecutivo as repo_consecutivo, 
                           r.obra_fechasolucion, 
                           t.even_codigo_retirado, t.even_cantidad_retirado, 

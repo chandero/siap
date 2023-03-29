@@ -11,7 +11,7 @@ import play.api.libs.functional.syntax._
 import play.api.db.DBApi
 
 import anorm._
-import anorm.SqlParser.{get, str, long, double}
+import anorm.SqlParser.{get, str, int, long, double}
 import anorm.JodaParameterMetaData._
 
 import scala.util.{Failure, Success}
@@ -195,7 +195,7 @@ object ElementoD {
   }
 }
 
-class ElementoRepository @Inject()(dbapi: DBApi)(
+class ElementoRepository @Inject()(dbapi: DBApi, gService: GeneralRepository)(
     implicit ec: DatabaseExecutionContext
 ) {
   private val db = dbapi.database("default")
@@ -1168,22 +1168,20 @@ from
     (select ep1.elpr_anho_anterior from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
     (select ep1.elpr_precio_anterior from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),        
         (select ep1.elpr_incremento from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
-        (select (ep1.elpr_precio_nuevo - ep1.elpr_precio_anterior) from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0) as elpr_diff,
+        (select (ep1.elpr_precio - ep1.elpr_precio_anterior) from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0) as elpr_diff,
         (select ep1.elpr_anho from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
 		(select ep1.elpr_fecha from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
 		(select ep1.elpr_precio_nuevo from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
         (select ep1.elpr_precio_cotizado from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
         (select ep1.elpr_precio from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
         u1.unit_codigo AS unit_codigo
-           FROM siap.reporte r1
-           INNER JOIN siap.reporte_evento re1 ON re1.repo_id = r1.repo_id
-           INNER JOIN siap.elemento e1 ON e1.elem_id = re1.elem_id
+           FROM siap.elemento e1
            LEFT join siap.elemento_precio elpr1 on elpr1.elem_id = e1.elem_id
            LEFT join siap.elemento_unitario eu1 ON eu1.elem_id = e1.elem_id
            LEFT join siap.unitario u1 ON u1.unit_id = eu1.unit_id
-           WHERE r1.reti_id IN (2,6) AND
+           WHERE 
                elpr1.elpr_anho = {anho} AND
-           		 r1.empr_id = {empr_id} AND
+           		 e1.empr_id = {empr_id} AND
            		 e1.elem_estado = 1
       ) as o
       """
@@ -1324,6 +1322,26 @@ from
   def todosPrecioXls(empr_id: Long, anho: Int): Array[Byte] = {
     var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
     var _listMerged01 = new ListBuffer[CellRange]()
+    val _usaIPC = db.withConnection {
+      implicit connection =>
+        val _parser =
+          int("usa_ipc") map {
+            case usa_ipc =>
+              (
+                usa_ipc
+              )
+          }
+        var query =
+          """SELECT 
+                     gene_numero as usa_ipc
+                     FROM siap.general WHERE gene_id = {gene_id}"""
+        SQL(
+          query
+        ).on(
+            'gene_id -> 10
+          )
+          .as(_parser.singleOpt).getOrElse(1) > 0
+    }
     val _fuenteNegrita = Font(
       height = 10.points,
       fontName = "Liberation Sans",
@@ -1342,8 +1360,8 @@ from
             "Descripcion",
             "Año Anterior",
             "Precio Anterior",
-            "IPC Año",
             "Incremento",
+            "Diferencia",
             "Precio Actual",
             "Precio Cotizado",
             "Precio Más Favorable",
@@ -1407,22 +1425,20 @@ from
         (select ep1.elpr_anho_anterior from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
         (select ep1.elpr_precio_anterior from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),        
         (select ep1.elpr_incremento from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
-        (select (ep1.elpr_precio_nuevo - ep1.elpr_precio_anterior) from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0) as elpr_diff,
+        (select (ep1.elpr_precio - ep1.elpr_precio_anterior) from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0) as elpr_diff,
         (select ep1.elpr_anho from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
 		(select ep1.elpr_fecha from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
 		(select ep1.elpr_precio_nuevo from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
         (select ep1.elpr_precio_cotizado from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
         (select ep1.elpr_precio from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
         u1.unit_codigo AS unit_codigo
-           FROM siap.reporte r1
-           INNER JOIN siap.reporte_evento re1 ON re1.repo_id = r1.repo_id
-           INNER JOIN siap.elemento e1 ON e1.elem_id = re1.elem_id
+           FROM siap.elemento e1
            LEFT join siap.elemento_precio elpr1 on elpr1.elem_id = e1.elem_id
            LEFT join siap.elemento_unitario eu1 ON eu1.elem_id = e1.elem_id
            LEFT join siap.unitario u1 ON u1.unit_id = eu1.unit_id
-           WHERE r1.reti_id IN (2,6) AND
+           WHERE 
                elpr1.elpr_anho = {anho} AND
-           		 r1.empr_id = {empr_id} AND
+           		 e1.empr_id = {empr_id} AND
            		 e1.elem_estado = 1
         ) as o
         group by 1,2,3,4,5,6,7,8,9,10,11,12"""

@@ -436,6 +436,7 @@ export default {
     'menu_informe_menu1consolidado_menu1-7aforo': 'Resumen Aforo',
     'menu_informe_menu1consolidado_menu1-8materialcuadrilla': 'Material Por Cuadrilla',
     'menu_informe_menu1consolidado_menu1-9reportesinfoto': 'Reportes Sin Foto',
+    'menu_informe_menu1consolidado_menu1-10materialusadoporreti': 'Material Utilizado por Tipo',
     menu_informe_menu2detallado: 'Detallado',
     'menu_informe_menu2detallado_menu2-1material': 'Material',
     'menu_informe_menu2detallado_menu2-2expansion': 'Expansión',
@@ -1395,6 +1396,7 @@ export default {
     srsot: 'Informe Reporte Sin Orden de Trabajo',
     srax: 'Informe Resumen Aforo',
     srf: 'Fotográfico',
+    srmupt: 'Material Utilizado por Tipo de Reporte',
     initialDate: 'Fecha Inicial',
     endDate: 'Fecha Final',
     dueDate: 'Fecha de Corte',
@@ -1525,7 +1527,9 @@ export default {
     repo_tipo_expansion: 'Tipo',
     siccmx: 'Consolidado de Material por Cuadrilla',
     srsf: 'Reportes Sin Registro Fotográfico',
-    fotos: 'Fotos'
+    fotos: 'Fotos',
+    processing: 'Procesando',
+    elem_unidad: 'Unidad'
   },
   grafica: {
     cantidad: 'Cantidad',

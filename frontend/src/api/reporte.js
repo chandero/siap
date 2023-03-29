@@ -402,3 +402,18 @@ export function cerrarReportes(lista) {
     data: lista
   })
 }
+
+export function siap_informe_material_usado_por_reti(fi, ff) {
+  return request({
+    url: '/repo/inmu/' + fi + '/' + ff,
+    method: 'get'
+  })
+}
+
+export function siap_informe_material_usado_por_reti_xlsx(fi, ff) {
+  return request({
+    url: '/repo/inmuxlsx/' + fi + '/' + ff,
+    method: 'get',
+    responseType: 'blob'
+  })
+}

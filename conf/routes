@@ -493,6 +493,8 @@ GET /api/repo/rsino/:fi/:ff controllers.ReporteController.reporteSinOrdenTrabajo
 GET /api/repo/grcd/:fi/:ff controllers.ReporteController.getReportesParaCierreDirecto(fi: Long, ff: Long)
 GET /api/repo/cr/:ti/:ri  controllers.ReporteController.cerrarReporte(ti: Long, ri: Long)
 POST /api/repo/crs  controllers.ReporteController.cerrarReportes
+GET /api/repo/inmu/:fi/:ff controllers.ReporteController.siap_informe_material_usado_por_reti(fi: Long, ff: Long)
+GET /api/repo/inmuxlsx/:fi/:ff controllers.ReporteController.siap_informe_material_usado_por_reti_xlsx(fi: Long, ff: Long)
 # ControlReporte
 
 POST /api/core/get controllers.ControlReporteController.todos

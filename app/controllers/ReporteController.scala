@@ -804,4 +804,27 @@ class ReporteController @Inject()(
       }
       Future.successful(Ok(write("true")))
   }
+
+  def siap_informe_material_usado_por_reti(fecha_inicial: scala.Long, fecha_final: scala.Long) = authenticatedUserAction.async { implicit request =>
+    val empr_id = Utility.extraerEmpresa(request)
+    val datos = reporteService.siap_informe_material_usado_por_reti(fecha_inicial, fecha_final, empr_id.get)
+    Future.successful(Ok(write(datos)))
+  }
+
+  def siap_informe_material_usado_por_reti_xlsx(fecha_inicial: scala.Long, fecha_final: scala.Long) =  authenticatedUserAction.async { implicit request =>
+    val empr_id = Utility.extraerEmpresa(request)
+    val usua_id = Utility.extraerUsuario(request)
+    val os = reporteService.siap_informe_material_usado_por_reti_xlsx(fecha_inicial, fecha_final, empr_id.get, usua_id.get)
+    val fi = new DateTime(fecha_inicial)
+    val ff = new DateTime(fecha_final)
+    val fmt = DateTimeFormat.forPattern("yyyyMMdd")
+    val filename = "Informe_Material_Usado_Periodo_" + fmt.print(fi) + "_al_" + fmt.print(ff) + ".xlsx"
+    val attach = "attachment; filename=" + filename
+    Future.successful(Ok(os)
+          .as(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          )
+          .withHeaders("Content-Disposition" -> attach))
+  }
+
 }

@@ -43,6 +43,7 @@ import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.DateTimeZone
+import org.joda.time.format.DateTimeFormat
 
 // Excel Export
 import com.norbitltd.spoiwo.model._
@@ -10876,5 +10877,105 @@ order by o.reti_descripcion, o.repo_consecutivo""" */
                   
       }
       result
+    }
+
+    def siap_informe_material_usado_por_reti(fecha_inicial: scala.Long, fecha_final: scala.Long, empr_id: scala.Long): List[(Option[String], Option[String], Option[String], Option[String], Option[Double])] = {
+      val resultSet = db.withConnection { implicit connection =>
+        val _parser = {
+          get[Option[String]]("reti_descripcion") ~
+          get[Option[String]]("elem_codigo") ~
+          get[Option[String]]("elem_descripcion") ~
+          get[Option[String]]("elem_unidad") ~
+          get[Option[Double]]("total") map {
+            case reti_descripcion ~ elem_codigo ~ elem_descripcion ~ elem_unidad ~ even_cantidad_instalado =>
+              (reti_descripcion, elem_codigo, elem_descripcion, elem_unidad, even_cantidad_instalado)
+          }
+        }
+        val _query = """select rt1.reti_descripcion, e1.elem_codigo, e1.elem_descripcion, e1.elem_unidad, SUM(re1.even_cantidad_instalado) as total
+                          from siap.reporte_evento re1
+                          inner join siap.reporte r1 on r1.repo_id = re1.repo_id
+                          inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+                          inner join siap.elemento e1 on e1.elem_id = re1.elem_id
+                        where r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and re1.even_estado < 8
+                        group by 1,2,3,4
+                        order by 1"""      
+        SQL(_query).
+        on(
+          "fecha_inicial" -> new DateTime(fecha_inicial),
+          "fecha_final" -> new DateTime(fecha_final),
+          "empr_id" -> empr_id
+        ).as(_parser *)
+      }
+      resultSet.toList
+    }
+
+    def siap_informe_material_usado_por_reti_xlsx(fecha_inicial: scala.Long, fecha_final: scala.Long, empr_id: scala.Long, usua_id: scala.Long) = {
+      val empresa = empresaService.buscarPorId(empr_id)
+      val usuario = usuarioService.buscarPorId(usua_id)
+      val _resultSet = siap_informe_material_usado_por_reti(fecha_inicial, fecha_final, empr_id)
+
+              var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+        var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
+        var _listMerged = new ListBuffer[CellRange]()  
+        val df = DateTimeFormat.forPattern("yyyy-MM-dd")
+        val dtf = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
+        val sheet = Sheet(
+          name = "Material Utilizado",
+          rows = {
+            _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(empresa match { case Some(e) => e.empr_descripcion case None => ""})
+            _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Material Utilizado en el Periodo " + df.print(fecha_inicial) + " al " + df.print(fecha_final))
+            _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Fecha de Generacion:" + dtf.print(DateTime.now()))
+            _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Usuario:", usuario match { case Some(u) => u.usua_nombre +" " + u.usua_apellido case None => ""})            
+            _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues("Tipo de Operación","Código Material","Descripción Material","Unidad","Cantidad Utilizada")
+            _resultSet.map {
+            i =>
+              _listRow += com.norbitltd.spoiwo.model
+                .Row()
+                .withCellValues(
+                  i._1 match { case Some(s) => s case None => "" },
+                  i._2 match { case Some(s) => s case None => "" },
+                  i._3 match { case Some(s) => s case None => "" },
+                  i._4 match { case Some(s) => s case None => "" },
+                  i._5 match { case Some(s) => s case None => 0.0 }
+                )
+          }
+          _listRow.toList
+        },
+        mergedRegions = {
+              _listMerged += CellRange((0, 0), (0, 4))
+              _listMerged += CellRange((1, 1), (0, 4))
+              _listMerged += CellRange((2, 2), (0, 4))
+              _listMerged += CellRange((3, 3), (0, 4))
+              _listMerged.toList
+            },
+        columns = {
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 0, width = new Width(30, WidthUnit.Character))
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 1, width = new Width(30, WidthUnit.Character))
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 2, width = new Width(40, WidthUnit.Character))
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 3, width = new Width(15, WidthUnit.Character))
+               _listColumn += com.norbitltd.spoiwo.model
+                .Column(index = 4, width = new Width(20, WidthUnit.Character))                
+              _listColumn.toList
+            }        
+      )
+      println("Escribiendo en el Stream")
+      var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+      Workbook(sheet).writeToOutputStream(os)
+      println("Stream Listo")
+      os.toByteArray
     }
 }

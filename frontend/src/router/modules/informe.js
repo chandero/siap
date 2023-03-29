@@ -28,6 +28,12 @@ const informeRouter = {
           meta: { title: 'menu_informe_menu1consolidado_menu1-1material', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
         },
         {
+          path: 'menu1-10materialusadoporreti',
+          component: () => import('@/views/informe/menu1consolidado/menu1-10materialusadoporreti'),
+          name: 'menu_informe_menu1consolidado_menu1-10materialusadoporreti',
+          meta: { title: 'menu_informe_menu1consolidado_menu1-10materialusadoporreti', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
+        },
+        {
           path: 'menu1-2portipo',
           component: () => import('@/views/informe/menu1consolidado/menu1-2portipo'),
           name: 'menu_informe_menu1consolidado_menu1-2portipo',
