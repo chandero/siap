@@ -12359,39 +12359,24 @@ class Cobro6Repository @Inject()(
       val _parseMaterial = int("cotr_id") ~ int("elem_id") ~ str("elem_descripcion") ~ double("cantidad") ~ double("valor") map {
         case cotr_id ~ elem_id ~ elem_descripcion ~ cantidad ~ valor => (cotr_id, elem_id, elem_descripcion, cantidad, valor)
       }
-      val _anho_anterior = orden.cotr_anho match {
+       val _anho_anterior = orden.cotr_anho match {
                               case Some(a) => a - 1
                               case None => Calendar.getInstance().get(Calendar.YEAR) - 1
       }
-/*       val _material = SQL("""select cotr1.cotr_id, re1.elem_id, er1.elre_descripcion as elem_descripcion , re1.even_cantidad_retirado as cantidad, uiv.ucap_ipp_valor_valor as valor from siap.cobro_orden_trabajo cot1
+       val _ipp2014 = SQL("""SELECT ucap_ipp_valor FROM siap.ucap_ipp WHERE ucap_ipp_anho = {anho}""").on('anho -> 2014).as(SqlParser.double("ucap_ipp_valor").single)
+       val _ippActual = SQL("""SELECT ucap_ipp_valor FROM siap.ucap_ipp WHERE ucap_ipp_anho = {anho}""").on('anho -> _anho_anterior).as(SqlParser.double("ucap_ipp_valor").single)
+       val _material = SQL("""select cotr1.cotr_id, re1.elem_id, e1.elem_descripcion as elem_descripcion , re1.even_cantidad_retirado as cantidad, (uiv.ucap_ipp_valor_valor * {ippActual}/{ipp2014}) as valor from siap.cobro_orden_trabajo cot1
                               inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
                               inner join siap.reporte_evento re1 on re1.repo_id = cotr1.repo_id and re1.aap_id = cotr1.aap_id and re1.even_estado < 8 and re1.even_cantidad_retirado > 0
-                              inner join siap.elemento_redimensionamiento er1 on er1.elem_id = re1.elem_id
-                              inner join siap.ucap_ipp_valor uiv on uiv.elem_id = er1.elem_id and uiv.ucap_ipp_valor_anho = {anho_anterior}
+                              inner join siap.elemento e1 on e1.elem_id = re1.elem_id and e1.tiel_id IN (1,6,9)
+                              inner join siap.ucap_ipp_valor uiv on uiv.elem_id = e1.elem_id and uiv.ucap_ipp_valor_anho = 2014
                               where cot1.cotr_id = {cotr_id}
                               order by 1,2""")
                               .on(
                                 'cotr_id -> orden.cotr_id,
-                                'anho_anterior -> _anho_anterior
-                              ).as(_parseMaterial *) */
-        val _material = SQL(/* """select cotr1.cotr_id, re1.elem_id, er1.elre_descripcion as elem_descripcion , re1.even_cantidad_retirado as cantidad, ep1.elpr_precio as valor from siap.cobro_orden_trabajo cot1
-                              inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                              inner join siap.reporte_evento re1 on re1.repo_id = cotr1.repo_id and re1.aap_id = cotr1.aap_id and re1.even_estado < 8 and re1.even_cantidad_retirado > 0
-                              inner join siap.elemento_redimensionamiento er1 on er1.elem_id = re1.elem_id
-                              inner join siap.elemento_precio ep1 on ep1.elem_id = er1.elem_id and ep1.elpr_anho = {anho_anterior}
-                              where cot1.cotr_id = {cotr_id}
-                              order by 1,2""" */
-                              """select cotr1.cotr_id, re1.elem_id, e1.elem_descripcion as elem_descripcion , re1.even_cantidad_retirado as cantidad, ep1.elpr_precio as valor from siap.cobro_orden_trabajo cot1
-                              inner join siap.cobro_orden_trabajo_reporte cotr1 on cotr1.cotr_id = cot1.cotr_id 
-                              inner join siap.reporte_evento re1 on re1.repo_id = cotr1.repo_id and re1.aap_id = cotr1.aap_id and re1.even_estado < 8 and re1.even_cantidad_retirado > 0
-                              inner join siap.elemento e1 on e1.elem_id = re1.elem_id and e1.tiel_id in (1,6,9)
-                              left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = {anho_anterior}
-                              where cot1.cotr_id = {cotr_id}
-                              order by 1,2""")
-                              .on(
-                                'cotr_id -> orden.cotr_id,
-                                'anho_anterior -> _anho_anterior
-                              ).as(_parseMaterial *)                              
+                                'ipp2014 -> _ipp2014,
+                                'ippActual -> _ippActual
+                              ).as(_parseMaterial *)                         
       var _desmonte = 0.0
       _material.map { _m =>
         _desmonte += _m._4 * _m._5
@@ -12413,15 +12398,16 @@ class Cobro6Repository @Inject()(
         case elem_descripcion ~ cantidad ~ valor => (elem_descripcion, cantidad, valor)
       }
       val _listMaterial = SQL(
-                """SELECT e1.elem_descripcion as elem_descripcion, SUM(ard1.acrede_cantidad) as cantidad, ep1.elpr_precio as valor from siap.acta_redimensionamiento_detalle ard1
+                """SELECT e1.elem_descripcion as elem_descripcion, SUM(ard1.acrede_cantidad) as cantidad, (uiv.ucap_ipp_valor_valor * {ippActual}/{ipp2014}) as valor from siap.acta_redimensionamiento_detalle ard1
                 inner join siap.elemento e1 on e1.elem_id = ard1.elem_id and e1.tiel_id in (1,6,9)
-                left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = {anho_anterior}
+                left join siap.ucap_ipp_valor uiv on uiv.elem_id = e1.elem_id and uiv.ucap_ipp_valor_anho = 2014
                 where ard1.cotr_id = {cotr_id}
                 group by 1,3
                 order by 1,2""")
                               .on(
                                 'cotr_id -> orden.cotr_id,
-                                'anho_anterior -> _anho_anterior
+                                'ipp2014 -> _ipp2014,
+                                'ippActual -> _ippActual
                               ).as(_parseMaterialAnexo *)
       //
       (_desmonte, _listMaterial)
