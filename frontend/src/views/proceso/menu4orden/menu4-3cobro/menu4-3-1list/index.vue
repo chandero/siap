@@ -360,7 +360,6 @@
     width="40%"
     destroy-on-close
     center
-    @closed="handleAnexoDialogClosed"
   >
     <el-container>
       <el-main>
@@ -678,7 +677,7 @@ export default {
       console.log('_idx: ', idx, ', row: ', JSON.stringify(orden))
       xls(orden.cotr_id, orden.cotr_tipo_obra).then(resp => {
         var blob = resp.data
-        const filename = 'Informe_Orden_Trabajo_ITAF_' + orden.cotr_consecutivo + '.xlsx'
+        const filename = resp.headers['content-disposition'].split('filename=')[1]
         if (window.navigator.msSaveOrOpenBlob) {
           window.navigator.msSaveBlob(blob, filename)
         } else {

@@ -699,7 +699,11 @@ class Cobro2Repository @Inject()(
     val _fechaConcesion = DateTime
       .parse(_fechaConcesionStr, DateTimeFormat.forPattern("yyyy-MM-dd"))
       .toLocalDate()
-
+    val _prefijo_interventoria = generalService
+      .buscarPorId(10, empresa.empr_id.get)
+      .get
+      .gene_valor
+      .get
     var _idx = 0
     Sheet(
       name = "Orden",
@@ -720,7 +724,7 @@ class Cobro2Repository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             StringCell(
-              "ORDEN DE TRABAJO No. ITAF-" + orden.cotr_consecutivo.get,
+              "ORDEN DE TRABAJO No. " + _prefijo_interventoria + "-" + orden.cotr_consecutivo.get,
               Some(1),
               style = Some(
                 CellStyle(
@@ -1671,7 +1675,11 @@ class Cobro2Repository @Inject()(
     val _fechaConcesion = DateTime
       .parse(_fechaConcesionStr, DateTimeFormat.forPattern("yyyy-MM-dd"))
       .toLocalDate()
-
+    val _prefijo_interventoria = generalService
+      .buscarPorId(10, empresa.empr_id.get)
+      .get
+      .gene_valor
+      .get
     val _fechaSolucion = db.withConnection { implicit connection =>
       SQL("""select r1.repo_fechasolucion from siap.cobro_orden_trabajo_reporte cotr1
            inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id 
@@ -1713,7 +1721,7 @@ class Cobro2Repository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             StringCell(
-              "ORDEN DE TRABAJO No. ITAF-" + orden.cotr_consecutivo.get,
+              "ORDEN DE TRABAJO No. " + _prefijo_interventoria + "-" + orden.cotr_consecutivo.get,
               Some(1),
               style = Some(
                 CellStyle(
@@ -2333,7 +2341,7 @@ class Cobro2Repository @Inject()(
     var _listRow02 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
     var _listMerged02 = new ListBuffer[com.norbitltd.spoiwo.model.CellRange]()
     var _idx = 0
-
+    val _prefijo_interventoria = generalService.buscarPorId(10, empresa.empr_id.get).get.gene_valor.get
     val _fuenteTitulo = Font(
       height = 10.points,
       fontName = "Liberation Sans",
@@ -2444,7 +2452,7 @@ class Cobro2Repository @Inject()(
         val header2 = com.norbitltd.spoiwo.model
           .Row(
             StringCell(
-              "ORDEN DE TRABAJO ITAF S.A.S No. " + "%06d".format(
+              "ORDEN DE TRABAJO " + _prefijo_interventoria + "-" + "%06d".format(
                 orden.cotr_consecutivo.get
               ) + " " + Utility
                 .mes(orden.cotr_fecha.get.getMonthOfYear)
@@ -14551,6 +14559,9 @@ class Cobro2Repository @Inject()(
       ]
   ): Sheet = {
     println("Procesando hoja 98 - Resumen Material")
+    var _firma01 = firmaService.buscarPorCodigo(6, empresa.empr_id.get)
+    var _firma02 = firmaService.buscarPorCodigo(7, empresa.empr_id.get)
+    val _prefijo_interventoria = generalService.buscarPorId(10, empresa.empr_id.get).get.gene_valor.get
     db.withConnection { implicit connection =>
       var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
       var _listMerged01 = new ListBuffer[CellRange]()
@@ -14629,7 +14640,7 @@ class Cobro2Repository @Inject()(
           _listRow01 += com.norbitltd.spoiwo.model
             .Row(
               StringCell(
-                "ORDEN DE TRABAJO No. ITAF-" + orden.cotr_consecutivo.get,
+                "ORDEN DE TRABAJO No. " + _prefijo_interventoria + "-" + orden.cotr_consecutivo.get,
                 Some(0),
                 style = Some(
                   CellStyle(
@@ -14876,7 +14887,7 @@ class Cobro2Repository @Inject()(
           _idx += 1
           _listRow01 += com.norbitltd.spoiwo.model.Row(
             StringCell(
-              "PEDRO PARRA CARREÑO",
+              _firma01.firm_nombre.getOrElse(""),
               Some(0),
               style = Some(
                 CellStyle(
@@ -14888,7 +14899,7 @@ class Cobro2Repository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             StringCell(
-              "ING. SALOMON IGLESIAS IGLESIAS",
+              _firma02.firm_nombre.getOrElse(""),
               Some(4),
               style = Some(
                 CellStyle(
@@ -14905,7 +14916,7 @@ class Cobro2Repository @Inject()(
           _idx += 1
           _listRow01 += com.norbitltd.spoiwo.model.Row(
             StringCell(
-              "Supervisor de Obra Isag",
+              _firma01.firm_titulo.getOrElse(""),
               Some(0),
               style = Some(
                 CellStyle(
@@ -14916,7 +14927,7 @@ class Cobro2Repository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             StringCell(
-              "Director Técnico de Interventoria ITAF",
+              _firma02.firm_titulo.getOrElse(""),
               Some(4),
               style = Some(
                 CellStyle(

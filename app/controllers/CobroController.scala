@@ -31,6 +31,7 @@ import com.hhandoko.play.pdf.PdfGenerator
 class CobroController @Inject()(
     cobro6Service: Cobro6Repository,
     cobro2Service: Cobro2Repository,
+    generalService: GeneralRepository,
     config: Configuration,
     authenticatedUserAction: AuthenticatedUserAction,
     cc: ControllerComponents,
@@ -117,7 +118,8 @@ class CobroController @Inject()(
         case 6 => cobro6Service.siap_orden_trabajo_cobro(empr_id.get , cotr_id, usua_id.get)
         case 2 => cobro2Service.siap_orden_trabajo_cobro(empr_id.get , cotr_id, usua_id.get)
       }
-      val filename = "Informe_Orden_Trabajo_ITAF_" + cotr_consecutivo + ".xlsx"
+      val _prefijo_interventoria = generalService.buscarPorId(10, empr_id.get).get.gene_valor.get
+      val filename = "Informe_Orden_Trabajo_" + _prefijo_interventoria + cotr_consecutivo + ".xlsx"
       val attach = "attachment; filename=" + filename
       Future.successful(Ok(os)
         .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

@@ -65,6 +65,7 @@ case class Medidor(
     empr_id: Option[Long],
     usua_id: Option[Long],
     medi_direccion: Option[String],
+    barr_id: Option[Long],
     medi_estado: Option[Int],
     medi_acta: Option[String],
     datos: Option[List[Medidor_Dato]]
@@ -196,6 +197,7 @@ object Medidor {
       (__ \ "empr_id").readNullable[Long] and
       (__ \ "usua_id").readNullable[Long] and
       (__ \ "medi_direccion").readNullable[String] and
+      (__ \ "barr_id").readNullable[Long] and
       (__ \ "medi_estado").readNullable[Int] and
       (__ \ "medi_acta").readNullable[String] and
       (__ \ "datos").readNullable[List[Medidor_Dato]]
@@ -210,6 +212,7 @@ object Medidor {
       get[Option[Long]]("empr_id") ~
       get[Option[Long]]("usua_id") ~
       get[Option[String]]("medi_direccion") ~
+      get[Option[Long]]("barr_id") ~
       get[Option[Int]]("medi_estado") ~
       get[Option[String]]("medi_acta") map {
       case medi_id ~
@@ -220,6 +223,7 @@ object Medidor {
             empr_id ~
             usua_id ~
             medi_direccion ~
+            barr_id ~
             medi_estado ~
             medi_acta =>
         Medidor(
@@ -231,6 +235,7 @@ object Medidor {
           empr_id,
           usua_id,
           medi_direccion,
+          barr_id,
           medi_estado,
           medi_acta,
           None
@@ -338,11 +343,12 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
     * Recuperar un Medidor dado su medi_id
     * @param medi_id: Long
     */
-  def buscarPorId(medi_id: Long): Option[Medidor] = {
+  def buscarPorId(medi_id: Long, empr_id:Long): Option[Medidor] = {
     db.withConnection { implicit connection =>
-      val m = SQL("SELECT * FROM siap.medidor WHERE medi_id = {medi_id}")
+      val m = SQL("SELECT * FROM siap.medidor WHERE medi_id = {medi_id} and empr_id = {empr_id}")
         .on(
-          'medi_id -> medi_id
+          'medi_id -> medi_id,
+          'empr_id -> empr_id
         )
         .as(Medidor._set.singleOpt)
 
@@ -593,8 +599,8 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
     * Actualizar Medidor
     * @param medidor: Medidor
     */
-  def actualizar(medidor: Medidor): Boolean = {
-    val medidor_ant: Option[Medidor] = buscarPorId(medidor.medi_id.get)
+  def actualizar(medidor: Medidor, empr_id: Long): Boolean = {
+    val medidor_ant: Option[Medidor] = buscarPorId(medidor.medi_id.get, empr_id)
     db.withConnection { implicit connection =>
       val fecha: LocalDate =
         new LocalDate(Calendar.getInstance().getTimeInMillis())

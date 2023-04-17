@@ -99,12 +99,16 @@
       width="100">
     </el-table-column>
     </el-table-column>
+    <el-table-column
+      :label="$t('informe.cuad_descripcion')"
+      prop="cuad_descripcion"
+      width="100" />
   </el-table>
     </el-col>
   </el-row>
   <el-row>
     <el-col :span="24">
-      <img :title="$t('pdf')" @click="exportarPdf()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/pdf.png')"/>
+      <!-- <img :title="$t('pdf')" @click="exportarPdf()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/pdf.png')"/> -->
       <img :title="$t('xls')" @click="exportarXls()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
     </el-col>
   </el-row>
@@ -142,8 +146,8 @@ export default {
     exportarXls () {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['Código Material', 'Nombre Material', 'Tipo de Reporte', 'Número Reporte', 'Fecha Solución', 'Luminaria', 'Código Retirado', 'Cantidad Retirado', 'Código Instalado', 'Cantidad Instalado']
-        const filterVal = ['elem_codigo', 'elem_descripcion', 'reti_descripcion', 'repo_numero', 'repo_fechasolucion', 'aap_id', 'even_codigo_retirado', 'even_cantidad_retirado', 'even_codigo_instalado', 'even_cantidad_instalado']
+        const tHeader = ['Código Material', 'Nombre Material', 'Tipo de Reporte', 'Número Reporte', 'Fecha Solución', 'Luminaria', 'Código Retirado', 'Cantidad Retirado', 'Código Instalado', 'Cantidad Instalado', 'Cuadirlla']
+        const filterVal = ['elem_codigo', 'elem_descripcion', 'reti_descripcion', 'repo_numero', 'repo_fechasolucion', 'aap_id', 'even_codigo_retirado', 'even_cantidad_retirado', 'even_codigo_instalado', 'even_cantidad_instalado', 'cuad_descripcion']
         const list = this.tableData
         const data = this.formatJson(filterVal, list)
         excel.export_json_to_excel(tHeader, data, 'detallado_materiales_' + this.$moment(this.fecha_final).format('YYYYMMDD'))

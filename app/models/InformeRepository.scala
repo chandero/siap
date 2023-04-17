@@ -95,7 +95,8 @@ case class Siap_detallado_material(
     even_codigo_retirado: Option[String],
     even_cantidad_retirado: Option[Double],
     even_codigo_instalado: Option[String],
-    even_cantidad_instalado: Option[Double]
+    even_cantidad_instalado: Option[Double],
+    cuad_descripcion: Option[String],
 )
 
 case class Siap_cuadrilla_consolidado_material(
@@ -602,7 +603,8 @@ object Siap_detallado_material {
       "even_codigo_retirado" -> srm.even_codigo_retirado,
       "even_cantidad_retirado" -> srm.even_cantidad_retirado,
       "even_codigo_instalado" -> srm.even_codigo_instalado,
-      "even_cantidad_instalado" -> srm.even_cantidad_instalado
+      "even_cantidad_instalado" -> srm.even_cantidad_instalado,
+      "cuad_descripcion" -> srm.cuad_descripcion
     )
   }
 }
@@ -2078,7 +2080,8 @@ class InformeRepository @Inject()(
       get[Option[String]]("even_codigo_retirado") ~
       get[Option[Double]]("even_cantidad_retirado") ~
       get[Option[String]]("even_codigo_instalado") ~
-      get[Option[Double]]("even_cantidad_instalado") map {
+      get[Option[Double]]("even_cantidad_instalado") ~
+      get[Option[String]]("cuad_descripcion") map {
       case elem_codigo ~
             elem_descripcion ~
             reti_descripcion ~
@@ -2088,7 +2091,8 @@ class InformeRepository @Inject()(
             even_codigo_retirado ~
             even_cantidad_retirado ~
             even_codigo_instalado ~
-            even_cantidad_instalado =>
+            even_cantidad_instalado ~ 
+            cuad_descripcion =>
         new Siap_detallado_material(
           elem_codigo,
           elem_descripcion,
@@ -2099,7 +2103,8 @@ class InformeRepository @Inject()(
           even_codigo_retirado,
           even_cantidad_retirado,
           even_codigo_instalado,
-          even_cantidad_instalado
+          even_cantidad_instalado,
+          cuad_descripcion
         )
     }
   }
@@ -2326,12 +2331,16 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           r.repo_fechasolucion,
                           t.aap_id,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
-                          t.even_codigo_instalado, t.even_cantidad_instalado 
+                          t.even_codigo_instalado, t.even_cantidad_instalado,
+                          c1.cuad_descripcion 
                     FROM siap.reporte r
                     LEFT JOIN siap.reporte_adicional a on a.repo_id = r.repo_id
                     LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
                     LEFT JOIN siap.reporte_direccion rd1 ON rd1.repo_id = r.repo_id and rd1.even_estado < 9
                     LEFT JOIN siap.reporte_evento t on t.repo_id = rd1.repo_id and t.aap_id = rd1.aap_id
+                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id
+                    INNER JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
+                    LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
                     WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado <> 9 and r.empr_id = {empr_id}
                     UNION ALL
@@ -2340,12 +2349,16 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           r.repo_fechasolucion, 
                           t.aap_id,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
-                          t.even_codigo_instalado, t.even_cantidad_instalado 
+                          t.even_codigo_instalado, t.even_cantidad_instalado,
+                          c1.cuad_descripcion 
                     FROM siap.control_reporte r
                     LEFT JOIN siap.control_reporte_adicional a on a.repo_id = r.repo_id
                     LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
                     LEFT JOIN siap.control_reporte_direccion rd1 ON rd1.repo_id = r.repo_id and rd1.even_estado < 9
                     LEFT JOIN siap.control_reporte_evento t on t.repo_id = rd1.repo_id and t.aap_id = rd1.aap_id
+                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id
+                    INNER JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
+                    LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
                     WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado <> 9 and r.empr_id = {empr_id}
                     UNION ALL
@@ -2354,12 +2367,16 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           r.repo_fechasolucion, 
                           t.aap_id,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
-                          t.even_codigo_instalado, t.even_cantidad_instalado 
+                          t.even_codigo_instalado, t.even_cantidad_instalado,
+                          c1.cuad_descripcion 
                     FROM siap.transformador_reporte r
                     LEFT JOIN siap.transformador_reporte_adicional a on a.repo_id = r.repo_id
                     LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
                     LEFT JOIN siap.transformador_reporte_direccion rd1 ON rd1.repo_id = r.repo_id and rd1.even_estado < 9 
                     LEFT JOIN siap.transformador_reporte_evento t on t.repo_id = rd1.repo_id and t.aap_id = rd1.aap_id
+                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id
+                    INNER JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
+                    LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
                     WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado <> 9 and r.empr_id = {empr_id}
                     UNION ALL                    
@@ -2368,9 +2385,13 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           r.obra_fechasolucion,
                           0 as aap_id,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
-                          t.even_codigo_instalado, t.even_cantidad_instalado 
+                          t.even_codigo_instalado, t.even_cantidad_instalado,
+                          c1.cuad_descripcion 
                     FROM siap.obra r
                     LEFT JOIN siap.obra_evento t on t.obra_id = r.obra_id
+                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.obra_id
+                    INNER JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.obra_fechasolucion
+                    LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
                     WHERE r.obra_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = {empr_id}
                     ORDER BY reti_descripcion, elem_codigo""")
