@@ -313,7 +313,9 @@ class ActaRedimensionamientoRepository @Inject()(
     _periodo.set(Calendar.DAY_OF_MONTH, 1)
     _periodo.set(Calendar.DATE, _periodo.getActualMaximum(Calendar.DATE))
 
+    var _fecha_para_textos = _periodo.clone().asInstanceOf[Calendar]
     var _fecha_corte = _periodo.clone().asInstanceOf[Calendar]
+    _fecha_corte.add(Calendar.MONTH, -1)
     var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
     _fecha_corte_anterior.add(Calendar.MONTH, -1)    
 
@@ -390,7 +392,7 @@ class ActaRedimensionamientoRepository @Inject()(
         _idx0 += 1
         _listRow02 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            Utility.fechaamesanho(Some(new DateTime(_fecha_corte.getTime()))),
+            Utility.fechaamesanho(Some(new DateTime(_fecha_para_textos.getTime()))),
             Some(0),
             style = Some(
                       CellStyle(
@@ -501,7 +503,7 @@ class ActaRedimensionamientoRepository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             StringCell(
-              "VALOR IPP DICIEMBRE " + (_fecha_corte.get(Calendar.YEAR) - 1),
+              "VALOR IPP DICIEMBRE " + (_fecha_para_textos.get(Calendar.YEAR) - 1),
               Some(3),
               style = Some(
                         CellStyle(
@@ -1101,7 +1103,7 @@ class ActaRedimensionamientoRepository @Inject()(
         _idx += 1
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "Redimensionamiento de la Infraestructura de Alumbrado Público Desde el 1 de Enero de 2015 hasta el " + Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
+            "Redimensionamiento de la Infraestructura de Alumbrado Público Desde el 1 de Enero de 2015 hasta el " + Utility.fechaatextosindia(Some(new DateTime(_fecha_para_textos.getTime()))),
             Some(0),
             style = Some(
                       CellStyle(
@@ -1224,7 +1226,7 @@ class ActaRedimensionamientoRepository @Inject()(
         }
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "Subtotal Redimensionamiento del Mes al " + Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
+            "Subtotal Redimensionamiento del Mes al " + Utility.fechaatextosindia(Some(new DateTime(_fecha_para_textos.getTime()))),
             Some(0),
             style = Some(
                       CellStyle(
@@ -1293,7 +1295,7 @@ class ActaRedimensionamientoRepository @Inject()(
         _idx += 1
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "Total redimensionamiento de la Infraestructura del sistema de Alumbrado Público desde el 1 de Enero de 2015 Hasta el " + Utility.fechaatextosindia(Some(new DateTime(_fecha_corte.getTime()))),
+            "Total redimensionamiento de la Infraestructura del sistema de Alumbrado Público desde el 1 de Enero de 2015 Hasta el " + Utility.fechaatextosindia(Some(new DateTime(_fecha_para_textos.getTime()))),
             Some(0),
             style = Some(
                       CellStyle(

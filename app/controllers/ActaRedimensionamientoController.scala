@@ -85,7 +85,7 @@ class ActaRedimensionamientoController @Inject()(
       _periodo.set(Calendar.MONTH, periodo - 1)
       _periodo.set(Calendar.DAY_OF_MONTH, 1)
       _periodo.set(Calendar.DATE, _periodo.getActualMaximum(Calendar.DATE))
-      val filename = "Acta_Redimensionamiento_" + _numero_acta + "_" + anho + "_" + periodo + ".docx"
+      val filename = "Acta_Redimensionamiento_" + _numero_acta + "_" + anho + "_" + periodo + ".doc"
       var _fecha_corte = _periodo.clone().asInstanceOf[Calendar]
       // _fecha_corte.add(Calendar.MONTH, -1)
       var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
@@ -122,7 +122,7 @@ class ActaRedimensionamientoController @Inject()(
         template_data.put("PERIODO_CON_DE", acta.periodo_corte)
         template_data.put("PERIODO_ANTERIOR_LETRAS", acta.fecha_corte_anterior)
         template_data.put("PERIODO_ANTERIOR_CON_DE", acta.periodo_corte)
-        template_data.put("VALOR_ACUMULADO_ANTERIOR", acta.valor_acumulado_anterior)
+        template_data.put("VALOR_ACUMULADO_ANTERIOR", acta.subtotal_total)
         template_data.put("PERIODO_LETRAS", acta.fecha_corte)
         template_data.put("VALOR_ACUMULADO", acta.valor_acumulado)
         template_data.put("FECHA_FIRMA", acta.fecha_firma)

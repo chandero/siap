@@ -5772,6 +5772,7 @@ class ReporteRepository @Inject()(
       case Some(1) => actualizarMovilLuminaria(reporte)
       case Some(2) => actualizarMovilControl(reporte)
       case Some(3) => actualizarMovilTransformador(reporte)
+      case Some(4) => actualizarMovilMedidor(reporte)
       case _ => false
     }
   }
@@ -5782,7 +5783,11 @@ class ReporteRepository @Inject()(
 
   def actualizarMovilTransformador(reporte: Reporte): Boolean = {
     true
-  }  
+  }
+
+  def actualizarMovilMedidor(reporte: Reporte): Boolean = {
+    true
+  }
   /**
     * Actualizar Reporte
     * @param reporte: Reporte
