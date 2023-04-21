@@ -17,11 +17,20 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import pdi.jwt.JwtSession
 
+import net.liftweb.json._
+import net.liftweb.json.Serialization.write
+import net.liftweb.json.Serialization.read
+import net.liftweb.json.parse
+
 import utilities._
 
 @Singleton
-class ControlController @Inject()(mService: ControlRepository, cc: ControllerComponents, authenticatedUserAction: AuthenticatedUserAction)(implicit ec: ExecutionContext) extends AbstractController(cc) {
-
+class ControlController @Inject()(mService: ControlRepository, cc: ControllerComponents, authenticatedUserAction: AuthenticatedUserAction)(implicit ec: ExecutionContext)
+    extends AbstractController(cc)
+    with ImplicitJsonFormats {
+  implicit val formats = Serialization.formats(NoTypeHints) ++ List(
+    DateTimeSerializer
+  )
     def buscarPorId(aap_id: Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
       val m = mService.buscarPorId(aap_id, empr_id.get)
@@ -77,6 +86,13 @@ class ControlController @Inject()(mService: ControlRepository, cc: ControllerCom
            Ok(Json.toJson(result))
         }
     }
+
+    def controlesMobile() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+        val empr_id = Utility.extraerEmpresa(request)
+        mService.controlesMobile(empr_id.get).map { aaps =>
+           Ok(write(aaps))
+        }
+    }    
 
     def guardar() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get

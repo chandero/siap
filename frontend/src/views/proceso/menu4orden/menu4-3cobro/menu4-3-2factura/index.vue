@@ -102,7 +102,7 @@
   <el-dialog
     title="Factura"
     :visible.sync="showFacturaDialog"
-    width="50%"
+    width="80%"
     destroy-on-close
     center
     @closed="handleFacturaDialogClosed"

@@ -326,6 +326,44 @@ class ControlRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
     }    
 
     /**
+    * Recuperar todos los TipoControl activos
+    * @param page_size: Long
+    * @param current_page: Long
+    */
+    def controlesMobile(empr_id: Long): Future[Iterable[AapMobile]] = Future[Iterable[AapMobile]] {
+        db.withConnection { implicit connection =>
+            var lista_result = new ListBuffer[AapMobile]
+            var lista = SQL("""SELECT aap_id, 
+                '' as aap_apoyo, 
+                -1 as aaco_id, 
+                -1 as aamo_id, 
+                -1 as aama_id, 
+                -1 as aacu_id,
+                -1 as aaus_id,
+                -1 as aatc_id,
+                -1 as tipo_id,
+                '' as aap_tecnologia,
+                -1 as aap_potencia,
+                '' as aap_brazo,
+                '' as aap_collarin,
+                '' as aap_poste_propietario,
+                -1 as aap_poste_altura,
+                '' as aap_lat,
+                '' as aap_lng,
+                -1 as medi_id,                
+                empr_id, 
+                usua_id, 
+                aap_direccion, barr_id, esta_id, cast (aap_fechacreacion as TEXT) as aap_fechatoma FROM siap.control WHERE esta_id <> 9 and empr_id = {empr_id} ORDER BY aap_id""").
+            on(
+              'empr_id -> empr_id
+            ).
+            as(AapMobile._set *)
+            lista.toList
+        }
+    }    
+
+
+    /**
     * Crear TipoControl
     * @param Control: Control
     */

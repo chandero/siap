@@ -80,6 +80,13 @@ class ActaRedimensionamientoController @Inject()(
       val empr_id = Utility.extraerEmpresa(request)
       val usua_id = Utility.extraerUsuario(request)
       val (_numero_acta, _valor_acumulado_anterior, _subtotal_expansion, _subtotal_modernizacion, _subtotal_desmonte, _subtotal_total) = aService.getActaRedimensionamiento(empr_id.get , anho, periodo, usua_id.get)
+      println("Numero Acta:" + _numero_acta)
+      println("Valor Acumulado Anterior:" + _valor_acumulado_anterior)
+      println("Subtotal Expansion:" + _subtotal_expansion)
+      println("Subtotal Modernizacion:" + _subtotal_modernizacion)
+      println("Subtotal Desmonte:" + _subtotal_desmonte)
+      println("Subtotal Total:" + _subtotal_total)
+      
       val _periodo = Calendar.getInstance()
       _periodo.set(Calendar.YEAR, anho)
       _periodo.set(Calendar.MONTH, periodo - 1)
@@ -121,14 +128,14 @@ class ActaRedimensionamientoController @Inject()(
         template_data.put("PERIODO", acta.periodo)
         template_data.put("PERIODO_CON_DE", acta.periodo_corte)
         template_data.put("PERIODO_ANTERIOR_LETRAS", acta.fecha_corte_anterior)
-        template_data.put("PERIODO_ANTERIOR_CON_DE", acta.periodo_corte)
-        template_data.put("VALOR_ACUMULADO_ANTERIOR", acta.subtotal_total)
+        template_data.put("PERIODO_ANTERIOR_CON_DE", acta.fecha_corte_anterior)
+        template_data.put("SUBTOTAL_PERIODO", acta.subtotal_total)
         template_data.put("PERIODO_LETRAS", acta.fecha_corte)
-        template_data.put("VALOR_ACUMULADO", acta.valor_acumulado)
+        template_data.put("TOTAL_PERIODO", acta.valor_acumulado)
         template_data.put("FECHA_FIRMA", acta.fecha_firma)
 
         val os = DocxGenerator.generateDocxFileFromTemplate2(
-          "siap_0101_template_acta_redimensionamiento.dotx",
+          "siap_0101_template_acta_redimensionamiento_2.dotx",
           template_data
         )
         val attach = "attachment; filename=" + filename

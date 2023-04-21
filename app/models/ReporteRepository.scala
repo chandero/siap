@@ -146,12 +146,12 @@ case class ReporteDireccionDatoAdicional(
 )
 
 case class ReporteDireccionFoto(
-  tireuc_id: Option[scala.Long],
-  repo_id: Option[scala.Long],
-  aap_id: Option[scala.Long],
-  refo_id: Option[Int],
-  refo_tipo: Option[Int],
-  refo_data: Option[String]
+    tireuc_id: Option[scala.Long],
+    repo_id: Option[scala.Long],
+    aap_id: Option[scala.Long],
+    refo_id: Option[Int],
+    refo_tipo: Option[Int],
+    refo_data: Option[String]
 )
 
 object ReporteDireccionFoto {
@@ -173,17 +173,24 @@ object ReporteDireccionFoto {
       (__ \ "refo_id").readNullable[Int] and
       (__ \ "refo_tipo").readNullable[Int] and
       (__ \ "refo_data").readNullable[String]
-  )(ReporteDireccionFoto.apply _)  
+  )(ReporteDireccionFoto.apply _)
 
   val _set = {
     get[Option[scala.Long]]("tireuc_id") ~
-    get[Option[scala.Long]]("repo_id") ~
-    get[Option[scala.Long]]("aap_id") ~
-    get[Option[Int]]("refo_id") ~
-    get[Option[Int]]("refo_tipo") ~
-    get[Option[String]]("refo_data") map {
+      get[Option[scala.Long]]("repo_id") ~
+      get[Option[scala.Long]]("aap_id") ~
+      get[Option[Int]]("refo_id") ~
+      get[Option[Int]]("refo_tipo") ~
+      get[Option[String]]("refo_data") map {
       case tireuc_id ~ repo_id ~ aap_id ~ refo_id ~ refo_tipo ~ refo_data =>
-        ReporteDireccionFoto(tireuc_id, repo_id, aap_id, refo_id, refo_tipo, refo_data)
+        ReporteDireccionFoto(
+          tireuc_id,
+          repo_id,
+          aap_id,
+          refo_id,
+          refo_tipo,
+          refo_data
+        )
     }
   }
 }
@@ -375,8 +382,8 @@ object Pendiente {
 
   implicit val adicionalRead: Reads[Pendiente] = (
     (__ \ "tire_descripcion").readNullable[String] and
-    (__ \ "reti_descripcion").readNullable[String] and
-    (__ \ "repo_consecutivo").readNullable[Int] and
+      (__ \ "reti_descripcion").readNullable[String] and
+      (__ \ "repo_consecutivo").readNullable[Int] and
       (__ \ "repo_fecharecepcion").readNullable[DateTime] and
       (__ \ "fecha_limite").readNullable[DateTime] and
       (__ \ "repo_nombre").readNullable[String] and
@@ -391,8 +398,8 @@ object Pendiente {
 
   val _set = {
     get[Option[String]]("tire_descripcion") ~
-    get[Option[String]]("reti_descripcion") ~
-    get[Option[Int]]("repo_consecutivo") ~
+      get[Option[String]]("reti_descripcion") ~
+      get[Option[Int]]("repo_consecutivo") ~
       get[Option[DateTime]]("repo_fecharecepcion") ~
       get[Option[DateTime]]("fecha_limite") ~
       get[Option[String]]("repo_nombre") ~
@@ -401,9 +408,9 @@ object Pendiente {
       get[Option[String]]("barr_descripcion") ~
       get[Option[String]]("orig_descripcion") ~
       get[Option[String]]("acti_descripcion") ~
-      get[Option[String]]("cuad_descripcion") ~ 
+      get[Option[String]]("cuad_descripcion") ~
       get[Option[String]]("estado") map {
-      case  tire_descripcion ~
+      case tire_descripcion ~
             reti_descripcion ~
             repo_consecutivo ~
             repo_fecharecepcion ~
@@ -414,7 +421,7 @@ object Pendiente {
             barr_descripcion ~
             orig_descripcion ~
             acti_descripcion ~
-            cuad_descripcion ~ 
+            cuad_descripcion ~
             estado =>
         Pendiente(
           tire_descripcion,
@@ -1651,20 +1658,25 @@ class ReporteRepository @Inject()(
                 )
               case Some(adi) => None
             }
-            var fotos = SQL("""
+            var fotos =
+              SQL("""
                 SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
                 """)
-              .on(
-                'repo_id -> r.repo_id,
-                'aap_id -> d.aap_id,
-                'tireuc_id -> r.tireuc_id
-              )
-              .as(ReporteDireccionFoto._set *)
+                .on(
+                  'repo_id -> r.repo_id,
+                  'aap_id -> d.aap_id,
+                  'tireuc_id -> r.tireuc_id
+                )
+                .as(ReporteDireccionFoto._set *)
             var _listFoto = new ListBuffer[ReporteDireccionFoto]()
             fotos.map { f =>
               _listFoto += f
             }
-            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
+            val direccion = d.copy(
+              dato = dat,
+              dato_adicional = adi,
+              fotos = Some(_listFoto.toList)
+            )
             _listDireccion += direccion
           }
           val reporte = new Reporte(
@@ -1823,20 +1835,25 @@ class ReporteRepository @Inject()(
                 )
               case Some(adi) => None
             }
-            var fotos = SQL("""
+            var fotos =
+              SQL("""
                 SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
                 """)
-              .on(
-                'repo_id -> r.repo_id,
-                'aap_id -> d.aap_id,
-                'tireuc_id -> r.tireuc_id
-              )
-              .as(ReporteDireccionFoto._set *)
+                .on(
+                  'repo_id -> r.repo_id,
+                  'aap_id -> d.aap_id,
+                  'tireuc_id -> r.tireuc_id
+                )
+                .as(ReporteDireccionFoto._set *)
             var _listFoto = new ListBuffer[ReporteDireccionFoto]()
             fotos.map { f =>
               _listFoto += f
             }
-            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
+            val direccion = d.copy(
+              dato = dat,
+              dato_adicional = adi,
+              fotos = Some(_listFoto.toList)
+            )
             _listDireccion += direccion
           }
           val reporte = new Reporte(
@@ -2000,20 +2017,25 @@ class ReporteRepository @Inject()(
                 )
               case Some(adi) => None
             }
-            var fotos = SQL("""
+            var fotos =
+              SQL("""
                 SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
                 """)
-              .on(
-                'repo_id -> r.repo_id,
-                'aap_id -> d.aap_id,
-                'tireuc_id -> r.tireuc_id
-              )
-              .as(ReporteDireccionFoto._set *)
+                .on(
+                  'repo_id -> r.repo_id,
+                  'aap_id -> d.aap_id,
+                  'tireuc_id -> r.tireuc_id
+                )
+                .as(ReporteDireccionFoto._set *)
             var _listFoto = new ListBuffer[ReporteDireccionFoto]()
             fotos.map { f =>
               _listFoto += f
             }
-            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
+            val direccion = d.copy(
+              dato = dat,
+              dato_adicional = adi,
+              fotos = Some(_listFoto.toList)
+            )
             _listDireccion += direccion
           }
           val reporte = new Reporte(
@@ -2083,7 +2105,7 @@ class ReporteRepository @Inject()(
       empr_id: scala.Long
   ): Option[ReporteWeb] = {
     db.withConnection { implicit connection =>
-      val r = SQL(        
+      val r = SQL(
         """SELECT DISTINCT * FROM (
             SELECT * FROM siap.reporte r
                             INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
@@ -2248,20 +2270,25 @@ class ReporteRepository @Inject()(
                 )
               case Some(adi) => None
             }
-            var fotos = SQL("""
+            var fotos =
+              SQL("""
                 SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
                 """)
-              .on(
-                'repo_id -> r.repo_id,
-                'aap_id -> d.aap_id,
-                'tireuc_id -> r.tireuc_id
-              )
-              .as(ReporteDireccionFoto._set *)
+                .on(
+                  'repo_id -> r.repo_id,
+                  'aap_id -> d.aap_id,
+                  'tireuc_id -> r.tireuc_id
+                )
+                .as(ReporteDireccionFoto._set *)
             var _listFoto = new ListBuffer[ReporteDireccionFoto]()
             fotos.map { f =>
               _listFoto += f
             }
-            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
+            val direccion = d.copy(
+              dato = dat,
+              dato_adicional = adi,
+              fotos = Some(_listFoto.toList)
+            )
             _listDireccion += direccion
           }
           val reporte = new Reporte(
@@ -2453,20 +2480,25 @@ class ReporteRepository @Inject()(
                 )
               case Some(adi) => None
             }
-            var fotos = SQL("""
+            var fotos =
+              SQL("""
                 SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
                 """)
-              .on(
-                'repo_id -> r.repo_id,
-                'aap_id -> d.aap_id,
-                'tireuc_id -> r.tireuc_id
-              )
-              .as(ReporteDireccionFoto._set *)
+                .on(
+                  'repo_id -> r.repo_id,
+                  'aap_id -> d.aap_id,
+                  'tireuc_id -> r.tireuc_id
+                )
+                .as(ReporteDireccionFoto._set *)
             var _listFoto = new ListBuffer[ReporteDireccionFoto]()
             fotos.map { f =>
               _listFoto += f
             }
-            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
+            val direccion = d.copy(
+              dato = dat,
+              dato_adicional = adi,
+              fotos = Some(_listFoto.toList)
+            )
             _listDireccion += direccion
           }
           val reporte = new Reporte(
@@ -2525,7 +2557,7 @@ class ReporteRepository @Inject()(
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
                     WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.rees_id in (1,2) AND (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE"""
       ).on(
-          'reti_id -> reti_id, 
+          'reti_id -> reti_id,
           'repo_consecutivo -> repo_consecutivo
           //'empr_id -> empr_id
         )
@@ -2640,25 +2672,30 @@ class ReporteRepository @Inject()(
                 )
               case Some(adi) => None
             }
-            var fotos = SQL("""
+            var fotos =
+              SQL("""
                 SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
                 """)
-              .on(
-                'repo_id -> r.repo_id,
-                'aap_id -> d.aap_id,
-                'tireuc_id -> r.tireuc_id
-              )
-              .as(ReporteDireccionFoto._set *)
+                .on(
+                  'repo_id -> r.repo_id,
+                  'aap_id -> d.aap_id,
+                  'tireuc_id -> r.tireuc_id
+                )
+                .as(ReporteDireccionFoto._set *)
             var _listFoto = new ListBuffer[ReporteDireccionFoto]()
             fotos.map { f =>
               _listFoto += f
             }
-            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
+            val direccion = d.copy(
+              dato = dat,
+              dato_adicional = adi,
+              fotos = Some(_listFoto.toList)
+            )
             _listDireccion += direccion
           }
           val reporte = new Reporte(
             r.repo_id,
-            r.tireuc_id,
+            Some(1),
             r.reti_id,
             r.repo_consecutivo,
             r.repo_fecharecepcion,
@@ -2685,7 +2722,362 @@ class ReporteRepository @Inject()(
           )
           Some(reporte)
 
-        case None => None
+        case None =>
+          val r = SQL(
+            """SELECT * FROM siap.control_reporte r
+                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.control_reporte_adicional ra on r.repo_id = ra.repo_id
+                            LEFT JOIN siap.actividad a on ra.acti_id = a.acti_id
+                            LEFT JOIN siap.origen o on r.orig_id = o.orig_id
+                            LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.rees_id in (1,2) AND (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE"""
+          ).on(
+              'reti_id -> reti_id,
+              'repo_consecutivo -> repo_consecutivo
+              //'empr_id -> empr_id
+            )
+            .as(Reporte._set.singleOpt)
+
+          r match {
+            case Some(r) =>
+              val eventos = SQL(
+                """SELECT * FROM siap.control_reporte_evento WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
+              ).on(
+                  'repo_id -> r.repo_id
+                )
+                .as(Evento.eventoSet *)
+              val meams = SQL(
+                """SELECT m.meam_id FROM siap.control_reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
+              ).on(
+                  'repo_id -> r.repo_id
+                )
+                .as(scalar[scala.Long].*)
+              val novedades = List[ReporteNovedad]() /* SQL(
+                """SELECT * FROM siap.control_reporte_novedad rn WHERE rn.repo_id = {repo_id} and rn.tireuc_id = {tireuc_id}"""
+              ).on(
+                  'repo_id -> r.repo_id,
+                  'tireuc_id -> r.tireuc_id
+                )
+              .as(ReporteNovedad._set *) */
+              val adicional = SQL(
+                """SELECT * FROM siap.control_reporte_adicional ra
+                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+                LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+                WHERE ra.repo_id = {repo_id}
+				        ORDER BY ot.ortr_fecha DESC
+				        LIMIT 1 """
+              ).on(
+                  'repo_id -> r.repo_id,
+                  'tireuc_id -> r.tireuc_id
+                )
+                .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
+              val direcciones = SQL(
+                """SELECT * FROM siap.control_reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
+              ).on(
+                  'repo_id -> r.repo_id
+                )
+                .as(ReporteDireccion.reporteDireccionSet *)
+              var _listDireccion = new ListBuffer[ReporteDireccion]()
+              direcciones.map { d =>
+                var dat = SQL(
+                  """SELECT * FROM siap.control_reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+                ).on(
+                    'repo_id -> d.repo_id,
+                    'aap_id -> d.aap_id,
+                    'even_id -> d.even_id
+                  )
+                  .as(ReporteDireccionDato.reporteDireccionDatoSet.singleOpt)
+                dat match {
+                  case None =>
+                    dat = Some(
+                      new ReporteDireccionDato(
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None
+                      )
+                    )
+                  case Some(dat) => None
+                }
+                var adi = SQL(
+                  """SELECT * FROM siap.control_reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+                ).on(
+                    'repo_id -> d.repo_id,
+                    'aap_id -> d.aap_id,
+                    'even_id -> d.even_id
+                  )
+                  .as(ReporteDireccionDatoAdicional._set.singleOpt)
+                adi match {
+                  case None =>
+                    adi = Some(
+                      new ReporteDireccionDatoAdicional(
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None
+                      )
+                    )
+                  case Some(adi) => None
+                }
+                var fotos =
+                  SQL("""
+                  SELECT * FROM siap.control_reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
+                  """)
+                    .on(
+                      'repo_id -> r.repo_id,
+                      'aap_id -> d.aap_id,
+                      'tireuc_id -> r.tireuc_id
+                    )
+                    .as(ReporteDireccionFoto._set *)
+                var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+                fotos.map { f =>
+                  _listFoto += f
+                }
+                val direccion = d.copy(
+                  dato = dat,
+                  dato_adicional = adi,
+                  fotos = Some(_listFoto.toList)
+                )
+                _listDireccion += direccion
+              }
+              val reporte = new Reporte(
+                r.repo_id,
+                Some(2),
+                r.reti_id,
+                r.repo_consecutivo,
+                r.repo_fecharecepcion,
+                r.repo_direccion,
+                r.repo_nombre,
+                r.repo_telefono,
+                r.repo_fechasolucion,
+                r.repo_horainicio,
+                r.repo_horafin,
+                r.repo_reportetecnico,
+                r.repo_descripcion,
+                r.repo_subrepoconsecutivo,
+                r.rees_id,
+                r.orig_id,
+                r.barr_id,
+                r.empr_id,
+                r.tiba_id,
+                r.usua_id,
+                adicional,
+                Some(meams),
+                Some(eventos),
+                Some(_listDireccion.toList),
+                Some(novedades)
+              )
+              Some(reporte)
+
+            case None =>
+              val r = SQL(
+                """SELECT * FROM siap.transformador_reporte r
+                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.transformador_reporte_adicional ra on r.repo_id = ra.repo_id
+                            LEFT JOIN siap.actividad a on ra.acti_id = a.acti_id
+                            LEFT JOIN siap.origen o on r.orig_id = o.orig_id
+                            LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.rees_id in (1,2) AND (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE"""
+              ).on(
+                  'reti_id -> reti_id,
+                  'repo_consecutivo -> repo_consecutivo
+                  //'empr_id -> empr_id
+                )
+                .as(Reporte._set.singleOpt)
+
+              r match {
+                case Some(r) =>
+                  val eventos = SQL(
+                    """SELECT * FROM siap.transformador_reporte_evento WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
+                  ).on(
+                      'repo_id -> r.repo_id
+                    )
+                    .as(Evento.eventoSet *)
+                  val meams = SQL(
+                    """SELECT m.meam_id FROM siap.transformador_reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
+                  ).on(
+                      'repo_id -> r.repo_id
+                    )
+                    .as(scalar[scala.Long].*)
+                  val novedades = List[ReporteNovedad]() /* SQL(
+                """SELECT * FROM siap.control_reporte_novedad rn WHERE rn.repo_id = {repo_id} and rn.tireuc_id = {tireuc_id}"""
+              ).on(
+                  'repo_id -> r.repo_id,
+                  'tireuc_id -> r.tireuc_id
+                )
+              .as(ReporteNovedad._set *) */
+                  val adicional = SQL(
+                    """SELECT * FROM siap.transformador_reporte_adicional ra
+                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+                LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+                WHERE ra.repo_id = {repo_id}
+				        ORDER BY ot.ortr_fecha DESC
+				        LIMIT 1 """
+                  ).on(
+                      'repo_id -> r.repo_id,
+                      'tireuc_id -> r.tireuc_id
+                    )
+                    .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
+                  val direcciones = SQL(
+                    """SELECT * FROM siap.transformador_reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
+                  ).on(
+                      'repo_id -> r.repo_id
+                    )
+                    .as(ReporteDireccion.reporteDireccionSet *)
+                  var _listDireccion = new ListBuffer[ReporteDireccion]()
+                  direcciones.map { d =>
+                    var dat = SQL(
+                      """SELECT * FROM siap.transformador_reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+                    ).on(
+                        'repo_id -> d.repo_id,
+                        'aap_id -> d.aap_id,
+                        'even_id -> d.even_id
+                      )
+                      .as(
+                        ReporteDireccionDato.reporteDireccionDatoSet.singleOpt
+                      )
+                    dat match {
+                      case None =>
+                        dat = Some(
+                          new ReporteDireccionDato(
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None
+                          )
+                        )
+                      case Some(dat) => None
+                    }
+                    var adi = SQL(
+                      """SELECT * FROM siap.transformador_reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+                    ).on(
+                        'repo_id -> d.repo_id,
+                        'aap_id -> d.aap_id,
+                        'even_id -> d.even_id
+                      )
+                      .as(ReporteDireccionDatoAdicional._set.singleOpt)
+                    adi match {
+                      case None =>
+                        adi = Some(
+                          new ReporteDireccionDatoAdicional(
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
+                            None
+                          )
+                        )
+                      case Some(adi) => None
+                    }
+                    var fotos =
+                      SQL("""
+                  SELECT * FROM siap.transformador_reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
+                  """).on(
+                          'repo_id -> r.repo_id,
+                          'aap_id -> d.aap_id,
+                          'tireuc_id -> r.tireuc_id
+                        )
+                        .as(ReporteDireccionFoto._set *)
+                    var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+                    fotos.map { f =>
+                      _listFoto += f
+                    }
+                    val direccion = d.copy(
+                      dato = dat,
+                      dato_adicional = adi,
+                      fotos = Some(_listFoto.toList)
+                    )
+                    _listDireccion += direccion
+                  }
+                  val reporte = new Reporte(
+                    r.repo_id,
+                    Some(3),
+                    r.reti_id,
+                    r.repo_consecutivo,
+                    r.repo_fecharecepcion,
+                    r.repo_direccion,
+                    r.repo_nombre,
+                    r.repo_telefono,
+                    r.repo_fechasolucion,
+                    r.repo_horainicio,
+                    r.repo_horafin,
+                    r.repo_reportetecnico,
+                    r.repo_descripcion,
+                    r.repo_subrepoconsecutivo,
+                    r.rees_id,
+                    r.orig_id,
+                    r.barr_id,
+                    r.empr_id,
+                    r.tiba_id,
+                    r.usua_id,
+                    adicional,
+                    Some(meams),
+                    Some(eventos),
+                    Some(_listDireccion.toList),
+                    Some(novedades)
+                  )
+                  Some(reporte)
+
+                case None => None
+              }
+          }
       }
     }
   }
@@ -2836,76 +3228,77 @@ class ReporteRepository @Inject()(
           )
           .as(ReporteDireccion.reporteDireccionSet *)
         var _listDireccion = new ListBuffer[ReporteDireccion]()
-          direcciones.map { d =>
-            var dat = SQL(
-              """SELECT * FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
-            ).on(
-                'repo_id -> d.repo_id,
-                'aap_id -> d.aap_id,
-                'even_id -> d.even_id
-              )
-              .as(ReporteDireccionDato.reporteDireccionDatoSet.singleOpt)
-            dat match {
-              case None =>
-                dat = Some(
-                  new ReporteDireccionDato(
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None
-                  )
+        direcciones.map { d =>
+          var dat = SQL(
+            """SELECT * FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+          ).on(
+              'repo_id -> d.repo_id,
+              'aap_id -> d.aap_id,
+              'even_id -> d.even_id
+            )
+            .as(ReporteDireccionDato.reporteDireccionDatoSet.singleOpt)
+          dat match {
+            case None =>
+              dat = Some(
+                new ReporteDireccionDato(
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None
                 )
-              case Some(dat) => None
-            }
-            var adi = SQL(
-              """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
-            ).on(
-                'repo_id -> d.repo_id,
-                'aap_id -> d.aap_id,
-                'even_id -> d.even_id
               )
-              .as(ReporteDireccionDatoAdicional._set.singleOpt)
-            adi match {
-              case None =>
-                adi = Some(
-                  new ReporteDireccionDatoAdicional(
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None
-                  )
+            case Some(dat) => None
+          }
+          var adi = SQL(
+            """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+          ).on(
+              'repo_id -> d.repo_id,
+              'aap_id -> d.aap_id,
+              'even_id -> d.even_id
+            )
+            .as(ReporteDireccionDatoAdicional._set.singleOpt)
+          adi match {
+            case None =>
+              adi = Some(
+                new ReporteDireccionDatoAdicional(
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None
                 )
-              case Some(adi) => None
-            }
-            var fotos = SQL("""
+              )
+            case Some(adi) => None
+          }
+          var fotos =
+            SQL("""
                 SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
                 """)
               .on(
@@ -2914,13 +3307,17 @@ class ReporteRepository @Inject()(
                 'tireuc_id -> r.tireuc_id
               )
               .as(ReporteDireccionFoto._set *)
-            var _listFoto = new ListBuffer[ReporteDireccionFoto]()
-            fotos.map { f =>
-              _listFoto += f
-            }
-            val direccion = d.copy(dato = dat, dato_adicional = adi, fotos = Some(_listFoto.toList))
-            _listDireccion += direccion
+          var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+          fotos.map { f =>
+            _listFoto += f
           }
+          val direccion = d.copy(
+            dato = dat,
+            dato_adicional = adi,
+            fotos = Some(_listFoto.toList)
+          )
+          _listDireccion += direccion
+        }
         val reporte = new Reporte(
           r.repo_id,
           r.tireuc_id,
@@ -3689,7 +4086,6 @@ class ReporteRepository @Inject()(
           }
         }
       }
-
 
       SQL("""DELETE FROM siap.reporte_evento WHERE repo_id = {repo_id}""")
         .on('repo_id -> reporte.repo_id)
@@ -5225,7 +5621,7 @@ class ReporteRepository @Inject()(
     }
   }
 
-    /**
+  /**
     * Actualizar Reporte
     * @param reporte: Reporte
     */
@@ -5246,7 +5642,6 @@ class ReporteRepository @Inject()(
         .on('repo_id -> reporte.repo_id)
         .executeUpdate()
 
-      
       reporte.eventos.map { eventos =>
         for (e <- eventos) {
           if (e.aap_id != None) {
@@ -5766,28 +6161,22 @@ class ReporteRepository @Inject()(
   }
 
   def actualizarMovil(
-    reporte: Reporte
+      reporte: Reporte
   ): Boolean = {
     reporte.tireuc_id match {
       case Some(1) => actualizarMovilLuminaria(reporte)
-      case Some(2) => actualizarMovilControl(reporte)
-      case Some(3) => actualizarMovilTransformador(reporte)
+      case Some(2) => controlReporteService.actualizarMovilControl(reporte)
+      case Some(3) =>
+        transformadorReporteService.actualizarMovilTransformador(reporte)
       case Some(4) => actualizarMovilMedidor(reporte)
-      case _ => false
+      case _       => false
     }
-  }
-
-  def actualizarMovilControl(reporte: Reporte): Boolean = {
-    true
-  }
-
-  def actualizarMovilTransformador(reporte: Reporte): Boolean = {
-    true
   }
 
   def actualizarMovilMedidor(reporte: Reporte): Boolean = {
     true
   }
+
   /**
     * Actualizar Reporte
     * @param reporte: Reporte
@@ -5800,81 +6189,83 @@ class ReporteRepository @Inject()(
     var result = false
     // if (true) {
     println("Actualizando Reporte Movil")
-    db.withConnection { implicit connection =>
-      val fecha: LocalDate =
-        new LocalDate(Calendar.getInstance().getTimeInMillis())
-      val hora: LocalDateTime =
-        new LocalDateTime(Calendar.getInstance().getTimeInMillis())
-      val fecha_solucion: Option[DateTime] = reporte_ant match {
-        case Some(r) => r.repo_fechasolucion match {
-          case Some(f) => Some(f)
-          case None => { 
-            if (reporte.direcciones.get.length > 0) {
-              Some(DateTime.now()) 
-            } else {
-              None
+    try {
+      db.withTransaction { implicit connection =>
+        val fecha: LocalDate =
+          new LocalDate(Calendar.getInstance().getTimeInMillis())
+        val hora: LocalDateTime =
+          new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+        val fecha_solucion: Option[DateTime] = reporte_ant match {
+          case Some(r) =>
+            r.repo_fechasolucion match {
+              case Some(f) => Some(f)
+              case None => {
+                if (reporte.direcciones.get.length > 0) {
+                  Some(DateTime.now())
+                } else {
+                  None
+                }
+              }
             }
-          }
+          case None => None
         }
-        case None => None
-      }
-      result = SQL(
-        "UPDATE siap.reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, repo_subrepoconsecutivo = {repo_subrepoconsecutivo}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tiba_id = {tiba_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
-      ).on(
-          'repo_id -> reporte.repo_id,
-          'repo_direccion -> reporte.repo_direccion,
-          'repo_nombre -> reporte.repo_nombre,
-          'repo_telefono -> reporte.repo_telefono,
-          'repo_fechasolucion -> fecha_solucion,
-          'repo_horainicio -> reporte.repo_horainicio,
-          'repo_horafin -> reporte.repo_horafin,
-          'repo_reportetecnico -> reporte.repo_reportetecnico,
-          'repo_descripcion -> reporte.repo_descripcion,
-          'repo_subrepoconsecutivo -> reporte.repo_subrepoconsecutivo,
-          'rees_id -> 2,
-          'orig_id -> reporte.orig_id,
-          'barr_id -> reporte.barr_id,
-          'empr_id -> reporte.empr_id,
-          'tiba_id -> reporte.tiba_id,
-          'usua_id -> reporte.usua_id
-        )
-        .executeUpdate() > 0
+        result = SQL(
+          "UPDATE siap.reporte SET repo_direccion = {repo_direccion}, repo_nombre = {repo_nombre}, repo_telefono = {repo_telefono}, repo_fechasolucion = {repo_fechasolucion}, repo_horainicio = {repo_horainicio}, repo_horafin = {repo_horafin}, repo_reportetecnico = {repo_reportetecnico}, repo_descripcion = {repo_descripcion}, repo_subrepoconsecutivo = {repo_subrepoconsecutivo}, rees_id = {rees_id}, orig_id = {orig_id}, barr_id = {barr_id}, empr_id = {empr_id}, tiba_id = {tiba_id}, usua_id = {usua_id} WHERE repo_id = {repo_id}"
+        ).on(
+            'repo_id -> reporte.repo_id,
+            'repo_direccion -> reporte.repo_direccion,
+            'repo_nombre -> reporte.repo_nombre,
+            'repo_telefono -> reporte.repo_telefono,
+            'repo_fechasolucion -> fecha_solucion,
+            'repo_horainicio -> reporte.repo_horainicio,
+            'repo_horafin -> reporte.repo_horafin,
+            'repo_reportetecnico -> reporte.repo_reportetecnico,
+            'repo_descripcion -> reporte.repo_descripcion,
+            'repo_subrepoconsecutivo -> reporte.repo_subrepoconsecutivo,
+            'rees_id -> 2,
+            'orig_id -> reporte.orig_id,
+            'barr_id -> reporte.barr_id,
+            'empr_id -> reporte.empr_id,
+            'tiba_id -> reporte.tiba_id,
+            'usua_id -> reporte.usua_id
+          )
+          .executeUpdate() > 0
 
-      // actualizar reporte adicional
-      reporte.adicional.map { adicional =>
-        val hayAdicional: Boolean = SQL(
-          """UPDATE siap.reporte_adicional SET repo_fechadigitacion = {repo_fechadigitacion}, 
+        // actualizar reporte adicional
+        reporte.adicional.map { adicional =>
+          val hayAdicional: Boolean = SQL(
+            """UPDATE siap.reporte_adicional SET repo_fechadigitacion = {repo_fechadigitacion}, 
                     repo_tipo_expansion = {repo_tipo_expansion}, repo_luminaria = {repo_luminaria}, 
                     repo_redes = {repo_redes}, repo_poste = {repo_poste}, repo_modificado = {repo_modificado}, 
                     repo_subreporte = {repo_subreporte}, repo_subid = {repo_subid}, repo_email = {repo_email}, 
                     acti_id = {acti_id}, repo_codigo = {repo_codigo}, repo_apoyo = {repo_apoyo}, 
                     urba_id = {urba_id}, muot_id = {muot_id}, medi_id = {medi_id}, tran_id = {tran_id}, 
                     medi_acta = {medi_acta}, aaco_id_anterior = {aaco_id_anterior}, aaco_id_nuevo = {aaco_id_nuevo} WHERE repo_id = {repo_id}"""
-        ).on(
-            'repo_fechadigitacion -> adicional.repo_fechadigitacion,
-            'repo_tipo_expansion -> adicional.repo_tipo_expansion,
-            'repo_luminaria -> adicional.repo_luminaria,
-            'repo_redes -> adicional.repo_redes,
-            'repo_poste -> adicional.repo_poste,
-            'repo_modificado -> hora,
-            'repo_subreporte -> adicional.repo_subreporte,
-            'repo_subid -> Option.empty[scala.Long],
-            'repo_email -> adicional.repo_email,
-            'acti_id -> adicional.acti_id,
-            'repo_codigo -> adicional.repo_codigo,
-            'repo_apoyo -> adicional.repo_apoyo,
-            'urba_id -> adicional.urba_id,
-            'muot_id -> adicional.muot_id,
-            'medi_id -> adicional.medi_id,
-            'tran_id -> adicional.tran_id,
-            'medi_acta -> adicional.medi_acta,
-            'aaco_id_anterior -> adicional.aaco_id_anterior,
-            'aaco_id_nuevo -> adicional.aaco_id_nuevo,
-            'repo_id -> reporte.repo_id
-          )
-          .executeUpdate() > 0
-        if (!hayAdicional) {
-          SQL("""INSERT INTO siap.reporte_adicional (repo_id, 
+          ).on(
+              'repo_fechadigitacion -> adicional.repo_fechadigitacion,
+              'repo_tipo_expansion -> adicional.repo_tipo_expansion,
+              'repo_luminaria -> adicional.repo_luminaria,
+              'repo_redes -> adicional.repo_redes,
+              'repo_poste -> adicional.repo_poste,
+              'repo_modificado -> hora,
+              'repo_subreporte -> adicional.repo_subreporte,
+              'repo_subid -> Option.empty[scala.Long],
+              'repo_email -> adicional.repo_email,
+              'acti_id -> adicional.acti_id,
+              'repo_codigo -> adicional.repo_codigo,
+              'repo_apoyo -> adicional.repo_apoyo,
+              'urba_id -> adicional.urba_id,
+              'muot_id -> adicional.muot_id,
+              'medi_id -> adicional.medi_id,
+              'tran_id -> adicional.tran_id,
+              'medi_acta -> adicional.medi_acta,
+              'aaco_id_anterior -> adicional.aaco_id_anterior,
+              'aaco_id_nuevo -> adicional.aaco_id_nuevo,
+              'repo_id -> reporte.repo_id
+            )
+            .executeUpdate() > 0
+          if (!hayAdicional) {
+            SQL("""INSERT INTO siap.reporte_adicional (repo_id, 
                                                                repo_fechadigitacion, 
                                                                repo_tipo_expansion, 
                                                                repo_luminaria, 
@@ -5905,54 +6296,57 @@ class ReporteRepository @Inject()(
                                                                 {urba_id},
                                                                 {muot_id}
                                                                )""")
-            .on(
-              'repo_fechadigitacion -> adicional.repo_fechadigitacion,
-              'repo_tipo_expansion -> adicional.repo_tipo_expansion,
-              'repo_luminaria -> adicional.repo_luminaria,
-              'repo_redes -> adicional.repo_redes,
-              'repo_poste -> adicional.repo_poste,
-              'repo_modificado -> hora,
-              'repo_subreporte -> adicional.repo_subreporte,
-              'repo_subid -> Option.empty[scala.Long],
-              'repo_email -> adicional.repo_email,
-              'acti_id -> adicional.acti_id,
-              'repo_codigo -> adicional.repo_codigo,
-              'repo_apoyo -> adicional.repo_apoyo,
-              'urba_id -> adicional.urba_id,
-              'muot_id -> adicional.muot_id,
-              'repo_id -> reporte.repo_id
-            )
-            .executeInsert()
+              .on(
+                'repo_fechadigitacion -> adicional.repo_fechadigitacion,
+                'repo_tipo_expansion -> adicional.repo_tipo_expansion,
+                'repo_luminaria -> adicional.repo_luminaria,
+                'repo_redes -> adicional.repo_redes,
+                'repo_poste -> adicional.repo_poste,
+                'repo_modificado -> hora,
+                'repo_subreporte -> adicional.repo_subreporte,
+                'repo_subid -> Option.empty[scala.Long],
+                'repo_email -> adicional.repo_email,
+                'acti_id -> adicional.acti_id,
+                'repo_codigo -> adicional.repo_codigo,
+                'repo_apoyo -> adicional.repo_apoyo,
+                'urba_id -> adicional.urba_id,
+                'muot_id -> adicional.muot_id,
+                'repo_id -> reporte.repo_id
+              )
+              .executeInsert()
+          }
         }
-      }
-      // Creación Actualizacion de Novedades
-      SQL("""DELETE FROM siap.reporte_novedad rn1 WHERE rn1.repo_id = {repo_id}""").
-      on(
-        'repo_id -> reporte.repo_id
-      ).executeUpdate()
-      reporte.novedades.map { novedades =>
-        for (n <- novedades) {
-          val novedadActualizado = SQL(
-            """UPDATE siap.reporte_novedad SET 
+        // Creación Actualizacion de Novedades
+        SQL(
+          """DELETE FROM siap.reporte_novedad rn1 WHERE rn1.repo_id = {repo_id}"""
+        ).on(
+            'repo_id -> reporte.repo_id
+          )
+          .executeUpdate()
+        reporte.novedades.map { novedades =>
+          for (n <- novedades) {
+            val novedadActualizado = SQL(
+              """UPDATE siap.reporte_novedad SET 
                                            nove_id = {nove_id}, 
                                            reno_horaini = {reno_horaini}, 
                                            reno_horafin = {reno_horafin}, 
                                            reno_observacion = {reno_observacion},
                                            even_estado = {even_estado}
                                           WHERE repo_id = {repo_id} AND even_id = {even_id}"""
-          ).on(
-              'repo_id -> reporte.repo_id,
-              'even_id -> n.even_id,
-              'nove_id -> n.nove_id,
-              'reno_horaini -> n.reno_horaini,
-              'reno_horafin -> n.reno_horafin,
-              'reno_observacion -> n.reno_observacion,
-              'even_estado -> n.even_estado
-            )
-            .executeUpdate() > 0
-          if (!novedadActualizado) {
-            if (n.even_estado.get < 8) {
-              val novedadInsertado = SQL(""" INSERT INTO siap.reporte_novedad (
+            ).on(
+                'repo_id -> reporte.repo_id,
+                'even_id -> n.even_id,
+                'nove_id -> n.nove_id,
+                'reno_horaini -> n.reno_horaini,
+                'reno_horafin -> n.reno_horafin,
+                'reno_observacion -> n.reno_observacion,
+                'even_estado -> n.even_estado
+              )
+              .executeUpdate() > 0
+            if (!novedadActualizado) {
+              if (n.even_estado.get < 8) {
+                val novedadInsertado = SQL(
+                  """ INSERT INTO siap.reporte_novedad (
                                              tireuc_id, 
                                              repo_id, 
                                              even_id, 
@@ -5971,26 +6365,26 @@ class ReporteRepository @Inject()(
                                              {reno_observacion},
                                              {even_estado}
                                            )
-                                    """)
-                .on(
-                  'tireuc_id -> reporte.tireuc_id,
-                  'repo_id -> reporte.repo_id,
-                  'even_id -> n.even_id,
-                  'nove_id -> n.nove_id,
-                  'reno_horaini -> n.reno_horaini,
-                  'reno_horafin -> n.reno_horafin,
-                  'reno_observacion -> n.reno_observacion,
-                  'even_estado -> n.even_estado
-                )
-                .executeUpdate() > 0
+                                    """
+                ).on(
+                    'tireuc_id -> reporte.tireuc_id,
+                    'repo_id -> reporte.repo_id,
+                    'even_id -> n.even_id,
+                    'nove_id -> n.nove_id,
+                    'reno_horaini -> n.reno_horaini,
+                    'reno_horafin -> n.reno_horafin,
+                    'reno_observacion -> n.reno_observacion,
+                    'even_estado -> n.even_estado
+                  )
+                  .executeUpdate() > 0
+              }
             }
           }
         }
-      }
 
-      /// Proceso Suspendido
-      // Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
-/*       if (reporte.reti_id.get == 2 && reporte.adicional.get.repo_tipo_expansion.get != 4 && reporte.rees_id.get == 4) {
+        /// Proceso Suspendido
+        // Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
+        /*       if (reporte.reti_id.get == 2 && reporte.adicional.get.repo_tipo_expansion.get != 4 && reporte.rees_id.get == 4) {
         reporte.direcciones.map { direcciones =>
           for (d <- direcciones) {
             if (d.aap_id != None) {
@@ -6074,45 +6468,47 @@ class ReporteRepository @Inject()(
           }
         }
       }
- */      /// Fin Proceso Suspendido
+         */ /// Fin Proceso Suspendido
 
-      SQL("""DELETE FROM siap.reporte_evento re1 WHERE re1.repo_id = {repo_id}""").
-      on(
-        'repo_id -> reporte.repo_id
-      ).executeUpdate()
-      reporte.eventos.map { eventos =>
-        for (e <- eventos) {
-          if (e.aap_id != None) {
-            var elemento: Elemento = null
-            var bombillo_retirado = None: Option[String]
-            var bombillo_instalado = None: Option[String]
-            var balasto_retirado = None: Option[String]
-            var balasto_instalado = None: Option[String]
-            var arrancador_retirado = None: Option[String]
-            var arrancador_instalado = None: Option[String]
-            var condensador_retirado = None: Option[String]
-            var condensador_instalado = None: Option[String]
-            var fotocelda_retirado = None: Option[String]
-            var fotocelda_instalado = None: Option[String]
+        SQL(
+          """DELETE FROM siap.reporte_evento re1 WHERE re1.repo_id = {repo_id}"""
+        ).on(
+            'repo_id -> reporte.repo_id
+          )
+          .executeUpdate()
+        reporte.eventos.map { eventos =>
+          for (e <- eventos) {
+            if (e.aap_id != None) {
+              var elemento: Elemento = null
+              var bombillo_retirado = None: Option[String]
+              var bombillo_instalado = None: Option[String]
+              var balasto_retirado = None: Option[String]
+              var balasto_instalado = None: Option[String]
+              var arrancador_retirado = None: Option[String]
+              var arrancador_instalado = None: Option[String]
+              var condensador_retirado = None: Option[String]
+              var condensador_instalado = None: Option[String]
+              var fotocelda_retirado = None: Option[String]
+              var fotocelda_instalado = None: Option[String]
 
-            e.elem_id match {
-              case None => None
-              case Some(elem_id) =>
-                elemento = elementoService.buscarPorId(elem_id).get
-            }
-            // Actualizar Evento si ya Existe
-            var estado = 0
-            e.even_estado match {
-              case Some(1) => estado = 2
-              case Some(2) => estado = 2
-              case Some(8) => estado = 9
-              case Some(9) => estado = 9
-              case _       => estado = 2
-            }
-            var eventoActualizado: Boolean = false
-            var eventoInsertado: Boolean = false
-            eventoActualizado = SQL(
-              """UPDATE siap.reporte_evento SET 
+              e.elem_id match {
+                case None => None
+                case Some(elem_id) =>
+                  elemento = elementoService.buscarPorId(elem_id).get
+              }
+              // Actualizar Evento si ya Existe
+              var estado = 0
+              e.even_estado match {
+                case Some(1) => estado = 2
+                case Some(2) => estado = 2
+                case Some(8) => estado = 9
+                case Some(9) => estado = 9
+                case _       => estado = 2
+              }
+              var eventoActualizado: Boolean = false
+              var eventoInsertado: Boolean = false
+              eventoActualizado = SQL(
+                """UPDATE siap.reporte_evento SET 
                                                                 even_fecha = {even_fecha}, 
                                                                 even_estado = {even_estado},
                                                                 even_codigo_retirado = {even_codigo_retirado},                                                                 
@@ -6123,25 +6519,25 @@ class ReporteRepository @Inject()(
                                                                 unit_id = {unit_id}
                                                             WHERE repo_id = {repo_id} and aap_id = {aap_id} and elem_id = {elem_id} AND even_id = {even_id}
                                                         """
-            ).on(
-                'even_fecha -> hora,
-                'elem_id -> e.elem_id,
-                'even_codigo_retirado -> e.even_codigo_retirado,
-                'even_cantidad_retirado -> e.even_cantidad_retirado,
-                'even_codigo_instalado -> e.even_codigo_instalado,
-                'even_cantidad_instalado -> e.even_cantidad_instalado,
-                'usua_id -> reporte.usua_id,
-                'even_estado -> estado,
-                'empr_id -> reporte.empr_id,
-                'repo_id -> reporte.repo_id,
-                'aap_id -> e.aap_id,
-                'unit_id -> e.unit_id,
-                'even_id -> e.even_id
-              )
-              .executeUpdate() > 0
-            if (!eventoActualizado) {
-              eventoInsertado = SQL(
-                """INSERT INTO siap.reporte_evento (even_fecha, 
+              ).on(
+                  'even_fecha -> hora,
+                  'elem_id -> e.elem_id,
+                  'even_codigo_retirado -> e.even_codigo_retirado,
+                  'even_cantidad_retirado -> e.even_cantidad_retirado,
+                  'even_codigo_instalado -> e.even_codigo_instalado,
+                  'even_cantidad_instalado -> e.even_cantidad_instalado,
+                  'usua_id -> reporte.usua_id,
+                  'even_estado -> estado,
+                  'empr_id -> reporte.empr_id,
+                  'repo_id -> reporte.repo_id,
+                  'aap_id -> e.aap_id,
+                  'unit_id -> e.unit_id,
+                  'even_id -> e.even_id
+                )
+                .executeUpdate() > 0
+              if (!eventoActualizado) {
+                eventoInsertado = SQL(
+                  """INSERT INTO siap.reporte_evento (even_fecha, 
                                     even_codigo_instalado,
                                     even_cantidad_instalado,
                                     even_codigo_retirado,
@@ -6167,28 +6563,28 @@ class ReporteRepository @Inject()(
                                     {empr_id},
                                     {even_id},
                                     {unit_id})"""
-              ).on(
-                  "even_fecha" -> hora,
-                  "even_codigo_instalado" -> e.even_codigo_instalado,
-                  "even_cantidad_instalado" -> e.even_cantidad_instalado,
-                  "even_codigo_retirado" -> e.even_codigo_retirado,
-                  "even_cantidad_retirado" -> e.even_cantidad_retirado,
-                  "even_estado" -> estado,
-                  "aap_id" -> e.aap_id,
-                  "repo_id" -> reporte.repo_id,
-                  "elem_id" -> e.elem_id,
-                  "usua_id" -> e.usua_id,
-                  "empr_id" -> reporte.empr_id,
-                  "even_id" -> e.even_id,
-                  "unit_id" -> e.unit_id
-                )
-                .executeUpdate() > 0
-            }
-            if ((eventoActualizado || eventoInsertado) && (estado != 9)) {
-              // validar elemento y actualizar aap_elemento
-              elemento.tiel_id match {
-                case Some(1) =>
-/*                   SQL(
+                ).on(
+                    "even_fecha" -> hora,
+                    "even_codigo_instalado" -> e.even_codigo_instalado,
+                    "even_cantidad_instalado" -> e.even_cantidad_instalado,
+                    "even_codigo_retirado" -> e.even_codigo_retirado,
+                    "even_cantidad_retirado" -> e.even_cantidad_retirado,
+                    "even_estado" -> estado,
+                    "aap_id" -> e.aap_id,
+                    "repo_id" -> reporte.repo_id,
+                    "elem_id" -> e.elem_id,
+                    "usua_id" -> e.usua_id,
+                    "empr_id" -> reporte.empr_id,
+                    "even_id" -> e.even_id,
+                    "unit_id" -> e.unit_id
+                  )
+                  .executeUpdate() > 0
+              }
+              if ((eventoActualizado || eventoInsertado) && (estado != 9)) {
+                // validar elemento y actualizar aap_elemento
+                elemento.tiel_id match {
+                  case Some(1) =>
+                  /*                   SQL(
                     """UPDATE siap.aap_elemento SET aap_bombillo = {aap_bombillo}, reti_id = {reti_id} , repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_bombillo -> e.even_codigo_instalado,
@@ -6198,7 +6594,7 @@ class ReporteRepository @Inject()(
                       'repo_consecutivo -> reporte.repo_consecutivo
                     )
                     .executeUpdate() */
-/*                   val updated: Boolean = SQL(
+                  /*                   val updated: Boolean = SQL(
                     """UPDATE siap.aap_elemento_historia SET aap_bombillo_retirado = {aap_bombillo_retirado}, aap_bombillo_instalado = {aap_bombillo_instalado}
                                                  WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
                   ).on(
@@ -6211,7 +6607,7 @@ class ReporteRepository @Inject()(
                       'empr_id -> reporte.empr_id
                     )
                     .executeUpdate() > 0 */
-/*                   if (!updated) {
+                  /*                   if (!updated) {
                     SQL("""INSERT INTO siap.aap_elemento_historia (
                                                     aap_id,
                                                     aael_fecha,
@@ -6266,8 +6662,8 @@ class ReporteRepository @Inject()(
                       )
                       .executeUpdate()
                   } */
-                case Some(2) =>
-/*                   SQL(
+                  case Some(2) =>
+                  /*                   SQL(
                     """UPDATE siap.aap_elemento SET aap_balasto = {aap_balasto}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_balasto -> e.even_codigo_instalado,
@@ -6324,7 +6720,7 @@ class ReporteRepository @Inject()(
                                                     {reti_id},
                                                     {repo_consecutivo},
                                                     {empr_id}
-                                                    )                                                    
+                                                    )
                                                 """)
                       .on(
                         'aap_bombillo_retirado -> "",
@@ -6345,8 +6741,9 @@ class ReporteRepository @Inject()(
                       )
                       //.executeUpdate()
                   }
- */                case Some(3) =>
-/*                   SQL(
+                   */
+                  case Some(3) =>
+                  /*                   SQL(
                     """UPDATE siap.aap_elemento SET aap_arrancador = {aap_arrancador}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_arrancador -> e.even_codigo_instalado,
@@ -6403,7 +6800,7 @@ class ReporteRepository @Inject()(
                                                     {reti_id},
                                                     {repo_consecutivo},
                                                     {empr_id}
-                                                    )                                                    
+                                                    )
                                                 """)
                       .on(
                         'aap_bombillo_retirado -> "",
@@ -6424,8 +6821,9 @@ class ReporteRepository @Inject()(
                       )
                       //.executeUpdate()
                   }
- */                case Some(4) =>
-/*                   SQL(
+                   */
+                  case Some(4) =>
+                  /*                   SQL(
                     """UPDATE siap.aap_elemento SET aap_condensador = {aap_condensador}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_condensador -> e.even_codigo_instalado,
@@ -6482,7 +6880,7 @@ class ReporteRepository @Inject()(
                                                     {reti_id},
                                                     {repo_consecutivo},
                                                     {empr_id}
-                                                    )                                                    
+                                                    )
                                                 """)
                       .on(
                         'aap_bombillo_retirado -> "",
@@ -6503,8 +6901,9 @@ class ReporteRepository @Inject()(
                       )
                       //.executeUpdate()
                   }
- */                case Some(5) =>
-/*                   SQL(
+                   */
+                  case Some(5) =>
+                  /*                   SQL(
                     """UPDATE siap.aap_elemento SET aap_fotocelda = {aap_fotocelda}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_fotocelda -> e.even_codigo_instalado,
@@ -6561,7 +6960,7 @@ class ReporteRepository @Inject()(
                                                     {reti_id},
                                                     {repo_consecutivo},
                                                     {empr_id}
-                                                    )                                                    
+                                                    )
                                                 """)
                       .on(
                         'aap_bombillo_retirado -> "",
@@ -6582,58 +6981,70 @@ class ReporteRepository @Inject()(
                       )
                       //.executeUpdate()
                   }
- */                case _ => None
+                   */
+                  case _ => None
+                }
               }
             }
           }
         }
-      }
 
-      SQL("""DELETE FROM siap.reporte_direccion rd1 WHERE rd1.repo_id = {repo_id}""").
-      on(
-        'repo_id -> reporte.repo_id
-      ).executeUpdate()
-      SQL("""DELETE FROM siap.reporte_direccion_dato rdd1 WHERE rdd1.repo_id = {repo_id}""").
-      on(
-        'repo_id -> reporte.repo_id
-      ).executeUpdate()
-      SQL("""DELETE FROM siap.reporte_direccion_dato_adicional rdda1 WHERE rdda1.repo_id = {repo_id}""").
-      on(
-        'repo_id -> reporte.repo_id
-      ).executeUpdate()
-      SQL("""DELETE FROM siap.reporte_direccion_foto rdf1 WHERE rdf1.repo_id = {repo_id}""").
-      on(
-        'repo_id -> reporte.repo_id
-      ).executeUpdate()      
-      reporte.direcciones.map { direcciones =>
-        for (d <- direcciones) {
-          if (d.aap_id != None && d.aap_id.get != "" && d.aap_id.get.toInt > 0) {            
-            var dirActualizado: Boolean = false
-            var dirInsertado: Boolean = false
-            var datoActualizado: Boolean = false
-            var datoInsertado: Boolean = false
-            var datoadicionalInsertado: Boolean = false
-            var datoadicionalActualizado: Boolean = false
-            val aap = aapService.buscarPorId(d.aap_id.get, reporte.empr_id.get) match {
-              case Some(a) => a
-              case None => { 
+        SQL(
+          """DELETE FROM siap.reporte_direccion rd1 WHERE rd1.repo_id = {repo_id}"""
+        ).on(
+            'repo_id -> reporte.repo_id
+          )
+          .executeUpdate()
+        SQL(
+          """DELETE FROM siap.reporte_direccion_dato rdd1 WHERE rdd1.repo_id = {repo_id}"""
+        ).on(
+            'repo_id -> reporte.repo_id
+          )
+          .executeUpdate()
+        SQL(
+          """DELETE FROM siap.reporte_direccion_dato_adicional rdda1 WHERE rdda1.repo_id = {repo_id}"""
+        ).on(
+            'repo_id -> reporte.repo_id
+          )
+          .executeUpdate()
+        SQL(
+          """DELETE FROM siap.reporte_direccion_foto rdf1 WHERE rdf1.repo_id = {repo_id}"""
+        ).on(
+            'repo_id -> reporte.repo_id
+          )
+          .executeUpdate()
+        reporte.direcciones.map { direcciones =>
+          for (d <- direcciones) {
+            if (d.aap_id != None && d.aap_id.get.toInt > 0) {
+              var dirActualizado: Boolean = false
+              var dirInsertado: Boolean = false
+              var datoActualizado: Boolean = false
+              var datoInsertado: Boolean = false
+              var datoadicionalInsertado: Boolean = false
+              var datoadicionalActualizado: Boolean = false
+              val aap = aapService.buscarPorId(
+                d.aap_id.get,
+                reporte.empr_id.get
+              ) match {
+                case Some(a) => a
+                case None => {
                   val app = Aap.empty
                   val a = app.copy(aap_id = d.aap_id)
                   a
+                }
               }
-            }
 
-            var estado = 0
-            d.even_estado match {
-              case Some(1) => estado = 2
-              case Some(2) => estado = 2
-              case Some(8) => estado = 9
-              case Some(9) => estado = 9
-              case _       => estado = 2
-            }
-            // Direccion
-            dirActualizado = SQL(
-              """UPDATE siap.reporte_direccion SET
+              var estado = 0
+              d.even_estado match {
+                case Some(1) => estado = 2
+                case Some(2) => estado = 2
+                case Some(8) => estado = 9
+                case Some(9) => estado = 9
+                case _       => estado = 2
+              }
+              // Direccion
+              dirActualizado = SQL(
+                """UPDATE siap.reporte_direccion SET
                                                 even_direccion = {even_direccion},
                                                 barr_id = {barr_id},
                                                 even_direccion_anterior = {even_direccion_anterior},
@@ -6645,42 +7056,42 @@ class ReporteRepository @Inject()(
                                             WHERE
                                                 repo_id = {repo_id} and
                                                 aap_id = {aap_id} """
-            ).on(
-                'even_direccion -> d.even_direccion,
-                'barr_id -> d.barr_id,
-                'even_direccion_anterior -> d.even_direccion_anterior,
-                'barr_id_anterior -> d.barr_id_anterior,
-                'even_estado -> estado,
-                'tire_id -> reporte.tireuc_id,
-                'repo_id -> reporte.repo_id,
-                'aap_id -> d.aap_id,
-                'even_horaini -> d.even_horaini,
-                'even_horafin -> d.even_horafin
-              )
-              .executeUpdate() > 0
-
-            if (!dirActualizado) {
-              dirInsertado = SQL(
-                """INSERT INTO siap.reporte_direccion (repo_id, aap_id, even_direccion, barr_id, even_id, even_direccion_anterior, barr_id_anterior, even_estado, tire_id, even_horaini, even_horafin) VALUES ({repo_id}, {aap_id}, {even_direccion}, {barr_id}, {even_id}, {even_direccion_anterior}, {barr_id_anterior}, {even_estado}, {tire_id}, {even_horaini}, {even_horafin})"""
               ).on(
-                  'repo_id -> reporte.repo_id,
-                  'aap_id -> d.aap_id,
                   'even_direccion -> d.even_direccion,
                   'barr_id -> d.barr_id,
-                  'even_id -> d.even_id,
-                  'even_horaini -> d.even_horaini,
-                  'even_horafin -> d.even_horafin,
+                  'even_direccion_anterior -> d.even_direccion_anterior,
+                  'barr_id_anterior -> d.barr_id_anterior,
+                  'even_estado -> estado,
                   'tire_id -> reporte.tireuc_id,
-                  'even_direccion_anterior -> aap.aap_direccion,
-                  'barr_id_anterior -> aap.barr_id,
-                  'even_estado -> estado
+                  'repo_id -> reporte.repo_id,
+                  'aap_id -> d.aap_id,
+                  'even_horaini -> d.even_horaini,
+                  'even_horafin -> d.even_horafin
                 )
                 .executeUpdate() > 0
-            }
-            // Fin Direccion
-            // Direccion Dato
-            datoActualizado = SQL(
-              """UPDATE siap.reporte_direccion_dato SET
+
+              if (!dirActualizado) {
+                dirInsertado = SQL(
+                  """INSERT INTO siap.reporte_direccion (repo_id, aap_id, even_direccion, barr_id, even_id, even_direccion_anterior, barr_id_anterior, even_estado, tire_id, even_horaini, even_horafin) VALUES ({repo_id}, {aap_id}, {even_direccion}, {barr_id}, {even_id}, {even_direccion_anterior}, {barr_id_anterior}, {even_estado}, {tire_id}, {even_horaini}, {even_horafin})"""
+                ).on(
+                    'repo_id -> reporte.repo_id,
+                    'aap_id -> d.aap_id,
+                    'even_direccion -> d.even_direccion,
+                    'barr_id -> d.barr_id,
+                    'even_id -> d.even_id,
+                    'even_horaini -> d.even_horaini,
+                    'even_horafin -> d.even_horafin,
+                    'tire_id -> reporte.tireuc_id,
+                    'even_direccion_anterior -> aap.aap_direccion,
+                    'barr_id_anterior -> aap.barr_id,
+                    'even_estado -> estado
+                  )
+                  .executeUpdate() > 0
+              }
+              // Fin Direccion
+              // Direccion Dato
+              datoActualizado = SQL(
+                """UPDATE siap.reporte_direccion_dato SET
                             aatc_id = {aatc_id},
                             aatc_id_anterior = {aatc_id_anterior},
                             aama_id = {aama_id},
@@ -6706,35 +7117,35 @@ class ReporteRepository @Inject()(
                             repo_id = {repo_id} and 
                             aap_id = {aap_id}
                         """
-            ).on(
-                'aatc_id -> d.dato.get.aatc_id,
-                'aatc_id_anterior -> d.dato.get.aatc_id_anterior,
-                'aama_id -> d.dato.get.aama_id,
-                'aama_id_anterior -> d.dato.get.aama_id_anterior,
-                'aamo_id -> d.dato.get.aamo_id,
-                'aamo_id_anterior -> d.dato.get.aamo_id_anterior,
-                'aaco_id -> d.dato.get.aaco_id,
-                'aaco_id_anterior -> d.dato.get.aaco_id_anterior,
-                'aap_potencia -> d.dato.get.aap_potencia,
-                'aap_potencia_anterior -> d.dato.get.aap_potencia_anterior,
-                'aap_tecnologia -> d.dato.get.aap_tecnologia,
-                'aap_tecnologia_anterior -> d.dato.get.aap_tecnologia_anterior,
-                'aap_brazo -> d.dato.get.aap_brazo,
-                'aap_brazo_anterior -> d.dato.get.aap_brazo_anterior,
-                'aap_collarin -> d.dato.get.aap_collarin,
-                'aap_collarin_anterior -> d.dato.get.aap_collarin_anterior,
-                'tipo_id -> d.dato.get.tipo_id,
-                'tipo_id_anterior -> d.dato.get.tipo_id_anterior,
-                'aap_poste_altura -> d.dato.get.aap_poste_altura,
-                'aap_poste_altura_anterior -> d.dato.get.aap_poste_altura_anterior,
-                'aap_poste_propietario -> d.dato.get.aap_poste_propietario,
-                'aap_poste_propietario_anterior -> d.dato.get.aap_poste_propietario_anterior,
-                'repo_id -> reporte.repo_id,
-                'aap_id -> d.aap_id
-              )
-              .executeUpdate() > 0
-            if (!datoActualizado) {
-              datoInsertado = SQL("""INSERT INTO siap.reporte_direccion_dato (
+              ).on(
+                  'aatc_id -> d.dato.get.aatc_id,
+                  'aatc_id_anterior -> d.dato.get.aatc_id_anterior,
+                  'aama_id -> d.dato.get.aama_id,
+                  'aama_id_anterior -> d.dato.get.aama_id_anterior,
+                  'aamo_id -> d.dato.get.aamo_id,
+                  'aamo_id_anterior -> d.dato.get.aamo_id_anterior,
+                  'aaco_id -> d.dato.get.aaco_id,
+                  'aaco_id_anterior -> d.dato.get.aaco_id_anterior,
+                  'aap_potencia -> d.dato.get.aap_potencia,
+                  'aap_potencia_anterior -> d.dato.get.aap_potencia_anterior,
+                  'aap_tecnologia -> d.dato.get.aap_tecnologia,
+                  'aap_tecnologia_anterior -> d.dato.get.aap_tecnologia_anterior,
+                  'aap_brazo -> d.dato.get.aap_brazo,
+                  'aap_brazo_anterior -> d.dato.get.aap_brazo_anterior,
+                  'aap_collarin -> d.dato.get.aap_collarin,
+                  'aap_collarin_anterior -> d.dato.get.aap_collarin_anterior,
+                  'tipo_id -> d.dato.get.tipo_id,
+                  'tipo_id_anterior -> d.dato.get.tipo_id_anterior,
+                  'aap_poste_altura -> d.dato.get.aap_poste_altura,
+                  'aap_poste_altura_anterior -> d.dato.get.aap_poste_altura_anterior,
+                  'aap_poste_propietario -> d.dato.get.aap_poste_propietario,
+                  'aap_poste_propietario_anterior -> d.dato.get.aap_poste_propietario_anterior,
+                  'repo_id -> reporte.repo_id,
+                  'aap_id -> d.aap_id
+                )
+                .executeUpdate() > 0
+              if (!datoActualizado) {
+                datoInsertado = SQL("""INSERT INTO siap.reporte_direccion_dato (
                                 repo_id,
                                 even_id,
                                 aap_id,
@@ -6788,58 +7199,63 @@ class ReporteRepository @Inject()(
                                     {aap_poste_propietario_anterior}
                                 )
                             """)
-                .on(
-                  'aatc_id -> d.dato.get.aatc_id,
-                  'aatc_id_anterior -> d.dato.get.aatc_id_anterior,
-                  'aama_id -> d.dato.get.aama_id,
-                  'aama_id_anterior -> d.dato.get.aama_id_anterior,
-                  'aamo_id -> d.dato.get.aamo_id,
-                  'aamo_id_anterior -> d.dato.get.aamo_id_anterior,
-                  'aaco_id -> d.dato.get.aaco_id,
-                  'aaco_id_anterior -> d.dato.get.aaco_id_anterior,
-                  'aap_potencia -> d.dato.get.aap_potencia,
-                  'aap_potencia_anterior -> d.dato.get.aap_potencia_anterior,
-                  'aap_tecnologia -> d.dato.get.aap_tecnologia,
-                  'aap_tecnologia_anterior -> d.dato.get.aap_tecnologia_anterior,
-                  'aap_brazo -> d.dato.get.aap_brazo,
-                  'aap_brazo_anterior -> d.dato.get.aap_brazo_anterior,
-                  'aap_collarin -> d.dato.get.aap_collarin,
-                  'aap_collarin_anterior -> d.dato.get.aap_collarin_anterior,
-                  'tipo_id -> d.dato.get.tipo_id,
-                  'tipo_id_anterior -> d.dato.get.tipo_id_anterior,
-                  'aap_poste_altura -> d.dato.get.aap_poste_altura,
-                  'aap_poste_altura_anterior -> d.dato.get.aap_poste_altura_anterior,
-                  'aap_poste_propietario -> d.dato.get.aap_poste_propietario,
-                  'aap_poste_propietario_anterior -> d.dato.get.aap_poste_propietario_anterior,
-                  'repo_id -> reporte.repo_id,
-                  'aap_id -> d.aap_id,
-                  'even_id -> d.even_id
-                )
-                .executeUpdate() > 0
-            }
-            // Fin Direccion Dato
-            // Direccion Dato Adicional
-            var medi_id = medidorService.buscarPorAap(aap.aap_id.get, aap.empr_id) match { 
-              case Some(m) => m.medi_id
-              case None => None
-            }
-            var tran_id = transformadorService.buscarPorId(aap.aap_id.get, aap.empr_id) match {
-              case Some(t) => t.aap_id
-              case None => None
-            }
-            var aacu_id:Option[Int] = SQL("""
+                  .on(
+                    'aatc_id -> d.dato.get.aatc_id,
+                    'aatc_id_anterior -> d.dato.get.aatc_id_anterior,
+                    'aama_id -> d.dato.get.aama_id,
+                    'aama_id_anterior -> d.dato.get.aama_id_anterior,
+                    'aamo_id -> d.dato.get.aamo_id,
+                    'aamo_id_anterior -> d.dato.get.aamo_id_anterior,
+                    'aaco_id -> d.dato.get.aaco_id,
+                    'aaco_id_anterior -> d.dato.get.aaco_id_anterior,
+                    'aap_potencia -> d.dato.get.aap_potencia,
+                    'aap_potencia_anterior -> d.dato.get.aap_potencia_anterior,
+                    'aap_tecnologia -> d.dato.get.aap_tecnologia,
+                    'aap_tecnologia_anterior -> d.dato.get.aap_tecnologia_anterior,
+                    'aap_brazo -> d.dato.get.aap_brazo,
+                    'aap_brazo_anterior -> d.dato.get.aap_brazo_anterior,
+                    'aap_collarin -> d.dato.get.aap_collarin,
+                    'aap_collarin_anterior -> d.dato.get.aap_collarin_anterior,
+                    'tipo_id -> d.dato.get.tipo_id,
+                    'tipo_id_anterior -> d.dato.get.tipo_id_anterior,
+                    'aap_poste_altura -> d.dato.get.aap_poste_altura,
+                    'aap_poste_altura_anterior -> d.dato.get.aap_poste_altura_anterior,
+                    'aap_poste_propietario -> d.dato.get.aap_poste_propietario,
+                    'aap_poste_propietario_anterior -> d.dato.get.aap_poste_propietario_anterior,
+                    'repo_id -> reporte.repo_id,
+                    'aap_id -> d.aap_id,
+                    'even_id -> d.even_id
+                  )
+                  .executeUpdate() > 0
+              }
+              // Fin Direccion Dato
+              // Direccion Dato Adicional
+              var medi_id =
+                medidorService.buscarPorAap(aap.aap_id.get, aap.empr_id) match {
+                  case Some(m) => m.medi_id
+                  case None    => None
+                }
+              var tran_id = transformadorService.buscarPorId(
+                aap.aap_id.get,
+                aap.empr_id
+              ) match {
+                case Some(t) => t.aap_id
+                case None    => None
+              }
+              var aacu_id: Option[Int] =
+                SQL("""
               select acu1.aacu_id from siap.aap a1
               left join siap.aap_cuentaap acu1 on
 	            acu1.aacu_aaco = a1.aaco_id and cast(a1.aaus_id as char) in (select regexp_split_to_table(acu1.aacu_aaus,',') from siap.aap_cuentaap acu2
               where acu2.aacu_id = acu1.aacu_id)
               where a1.aap_id = {aap_id}
-            """).on('aap_id -> aap.aap_id.get).as(SqlParser.scalar[Int].singleOpt)
-               match {
-                case Some(a) => Some(a)
-                case None => Some(-1)
-            }
-            datoadicionalActualizado = SQL(
-              """UPDATE siap.reporte_direccion_dato_adicional SET 
+            """).on('aap_id -> aap.aap_id.get)
+                  .as(SqlParser.scalar[Int].singleOpt) match {
+                  case Some(a) => Some(a)
+                  case None    => Some(-1)
+                }
+              datoadicionalActualizado = SQL(
+                """UPDATE siap.reporte_direccion_dato_adicional SET 
                                 aacu_id_anterior = {aacu_id_anterior},
                                 aacu_id = {aacu_id},
                                 aaus_id_anterior = {aaus_id_anterior},
@@ -6858,28 +7274,28 @@ class ReporteRepository @Inject()(
                                     repo_id = {repo_id} and
                                     aap_id = {aap_id}
                                 """
-            ).on(
-                'aacu_id_anterior -> d.dato_adicional.get.aacu_id_anterior,
-                'aacu_id -> aacu_id,
-                'aaus_id_anterior -> d.dato_adicional.get.aaus_id_anterior,
-                'aaus_id -> d.dato_adicional.get.aaus_id,
-                'medi_id_anterior -> medi_id, //d.dato_adicional.get.medi_id_anterior,
-                'medi_id -> medi_id, //d.dato_adicional.get.medi_id,
-                'tran_id_anterior -> tran_id, //d.dato_adicional.get.tran_id_anterior,
-                'tran_id -> tran_id, //d.dato_adicional.get.tran_id,
-                'aap_apoyo -> d.dato_adicional.get.aap_apoyo,
-                'aap_apoyo_anterior -> d.dato_adicional.get.aap_apoyo,
-                'aap_lat -> d.dato_adicional.get.aap_lat,
-                'aap_lat_anterior -> d.dato_adicional.get.aap_lat_anterior,
-                'aap_lng -> d.dato_adicional.get.aap_lng,
-                'aap_lng_anterior -> d.dato_adicional.get.aap_lng_anterior,
-                'repo_id -> reporte.repo_id,
-                'aap_id -> d.aap_id
-              )
-              .executeUpdate() > 0
-            if (!datoadicionalActualizado) {
-              datoadicionalInsertado = SQL(
-                """INSERT INTO siap.reporte_direccion_dato_adicional (
+              ).on(
+                  'aacu_id_anterior -> d.dato_adicional.get.aacu_id_anterior,
+                  'aacu_id -> aacu_id,
+                  'aaus_id_anterior -> d.dato_adicional.get.aaus_id_anterior,
+                  'aaus_id -> d.dato_adicional.get.aaus_id,
+                  'medi_id_anterior -> medi_id, //d.dato_adicional.get.medi_id_anterior,
+                  'medi_id -> medi_id, //d.dato_adicional.get.medi_id,
+                  'tran_id_anterior -> tran_id, //d.dato_adicional.get.tran_id_anterior,
+                  'tran_id -> tran_id, //d.dato_adicional.get.tran_id,
+                  'aap_apoyo -> d.dato_adicional.get.aap_apoyo,
+                  'aap_apoyo_anterior -> d.dato_adicional.get.aap_apoyo,
+                  'aap_lat -> d.dato_adicional.get.aap_lat,
+                  'aap_lat_anterior -> d.dato_adicional.get.aap_lat_anterior,
+                  'aap_lng -> d.dato_adicional.get.aap_lng,
+                  'aap_lng_anterior -> d.dato_adicional.get.aap_lng_anterior,
+                  'repo_id -> reporte.repo_id,
+                  'aap_id -> d.aap_id
+                )
+                .executeUpdate() > 0
+              if (!datoadicionalActualizado) {
+                datoadicionalInsertado = SQL(
+                  """INSERT INTO siap.reporte_direccion_dato_adicional (
                                     repo_id,
                                     even_id,
                                     aap_id,
@@ -6917,32 +7333,32 @@ class ReporteRepository @Inject()(
                                     {aap_lng_anterior}
                                 )
                                 """
-              ).on(
-                  'aacu_id_anterior -> d.dato_adicional.get.aacu_id_anterior,
-                  'aacu_id -> d.dato_adicional.get.aacu_id,
-                  'aaus_id_anterior -> d.dato_adicional.get.aaus_id_anterior,
-                  'aaus_id -> d.dato_adicional.get.aaus_id,
-                  'medi_id_anterior -> medi_id, // d.dato_adicional.get.medi_id_anterior,
-                  'medi_id -> medi_id, //d.dato_adicional.get.medi_id,
-                  'tran_id_anterior -> tran_id, //d.dato_adicional.get.tran_id_anterior,
-                  'tran_id -> tran_id, // d.dato_adicional.get.tran_id,
-                  'aap_apoyo -> d.dato_adicional.get.aap_apoyo,
-                  'aap_apoyo_anterior -> d.dato_adicional.get.aap_apoyo,
-                  'aap_lat -> d.dato_adicional.get.aap_lat,
-                  'aap_lat_anterior -> d.dato_adicional.get.aap_lat_anterior,
-                  'aap_lng -> d.dato_adicional.get.aap_lng,
-                  'aap_lng_anterior -> d.dato_adicional.get.aap_lng_anterior,                  
-                  'repo_id -> reporte.repo_id,
-                  'aap_id -> d.aap_id,
-                  'even_id -> d.even_id
-                )
-                .executeUpdate() > 0
-            }
-            // Procesando Fotos
-            d.fotos.map { fotos =>
-             for (f <- fotos) {
-              val fotoActualizada = SQL(
-                """UPDATE siap.reporte_direccion_foto SET 
+                ).on(
+                    'aacu_id_anterior -> d.dato_adicional.get.aacu_id_anterior,
+                    'aacu_id -> d.dato_adicional.get.aacu_id,
+                    'aaus_id_anterior -> d.dato_adicional.get.aaus_id_anterior,
+                    'aaus_id -> d.dato_adicional.get.aaus_id,
+                    'medi_id_anterior -> medi_id, // d.dato_adicional.get.medi_id_anterior,
+                    'medi_id -> medi_id, //d.dato_adicional.get.medi_id,
+                    'tran_id_anterior -> tran_id, //d.dato_adicional.get.tran_id_anterior,
+                    'tran_id -> tran_id, // d.dato_adicional.get.tran_id,
+                    'aap_apoyo -> d.dato_adicional.get.aap_apoyo,
+                    'aap_apoyo_anterior -> d.dato_adicional.get.aap_apoyo,
+                    'aap_lat -> d.dato_adicional.get.aap_lat,
+                    'aap_lat_anterior -> d.dato_adicional.get.aap_lat_anterior,
+                    'aap_lng -> d.dato_adicional.get.aap_lng,
+                    'aap_lng_anterior -> d.dato_adicional.get.aap_lng_anterior,
+                    'repo_id -> reporte.repo_id,
+                    'aap_id -> d.aap_id,
+                    'even_id -> d.even_id
+                  )
+                  .executeUpdate() > 0
+              }
+              // Procesando Fotos
+              d.fotos.map { fotos =>
+                for (f <- fotos) {
+                  val fotoActualizada = SQL(
+                    """UPDATE siap.reporte_direccion_foto SET 
                                     refo_data = {refo_data}
                                 WHERE
                                     repo_id = {repo_id} and
@@ -6951,16 +7367,18 @@ class ReporteRepository @Inject()(
                                     refo_id = {refo_id} and
                                     refo_tipo = {refo_tipo}
                                 """
-              ).on(
-                  'repo_id -> reporte.repo_id,
-                  'tireuc_id -> reporte.tireuc_id,
-                  'aap_id -> d.aap_id,
-                  'refo_id -> f.refo_id,
-                  'refo_tipo -> f.refo_tipo,
-                  'refo_data -> f.refo_data,
-              ).executeUpdate() > 0
-              if (!fotoActualizada) {
-                val fotoInsertada = SQL("""
+                  ).on(
+                      'repo_id -> reporte.repo_id,
+                      'tireuc_id -> reporte.tireuc_id,
+                      'aap_id -> d.aap_id,
+                      'refo_id -> f.refo_id,
+                      'refo_tipo -> f.refo_tipo,
+                      'refo_data -> f.refo_data
+                    )
+                    .executeUpdate() > 0
+                  if (!fotoActualizada) {
+                    val fotoInsertada = SQL(
+                      """
                     INSERT INTO siap.reporte_direccion_foto (
                         repo_id,
                         tireuc_id,
@@ -6976,308 +7394,318 @@ class ReporteRepository @Inject()(
                         {refo_tipo},
                         {refo_data}
                     )
-                """).on(
-                    'repo_id -> reporte.repo_id,
-                    'tireuc_id -> reporte.tireuc_id,
-                    'aap_id -> d.aap_id,
-                    'refo_id -> f.refo_id,
-                    'refo_tipo -> f.refo_tipo,
-                    'refo_data -> f.refo_data,
-                ).executeUpdate() > 0
+                """
+                    ).on(
+                        'repo_id -> reporte.repo_id,
+                        'tireuc_id -> reporte.tireuc_id,
+                        'aap_id -> d.aap_id,
+                        'refo_id -> f.refo_id,
+                        'refo_tipo -> f.refo_tipo,
+                        'refo_data -> f.refo_data
+                      )
+                      .executeUpdate() > 0
+                  }
+                }
               }
-             }
-            }
 
-            // Fin Direccion Dato Adicional
-            // actualizar direccion de la luminaria y datos adicionales
-            // Actualizar direccion sin importar el tipo de reporte
-            // if (reporte.reti_id.get == 1 || reporte.reti_id.get == 2 || reporte.reti_id.get == 3) {
-          } // Fin d.aap_id != null
-        } // Fin for direcciones
-      } // Fin direcciones map
-     
-      //
-      // guardar medio ambiente
-      SQL(
-        """DELETE FROM siap.reporte_medioambiente WHERE repo_id = {repo_id}"""
-      ).on(
-          'repo_id -> reporte.repo_id
-        )
-        .execute()
+              // Fin Direccion Dato Adicional
+              // actualizar direccion de la luminaria y datos adicionales
+              // Actualizar direccion sin importar el tipo de reporte
+              // if (reporte.reti_id.get == 1 || reporte.reti_id.get == 2 || reporte.reti_id.get == 3) {
+            } // Fin d.aap_id != null
+          } // Fin for direcciones
+        } // Fin direcciones map
 
-      reporte.meams.map { meams =>
-        for (m <- meams) {
-          SQL(
-            """INSERT INTO siap.reporte_medioambiente (repo_id, meam_id) VALUES ({repo_id}, {meam_id})"""
-          ).on(
-              'repo_id -> reporte.repo_id.get,
-              'meam_id -> m
-            )
-            .executeInsert()
+        //
+        // guardar medio ambiente
+        SQL(
+          """DELETE FROM siap.reporte_medioambiente WHERE repo_id = {repo_id}"""
+        ).on(
+            'repo_id -> reporte.repo_id
+          )
+          .execute()
+
+        reporte.meams.map { meams =>
+          for (m <- meams) {
+            SQL(
+              """INSERT INTO siap.reporte_medioambiente (repo_id, meam_id) VALUES ({repo_id}, {meam_id})"""
+            ).on(
+                'repo_id -> reporte.repo_id.get,
+                'meam_id -> m
+              )
+              .executeInsert()
+          }
         }
-      }
 
-      val operaciones = reporte.direcciones match {
-        case Some(d) => d.length
-        case None => 0
-      }
+        val operaciones = reporte.direcciones match {
+          case Some(d) => d.length
+          case None    => 0
+        }
 
-      val materiales = reporte.eventos match {
-        case Some(e) => e.length
-        case None => 0
-      }
-      //
-     /*  val repoSyncUpdated = SQL("""UPDATE siap.reporte_sincronizacion SET resi_operaciones = {resi_operaciones}, resi_material = {resi_material}, resi_ultimo_sync = {resi_ultimo_sync} WHERE tireuc_id = {tireuc_id} and repo_id = {repo_id}""").on(
+        val materiales = reporte.eventos match {
+          case Some(e) => e.length
+          case None    => 0
+        }
+        //
+        /*  val repoSyncUpdated = SQL("""UPDATE siap.reporte_sincronizacion SET resi_operaciones = {resi_operaciones}, resi_material = {resi_material}, resi_ultimo_sync = {resi_ultimo_sync} WHERE tireuc_id = {tireuc_id} and repo_id = {repo_id}""").on(
           'resi_ultimo_sync -> new DateTime(),
           'resi_operaciones -> operaciones,
           'resi_material -> materiales,
           'tireuc_id -> reporte.tireuc_id,
           'repo_id -> reporte.repo_id.get
         ).executeUpdate() > 0 */
-      val repoSyncUpdated = false
+        val repoSyncUpdated = false
 
-      if (!repoSyncUpdated) {
-         SQL("""INSERT INTO siap.reporte_sincronizacion VALUES ({tireuc_id}, {repo_id}, {reti_id}, {repo_consecutivo}, {resi_ultimo_sync}, {resi_operaciones}, {resi_material})""").
-      on(
-          'tireuc_id -> reporte.tireuc_id,
-          'repo_id -> reporte.repo_id,
-          'reti_id -> reporte.reti_id,
-          'repo_consecutivo -> reporte.repo_consecutivo,
-          'resi_ultimo_sync -> DateTime.now(),
-          'resi_operaciones -> operaciones,
-          'resi_material -> materiales,
-        ).executeInsert()
+        if (!repoSyncUpdated) {
+          SQL(
+            """INSERT INTO siap.reporte_sincronizacion VALUES ({tireuc_id}, {repo_id}, {reti_id}, {repo_consecutivo}, {resi_ultimo_sync}, {resi_operaciones}, {resi_material})"""
+          ).on(
+              'tireuc_id -> reporte.tireuc_id,
+              'repo_id -> reporte.repo_id,
+              'reti_id -> reporte.reti_id,
+              'repo_consecutivo -> reporte.repo_consecutivo,
+              'resi_ultimo_sync -> DateTime.now(),
+              'resi_operaciones -> operaciones,
+              'resi_material -> materiales
+            )
+            .executeInsert()
+        }
+        if (reporte_ant != None) {
+          if (reporte_ant.get.repo_fecharecepcion != reporte.repo_fecharecepcion) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "repo_fecharecepcion",
+                'audi_valorantiguo -> reporte_ant.get.repo_fecharecepcion,
+                'audi_valornuevo -> reporte.repo_fecharecepcion,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+
+          if (reporte_ant.get.repo_direccion != reporte.repo_direccion) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "repo_direccion",
+                'audi_valorantiguo -> reporte_ant.get.repo_direccion,
+                'audi_valornuevo -> reporte.repo_direccion,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+
+          if (reporte_ant.get.repo_nombre != reporte.repo_nombre) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "repo_nombre",
+                'audi_valorantiguo -> reporte_ant.get.repo_nombre,
+                'audi_valornuevo -> reporte.repo_nombre,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+
+          if (reporte_ant.get.repo_telefono != reporte.repo_telefono) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "repo_telefono",
+                'audi_valorantiguo -> reporte_ant.get.repo_telefono,
+                'audi_valornuevo -> reporte.repo_telefono,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+
+          if (reporte_ant.get.repo_fechasolucion != reporte.repo_fechasolucion) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "repo_fechasolucion",
+                'audi_valorantiguo -> reporte_ant.get.repo_fechasolucion,
+                'audi_valornuevo -> reporte.repo_fechasolucion,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+
+          if (reporte_ant.get.repo_horainicio != reporte.repo_horainicio) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "repo_horainicio",
+                'audi_valorantiguo -> reporte_ant.get.repo_horainicio,
+                'audi_valornuevo -> reporte.repo_horainicio,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+
+          if (reporte_ant.get.repo_horafin != reporte.repo_horafin) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "repo_horafin",
+                'audi_valorantiguo -> reporte_ant.get.repo_horafin,
+                'audi_valornuevo -> reporte.repo_horafin,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+
+          if (reporte_ant.get.repo_reportetecnico != reporte.repo_reportetecnico) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "repo_reportetecnico",
+                'audi_valorantiguo -> reporte_ant.get.repo_reportetecnico,
+                'audi_valornuevo -> reporte.repo_reportetecnico,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+
+          if (reporte_ant.get.rees_id != reporte.rees_id) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.rees_id,
+                'audi_campo -> "rees_id",
+                'audi_valorantiguo -> reporte_ant.get.rees_id,
+                'audi_valornuevo -> reporte.rees_id,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+
+          if (reporte_ant.get.orig_id != reporte.orig_id) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "orig_id",
+                'audi_valorantiguo -> reporte_ant.get.orig_id,
+                'audi_valornuevo -> reporte.orig_id,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+
+          if (reporte_ant.get.barr_id != reporte.barr_id) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "barr_id",
+                'audi_valorantiguo -> reporte_ant.get.barr_id,
+                'audi_valornuevo -> reporte.barr_id,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+
+          if (reporte_ant.get.empr_id != reporte.empr_id) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "empr_id",
+                'audi_valorantiguo -> reporte_ant.get.empr_id,
+                'audi_valornuevo -> reporte.empr_id,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+
+          if (reporte_ant.get.usua_id != reporte.usua_id) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "usua_id",
+                'audi_valorantiguo -> reporte_ant.get.usua_id,
+                'audi_valornuevo -> reporte.usua_id,
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+        }
+        //}
+
+        result = true
       }
-      if (reporte_ant != None) {
-        if (reporte_ant.get.repo_fecharecepcion != reporte.repo_fecharecepcion) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "repo_fecharecepcion",
-              'audi_valorantiguo -> reporte_ant.get.repo_fecharecepcion,
-              'audi_valornuevo -> reporte.repo_fecharecepcion,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
-
-        if (reporte_ant.get.repo_direccion != reporte.repo_direccion) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "repo_direccion",
-              'audi_valorantiguo -> reporte_ant.get.repo_direccion,
-              'audi_valornuevo -> reporte.repo_direccion,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
-
-        if (reporte_ant.get.repo_nombre != reporte.repo_nombre) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "repo_nombre",
-              'audi_valorantiguo -> reporte_ant.get.repo_nombre,
-              'audi_valornuevo -> reporte.repo_nombre,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
-
-        if (reporte_ant.get.repo_telefono != reporte.repo_telefono) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "repo_telefono",
-              'audi_valorantiguo -> reporte_ant.get.repo_telefono,
-              'audi_valornuevo -> reporte.repo_telefono,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
-
-        if (reporte_ant.get.repo_fechasolucion != reporte.repo_fechasolucion) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "repo_fechasolucion",
-              'audi_valorantiguo -> reporte_ant.get.repo_fechasolucion,
-              'audi_valornuevo -> reporte.repo_fechasolucion,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
-
-        if (reporte_ant.get.repo_horainicio != reporte.repo_horainicio) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "repo_horainicio",
-              'audi_valorantiguo -> reporte_ant.get.repo_horainicio,
-              'audi_valornuevo -> reporte.repo_horainicio,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
-
-        if (reporte_ant.get.repo_horafin != reporte.repo_horafin) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "repo_horafin",
-              'audi_valorantiguo -> reporte_ant.get.repo_horafin,
-              'audi_valornuevo -> reporte.repo_horafin,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
-
-        if (reporte_ant.get.repo_reportetecnico != reporte.repo_reportetecnico) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "repo_reportetecnico",
-              'audi_valorantiguo -> reporte_ant.get.repo_reportetecnico,
-              'audi_valornuevo -> reporte.repo_reportetecnico,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
-
-        if (reporte_ant.get.rees_id != reporte.rees_id) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.rees_id,
-              'audi_campo -> "rees_id",
-              'audi_valorantiguo -> reporte_ant.get.rees_id,
-              'audi_valornuevo -> reporte.rees_id,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
-
-        if (reporte_ant.get.orig_id != reporte.orig_id) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "orig_id",
-              'audi_valorantiguo -> reporte_ant.get.orig_id,
-              'audi_valornuevo -> reporte.orig_id,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
-
-        if (reporte_ant.get.barr_id != reporte.barr_id) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "barr_id",
-              'audi_valorantiguo -> reporte_ant.get.barr_id,
-              'audi_valornuevo -> reporte.barr_id,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
-
-        if (reporte_ant.get.empr_id != reporte.empr_id) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "empr_id",
-              'audi_valorantiguo -> reporte_ant.get.empr_id,
-              'audi_valornuevo -> reporte.empr_id,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
-
-        if (reporte_ant.get.usua_id != reporte.usua_id) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "usua_id",
-              'audi_valorantiguo -> reporte_ant.get.usua_id,
-              'audi_valornuevo -> reporte.usua_id,
-              'audi_evento -> "A"
-            )
-            .executeInsert()
-        }
+    } catch {
+      case e: Exception => {
+        println("Guardando Reporte Movil Luminaria Error: " + e.getMessage())
+        result = false
       }
-    //}
-
-      result
     }
+    result
   }
 
-
-    def actualizarMaterialMovil(
+  def actualizarMaterialMovil(
       eventos: List[Evento],
       repo_id: Long
   ): Boolean = {
@@ -7288,44 +7716,44 @@ class ReporteRepository @Inject()(
       case Some(reporte) =>
         db.withConnection { implicit connection =>
           val fecha: LocalDate =
-          new LocalDate(Calendar.getInstance().getTimeInMillis())
+            new LocalDate(Calendar.getInstance().getTimeInMillis())
           val hora: LocalDateTime =
-          new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+            new LocalDateTime(Calendar.getInstance().getTimeInMillis())
 
-      // Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
+          // Proceso de Creación de Luminarias Nuevas por Expansión Tipo III
 
-       for (e <- eventos) {
+          for (e <- eventos) {
             if (e.aap_id != None) {
-            var elemento: Elemento = null
-            var bombillo_retirado = None: Option[String]
-            var bombillo_instalado = None: Option[String]
-            var balasto_retirado = None: Option[String]
-            var balasto_instalado = None: Option[String]
-            var arrancador_retirado = None: Option[String]
-            var arrancador_instalado = None: Option[String]
-            var condensador_retirado = None: Option[String]
-            var condensador_instalado = None: Option[String]
-            var fotocelda_retirado = None: Option[String]
-            var fotocelda_instalado = None: Option[String]
+              var elemento: Elemento = null
+              var bombillo_retirado = None: Option[String]
+              var bombillo_instalado = None: Option[String]
+              var balasto_retirado = None: Option[String]
+              var balasto_instalado = None: Option[String]
+              var arrancador_retirado = None: Option[String]
+              var arrancador_instalado = None: Option[String]
+              var condensador_retirado = None: Option[String]
+              var condensador_instalado = None: Option[String]
+              var fotocelda_retirado = None: Option[String]
+              var fotocelda_instalado = None: Option[String]
 
-            e.elem_id match {
-              case None => None
-              case Some(elem_id) =>
-                elemento = elementoService.buscarPorId(elem_id).get
-            }
-            // Actualizar Evento si ya Existe
-            var estado = 0
-            e.even_estado match {
-              case Some(1) => estado = 2
-              case Some(2) => estado = 2
-              case Some(8) => estado = 9
-              case Some(9) => estado = 9
-              case _       => estado = 2
-            }
-            var eventoActualizado: Boolean = false
-            var eventoInsertado: Boolean = false
-            eventoActualizado = SQL(
-              """UPDATE siap.reporte_evento SET 
+              e.elem_id match {
+                case None => None
+                case Some(elem_id) =>
+                  elemento = elementoService.buscarPorId(elem_id).get
+              }
+              // Actualizar Evento si ya Existe
+              var estado = 0
+              e.even_estado match {
+                case Some(1) => estado = 2
+                case Some(2) => estado = 2
+                case Some(8) => estado = 9
+                case Some(9) => estado = 9
+                case _       => estado = 2
+              }
+              var eventoActualizado: Boolean = false
+              var eventoInsertado: Boolean = false
+              eventoActualizado = SQL(
+                """UPDATE siap.reporte_evento SET 
                                                                 even_fecha = {even_fecha}, 
                                                                 even_estado = {even_estado},
                                                                 even_codigo_retirado = {even_codigo_retirado},                                                                 
@@ -7336,24 +7764,24 @@ class ReporteRepository @Inject()(
                                                                 unit_id = {unit_id}
                                                             WHERE repo_id = {repo_id} and aap_id = {aap_id} and elem_id = {elem_id}
                                                         """
-            ).on(
-                'even_fecha -> hora,
-                'elem_id -> e.elem_id,
-                'even_codigo_retirado -> e.even_codigo_retirado,
-                'even_cantidad_retirado -> e.even_cantidad_retirado,
-                'even_codigo_instalado -> e.even_codigo_instalado,
-                'even_cantidad_instalado -> e.even_cantidad_instalado,
-                'usua_id -> reporte.usua_id,
-                'even_estado -> estado,
-                'empr_id -> reporte.empr_id,
-                'repo_id -> reporte.repo_id,
-                'aap_id -> e.aap_id,
-                'unit_id -> e.unit_id
-              )
-              .executeUpdate() > 0
-            if (!eventoActualizado) {
-              eventoInsertado = SQL(
-                """INSERT INTO siap.reporte_evento (even_fecha, 
+              ).on(
+                  'even_fecha -> hora,
+                  'elem_id -> e.elem_id,
+                  'even_codigo_retirado -> e.even_codigo_retirado,
+                  'even_cantidad_retirado -> e.even_cantidad_retirado,
+                  'even_codigo_instalado -> e.even_codigo_instalado,
+                  'even_cantidad_instalado -> e.even_cantidad_instalado,
+                  'usua_id -> reporte.usua_id,
+                  'even_estado -> estado,
+                  'empr_id -> reporte.empr_id,
+                  'repo_id -> reporte.repo_id,
+                  'aap_id -> e.aap_id,
+                  'unit_id -> e.unit_id
+                )
+                .executeUpdate() > 0
+              if (!eventoActualizado) {
+                eventoInsertado = SQL(
+                  """INSERT INTO siap.reporte_evento (even_fecha, 
                                     even_codigo_instalado,
                                     even_cantidad_instalado,
                                     even_codigo_retirado,
@@ -7379,28 +7807,28 @@ class ReporteRepository @Inject()(
                                     {empr_id},
                                     {even_id},
                                     {unit_id})"""
-              ).on(
-                  "even_fecha" -> hora,
-                  "even_codigo_instalado" -> e.even_codigo_instalado,
-                  "even_cantidad_instalado" -> e.even_cantidad_instalado,
-                  "even_codigo_retirado" -> e.even_codigo_retirado,
-                  "even_cantidad_retirado" -> e.even_cantidad_retirado,
-                  "even_estado" -> estado,
-                  "aap_id" -> e.aap_id,
-                  "repo_id" -> reporte.repo_id,
-                  "elem_id" -> e.elem_id,
-                  "usua_id" -> e.usua_id,
-                  "empr_id" -> reporte.empr_id,
-                  "even_id" -> e.even_id,
-                  "unit_id" -> e.unit_id
-                )
-                .executeUpdate() > 0
-            }
-            if ((eventoActualizado || eventoInsertado) && (estado != 9)) {
-              // validar elemento y actualizar aap_elemento
-              elemento.tiel_id match {
-                case Some(1) =>
-/*                   SQL(
+                ).on(
+                    "even_fecha" -> hora,
+                    "even_codigo_instalado" -> e.even_codigo_instalado,
+                    "even_cantidad_instalado" -> e.even_cantidad_instalado,
+                    "even_codigo_retirado" -> e.even_codigo_retirado,
+                    "even_cantidad_retirado" -> e.even_cantidad_retirado,
+                    "even_estado" -> estado,
+                    "aap_id" -> e.aap_id,
+                    "repo_id" -> reporte.repo_id,
+                    "elem_id" -> e.elem_id,
+                    "usua_id" -> e.usua_id,
+                    "empr_id" -> reporte.empr_id,
+                    "even_id" -> e.even_id,
+                    "unit_id" -> e.unit_id
+                  )
+                  .executeUpdate() > 0
+              }
+              if ((eventoActualizado || eventoInsertado) && (estado != 9)) {
+                // validar elemento y actualizar aap_elemento
+                elemento.tiel_id match {
+                  case Some(1) =>
+                  /*                   SQL(
                     """UPDATE siap.aap_elemento SET aap_bombillo = {aap_bombillo}, reti_id = {reti_id} , repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_bombillo -> e.even_codigo_instalado,
@@ -7410,7 +7838,7 @@ class ReporteRepository @Inject()(
                       'repo_consecutivo -> reporte.repo_consecutivo
                     )
                     .executeUpdate() */
-/*                   val updated: Boolean = SQL(
+                  /*                   val updated: Boolean = SQL(
                     """UPDATE siap.aap_elemento_historia SET aap_bombillo_retirado = {aap_bombillo_retirado}, aap_bombillo_instalado = {aap_bombillo_instalado}
                                                  WHERE aap_id = {aap_id} and aael_fecha = {aael_fecha} and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo} and empr_id = {empr_id}"""
                   ).on(
@@ -7423,7 +7851,7 @@ class ReporteRepository @Inject()(
                       'empr_id -> reporte.empr_id
                     )
                     .executeUpdate() > 0 */
-/*                   if (!updated) {
+                  /*                   if (!updated) {
                     SQL("""INSERT INTO siap.aap_elemento_historia (
                                                     aap_id,
                                                     aael_fecha,
@@ -7478,8 +7906,8 @@ class ReporteRepository @Inject()(
                       )
                       .executeUpdate()
                   } */
-                case Some(2) =>
-/*                   SQL(
+                  case Some(2) =>
+                  /*                   SQL(
                     """UPDATE siap.aap_elemento SET aap_balasto = {aap_balasto}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_balasto -> e.even_codigo_instalado,
@@ -7536,7 +7964,7 @@ class ReporteRepository @Inject()(
                                                     {reti_id},
                                                     {repo_consecutivo},
                                                     {empr_id}
-                                                    )                                                    
+                                                    )
                                                 """)
                       .on(
                         'aap_bombillo_retirado -> "",
@@ -7557,8 +7985,9 @@ class ReporteRepository @Inject()(
                       )
                       //.executeUpdate()
                   }
- */                case Some(3) =>
-/*                   SQL(
+                   */
+                  case Some(3) =>
+                  /*                   SQL(
                     """UPDATE siap.aap_elemento SET aap_arrancador = {aap_arrancador}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_arrancador -> e.even_codigo_instalado,
@@ -7615,7 +8044,7 @@ class ReporteRepository @Inject()(
                                                     {reti_id},
                                                     {repo_consecutivo},
                                                     {empr_id}
-                                                    )                                                    
+                                                    )
                                                 """)
                       .on(
                         'aap_bombillo_retirado -> "",
@@ -7636,8 +8065,9 @@ class ReporteRepository @Inject()(
                       )
                       //.executeUpdate()
                   }
- */                case Some(4) =>
-/*                   SQL(
+                   */
+                  case Some(4) =>
+                  /*                   SQL(
                     """UPDATE siap.aap_elemento SET aap_condensador = {aap_condensador}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_condensador -> e.even_codigo_instalado,
@@ -7694,7 +8124,7 @@ class ReporteRepository @Inject()(
                                                     {reti_id},
                                                     {repo_consecutivo},
                                                     {empr_id}
-                                                    )                                                    
+                                                    )
                                                 """)
                       .on(
                         'aap_bombillo_retirado -> "",
@@ -7715,8 +8145,9 @@ class ReporteRepository @Inject()(
                       )
                       //.executeUpdate()
                   }
- */                case Some(5) =>
-/*                   SQL(
+                   */
+                  case Some(5) =>
+                  /*                   SQL(
                     """UPDATE siap.aap_elemento SET aap_fotocelda = {aap_fotocelda}, reti_id = {reti_id}, repo_consecutivo = {repo_consecutivo} where aap_id = {aap_id} and empr_id = {empr_id}"""
                   ).on(
                       'aap_fotocelda -> e.even_codigo_instalado,
@@ -7773,7 +8204,7 @@ class ReporteRepository @Inject()(
                                                     {reti_id},
                                                     {repo_consecutivo},
                                                     {empr_id}
-                                                    )                                                    
+                                                    )
                                                 """)
                       .on(
                         'aap_bombillo_retirado -> "",
@@ -7794,34 +8225,36 @@ class ReporteRepository @Inject()(
                       )
                       //.executeUpdate()
                   }
- */                case _ => None
+                   */
+                  case _ => None
+                }
               }
-            }
             }
           }
 
-        if (reporte_ant != None) {
-          SQL(
-            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
-          ).on(
-              'audi_fecha -> fecha,
-              'audi_hora -> hora,
-              'usua_id -> reporte.usua_id,
-              'audi_tabla -> "reporte_evento",
-              'audi_uid -> reporte.repo_id,
-              'audi_campo -> "evento",
-              'audi_valorantiguo -> "",
-              'audi_valornuevo -> "",
-              'audi_evento -> "A"
-            )
-            .executeInsert()
+          if (reporte_ant != None) {
+            SQL(
+              "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+            ).on(
+                'audi_fecha -> fecha,
+                'audi_hora -> hora,
+                'usua_id -> reporte.usua_id,
+                'audi_tabla -> "reporte_evento",
+                'audi_uid -> reporte.repo_id,
+                'audi_campo -> "evento",
+                'audi_valorantiguo -> "",
+                'audi_valornuevo -> "",
+                'audi_evento -> "A"
+              )
+              .executeInsert()
+          }
+          result = true
         }
-        result = true
-      }
       case None => None
     }
-      result
+    result
   }
+
   /**
     *
     *
@@ -9266,8 +9699,7 @@ class ReporteRepository @Inject()(
                     horizontalAlignment = HA.Center
                   )
                 )
-                .withCellValues(
-                  "OPERACION Y MANTENIMIENTO PENDIENTE")
+                .withCellValues("OPERACION Y MANTENIMIENTO PENDIENTE")
               val headerRow = com.norbitltd.spoiwo.model
                 .Row(style = CellStyle(font = Font(bold = true)))
                 .withCellValues(
@@ -9286,7 +9718,8 @@ class ReporteRepository @Inject()(
                   "Pendiente"
                 )
               var j = 2
-              var query = """
+              var query =
+                """
                 	select r.* from 
 				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
         case 
@@ -9451,7 +9884,7 @@ class ReporteRepository @Inject()(
                       Some(8),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
-                    ),                    
+                    ),
                     StringCell(
                       i.orig_descripcion match {
                         case Some(value) => value
@@ -9612,8 +10045,7 @@ class ReporteRepository @Inject()(
                     horizontalAlignment = HA.Center
                   )
                 )
-                .withCellValues(
-                  "OPERACION Y MANTENIMIENTO PENDIENTE")
+                .withCellValues("OPERACION Y MANTENIMIENTO PENDIENTE")
               val headerRow = com.norbitltd.spoiwo.model
                 .Row(style = CellStyle(font = Font(bold = true)))
                 .withCellValues(
@@ -9631,7 +10063,8 @@ class ReporteRepository @Inject()(
                   "Cuadrilla"
                 )
               var j = 2
-              var query = """
+              var query =
+                """
                 	select r.* from 
 				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
 				           from siap.reporte r 
@@ -9781,7 +10214,7 @@ class ReporteRepository @Inject()(
                       Some(8),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
-                    ),                    
+                    ),
                     StringCell(
                       i.orig_descripcion match {
                         case Some(value) => value
@@ -9826,7 +10259,7 @@ class ReporteRepository @Inject()(
     }
   }
 
-    def imprimirEjecutado(
+  def imprimirEjecutado(
       fecha_inicial: Long,
       fecha_final: Long,
       empr_id: scala.Long,
@@ -9959,7 +10392,8 @@ class ReporteRepository @Inject()(
                   "Cuadrilla"
                 )
               var j = 2
-              var query = """
+              var query =
+                """
                 	select r.* from 
 				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion as fecha_limite,  c.cuad_descripcion 
 				           from siap.reporte r 
@@ -10108,7 +10542,7 @@ class ReporteRepository @Inject()(
                       Some(8),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
-                    ),                    
+                    ),
                     StringCell(
                       i.orig_descripcion match {
                         case Some(value) => value
@@ -10279,8 +10713,7 @@ class ReporteRepository @Inject()(
                     horizontalAlignment = HA.Center
                   )
                 )
-                .withCellValues(
-                  cuadrilla.cuad_descripcion)
+                .withCellValues(cuadrilla.cuad_descripcion)
               val headerRow = com.norbitltd.spoiwo.model
                 .Row(style = CellStyle(font = Font(bold = true)))
                 .withCellValues(
@@ -10298,7 +10731,8 @@ class ReporteRepository @Inject()(
                   "Cuadrilla"
                 )
               var j = 2
-              var query = """
+              var query =
+                """
                 	select r.* from 
 				          (select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, r.repo_fechasolucion as fecha_limite,  c.cuad_descripcion 
 				           from siap.reporte r 
@@ -10448,7 +10882,7 @@ class ReporteRepository @Inject()(
                       Some(8),
                       style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                       CellStyleInheritance.CellThenRowThenColumnThenSheet
-                    ),                    
+                    ),
                     StringCell(
                       i.orig_descripcion match {
                         case Some(value) => value
@@ -10576,15 +11010,31 @@ class ReporteRepository @Inject()(
     }
   }
 
-  def getReportesParaCierreDirecto(fecha_inicial:Long, fecha_final:Long, empr_id: Long): Future[List[(Int, Int, Int, String, Int, java.util.Date, String)]] = Future {
-    val resultSet = db.withConnection { implicit connection => 
-      val _parser = int("tireuc_id") ~ int("repo_id") ~ int("reti_id") ~ 
-                    str("reti_descripcion") ~ int("repo_consecutivo") ~ date("repo_fecharecepcion") ~
-                    str("repo_fechasolucion") map {
-                      case tireuc_id ~ repo_id ~ reti_id ~ reti_descripcion ~ repo_consecutivo ~ repo_fecharecepcion ~ repo_fechasolucion =>
-                        (tireuc_id, repo_id, reti_id, reti_descripcion, repo_consecutivo, repo_fecharecepcion, repo_fechasolucion)
-                    }
-      val _query = """select * from (
+  def getReportesParaCierreDirecto(
+      fecha_inicial: Long,
+      fecha_final: Long,
+      empr_id: Long
+  ): Future[List[(Int, Int, Int, String, Int, java.util.Date, String)]] =
+    Future {
+      val resultSet = db.withConnection { implicit connection =>
+        val _parser = int("tireuc_id") ~ int("repo_id") ~ int("reti_id") ~
+          str("reti_descripcion") ~ int("repo_consecutivo") ~ date(
+          "repo_fecharecepcion"
+        ) ~
+          str("repo_fechasolucion") map {
+          case tireuc_id ~ repo_id ~ reti_id ~ reti_descripcion ~ repo_consecutivo ~ repo_fecharecepcion ~ repo_fechasolucion =>
+            (
+              tireuc_id,
+              repo_id,
+              reti_id,
+              reti_descripcion,
+              repo_consecutivo,
+              repo_fecharecepcion,
+              repo_fechasolucion
+            )
+        }
+        val _query =
+          """select * from (
 select distinct
   r1.tireuc_id,
   r1.repo_id,
@@ -10675,7 +11125,7 @@ order by o.reti_descripcion, o.repo_consecutivo
       """
         /* """
 select * from (
-select distinct 
+select distinct
   r1.tireuc_id,
   r1.repo_id,
   r1.reti_id,
@@ -10683,15 +11133,15 @@ select distinct
   r1.repo_consecutivo,
   r1.repo_fecharecepcion,
   cast(r1.repo_fechasolucion as varchar)
-from 
+from
   siap.reporte r1
   left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
-  left join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+  left join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id
 where
-  r1.rees_id in (1,2) and (coalesce(r1.repo_reportetecnico, '') = '') IS FALSE 
+  r1.rees_id in (1,2) and (coalesce(r1.repo_reportetecnico, '') = '') IS FALSE
 group by 1,2,3,4,5,6,7
 having count(rd1.*) < 1
-union all   
+union all
 select distinct
   r1.tireuc_id,
   r1.repo_id,
@@ -10701,27 +11151,27 @@ select distinct
   r1.repo_fecharecepcion,
   cast(r1.repo_fechasolucion as varchar)
 from siap.reporte r1
-inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id
 inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
 inner join siap.reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
 left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
-left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
+left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior
 left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
 left join siap.aap_conexion ac1 on ac1.aaco_id = rdd1.aaco_id_anterior
 left join siap.aap_conexion ac2 on ac2.aaco_id = rdd1.aaco_id
-left join siap.aap_tipo_carcasa atcrdd1 on atcrdd1.aatc_id = rdd1.aatc_id_anterior 
+left join siap.aap_tipo_carcasa atcrdd1 on atcrdd1.aatc_id = rdd1.aatc_id_anterior
 left join siap.aap_tipo_carcasa atcrdd2 on atcrdd2.aatc_id = rdd1.aatc_id
-left join siap.aap_marca amardd1 on amardd1.aama_id = rdd1.aama_id_anterior  
+left join siap.aap_marca amardd1 on amardd1.aama_id = rdd1.aama_id_anterior
 left join siap.aap_marca amardd2 on amardd2.aama_id = rdd1.aama_id
-left join siap.aap_modelo amordd1 on amordd1.aamo_id = rdd1.aamo_id_anterior  
+left join siap.aap_modelo amordd1 on amordd1.aamo_id = rdd1.aamo_id_anterior
 left join siap.aap_modelo amordd2 on amordd2.aamo_id = rdd1.aamo_id
-left join siap.aap_cuentaap acu1 on acu1.aacu_id = rdda1.aacu_id_anterior 
+left join siap.aap_cuentaap acu1 on acu1.aacu_id = rdda1.aacu_id_anterior
 left join siap.aap_cuentaap acu2 on acu2.aacu_id = rdda1.aacu_id
-left join siap.aap_uso aus1 on aus1.aaus_id = rdda1.aaus_id_anterior 
+left join siap.aap_uso aus1 on aus1.aaus_id = rdda1.aaus_id_anterior
 left join siap.aap_uso aus2 on aus2.aaus_id = rdda1.aaus_id
-left join siap.medidor m1 on m1.medi_id = rdda1.medi_id_anterior 
-left join siap.medidor m2 on m2.medi_id = rdda1.medi_id 
-left join siap.transformador t1 on t1.aap_id = rdda1.tran_id_anterior 
+left join siap.medidor m1 on m1.medi_id = rdda1.medi_id_anterior
+left join siap.medidor m2 on m2.medi_id = rdda1.medi_id
+left join siap.transformador t1 on t1.aap_id = rdda1.tran_id_anterior
 left join siap.transformador t2 on t2.aap_id = rdda1.tran_id
 left join siap.tipo_poste tp1 on tp1.tipo_id = rdd1.tipo_id_anterior
 left join siap.tipo_poste tp2 on tp2.tipo_id = rdd1.tipo_id
@@ -10746,7 +11196,7 @@ where r1.empr_id = {empr_id} and
 	(rdda1.tran_id = rdda1.tran_id_anterior or rdda1.tran_id_anterior = -1 or rdda1.tran_id_anterior is null) and
 	(rdd1.tipo_id = rdd1.tipo_id_anterior or rdd1.tipo_id_anterior is null)
 	)
-union all 
+union all
 select distinct
   r1.tireuc_id,
   r1.repo_id,
@@ -10756,27 +11206,27 @@ select distinct
   r1.repo_fecharecepcion,
   cast(r1.repo_fechasolucion as varchar)
 from siap.reporte r1
-inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id
 inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
 inner join siap.reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
 left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
-left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
+left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior
 left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
 left join siap.aap_conexion ac1 on ac1.aaco_id = rdd1.aaco_id_anterior
 left join siap.aap_conexion ac2 on ac2.aaco_id = rdd1.aaco_id
-left join siap.aap_tipo_carcasa atcrdd1 on atcrdd1.aatc_id = rdd1.aatc_id_anterior 
+left join siap.aap_tipo_carcasa atcrdd1 on atcrdd1.aatc_id = rdd1.aatc_id_anterior
 left join siap.aap_tipo_carcasa atcrdd2 on atcrdd2.aatc_id = rdd1.aatc_id
-left join siap.aap_marca amardd1 on amardd1.aama_id = rdd1.aama_id_anterior  
+left join siap.aap_marca amardd1 on amardd1.aama_id = rdd1.aama_id_anterior
 left join siap.aap_marca amardd2 on amardd2.aama_id = rdd1.aama_id
-left join siap.aap_modelo amordd1 on amordd1.aamo_id = rdd1.aamo_id_anterior  
+left join siap.aap_modelo amordd1 on amordd1.aamo_id = rdd1.aamo_id_anterior
 left join siap.aap_modelo amordd2 on amordd2.aamo_id = rdd1.aamo_id
-left join siap.aap_cuentaap acu1 on acu1.aacu_id = rdda1.aacu_id_anterior 
+left join siap.aap_cuentaap acu1 on acu1.aacu_id = rdda1.aacu_id_anterior
 left join siap.aap_cuentaap acu2 on acu2.aacu_id = rdda1.aacu_id
-left join siap.aap_uso aus1 on aus1.aaus_id = rdda1.aaus_id_anterior 
+left join siap.aap_uso aus1 on aus1.aaus_id = rdda1.aaus_id_anterior
 left join siap.aap_uso aus2 on aus2.aaus_id = rdda1.aaus_id
-left join siap.medidor m1 on m1.medi_id = rdda1.medi_id_anterior 
-left join siap.medidor m2 on m2.medi_id = rdda1.medi_id 
-left join siap.transformador t1 on t1.aap_id = rdda1.tran_id_anterior 
+left join siap.medidor m1 on m1.medi_id = rdda1.medi_id_anterior
+left join siap.medidor m2 on m2.medi_id = rdda1.medi_id
+left join siap.transformador t1 on t1.aap_id = rdda1.tran_id_anterior
 left join siap.transformador t2 on t2.aap_id = rdda1.tran_id
 left join siap.tipo_poste tp1 on tp1.tipo_id = rdd1.tipo_id_anterior
 left join siap.tipo_poste tp2 on tp2.tipo_id = rdd1.tipo_id
@@ -10810,20 +11260,20 @@ select distinct
   r1.repo_fecharecepcion,
   cast(r1.repo_fechasolucion as varchar)
 from siap.control_reporte r1
-inner join siap.control_reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+inner join siap.control_reporte_direccion rd1 on rd1.repo_id = r1.repo_id
 left join siap.control_reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
 left join siap.control_reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
 left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
-left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
+left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior
 left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
 where r1.empr_id = {empr_id} and
 	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id = 1 and r1.rees_id = 2 and
 	((rd1.even_direccion = rd1.even_direccion_anterior or rd1.even_direccion_anterior is null or rd1.even_direccion_anterior = '') and
-	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and 
+	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and
 	(rdda1.aap_lat = rdda1.aap_lat_anterior or rdda1.aap_lat_anterior = '' or rdda1.aap_lat_anterior is null) and
 	(rdda1.aap_lng = rdda1.aap_lng_anterior or rdda1.aap_lng_anterior = '' or rdda1.aap_lng_anterior is null)
 	)
-union all 
+union all
 select distinct
   r1.tireuc_id,
   r1.repo_id,
@@ -10833,154 +11283,219 @@ select distinct
   r1.repo_fecharecepcion,
   cast(r1.repo_fechasolucion as varchar)
 from siap.transformador_reporte r1
-inner join siap.transformador_reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+inner join siap.transformador_reporte_direccion rd1 on rd1.repo_id = r1.repo_id
 left join siap.transformador_reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
 left join siap.transformador_reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
 left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
-left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
+left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior
 left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
 where r1.empr_id = {empr_id} and
 	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id = 1 and r1.rees_id = 2 and
 	((rd1.even_direccion = rd1.even_direccion_anterior or rd1.even_direccion_anterior is null or rd1.even_direccion_anterior = '') and
-	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and 
+	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and
 	(rdda1.aap_lat = rdda1.aap_lat_anterior or rdda1.aap_lat_anterior = '' or rdda1.aap_lat_anterior is null) and
 	(rdda1.aap_lng = rdda1.aap_lng_anterior or rdda1.aap_lng_anterior = '' or rdda1.aap_lng_anterior is null)
 	)
 ) o
 order by o.reti_descripcion, o.repo_consecutivo""" */
 
-        SQL(_query).
-        on(
-          "fecha_inicial" -> new DateTime(fecha_inicial),
-          "fecha_final" -> new DateTime(fecha_final),
-          "empr_id" -> empr_id
-        ).as(_parser *)
+        SQL(_query)
+          .on(
+            "fecha_inicial" -> new DateTime(fecha_inicial),
+            "fecha_final" -> new DateTime(fecha_final),
+            "empr_id" -> empr_id
+          )
+          .as(_parser *)
       }
       println("ResultSet:" + resultSet)
       resultSet
     }
 
-    def cerrarReporte(tireuc_id: scala.Long, repo_id: scala.Long, empr_id: scala.Long, user_id: scala.Long) = {
-      val result = tireuc_id match {
-        case 1L => val reporte = buscarPorId(repo_id)
-                  reporte match {
-                    case Some(r) => actualizar(r, 0, "")
-                    case None => false
-                  }
-                  
-        case 2L => val reporte = controlReporteService.buscarPorId(repo_id)
-                  reporte match {
-                    case Some(r) => controlReporteService.actualizar(r, 0, "")
-                    case None => false
-                  }
-                  
-        case 3L => val reporte = transformadorReporteService.buscarPorId(repo_id)
-                  reporte match {
-                    case Some(r) => transformadorReporteService.actualizar(r, 0, "")
-                    case None => false
-                  }
-                  
-      }
-      result
-    }
+  def cerrarReporte(
+      tireuc_id: scala.Long,
+      repo_id: scala.Long,
+      empr_id: scala.Long,
+      user_id: scala.Long
+  ) = {
+    val result = tireuc_id match {
+      case 1L =>
+        val reporte = buscarPorId(repo_id)
+        reporte match {
+          case Some(r) => actualizar(r, 0, "")
+          case None    => false
+        }
 
-    def siap_informe_material_usado_por_reti(fecha_inicial: scala.Long, fecha_final: scala.Long, empr_id: scala.Long): List[(Option[String], Option[String], Option[String], Option[String], Option[Double])] = {
-      val resultSet = db.withConnection { implicit connection =>
-        val _parser = {
-          get[Option[String]]("reti_descripcion") ~
+      case 2L =>
+        val reporte = controlReporteService.buscarPorId(repo_id)
+        reporte match {
+          case Some(r) => controlReporteService.actualizar(r, 0, "")
+          case None    => false
+        }
+
+      case 3L =>
+        val reporte = transformadorReporteService.buscarPorId(repo_id)
+        reporte match {
+          case Some(r) => transformadorReporteService.actualizar(r, 0, "")
+          case None    => false
+        }
+
+    }
+    result
+  }
+
+  def siap_informe_material_usado_por_reti(
+      fecha_inicial: scala.Long,
+      fecha_final: scala.Long,
+      empr_id: scala.Long
+  ): List[
+    (
+        Option[String],
+        Option[String],
+        Option[String],
+        Option[String],
+        Option[Double]
+    )
+  ] = {
+    val resultSet = db.withConnection { implicit connection =>
+      val _parser = {
+        get[Option[String]]("reti_descripcion") ~
           get[Option[String]]("elem_codigo") ~
           get[Option[String]]("elem_descripcion") ~
           get[Option[String]]("elem_unidad") ~
           get[Option[Double]]("total") map {
-            case reti_descripcion ~ elem_codigo ~ elem_descripcion ~ elem_unidad ~ even_cantidad_instalado =>
-              (reti_descripcion, elem_codigo, elem_descripcion, elem_unidad, even_cantidad_instalado)
-          }
+          case reti_descripcion ~ elem_codigo ~ elem_descripcion ~ elem_unidad ~ even_cantidad_instalado =>
+            (
+              reti_descripcion,
+              elem_codigo,
+              elem_descripcion,
+              elem_unidad,
+              even_cantidad_instalado
+            )
         }
-        val _query = """select rt1.reti_descripcion, e1.elem_codigo, e1.elem_descripcion, e1.elem_unidad, SUM(re1.even_cantidad_instalado) as total
+      }
+      val _query =
+        """select rt1.reti_descripcion, e1.elem_codigo, e1.elem_descripcion, e1.elem_unidad, SUM(re1.even_cantidad_instalado) as total
                           from siap.reporte_evento re1
                           inner join siap.reporte r1 on r1.repo_id = re1.repo_id
                           inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
                           inner join siap.elemento e1 on e1.elem_id = re1.elem_id
                         where r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and re1.even_estado < 8
                         group by 1,2,3,4
-                        order by 1"""      
-        SQL(_query).
-        on(
+                        order by 1"""
+      SQL(_query)
+        .on(
           "fecha_inicial" -> new DateTime(fecha_inicial),
           "fecha_final" -> new DateTime(fecha_final),
           "empr_id" -> empr_id
-        ).as(_parser *)
+        )
+        .as(_parser *)
+    }
+    resultSet.toList
+  }
+
+  def siap_informe_material_usado_por_reti_xlsx(
+      fecha_inicial: scala.Long,
+      fecha_final: scala.Long,
+      empr_id: scala.Long,
+      usua_id: scala.Long
+  ) = {
+    val empresa = empresaService.buscarPorId(empr_id)
+    val usuario = usuarioService.buscarPorId(usua_id)
+    val _resultSet =
+      siap_informe_material_usado_por_reti(fecha_inicial, fecha_final, empr_id)
+
+    var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
+    var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
+    var _listMerged = new ListBuffer[CellRange]()
+    val df = DateTimeFormat.forPattern("yyyy-MM-dd")
+    val dtf = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
+    val sheet = Sheet(
+      name = "Material Utilizado",
+      rows = {
+        _listRow += com.norbitltd.spoiwo.model
+          .Row()
+          .withCellValues(empresa match {
+            case Some(e) => e.empr_descripcion
+            case None    => ""
+          })
+        _listRow += com.norbitltd.spoiwo.model
+          .Row()
+          .withCellValues(
+            "Material Utilizado en el Periodo " + df
+              .print(fecha_inicial) + " al " + df.print(fecha_final)
+          )
+        _listRow += com.norbitltd.spoiwo.model
+          .Row()
+          .withCellValues("Fecha de Generacion:" + dtf.print(DateTime.now()))
+        _listRow += com.norbitltd.spoiwo.model
+          .Row()
+          .withCellValues("Usuario:", usuario match {
+            case Some(u) => u.usua_nombre + " " + u.usua_apellido
+            case None    => ""
+          })
+        _listRow += com.norbitltd.spoiwo.model
+          .Row()
+          .withCellValues(
+            "Tipo de Operación",
+            "Código Material",
+            "Descripción Material",
+            "Unidad",
+            "Cantidad Utilizada"
+          )
+        _resultSet.map {
+          i =>
+            _listRow += com.norbitltd.spoiwo.model
+              .Row()
+              .withCellValues(
+                i._1 match {
+                  case Some(s) => s
+                  case None    => ""
+                },
+                i._2 match {
+                  case Some(s) => s
+                  case None    => ""
+                },
+                i._3 match {
+                  case Some(s) => s
+                  case None    => ""
+                },
+                i._4 match {
+                  case Some(s) => s
+                  case None    => ""
+                },
+                i._5 match {
+                  case Some(s) => s
+                  case None    => 0.0
+                }
+              )
+        }
+        _listRow.toList
+      },
+      mergedRegions = {
+        _listMerged += CellRange((0, 0), (0, 4))
+        _listMerged += CellRange((1, 1), (0, 4))
+        _listMerged += CellRange((2, 2), (0, 4))
+        _listMerged += CellRange((3, 3), (0, 4))
+        _listMerged.toList
+      },
+      columns = {
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 0, width = new Width(30, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 1, width = new Width(30, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 2, width = new Width(40, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 3, width = new Width(15, WidthUnit.Character))
+        _listColumn += com.norbitltd.spoiwo.model
+          .Column(index = 4, width = new Width(20, WidthUnit.Character))
+        _listColumn.toList
       }
-      resultSet.toList
-    }
-
-    def siap_informe_material_usado_por_reti_xlsx(fecha_inicial: scala.Long, fecha_final: scala.Long, empr_id: scala.Long, usua_id: scala.Long) = {
-      val empresa = empresaService.buscarPorId(empr_id)
-      val usuario = usuarioService.buscarPorId(usua_id)
-      val _resultSet = siap_informe_material_usado_por_reti(fecha_inicial, fecha_final, empr_id)
-
-              var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
-        var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
-        var _listMerged = new ListBuffer[CellRange]()  
-        val df = DateTimeFormat.forPattern("yyyy-MM-dd")
-        val dtf = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
-        val sheet = Sheet(
-          name = "Material Utilizado",
-          rows = {
-            _listRow += com.norbitltd.spoiwo.model
-                .Row()
-                .withCellValues(empresa match { case Some(e) => e.empr_descripcion case None => ""})
-            _listRow += com.norbitltd.spoiwo.model
-                .Row()
-                .withCellValues("Material Utilizado en el Periodo " + df.print(fecha_inicial) + " al " + df.print(fecha_final))
-            _listRow += com.norbitltd.spoiwo.model
-                .Row()
-                .withCellValues("Fecha de Generacion:" + dtf.print(DateTime.now()))
-            _listRow += com.norbitltd.spoiwo.model
-                .Row()
-                .withCellValues("Usuario:", usuario match { case Some(u) => u.usua_nombre +" " + u.usua_apellido case None => ""})            
-            _listRow += com.norbitltd.spoiwo.model
-                .Row()
-                .withCellValues("Tipo de Operación","Código Material","Descripción Material","Unidad","Cantidad Utilizada")
-            _resultSet.map {
-            i =>
-              _listRow += com.norbitltd.spoiwo.model
-                .Row()
-                .withCellValues(
-                  i._1 match { case Some(s) => s case None => "" },
-                  i._2 match { case Some(s) => s case None => "" },
-                  i._3 match { case Some(s) => s case None => "" },
-                  i._4 match { case Some(s) => s case None => "" },
-                  i._5 match { case Some(s) => s case None => 0.0 }
-                )
-          }
-          _listRow.toList
-        },
-        mergedRegions = {
-              _listMerged += CellRange((0, 0), (0, 4))
-              _listMerged += CellRange((1, 1), (0, 4))
-              _listMerged += CellRange((2, 2), (0, 4))
-              _listMerged += CellRange((3, 3), (0, 4))
-              _listMerged.toList
-            },
-        columns = {
-               _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 0, width = new Width(30, WidthUnit.Character))
-               _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 1, width = new Width(30, WidthUnit.Character))
-               _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 2, width = new Width(40, WidthUnit.Character))
-               _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 3, width = new Width(15, WidthUnit.Character))
-               _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 4, width = new Width(20, WidthUnit.Character))                
-              _listColumn.toList
-            }        
-      )
-      println("Escribiendo en el Stream")
-      var os: ByteArrayOutputStream = new ByteArrayOutputStream()
-      Workbook(sheet).writeToOutputStream(os)
-      println("Stream Listo")
-      os.toByteArray
-    }
+    )
+    println("Escribiendo en el Stream")
+    var os: ByteArrayOutputStream = new ByteArrayOutputStream()
+    Workbook(sheet).writeToOutputStream(os)
+    println("Stream Listo")
+    os.toByteArray
+  }
 }

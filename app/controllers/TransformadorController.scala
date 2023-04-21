@@ -52,6 +52,13 @@ class TransformadorController @Inject()(mService: TransformadorRepository, cc: C
         }
     }
 
+    def rtransformadores() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+        val empr_id = Utility.extraerEmpresa(request)
+        mService.rtransformadores(empr_id.get).map { result =>
+           Ok(write(result))
+        }
+    }    
+
     def guardar() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
       var m = net.liftweb.json.parse((json).toString).extract[Transformador]

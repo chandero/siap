@@ -1217,9 +1217,21 @@ class OrdenTrabajoRepository @Inject()(
         """select ot1.ortr_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
-                    inner join siap.reporte r1 on r1.repo_id = or1.repo_id 
+                    inner join siap.reporte r1 on r1.repo_id = or1.repo_id and r1.tireuc_id = or1.tireuc_id
                    where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND r1.rees_id in (1,2) AND (coalesce(r1.repo_reportetecnico, '') = '') IS NOT FALSE
-                   union all 
+                   union all
+                   select ot1.ortr_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
+                    inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
+                    inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
+                    inner join siap.control_reporte r1 on r1.repo_id = or1.repo_id and r1.tireuc_id = or1.tireuc_id
+                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND r1.rees_id in (1,2) AND (coalesce(r1.repo_reportetecnico, '') = '') IS NOT FALSE
+                   union all
+                   select ot1.ortr_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
+                    inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
+                    inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
+                    inner join siap.transformador_reporte r1 on r1.repo_id = or1.repo_id and r1.tireuc_id = or1.tireuc_id
+                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND r1.rees_id in (1,2) AND (coalesce(r1.repo_reportetecnico, '') = '') IS NOT FALSE
+                   union all                   
                    select ot1.ortr_id, o1.obra_id as repo_id, 99 as reti_id, o1.obra_consecutivo as repo_consecutivo from siap.ordentrabajo ot1
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_obra oo1 on oo1.ortr_id = ot1.ortr_id 

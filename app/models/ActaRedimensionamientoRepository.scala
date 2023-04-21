@@ -164,7 +164,6 @@ class ActaRedimensionamientoRepository @Inject()(
       case Some(e) => e
       case None => Empresa(None, "", "", "", "", "", None, 0, 0, 0, 0, None, None)
     }
-    val ordenes =  buscarPorEmpresaFacturasAnhoPeriodo(empresa.empr_id.get, anho, periodo)
     var _subtotal_expansion = 0.0
     var _subtotal_modernizacion = 0.0
     var _subtotal_desmonte = 0.0
@@ -183,9 +182,12 @@ class ActaRedimensionamientoRepository @Inject()(
     var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
     _fecha_corte_anterior.add(Calendar.MONTH, -1)    
 
+    val ordenes =  buscarPorEmpresaFacturasAnhoPeriodo(empresa.empr_id.get, _fecha_corte_anterior.get(Calendar.YEAR), _fecha_corte_anterior.get(Calendar.MONTH) + 1)
     val _valor_acumulado_anterior = db.withTransaction { implicit connection =>
-      val _periodo_previo = _fecha_corte_anterior.get(Calendar.MONTH) + 1
-      val _anho_previo = _fecha_corte_anterior.get(Calendar.YEAR)
+      val _fecha_previo = _fecha_corte_anterior.clone().asInstanceOf[Calendar]
+      _fecha_previo.add(Calendar.MONTH, -1)
+      val _periodo_previo = _fecha_previo.get(Calendar.MONTH) + 1
+      val _anho_previo = _fecha_previo.get(Calendar.YEAR)
       println("anho previo: " + _anho_previo)
       println("periodo previo: " + _periodo_previo)
       val _valorOpt = SQL("""SELECT reco_valor FROM siap.redimensionamiento_control rc1 WHERE rc1.reco_anho = {anho} AND rc1.reco_periodo = {periodo} AND rc1.empr_id = {empr_id}""").
@@ -266,11 +268,13 @@ class ActaRedimensionamientoRepository @Inject()(
       }
       // Actualizar redimensionamiento control
       db.withTransaction { implicit connection =>
+        var _fecha_valor = Calendar.getInstance()
+        _fecha_valor.add(Calendar.MONTH, -1)
         val _actualizado = SQL("""UPDATE siap.redimensionamiento_control SET reco_valor = {valor} WHERE reco_anho = {anho} AND reco_periodo = {periodo} AND empr_id = {empr_id}""").
         on(
           'valor -> (_valor_acumulado_anterior + _subtotal_total),
-          'anho -> anho,
-          'periodo -> periodo,
+          'anho -> _fecha_valor.get(Calendar.YEAR),
+          'periodo -> (_fecha_valor.get(Calendar.MONTH)),
           'empr_id -> empr_id
         ).executeUpdate() > 0
 
@@ -278,8 +282,8 @@ class ActaRedimensionamientoRepository @Inject()(
           SQL("""INSERT INTO siap.redimensionamiento_control(reco_valor, reco_anho, reco_periodo, empr_id) VALUES({valor}, {anho}, {periodo}, {empr_id})""").
           on(
             'valor -> (_valor_acumulado_anterior + _subtotal_total),
-            'anho -> anho,
-            'periodo -> periodo,
+            'anho -> _fecha_valor.get(Calendar.YEAR),
+            'periodo -> (_fecha_valor.get(Calendar.MONTH)),
             'empr_id -> empr_id
           ).executeInsert()
         }
@@ -301,7 +305,6 @@ class ActaRedimensionamientoRepository @Inject()(
       case Some(e) => e
       case None => Empresa(None, "", "", "", "", "", None, 0, 0, 0, 0, None, None)
     }
-    val ordenes =  buscarPorEmpresaFacturasAnhoPeriodo(empresa.empr_id.get, anho, periodo)
     val formatter = java.text.NumberFormat.getIntegerInstance
     var _subtotal_expansion = 0.0
     var _subtotal_modernizacion = 0.0
@@ -314,6 +317,10 @@ class ActaRedimensionamientoRepository @Inject()(
     _periodo.set(Calendar.DATE, _periodo.getActualMaximum(Calendar.DATE))
 
     var _fecha_para_textos = _periodo.clone().asInstanceOf[Calendar]
+    var _fecha_para_texto_2_meses_atras = _periodo.clone().asInstanceOf[Calendar]
+    _fecha_para_texto_2_meses_atras.add(Calendar.MONTH, -2)
+    var _fecha_para_texto_1_mes_atras = _periodo.clone().asInstanceOf[Calendar]
+    _fecha_para_texto_1_mes_atras.add(Calendar.MONTH, -1)
     var _fecha_corte = _periodo.clone().asInstanceOf[Calendar]
     _fecha_corte.add(Calendar.MONTH, -1)
     var _fecha_corte_anterior = _fecha_corte.clone().asInstanceOf[Calendar]
@@ -323,9 +330,11 @@ class ActaRedimensionamientoRepository @Inject()(
     var _listRow02 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
     var _listMerged01 = new ListBuffer[CellRange]()
     var _listMerged02 = new ListBuffer[CellRange]()
+    val ordenes =  buscarPorEmpresaFacturasAnhoPeriodo(empresa.empr_id.get, _fecha_corte.get(Calendar.YEAR), _fecha_corte.get(Calendar.MONTH) + 1)
+
     val _valor_acumulado_anterior = db.withTransaction { implicit connection =>
-      val _periodo_previo = _fecha_corte_anterior.get(Calendar.MONTH) + 1
-      val _anho_previo = _fecha_corte_anterior.get(Calendar.YEAR)
+      val _periodo_previo = _fecha_corte.get(Calendar.MONTH) + 1
+      val _anho_previo = _fecha_corte.get(Calendar.YEAR)
       println("anho previo: " + _anho_previo)
       println("periodo previo: " + _periodo_previo)
       val _valorOpt = SQL("""SELECT reco_valor FROM siap.redimensionamiento_control rc1 WHERE rc1.reco_anho = {anho} AND rc1.reco_periodo = {periodo} AND rc1.empr_id = {empr_id}""").
@@ -1103,7 +1112,7 @@ class ActaRedimensionamientoRepository @Inject()(
         _idx += 1
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "Redimensionamiento de la Infraestructura de Alumbrado Público Desde el 1 de Enero de 2015 hasta el " + Utility.fechaatextosindia(Some(new DateTime(_fecha_para_textos.getTime()))),
+            "Redimensionamiento de la Infraestructura de Alumbrado Público Desde el 1 de Enero de 2015 hasta el " + Utility.fechaatextosindia(Some(new DateTime(_fecha_para_texto_2_meses_atras.getTime()))),
             Some(0),
             style = Some(
                       CellStyle(
@@ -1226,7 +1235,7 @@ class ActaRedimensionamientoRepository @Inject()(
         }
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "Subtotal Redimensionamiento del Mes al " + Utility.fechaatextosindia(Some(new DateTime(_fecha_para_textos.getTime()))),
+            "Subtotal Redimensionamiento del Mes de " + Utility.fechaamesanho(Some(new DateTime(_fecha_para_texto_1_mes_atras.getTime()))),
             Some(0),
             style = Some(
                       CellStyle(
@@ -1295,7 +1304,7 @@ class ActaRedimensionamientoRepository @Inject()(
         _idx += 1
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
-            "Total redimensionamiento de la Infraestructura del sistema de Alumbrado Público desde el 1 de Enero de 2015 Hasta el " + Utility.fechaatextosindia(Some(new DateTime(_fecha_para_textos.getTime()))),
+            "Total redimensionamiento de la Infraestructura del sistema de Alumbrado Público desde el 1 de Enero de 2015 Hasta el " + Utility.fechaatextosindia(Some(new DateTime(_fecha_para_texto_1_mes_atras.getTime()))),
             Some(0),
             style = Some(
                       CellStyle(

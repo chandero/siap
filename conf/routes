@@ -348,6 +348,8 @@ GET /api/tran/get/:p/:c controllers.TransformadorController.todos(p:Long, c:Long
 GET /api/tran/all controllers.TransformadorController.transformadores
 +nocsrf
 GET /api/tran/m/all controllers.TransformadorController.transformadores
++nocsrf
+GET /api/tran/mobi/all controllers.TransformadorController.rtransformadores
 GET /api/tran/:id controllers.TransformadorController.buscarPorId(id: Long)
 GET /api/tran/del/:id controllers.TransformadorController.borrar(id: Long)
 POST /api/tran/save controllers.TransformadorController.guardar
@@ -361,6 +363,8 @@ GET /api/tran/ism/:e controllers.TransformadorController.informe_siap_transforma
 
 POST /api/cont/get controllers.ControlController.todos
 POST /api/cont/gte controllers.ControlController.todosEliminados
++nocsrf
+GET /api/cont/mobi/all controllers.ControlController.controlesMobile
 GET /api/cont/all controllers.ControlController.controles
 GET /api/cont/next controllers.ControlController.buscarSiguienteACrear()
 GET /api/cont/:id controllers.ControlController.buscarPorId(id: Long)

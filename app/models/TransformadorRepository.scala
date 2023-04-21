@@ -249,6 +249,44 @@ class TransformadorRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecu
     }    
 
     /**
+    * Recuperar todos los TipoTransformador activos
+    * @param page_size: Long
+    * @param current_page: Long
+    */
+    def rtransformadores(empr_id: Long): Future[Iterable[AapMobile]] = Future[Iterable[AapMobile]] {
+        db.withConnection { implicit connection =>
+            SQL("""SELECT aap_id, 
+                aap_codigo_apoyo as aap_apoyo, 
+                -1 as aaco_id, 
+                -1 as aamo_id, 
+                -1 as aama_id, 
+                -1 as aacu_id,
+                -1 as aaus_id,
+                -1 as aatc_id,
+                tipo_id,
+                '' as aap_tecnologia,
+                -1 as aap_potencia,
+                '' as aap_brazo,
+                '' as aap_collarin,
+                aap_propietario as aap_poste_propietario,
+                -1 as aap_poste_altura,
+                '' as aap_lat,
+                '' as aap_lng,
+                -1 as medi_id,                
+                empr_id, 
+                usua_id, 
+                aap_direccion, 
+                barr_id, 
+                aap_estado as esta_id, 
+                cast(CURRENT_DATE as TEXT) as aap_fechatoma 
+                FROM siap.transformador WHERE aap_estado <> 9 and empr_id = {empr_id} ORDER BY aap_id""").
+            on(
+              'empr_id -> empr_id
+            ).
+            as(AapMobile._set *)
+        }        
+    }     
+    /**
     * Crear TipoTransformador
     * @param Transformador: Transformador
     */
