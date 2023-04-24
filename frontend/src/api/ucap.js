@@ -59,3 +59,25 @@ export function deleteUcap (ucap_id) {
     method: 'get'
   })
 }
+
+export function getListaIppIpc () {
+  return request({
+    url: '/ucap/lipp/all',
+    method: 'get'
+  })
+}
+
+export function guardarIppIpc (data) {
+  return request({
+    url: '/ucap/lipp/save',
+    method: 'post',
+    data: data
+  })
+}
+
+export function eliminarIppIpc(id) {
+  return request({
+    url: '/ucap/lipp/del/' + id,
+    method: 'get'
+  })
+}

@@ -1048,10 +1048,9 @@ class ElementoRepository @Inject()(dbapi: DBApi, gService: GeneralRepository)(
            FROM siap.reporte r1
            INNER JOIN siap.reporte_evento re1 ON re1.repo_id = r1.repo_id
            INNER JOIN siap.elemento e1 ON e1.elem_id = re1.elem_id
-           left join siap.elemento_precio elpr1 on elpr1.elem_id = e1.elem_id
+           left join siap.elemento_precio elpr1 on elpr1.elem_id = e1.elem_id and elpr1.elpr_anho = {anho}
            WHERE r1.reti_id IN (2,6) AND
            		 r1.empr_id = {empr_id} AND
-               elpr1.elpr_anho = {anho} AND
            		 e1.elem_estado = 1"""
       query = query + ") as o "
       if (!filter.isEmpty) {
@@ -1091,8 +1090,7 @@ class ElementoRepository @Inject()(dbapi: DBApi, gService: GeneralRepository)(
         Option[Double],
         Option[Double],
         Option[Int],
-        Option[DateTime],
-        Option[String]
+        Option[DateTime]
     )
   ]] =
     Future[List[
@@ -1108,8 +1106,7 @@ class ElementoRepository @Inject()(dbapi: DBApi, gService: GeneralRepository)(
           Option[Double],
           Option[Double],
           Option[Int],
-          Option[DateTime],
-          Option[String]
+          Option[DateTime]
       )
     ]] {
       val _parser =
@@ -1124,9 +1121,8 @@ class ElementoRepository @Inject()(dbapi: DBApi, gService: GeneralRepository)(
           get[Option[Double]]("elpr_precio_cotizado") ~
           get[Option[Double]]("elpr_precio") ~
           get[Option[Int]]("elpr_anho") ~
-          get[Option[DateTime]]("elpr_fecha") ~
-          get[Option[String]]("unit_codigo") map {
-          case elem_id ~ elem_codigo ~ elem_descripcion ~ elpr_anho_anterior ~ elpr_precio_anterior ~ elpr_incremento ~ elpr_diff ~ elpr_precio_nuevo ~ elpr_precio_cotizado ~ elpr_precio ~ elpr_anho ~ elpr_fecha ~ unit_codigo =>
+          get[Option[DateTime]]("elpr_fecha") map {
+          case elem_id ~ elem_codigo ~ elem_descripcion ~ elpr_anho_anterior ~ elpr_precio_anterior ~ elpr_incremento ~ elpr_diff ~ elpr_precio_nuevo ~ elpr_precio_cotizado ~ elpr_precio ~ elpr_anho ~ elpr_fecha =>
             (
               elem_id,
               elem_codigo,
@@ -1139,56 +1135,28 @@ class ElementoRepository @Inject()(dbapi: DBApi, gService: GeneralRepository)(
               elpr_precio_cotizado,
               elpr_precio,
               elpr_anho,
-              elpr_fecha,
-              unit_codigo
+              elpr_fecha
             )
         }
 
       db.withConnection { implicit connection =>
         var query =
-          """select distinct 
-	o.elem_id, 
-	o.elem_codigo, 
-	o.elem_descripcion, 
-	o.elpr_anho_anterior, 
-	o.elpr_precio_anterior, 
-	o.elpr_incremento,
-	o.elpr_diff,
-	o.elpr_anho,
-	o.elpr_fecha,
-	o.elpr_precio_nuevo,
-	o.elpr_precio_cotizado,
-	o.elpr_precio,
-	string_agg(o.unit_codigo, ',') as unit_codigo
-from 
-(SELECT  DISTINCT
-    e1.elem_id, 
-		e1.elem_codigo, 
-		e1.elem_descripcion, 
-    (select ep1.elpr_anho_anterior from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
-    (select ep1.elpr_precio_anterior from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),        
-        (select ep1.elpr_incremento from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
-        (select (ep1.elpr_precio - ep1.elpr_precio_anterior) from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0) as elpr_diff,
-        (select ep1.elpr_anho from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
-		(select ep1.elpr_fecha from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
-		(select ep1.elpr_precio_nuevo from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
-        (select ep1.elpr_precio_cotizado from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
-        (select ep1.elpr_precio from siap.elemento_precio ep1 where ep1.elem_id = e1.elem_id order by ep1.elpr_fecha desc limit 1 offset 0),
-        u1.unit_codigo AS unit_codigo
-           FROM siap.elemento e1
-           LEFT join siap.elemento_precio elpr1 on elpr1.elem_id = e1.elem_id
-           LEFT join siap.elemento_unitario eu1 ON eu1.elem_id = e1.elem_id
-           LEFT join siap.unitario u1 ON u1.unit_id = eu1.unit_id
-           WHERE 
-               elpr1.elpr_anho = {anho} AND
-           		 e1.empr_id = {empr_id} AND
-           		 e1.elem_estado = 1
-      ) as o
+          """select * from (select DISTINCT e1.elem_id, e1.elem_codigo, e1.elem_descripcion, ep1.elpr_anho_anterior, ep1.elpr_precio_anterior, 
+                    ep1.elpr_incremento, (ep1.elpr_precio - ep1.elpr_precio_anterior) as elpr_diff,
+                    ep1.elpr_anho, ep1.elpr_fecha, ep1.elpr_precio_nuevo, ep1.elpr_precio_cotizado, ep1.elpr_precio
+              from siap.reporte r1
+              INNER JOIN siap.reporte_evento re1 ON re1.repo_id = r1.repo_id
+              INNER JOIN siap.elemento e1 ON e1.elem_id = re1.elem_id
+              left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = {anho}
+             where
+                         r1.reti_id IN (2,6) AND
+                         e1.empr_id = {empr_id} AND
+                         e1.elem_estado = 1
+                         ) as o
       """
         if (!filter.isEmpty) {
           query = query + " where " + filter
         }
-        query = query + s"group by 1,2,3,4,5,6,7,8,9,10,11,12"
         if (!orderby.isEmpty) {
           query = query + s" ORDER BY $orderby"
         } else {

@@ -8,6 +8,11 @@ import com.google.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Failure}
 
+import net.liftweb.json._
+import net.liftweb.json.Serialization.write
+import net.liftweb.json.Serialization.read
+import net.liftweb.json.parse
+
 import pdi.jwt.JwtSession
 
 import utilities._
@@ -20,7 +25,12 @@ class UcapController @Inject()(
     cc: ControllerComponents,
     authenticatedUserAction: AuthenticatedUserAction)(
     implicit ec: ExecutionContext)
-    extends AbstractController(cc) {
+    extends AbstractController(cc) 
+    with ImplicitJsonFormats {
+  implicit val formats = Serialization.formats(NoTypeHints) ++ List(
+    DateTimeSerializer
+  )
+
   def todos(page_size: Long, current_page: Long): Action[AnyContent] =
     authenticatedUserAction.async {
       val total = ucapService.cuenta()
@@ -90,6 +100,38 @@ class UcapController @Inject()(
     implicit request: Request[AnyContent] =>
       val usua_id = Utility.extraerUsuario(request)
       if (ucapService.borrar(id, usua_id.get)) {
+        Future.successful(Ok(Json.toJson("true")))
+      } else {
+        Future.successful(ServiceUnavailable(Json.toJson("false")))
+      }
+  }
+
+  def listaUcapIppIpc() = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      ucapService.listaUcapIppIpc(empr_id.get).map { ucaps =>
+        Ok(write(ucaps))
+      }
+  }
+
+  def guardarUcapIpp() = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val json = request.body.asJson.get
+      val ucapIppIpc = net.liftweb.json.parse(json.toString).extract[UcapIppIpc]
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)
+      if (ucapService.guardarUcapIpp(ucapIppIpc, usua_id.get, empr_id.get)) {
+        Future.successful(Ok(Json.toJson("true")))
+      } else {
+        Future.successful(NotAcceptable(Json.toJson("true")))
+      }
+  }
+
+  def borrarUcapIpp(id: scala.Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)
+      if (ucapService.borrarUcapIpp(id, usua_id.get, empr_id.get)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
         Future.successful(ServiceUnavailable(Json.toJson("false")))

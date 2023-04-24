@@ -26,6 +26,14 @@ case class Ucap(ucap_id:Option[Long],
                 ucap_estado: Option[Int],
                 usua_id: Option[Long])
 
+case class UcapIppIpc(
+    ucap_ipp_id: Option[scala.Long],
+    ucap_ipp_anho: Option[Int],
+    ucap_ipp_valor: Option[Double],
+    ucap_ipc_valor: Option[Double],
+    empr_id: Option[scala.Long],
+)                
+
 object Ucap {
     implicit val yourJodaDateReads = JodaReads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     implicit val yourJodaDateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ'")
@@ -46,6 +54,18 @@ object Ucap {
         (__ \ "usua_id").readNullable[Long]
     )(Ucap.apply _)
 
+}
+
+object UcapIppIpc {
+    val _set = {
+        get[Option[scala.Long]]("ucap_ipp_id") ~
+        get[Option[Int]]("ucap_ipp_anho") ~
+        get[Option[Double]]("ucap_ipp_valor") ~
+        get[Option[Double]]("ucap_ipc_valor") ~
+        get[Option[scala.Long]]("empr_id") map {
+            case ucap_ipp_id ~ ucap_ipp_anho ~ ucap_ipp_valor ~ ucap_ipc_valor ~ empr_id => UcapIppIpc(ucap_ipp_id, ucap_ipp_anho, ucap_ipp_valor, ucap_ipc_valor, empr_id)
+        }
+    }
 }
 
 class UcapRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionContext){
@@ -256,6 +276,140 @@ class UcapRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionConte
                     executeInsert()
 
             count > 0            
+        }
+    }
+
+    /**
+     * Lista Ucap Valor
+     * @param empr_id: Long
+     */
+    def listaUcapIppIpc(empr_id: scala.Long): Future[Iterable[UcapIppIpc]] = Future {
+        db.withConnection { implicit connection =>
+            SQL("SELECT * FROM siap.ucap_ipp WHERE empr_id = {empr_id}").
+            on(
+                'empr_id -> empr_id
+            ).as(UcapIppIpc._set *)
+        }
+    }
+
+    /**
+     * Guardar Ucap Valor
+     * @param ucap_ipp_id: Ucap Ipp Id
+     * @param ucap_ipp_valor: Ucap Ipp Valor
+     * @param ucap_ipc_valor: Ucap Ipc Valor
+     * @param empr_id: Long
+     */
+    def guardarUcapIpp(uipp: UcapIppIpc, usua_id: scala.Long, empr_id: scala.Long) = {
+        db.withTransaction { implicit connection =>
+            val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
+            val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())        
+
+            val ucap_ipp_ant: Option[UcapIppIpc] = SQL("SELECT * FROM siap.ucap_ipp WHERE ucap_ipp_id = {ucap_ipp_id}").
+            on(
+                'ucap_ipp_id -> uipp.ucap_ipp_id
+            ).as(UcapIppIpc._set.singleOpt)
+
+            val esActualizado: Boolean = SQL("UPDATE siap.ucap_ipp SET ucap_ipp_valor = {ucap_ipp_valor}, ucap_ipc_valor = {ucap_ipc_valor} WHERE ucap_ipp_id = {ucap_ipp_id}").
+            on(
+               'ucap_ipp_id -> uipp.ucap_ipp_id,
+               'ucap_ipp_valor -> uipp.ucap_ipp_valor,
+               'ucap_ipc_valor -> uipp.ucap_ipc_valor,
+               'empr_id -> empr_id
+            ).executeUpdate() > 0
+
+            val esInsertado = if (!esActualizado) {
+                SQL("""INSERT INTO siap.ucap_ipp (ucap_ipp_anho, ucap_ipp_valor, ucap_ipc_valor, empr_id) VALUES ({ucap_ipp_anho}, {ucap_ipp_valor}, {ucap_ipc_valor}, {empr_id})""").
+                on(
+                    'ucap_ipp_anho -> uipp.ucap_ipp_anho,
+                    'ucap_ipp_valor -> uipp.ucap_ipp_valor,
+                    'ucap_ipc_valor -> uipp.ucap_ipc_valor,
+                    'empr_id -> empr_id
+                ).executeUpdate() > 0
+            } else {
+                false
+            }
+
+            if (ucap_ipp_ant != None){
+                if (ucap_ipp_ant.get.ucap_ipp_valor != uipp.ucap_ipp_valor){
+                SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
+                on(
+                    'audi_fecha -> fecha,
+                    'audi_hora -> hora,
+                    'usua_id -> usua_id,
+                    'audi_tabla -> "ucap_ipp", 
+                    'audi_uid -> uipp.ucap_ipp_id,
+                    'audi_campo -> "ucap_ipp_valor", 
+                    'audi_valorantiguo -> ucap_ipp_ant.get.ucap_ipp_valor,
+                    'audi_valornuevo -> uipp.ucap_ipp_valor,
+                    'audi_evento -> "U").
+                    executeInsert()                    
+                }
+
+                if (ucap_ipp_ant.get.ucap_ipc_valor != uipp.ucap_ipc_valor){
+                SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
+                on(
+                    'audi_fecha -> fecha,
+                    'audi_hora -> hora,
+                    'usua_id -> usua_id,
+                    'audi_tabla -> "ucap_ipp", 
+                    'audi_uid -> uipp.ucap_ipp_id,
+                    'audi_campo -> "ucap_ipc_valor", 
+                    'audi_valorantiguo -> ucap_ipp_ant.get.ucap_ipc_valor,
+                    'audi_valornuevo -> uipp.ucap_ipc_valor,
+                    'audi_evento -> "U").
+                    executeInsert()
+                }
+            } else {
+                SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_evento})").
+                on(
+                    'audi_fecha -> fecha,
+                    'audi_hora -> hora,
+                    'usua_id -> usua_id,
+                    'audi_tabla -> "ucap_ipp", 
+                    'audi_uid -> uipp.ucap_ipp_id,
+                    'audi_evento -> "I").
+                    executeInsert()                    
+            }
+
+            esActualizado || esInsertado
+        }
+    }
+    
+    /**
+     * Eliminar Ucap Valor
+     * @param ucap_ipp_id: Ucap Ipp Id
+     * @param empr_id: Long
+     */
+    def borrarUcapIpp(ucap_ipp_id: scala.Long, usua_id: scala.Long, empr_id: scala.Long) = {
+        db.withTransaction { implicit connection =>
+            val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
+            val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())        
+
+            val ucap_ipp_ant: Option[UcapIppIpc] = SQL("SELECT * FROM siap.ucap_ipp WHERE ucap_ipp_id = {ucap_ipp_id}").
+            on(
+                'ucap_ipp_id -> ucap_ipp_id
+            ).as(UcapIppIpc._set.singleOpt)
+
+            val result = SQL("DELETE FROM siap.ucap_ipp WHERE ucap_ipp_id = {ucap_ipp_id}").
+            on(
+                'ucap_ipp_id -> ucap_ipp_id
+            ).executeUpdate() > 0
+
+            if (ucap_ipp_ant != None){
+                SQL("INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})").
+                on(
+                    'audi_fecha -> fecha,
+                    'audi_hora -> hora,
+                    'usua_id -> usua_id,
+                    'audi_tabla -> "ucap_ipp", 
+                    'audi_uid -> ucap_ipp_id,
+                    'audi_campo -> "ucap_ipp_anho", 
+                    'audi_valorantiguo -> None,
+                    'audi_valornuevo -> None,
+                    'audi_evento -> "D").
+                    executeInsert()
+            }
+            result
         }
     }
 }

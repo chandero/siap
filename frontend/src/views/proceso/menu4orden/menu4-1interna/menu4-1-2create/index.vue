@@ -86,9 +86,12 @@
                               <span style="font-weight: bold;">Descripción de Reporte</span>
                             </el-col>
                             <el-col :xs="16" :sm="16" :md="11" :lg="11" :xl="11">
+                              <div style="display: flex;">
+                                <span style="width:120px;">({{ evento.tireuc_id === 1 ? "Luminaria": evento.tireuc_id === 2 ? "Control" : evento.tireuc_id === 3 ? "Transformador" : "Indefinido" }})</span>
                                 <el-form-item>
                                     <el-input readonly :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.repo_descripcion"></el-input>
                                 </el-form-item>
+                              </div>
                             </el-col>
                             <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1">
                               <el-button v-if="evento.even_estado < 8" size="mini" type="danger" circle icon="el-icon-minus" title="Quitar Fila" @click="handleDelete(index, evento)"></el-button>

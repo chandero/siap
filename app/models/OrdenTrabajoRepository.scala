@@ -642,6 +642,7 @@ class OrdenTrabajoRepository @Inject()(
                 case Some(1) => reporteService.buscarPorId(r.repo_id.get)
                 case Some(2) => controlReporteService.buscarPorId(r.repo_id.get)
                 case Some(3) => transformadorReporteService.buscarPorId(r.repo_id.get)
+                case _ => None
               }
               reporte match {
                 case Some(rep) =>
@@ -766,6 +767,7 @@ class OrdenTrabajoRepository @Inject()(
                 case Some(1) => reporteService.buscarPorId(r.repo_id.get)
                 case Some(2) => controlReporteService.buscarPorId(r.repo_id.get)
                 case Some(3) => transformadorReporteService.buscarPorId(r.repo_id.get)
+                case _ => None
               }
               println("")
               println("Reporte encontrado: " + reporte)

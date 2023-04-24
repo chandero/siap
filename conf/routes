@@ -82,6 +82,9 @@ GET /api/ucap/:id controllers.UcapController.buscarPorId(id: Long)
 GET /api/ucap/del/:id controllers.UcapController.borrarUcap(id: Long)
 POST /api/ucap/save controllers.UcapController.guardarUcap
 POST /api/ucap/upd controllers.UcapController.actualizarUcap
+GET /api/ucap/lipp/all controllers.UcapController.listaUcapIppIpc
+POST /api/ucap/lipp/save controllers.UcapController.guardarUcapIpp
+GET /api/ucap/lipp/del/:id controllers.UcapController.borrarUcapIpp(id: Long)
 
 # Municipio Obra
 

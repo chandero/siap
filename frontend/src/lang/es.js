@@ -340,6 +340,9 @@ export default {
     transformador: 'Transformador',
     transformadorcreate: 'Nuevo Transformador',
     transformadoredit: 'Editar Transformador',
+    ipp: {
+      lista: 'Ipp / Ipc'
+    },
     // Bloque nuevo con sub menu
     menu_inventario: 'Inventario',
     menu_inventario_menu1luminaria: 'Luminaria',
