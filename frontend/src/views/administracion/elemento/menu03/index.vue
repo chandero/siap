@@ -24,14 +24,21 @@
               <el-table
                 :data="tableData"
                 stripe
+                @sort-change="handleTableSort"
                 width="100%" height="500">
         <el-table-column
           :label="$t('elemento.id')"
-          width="50"
+          width="100"
+          sortable
           prop="elem_id">
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ scope.row._1 }}</span>
+          </template>
         </el-table-column>
         <el-table-column
           :label="$t('elemento.description')"
+          sortable
+          prop="elem_descripcion"
           width="350"
         >
           <template slot-scope="scope">
@@ -40,6 +47,8 @@
         </el-table-column>
         <el-table-column
           :label="$t('elemento.code')"
+          sortable
+          prop="elem_codigo"
           width="100">
           <template slot-scope="scope">
             <span style="margin-left: 10px">{{ scope.row._2 }}</span>
@@ -135,7 +144,9 @@
         </el-table-column>
         <el-table-column
           :label="$t('elemento.elpr_anho')"
-          width="100">
+          prop="elpr_anho"
+          sortable
+          width="120">
           <template slot-scope="scope">
             <span style="margin-left: 10px">{{ scope.row._11 }}</span>
           </template>
@@ -178,7 +189,8 @@
             </el-col>
             <el-col :span="24">
               <el-form-item label="Incremento">
-                <el-input type="number" v-model="precioIncremento" />
+                <el-radio v-model="usarParaIncremento" label="ipc">Usar IPC</el-radio>
+                <el-radio v-model="usarParaIncremento" label="ipp">Usar IPP</el-radio>
               </el-form-item>
             </el-col>
           </el-row>
@@ -187,7 +199,7 @@
     </el-container>
     <span slot="footer" class="dialog-footer">
         <el-button @click="showPrecioPeriodoDialog = false">Cancelar</el-button>
-        <el-button :disabled="!precioAnho || !precioIncremento" type="primary" @click="handlePrecioPeriodo()">Calcular y Guardar</el-button>
+        <el-button :disabled="!precioAnho || !usarParaIncremento" type="primary" @click="handlePrecioPeriodo()">Calcular y Guardar</el-button>
     </span>
   </el-dialog>
   <el-dialog
@@ -214,7 +226,7 @@
                                 ref="uploadFile"
                                 name="precio_cotizado"
                                 :action="uploadFileUrl()"
-                                :auto-upload="true"
+                                :auto-upload="false"
                                 :on-success="uploadOk"
                                 :on-error="uploadError"
                                 >
@@ -229,15 +241,16 @@
     </el-container>
     <span slot="footer" class="dialog-footer">
         <el-button @click="showCotizadoPeriodoDialog = false">Cancelar</el-button>
-        <el-button :disabled="!cotizadoAnho" type="primary" @click="uploadFileAction()">Subir y Calcular</el-button>
+        <el-button :disabled="!cotizadoAnho" type="primary" @click="uploadFileAction()">Subir y Actualizar</el-button>
     </span>
   </el-dialog>
  </el-container>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import VueQueryBuilder from 'vue-query-builder'
-import { getTodosPrecio, updatePriceElemento, todosPrecioXls, newPriceElemento } from '@/api/elemento'
+import { getTodosPrecio, updatePriceElemento, todosPrecioXls, newPriceElemento, cargarPrecioFijo } from '@/api/elemento'
 export default {
   components: {
     'query-builder': VueQueryBuilder
@@ -251,6 +264,7 @@ export default {
       precioAnho: new Date().getFullYear(),
       cotizadoAnho: new Date().getFullYear(),
       precioIncremento: null,
+      usarParaIncremento: 'ipc',
       total: 0,
       order: '',
       showPrecioPeriodoDialog: false,
@@ -292,6 +306,14 @@ export default {
       ]
     }
   },
+  computed: {
+    ...mapGetters([
+      'baseurl',
+      'empresa',
+      'sessionUUID',
+      'months'
+    ])
+  },
   methods: {
     uploadOk(response, file, list) {
       this.uno_ok = true
@@ -303,6 +325,29 @@ export default {
         this.$message({
           message: 'Archivo subido al servidor',
           type: 'success'
+        })
+        this.showCotizadoPeriodoDialog = false
+        cargarPrecioFijo(this.anho).then(response => {
+          if (response.data._1 === true) {
+            this.$message({
+              message: 'Precios cargados',
+              type: 'success'
+            })
+          } else {
+            this.$message({
+              message: 'Error al cargar precios',
+              type: 'warning'
+            })
+          }
+          this.$message({
+            message: 'Precios cargados',
+            type: 'success'
+          })
+        }).catch(error => {
+          this.$message({
+            message: 'Error al cargar precios: ' + error,
+            type: 'warning'
+          })
         })
       }
     },
@@ -325,7 +370,7 @@ export default {
       console.log(files, fileList)
     },
     uploadFileUrl() {
-      return '/api/elem/uploadFile?anho=' + this.cotizadoAnho
+      return this.baseurl.url + '/elem/upfipr/' + this.cotizadoAnho
     },
     uploadFileAction () {
       this.$refs.uploadFile.submit()
@@ -342,23 +387,25 @@ export default {
       this.precioIncremento = null
     },
     handlePrecioPeriodo () {
+
+    },
+    procesarPrecioPeriodo () {
       this.showPrecioPeriodoDialog = false
       const loading = this.$loading({
         lock: true
       })
-      newPriceElemento(parseInt(this.precioAnho), parseFloat(this.precioIncremento)).then(resp => {
+      newPriceElemento(parseInt(this.precioAnho), this.usarParaIncremento).then(resp => {
         loading.close()
         this.getElementos()
         if (resp.data === 'true') {
           this.$message({
-            message: 'Precios Cargados con Exito',
+            message: 'Precios Calculados con Exito',
             type: 'success'
           })
         } else {
-          this.$message({
-            message: 'No se pudo cargar los nuevos precios',
-            type: 'warning'
-          })
+          this.$alert('No se pudo calcular los nuevos precios, revise los valores de IPP e IPC del Año a Procesar',
+            'Atención'
+          )
         }
       }).catch(err => {
         loading.close()
@@ -373,6 +420,24 @@ export default {
     handleCurrentChange (val) {
       this.current_page = val
       this.getElementos()
+    },
+    handleTableSort({ col, prop, order }) {
+      console.log('Column:', col)
+      console.log('Prop:', prop)
+      console.log('Order:', order)
+      switch (order) {
+        case 'ascending':
+          order = 'asc'
+          break
+        case 'descending':
+          order = 'desc'
+          break
+        case null:
+          order = ''
+          break
+      }
+      this.order = prop + ' ' + order
+      this.actualizar()
     },
     actualizar () {
       this.getElementos()
@@ -396,11 +461,19 @@ export default {
       getTodosPrecio(this.page_size, this.current_page, this.order, this.qbquery, parseInt(this.anho))
         .then(response => {
           this.total = response.data.total
-          this.tableData = response.data.data.map(v => {
-            this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
-            this.$set(v, 'precioOriginal', v._5)
-            return v
-          })
+          if (this.order.includes('desc')) {
+            this.tableData = response.data.data.map(v => {
+              this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
+              this.$set(v, 'precioOriginal', v._5)
+              return v
+            }).reverse()
+          } else {
+            this.tableData = response.data.data.map(v => {
+              this.$set(v, 'edit', false) // https://vuejs.org/v2/guide/reactivity.html
+              this.$set(v, 'precioOriginal', v._5)
+              return v
+            })
+          }
           loading.close()
         }).catch(() => {
           loading.close()

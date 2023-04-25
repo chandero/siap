@@ -111,10 +111,10 @@ export function updatePriceElemento (elpr_anho, elem_id, elpr_precio) {
   })
 }
 
-export function newPriceElemento (anho, tasa) {
+export function newPriceElemento (anho, usar) {
   const data = {
     anho,
-    tasa
+    usar
   }
   return request({
     url: '/elem/npr',
@@ -136,5 +136,15 @@ export function todosPrecioXls (anho) {
     url: `/elem/mat/xlsp/${anho}`,
     method: 'get',
     responseType: 'blob'
+  })
+}
+
+export function cargarPrecioFijo (anho) {
+  const data = {
+    anho
+  }
+  return request({
+    url: '/elem/upfipr/' + data.anho,
+    method: 'get'
   })
 }

@@ -10,6 +10,7 @@ import inventarioRouter from './modules/inventario'
 import procesoRouter from './modules/proceso'
 import informeRouter from './modules/informe'
 import solicitudRouter from './modules/solicitud'
+import auditorRouter from './modules/auditor'
 
 const _import = require('./_import_' + process.env.NODE_ENV)
 
@@ -419,6 +420,7 @@ export const asyncRouterMap = [
       { path: 'reporteporuso', component: _import('gerencia/reporteporuso'), name: 'reporteporuso', meta: { title: 'reporteporuso', roles: ['super', 'admin', 'ingeniero', 'gerencia'] } }
     ]
   },
+  auditorRouter,
   {
     path: '/administracion',
     component: Layout,

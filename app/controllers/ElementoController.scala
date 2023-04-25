@@ -202,13 +202,13 @@ class ElementoController @Inject()(
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
       val anho = (json \ "anho").as[Int]
-      val tasa = (json \ "tasa").as[Double]
+      val usar = (json \ "usar").as[String]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
-      if (elementoService.nuevoPrecioAnho(anho, tasa, empr_id.get)) {
+      if (elementoService.nuevoPrecioAnho(anho, usar, empr_id.get)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
-        Future.successful(ServiceUnavailable(Json.toJson("false")))
+        Future.successful(Ok(Json.toJson("false")))
       }
   }
 
@@ -284,4 +284,36 @@ class ElementoController @Inject()(
           NotFound("Archivo No Cargado")
         }
     }
+
+def cargarArchivoPrecioFijo(anho: Int) =  Action(parse.multipartFormData) { request =>
+  request.body
+    .file("precio_cotizado")
+    .map { f =>
+      // only get the last part of the filename
+      // otherwise someone can send a path like ../../home/foo/bar.txt to write to other files on the system
+      val filename    = "file_precio_anho_" + anho + ".xlsx" // Paths.get(f.filename).getFileName
+      val fileSize    = f.fileSize
+      val contentType = f.contentType
+      val path = "/opt/tmp/" // System.getProperty("java.io.tmpdir")
+      println("tmp path:" + path)
+      val newTempDir = new File(path, "cargasiap")
+      if (!newTempDir.exists()) {
+          newTempDir.mkdirs()
+      }
+      val file = newTempDir + "/" +filename
+      println("tmp file: " + file)      
+      f.ref.copyTo(Paths.get(s"$file"), replace = true)
+      Ok("Archivo Cargado")
+    }
+    .getOrElse {
+      NotFound("Archivo No Cargado")
+    }
+  }
+
+  def actualizarPrecioFijo(anho: Int) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)
+      Future.successful(Ok(write(elementoService.actualizarPrecioFijo(anho, empr_id.get, usua_id.get))))
+  }
 }

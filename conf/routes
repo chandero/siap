@@ -255,6 +255,8 @@ POST /api/elem/mat/gap controllers.ElementoController.todosPrecio
 GET /api/elem/mat/xls controllers.ElementoController.todosXls
 GET /api/elem/mat/xlsp/:a controllers.ElementoController.todosPrecioXls(a: Int)
 POST /api/elem/npr controllers.ElementoController.nuevoPrecioAnho
+GET /api/elem/upfipr/:a controllers.ElementoController.actualizarPrecioFijo(a: Int)
+POST /api/elem/upfipr/:a controllers.ElementoController.cargarArchivoPrecioFijo(a: Int)
 
 # Cuadrilla
 
@@ -798,6 +800,10 @@ GET /api/acde/gen/:fi/:ff/:tu          controllers.ActaDesmonteController.crearA
 
 # Acta De Redimensionamiento
 POST /api/acre                          controllers.ActaRedimensionamientoController.getActasRedimensionamiento
+
+
+# Auditoria
+GET /api/audi/coau/l/:fi/:ff            controllers.CodigoautorizacionController.informeUsoCodigoAutorizacion(fi: Long, ff: Long)
 
 # SSE - Server Send Event
 

@@ -484,7 +484,9 @@ export default {
     'menu_solicitud_menu1carta_menu1-4edit': 'Informe',
     menu_solicitud_menu2almacen: 'Asignar Consecutivo',
     menu_solicitud_menu3detallado: 'Informe Detallado',
-    menu_solicitud_menu4porvencer: 'Informe por Vencer'
+    menu_solicitud_menu4porvencer: 'Informe por Vencer',
+    menu_auditor: 'Auditoria',
+    menu_auditor_menu1codigoautorizacion: 'Código Autorización'
   },
   navbar: {
     logOut: 'Cerrar Sesión',

@@ -2,6 +2,7 @@ package models
 
 import javax.inject.Inject
 import java.util.Calendar
+import java.sql.Connection
 
 import play.api.libs.json._
 import play.api.libs.json.JodaReads
@@ -37,6 +38,18 @@ import Height._
 import org.apache.poi.common.usermodel.HyperlinkType
 
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.util.UUID
+import java.io.FileInputStream
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.ss.usermodel.FormulaEvaluator
+import org.apache.poi.ss.usermodel.Row
+
+import services.ProcessingProgressTrackerEvent
+import java.text.SimpleDateFormat
+import org.apache.poi.ss.usermodel.DataFormatter
+import scala.util.control.NonFatal
 
 case class Elemento_Precio(
     elem_id: Option[Long],
@@ -199,6 +212,8 @@ class ElementoRepository @Inject()(dbapi: DBApi, gService: GeneralRepository)(
     implicit ec: DatabaseExecutionContext
 ) {
   private val db = dbapi.database("default")
+  private val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+  private val df = new DataFormatter(true)
 
   /**
     Parsear un Elemento desde un ResultSet
@@ -918,7 +933,7 @@ class ElementoRepository @Inject()(dbapi: DBApi, gService: GeneralRepository)(
             'elpr_precio -> elpr_precio,
             'elpr_unidad -> "UND",
             'elpr_fecha -> fecha,
-            'elpr_precio_nuevo -> elpr_precio            
+            'elpr_precio_nuevo -> elpr_precio
           )
           .executeUpdate() > 0
       }
@@ -943,23 +958,67 @@ class ElementoRepository @Inject()(dbapi: DBApi, gService: GeneralRepository)(
     }
   }
 
-  def nuevoPrecioAnho(anho: Int, tasa: Double, empr_id: Long) = {
-    db.withConnection { implicit connection =>
-      val _query =
-        """INSERT INTO siap.elemento_precio (elem_id, elpr_anho_anterior, elpr_anho, elpr_precio_anterior, elpr_incremento, elpr_precio, elpr_unidad, elpr_fecha) select ep1.elem_id, ep1.elpr_anho as elpr_anho_anterior, {anho} as elpr_anho, ep1.elpr_precio as elpr_precio_anterior, {tasa} as elpr_incremento, ROUND(ep1.elpr_precio + ep1.elpr_precio * ({tasa}/100)) as elpr_precio, ep1.elpr_unidad, {fecha} as elpr_fecha from siap.elemento_precio ep1
+  def nuevoPrecioAnho(anho: Int, usar: String, empr_id: Long):Boolean = {
+    val _anho_inicial = anho - 2
+    val _anho_final = anho - 1
+    db.withTransaction { implicit connection =>
+      val _parseUcapIppValor = get[Option[Double]]("ucap_ipp_valor") ~ get[
+        Option[Double]
+      ]("ucap_ipc_valor") map {
+        case ucap_ipp_valor ~ ucap_ipc_valor =>
+          (
+            ucap_ipp_valor,
+            ucap_ipc_valor
+          )
+      }
+      val _ucapIppValor = SQL(
+        """SELECT ucap_ipp_valor, ucap_ipc_valor FROM siap.ucap_ipp WHERE ucap_ipp_anho = {anho} and empr_id = {empr_id}"""
+      ).on(
+          'anho -> _anho_final,
+          'empr_id -> empr_id
+        )
+        .as(_parseUcapIppValor.singleOpt)
+      _ucapIppValor match {
+        case Some(_valor) =>
+          val tasa = usar match {
+            case "ipp" => // buscar ipp año anterior
+                       val _ipp_anterior = SQL("""SELECT ucap_ipp_valor FROM siap.ucap_ipp WHERE ucap_ipp_anho = {anho} and empr_id = {empr_id}""")
+                       .on(
+                          'anho -> _anho_inicial,
+                          'empr_id -> empr_id
+                        ).as(SqlParser.scalar[Double].singleOpt)
+
+                        _ipp_anterior match {
+                            case Some(_ipp_anterior) => _valor._1 match {
+                              case Some(_valor) => Some((_valor  / _ipp_anterior))
+                              case None => Option.empty[Double]
+                            }
+                            case _ => Option.empty[Double]
+                        }
+            case "ipc" => _valor._2
+            case _     => Option.empty[Double]
+          }
+          tasa match {
+            case Some(_tasa) =>
+              val _query =
+                """INSERT INTO siap.elemento_precio (elem_id, elpr_anho_anterior, elpr_anho, elpr_precio_anterior, elpr_incremento, elpr_precio, elpr_unidad, elpr_fecha) select ep1.elem_id, ep1.elpr_anho as elpr_anho_anterior, {anho} as elpr_anho, ep1.elpr_precio as elpr_precio_anterior, {tasa} as elpr_incremento, ROUND(ep1.elpr_precio + ep1.elpr_precio * ({tasa}/100)) as elpr_precio, ep1.elpr_unidad, {fecha} as elpr_fecha from siap.elemento_precio ep1
                       WHERE ep1.elpr_anho = {anho_anterior}
                       ORDER BY ep1.elem_id asc"""
-      var _fecha = Calendar.getInstance().getTime()
-      var _anho_anterior = anho - 1
-      val _result = SQL(_query)
-        .on(
-          'anho -> anho,
-          'anho_anterior -> _anho_anterior,
-          'tasa -> tasa,
-          'fecha -> _fecha
-        )
-        .executeUpdate > 0
-      _result
+              var _fecha = Calendar.getInstance().getTime()
+              var _anho_anterior = anho - 1
+              val _result = SQL(_query)
+                .on(
+                  'anho -> anho,
+                  'anho_anterior -> _anho_anterior,
+                  'tasa -> tasa,
+                  'fecha -> _fecha
+                )
+                .executeUpdate > 0
+              _result
+            case None => false
+          }
+        case None => false
+      }
     }
   }
 
@@ -1055,7 +1114,7 @@ class ElementoRepository @Inject()(dbapi: DBApi, gService: GeneralRepository)(
       query = query + ") as o "
       if (!filter.isEmpty) {
         query = query + " WHERE " + filter
-      }      
+      }
       val result = SQL(query)
         .on(
           'empr_id -> empr_id,
@@ -1290,25 +1349,25 @@ class ElementoRepository @Inject()(dbapi: DBApi, gService: GeneralRepository)(
   def todosPrecioXls(empr_id: Long, anho: Int): Array[Byte] = {
     var _listRow01 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
     var _listMerged01 = new ListBuffer[CellRange]()
-    val _usaIPC = db.withConnection {
-      implicit connection =>
-        val _parser =
-          int("usa_ipc") map {
-            case usa_ipc =>
-              (
-                usa_ipc
-              )
-          }
-        var query =
-          """SELECT 
+    val _usaIPC = db.withConnection { implicit connection =>
+      val _parser =
+        int("usa_ipc") map {
+          case usa_ipc =>
+            (
+              usa_ipc
+            )
+        }
+      var query =
+        """SELECT 
                      gene_numero as usa_ipc
                      FROM siap.general WHERE gene_id = {gene_id}"""
-        SQL(
-          query
-        ).on(
-            'gene_id -> 10
-          )
-          .as(_parser.singleOpt).getOrElse(1) > 0
+      SQL(
+        query
+      ).on(
+          'gene_id -> 10
+        )
+        .as(_parser.singleOpt)
+        .getOrElse(1) > 0
     }
     val _fuenteNegrita = Font(
       height = 10.points,
@@ -1414,7 +1473,7 @@ from
               query
             ).on(
                 'empr_id -> empr_id,
-                'anho    -> anho
+                'anho -> anho
               )
               .as(_parser *)
         }
@@ -1531,4 +1590,190 @@ from
     println("Stream Listo")
     os.toByteArray
   }
+
+  def actualizarPrecioFijo(
+      anho: Int,
+      empr_id: scala.Long,
+      usua_id: scala.Long
+  ) = {
+    val hoy: LocalDateTime = new LocalDateTime(
+      Calendar.getInstance().getTimeInMillis()
+    )
+    val uuid = ""
+    val path = "/opt/tmp/" // System.getProperty("java.io.tmpdir")
+    val newTempDir = new File(path, "cargasiap")
+    val filenameone =
+      "file_precio_anho_" + anho + ".xlsx"
+    val filestringone = newTempDir + "/" + filenameone
+    val fileone = new File(filestringone)
+    var lastEventTime = Calendar.getInstance().getTime()
+    var currentEventTime = Calendar.getInstance().getTime()
+    var exito = false
+    var msg = "Carga Exitosa"
+    val sessionUUID = UUID.randomUUID // UUID.fromString(uuid)
+    println("token a usar: " + uuid)
+    // val fis = new FileInputStream(fileone)
+    // val wb = new HSSFWorkbook(fis)
+    var headersLength = 0
+    var isHeadersWritten = false
+    var filaPos = 0
+    // val wb = WorkbookFactory.create(fileone)
+    val fis = new FileInputStream(fileone)
+    val wb = new XSSFWorkbook(fis)
+    val formulaEvaluator: FormulaEvaluator =
+      wb.getCreationHelper().createFormulaEvaluator()
+    ProcessingProgressTrackerEvent.registerNewStatus(
+      new ProcessEvent("0", "0", "1", "materialPreparingEvent"),
+      sessionUUID
+    )
+    // wb.asScala.zipWithIndex.map {
+    try {
+      db.withTransaction { implicit connection =>
+        val mySheet = wb.getSheetAt(0)
+        mySheet match {
+          case (sheet) =>
+            // val sheet = wb.getSheetAt(0)
+            println(
+              "Inicio Carga: " + sdf.format(Calendar.getInstance().getTime())
+            )
+            val totalRow = sheet.getLastRowNum().toString
+            println("Filas: " + totalRow)
+            // EventStream.publish(new ComenergiaStartLoadingEvent(empr_id, comenergia_id, usua_id, "ComenergiaStartLoadingEvent", "0"))
+            val rowIterator = sheet.rowIterator()
+
+            while (rowIterator.hasNext) {
+              val row = rowIterator.next()
+              // registerNewStatus(Status.Parsing, sessionUUID)
+              if (Option(row).isDefined) {
+                try {
+                  filaPos += 1
+                  currentEventTime = Calendar.getInstance().getTime()
+                  if ((currentEventTime.getTime() - lastEventTime
+                        .getTime()) / 1000 >= 1) {
+                    ProcessingProgressTrackerEvent.registerNewStatus(
+                      new ProcessEvent(
+                        totalRow.toString(),
+                        filaPos.toString(),
+                        "2",
+                        "materialParsingEvent"
+                      ),
+                      sessionUUID
+                    )
+                    lastEventTime = currentEventTime
+                  }
+                  if (filaPos >= 6) {
+                    val rowData = (0 until row.getLastCellNum).toArray.map {
+                      index =>
+                        removeLineBreakingChars(
+                          df.formatCellValue(
+                            row.getCell(
+                              index,
+                              Row.MissingCellPolicy.CREATE_NULL_AS_BLANK
+                            ),
+                            formulaEvaluator
+                          )
+                        )
+
+                    }
+                    // if (isHeadersWritten && filaPos >= 4) {
+                    // if (headersLength == rowData.length) {
+                    // println(s"escribiendo Fila número ${row.getRowNum}")
+                    // csvWriter.write(rowData)
+                    escribirFilaOne(rowData, empr_id, anho)
+                    // } else {
+                    // println(s"Fila invalida [Fila no - ${row.getRowNum}] [Headers count = $headersLength and current row columns count = ${rowData.length}]")
+                    // }
+                  } // else if (!isHeadersWritten) {
+                  // csvWriter.writeHeaders(rowData)
+                  // isHeadersWritten = true
+                  // headersLength = rowData.length
+                  // }
+                } catch {
+                  case NonFatal(th) =>
+                    msg = th.getMessage() + ", [Linea " + (filaPos) + "]"
+                    exito = false
+                    th.printStackTrace()
+                }
+              }
+            }
+            // registerNewStatus(Status.Done, sessionUUID)
+            ProcessingProgressTrackerEvent.registerNewStatus(
+              new ProcessEvent("0", "0", "3", "medidorDoneEvent"),
+              sessionUUID
+            )
+            println(
+              "Fin Carga: " + sdf.format(Calendar.getInstance().getTime())
+            )
+        }
+      }
+      exito = true
+    } catch {
+      case NonFatal(th) =>
+        msg = th.getMessage()
+        exito = false
+    } finally {
+      try {
+        wb.close()
+        fis.close()
+        fileone.delete()
+      } catch {
+        case NonFatal(th) =>
+          msg = th.getMessage()
+          exito = false
+      }
+    }
+    (exito, msg)
+  }
+
+  def escribirFilaOne(fila: Array[String], empr_id: Long, anho: Int)(
+      implicit connection: Connection
+  ): Unit = {
+    val elem_codigo_fila = fila(0).replaceAll("[a-zA-Z\\-]{0,}", "")
+    val elem_codigo_numero = elem_codigo_fila.toInt
+    val elem_codigo = f"${elem_codigo_numero}%06d"
+    println("Evaluando Material Código: " + elem_codigo)
+    val elem_descripcion = fila(1)
+    val elem_precio_nuevo = fila(2).replaceAll("[a-zA-Z\\-]{0,}", "").toDouble
+    val elem_precio_cotizado =
+      fila(3).replaceAll("[a-zA-Z\\-]{0,}", "").toDouble
+    val elem_id = SQL(
+      """SELECT e1.elem_id FROM siap.elemento e1 WHERE e1.elem_codigo = {elem_codigo}"""
+    ).on(
+        'elem_codigo -> elem_codigo
+      )
+      .as(SqlParser.scalar[scala.Long].singleOpt)
+
+    elem_id match {
+      case Some(elem_id) =>
+        val esActualizado = SQL(
+          """UPDATE siap.elemento_precio SET elpr_precio_nuevo = case when {elpr_precio_nuevo} > 0 then {elpr_precio_nuevo} else elpr_precio_nuevo end, elpr_precio_cotizado = case when {elpr_precio_cotizado} > 0 then {elpr_precio_cotizado} else elpr_precio_cotizado end WHERE elem_id = {elem_id} and elpr_anho = {elpr_anho}"""
+        ).on(
+            'elpr_precio_nuevo -> elem_precio_nuevo,
+            'elpr_precio_cotizado -> elem_precio_cotizado,
+            'elem_id -> elem_id,
+            'elpr_anho -> anho
+          )
+          .executeUpdate() > 0
+
+        val esInsertado = if (!esActualizado) {
+          SQL(
+            """INSERT INTO siap.elemento_precio (elem_id, elpr_anho, elpr_precio_cotizado, elpr_precio_nuevo) VALUES ({elem_id}, {elpr_anho}, {elpr_precio_cotizado}, {elpr_precio_nuevo})"""
+          ).on(
+              'elem_id -> elem_id,
+              'elpr_anho -> anho,
+              'elpr_precio_cotizado -> elem_precio_cotizado,
+              'elpr_precio_nuevo -> elem_precio_nuevo
+            )
+            .executeUpdate() > 0
+        } else {
+          false
+        }
+
+      case None => None
+    }
+  }
+
+  def removeLineBreakingChars(cell: String): String =
+    cell.replaceAll("[\\t\\n\\r]", " ")
+
 }

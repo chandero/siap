@@ -38,6 +38,7 @@ class CanalizacionReporteController @Inject()(
     implicit ec: ExecutionContext)
     extends AbstractController(cc) {
   implicit val formats = net.liftweb.json.DefaultFormats
+  
   def todos(): Action[AnyContent] =
     authenticatedUserAction.async { implicit request: Request[AnyContent] => 
     val json = request.body.asJson.get
