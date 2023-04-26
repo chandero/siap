@@ -16,6 +16,7 @@ import net.liftweb.json.parse
 import pdi.jwt.JwtSession
 
 import utilities._
+import java.util.Date
 
 @Singleton
 class CodigoautorizacionController @Inject()(
@@ -48,5 +49,19 @@ class CodigoautorizacionController @Inject()(
         codigoService.informeUsoCodigoAutorizacion(fi, ff, empr_id.get).map { informe =>
             Ok(write(informe))
         }
+    }
+
+    def informeUsoCodigoAutorizacionXlsx(fi: scala.Long, ff: scala.Long) = authenticatedUserAction.async {
+        implicit request: Request[AnyContent] =>
+        val empr_id = Utility.extraerEmpresa(request)
+        val usua_id = Utility.extraerUsuario(request)
+        val os = codigoService.informeUsoCodigoAutorizacionXls(fi, ff, empr_id.get, usua_id.get)
+        val sdf = new java.text.SimpleDateFormat("yyyyMMdd")
+        val filename = "informe_uso_codigo_autorizacion_" + sdf.format(new Date(fi)) + "_" + sdf.format(new Date(ff)) + ".xlsx"
+        val attach = "attachment; filename=" + filename
+        Future.successful(Ok(os)
+            .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            .withHeaders("Content-Disposition" -> attach)
+        )
     }
 }

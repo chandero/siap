@@ -111,11 +111,25 @@
         </el-table>
       </el-col>
     </el-row>
+    <el-row>
+      <el-col>
+        <el-pagination
+          layout="prev, pager, next"
+          :total="tablaData.length"
+          :page-size="10">
+        </el-pagination>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="24">
+          <img :title="$t('xls')" @click="handleExcelClick()" style="width:32px; height: 36px; cursor: pointer;" :src="require('@/assets/xls.png')"/>
+      </el-col>
+    </el-row>
     </el-main>
   </el-container>
 </template>
 <script>
-import { obtenerInforme } from '@/api/auditor'
+import { obtenerInforme, obtenerInformeXlsx } from '@/api/auditor'
 
 export default {
   data() {
@@ -159,6 +173,28 @@ export default {
         })
         .catch((error) => {
           console.log(error)
+        })
+    },
+    handleExcelClick() {
+      const loading = this.$loading({
+        lock: true,
+        text: 'Generando Informe...',
+        spinner: 'el-icon-loading'
+      })
+      obtenerInformeXlsx(this.fechaInicial.getTime(), this.fechaFinal.getTime())
+        .then((response) => {
+          loading.close()
+          console.log(response)
+          const filename = response.headers['content-disposition'].split('filename=')[1]
+          const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+          const link = document.createElement('a')
+          link.href = window.URL.createObjectURL(blob)
+          link.download = filename
+          link.click()
+        })
+        .catch((error) => {
+          loading.close()
+          console.log('Error generando excel:', error)
         })
     }
   }

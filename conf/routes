@@ -804,6 +804,7 @@ POST /api/acre                          controllers.ActaRedimensionamientoContro
 
 # Auditoria
 GET /api/audi/coau/l/:fi/:ff            controllers.CodigoautorizacionController.informeUsoCodigoAutorizacion(fi: Long, ff: Long)
+GET /api/audi/coau/lxlsx/:fi/:ff            controllers.CodigoautorizacionController.informeUsoCodigoAutorizacionXlsx(fi: Long, ff: Long)
 
 # SSE - Server Send Event
 
