@@ -85,7 +85,8 @@ class ActaRedimensionamientoRepository @Inject()(
     usuarioService: UsuarioRepository,
     empresaService: EmpresaRepository,
     dataUtil: DataUtil,
-    cobroService: Cobro6Repository
+    cobroService: Cobro6Repository,
+    generalService: GeneralRepository
 )(implicit ec: DatabaseExecutionContext) {
 
   private val db = dbapi.database("default")
@@ -258,7 +259,7 @@ class ActaRedimensionamientoRepository @Inject()(
 /*       _listData += 
         (
                    ( 
-                    "Orden de Trabajo ITAF-" + orden.cotr_consecutivo.get,
+                    "Orden de Trabajo -" + orden.cotr_consecutivo.get,
                     if (_expansion > 0.0) { "$" + formatter.format(_expansion) } else { "" },
                     if (_modernizacion > 0.0) { "$" + formatter.format(_modernizacion) } else { "" },
                     if (_desmonte > 0.0) { "-$" + formatter.format(_desmonte) } else { "" },
@@ -266,6 +267,7 @@ class ActaRedimensionamientoRepository @Inject()(
                   )
         ) */
       }
+      val _prefijo_interventoria = generalService.buscarPorId(10, empr_id).get.gene_valor.get
       // Actualizar redimensionamiento control
       db.withTransaction { implicit connection =>
         var _fecha_valor = Calendar.getInstance()
@@ -381,6 +383,7 @@ class ActaRedimensionamientoRepository @Inject()(
         'empr_id -> empr_id
       ).as(SqlParser.scalar[Int].single)
     }
+    val _prefijo_interventoria = generalService.buscarPorId(10, empr_id).get.gene_valor.get
     val _sheet02 = Sheet(
       name = "Anexo 02",
       rows = {
@@ -428,7 +431,7 @@ class ActaRedimensionamientoRepository @Inject()(
           if (orden.cotr_tipo_obra.get == 6) {
             _listRow02 += com.norbitltd.spoiwo.model.Row(
             StringCell(
-              "DESMONTE DE UCAPS MODERNIZADAS ODT ITAF-" + orden.cotr_consecutivo.get,
+              "DESMONTE DE UCAPS MODERNIZADAS ODT - " + _prefijo_interventoria + "-" + + orden.cotr_consecutivo.get,
               Some(0),
               style = Some(
                         CellStyle(
@@ -944,7 +947,7 @@ class ActaRedimensionamientoRepository @Inject()(
           _listData += 
             (
                    ( 
-                    "Orden de Trabajo ITAF-" + orden.cotr_consecutivo.get,
+                    "Orden de Trabajo " + _prefijo_interventoria + "-" + orden.cotr_consecutivo.get,
                     _expansion,
                     _modernizacion,
                     _desmonte,

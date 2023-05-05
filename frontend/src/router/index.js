@@ -486,9 +486,60 @@ export const asyncRouterMap = [
       { path: 'elemento/editar/:id', component: _import('administracion/elemento/edit'), name: 'elementoedit', hidden: true, redirect: false, meta: { title: 'elementoedit', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
       { path: 'elemento/crear', component: _import('administracion/elemento/create'), name: 'elementocreate', hidden: true, meta: { title: 'elementocreate', roles: ['super', 'admin', 'ingeniero', 'auxiliar'] } },
       */// FIN ELEMENTO
-      { path: 'manoobra', component: _import('administracion/manoobra'), name: 'manoobra', meta: { title: 'manoobra', roles: ['super', 'admin', 'almacen'] } },
+      {
+        path: 'maob',
+        component: () => import('@/views/administracion/manoobraorden/index'),
+        redirect: '/administracion/manoobraorden/menu01',
+        name: 'mano_obra',
+        meta: {
+          title: 'mano_obra.title',
+          icon: 'el-icon-document',
+          roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor']
+        },
+        children: [
+          {
+            path: 'list',
+            component: () => import('@/views/administracion/manoobraorden/menu01/index'),
+            name: 'mano_obra_lista',
+            meta: { title: 'mano_obra.lista', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
+          },
+          {
+            path: 'price',
+            component: () => import('@/views/administracion/manoobraorden/menu02/index'),
+            name: 'mano_obra_precio',
+            meta: { title: 'mano_obra.precio', icon: 'el-icon-money', roles: ['super', 'admin', 'supervisor'] }
+          }
+        ]
+      },
+      {
+        path: 'math',
+        component: () => import('@/views/administracion/manoherramientaorden/index'),
+        redirect: '/administracion/manoherramientaorden/menu01',
+        name: 'mano_herramienta',
+        meta: {
+          title: 'mano_herramienta.title',
+          icon: 'el-icon-document',
+          roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor']
+        },
+        children: [
+          {
+            path: 'list',
+            component: () => import('@/views/administracion/manoherramientaorden/menu01/index'),
+            name: 'mano_herramienta_lista',
+            meta: { title: 'mano_herramienta.lista', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
+          },
+          {
+            path: 'price',
+            component: () => import('@/views/administracion/manoherramientaorden/menu02/index'),
+            name: 'mano_herramienta_precio',
+            meta: { title: 'mano_herramienta.precio', icon: 'el-icon-money', roles: ['super', 'admin', 'supervisor'] }
+          }
+        ]
+      },
+      /* { path: 'manoobra', component: _import('administracion/manoobra'), name: 'manoobra', meta: { title: 'manoobra', roles: ['super', 'admin', 'almacen'] } },
       { path: 'manoobra/editar/:id', component: _import('administracion/manoobra/edit'), name: 'manoobraedit', hidden: true, redirect: false, meta: { title: 'manoobraedit', roles: ['super', 'admin', 'almacen'] } },
       { path: 'manoobra/crear', component: _import('administracion/manoobra/create'), name: 'manoobracreate', hidden: true, meta: { title: 'manoobracreate', roles: ['super', 'admin', 'almacen'] } },
+      */
       { path: 'cuadrilla', component: _import('administracion/cuadrilla'), name: 'cuadrilla', meta: { title: 'cuadrilla', roles: ['super', 'admin', 'ingeniero'] } },
       { path: 'cuadrilla/editar/:id', component: _import('administracion/cuadrilla/edit'), name: 'cuadrillaedit', hidden: true, redirect: false, meta: { title: 'cuadrillaedit', roles: ['super', 'admin', 'ingeniero'] } },
       { path: 'cuadrilla/crear', component: _import('administracion/cuadrilla/create'), name: 'cuadrillacreate', hidden: true, meta: { title: 'cuadrillacreate', roles: ['super', 'admin', 'ingeniero'] } },

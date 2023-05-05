@@ -253,6 +253,12 @@ const informeRouter = {
           meta: { title: 'menu_informe_menu4calculo_menu4-1disponibilidad', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
         },
         {
+          path: 'menu4-5indisponibilidad',
+          component: () => import('@/views/informe/menu4calculo/menu4-5indisponibilidad'),
+          name: 'menu_informe_menu4calculo_menu4-5indisponibilidad',
+          meta: { title: 'menu_informe_menu4calculo_menu4-5indisponibilidad', icon: 'el-icon-info', roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor'] }
+        },
+        {
           path: 'menu4-2carga',
           component: () => import('@/views/informe/menu4calculo/menu4-2carga'),
           name: 'menu_informe_menu4calculo_menu4-2carga',

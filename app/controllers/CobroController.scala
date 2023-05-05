@@ -149,7 +149,8 @@ class CobroController @Inject()(
       val empr_id = Utility.extraerEmpresa(request)
       val usua_id = Utility.extraerUsuario(request)
       val os = cobro6Service.siap_orden_trabajo_cobro_relacion(empr_id.get , anho, periodo)
-      val filename = "Relacion_Orden_Trabajo_ITAF_" + anho.toString() + "_" + periodo.toString() + ".xlsx"
+      val _prefijo_interventoria = generalService.buscarPorId(10, empr_id.get).get.gene_valor.get
+      val filename = "Relacion_Orden_Trabajo_" + _prefijo_interventoria + "_" + anho.toString() + "_" + periodo.toString() + ".xlsx"
       val attach = "attachment; filename=" + filename
       Future.successful(Ok(os)
         .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
@@ -161,7 +162,8 @@ class CobroController @Inject()(
       val empr_id = Utility.extraerEmpresa(request)
       val usua_id = Utility.extraerUsuario(request)
       val os = cobro6Service.siap_orden_trabajo_cobro_relacion_factura(empr_id.get)
-      val filename = "Relacion_Orden_Trabajo_ITAF_Factura" + ".xlsx"
+      val _prefijo_interventoria = generalService.buscarPorId(10, empr_id.get).get.gene_valor.get
+      val filename = "Relacion_Orden_Trabajo_"+ _prefijo_interventoria + "_Factura" + ".xlsx"
       val attach = "attachment; filename=" + filename
       Future.successful(Ok(os)
         .as("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

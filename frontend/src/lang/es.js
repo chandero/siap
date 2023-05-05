@@ -27,6 +27,8 @@ export default {
   fecha: 'Fecha',
   registros: 'Registros',
   mensaje: 'Ultimo Mensaje',
+  savesuccessful: 'Datos guardados exitosamente',
+  savefail: 'Error al guardar los datos',
   months: {
     m1: 'Enero',
     m2: 'Febrero',
@@ -343,6 +345,16 @@ export default {
     ipp: {
       lista: 'Ipp / Ipc'
     },
+    mano_obra: {
+      title: 'Mano Obra',
+      lista: 'Lista',
+      precio: 'Precio'
+    },
+    mano_herramienta: {
+      title: 'Transporte Herramienta',
+      lista: 'Lista',
+      precio: 'Precio'
+    },
     // Bloque nuevo con sub menu
     menu_inventario: 'Inventario',
     menu_inventario_menu1luminaria: 'Luminaria',
@@ -470,6 +482,7 @@ export default {
     'menu_informe_menu3inventario_menu3-7medidor': 'Medidor',
     menu_informe_menu4calculo: 'Cálculo',
     'menu_informe_menu4calculo_menu4-1disponibilidad': 'Disponibilidad',
+    'menu_informe_menu4calculo_menu4-5indisponibilidad': 'Acta Indisponibilidad',
     'menu_informe_menu4calculo_menu4-2carga': 'Carga',
     'menu_informe_menu4calculo_menu4-3eficiencia': 'Eficiencia',
     'menu_informe_menu4calculo_menu4-4ucap': 'Unidad Constructiva',
@@ -681,7 +694,9 @@ export default {
     elpr_ipc: 'IPC Año',
     elpr_precio_nuevo: 'Precio Actual',
     elpr_precio_cotizado: 'Precio Cotizado',
-    fecha_digitacion: 'Fecha Digitación'
+    fecha_digitacion: 'Fecha Digitación',
+    elpr_tipo_obra: 'Tipo Obra',
+    elpr_tipo_obra_tipo: 'Nivel'
   },
   unitario: {
     select: 'Seleccione las Ucap',
@@ -692,11 +707,40 @@ export default {
   },
   manoobra: {
     tabletitle: 'Mano de Obra',
+    lista: 'Lista',
+    precio: 'Precio',
     select: 'Seleccione la Mano de Obra',
     submit: 'Seleccionar',
     maob_descripcion: 'Descripción',
     maob_tipo: 'Tipo',
     mopr_precio: 'Precio',
+    success: 'Éxito',
+    created: 'Nueva Mano de Obra Creada',
+    error: 'Error',
+    notcreated: 'No se pudo crear la Mano de Obra, error =>',
+    updated: 'Mano de Obra actualizada con exito!',
+    notupdated: 'Mano de Obra no fue actualizada, error =>',
+    confirmationmsg:
+      'Se procederá a borrar la Mano de Obra seleccionada, continuar?'
+  },
+  mano_herramienta: {
+    tabletitle: 'Transporte y Herramienta',
+    select: 'Seleccione la Mano de Obra',
+    submit: 'Seleccionar',
+    math_descripcion: 'Descripción',
+    math_codigo: 'Código',
+    mathpr_anho_anterior: 'Año Anterior',
+    mathpr_incremento: 'Incremento',
+    mathpr_precio_anterior: 'Precio Anterior',
+    mathpr_anho: 'Año Actual',
+    math_tipo: 'Tipo',
+    mathpr_precio: 'Precio',
+    mathpr_es_porcentaje: 'Es Porcentaje',
+    mathpr_rendimiento: 'Rendimiento',
+    mathpr_cantidad: 'Cantidad',
+    mathpr_fecha: 'Fecha',
+    cotr_tipo_obra: 'Tipo Obra',
+    cotr_tipo_obra_tipo: 'Nivel',
     success: 'Éxito',
     created: 'Nueva Mano de Obra Creada',
     error: 'Error',
@@ -973,6 +1017,7 @@ export default {
       'Se procederá a borrar la Municipio Obra seleccionada, continuar?'
   },
   reporte: {
+    actaindisponibilidad: 'Acta Indisponibilidad',
     tipo: {
       select: 'Seleccione el Tipo de Reporte'
     },

@@ -178,7 +178,7 @@ class Cobro6Repository @Inject()(
 
   private val db = dbapi.database("default")
   private val REPORT_DEFINITION_PATH = System.getProperty("user.dir") + "/conf/reports/"
-
+  
   def buscarPorId(empr_id: Long, cotr_id: Long): Option[orden_trabajo_cobro] = {
     db.withConnection { implicit connection =>
       val query =
@@ -721,7 +721,7 @@ class Cobro6Repository @Inject()(
     val _fechaConcesion = DateTime
       .parse(_fechaConcesionStr, DateTimeFormat.forPattern("yyyy-MM-dd"))
       .toLocalDate()
-
+    val _prefijo_interventoria = generalService.buscarPorId(10, empresa.empr_id.get).get.gene_valor.get
     var _idx = 0
     Sheet(
       name = "Orden",
@@ -742,7 +742,7 @@ class Cobro6Repository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             StringCell(
-              "ORDEN DE TRABAJO No. ITAF-" + orden.cotr_consecutivo.get,
+              "ORDEN DE TRABAJO No. " + _prefijo_interventoria + "-" + orden.cotr_consecutivo.get,
               Some(1),
               style = Some(
                 CellStyle(
@@ -1686,7 +1686,7 @@ class Cobro6Repository @Inject()(
     val _fechaConcesion = DateTime
       .parse(_fechaConcesionStr, DateTimeFormat.forPattern("yyyy-MM-dd"))
       .toLocalDate()
-
+    val _prefijo_interventoria = generalService.buscarPorId(10, empresa.empr_id.get).get.gene_valor.get
     val _fechaSolucion = db.withConnection { implicit connection =>
       SQL("""select r1.repo_fechasolucion from siap.cobro_orden_trabajo_reporte cotr1
            inner join siap.reporte r1 on r1.repo_id = cotr1.repo_id 
@@ -1728,7 +1728,7 @@ class Cobro6Repository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             StringCell(
-              "ORDEN DE TRABAJO No. ITAF-" + orden.cotr_consecutivo.get,
+              "ORDEN DE TRABAJO No. " + _prefijo_interventoria + "-" + orden.cotr_consecutivo.get,
               Some(1),
               style = Some(
                 CellStyle(
@@ -2332,7 +2332,7 @@ class Cobro6Repository @Inject()(
     var _listRow02 = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
     var _listMerged02 = new ListBuffer[com.norbitltd.spoiwo.model.CellRange]()
     var _idx = 0
-
+    val _prefijo_interventoria = generalService.buscarPorId(10, empresa.empr_id.get).get.gene_valor.get
     val _fuenteTitulo = Font(
       height = 10.points,
       fontName = "Liberation Sans",
@@ -2443,7 +2443,7 @@ class Cobro6Repository @Inject()(
         val header2 = com.norbitltd.spoiwo.model
           .Row(
             StringCell(
-              "ORDEN DE TRABAJO ITAF S.A.S No. " + "%06d".format(
+              "ORDEN DE TRABAJO "+ _prefijo_interventoria + " No. " + "%06d".format(
                 orden.cotr_consecutivo.get
               ) + " " + Utility
                 .mes(orden.cotr_fecha.get.getMonthOfYear)
@@ -10326,6 +10326,7 @@ class Cobro6Repository @Inject()(
         italic = false,
         strikeout = false
       )
+      val _prefijo_interventoria = generalService.buscarPorId(10, empresa.empr_id.get).get.gene_valor.get
       val _parseMaterial = str("elem_codigo") ~ str("elem_descripcion") ~ double(
         "even_cantidad"
       ) ~ get[Option[String]]("elpr_unidad") ~ get[Option[Double]](
@@ -10393,7 +10394,7 @@ class Cobro6Repository @Inject()(
           _listRow01 += com.norbitltd.spoiwo.model
             .Row(
               StringCell(
-                "ORDEN DE TRABAJO No. ITAF-" + orden.cotr_consecutivo.get,
+                "ORDEN DE TRABAJO No. " + _prefijo_interventoria + "-" + orden.cotr_consecutivo.get,
                 Some(0),
                 style = Some(
                   CellStyle(
@@ -10672,7 +10673,7 @@ class Cobro6Repository @Inject()(
               CellStyleInheritance.CellThenRowThenColumnThenSheet
             ),
             StringCell(
-              "Director Técnico de Interventoria ITAF",
+              "Director Técnico de Interventoria " + _prefijo_interventoria,
               Some(4),
               style = Some(
                 CellStyle(
@@ -11245,7 +11246,7 @@ class Cobro6Repository @Inject()(
 /*       _listData += 
         (
                    ( 
-                    "Orden de Trabajo ITAF-" + orden.cotr_consecutivo.get,
+                    "Orden de Trabajo -" + orden.cotr_consecutivo.get,
                     if (_expansion > 0.0) { "$" + formatter.format(_expansion) } else { "" },
                     if (_modernizacion > 0.0) { "$" + formatter.format(_modernizacion) } else { "" },
                     if (_desmonte > 0.0) { "-$" + formatter.format(_desmonte) } else { "" },
@@ -11270,6 +11271,7 @@ class Cobro6Repository @Inject()(
       case Some(e) => e
       case None => Empresa(None, "", "", "", "", "", None, 0, 0, 0, 0, None, None)
     }
+    val _prefijo_interventoria = generalService.buscarPorId(10, empresa.empr_id.get).get.gene_valor.get
     val ordenes =  buscarPorEmpresaAnhoPeriodo(empresa.empr_id.get, anho, periodo)
     val formatter = java.text.NumberFormat.getIntegerInstance
     var _subtotal_expansion = 0.0
@@ -11902,7 +11904,7 @@ class Cobro6Repository @Inject()(
           _listData += 
             (
                    ( 
-                    "Orden de Trabajo ITAF-" + orden.cotr_consecutivo.get,
+                    "Orden de Trabajo " + _prefijo_interventoria + "-" + orden.cotr_consecutivo.get,
                     _expansion,
                     _modernizacion,
                     _desmonte,

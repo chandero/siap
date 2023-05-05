@@ -3979,7 +3979,7 @@ class Cobro2Repository @Inject()(
           'cotr_id -> orden.cotr_id
       )
         .as(SqlParser.str("unit_codigo").*)
-      if (_hayObras) { 
+       if (_hayObras) { 
         println("*** HAY OBRAS ****")
         var _nunitarios = _unitarios.to[ListBuffer]
         _nunitarios += "1.06"
@@ -10520,7 +10520,7 @@ class Cobro2Repository @Inject()(
       _listRow01 += headerRow11
       _idx += 1
       println("Validando Obras")
-      val _parseMaterial = str("elem_descripcion") ~ get[Option[String]](
+       val _parseMaterial = str("elem_descripcion") ~ get[Option[String]](
         "elpr_unidad"
       ) ~ get[Option[Int]]("elpr_precio") ~ double("cotrma_cantidad") map {
         case a1 ~ a2 ~ a3 ~ a4 => (a1, a2, a3, a4)
@@ -10540,16 +10540,17 @@ class Cobro2Repository @Inject()(
               SqlParser.scalar[Int] *
             )
           println("Obras: (" + _obras.mkString(",") + ")")
-          SQL("""select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, SUM(re1.even_cantidad_instalado) as cotrma_cantidad
+          SQL("""select e1.elem_descripcion, ep1.elpr_unidad, ep1.elpr_precio, SUM(oe1.even_cantidad_instalado) as cotrma_cantidad
                       from siap.obra o1
                       inner join siap.obra_evento oe1 ON oe1.obra_id = o1.obra_id and oe1.even_id < 8
                       inner join siap.elemento e1 on e1.elem_id = oe1.elem_id and e1.elem_estado = 1
                       left join siap.elemento_precio ep1 on ep1.elem_id = e1.elem_id and ep1.elpr_anho = {anho}
-                      where o1.empr_id = {empr_id} and u1.unit_codigo = {unit_codigo} and CAST(o1.obra_id as VARCHAR) IN ({obras})
+                      where o1.empr_id = {empr_id} and CAST(o1.obra_id as VARCHAR) IN ({obras})
                       group by 1,2,3""")
             .on(
               'empr_id -> empresa.empr_id.get,
               'unit_codigo -> "1.06",
+              'anho -> orden.cotr_anho.get,
               'obras -> _obras.mkString(",").split(",").toSeq
             )
             .as(_parseMaterial *)
@@ -10557,7 +10558,7 @@ class Cobro2Repository @Inject()(
       println("Cargar Material Obra: " + _materiales)
       _idx_inicial = _idx + 1
       _idx_final = _idx + 1
-      _materiales.map { _m =>
+       _materiales.map { _m =>
         _listRow01 += com.norbitltd.spoiwo.model.Row(
           StringCell(
             _m._1,

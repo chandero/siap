@@ -387,7 +387,8 @@ export default {
       this.precioIncremento = null
     },
     handlePrecioPeriodo () {
-
+      this.showPrecioPeriodoDialog = false
+      this.procesarPrecioPeriodo()
     },
     procesarPrecioPeriodo () {
       this.showPrecioPeriodoDialog = false

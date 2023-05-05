@@ -356,7 +356,7 @@ export default {
       relacion2().then(resp => {
         loading.close()
         var blob = resp.data
-        const filename = 'Relacion_Orden_Trabajo_ITAF_Factura' + '.xlsx'
+        const filename = 'Relacion_Orden_Trabajo_Interventoria_Factura' + '.xlsx'
         if (window.navigator.msSaveOrOpenBlob) {
           window.navigator.msSaveBlob(blob, filename)
         } else {

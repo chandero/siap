@@ -1244,7 +1244,8 @@ class TransformadorReporteRepository @Inject()(
               'repo_horafin -> reporte.repo_horafin,
               'reti_id -> reporte.reti_id,
               'repo_consecutivo -> consec,
-              'tiba_id -> reporte.tiba_id
+              'tiba_id -> reporte.tiba_id,
+              'tireuc_id -> 3
             )
             .executeInsert()
             .get

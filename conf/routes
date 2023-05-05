@@ -757,6 +757,23 @@ POST /api/maob/upd controllers.ManoObraController.actualizar
 GET /api/maob/bdesc/:q controllers.ManoObraController.buscarPorDescripcion(q: String)
 POST /api/maob/upa controllers.ManoObraController.actualizarPrecio
 
+# Mano Herramienta
+## Obra
+GET /api/maher/maob/get controllers.ManoHerramientaController.getManoObraOrden
+POST /api/maher/maob/save controllers.ManoHerramientaController.guardarManoObraOrden
+POST /api/maher/maobpr/save controllers.ManoHerramientaController.guardarManoObraOrdenPrecio
+POST /api/maher/maobpr/del controllers.ManoHerramientaController.borrarManoObraOrdenPrecio
+POST /api/maher/maobpr/get controllers.ManoHerramientaController.getManoObraOrdenPrecio
+GET /api/maher/maobpr/getxlsx/:a controllers.ManoHerramientaController.getManoObraOrdenPrecioXlsx(a: Int)
+## Transporte Herramienta
+GET /api/maher/math/get controllers.ManoHerramientaController.getManoHerramientaOrden
+POST /api/maher/math/save controllers.ManoHerramientaController.guardarManoHerramientaOrden
+POST /api/maher/mathpr/save controllers.ManoHerramientaController.guardarManoHerramientaOrdenPrecio
+POST /api/maher/mathpr/del controllers.ManoHerramientaController.borrarManoHerramientaOrdenPrecio
+POST /api/maher/mathpr/get controllers.ManoHerramientaController.getManoHerramientaOrdenPrecio
+GET /api/maher/mathpr/getxlsx/:a controllers.ManoHerramientaController.getManoHerramientaOrdenPrecioXlsx(a: Int)
+
+
 # Cargar Archivos
 
 POST /api/mdone/:a/:m/:e controllers.UploadController.upload_medidor_lectura(a:Int, m: Int, e: Long)

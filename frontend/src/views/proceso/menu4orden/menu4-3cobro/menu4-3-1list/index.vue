@@ -275,7 +275,7 @@
           </el-row>
           <el-row>
             <el-col :span="24">
-              <el-form-item label="Consecutivo ITAF Siguente">
+              <el-form-item label="Consecutivo Orden Siguente">
                 <el-input :disabled="validCsc" v-model="cotr_consecutivo" style="font-weight: bolder;" />
               </el-form-item>
             </el-col>
@@ -626,7 +626,7 @@ export default {
         excel.export_json_to_excel(
           tHeader,
           data,
-          'general_orden_de_trabajo_itaf_año_' +
+          'general_orden_de_trabajo_año_' +
             this.anho +
             '_periodo_' +
             this.$i18n.t(`months.m${this.mes}`)
@@ -694,7 +694,7 @@ export default {
       this.showRelacionDialog = false
       relacion(this.anho, this.mes).then(resp => {
         var blob = resp.data
-        const filename = 'Relacion_Orden_Trabajo_ITAF_' + this.anho + '_' + this.$i18n.t(this.mes) + '.xlsx'
+        const filename = 'Relacion_Orden_Trabajo_Interventoria_' + this.anho + '_' + this.$i18n.t(this.mes) + '.xlsx'
         if (window.navigator.msSaveOrOpenBlob) {
           window.navigator.msSaveBlob(blob, filename)
         } else {

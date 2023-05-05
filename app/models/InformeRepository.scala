@@ -2025,7 +2025,8 @@ class InformeRepository @Inject()(
     usuarioService: UsuarioRepository,
     empresaService: EmpresaRepository,
     municipioService: MunicipioRepository,
-    cuadrillaService: CuadrillaRepository
+    cuadrillaService: CuadrillaRepository,
+    generalService: GeneralRepository
 )(implicit ec: DatabaseExecutionContext) {
 
   private val db = dbapi.database("default")
@@ -4928,6 +4929,7 @@ ORDER BY e.reti_id, e.elem_codigo        """)
       empresa match {
         case Some(empresa) =>
           val municipio = municipioService.buscarPorId(empresa.muni_id)
+          val _prefijo_interventoria = generalService.buscarPorId(10, empresa.empr_id.get).get.gene_valor.get
           val fmt = DateTimeFormat.forPattern("yyyyMMdd")
           val format = new SimpleDateFormat("yyyy-MM-dd")
           val fi = new DateTime(fecha_inicial)
@@ -5153,7 +5155,7 @@ ORDER BY e.reti_id, e.elem_codigo        """)
               _listRow += com.norbitltd.spoiwo.model.Row().withCellValues("")
               _listRow += com.norbitltd.spoiwo.model.Row(
                 StringCell(
-                  "ACTA ITAF No.",
+                  "ACTA " + _prefijo_interventoria + " No.",
                   index = Some(0),
                   style = Some(
                     CellStyle(
