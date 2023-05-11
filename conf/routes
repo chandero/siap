@@ -814,7 +814,10 @@ GET /api/unit/elems                             controllers.UnitarioController.m
 GET /api/acde/all/:fi/:ff                      controllers.ActaDesmonteController.todos(fi: Long, ff: Long)
 GET /api/acde/get/:id                  controllers.ActaDesmonteController.ActaDesmonteXls(id: Long)
 GET /api/acde/gen/:fi/:ff/:tu          controllers.ActaDesmonteController.crearActas(fi: Long, ff: Long, tu: Int)
-
+# Acta Indisponibilidad
+GET /api/acin/all/:fi/:ff                      controllers.ActaIndisponibilidadController.todos(fi: Long, ff: Long)
+GET /api/acin/get/:id                  controllers.ActaIndisponibilidadController.actaIndisponibilidadXls(id: Long)
+GET /api/acin/gen/:a/:p/:t          controllers.ActaIndisponibilidadController.crearActas(a: Int, p: Int, t: Double)
 # Acta De Redimensionamiento
 POST /api/acre                          controllers.ActaRedimensionamientoController.getActasRedimensionamiento
 

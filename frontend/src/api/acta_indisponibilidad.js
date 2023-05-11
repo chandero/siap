@@ -1,15 +1,15 @@
 import request from '@/utils/request'
 
-export function getTodos () {
+export function getTodos (fi, ff) {
   return request({
-    url: '/acin/all',
+    url: `/acin/all/${fi}/${ff}`,
     method: 'get'
   })
 }
 
-export function generarActas(anho, periodo) {
+export function generarActas(anho, periodo, tarifa) {
   return request({
-    url: `/acin/gen/${anho}/${periodo}/`,
+    url: `/acin/gen/${anho}/${periodo}/${tarifa}`,
     method: 'get'
   })
 }

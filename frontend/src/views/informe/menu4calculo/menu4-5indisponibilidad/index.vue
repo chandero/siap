@@ -4,10 +4,53 @@
       <span>{{ $t('reporte.actaindisponibilidad') }}</span>
     </el-header>
     <el-main>
+      <el-form>
+        <el-row :gutter="8">
+          <el-col :xs="24" :sm="24" :md="4" :xl="4" :lg="4">
+            <span>Procesar Acta Periodo: </span>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="4" :xl="4" :lg="4">
+            <el-form-item label="Año">
+              <el-input type="number" v-model="anho" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="4" :xl="4" :lg="4">
+            <el-form-item label="Periodo">
+                <el-select v-model="mes">
+                  <el-option v-for="m in months" :key="m.id" :value="m.id" :label="$t(`months.${m.label}`)"></el-option>
+                </el-select>
+              </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="4" :xl="4" :lg="4">
+            <el-form-item label="Tarifa TEEn">
+              <el-input type="number" v-model="tarifa" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="4" :xl="4" :lg="4">
+            <el-button type="primary" @click="generar">Generar Acta</el-button>
+          </el-col>
+        </el-row>
+      </el-form>
+      <el-row :gutter="8">
+        <el-col :xs="24" :sm="24" :md="2" :xl="2" :lg="2">
+          <span>Rango Lista</span>
+        </el-col>
+        <el-col :xs="24" :sm="24" :md="6" :xl="6" :lg="6">
+          <el-date-picker v-model="fi" @change="handleDateChange"
+            type="monthrange"
+            range-separator="A"
+            start-placeholder="Mes Inicial"
+            end-placeholder="Mes Final">
+          </el-date-picker>
+        </el-col>
+        <el-col>
+          <el-button type="primary" circle icon="el-icon-refresh" @click="refrescar" />
+        </el-col>
+      </el-row>
       <el-row>
         <el-col>
           <el-table :data="actas" style="width: 80%" max-height="400" stripe @selection-change="handleSelectionChange">
-            <el-table-column prop="acde_numero" label="Número Acta" width="100" align="center">
+            <el-table-column prop="acin_numero" label="Número Acta" width="100" align="center">
             </el-table-column>
             <el-table-column prop="acin_anho" label="Año" width="140" align="center">
               <template slot-scope="scope">
@@ -17,6 +60,11 @@
             <el-table-column prop="acin_periodo" label="Periodo" width="140" align="center">
               <template slot-scope="scope">
                 <span>{{ scope.row.acin_periodo }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="acin_tarifa" label="Tarifa" width="140" align="rigth">
+              <template slot-scope="scope">
+                <span>{{ scope.row.acin_tarifa }}</span>
               </template>
             </el-table-column>
             <el-table-column prop="acin_fechagenerado" label="Fecha" width="140" align="center">
@@ -44,9 +92,11 @@ import { getTodos, generarActas, getActa } from '@/api/acta_indisponibilidad'
 export default {
   data() {
     return {
-      tipo: 1,
       anho: null,
-      periodo: null,
+      mes: null,
+      tarifa: null,
+      fi: null,
+      ff: null,
       labelPosition: 'top',
       actas: [],
       multipleSelection: []
@@ -55,17 +105,21 @@ export default {
   computed: {
     ...mapGetters([
       'empresa',
-      'usuario'
+      'usuario',
+      'months'
     ])
   },
   methods: {
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
+    handleDateChange(val) {
+      console.log('Date Value:', val)
+    },
     imprimir(formato) {
       for (var item in this.multipleSelection) {
         console.log('Item:', item)
-        getActa(this.multipleSelection[item].acde_id, 1).then(resp => {
+        getActa(this.multipleSelection[item].acin_id, 1).then(resp => {
           if (resp.status === 200) {
             var blob = resp.data
             const filename = resp.headers['content-disposition'].split(';')[1].split('=')[1]
@@ -93,14 +147,21 @@ export default {
         })
       }
     },
+    refrescar() {
+      this.getActas()
+    },
     getActas() {
-      getTodos().then(resp => {
+      const fi = this.fi[0]
+      const ff = new Date(this.fi[1].getFullYear(), this.fi[1].getMonth() + 1, 0)
+      fi.setDate(1)
+      getTodos(fi.getTime(), ff.getTime()).then(resp => {
         this.actas = resp.data.data
         console.log('Actas: ', this.actas)
       })
     },
     generar() {
-      generarActas(this.anho, this.periodo, 1).then(resp => {
+      const tarifa = parseFloat(this.tarifa)
+      generarActas(this.anho, this.mes, tarifa).then(resp => {
         if (resp.status === 200) {
           this.$message({
             message: 'Actas Generadas Correctamente',
@@ -123,8 +184,11 @@ export default {
   },
   beforeMount() {
     const date = new Date()
+    const fecha = new Date()
+    fecha.setMonth(0)
+    this.fi = [fecha, date]
     this.anho = date.getFullYear()
-    this.periodo = date.getMonth() + 1
+    this.mes = date.getMonth() + 1
     this.getActas()
   }
 }
