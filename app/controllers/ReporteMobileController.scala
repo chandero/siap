@@ -67,6 +67,50 @@ class ReporteMobileController @Inject()(
       }
     }
 
+  def guardarReporteMovil()  = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val json = request.body.asJson.get
+      println("json: " + json)
+      var reporte = net.liftweb.json.parse(json.toString).extract[Reporte]
+      val usua_id = Utility.extraerUsuario(request)
+      val empr_id = Utility.extraerEmpresa(request)
+      val reportenuevo = new Reporte(
+        null,
+        reporte.tireuc_id,
+        reporte.reti_id,
+        reporte.repo_consecutivo,
+        Some(new DateTime()),
+        reporte.repo_direccion,
+        reporte.repo_nombre,
+        reporte.repo_telefono,
+        reporte.repo_fechasolucion,
+        reporte.repo_horainicio,
+        reporte.repo_horafin,
+        reporte.repo_reportetecnico,
+        reporte.repo_descripcion,
+        reporte.repo_subrepoconsecutivo,
+        reporte.rees_id,
+        reporte.orig_id,
+        reporte.barr_id,
+        empr_id,
+        reporte.tiba_id,
+        usua_id,
+        reporte.adicional,
+        reporte.meams,
+        reporte.eventos,
+        reporte.direcciones,
+        reporte.novedades
+      )
+      reporteService.crearFromMovil(reportenuevo).map {
+        case (id, consec) =>
+          if (id > 0) {
+            Created(Json.obj("id" -> id, "consec" -> consec))
+          } else {
+            NotAcceptable(Json.toJson("true"))
+          }
+      }
+  }
+
   def actualizarReporteMovil() = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get

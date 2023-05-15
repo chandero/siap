@@ -471,6 +471,8 @@ GET /api/repo/del/:id controllers.ReporteController.borrarReporte(id: Long)
 POST /api/repo/save controllers.ReporteController.guardarReporte
 POST /api/repo/upd controllers.ReporteController.actualizarReporte
 +nocsrf
+POST /api/repo/savem controllers.ReporteMobileController.guardarReporteMovil
++nocsrf
 POST /api/repo/updm controllers.ReporteMobileController.actualizarReporteMovil
 +nocsrf
 POST /api/repo/uplfm controllers.ReporteMobileController.uploadFotoMovil

@@ -3598,6 +3598,132 @@ class ReporteRepository @Inject()(
       }
     }
 
+
+  /**
+    * Crear Reporte
+    */
+  def crearFromMovil(reporte: Reporte): Future[(scala.Long, scala.Long)] =
+    Future[(scala.Long, scala.Long)] {
+      db.withConnection { implicit connection =>
+        val fecha: LocalDate =
+          new LocalDate(Calendar.getInstance().getTimeInMillis())
+        val hora: LocalDateTime =
+          new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+        val consec = consecutivo(reporte.reti_id.get)
+        if (consec > 0) {
+          val id: scala.Long = SQL(
+            "INSERT INTO siap.reporte (tireuc_id, repo_fecharecepcion, repo_direccion, repo_nombre, repo_telefono, repo_fechasolucion, repo_horainicio, repo_horafin, repo_reportetecnico, repo_descripcion, rees_id, orig_id, barr_id, empr_id, tiba_id, usua_id, reti_id, repo_consecutivo) VALUES ({tireuc_id}, {repo_fecharecepcion}, {repo_direccion}, {repo_nombre}, {repo_telefono}, {repo_fechasolucion}, {repo_horainicio}, {repo_horafin}, {repo_reportetecnico}, {repo_descripcion}, {rees_id}, {orig_id}, {barr_id}, {empr_id}, {tiba_id}, {usua_id}, {reti_id}, {repo_consecutivo})"
+          ).on(
+              'tireuc_id -> reporte.tireuc_id,
+              'repo_fecharecepcion -> reporte.repo_fecharecepcion,
+              'repo_direccion -> reporte.repo_direccion,
+              'repo_nombre -> reporte.repo_nombre,
+              'repo_telefono -> reporte.repo_telefono,
+              'repo_fechasolucion -> reporte.repo_fechasolucion,
+              'repo_reportetecnico -> reporte.repo_reportetecnico,
+              'orig_id -> reporte.orig_id,
+              'barr_id -> reporte.barr_id,
+              'usua_id -> reporte.usua_id,
+              'empr_id -> reporte.empr_id,
+              'rees_id -> reporte.rees_id,
+              'repo_descripcion -> reporte.repo_descripcion,
+              'repo_horainicio -> reporte.repo_horainicio,
+              'repo_horafin -> reporte.repo_horafin,
+              'reti_id -> reporte.reti_id,
+              'repo_consecutivo -> consec,
+              'tiba_id -> reporte.tiba_id
+            )
+            .executeInsert()
+            .get
+
+          reporte.adicional.map { adicional =>
+            SQL("""INSERT INTO siap.reporte_adicional (repo_id, 
+                                                               repo_fechadigitacion, 
+                                                               repo_tipo_expansion, 
+                                                               repo_luminaria, 
+                                                               repo_redes, 
+                                                               repo_poste, 
+                                                               repo_modificado, 
+                                                               repo_subreporte, 
+                                                               repo_subid, 
+                                                               repo_email,
+                                                               acti_id,
+                                                               repo_codigo,
+                                                               repo_apoyo,
+                                                               urba_id,
+                                                               muot_id,
+                                                               medi_id,
+                                                               tran_id,
+                                                               medi_acta,
+                                                               aaco_id_anterior,
+                                                               aaco_id_nuevo) VALUES (
+                                                                {repo_id}, 
+                                                                {repo_fechadigitacion}, 
+                                                                {repo_tipo_expansion}, 
+                                                                {repo_luminaria}, 
+                                                                {repo_redes}, 
+                                                                {repo_poste}, 
+                                                                {repo_modificado}, 
+                                                                {repo_subreporte}, 
+                                                                {repo_subid}, 
+                                                                {repo_email},
+                                                                {acti_id},
+                                                                {repo_codigo},
+                                                                {repo_apoyo},
+                                                                {urba_id},
+                                                                {muot_id},
+                                                                {medi_id},
+                                                                {tran_id},
+                                                                {medi_acta},
+                                                                {aaco_id_anterior},
+                                                                {aaco_id_nuevo}
+                                                               )""")
+              .on(
+                'repo_fechadigitacion -> adicional.repo_fechadigitacion,
+                'repo_tipo_expansion -> adicional.repo_tipo_expansion,
+                'repo_luminaria -> adicional.repo_luminaria,
+                'repo_redes -> adicional.repo_redes,
+                'repo_poste -> adicional.repo_poste,
+                'repo_modificado -> hora,
+                'repo_subreporte -> adicional.repo_subreporte,
+                'repo_subid -> adicional.repo_subid,
+                'repo_email -> adicional.repo_email,
+                'acti_id -> adicional.acti_id,
+                'repo_codigo -> adicional.repo_codigo,
+                'repo_apoyo -> adicional.repo_apoyo,
+                'urba_id -> adicional.urba_id,
+                'muot_id -> adicional.muot_id,
+                'medi_id -> adicional.medi_id,
+                'tran_id -> adicional.tran_id,
+                'medi_acta -> adicional.medi_acta,
+                'aaco_id_anterior -> adicional.aaco_id_anterior,
+                'aaco_id_nuevo -> adicional.aaco_id_nuevo,
+                'repo_id -> id
+              )
+              .executeInsert()
+          }
+
+          SQL(
+            "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+          ).on(
+              'audi_fecha -> fecha,
+              'audi_hora -> hora,
+              'usua_id -> reporte.usua_id,
+              'audi_tabla -> "reporte",
+              'audi_uid -> id,
+              'audi_campo -> "repo_id",
+              'audi_valorantiguo -> "",
+              'audi_valornuevo -> id,
+              'audi_evento -> "I"
+            )
+            .executeInsert()
+
+          (id, consec)
+        } else {
+          (0, 0)
+        }
+      }
+    }    
   /**
     * convertir
     *
