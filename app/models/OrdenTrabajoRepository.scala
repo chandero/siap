@@ -61,116 +61,160 @@ import org.checkerframework.checker.units.qual.s
 import org.apache.poi.ss.usermodel.CellType
 
 case class InformeCambios(
-  ortr_consecutivo: Option[scala.Long],
-  cuad_descripcion: Option[String],
-  reti_descripcion: Option[String],
-  repo_consecutivo: Option[scala.Long],
-  repo_fecharecepcion: Option[DateTime],
-  repo_fechasolucion: Option[DateTime],
-  aap_id: Option[scala.Long],
-  even_direccion_anterior: Option[String],
-  even_direccion: Option[String],
-  barr_id_anterior: Option[String],
-  barr_id: Option[String],
-  aap_apoyo_anterior: Option[String],
-  aap_apoyo: Option[String],
-  aaco_id_anterior: Option[String],
-  aaco_id: Option[String],
-  aap_tecnologia_anterior: Option[String],
-  aap_tecnologia: Option[String],
-  aap_potencia_anterior: Option[String],
-  aap_potencia: Option[String],
-  aatc_id_anterior: Option[String],
-  aatc_id: Option[String],
-  aama_id_anterior: Option[String],
-  aama_id: Option[String],
-  aamo_id_anterior: Option[String],
-  aamo_id: Option[String],
-  aacu_id_anterior: Option[String],
-  aacu_id: Option[String],
-  aaus_id_anterior: Option[String],
-  aaus_id: Option[String],
-  medi_id_anterior: Option[String],
-  medi_id: Option[String],
-  tran_id_anterior: Option[String],
-  tran_id: Option[String],
-  aap_lat_anterior: Option[String],
-  aap_lat: Option[String],
-  aap_lng_anterior: Option[String],
-  aap_lng: Option[String],
-  aap_brazo_anterior: Option[String],
-  aap_brazo: Option[String],
-  aap_collarin_anterior: Option[String],
-  aap_collarin: Option[String],
-  aap_poste_propietario_anterior: Option[String],
-  aap_poste_propietario: Option[String],
-  aap_poste_altura_anterior: Option[String],
-  aap_poste_altura: Option[String],
-  tipo_id_anterior: Option[String],
-  tipo_id: Option[String]
+    ortr_consecutivo: Option[scala.Long],
+    cuad_descripcion: Option[String],
+    reti_descripcion: Option[String],
+    repo_consecutivo: Option[scala.Long],
+    repo_fecharecepcion: Option[DateTime],
+    repo_fechasolucion: Option[DateTime],
+    aap_id: Option[scala.Long],
+    even_direccion_anterior: Option[String],
+    even_direccion: Option[String],
+    barr_id_anterior: Option[String],
+    barr_id: Option[String],
+    aap_apoyo_anterior: Option[String],
+    aap_apoyo: Option[String],
+    aaco_id_anterior: Option[String],
+    aaco_id: Option[String],
+    aap_tecnologia_anterior: Option[String],
+    aap_tecnologia: Option[String],
+    aap_potencia_anterior: Option[String],
+    aap_potencia: Option[String],
+    aatc_id_anterior: Option[String],
+    aatc_id: Option[String],
+    aama_id_anterior: Option[String],
+    aama_id: Option[String],
+    aamo_id_anterior: Option[String],
+    aamo_id: Option[String],
+    aacu_id_anterior: Option[String],
+    aacu_id: Option[String],
+    aaus_id_anterior: Option[String],
+    aaus_id: Option[String],
+    medi_id_anterior: Option[String],
+    medi_id: Option[String],
+    tran_id_anterior: Option[String],
+    tran_id: Option[String],
+    aap_lat_anterior: Option[String],
+    aap_lat: Option[String],
+    aap_lng_anterior: Option[String],
+    aap_lng: Option[String],
+    aap_brazo_anterior: Option[String],
+    aap_brazo: Option[String],
+    aap_collarin_anterior: Option[String],
+    aap_collarin: Option[String],
+    aap_poste_propietario_anterior: Option[String],
+    aap_poste_propietario: Option[String],
+    aap_poste_altura_anterior: Option[String],
+    aap_poste_altura: Option[String],
+    tipo_id_anterior: Option[String],
+    tipo_id: Option[String]
 )
 
 object InformeCambios {
-  val _set = { 
-                  get[Option[scala.Long]]("ortr_consecutivo") ~
-                   get[Option[String]]("cuad_descripcion") ~
-                   get[Option[String]]("reti_descripcion") ~
-                   get[Option[scala.Long]]("repo_consecutivo") ~
-                   get[Option[DateTime]]("repo_fecharecepcion") ~
-                   get[Option[DateTime]]("repo_fechasolucion") ~                   
-                   get[Option[scala.Long]]("aap_id") ~
-                   get[Option[String]]("even_direccion_anterior") ~
-                   get[Option[String]]("even_direccion") ~
-                   get[Option[String]]("barr_id_anterior") ~
-                   get[Option[String]]("barr_id") ~
-                   get[Option[String]]("aap_apoyo_anterior") ~
-                   get[Option[String]]("aap_apoyo") ~
-                   get[Option[String]]("aaco_id_anterior") ~
-                   get[Option[String]]("aaco_id") ~
-                   get[Option[String]]("aap_tecnologia_anterior") ~
-                   get[Option[String]]("aap_tecnologia") ~
-                   get[Option[String]]("aap_potencia_anterior") ~
-                   get[Option[String]]("aap_potencia") ~
-                   get[Option[String]]("aatc_id_anterior") ~
-                   get[Option[String]]("aatc_id") ~
-                   get[Option[String]]("aama_id_anterior") ~
-                   get[Option[String]]("aama_id") ~
-                   get[Option[String]]("aamo_id_anterior") ~
-                   get[Option[String]]("aamo_id") ~
-                   get[Option[String]]("aacu_id_anterior") ~
-                   get[Option[String]]("aacu_id") ~
-                   get[Option[String]]("aaus_id_anterior") ~
-                   get[Option[String]]("aaus_id") ~
-                   get[Option[String]]("medi_id_anterior") ~
-                   get[Option[String]]("medi_id") ~
-                   get[Option[String]]("tran_id_anterior") ~
-                   get[Option[String]]("tran_id") ~
-                   get[Option[String]]("aap_lat_anterior") ~
-                   get[Option[String]]("aap_lat") ~
-                   get[Option[String]]("aap_lng_anterior") ~
-                   get[Option[String]]("aap_lng") ~
-                   get[Option[String]]("aap_brazo_anterior") ~
-                   get[Option[String]]("aap_brazo") ~
-                   get[Option[String]]("aap_collarin_anterior") ~
-                   get[Option[String]]("aap_collarin") ~
-                   get[Option[String]]("aap_poste_propietario_anterior") ~
-                   get[Option[String]]("aap_poste_propietario") ~
-                   get[Option[String]]("aap_poste_altura_anterior") ~
-                   get[Option[String]]("aap_poste_altura") ~
-                   get[Option[String]]("tipo_id_anterior") ~
-                   get[Option[String]]("tipo_id") map {
-                    case a01 ~ a02 ~ a03 ~ a04 ~ a05 ~ a06 ~ a07 ~ a08 ~ a09 ~ a10 ~ 
-                         a11 ~ a12 ~ a13 ~ a14 ~ a15 ~ a16 ~ a17 ~ a18 ~ a19 ~ a20 ~ 
-                         a21 ~ a22 ~ a23 ~ a24 ~ a25 ~ a26 ~ a27 ~ a28 ~ a29 ~ a30 ~ 
-                         a31 ~ a32 ~ a33 ~ a34 ~ a35 ~ a36 ~ a37 ~ a38 ~ a39 ~ a40 ~ 
-                         a41 ~ a42 ~ a43 ~ a44 ~ a45 ~ a46 ~ a47 => new InformeCambios(
-                           a01, a02, a03, a04, a05, a06, a07, a08, a09, a10,
-                           a11, a12, a13, a14, a15, a16, a17, a18, a19, a20,
-                           a21, a22, a23, a24, a25, a26, a27, a28, a29, a30,
-                           a31, a32, a33, a34, a35, a36, a37, a38, a39, a40,
-                           a41, a42, a43, a44, a45, a46, a47)
-                   }
-        }
+  val _set = {
+    get[Option[scala.Long]]("ortr_consecutivo") ~
+      get[Option[String]]("cuad_descripcion") ~
+      get[Option[String]]("reti_descripcion") ~
+      get[Option[scala.Long]]("repo_consecutivo") ~
+      get[Option[DateTime]]("repo_fecharecepcion") ~
+      get[Option[DateTime]]("repo_fechasolucion") ~
+      get[Option[scala.Long]]("aap_id") ~
+      get[Option[String]]("even_direccion_anterior") ~
+      get[Option[String]]("even_direccion") ~
+      get[Option[String]]("barr_id_anterior") ~
+      get[Option[String]]("barr_id") ~
+      get[Option[String]]("aap_apoyo_anterior") ~
+      get[Option[String]]("aap_apoyo") ~
+      get[Option[String]]("aaco_id_anterior") ~
+      get[Option[String]]("aaco_id") ~
+      get[Option[String]]("aap_tecnologia_anterior") ~
+      get[Option[String]]("aap_tecnologia") ~
+      get[Option[String]]("aap_potencia_anterior") ~
+      get[Option[String]]("aap_potencia") ~
+      get[Option[String]]("aatc_id_anterior") ~
+      get[Option[String]]("aatc_id") ~
+      get[Option[String]]("aama_id_anterior") ~
+      get[Option[String]]("aama_id") ~
+      get[Option[String]]("aamo_id_anterior") ~
+      get[Option[String]]("aamo_id") ~
+      get[Option[String]]("aacu_id_anterior") ~
+      get[Option[String]]("aacu_id") ~
+      get[Option[String]]("aaus_id_anterior") ~
+      get[Option[String]]("aaus_id") ~
+      get[Option[String]]("medi_id_anterior") ~
+      get[Option[String]]("medi_id") ~
+      get[Option[String]]("tran_id_anterior") ~
+      get[Option[String]]("tran_id") ~
+      get[Option[String]]("aap_lat_anterior") ~
+      get[Option[String]]("aap_lat") ~
+      get[Option[String]]("aap_lng_anterior") ~
+      get[Option[String]]("aap_lng") ~
+      get[Option[String]]("aap_brazo_anterior") ~
+      get[Option[String]]("aap_brazo") ~
+      get[Option[String]]("aap_collarin_anterior") ~
+      get[Option[String]]("aap_collarin") ~
+      get[Option[String]]("aap_poste_propietario_anterior") ~
+      get[Option[String]]("aap_poste_propietario") ~
+      get[Option[String]]("aap_poste_altura_anterior") ~
+      get[Option[String]]("aap_poste_altura") ~
+      get[Option[String]]("tipo_id_anterior") ~
+      get[Option[String]]("tipo_id") map {
+      case a01 ~ a02 ~ a03 ~ a04 ~ a05 ~ a06 ~ a07 ~ a08 ~ a09 ~ a10 ~
+            a11 ~ a12 ~ a13 ~ a14 ~ a15 ~ a16 ~ a17 ~ a18 ~ a19 ~ a20 ~
+            a21 ~ a22 ~ a23 ~ a24 ~ a25 ~ a26 ~ a27 ~ a28 ~ a29 ~ a30 ~
+            a31 ~ a32 ~ a33 ~ a34 ~ a35 ~ a36 ~ a37 ~ a38 ~ a39 ~ a40 ~
+            a41 ~ a42 ~ a43 ~ a44 ~ a45 ~ a46 ~ a47 =>
+        new InformeCambios(
+          a01,
+          a02,
+          a03,
+          a04,
+          a05,
+          a06,
+          a07,
+          a08,
+          a09,
+          a10,
+          a11,
+          a12,
+          a13,
+          a14,
+          a15,
+          a16,
+          a17,
+          a18,
+          a19,
+          a20,
+          a21,
+          a22,
+          a23,
+          a24,
+          a25,
+          a26,
+          a27,
+          a28,
+          a29,
+          a30,
+          a31,
+          a32,
+          a33,
+          a34,
+          a35,
+          a36,
+          a37,
+          a38,
+          a39,
+          a40,
+          a41,
+          a42,
+          a43,
+          a44,
+          a45,
+          a46,
+          a47
+        )
+    }
+  }
 }
 
 case class OrdenEvento(
@@ -503,17 +547,18 @@ class OrdenTrabajoRepository @Inject()(
   }
 
   def buscarPorCuadrillaFecha(
-    cuad_id: Long,
-    fecha: Long
+      cuad_id: Long,
+      fecha: Long
   ): Future[Option[OrdenTrabajo]] = Future {
-    db.withConnection { implicit connection => 
-        SQL("""SELECT * FROM siap.ordentrabajo ot1 
+    db.withConnection { implicit connection =>
+      SQL("""SELECT * FROM siap.ordentrabajo ot1 
         LEFT JOIN siap.cuadrilla c1 ON c1.cuad_id = ot1.cuad_id
-        WHERE ot1.cuad_id = {cuad_id} and ot1.ortr_fecha = {fecha}""").
-        on(
+        WHERE ot1.cuad_id = {cuad_id} and ot1.ortr_fecha = {fecha}""")
+        .on(
           'cuad_id -> cuad_id,
           'fecha -> new DateTime(fecha)
-        ).as(OrdenTrabajo.simple.singleOpt)
+        )
+        .as(OrdenTrabajo.simple.singleOpt)
     }
   }
 
@@ -638,31 +683,57 @@ class OrdenTrabajoRepository @Inject()(
         for (r <- reportes) {
           r.repo_consecutivo match {
             case Some(consec) =>
-              val reporte = r.tireuc_id match { 
+              println("Tipo Reporte: " + r.tireuc_id)
+              val reporte = r.tireuc_id match {
                 case Some(1) => reporteService.buscarPorId(r.repo_id.get)
                 case Some(2) => controlReporteService.buscarPorId(r.repo_id.get)
-                case Some(3) => transformadorReporteService.buscarPorId(r.repo_id.get)
+                case Some(3) =>
+                  transformadorReporteService.buscarPorId(r.repo_id.get)
                 case _ => None
               }
               reporte match {
                 case Some(rep) =>
-                  if (rep.rees_id.get < 3) {
+                  if (rep.rees_id.get < 9) {
                     SQL(
                       """INSERT INTO siap.ordentrabajo_reporte (ortr_id, repo_id, even_id, even_estado, tireuc_id) VALUES ({ortr_id}, {repo_id}, {even_id}, {even_estado}, {tireuc_id})"""
                     ).on(
-                      'ortr_id -> id,
-                      'repo_id -> r.repo_id,
-                      'even_id -> r.even_id,
-                      'even_estado -> r.even_estado,
-                      'tireuc_id -> r.tireuc_id
-                    )
-                    .executeInsert()
-                    SQL("""UPDATE siap.reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}""").
-                    on(
-                      'repo_fechasolucion -> Option.empty[DateTime],
-                      'tireuc_id -> r.tireuc_id,
-                      'repo_id -> r.repo_id
-                    ).executeUpdate()
+                        'ortr_id -> id,
+                        'repo_id -> r.repo_id,
+                        'even_id -> r.even_id,
+                        'even_estado -> r.even_estado,
+                        'tireuc_id -> r.tireuc_id
+                      )
+                      .executeInsert()
+                    r.tireuc_id match {
+                      case Some(1) =>
+                        SQL(
+                          """UPDATE siap.reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}"""
+                        ).on(
+                            'repo_fechasolucion -> Option.empty[DateTime],
+                            'tireuc_id -> r.tireuc_id,
+                            'repo_id -> r.repo_id
+                          )
+                          .executeUpdate()
+                      case Some(2) =>
+                        SQL(
+                          """UPDATE siap.control_reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}"""
+                        ).on(
+                            'repo_fechasolucion -> Option.empty[DateTime],
+                            'tireuc_id -> r.tireuc_id,
+                            'repo_id -> r.repo_id
+                          )
+                          .executeUpdate()
+                      case Some(3) =>
+                        SQL(
+                          """UPDATE siap.transformador_reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}"""
+                        ).on(
+                            'repo_fechasolucion -> Option.empty[DateTime],
+                            'tireuc_id -> r.tireuc_id,
+                            'repo_id -> r.repo_id
+                          )
+                          .executeUpdate()
+                      case _ => None
+                    }
                   }
                 case None => None
               }
@@ -763,10 +834,11 @@ class OrdenTrabajoRepository @Inject()(
           println("Reporte tipo a buscar: " + r.tireuc_id)
           r.repo_consecutivo match {
             case Some(consec) =>
-              val reporte = r.tireuc_id match { 
+              val reporte = r.tireuc_id match {
                 case Some(1) => reporteService.buscarPorId(r.repo_id.get)
                 case Some(2) => controlReporteService.buscarPorId(r.repo_id.get)
-                case Some(3) => transformadorReporteService.buscarPorId(r.repo_id.get)
+                case Some(3) =>
+                  transformadorReporteService.buscarPorId(r.repo_id.get)
                 case _ => None
               }
               println("")
@@ -777,26 +849,26 @@ class OrdenTrabajoRepository @Inject()(
                     val esactualizado: Boolean = SQL(
                       """UPDATE siap.ordentrabajo_reporte SET repo_id = {repo_id}, even_estado = {even_estado}, tireuc_id = {tireuc_id} where ortr_id = {ortr_id} and even_id = {even_id}"""
                     ).on(
-                      'ortr_id -> ortr.ortr_id,
-                      'even_id -> r.even_id,
-                      'repo_id -> r.repo_id,
-                      'even_estado -> r.even_estado,
-                      'tireuc_id -> r.tireuc_id
-                    )
-                   .executeUpdate() > 0
+                        'ortr_id -> ortr.ortr_id,
+                        'even_id -> r.even_id,
+                        'repo_id -> r.repo_id,
+                        'even_estado -> r.even_estado,
+                        'tireuc_id -> r.tireuc_id
+                      )
+                      .executeUpdate() > 0
                     if (!esactualizado) {
                       SQL(
                         """INSERT INTO siap.ordentrabajo_reporte (ortr_id, repo_id, even_id, even_estado, tireuc_id) VALUES ({ortr_id}, {repo_id}, {even_id}, {even_estado}, {tireuc_id})"""
                       ).on(
-                       'ortr_id -> ortr.ortr_id,
-                       'repo_id -> r.repo_id,
-                       'even_id -> r.even_id,
-                       'even_estado -> r.even_estado,
-                       'tireuc_id -> r.tireuc_id
-                     )
-                      .executeInsert()
+                          'ortr_id -> ortr.ortr_id,
+                          'repo_id -> r.repo_id,
+                          'even_id -> r.even_id,
+                          'even_estado -> r.even_estado,
+                          'tireuc_id -> r.tireuc_id
+                        )
+                        .executeInsert()
                     }
-/*                     SQL("""UPDATE siap.reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}""").
+                    /*                     SQL("""UPDATE siap.reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}""").
                     on(
                      'repo_fechasolucion -> Option.empty[DateTime],
                      'tireuc_id -> r.tireuc_id,
@@ -1106,12 +1178,14 @@ class OrdenTrabajoRepository @Inject()(
           .executeInsert()
           .get > 0
 
-          SQL("""UPDATE siap.reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}""").
-               on(
-                 'repo_fechasolucion -> Option.empty[DateTime],
-                 'tireuc_id -> tireuc_id,
-                 'repo_id -> repo_id
-               ).executeUpdate()
+        SQL(
+          """UPDATE siap.reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}"""
+        ).on(
+            'repo_fechasolucion -> Option.empty[DateTime],
+            'tireuc_id -> tireuc_id,
+            'repo_id -> repo_id
+          )
+          .executeUpdate()
       }
       result
     }
@@ -1209,32 +1283,34 @@ class OrdenTrabajoRepository @Inject()(
     val fecha_corte = new DateTime() //.toString("yyyy-MM-dd")
     var _listResult: ListBuffer[Reporte] = new ListBuffer()
     val _lista = db.withConnection { implicit connection =>
-      val _parser = int("ortr_id") ~ int("repo_id") ~ int("reti_id") ~ int(
+      val _parser = int("ortr_id") ~ int("tireuc_id") ~ int("repo_id") ~ int(
+        "reti_id"
+      ) ~ int(
         "repo_consecutivo"
       ) map {
-        case a1 ~ a2 ~ a3 ~ a4 => (a1, a2, a3, a4)
+        case a1 ~ a2 ~ a3 ~ a4 ~ a5 => (a1, a2, a3, a4, a5)
       }
       println("Cuadrilla Mobile Ejecutando Query")
       val _res = SQL(
-        """select ot1.ortr_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
+        """select ot1.ortr_id, 1 as tireuc_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
                     inner join siap.reporte r1 on r1.repo_id = or1.repo_id and r1.tireuc_id = or1.tireuc_id
                    where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND r1.rees_id in (1,2) AND (coalesce(r1.repo_reportetecnico, '') = '') IS NOT FALSE
                    union all
-                   select ot1.ortr_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
+                   select ot1.ortr_id, 2 as  tireuc_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
                     inner join siap.control_reporte r1 on r1.repo_id = or1.repo_id and r1.tireuc_id = or1.tireuc_id
                    where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND r1.rees_id in (1,2) AND (coalesce(r1.repo_reportetecnico, '') = '') IS NOT FALSE
                    union all
-                   select ot1.ortr_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
+                   select ot1.ortr_id, 3 as tireuc_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
                     inner join siap.transformador_reporte r1 on r1.repo_id = or1.repo_id and r1.tireuc_id = or1.tireuc_id
                    where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND r1.rees_id in (1,2) AND (coalesce(r1.repo_reportetecnico, '') = '') IS NOT FALSE
                    union all                   
-                   select ot1.ortr_id, o1.obra_id as repo_id, 99 as reti_id, o1.obra_consecutivo as repo_consecutivo from siap.ordentrabajo ot1
+                   select ot1.ortr_id, 99 as tireuc_id, o1.obra_id as repo_id, 99 as reti_id, o1.obra_consecutivo as repo_consecutivo from siap.ordentrabajo ot1
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_obra oo1 on oo1.ortr_id = ot1.ortr_id 
                     inner join siap.obra o1 on o1.obra_id = oo1.obra_id  
@@ -1249,10 +1325,10 @@ class OrdenTrabajoRepository @Inject()(
     }
     println("Lista Orden:" + _lista)
     for (_r <- _lista) {
-      println("Reporte Encontrado:" + _r._2 + ", tipo: " + _r._3)
-      _r._3 match {
+      println("Reporte Encontrado:" + _r._3 + ", tipo: " + _r._2)
+      _r._2 match {
         case 99 => {
-          val _obra = obraService.buscarPorId(_r._2)
+          val _obra = obraService.buscarPorId(_r._3)
           _obra match {
             case Some(o) => {
               _listResult += Reporte(
@@ -1286,6 +1362,33 @@ class OrdenTrabajoRepository @Inject()(
             case None => {}
           }
         }
+        case 1 => {
+          val _reporte = reporteService.buscarPorId(_r._3)
+          _reporte match {
+            case Some(r) => {
+              _listResult += r
+            }
+            case None => {}
+          }
+        }
+        case 2 => {
+          val _reporte = controlReporteService.buscarPorId(_r._3)
+          _reporte match {
+            case Some(r) => {
+              _listResult += r
+            }
+            case None => {}
+          }
+        }
+        case 3 => {
+          val _reporte = transformadorReporteService.buscarPorId(_r._3)
+          _reporte match {
+            case Some(r) => {
+              _listResult += r
+            }
+            case None => {}
+          }
+        }
         case _ => {
           val _reporte = reporteService.buscarPorId(_r._2)
           _reporte match {
@@ -1300,7 +1403,11 @@ class OrdenTrabajoRepository @Inject()(
     _listResult.toList
   }
 
-  def siap_informe_cambios_en_reporte(fecha_inicial: scala.Long, fecha_final: scala.Long, empr_id: scala.Long):Array[Byte] = {
+  def siap_informe_cambios_en_reporte(
+      fecha_inicial: scala.Long,
+      fecha_final: scala.Long,
+      empr_id: scala.Long
+  ): Array[Byte] = {
     val empresa = empresaService.buscarPorId(empr_id).get
     //val usuario = usuarioService.buscarPorId(usua_id).get
     var fi = Calendar.getInstance()
@@ -1325,65 +1432,68 @@ class OrdenTrabajoRepository @Inject()(
       var _listRow = new ListBuffer[com.norbitltd.spoiwo.model.Row]()
       var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
       val parser = get[Option[Int]]("ortr_consecutivo") ~
-                   get[Option[String]]("cuad_descripcion") ~
-                   get[Option[String]]("reti_descripcion") ~
-                   get[Option[Int]]("repo_consecutivo") ~
-                   get[Option[DateTime]]("repo_fecharecepcion") ~
-                   get[Option[DateTime]]("repo_fechasolucion") ~                   
-                   get[Option[Int]]("aap_id") ~
-                   get[Option[String]]("even_direccion_anterior") ~
-                   get[Option[String]]("even_direccion") ~
-                   get[Option[String]]("barr_id_anterior") ~
-                   get[Option[String]]("barr_id") ~
-                   get[Option[String]]("aap_apoyo_anterior") ~
-                   get[Option[String]]("aap_apoyo") ~
-                   get[Option[String]]("aaco_id_anterior") ~
-                   get[Option[String]]("aaco_id") ~
-                   get[Option[String]]("aap_tecnologia_anterior") ~
-                   get[Option[String]]("aap_tecnologia") ~
-                   get[Option[String]]("aap_potencia_anterior") ~
-                   get[Option[String]]("aap_potencia") ~
-                   get[Option[String]]("aap_potencia_anterior") ~
-                   get[Option[String]]("aatc_id_anterior") ~
-                   get[Option[String]]("aatc_id") ~
-                   get[Option[String]]("aama_id_anterior") ~
-                   get[Option[String]]("aama_id") ~
-                   get[Option[String]]("aamo_id_anterior") ~
-                   get[Option[String]]("aamo_id") ~
-                   get[Option[String]]("aacu_id_anterior") ~
-                   get[Option[String]]("aacu_id") ~
-                   get[Option[String]]("aaus_id_anterior") ~
-                   get[Option[String]]("aaus_id") ~
-                   get[Option[String]]("medi_id_anterior") ~
-                   get[Option[String]]("medi_id") ~
-                   get[Option[String]]("tran_id_anterior") ~
-                   get[Option[String]]("tran_id") ~
-                   get[Option[String]]("aap_lat_anterior") ~
-                   get[Option[String]]("aap_lat") ~
-                   get[Option[String]]("aap_lng_anterior") ~
-                   get[Option[String]]("aap_lng") ~
-                   get[Option[String]]("aap_brazo_anterior") ~
-                   get[Option[String]]("aap_brazo") ~
-                   get[Option[String]]("aap_collarin_anterior") ~
-                   get[Option[String]]("aap_collarin") ~
-                   get[Option[String]]("aap_poste_propietario_anterior") ~
-                   get[Option[String]]("aap_poste_propietario") ~
-                   get[Option[String]]("aap_poste_altura_anterior") ~
-                   get[Option[String]]("aap_poste_altura") ~
-                   get[Option[String]]("tipo_id_anterior") ~
-                   get[Option[String]]("tipo_id") map {
-                    case a01 ~ a02 ~ a03 ~ a04 ~ a05 ~ a06 ~ a07 ~ a08 ~ a09 ~ a10 ~ 
-                         a11 ~ a12 ~ a13 ~ a14 ~ a15 ~ a16 ~ a17 ~ a18 ~ a19 ~ a20 ~ 
-                         a21 ~ a22 ~ a23 ~ a24 ~ a25 ~ a26 ~ a27 ~ a28 ~ a29 ~ a30 ~ 
-                         a31 ~ a32 ~ a33 ~ a34 ~ a35 ~ a36 ~ a37 ~ a38 ~ a39 ~ a40 ~ 
-                         a41 ~ a42 ~ a43 ~ a44 ~ a45 ~ a46 => (
-                           (a01, a02, a03, a04, a05, a06, a07, a08, a09, a10), 
-                           (a11, a12, a13, a14, a15, a16, a17, a18, a19, a20),
-                           (a21, a22, a23, a24, a25, a26, a27, a28, a29, a30), 
-                           (a31, a32, a33, a34, a35, a36, a37, a38, a39, a40),
-                           (a41, a42, a43, a44, a45, a46))
-                   }
-      val resultSet = SQL("""
+        get[Option[String]]("cuad_descripcion") ~
+        get[Option[String]]("reti_descripcion") ~
+        get[Option[Int]]("repo_consecutivo") ~
+        get[Option[DateTime]]("repo_fecharecepcion") ~
+        get[Option[DateTime]]("repo_fechasolucion") ~
+        get[Option[Int]]("aap_id") ~
+        get[Option[String]]("even_direccion_anterior") ~
+        get[Option[String]]("even_direccion") ~
+        get[Option[String]]("barr_id_anterior") ~
+        get[Option[String]]("barr_id") ~
+        get[Option[String]]("aap_apoyo_anterior") ~
+        get[Option[String]]("aap_apoyo") ~
+        get[Option[String]]("aaco_id_anterior") ~
+        get[Option[String]]("aaco_id") ~
+        get[Option[String]]("aap_tecnologia_anterior") ~
+        get[Option[String]]("aap_tecnologia") ~
+        get[Option[String]]("aap_potencia_anterior") ~
+        get[Option[String]]("aap_potencia") ~
+        get[Option[String]]("aap_potencia_anterior") ~
+        get[Option[String]]("aatc_id_anterior") ~
+        get[Option[String]]("aatc_id") ~
+        get[Option[String]]("aama_id_anterior") ~
+        get[Option[String]]("aama_id") ~
+        get[Option[String]]("aamo_id_anterior") ~
+        get[Option[String]]("aamo_id") ~
+        get[Option[String]]("aacu_id_anterior") ~
+        get[Option[String]]("aacu_id") ~
+        get[Option[String]]("aaus_id_anterior") ~
+        get[Option[String]]("aaus_id") ~
+        get[Option[String]]("medi_id_anterior") ~
+        get[Option[String]]("medi_id") ~
+        get[Option[String]]("tran_id_anterior") ~
+        get[Option[String]]("tran_id") ~
+        get[Option[String]]("aap_lat_anterior") ~
+        get[Option[String]]("aap_lat") ~
+        get[Option[String]]("aap_lng_anterior") ~
+        get[Option[String]]("aap_lng") ~
+        get[Option[String]]("aap_brazo_anterior") ~
+        get[Option[String]]("aap_brazo") ~
+        get[Option[String]]("aap_collarin_anterior") ~
+        get[Option[String]]("aap_collarin") ~
+        get[Option[String]]("aap_poste_propietario_anterior") ~
+        get[Option[String]]("aap_poste_propietario") ~
+        get[Option[String]]("aap_poste_altura_anterior") ~
+        get[Option[String]]("aap_poste_altura") ~
+        get[Option[String]]("tipo_id_anterior") ~
+        get[Option[String]]("tipo_id") map {
+        case a01 ~ a02 ~ a03 ~ a04 ~ a05 ~ a06 ~ a07 ~ a08 ~ a09 ~ a10 ~
+              a11 ~ a12 ~ a13 ~ a14 ~ a15 ~ a16 ~ a17 ~ a18 ~ a19 ~ a20 ~
+              a21 ~ a22 ~ a23 ~ a24 ~ a25 ~ a26 ~ a27 ~ a28 ~ a29 ~ a30 ~
+              a31 ~ a32 ~ a33 ~ a34 ~ a35 ~ a36 ~ a37 ~ a38 ~ a39 ~ a40 ~
+              a41 ~ a42 ~ a43 ~ a44 ~ a45 ~ a46 =>
+          (
+            (a01, a02, a03, a04, a05, a06, a07, a08, a09, a10),
+            (a11, a12, a13, a14, a15, a16, a17, a18, a19, a20),
+            (a21, a22, a23, a24, a25, a26, a27, a28, a29, a30),
+            (a31, a32, a33, a34, a35, a36, a37, a38, a39, a40),
+            (a41, a42, a43, a44, a45, a46)
+          )
+      }
+      val resultSet = SQL(
+        """
   SELECT 
   ot1.ortr_consecutivo,
   c1.cuad_descripcion,
@@ -1605,635 +1715,782 @@ rdd1.tipo_id <> rdd1.tipo_id_anterior
 )
 order by ot1.ortr_consecutivo, c1.cuad_descripcion 
     
-       """).
-      on(
-        'empr_id -> empr_id,
-        'fecha_inicial -> dti,
-        'fecha_final -> dtf
-      ).as(InformeCambios._set *)
+       """
+      ).on(
+          'empr_id -> empr_id,
+          'fecha_inicial -> dti,
+          'fecha_final -> dtf
+        )
+        .as(InformeCambios._set *)
 
       val sheet01 = Sheet(
-          name = "Cambios de Información",
-          rows = {
-            _listRow += com.norbitltd.spoiwo.model
-              .Row()
-              .withCellValues(empresa.empr_descripcion)
-            _listRow += com.norbitltd.spoiwo.model.Row().withCellValues("Informe de Cambios de Información en Reportes")
-            _listRow += com.norbitltd.spoiwo.model.Row(
-              StringCell(
-                "Desde:",
-                Some(0),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
+        name = "Cambios de Información",
+        rows = {
+          _listRow += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues(empresa.empr_descripcion)
+          _listRow += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("Informe de Cambios de Información en Reportes")
+          _listRow += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "Desde:",
+              Some(0),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            DateCell(
+              dti.toDate(),
+              Some(1),
+              style = Some(
+                CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
               ),
-              DateCell(
-                dti.toDate(),
-                Some(1),
-                style = Some(
-                  CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
-                ),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Hasta:",
+              Some(2),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            DateCell(
+              dtf.toDate(),
+              Some(3),
+              style = Some(
+                CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
               ),
-              StringCell(
-                "Hasta:",
-                Some(2),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              DateCell(
-                dtf.toDate(),
-                Some(3),
-                style = Some(
-                  CellStyle(dataFormat = CellDataFormat("YYYY/MM/DD"))
-                ),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              )
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
             )
-            _listRow += com.norbitltd.spoiwo.model.Row().withCellValues("Generado el: ", fmdt.print(DateTime.now()))
-            _listRow += com.norbitltd.spoiwo.model.Row(
-              StringCell(
-                "OT No.",
-                Some(0),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Cuadrilla",
-                Some(1),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Tipo de Reporte",
-                Some(2),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Consecutivo Reporte",
-                Some(3),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Fecha Recepción",
-                Some(4),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Fecha Solución",
-                Some(5),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Luminaria",
-                Some(6),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Dirección Ant.",
-                Some(7),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Dirección Nue.",
-                Some(8),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Barrio Ant.",
-                Some(9),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Barrio Nue.",
-                Some(10),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Apoyo Ant.",
-                Some(11),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Apoyo Nue.",
-                Some(12),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Conexión Ant.",
-                Some(13),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Conexión Nue.",
-                Some(14),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Tecnología Ant.",
-                Some(15),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Tecnología Nue.",
-                Some(16),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Potencia Ant.",
-                Some(17),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Potencia Nue.",
-                Some(18),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Tipo de Luminaria Ant.",
-                Some(19),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Tipo de Luminaria Nue.",
-                Some(20),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Marca Ant.",
-                Some(21),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Marca Nue.",
-                Some(22),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Modelo Ant.",
-                Some(23),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Modelo Nue.",
-                Some(24),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Cuenta Ant.",
-                Some(25),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Cuenta Nue.",
-                Some(26),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Uso Ant.",
-                Some(27),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Uso Nue.",
-                Some(28),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Medidor Ant.",
-                Some(29),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Medidor Nue.",
-                Some(30),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Transformador Ant.",
-                Some(31),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Transformador Nue.",
-                Some(32),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Latitud Ant.",
-                Some(33),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Latitud Nue.",
-                Some(34),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Longitud Ant.",
-                Some(35),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Longitud Nue.",
-                Some(36),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Brazo Ant.",
-                Some(37),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Brazo Nue.",
-                Some(38),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Collarin Ant.",
-                Some(39),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Collarin Nue.",
-                Some(40),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Poste Propietario Ant.",
-                Some(41),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Poste Propietario Nue.",
-                Some(42),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Poste Altura Ant.",
-                Some(43),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Poste Altura Nue.",
-                Some(44),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Poste Tipo Ant.",
-                Some(45),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
-              StringCell(
-                "Poste Tipo Nue.",
-                Some(46),
-                style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
-                CellStyleInheritance.CellThenRowThenColumnThenSheet
-              ),
+          )
+          _listRow += com.norbitltd.spoiwo.model
+            .Row()
+            .withCellValues("Generado el: ", fmdt.print(DateTime.now()))
+          _listRow += com.norbitltd.spoiwo.model.Row(
+            StringCell(
+              "OT No.",
+              Some(0),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Cuadrilla",
+              Some(1),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Tipo de Reporte",
+              Some(2),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Consecutivo Reporte",
+              Some(3),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Fecha Recepción",
+              Some(4),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Fecha Solución",
+              Some(5),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Luminaria",
+              Some(6),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Dirección Ant.",
+              Some(7),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Dirección Nue.",
+              Some(8),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Barrio Ant.",
+              Some(9),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Barrio Nue.",
+              Some(10),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Apoyo Ant.",
+              Some(11),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Apoyo Nue.",
+              Some(12),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Conexión Ant.",
+              Some(13),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Conexión Nue.",
+              Some(14),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Tecnología Ant.",
+              Some(15),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Tecnología Nue.",
+              Some(16),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Potencia Ant.",
+              Some(17),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Potencia Nue.",
+              Some(18),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Tipo de Luminaria Ant.",
+              Some(19),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Tipo de Luminaria Nue.",
+              Some(20),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Marca Ant.",
+              Some(21),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Marca Nue.",
+              Some(22),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Modelo Ant.",
+              Some(23),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Modelo Nue.",
+              Some(24),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Cuenta Ant.",
+              Some(25),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Cuenta Nue.",
+              Some(26),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Uso Ant.",
+              Some(27),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Uso Nue.",
+              Some(28),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Medidor Ant.",
+              Some(29),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Medidor Nue.",
+              Some(30),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Transformador Ant.",
+              Some(31),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Transformador Nue.",
+              Some(32),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Latitud Ant.",
+              Some(33),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Latitud Nue.",
+              Some(34),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Longitud Ant.",
+              Some(35),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Longitud Nue.",
+              Some(36),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Brazo Ant.",
+              Some(37),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Brazo Nue.",
+              Some(38),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Collarin Ant.",
+              Some(39),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Collarin Nue.",
+              Some(40),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Poste Propietario Ant.",
+              Some(41),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Poste Propietario Nue.",
+              Some(42),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Poste Altura Ant.",
+              Some(43),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Poste Altura Nue.",
+              Some(44),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Poste Tipo Ant.",
+              Some(45),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
+            ),
+            StringCell(
+              "Poste Tipo Nue.",
+              Some(46),
+              style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
+              CellStyleInheritance.CellThenRowThenColumnThenSheet
             )
-            resultSet.map { row =>
+          )
+          resultSet.map {
+            row =>
               _listRow += com.norbitltd.spoiwo.model.Row(
                 StringCell(
-                  row.ortr_consecutivo match { case Some(x) => x.toString case None => "" },
+                  row.ortr_consecutivo match {
+                    case Some(x) => x.toString
+                    case None    => ""
+                  },
                   Some(0),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.cuad_descripcion match { case Some(x) => x.toString case None => "" },
+                  row.cuad_descripcion match {
+                    case Some(x) => x.toString
+                    case None    => ""
+                  },
                   Some(1),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.reti_descripcion match { case Some(x) => x.toString case None => "" },
+                  row.reti_descripcion match {
+                    case Some(x) => x.toString
+                    case None    => ""
+                  },
                   Some(2),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.repo_consecutivo match { case Some(x) => x.toString case None => "" },
+                  row.repo_consecutivo match {
+                    case Some(x) => x.toString
+                    case None    => ""
+                  },
                   Some(3),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.repo_fecharecepcion match { case Some(x) => x.toString("yyyy-MM-dd HH:mm:ss") case None => "" },
+                  row.repo_fecharecepcion match {
+                    case Some(x) => x.toString("yyyy-MM-dd HH:mm:ss")
+                    case None    => ""
+                  },
                   Some(4),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.repo_fechasolucion match { case Some(x) => x.toString("yyyy-MM-dd") case None => "" },
+                  row.repo_fechasolucion match {
+                    case Some(x) => x.toString("yyyy-MM-dd")
+                    case None    => ""
+                  },
                   Some(5),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_id match { case Some(x) => x.toString() case None => "" },
+                  row.aap_id match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(6),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.even_direccion_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.even_direccion_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(7),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.even_direccion match { case Some(x) => x.toString() case None => "" },
+                  row.even_direccion match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(8),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.barr_id_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.barr_id_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(9),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.barr_id match { case Some(x) => x.toString() case None => "" },
+                  row.barr_id match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(10),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_apoyo_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aap_apoyo_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(11),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_apoyo match { case Some(x) => x.toString() case None => "" },
+                  row.aap_apoyo match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(12),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aaco_id_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aaco_id_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(13),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aaco_id match { case Some(x) => x.toString() case None => "" },
+                  row.aaco_id match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(14),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_tecnologia_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aap_tecnologia_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(15),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_tecnologia match { case Some(x) => x.toString() case None => "" },
+                  row.aap_tecnologia match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(16),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_potencia_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aap_potencia_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(17),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_potencia match { case Some(x) => x.toString() case None => "" },
+                  row.aap_potencia match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(18),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aatc_id_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aatc_id_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(19),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aatc_id match { case Some(x) => x.toString() case None => "" },
+                  row.aatc_id match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(20),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aama_id_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aama_id_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(21),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aama_id match { case Some(x) => x.toString() case None => "" },
+                  row.aama_id match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(22),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aamo_id_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aamo_id_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(23),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aamo_id match { case Some(x) => x.toString() case None => "" },
+                  row.aamo_id match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(24),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aacu_id_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aacu_id_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(25),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aacu_id match { case Some(x) => x.toString() case None => "" },
+                  row.aacu_id match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(26),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aaus_id_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aaus_id_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(27),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aaus_id match { case Some(x) => x.toString() case None => "" },
+                  row.aaus_id match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(28),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.medi_id_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.medi_id_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(29),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.medi_id match { case Some(x) => x.toString() case None => "" },
+                  row.medi_id match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(30),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.tran_id_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.tran_id_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(31),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.tran_id match { case Some(x) => x.toString() case None => "" },
+                  row.tran_id match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(32),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_lat_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aap_lat_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(33),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_lat match { case Some(x) => x.toString() case None => "" },
+                  row.aap_lat match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(34),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_lng_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aap_lng_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(35),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_lng match { case Some(x) => x.toString() case None => "" },
+                  row.aap_lng match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(36),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_brazo_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aap_brazo_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(37),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_brazo match { case Some(x) => x.toString() case None => "" },
+                  row.aap_brazo match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(38),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_collarin_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aap_collarin_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(39),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_collarin match { case Some(x) => x.toString() case None => "" },
+                  row.aap_collarin match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(40),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_poste_propietario_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aap_poste_propietario_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(41),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_poste_propietario match { case Some(x) => x.toString() case None => "" },
+                  row.aap_poste_propietario match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(42),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_poste_altura_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.aap_poste_altura_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(43),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.aap_poste_altura match { case Some(x) => x.toString() case None => "" },
+                  row.aap_poste_altura match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(44),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.tipo_id_anterior match { case Some(x) => x.toString() case None => "" },
+                  row.tipo_id_anterior match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(45),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 ),
                 StringCell(
-                  row.tipo_id match { case Some(x) => x.toString() case None => "" },
+                  row.tipo_id match {
+                    case Some(x) => x.toString()
+                    case None    => ""
+                  },
                   Some(46),
                   style = Some(CellStyle(dataFormat = CellDataFormat("@"))),
                   CellStyleInheritance.CellThenRowThenColumnThenSheet
                 )
               )
-            }
-            _listRow.toList
-          },
-          mergedRegions = {
-              _listMerged += CellRange((0, 0), (0, 5))
-              _listMerged += CellRange((1, 1), (0, 5))
-              _listMerged.toList
-            },
-          columns = {
-               _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 1, width = new Width(15, WidthUnit.Character))
-               _listColumn += com.norbitltd.spoiwo.model
-                .Column(index = 2, width = new Width(30, WidthUnit.Character))                
-              _listColumn.toList
-            }
+          }
+          _listRow.toList
+        },
+        mergedRegions = {
+          _listMerged += CellRange((0, 0), (0, 5))
+          _listMerged += CellRange((1, 1), (0, 5))
+          _listMerged.toList
+        },
+        columns = {
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 1, width = new Width(15, WidthUnit.Character))
+          _listColumn += com.norbitltd.spoiwo.model
+            .Column(index = 2, width = new Width(30, WidthUnit.Character))
+          _listColumn.toList
+        }
       )
       println("Escribiendo en el Stream")
       var os: ByteArrayOutputStream = new ByteArrayOutputStream()

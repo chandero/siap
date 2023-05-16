@@ -3078,7 +3078,7 @@ class TransformadorReporteRepository @Inject()(
           'repo_horafin -> reporte.repo_horafin,
           'repo_reportetecnico -> reporte.repo_reportetecnico,
           'repo_descripcion -> reporte.repo_descripcion,
-          'rees_id -> 3,
+          'rees_id -> 2,
           'orig_id -> reporte.orig_id,
           'barr_id -> reporte.barr_id,
           'empr_id -> reporte.empr_id,

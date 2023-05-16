@@ -411,6 +411,7 @@ export default {
             if (response.status === 200) {
               evento.repo_descripcion = response.data.repo_descripcion
               evento.repo_id = response.data.repo_id
+              evento.tireuc_id = response.data.tireuc_id
               evento.es_valido = true
             } else {
               evento.es_valido = false
