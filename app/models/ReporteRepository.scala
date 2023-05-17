@@ -31,7 +31,7 @@ import play.api.libs.functional.syntax._
 import play.api.db.DBApi
 
 import anorm._
-import anorm.SqlParser.{get, str, scalar, int, double, date}
+import anorm.SqlParser.{get, str, int, date, double, scalar, flatten}
 import anorm.JodaParameterMetaData._
 
 import scala.util.{Failure, Success}
@@ -3703,6 +3703,42 @@ class ReporteRepository @Inject()(
               .executeInsert()
           }
 
+          // Adicionar a la orden de trabajo del día
+            // Buscar Cuadrilla usando el usuario
+          val _cuad_id = SQL("""SELECT c1.cuad_id FROM siap.cuadrilla c1
+            INNER JOIN siap.cuadrilla_usuario cu1 ON cu1.cuad_id = c1.cuad_id
+            INNER JOIN siap.usuario u1 ON u1.usua_id = cu1.usua_id
+            WHERE u1.usua_id = {usua_id}""").
+            on(
+              "usua_id" -> reporte.usua_id
+            ).as(SqlParser.scalar[scala.Long].singleOpt)
+
+          _cuad_id match {
+              case Some(cuad_id) => 
+                // Buscar Orden de Trabajo
+                var ortr_id = SQL("""SELECT ortr_id FROM siap.ordentrabajo ot1 WHERE ot1.cuad_id = {cuad_id} and ot1.ortr_fecha = {fecha}""").
+                on(
+                  "cuad_id" -> cuad_id,
+                  "fecha" -> fecha
+                ).as(SqlParser.int("ortr_id").singleOpt)
+                
+                val cantidad = SQL("""SELECT COUNT(*) FROM siap.ordentrabajo_reporte WHERE ortr_id = {ortr_id}""").
+                on(
+                  "ortr_id" -> ortr_id
+                ).as(SqlParser.scalar[scala.Long].single)
+                SQL(
+                  """INSERT INTO siap.ordentrabajo_reporte (ortr_id, repo_id, even_id, even_estado, tireuc_id) VALUES ({ortr_id}, {repo_id}, {even_id}, {even_estado}, {tireuc_id})"""
+                ).on(
+                 'ortr_id -> ortr_id,
+                 'repo_id -> id,
+                 'even_id -> (cantidad + 1),
+                 'even_estado -> 1,
+                 'tireuc_id -> 1
+                )
+                .executeInsert()
+              case None => None
+          }
+          // Adicionar auditoría
           SQL(
             "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
           ).on(
