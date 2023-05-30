@@ -11207,13 +11207,11 @@ select distinct
   cast(r1.repo_fechasolucion as varchar)
 from siap.reporte r1
 left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
-inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id
-inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id  
+left join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id and (rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null)
+left join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and 	(rdd1.aap_potencia = rdd1.aap_potencia_anterior or rdd1.aap_potencia_anterior is null) and
+	(rdd1.aap_tecnologia = rdd1.aap_tecnologia_anterior or rdd1.aap_tecnologia_anterior is null)
 where r1.empr_id = {empr_id} and
-	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id <> 2 and r1.rees_id = 2 and
-	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null) and
-	(rdd1.aap_potencia = rdd1.aap_potencia_anterior or rdd1.aap_potencia_anterior is null) and
-	(rdd1.aap_tecnologia = rdd1.aap_tecnologia_anterior or rdd1.aap_tecnologia_anterior is null)	
+	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id <> 2 and r1.rees_id = 2	
 union all 
 select distinct
   r1.tireuc_id,
