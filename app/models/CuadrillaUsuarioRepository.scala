@@ -20,7 +20,7 @@ import scala.concurrent.{Await, Future}
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 
-case class CuadrillaUsuario(cuad_id: Option[Long], usua_id: Option[Long], cuus_esreponsable: Option[Boolean])
+case class CuadrillaUsuario(cuad_id: Option[Long], usua_id: Option[Long], cuus_esresponsable: Option[Boolean])
 
 object CuadrillaUsuario {
   implicit val yourJodaDateReads =
@@ -32,7 +32,7 @@ object CuadrillaUsuario {
     def writes(cuadrillausuario: CuadrillaUsuario) = Json.obj(
       "cuad_id" -> cuadrillausuario.cuad_id,
       "usua_id" -> cuadrillausuario.usua_id,
-      "cuus_esresponsable" -> cuadrillausuario.cuus_esreponsable
+      "cuus_esresponsable" -> cuadrillausuario.cuus_esresponsable
     )
   }
 
@@ -49,7 +49,7 @@ object CuadrillaUsuario {
     get[Option[Long]]("cuad_id") ~
       get[Option[Long]]("usua_id") ~ 
       get[Option[Boolean]]("cuus_esresponsable") map {
-      case cuad_id ~ usua_id ~ cuus_esreponsable => CuadrillaUsuario(cuad_id, usua_id, cuus_esreponsable)
+      case cuad_id ~ usua_id ~ cuus_esresponsable => CuadrillaUsuario(cuad_id, usua_id, cuus_esresponsable)
     }
   }
 }
@@ -136,22 +136,22 @@ class CuadrillaUsuarioRepository @Inject()(dbapi: DBApi)(
     }
   }
 
-  def actualizarUsuarioCuadrilla(empr_id: Long, cuad_id: Long, usua_id: Long, cuus_esreponsable: Boolean): Boolean = {
+  def actualizarUsuarioCuadrilla(empr_id: Long, cuad_id: Long, usua_id: Long, cuus_esresponsable: Boolean): Boolean = {
     db.withConnection { implicit connection =>
-      val actualizado = SQL("UPDATE siap.cuadrilla_usuario SET cuad_id = {cuad_id}, cuus_esresponsable = {cuus_esreponsable} WHERE usua_id = {usua_id} ")
+      val actualizado = SQL("UPDATE siap.cuadrilla_usuario SET cuad_id = {cuad_id}, cuus_esresponsable = {cuus_esresponsable} WHERE usua_id = {usua_id} ")
         .on(
           'cuad_id -> cuad_id,
           'usua_id -> usua_id,
-          'cuus_esreponsable -> cuus_esreponsable
+          'cuus_esresponsable -> cuus_esresponsable
         )
         .executeUpdate() > 0
 
       if (!actualizado) {
-        val creado = SQL("INSERT INTO siap.cuadrilla_usuario (cuad_id, usua_id, cuus_esreponsable) VALUES ({cuad_id}, {usua_id}, {cuus_esreponsable})")
+        val creado = SQL("INSERT INTO siap.cuadrilla_usuario (cuad_id, usua_id, cuus_esresponsable) VALUES ({cuad_id}, {usua_id}, {cuus_esresponsable})")
           .on(
             'cuad_id -> cuad_id,
             'usua_id -> usua_id,
-            'cuus_esreponsable -> cuus_esreponsable
+            'cuus_esresponsable -> cuus_esresponsable
           )
           .executeUpdate() > 0
         creado

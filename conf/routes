@@ -490,7 +490,9 @@ GET /api/repo/prn/ejec/:fi/:ff/:e/:u/:f controllers.ReporteController.imprimirEj
 GET /api/repo/prn/ejecf/:id/:fi/:ff/:e/:u/:f controllers.ReporteController.imprimirEjecutadoFiltrado(id:Long, fi: Long, ff:Long, e:Long, u:Long, f:String)
 GET /api/repo/prn/form/:i/:e controllers.ReporteController.imprimirFormato(i:Long, e:Long)
 GET /api/repo/rang/:y/:m/:t controllers.ReporteController.buscarPorRango(y: Int, m: Int, t:Int)
+GET /api/repo/vari/:f/:t controllers.ReporteController.buscarReportePorVarios(f: String, t: Int)
 GET /api/repo/gbtc/:t/:n controllers.ReporteController.buscarPorConsecutivo(t: Long, n:Int)
+GET /api/repo/btc/:t/:r/:c controllers.ReporteController.buscarReportePorTipoConsectivo(t: Int, r:Int, c: Int)
 +nocsrf
 GET /api/repo/gbtcm/:t/:n controllers.ReporteController.buscarPorConsecutivoMovil(t: Long, n:Int)
 GET /api/repo/vali/:e/:c controllers.ReporteController.validarCodigo(e: Long, c: String)

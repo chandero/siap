@@ -5852,38 +5852,22 @@ export default {
                                                                                                               ) => {
                                                                                                                 this.transformadores =
                                                                                                                   response.data
-                                                                                                                getOrdenes()
+                                                                                                                getNovedades(
+                                                                                                                  1
+                                                                                                                )
                                                                                                                   .then(
                                                                                                                     (
                                                                                                                       response
                                                                                                                     ) => {
-                                                                                                                      this.ordenestrabajo =
-                                                                                                                        response.data
-                                                                                                                      getNovedades(
-                                                                                                                        1
-                                                                                                                      )
-                                                                                                                        .then(
-                                                                                                                          (
-                                                                                                                            response
-                                                                                                                          ) => {
-                                                                                                                            this.novedades =
-                                                                                                                              response.data
-                                                                                                                            getUnitariosTodas().then(response => {
-                                                                                                                              this.unitario_lista = response.data
-                                                                                                                              this.obtenerReporte()
-                                                                                                                            })
-                                                                                                                          }
-                                                                                                                        )
-                                                                                                                        .catch(
-                                                                                                                          (
-                                                                                                                            error
-                                                                                                                          ) => {
-                                                                                                                            console.log(
-                                                                                                                              'getNovedades:' +
-                                                                                                                                error
-                                                                                                                            )
-                                                                                                                          }
-                                                                                                                        )
+                                                                                                                      this.novedades =
+                                                                                                                         response.data
+                                                                                                                      getUnitariosTodas().then(response => {
+                                                                                                                        this.unitario_lista = response.data
+                                                                                                                        this.obtenerReporte()
+                                                                                                                        getOrdenes().then(response => {
+                                                                                                                          this.ordenestrabajo = response.data
+                                                                                                                        })
+                                                                                                                      })
                                                                                                                     }
                                                                                                                   )
                                                                                                                   .catch(
@@ -5891,7 +5875,7 @@ export default {
                                                                                                                       error
                                                                                                                     ) => {
                                                                                                                       console.log(
-                                                                                                                        'Error Ordenes Trabajo: ' +
+                                                                                                                        'getNovedades:' +
                                                                                                                           error
                                                                                                                       )
                                                                                                                     }

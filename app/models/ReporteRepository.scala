@@ -1547,7 +1547,7 @@ class ReporteRepository @Inject()(
             'current_page -> current_page
           )
           .as(Reporte._set *)
-        reps.map { r =>
+        /*reps.map { r =>
           val adicional = SQL(
             """SELECT * FROM siap.reporte_adicional ra
                 LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
@@ -1561,6 +1561,7 @@ class ReporteRepository @Inject()(
               'tireuc_id -> r.tireuc_id
             )
             .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
+          
           val eventos = SQL(
             """SELECT * FROM siap.reporte_evento WHERE repo_id = {repo_id} and even_estado < 8"""
           ).on(
@@ -1700,15 +1701,16 @@ class ReporteRepository @Inject()(
             r.empr_id,
             r.tiba_id,
             r.usua_id,
-            adicional,
-            Some(meams),
-            Some(eventos),
-            Some(_listDireccion.toList),
-            Some(novedades)
+            None, // adicional,
+            None, // Some(meams),
+            None, // Some(eventos),
+            None, // Some(_listDireccion.toList),
+            None //Some(novedades)
           )
           _list += reporte
-        }
-        _list
+        } */
+        //_list
+        reps.toList
       }
     }
 
@@ -3189,7 +3191,8 @@ class ReporteRepository @Inject()(
           'tireuc_id -> tireuc_id
         )
         .as(Reporte._set *)
-      reps.map { r =>
+      // Bloquear esta línea para la carga inicial de busqueda
+      /* reps.map { r =>
         val adicional = SQL(
           """SELECT * FROM siap.reporte_adicional ra
                 LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
@@ -3346,10 +3349,422 @@ class ReporteRepository @Inject()(
           None
         )
         _list += reporte
-      }
-      _list
+      }*/
+      // _list
+      reps.toList
     }
   }
+
+  /**
+    * Recuperar todos los Reporte dado su rango de fecha de recepcion
+    * @param anho: Int
+    * @param mes: Int
+    * @param empr_id: scala.Long
+    */
+  def buscarReportePorVarios(
+      tireuc_id: Int,
+      filtro: String,
+      empr_id: scala.Long
+  ): Future[Iterable[Reporte]] = Future[Iterable[Reporte]] {
+    db.withConnection { implicit connection =>
+      var _list: ListBuffer[Reporte] = new ListBuffer[Reporte]()
+      var query: String =
+        """SELECT *
+              FROM siap.reporte r 
+              LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+               WHERE r.empr_id = {empr_id} and tireuc_id = {tireuc_id} and r.rees_id < 9 
+               and (repo_consecutivo::TEXT = {filtro1} or repo_nombre LIKE {filtro} or repo_telefono LIKE {filtro} or repo_direccion LIKE {filtro} or repo_descripcion LIKE {filtro})
+               ORDER BY r.repo_fecharecepcion DESC """
+      /*
+                    if (!filter.isEmpty) {
+                        query = query + " and " + filter
+                    }
+                    if (!orderby.isEmpty) {
+                        query = query + s" ORDER BY $orderby"
+                    } else {
+                        query = query + s" ORDER BY r.rees_id ASC, r.repo_id DESC"
+                    }
+       */
+      val numero = try {
+        filtro.toInt
+      } catch {
+        case e: Exception => 0
+      }
+      val reps = SQL(query)
+        .on(
+          'empr_id -> empr_id,
+          'tireuc_id -> tireuc_id,
+          "filtro1" -> filtro,
+          "filtro" -> (filtro + "%")
+        )
+        .as(Reporte._set *)
+      // Bloquear esta línea para la carga inicial de busqueda
+      /* reps.map { r =>
+        val adicional = SQL(
+          """SELECT * FROM siap.reporte_adicional ra
+                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+                LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+                WHERE ra.repo_id = {repo_id}
+				        ORDER BY ot.ortr_fecha DESC
+				        LIMIT 1 """
+        ).on(
+            'repo_id -> r.repo_id,
+            'tireuc_id -> r.tireuc_id
+          )
+          .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
+        val eventos = SQL(
+          """SELECT * FROM siap.reporte_evento WHERE repo_id = {repo_id} """
+        ).on(
+            'repo_id -> r.repo_id
+          )
+          .as(Evento.eventoSet *)
+        val meams = SQL(
+          """SELECT m.meam_id FROM siap.reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
+        ).on(
+            'repo_id -> r.repo_id
+          )
+          .as(scalar[scala.Long].*)
+        val novedades = SQL(
+          """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id} and rn.tireuc_id = {tireuc_id}"""
+        ).on(
+            'repo_id -> r.repo_id,
+            'tireuc_id -> r.tireuc_id
+          )
+          .as(ReporteNovedad._set *)
+        val direcciones = SQL(
+          """SELECT * FROM siap.reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
+        ).on(
+            'repo_id -> r.repo_id
+          )
+          .as(ReporteDireccion.reporteDireccionSet *)
+        var _listDireccion = new ListBuffer[ReporteDireccion]()
+        direcciones.map { d =>
+          var dat = SQL(
+            """SELECT * FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+          ).on(
+              'repo_id -> d.repo_id,
+              'aap_id -> d.aap_id,
+              'even_id -> d.even_id
+            )
+            .as(ReporteDireccionDato.reporteDireccionDatoSet.singleOpt)
+          dat match {
+            case None =>
+              dat = Some(
+                new ReporteDireccionDato(
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None
+                )
+              )
+            case Some(dat) => None
+          }
+          var adi = SQL(
+            """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+          ).on(
+              'repo_id -> d.repo_id,
+              'aap_id -> d.aap_id,
+              'even_id -> d.even_id
+            )
+            .as(ReporteDireccionDatoAdicional._set.singleOpt)
+          adi match {
+            case None =>
+              adi = Some(
+                new ReporteDireccionDatoAdicional(
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None
+                )
+              )
+            case Some(adi) => None
+          }
+          var fotos =
+            SQL("""
+                SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
+                """)
+              .on(
+                'repo_id -> r.repo_id,
+                'aap_id -> d.aap_id,
+                'tireuc_id -> r.tireuc_id
+              )
+              .as(ReporteDireccionFoto._set *)
+          var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+          fotos.map { f =>
+            _listFoto += f
+          }
+          val direccion = d.copy(
+            dato = dat,
+            dato_adicional = adi,
+            fotos = Some(_listFoto.toList)
+          )
+          _listDireccion += direccion
+        }
+        val reporte = new Reporte(
+          r.repo_id,
+          r.tireuc_id,
+          r.reti_id,
+          r.repo_consecutivo,
+          r.repo_fecharecepcion,
+          r.repo_direccion,
+          r.repo_nombre,
+          r.repo_telefono,
+          r.repo_fechasolucion,
+          r.repo_horainicio,
+          r.repo_horafin,
+          r.repo_reportetecnico,
+          r.repo_descripcion,
+          r.repo_subrepoconsecutivo,
+          r.rees_id,
+          r.orig_id,
+          r.barr_id,
+          r.empr_id,
+          r.tiba_id,
+          r.usua_id,
+          adicional,
+          None, //Some(meams),
+          None, //Some(eventos),
+          None, //Some(_listDireccion.toList)
+          None
+        )
+        _list += reporte
+      }*/
+      // _list
+      reps.toList
+    }
+  }
+
+  /**
+    * Recuperar todos los Reporte dado su rango de fecha de recepcion
+    * @param anho: Int
+    * @param mes: Int
+    * @param empr_id: scala.Long
+    */
+  def buscarReportePorTipoConsectivo(
+      tireuc_id: Int,
+      reti_id: Int,
+      repo_consecutivo: Int,
+      empr_id: scala.Long
+  ): Future[Iterable[Reporte]] = Future[Iterable[Reporte]] {
+    db.withConnection { implicit connection =>
+      var _list: ListBuffer[Reporte] = new ListBuffer[Reporte]()
+      var query: String =
+        """SELECT *
+              FROM siap.reporte r 
+              LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+               WHERE r.empr_id = {empr_id} and tireuc_id = {tireuc_id} and r.rees_id < 9 
+               and reti_id = {reti_id} and repo_consecutivo = {repo_consecutivo}
+               ORDER BY r.repo_fecharecepcion DESC """
+      /*
+                    if (!filter.isEmpty) {
+                        query = query + " and " + filter
+                    }
+                    if (!orderby.isEmpty) {
+                        query = query + s" ORDER BY $orderby"
+                    } else {
+                        query = query + s" ORDER BY r.rees_id ASC, r.repo_id DESC"
+                    }
+       */
+      val reps = SQL(query)
+        .on(
+          'empr_id -> empr_id,
+          'tireuc_id -> tireuc_id,
+          "reti_id" -> reti_id,
+          "repo_consecutivo" -> repo_consecutivo
+        )
+        .as(Reporte._set *)
+      // Bloquear esta línea para la carga inicial de busqueda
+      /* reps.map { r =>
+        val adicional = SQL(
+          """SELECT * FROM siap.reporte_adicional ra
+                LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+                LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+                WHERE ra.repo_id = {repo_id}
+				        ORDER BY ot.ortr_fecha DESC
+				        LIMIT 1 """
+        ).on(
+            'repo_id -> r.repo_id,
+            'tireuc_id -> r.tireuc_id
+          )
+          .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
+        val eventos = SQL(
+          """SELECT * FROM siap.reporte_evento WHERE repo_id = {repo_id} """
+        ).on(
+            'repo_id -> r.repo_id
+          )
+          .as(Evento.eventoSet *)
+        val meams = SQL(
+          """SELECT m.meam_id FROM siap.reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
+        ).on(
+            'repo_id -> r.repo_id
+          )
+          .as(scalar[scala.Long].*)
+        val novedades = SQL(
+          """SELECT * FROM siap.reporte_novedad rn WHERE rn.repo_id = {repo_id} and rn.tireuc_id = {tireuc_id}"""
+        ).on(
+            'repo_id -> r.repo_id,
+            'tireuc_id -> r.tireuc_id
+          )
+          .as(ReporteNovedad._set *)
+        val direcciones = SQL(
+          """SELECT * FROM siap.reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8"""
+        ).on(
+            'repo_id -> r.repo_id
+          )
+          .as(ReporteDireccion.reporteDireccionSet *)
+        var _listDireccion = new ListBuffer[ReporteDireccion]()
+        direcciones.map { d =>
+          var dat = SQL(
+            """SELECT * FROM siap.reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+          ).on(
+              'repo_id -> d.repo_id,
+              'aap_id -> d.aap_id,
+              'even_id -> d.even_id
+            )
+            .as(ReporteDireccionDato.reporteDireccionDatoSet.singleOpt)
+          dat match {
+            case None =>
+              dat = Some(
+                new ReporteDireccionDato(
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None
+                )
+              )
+            case Some(dat) => None
+          }
+          var adi = SQL(
+            """SELECT * FROM siap.reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+          ).on(
+              'repo_id -> d.repo_id,
+              'aap_id -> d.aap_id,
+              'even_id -> d.even_id
+            )
+            .as(ReporteDireccionDatoAdicional._set.singleOpt)
+          adi match {
+            case None =>
+              adi = Some(
+                new ReporteDireccionDatoAdicional(
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None
+                )
+              )
+            case Some(adi) => None
+          }
+          var fotos =
+            SQL("""
+                SELECT * FROM siap.reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
+                """)
+              .on(
+                'repo_id -> r.repo_id,
+                'aap_id -> d.aap_id,
+                'tireuc_id -> r.tireuc_id
+              )
+              .as(ReporteDireccionFoto._set *)
+          var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+          fotos.map { f =>
+            _listFoto += f
+          }
+          val direccion = d.copy(
+            dato = dat,
+            dato_adicional = adi,
+            fotos = Some(_listFoto.toList)
+          )
+          _listDireccion += direccion
+        }
+        val reporte = new Reporte(
+          r.repo_id,
+          r.tireuc_id,
+          r.reti_id,
+          r.repo_consecutivo,
+          r.repo_fecharecepcion,
+          r.repo_direccion,
+          r.repo_nombre,
+          r.repo_telefono,
+          r.repo_fechasolucion,
+          r.repo_horainicio,
+          r.repo_horafin,
+          r.repo_reportetecnico,
+          r.repo_descripcion,
+          r.repo_subrepoconsecutivo,
+          r.rees_id,
+          r.orig_id,
+          r.barr_id,
+          r.empr_id,
+          r.tiba_id,
+          r.usua_id,
+          adicional,
+          None, //Some(meams),
+          None, //Some(eventos),
+          None, //Some(_listDireccion.toList)
+          None
+        )
+        _list += reporte
+      }*/
+      // _list
+      reps.toList
+    }
+  }
+
 
   /**
     * Recuperar todos los Reporte dado su rango de fecha de solucion
@@ -7619,7 +8034,7 @@ class ReporteRepository @Inject()(
         val repoSyncUpdated = false
 
         if (!repoSyncUpdated) {
-          SQL(
+          result = SQL(
             """INSERT INTO siap.reporte_sincronizacion VALUES ({tireuc_id}, {repo_id}, {reti_id}, {repo_consecutivo}, {resi_ultimo_sync}, {resi_operaciones}, {resi_material})"""
           ).on(
               'tireuc_id -> reporte.tireuc_id,
@@ -7630,7 +8045,7 @@ class ReporteRepository @Inject()(
               'resi_operaciones -> operaciones,
               'resi_material -> materiales
             )
-            .executeInsert()
+            .executeUpdate() > 0
         }
         if (reporte_ant != None) {
           if (reporte_ant.get.repo_fecharecepcion != reporte.repo_fecharecepcion) {

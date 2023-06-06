@@ -150,6 +150,24 @@ class ReporteController @Inject()(
       }
     }
 
+  def buscarReportePorTipoConsectivo(tireuc_id: Int, reti_id: Int, repo_consecutivo: Int) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      reporteService.buscarReportePorTipoConsectivo(tireuc_id, reti_id, repo_consecutivo, empr_id.get).map {
+        reportes =>
+          Ok(write(reportes))
+      }
+  }
+
+  def buscarReportePorVarios(filtro: String, tireuc_id: Int) = {
+    authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      reporteService.buscarReportePorVarios(tireuc_id, filtro, empr_id.get).map {
+        reportes =>
+          Ok(write(reportes))
+      }
+    }
+  }
+
   def buscarPorAap(aap_id: Long) = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)

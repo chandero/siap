@@ -71,6 +71,29 @@ export function getReportePorConsecutivo(reti_id, repo_consecutivo) {
   })
 }
 
+export function buscarReportePorTipoConsectivo(tireuc_id, reti_id, repo_consecutivo) {
+  const data = {
+    tireuc_id,
+    reti_id,
+    repo_consecutivo
+  }
+  return request({
+    url: '/repo/btc/' + data.tireuc_id + '/' + data.reti_id + '/' + data.repo_consecutivo,
+    method: 'get'
+  })
+}
+
+export function buscarReportePorVarios(filtro, tireuc_id) {
+  const data = {
+    filtro,
+    tireuc_id
+  }
+  return request({
+    url: '/repo/vari/' + data.filtro + '/' + data.tireuc_id,
+    method: 'get'
+  })
+}
+
 export function saveReporte(reporte) {
   const data = {
     reporte

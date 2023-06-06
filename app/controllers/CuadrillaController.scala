@@ -132,10 +132,10 @@ class CuadrillaController @Inject()(
       }
   }
 
-  def actualizarUsuarioCuadrilla(usua_id: Long, cuad_id: Long, cuus_esreponsable: Boolean) = authenticatedUserAction.async {
+  def actualizarUsuarioCuadrilla(usua_id: Long, cuad_id: Long, cuus_esresponsable: Boolean) = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
-      if (cuadrillaUsuarioService.actualizarUsuarioCuadrilla(empr_id.get, cuad_id, usua_id, cuus_esreponsable)) {
+      if (cuadrillaUsuarioService.actualizarUsuarioCuadrilla(empr_id.get, cuad_id, usua_id, cuus_esresponsable)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
         Future.successful(ServiceUnavailable(Json.toJson("false")))

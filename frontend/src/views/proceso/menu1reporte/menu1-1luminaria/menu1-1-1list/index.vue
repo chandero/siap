@@ -71,7 +71,7 @@
       <el-container>
         <el-header>
           <el-row :gutter="4">
-            <el-col :span="2">
+            <el-col :xs="4" :sm="4" :md="2" :lg="2" :xl="2">
               <el-button
                 type="primary"
                 icon="el-icon-plus"
@@ -79,8 +79,6 @@
                 @click="nuevo"
                 title="Crear Nuevo Reporte"
               ></el-button>
-            </el-col>
-            <el-col :span="2">
               <el-button
                 type="success"
                 icon="el-icon-refresh"
@@ -89,13 +87,14 @@
                 title="Actualizar listado de Reportes"
               ></el-button>
             </el-col>
-            <el-col :span="18">
+            <el-col :xs="16" :sm="16" :md="10" :lg="10" :xl="10">
               <el-input
-                style="display: inline-block; position: absolute"
                 v-model="filtro"
-                @input="filtro = $event.toUpperCase()"
                 placeholder="Buscar por..."
               ></el-input>
+            </el-col>
+            <el-col :xs="4" :sm="4" :md="2" :lg="2" :xl="2">
+              <el-button type="warning" icon="el-icon-search" circle @click="filtered" title="Buscar por filtro"></el-button>
             </el-col>
           </el-row>
         </el-header>
@@ -132,7 +131,7 @@
                     >
                       <el-table
                         v-loading="loading"
-                        :data="tableData.filter((data) => filtrar(data))"
+                        :data="tableData"
                         stripe
                         :default-sort="{
                           prop: 'repo_consecutivo',
@@ -337,7 +336,9 @@ import {
   deleteReporte,
   getEstados,
   getTipos,
-  printReporte
+  printReporte,
+  buscarReportePorTipoConsectivo,
+  buscarReportePorVarios
 } from '@/api/reporte'
 import { getBarriosEmpresa } from '@/api/barrio'
 import { getOrigenes } from '@/api/origen'
@@ -624,6 +625,7 @@ export default {
     },
     actualizar() {
       this.filtro = this.freti_id + '|' + this.fconsec
+      this.filtered()
     },
     nuevo() {
       this.$router.push({
@@ -661,9 +663,14 @@ export default {
       if (id === null) {
         return ''
       } else {
-        return this.barrios.find((e) => e.barr_id === id, {
+        const barrio = this.barrios.find((e) => e.barr_id === id, {
           barr_descripcion: ''
-        }).barr_descripcion
+        })
+        if (barrio) {
+          return barrio.barr_descripcion
+        } else {
+          return ''
+        }
       }
     },
     getData(anho, mes, index, name) {
@@ -680,6 +687,7 @@ export default {
         })
     },
     filtrar(data) {
+      console.log('Filtrando....')
       if (!this.filtro) {
         return data
       } else {
@@ -732,6 +740,28 @@ export default {
         } else {
           return null
         }
+      }
+    },
+    filtered() {
+      this.filtro = this.filtro.toUpperCase()
+      if (this.filtro.includes('|')) {
+        var reti_id = parseInt(this.filtro.split('|')[0])
+        var repo_consecutivo = parseInt(this.filtro.split('|')[1])
+        this.loading = true
+        buscarReportePorTipoConsectivo(1, reti_id, repo_consecutivo).then(response => {
+          this.tableData = response.data
+          this.loading = false
+        }).catch(() => {
+          this.loading = false
+        })
+      } else {
+        this.loading = true
+        buscarReportePorVarios(this.filtro, 1).then(response => {
+          this.tableData = response.data
+          this.loading = false
+        }).catch(() => {
+          this.loading = false
+        })
       }
     }
   },
