@@ -1,37 +1,59 @@
-<!--
-  ~ Copyright (C) 2009-2018 Lightbend Inc. <https://www.lightbend.com>
-  -->
-<!-- The default logback configuration that Play uses if no other configuration is provided -->
 <configuration>
-  <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder>
-      <pattern>%coloredLevel %logger{15} - %message%n%xException{10}</pattern>
-    </encoder>
-  </appender>
 
-  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>${application.home:-.}/logs/application.log</file>
-    <encoder>
-        <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
-    </encoder>
-  </appender>  
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${application.home:-.}/logs/application.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Daily rollover with compression -->
+            <fileNamePattern>${application.home:-.}/logs/application-log-%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <!-- keep 30 days worth of history -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date{yyyy-MM-dd HH:mm:ss ZZZZ} [%level] from %logger in %thread - %message%n%xException</pattern>
+        </encoder>
+    </appender>
 
-  <appender name="ASYNCSTDOUT" class="ch.qos.logback.classic.AsyncAppender">
-    <appender-ref ref="FILE" />
-  </appender>
+    <appender name="SECURITY_FILE" class="ch.qos.logback.core.FileAppender">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>SECURITY</marker>
+            </evaluator>
+            <OnMismatch>DENY</OnMismatch>
+            <OnMatch>ACCEPT</OnMatch>
+        </filter>
+        <file>${application.home:-.}/logs/security.log</file>
+        <encoder>
+            <pattern>%date [%level] [%marker] from %logger in %thread - %message%n%xException</pattern>
+        </encoder>
+    </appender>
 
-  <logger name="play" level="DEBUG" />
-  <logger name="application" level="DEBUG" />
+    <appender name="ACCESS_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${application.home:-.}/logs/access.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover with compression -->
+            <fileNamePattern>${application.home:-.}/logs/access-log-%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <!-- keep 1 week worth of history -->
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date{yyyy-MM-dd HH:mm:ss ZZZZ} %message%n</pattern>
+            <!-- this quadruples logging throughput -->
+            <immediateFlush>true</immediateFlush>
+        </encoder>
+    </appender>
 
-  <logger name="com.gargoylesoftware.htmlunit.javascript" level="OFF" />
-  <!-- https://hibernate.atlassian.net/browse/HV-1323 -->
-  <logger name="org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator" level="ERROR" />
+    <!-- additivity=false ensures access log data only goes to the access log -->
+    <logger name="access" level="INFO" additivity="false">
+        <appender-ref ref="ACCESS_FILE" />
+    </logger>
 
-  <root level="WARN">
-    <appender-ref ref="ASYNCSTDOUT" />
-  </root>
+    <logger name="com.mkyong" level="debug" additivity="false">
+        <appender-ref ref="FILE"/>
+    </logger>    
 
-  <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+    <root level="debug">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="SECURITY_FILE"/>
+    </root>
 
 </configuration>

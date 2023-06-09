@@ -193,7 +193,7 @@ class UsuarioRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
                 'enla_uuid -> link
             ).as(SqlParser.scalar[Long].single)
 
-            val result:Boolean = SQL("UPDATE siap.usuario SET usua_clave = public.crypt({usua_clave}, public.gen_salt('bf')) WHERE usua_id = {usua_id}").
+            val result:Boolean = SQL("UPDATE siap.usuario SET usua_clave = public.crypt({usua_clave}, public.gen_salt('bf', 6)) WHERE usua_id = {usua_id}").
             on(
                 'usua_id -> usua_id,
                 'usua_clave -> clave
@@ -233,7 +233,7 @@ class UsuarioRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
         db.withConnection { implicit connection =>
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())
-            val id: Long = SQL("INSERT INTO siap.usuario (usua_email, usua_clave, usua_nombre, usua_apellido, usua_activo) VALUES({usua_email},public.crypt({usua_clave}::text, public.gen_salt('bf')), {usua_nombre}, {usua_apellido}, {usua_activo})").
+            val id: Long = SQL("INSERT INTO siap.usuario (usua_email, usua_clave, usua_nombre, usua_apellido, usua_activo) VALUES({usua_email},public.crypt({usua_clave}::text, public.gen_salt('bf', 6)), {usua_nombre}, {usua_apellido}, {usua_activo})").
             on(
                 'usua_email -> usua_email, 
                 'usua_clave -> usua_clave, 
@@ -290,7 +290,7 @@ class UsuarioRepository @Inject()(dbapi: DBApi)(implicit ec: DatabaseExecutionCo
         db.withConnection { implicit connection => 
             val fecha: LocalDate = new LocalDate(Calendar.getInstance().getTimeInMillis())
             val hora: LocalDateTime = new LocalDateTime(Calendar.getInstance().getTimeInMillis())
-            val count: Long = SQL("UPDATE siap.usuario SET usua_clave = public.crypt({usua_clave}, public.gen_salt('bf')), usua_nombre = {usua_nombre}, usua_apellido = {usua_apellido}, usua_activo = {usua_activo}, usua_ultimasesion = {usua_ultimasesion} WHERE usua_id = {usua_id}").
+            val count: Long = SQL("UPDATE siap.usuario SET usua_clave = public.crypt({usua_clave}, public.gen_salt('bf', 6)), usua_nombre = {usua_nombre}, usua_apellido = {usua_apellido}, usua_activo = {usua_activo}, usua_ultimasesion = {usua_ultimasesion} WHERE usua_id = {usua_id}").
             on(
                 'usua_id -> usuario.usua_id,
                 'usua_clave -> usuario.usua_clave, 
