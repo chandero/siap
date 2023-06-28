@@ -1101,7 +1101,8 @@ export default {
     fechaCorte: 'Fecha a Procesar',
     ejecutado: 'Informe de Reportes Ejecutados',
     fechaInicio: 'Fecha Inicial',
-    fechaFinal: 'Fecha Final'
+    fechaFinal: 'Fecha Final',
+    orig_descripcion: 'Origen'
   },
   ortr: {
     select: 'Seleccione la ODT'

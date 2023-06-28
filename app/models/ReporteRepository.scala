@@ -11591,15 +11591,15 @@ class ReporteRepository @Inject()(
       fecha_inicial: Long,
       fecha_final: Long,
       empr_id: Long
-  ): Future[List[(Int, Int, Int, String, Int, java.util.Date, String)]] =
+  ): Future[List[(Int, Int, Int, String, Int, java.util.Date, String, String)]] =
     Future {
       val resultSet = db.withConnection { implicit connection =>
         val _parser = int("tireuc_id") ~ int("repo_id") ~ int("reti_id") ~
           str("reti_descripcion") ~ int("repo_consecutivo") ~ date(
           "repo_fecharecepcion"
         ) ~
-          str("repo_fechasolucion") map {
-          case tireuc_id ~ repo_id ~ reti_id ~ reti_descripcion ~ repo_consecutivo ~ repo_fecharecepcion ~ repo_fechasolucion =>
+          str("repo_fechasolucion") ~ str("orig_descripcion") map {
+          case tireuc_id ~ repo_id ~ reti_id ~ reti_descripcion ~ repo_consecutivo ~ repo_fecharecepcion ~ repo_fechasolucion ~ orig_descripcion =>
             (
               tireuc_id,
               repo_id,
@@ -11607,7 +11607,8 @@ class ReporteRepository @Inject()(
               reti_descripcion,
               repo_consecutivo,
               repo_fecharecepcion,
-              repo_fechasolucion
+              repo_fechasolucion,
+              orig_descripcion
             )
         }
         val _query =
@@ -11619,14 +11620,17 @@ select distinct
   rt1.reti_descripcion,
   r1.repo_consecutivo,
   r1.repo_fecharecepcion,
-  cast(r1.repo_fechasolucion as varchar)
+  cast(r1.repo_fechasolucion as varchar),
+  o1.orig_descripcion
 from siap.reporte r1
 left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
 left join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id and (rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null)
-left join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and 	(rdd1.aap_potencia = rdd1.aap_potencia_anterior or rdd1.aap_potencia_anterior is null) and
+left join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and (rdd1.aap_potencia = rdd1.aap_potencia_anterior or rdd1.aap_potencia_anterior is null) and
 	(rdd1.aap_tecnologia = rdd1.aap_tecnologia_anterior or rdd1.aap_tecnologia_anterior is null)
+inner join siap.origen o1 on o1.orig_id = r1.orig_id
 where r1.empr_id = {empr_id} and
 	r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r1.reti_id <> 2 and r1.rees_id = 2	
+  and r1.repo_reportetecnico > ''
 union all 
 select distinct
   r1.tireuc_id,
@@ -11635,11 +11639,13 @@ select distinct
   rt1.reti_descripcion,
   r1.repo_consecutivo,
   r1.repo_fecharecepcion,
-  cast(r1.repo_fechasolucion as varchar)
+  cast(r1.repo_fechasolucion as varchar),
+  o1.orig_descripcion
 from siap.reporte r1
 inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
 inner join siap.reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
 inner join siap.reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
+inner join siap.origen o1 on o1.orig_id = r1.orig_id
 left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
 left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
 left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
@@ -11653,6 +11659,7 @@ where r1.empr_id = {empr_id} and
 	(rdd1.aaco_id = rdd1.aaco_id_anterior or rdd1.aaco_id_anterior is null) and
 	(rdd1.aap_tecnologia <> rdd1.aap_tecnologia_anterior or rdd1.aap_tecnologia_anterior is null) and
 	(rdd1.aap_potencia = rdd1.aap_potencia_anterior or rdd1.aap_potencia_anterior is null)
+  and r1.repo_reportetecnico > ''
 union all
 select distinct
   r1.tireuc_id,
@@ -11661,11 +11668,13 @@ select distinct
   rt1.reti_descripcion,
   r1.repo_consecutivo,
   r1.repo_fecharecepcion,
-  cast(r1.repo_fechasolucion as varchar)
+  cast(r1.repo_fechasolucion as varchar),
+  o1.orig_descripcion
 from siap.control_reporte r1
 inner join siap.control_reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
 left join siap.control_reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
 left join siap.control_reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
+inner join siap.origen o1 on o1.orig_id = r1.orig_id
 left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
 left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
 left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
@@ -11674,6 +11683,7 @@ where r1.empr_id = {empr_id} and
 	((rd1.even_direccion = rd1.even_direccion_anterior or rd1.even_direccion_anterior is null or rd1.even_direccion_anterior = '') and
 	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null)
 	)
+  and r1.repo_reportetecnico > ''
 union all 
 select distinct
   r1.tireuc_id,
@@ -11682,12 +11692,14 @@ select distinct
   rt1.reti_descripcion,
   r1.repo_consecutivo,
   r1.repo_fecharecepcion,
-  cast(r1.repo_fechasolucion as varchar)
+  cast(r1.repo_fechasolucion as varchar),
+  o1.orig_descripcion
 from siap.transformador_reporte r1
 left join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
 inner join siap.transformador_reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
 left join siap.transformador_reporte_direccion_dato rdd1 on rdd1.repo_id = rd1.repo_id and rdd1.aap_id = rd1.aap_id and rdd1.even_id = rd1.even_id and rd1.even_estado <> 9
 left join siap.transformador_reporte_direccion_dato_adicional rdda1 on rdda1.repo_id = rd1.repo_id and rdda1.aap_id = rd1.aap_id and rdda1.even_id = rd1.even_id
+inner join siap.origen o1 on o1.orig_id = r1.orig_id
 left join siap.barrio brd1 on brd1.barr_id = rd1.barr_id_anterior 
 left join siap.barrio brd2 on brd2.barr_id = rd1.barr_id
 where r1.empr_id = {empr_id} and
@@ -11695,6 +11707,7 @@ where r1.empr_id = {empr_id} and
 	((rd1.even_direccion = rd1.even_direccion_anterior or rd1.even_direccion_anterior is null or rd1.even_direccion_anterior = '') and
 	(rd1.barr_id = rd1.barr_id_anterior or rd1.barr_id_anterior is null)
 	)
+  and r1.repo_reportetecnico > ''
 ) o
 order by o.reti_descripcion, o.repo_consecutivo
       """

@@ -6,130 +6,93 @@
     <el-main>
       <el-row :gutter="4">
         <el-form>
-                    <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                        <el-form-item :label="$t('informe.initialDate')">
-                            <el-date-picker v-model="fecha_inicial" format="yyyy/MM/dd"></el-date-picker>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                        <el-form-item :label="$t('informe.endDate')">
-                            <el-date-picker v-model="fecha_final" format="yyyy/MM/dd"></el-date-picker>
-                        </el-form-item>
-                    </el-col>
+          <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+            <el-form-item :label="$t('informe.initialDate')">
+              <el-date-picker v-model="fecha_inicial" format="yyyy/MM/dd"></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+            <el-form-item :label="$t('informe.endDate')">
+              <el-date-picker v-model="fecha_final" format="yyyy/MM/dd"></el-date-picker>
+            </el-form-item>
+          </el-col>
         </el-form>
       </el-row>
       <el-row>
         <el-button type="primary" @click="getData()">Obtener Reportes</el-button>
       </el-row>
-      <el-row><el-col><br/></el-col></el-row>
-        <el-row>
-          <el-col :span="24">
-                      <el-table
-                        :data="tableData"
-                        stripe
-                        :default-sort="{
-                          prop: '_5',
-                          order: 'ascending'
-                        }"
-                        style="width: 100%"
-                        max-height="600"
-
-                        @selection-change="handleSelectionChange">
-                        <el-table-column
-                          type="selection"
-                          width="55">
-                        </el-table-column>
-                      <el-table-column
-                        type="index"
-                        width="50">
-                      </el-table-column>
-                        <el-table-column
-                          :label="$t('reporte.date')"
-                          width="100"
-                          prop="repo_fecharecepcion"
-                          resizable
-                        >
-                          <template slot-scope="scope">
-                            <span style="margin-left: 10px">{{
-                              scope.row._6
-                                | moment('YYYY/MM/DD')
-                            }}</span>
-                          </template>
-                        </el-table-column>
-                        <el-table-column
-                          :label="$t('reporte.type')"
-                          width="300"
-                          prop="_4"
-                          resizable
-                        >
-                          <template slot-scope="scope">
-                            <span style="margin-left: 10px">{{
-                              scope.row._4
-                            }}</span>
-                          </template>
-                        </el-table-column>
-                        <el-table-column
-                          :label="$t('reporte.number')"
-                          width="120"
-                          prop="_5"
-                          resizable
-                        >
-                          <template slot-scope="scope">
-                            <span style="margin-left: 10px">{{
-                              scope.row._5
-                            }}</span>
-                          </template>
-                        </el-table-column>
-                        <el-table-column
-                          :label="$t('reporte.date_solve')"
-                          width="130"
-                          prop="_7"
-                          resizable
-                        >
-                          <template slot-scope="scope">
-                            <span style="margin-left: 10px">{{
-                              scope.row._7 | moment('YYYY/MM/DD')
-                            }}</span>
-                          </template>
-                        </el-table-column>
-                        <el-table-column
-                          fixed="right"
-                          :label="$t('table.accion')"
-                          width="150"
-                        >
-                          <template slot-scope="scope">
-                            <el-button
-                              size="mini"
-                              circle
-                              type="info"
-                              @click="
-                                handleEdit(scope.$index, scope.row)
-                              "
-                              :title="$t('edit_element')"
-                              ><i class="el-icon-edit-outline"></i>
-                            </el-button>
-                            <el-button
-                              size="mini"
-                              circle
-                              type="success"
-                              @click="handleClose(scope.$index, scope.row)"
-                              :title="$t('close')"
-                              ><i class="el-icon-check"></i>
-                            </el-button>
-                          </template>
-                        </el-table-column>
-                      </el-table>
-                    </el-col>
-                  </el-row>
-                  <el-row><el-col><br/></el-col></el-row>
-                  <el-row>
-                    <el-col :span="4">
-                      <el-button :disabled="multipleSelection.length == 0" type="primary" icon="el-icon-check" @click="handleCloseSelected()">Cerrar Selección</el-button>
-                    </el-col>
-                    <el-col :span="4">
-                      <el-button :disabled="tableData.length == 0" type="success" icon="el-icon-check" @click="handleCloseAll()">Cerrar Todos</el-button>
-                    </el-col>
-                  </el-row>
+      <el-row><el-col><br /></el-col></el-row>
+      <el-row>
+        <el-col :span="24">
+          <el-table :data="tableData" stripe :default-sort="{
+            prop: '_5',
+            order: 'ascending'
+          }" style="width: 100%" max-height="600" @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="55">
+            </el-table-column>
+            <el-table-column type="index" width="50">
+            </el-table-column>
+            <el-table-column :label="$t('reporte.date')" width="100" prop="repo_fecharecepcion" resizable>
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{
+                  scope.row._6
+                  | moment('YYYY/MM/DD')
+                }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column :label="$t('reporte.type')" width="300" prop="_4" resizable>
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{
+                  scope.row._4
+                }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column :label="$t('reporte.number')" width="120" prop="_5" resizable>
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{
+                  scope.row._5
+                }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column :label="$t('reporte.date_solve')" width="130" prop="_7" resizable>
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{
+                  scope.row._7 | moment('YYYY/MM/DD')
+                }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column :label="$t('reporte.orig_descripcion')" width="130" prop="_7" resizable>
+              <template slot-scope="scope">
+                <span style="margin-left: 10px">{{
+                  scope.row._8
+                }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column fixed="right" :label="$t('table.accion')" width="150">
+              <template slot-scope="scope">
+                <el-button size="mini" circle type="info" @click="
+                  handleEdit(scope.$index, scope.row)
+                  " :title="$t('edit_element')"><i class="el-icon-edit-outline"></i>
+                </el-button>
+                <el-button size="mini" circle type="success" @click="handleClose(scope.$index, scope.row)"
+                  :title="$t('close')"><i class="el-icon-check"></i>
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-col>
+      </el-row>
+      <el-row><el-col><br /></el-col></el-row>
+      <el-row>
+        <el-col :span="4">
+          <el-button :disabled="multipleSelection.length == 0" type="primary" icon="el-icon-check"
+            @click="handleCloseSelected()">Cerrar Selección</el-button>
+        </el-col>
+        <el-col :span="4">
+          <el-button :disabled="tableData.length == 0" type="success" icon="el-icon-check"
+            @click="handleCloseAll()">Cerrar Todos</el-button>
+        </el-col>
+      </el-row>
     </el-main>
   </el-container>
 </template>
