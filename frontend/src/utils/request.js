@@ -19,7 +19,8 @@ service.interceptors.request.use(config => {
   }
   config.headers['Access-Control-Allow-Origin'] = '*'
   config.headers['Access-Control-Allow-Credentials'] = 'true'
-  config.headers['set-cookie'] = [
+  config.headers.withCredentials = 'true'
+  document.cookie = [
     'same-site-cookie=siapsamesiteprivate; SameSite=siap',
     'cross-site-cookie=siapsamesitepublic; SameSite=None; Secure'
   ]
