@@ -436,7 +436,7 @@ class ReporteController @Inject()(
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
       val dateFormatter = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-      
+      val ip_address = request.remoteAddress
       val reportenuevo = new Reporte(
         reporte.repo_id,
         reporte.tireuc_id,
@@ -465,7 +465,7 @@ class ReporteController @Inject()(
         reporte.novedades
       )
       println("reporte nuevo: " + reportenuevo)
-      if (reporteService.actualizarMovil(reportenuevo)) {
+      if (reporteService.actualizarMovil(reportenuevo,ip_address)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
         Future.successful(NotAcceptable(Json.toJson("true")))

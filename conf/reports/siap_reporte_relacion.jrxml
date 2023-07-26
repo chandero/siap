@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
+<!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_relacion" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="817" leftMargin="20" rightMargin="5" topMargin="5" bottomMargin="5" uuid="05a69750-b169-4a0d-b037-910a744e89b1">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -20,7 +20,7 @@
 	<parameter name="EMPR_ID" class="java.lang.Long"/>
 	<queryString language="SQL">
 		<![CDATA[select r.* from 
-				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
+				(select distinct on (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
 					case 
 						when (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE THEN 'X'
 						else ''
@@ -32,7 +32,7 @@
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = $P{FECHA_FINAL}
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID}
                    union all
@@ -48,7 +48,7 @@
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = $P{FECHA_FINAL}
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID}
 				           union all
@@ -64,7 +64,7 @@
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = $P{FECHA_FINAL}
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID}
                    union all
@@ -77,7 +77,7 @@
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
                         left join siap.ordentrabajo_obra otr on otr.obra_id = r.obra_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = $P{FECHA_FINAL}
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.obra_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.obra_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID}
                     ) r

@@ -6738,17 +6738,538 @@ class ReporteRepository @Inject()(
   }
 
   def actualizarMovil(
-      reporte: Reporte
+      reporte: Reporte,
+      ip_address: String
   ): Boolean = {
-    reporte.tireuc_id match {
-      case Some(1) => actualizarMovilLuminaria(reporte)
-      case Some(2) => controlReporteService.actualizarMovilControl(reporte)
-      case Some(3) =>
-        transformadorReporteService.actualizarMovilTransformador(reporte)
-      case Some(4) => actualizarMovilMedidor(reporte)
-      case _       => false
+    reporte.repo_id match {
+      case Some(repo_id) =>
+        if (repo_id > -1) {
+          reporte.tireuc_id match {
+            case Some(1) => actualizarMovilLuminaria(reporte)
+            case Some(2) => controlReporteService.actualizarMovilControl(reporte)
+            case Some(3) =>
+              transformadorReporteService.actualizarMovilTransformador(reporte)
+            case Some(4) => actualizarMovilMedidor(reporte)
+            case _       => false
+          }
+          insertarSincronizacionMovil(reporte, ip_address)
+        } else {
+          false
+        }
+      case None => false
     }
   }
+
+  /**
+    * Sincronizacion de Reporte
+    * @param reporte: Reporte
+    * @param ip_address: String
+    */
+  def insertarSincronizacionMovil(
+      reporte: Reporte,
+      ip_address: String
+  ): Boolean = {
+    var result = false
+
+    try {
+      db.withTransaction { implicit connection =>
+        val fecha: LocalDate =
+          new LocalDate(Calendar.getInstance().getTimeInMillis())
+        val hora: LocalDateTime =
+          new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+        val _uuid = java.util.UUID.randomUUID
+
+        var _parseOrtr = get[Option[Int]]("ortr_id") ~ get[Option[Int]]("cuad_id") map {
+          case ortr_id ~ cuad_id => (ortr_id, cuad_id)
+        }
+        val _ortr = SQL(
+          """select o1.ortr_id, o1.cuad_id  from siap.reporte r1
+              inner join siap.ordentrabajo_reporte or1 on or1.repo_id = r1.repo_id and or1.even_estado < 8
+              inner join siap.ordentrabajo o1 on o1.ortr_id = or1.ortr_id and o1.otes_id < 8
+             where r1.repo_id = {repo_id} and o1.ortr_fecha = {fecha_solucion}
+             order by o1.ortr_fecha desc
+             limit 1""").on(
+            'repo_id -> reporte.repo_id,
+            'fecha_solucion -> reporte.repo_fechasolucion
+          ).as(_parseOrtr.singleOpt).getOrElse((None, None))
+
+        val _ortr_id:Int = _ortr._1 match {
+          case Some(ortr_id:Int) => ortr_id
+          case None => -1
+        }
+
+        val _cuad_id:Int = _ortr._2 match {
+          case Some(cuad_id:Int) => cuad_id
+          case None => -1
+        }
+
+        val _reporteInsertado = SQL(
+            """INSERT INTO siap.sincronizacion_reporte (
+                repo_id,  
+                repo_fecharecepcion, 
+                repo_direccion, 
+                repo_nombre, 
+                repo_telefono, 
+                repo_fechasolucion,
+                repo_reportetecnico,
+                orig_id,
+                barr_id,
+                usua_id,
+                empr_id,
+                rees_id,
+                repo_descripcion,
+                repo_horainicio,
+                repo_horafin,
+                reti_id, 
+                repo_consecutivo,
+                tiba_id, 
+                tireuc_id,
+                repo_subrepoconsecutivo,
+                ortr_id, 
+                cuad_id, 
+                ip_address, 
+                repo_idx, 
+                repo_fecha_sync) VALUES (
+                  {repo_id},
+                  {repo_fecharecepcion}, 
+                  {repo_direccion}, 
+                  {repo_nombre}, 
+                  {repo_telefono}, 
+                  {repo_fechasolucion}, 
+                  {repo_reportetecnico},
+                  {orig_id},
+                  {barr_id},
+                  {usua_id},
+                  {empr_id},
+                  {rees_id},
+                  {repo_descripcion},
+                  {repo_horainicio}, 
+                  {repo_horafin}, 
+                  {reti_id},                  
+                  {repo_consecutivo},                   
+                  {tiba_id},                   
+                  {tireuc_id}, 
+                  {repo_subrepoconsecutivo},
+                  {ortr_id}, 
+                  {cuad_id}, 
+                  {ip_address}, 
+                  {repo_idx}::uuid, 
+                  {repo_fecha_sync})"""
+          ).on(
+              'repo_id -> reporte.repo_id,
+              'tireuc_id -> reporte.tireuc_id,
+              'repo_fecharecepcion -> reporte.repo_fecharecepcion,
+              'repo_direccion -> reporte.repo_direccion,
+              'repo_nombre -> reporte.repo_nombre,
+              'repo_telefono -> reporte.repo_telefono,
+              'repo_fechasolucion -> reporte.repo_fechasolucion,
+              'repo_reportetecnico -> reporte.repo_reportetecnico,
+              'orig_id -> reporte.orig_id,
+              'barr_id -> reporte.barr_id,
+              'usua_id -> reporte.usua_id,
+              'empr_id -> reporte.empr_id,
+              'rees_id -> reporte.rees_id,
+              'repo_descripcion -> reporte.repo_descripcion,
+              'repo_horainicio -> reporte.repo_horainicio,
+              'repo_horafin -> reporte.repo_horafin,
+              'reti_id -> reporte.reti_id,
+              'repo_consecutivo -> reporte.repo_consecutivo,
+              'tiba_id -> reporte.tiba_id,
+              'repo_subrepoconsecutivo -> reporte.repo_subrepoconsecutivo,
+              'ortr_id -> _ortr_id,
+              'cuad_id -> _cuad_id,
+              'ip_address -> ip_address,
+              'repo_idx -> _uuid,
+              'repo_fecha_sync -> hora
+            )
+            .executeUpdate() > 0
+
+        // actualizar reporte adicional
+        reporte.adicional.map { adicional =>
+          val hayAdicional: Boolean =
+            SQL("""INSERT INTO siap.sincronizacion_reporte_adicional (repo_id, 
+                                                               repo_fechadigitacion, 
+                                                               repo_tipo_expansion, 
+                                                               repo_luminaria, 
+                                                               repo_redes, 
+                                                               repo_poste, 
+                                                               repo_modificado, 
+                                                               repo_subreporte, 
+                                                               repo_email,
+                                                               repo_subid, 
+                                                               acti_id,
+                                                               repo_codigo,
+                                                               repo_apoyo,
+                                                               urba_id,
+                                                               muot_id,
+                                                               repo_idx) VALUES (
+                                                                {repo_id}, 
+                                                                {repo_fechadigitacion}, 
+                                                                {repo_tipo_expansion}, 
+                                                                {repo_luminaria}, 
+                                                                {repo_redes}, 
+                                                                {repo_poste}, 
+                                                                {repo_modificado}, 
+                                                                {repo_subreporte}, 
+                                                                {repo_email},
+                                                                {repo_subid}, 
+                                                                {acti_id},
+                                                                {repo_codigo},
+                                                                {repo_apoyo},
+                                                                {urba_id},
+                                                                {muot_id},
+                                                                {repo_idx}::uuid
+                                                               )""")
+              .on(
+                'repo_fechadigitacion -> adicional.repo_fechadigitacion,
+                'repo_tipo_expansion -> adicional.repo_tipo_expansion,
+                'repo_luminaria -> adicional.repo_luminaria,
+                'repo_redes -> adicional.repo_redes,
+                'repo_poste -> adicional.repo_poste,
+                'repo_modificado -> hora,
+                'repo_subreporte -> adicional.repo_subreporte,
+                'repo_subid -> Option.empty[scala.Long],
+                'repo_email -> adicional.repo_email,
+                'acti_id -> adicional.acti_id,
+                'repo_codigo -> adicional.repo_codigo,
+                'repo_apoyo -> adicional.repo_apoyo,
+                'urba_id -> adicional.urba_id,
+                'muot_id -> adicional.muot_id,
+                'repo_id -> reporte.repo_id,
+                'repo_idx -> _uuid
+              )
+              .executeUpdate() > 0
+        }
+        reporte.novedades.map { novedades =>
+          for (n <- novedades) {
+              if (n.even_estado.get < 8) {
+                val novedadInsertado = SQL(
+                  """ INSERT INTO siap.sincronizacion_reporte_novedad (
+                                             tireuc_id, 
+                                             repo_id, 
+                                             even_id, 
+                                             nove_id, 
+                                             reno_horaini, 
+                                             reno_horafin, 
+                                             reno_observacion, 
+                                             even_estado,
+                                             repo_idx
+                                           ) VALUES (
+                                             {tireuc_id},
+                                             {repo_id},
+                                             {even_id},
+                                             {nove_id},
+                                             {reno_horaini},
+                                             {reno_horafin},
+                                             {reno_observacion},
+                                             {even_estado},
+                                             {repo_idx}::uuid
+                                           )
+                                    """
+                ).on(
+                    'tireuc_id -> reporte.tireuc_id,
+                    'repo_id -> reporte.repo_id,
+                    'even_id -> n.even_id,
+                    'nove_id -> n.nove_id,
+                    'reno_horaini -> n.reno_horaini,
+                    'reno_horafin -> n.reno_horafin,
+                    'reno_observacion -> n.reno_observacion,
+                    'even_estado -> n.even_estado,
+                    'repo_idx -> _uuid
+                  )
+                  .executeUpdate() > 0
+              }
+          }
+        }
+
+        reporte.eventos.map { eventos =>
+          for (e <- eventos) {
+            if (e.aap_id != None) {
+              var eventoInsertado = SQL(
+                  """INSERT INTO siap.sincronizacion_reporte_evento (even_fecha, 
+                                    even_codigo_instalado,
+                                    even_cantidad_instalado,
+                                    even_codigo_retirado,
+                                    even_cantidad_retirado, 
+                                    even_estado, 
+                                    aap_id, 
+                                    repo_id, 
+                                    elem_id, 
+                                    usua_id, 
+                                    empr_id,
+                                    even_id,
+                                    unit_id,
+                                    repo_idx) VALUES (
+                                    {even_fecha}, 
+                                    {even_codigo_instalado},
+                                    {even_cantidad_instalado},
+                                    {even_codigo_retirado},
+                                    {even_cantidad_retirado},
+                                    {even_estado},
+                                    {aap_id}, 
+                                    {repo_id}, 
+                                    {elem_id}, 
+                                    {usua_id}, 
+                                    {empr_id},
+                                    {even_id},
+                                    {unit_id},
+                                    {repo_idx}::uuid
+                                    )"""
+                ).on(
+                    "even_fecha" -> hora,
+                    "even_codigo_instalado" -> e.even_codigo_instalado,
+                    "even_cantidad_instalado" -> e.even_cantidad_instalado,
+                    "even_codigo_retirado" -> e.even_codigo_retirado,
+                    "even_cantidad_retirado" -> e.even_cantidad_retirado,
+                    "even_estado" -> e.even_estado,
+                    "aap_id" -> e.aap_id,
+                    "repo_id" -> reporte.repo_id,
+                    "elem_id" -> e.elem_id,
+                    "usua_id" -> e.usua_id,
+                    "empr_id" -> reporte.empr_id,
+                    "even_id" -> e.even_id,
+                    "unit_id" -> e.unit_id,
+                    "repo_idx" -> _uuid
+                  )
+                  .executeUpdate() > 0
+              }
+            }
+        }
+
+        reporte.direcciones.map { direcciones =>
+          for (d <- direcciones) {
+            if (d.aap_id != null) {
+              val dirInsertado = SQL(
+                  """INSERT INTO siap.sincronizacion_reporte_direccion (repo_id, aap_id, even_direccion, barr_id, even_id, even_direccion_anterior, barr_id_anterior, even_estado, tire_id, even_horaini, even_horafin, repo_idx) VALUES ({repo_id}, {aap_id}, {even_direccion}, {barr_id}, {even_id}, {even_direccion_anterior}, {barr_id_anterior}, {even_estado}, {tire_id}, {even_horaini}, {even_horafin}, {repo_idx}::uuid)"""
+                ).on(
+                    'repo_id -> reporte.repo_id,
+                    'aap_id -> d.aap_id,
+                    'even_direccion -> d.even_direccion,
+                    'barr_id -> d.barr_id,
+                    'even_id -> d.even_id,
+                    'even_horaini -> d.even_horaini,
+                    'even_horafin -> d.even_horafin,
+                    'tire_id -> reporte.tireuc_id,
+                    'even_direccion_anterior -> d.even_direccion_anterior,
+                    'barr_id_anterior -> d.barr_id_anterior,
+                    'even_estado -> d.even_estado,
+                    'repo_idx -> _uuid
+                  )
+                  .executeUpdate() > 0
+              val datoInsertado = SQL("""INSERT INTO siap.sincronizacion_reporte_direccion_dato (
+                                repo_id,
+                                even_id,
+                                aap_id,
+                                aatc_id,
+                                aatc_id_anterior,
+                                aama_id,
+                                aama_id_anterior,
+                                aamo_id,
+                                aamo_id_anterior,
+                                aaco_id,
+                                aaco_id_anterior,
+                                aap_potencia,
+                                aap_potencia_anterior,
+                                aap_tecnologia,
+                                aap_tecnologia_anterior,
+                                aap_brazo,
+                                aap_brazo_anterior,
+                                aap_collarin,
+                                aap_collarin_anterior,
+                                tipo_id,
+                                tipo_id_anterior,
+                                aap_poste_altura,
+                                aap_poste_altura_anterior,
+                                aap_poste_propietario,
+                                aap_poste_propietario_anterior,
+                                repo_idx
+                                ) VALUES (
+                                    {repo_id},
+                                    {even_id},
+                                    {aap_id},
+                                    {aatc_id},
+                                    {aatc_id_anterior},
+                                    {aama_id},
+                                    {aama_id_anterior},
+                                    {aamo_id},
+                                    {aamo_id_anterior},
+                                    {aaco_id},
+                                    {aaco_id_anterior},
+                                    {aap_potencia},
+                                    {aap_potencia_anterior},
+                                    {aap_tecnologia},
+                                    {aap_tecnologia_anterior},
+                                    {aap_brazo},
+                                    {aap_brazo_anterior},
+                                    {aap_collarin},
+                                    {aap_collarin_anterior},
+                                    {tipo_id},
+                                    {tipo_id_anterior},
+                                    {aap_poste_altura},
+                                    {aap_poste_altura_anterior},
+                                    {aap_poste_propietario},
+                                    {aap_poste_propietario_anterior},
+                                    {repo_idx}::uuid
+                                )
+                            """)
+                  .on(
+                    'aatc_id -> d.dato.get.aatc_id,
+                    'aatc_id_anterior -> d.dato.get.aatc_id_anterior,
+                    'aama_id -> d.dato.get.aama_id,
+                    'aama_id_anterior -> d.dato.get.aama_id_anterior,
+                    'aamo_id -> d.dato.get.aamo_id,
+                    'aamo_id_anterior -> d.dato.get.aamo_id_anterior,
+                    'aaco_id -> d.dato.get.aaco_id,
+                    'aaco_id_anterior -> d.dato.get.aaco_id_anterior,
+                    'aap_potencia -> d.dato.get.aap_potencia,
+                    'aap_potencia_anterior -> d.dato.get.aap_potencia_anterior,
+                    'aap_tecnologia -> d.dato.get.aap_tecnologia,
+                    'aap_tecnologia_anterior -> d.dato.get.aap_tecnologia_anterior,
+                    'aap_brazo -> d.dato.get.aap_brazo,
+                    'aap_brazo_anterior -> d.dato.get.aap_brazo_anterior,
+                    'aap_collarin -> d.dato.get.aap_collarin,
+                    'aap_collarin_anterior -> d.dato.get.aap_collarin_anterior,
+                    'tipo_id -> d.dato.get.tipo_id,
+                    'tipo_id_anterior -> d.dato.get.tipo_id_anterior,
+                    'aap_poste_altura -> d.dato.get.aap_poste_altura,
+                    'aap_poste_altura_anterior -> d.dato.get.aap_poste_altura_anterior,
+                    'aap_poste_propietario -> d.dato.get.aap_poste_propietario,
+                    'aap_poste_propietario_anterior -> d.dato.get.aap_poste_propietario_anterior,
+                    'repo_id -> reporte.repo_id,
+                    'aap_id -> d.aap_id,
+                    'even_id -> d.even_id,
+                    'repo_idx -> _uuid
+                  )
+                  .executeUpdate() > 0
+              // Fin Direccion Dato
+              // Direccion Dato Adicional
+              val datoadicionalInsertado = SQL(
+                  """INSERT INTO siap.sincronizacion_reporte_direccion_dato_adicional (
+                                    repo_id,
+                                    even_id,
+                                    aap_id,
+                                    aacu_id_anterior,
+                                    aacu_id,
+                                    aaus_id_anterior,
+                                    aaus_id,
+                                    medi_id_anterior,
+                                    medi_id,
+                                    tran_id_anterior,
+                                    tran_id,
+                                    aap_apoyo,
+                                    aap_apoyo_anterior,
+                                    aap_lat,
+                                    aap_lat_anterior,
+                                    aap_lng,
+                                    aap_lng_anterior,
+                                    repo_idx) 
+                                VALUES (
+                                    {repo_id},
+                                    {even_id},
+                                    {aap_id},
+                                    {aacu_id_anterior},
+                                    {aacu_id},
+                                    {aaus_id_anterior},
+                                    {aaus_id},
+                                    {medi_id_anterior},
+                                    {medi_id},
+                                    {tran_id_anterior},
+                                    {tran_id},
+                                    {aap_apoyo},
+                                    {aap_apoyo_anterior},
+                                    {aap_lat},
+                                    {aap_lat_anterior},
+                                    {aap_lng},
+                                    {aap_lng_anterior},
+                                    {repo_idx}::uuid
+                                )
+                                """
+                ).on(
+                    'aacu_id_anterior -> d.dato_adicional.get.aacu_id_anterior,
+                    'aacu_id -> d.dato_adicional.get.aacu_id,
+                    'aaus_id_anterior -> d.dato_adicional.get.aaus_id_anterior,
+                    'aaus_id -> d.dato_adicional.get.aaus_id,
+                    'medi_id_anterior -> d.dato_adicional.get.medi_id_anterior,
+                    'medi_id -> d.dato_adicional.get.medi_id,
+                    'tran_id_anterior -> d.dato_adicional.get.tran_id_anterior,
+                    'tran_id -> d.dato_adicional.get.tran_id,
+                    'aap_apoyo -> d.dato_adicional.get.aap_apoyo,
+                    'aap_apoyo_anterior -> d.dato_adicional.get.aap_apoyo,
+                    'aap_lat -> d.dato_adicional.get.aap_lat,
+                    'aap_lat_anterior -> d.dato_adicional.get.aap_lat_anterior,
+                    'aap_lng -> d.dato_adicional.get.aap_lng,
+                    'aap_lng_anterior -> d.dato_adicional.get.aap_lng_anterior,
+                    'repo_id -> reporte.repo_id,
+                    'aap_id -> d.aap_id,
+                    'even_id -> d.even_id,
+                    'repo_idx -> _uuid
+                  )
+                  .executeUpdate() > 0
+              // Procesando Fotos
+              d.fotos.map { fotos =>
+                for (f <- fotos) {
+                    val fotoInsertada = SQL(
+                      """
+                    INSERT INTO siap.sincronizacion_reporte_direccion_foto (
+                        repo_id,
+                        tireuc_id,
+                        aap_id,
+                        refo_id,
+                        refo_tipo,
+                        refo_data,
+                        repo_idx
+                    ) VALUES (
+                        {repo_id},
+                        {tireuc_id},
+                        {aap_id},
+                        {refo_id},
+                        {refo_tipo},
+                        {refo_data},
+                        {repo_idx}::uuid
+                    )
+                """
+                    ).on(
+                        'repo_id -> reporte.repo_id,
+                        'tireuc_id -> reporte.tireuc_id,
+                        'aap_id -> d.aap_id,
+                        'refo_id -> f.refo_id,
+                        'refo_tipo -> f.refo_tipo,
+                        'refo_data -> f.refo_data,
+                        'repo_idx -> _uuid
+                      )
+                      .executeUpdate() > 0
+                  }
+                }
+              // Fin Direccion Dato Adicional
+              // actualizar direccion de la luminaria y datos adicionales
+              // Actualizar direccion sin importar el tipo de reporte
+              // if (reporte.reti_id.get == 1 || reporte.reti_id.get == 2 || reporte.reti_id.get == 3) {
+            } // Fin d.aap_id != null
+          } // Fin for direcciones
+        } // Fin direcciones map
+
+        reporte.meams.map { meams =>
+          for (m <- meams) {
+            SQL(
+              """INSERT INTO siap.sincronizacion_reporte_medioambiente (repo_id, meam_id, repo_idx) VALUES ({repo_id}, {meam_id}, {repo_idx}::uuid)"""
+            ).on(
+                'repo_id -> reporte.repo_id.get,
+                'meam_id -> m,
+                'repo_idx -> _uuid
+              )
+              .executeInsert()
+          }
+        }
+        result = true
+      }
+    } catch {
+      case e: Exception => {
+        println("Guardando Reporte Movil Luminaria Error: " + e.getMessage())
+        result = false
+      }
+    }
+    result
+  }  
 
   def actualizarMovilMedidor(reporte: Reporte): Boolean = {
     true
@@ -10298,7 +10819,7 @@ class ReporteRepository @Inject()(
               var query =
                 """
                 	select r.* from 
-				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
+				(select distinct on (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
         case 
 						when (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE THEN 'X'
 						else ''
@@ -10310,7 +10831,7 @@ class ReporteRepository @Inject()(
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = {fecha_final}
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE and r.empr_id = {empr_id}
                    union all
@@ -10326,7 +10847,7 @@ class ReporteRepository @Inject()(
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = {fecha_final}
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE and r.empr_id = {empr_id}
 				           union all
@@ -10355,11 +10876,11 @@ class ReporteRepository @Inject()(
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
                         left join siap.ordentrabajo_obra otr on otr.obra_id = r.obra_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = {fecha_final}
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.obra_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and (coalesce(trim(r.obra_reportetecnico), '') = '') IS NOT FALSE and r.empr_id = {empr_id}
                     ) r
-                  ORDER BY r.reti_descripcion ASC, r.repo_consecutivo ASC              
+                  ORDER BY r.reti_descripcion ASC, r.repo_consecutivo ASC 
               """
               val resultSet =
                 SQL(query)
@@ -10643,7 +11164,7 @@ class ReporteRepository @Inject()(
               var query =
                 """
                 	select r.* from 
-				(select r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
+				(select distinct on (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'LUMINARIA' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
 				           from siap.reporte r 
                         left join siap.reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id

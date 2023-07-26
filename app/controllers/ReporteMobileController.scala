@@ -122,7 +122,7 @@ class ReporteMobileController @Inject()(
         net.liftweb.json.parse(json.toString).extract[Reporte]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
-      
+      val ip_address = request.remoteAddress
       val reportenuevo = new Reporte(
         reporte.repo_id,
         reporte.tireuc_id,
@@ -153,11 +153,17 @@ class ReporteMobileController @Inject()(
       println("reporte nuevo: " + reportenuevo)
       fw.write(currentDate.toString + ": Reporte: " + reportenuevo)
       fw.close()
-      if (reporteService.actualizarMovil(reportenuevo)) {
-        Future.successful(Ok(Json.toJson("true")))
-      } else {
-        Future.successful(NotAcceptable(Json.toJson("true")))
+      val thread = new Thread {
+        override def run {
+          reporteService.actualizarMovil(reportenuevo, ip_address)
+        }
       }
+      thread.start
+      // if (reporteService.actualizarMovil(reportenuevo, ip_address)) {
+      Future.successful(Ok(Json.toJson("true")))
+      //} else {
+      //  Future.successful(NotAcceptable(Json.toJson("true")))
+      //}
   }
 
   def uploadFotoMovil() = authenticatedUserAction(parse.multipartFormData) { request =>
