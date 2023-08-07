@@ -29,8 +29,8 @@ import utilities._
 
 import dto._
 
-@Singleton 
-class TransformadorReporteController @Inject()(
+@Singleton
+class MedidorReporteController @Inject()(
     reporteService: TransformadorReporteRepository,
     cc: ControllerComponents,
     config: Configuration,

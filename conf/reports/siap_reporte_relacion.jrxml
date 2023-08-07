@@ -32,7 +32,7 @@
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = $P{FECHA_FINAL}
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = $P{FECHA_FINAL}  and ot.otes_id < 8
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID}
                    union all
@@ -48,7 +48,7 @@
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = $P{FECHA_FINAL}
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = $P{FECHA_FINAL}  and ot.otes_id < 8
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID}
 				           union all
@@ -64,7 +64,7 @@
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
                         left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = $P{FECHA_FINAL}
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = $P{FECHA_FINAL}  and ot.otes_id < 8
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID}
                    union all
@@ -77,7 +77,7 @@
                         left join siap.barrio b on r.barr_id = b.barr_id
                         left join siap.origen o on r.orig_id = o.orig_id
                         left join siap.ordentrabajo_obra otr on otr.obra_id = r.obra_id
-                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = $P{FECHA_FINAL}
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = $P{FECHA_FINAL}  and ot.otes_id < 8
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.obra_fecharecepcion between $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.rees_id in (1,2) and (coalesce(trim(r.obra_reportetecnico), '') = '') IS NOT FALSE   and r.empr_id = $P{EMPR_ID}
                     ) r
