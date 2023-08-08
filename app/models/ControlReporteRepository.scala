@@ -2212,6 +2212,8 @@ class ControlReporteRepository @Inject()(
                                                 even_direccion_anterior = {even_direccion_anterior},
                                                 barr_id_anterior = {barr_id_anterior},
                                                 even_estado = {even_estado},
+                                                even_horaini = {even_horaini},
+                                                even_horafin = {even_horafin},
                                                 tire_id = {tire_id}
                                             WHERE
                                                 repo_id = {repo_id} and
@@ -2226,6 +2228,8 @@ class ControlReporteRepository @Inject()(
                 'tire_id -> d.tire_id,
                 'repo_id -> reporte.repo_id,
                 'aap_id -> d.aap_id,
+                'even_horaini -> d.even_horaini,
+                'even_horafin -> d.even_horafin,
                 'even_id -> d.even_id
               )
               .executeUpdate() > 0
@@ -3887,6 +3891,8 @@ class ControlReporteRepository @Inject()(
                                                 even_direccion_anterior = {even_direccion_anterior},
                                                 barr_id_anterior = {barr_id_anterior},
                                                 even_estado = {even_estado},
+                                                even_horaini = {even_horaini},
+                                                even_horafin = {even_horafin},
                                                 tire_id = {tire_id}
                                             WHERE
                                                 repo_id = {repo_id} and
@@ -3901,6 +3907,8 @@ class ControlReporteRepository @Inject()(
                     'tire_id -> d.tire_id,
                     'repo_id -> reporte.repo_id,
                     'aap_id -> d.aap_id,
+                    'even_horaini -> d.even_horaini,
+                    'even_horafin -> d.even_horafin,
                     'even_id -> d.even_id
                   )
                   .executeUpdate() > 0

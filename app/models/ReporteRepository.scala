@@ -12067,6 +12067,7 @@ class ReporteRepository @Inject()(
   ): Future[List[
     (
         Option[String],
+        Option[String],
         Option[Int],
         Option[DateTime],
         Option[DateTime],
@@ -12087,7 +12088,9 @@ class ReporteRepository @Inject()(
     ff.set(Calendar.SECOND, 59)
     ff.set(Calendar.MINUTE, 59)
     ff.set(Calendar.HOUR, 23)
-    val _parser = get[Option[String]]("reti_descripcion") ~
+    val _parser = 
+      get[Option[String]]("tipo_operacion") ~ 
+      get[Option[String]]("reti_descripcion") ~
       get[Option[Int]]("repo_consecutivo") ~
       get[Option[DateTime]]("repo_fecharecepcion") ~
       get[Option[DateTime]]("repo_fechasolucion") ~
@@ -12098,23 +12101,58 @@ class ReporteRepository @Inject()(
             c1 ~
             d1 ~
             e1 ~
-            f1 =>
-        (a1, b1, c1, d1, e1, f1)
+            f1 ~
+            g1 =>
+        (a1, b1, c1, d1, e1, f1, g1)
     }
     db.withConnection { implicit connection =>
       SQL(
-        """SELECT rt1.reti_descripcion, r1.repo_consecutivo, r1.repo_fecharecepcion, r1.repo_fechasolucion, 
-                      ot1.ortr_consecutivo, 
+        """select * from (SELECT r1.repo_id, 'LUMINARIA' AS tipo_operacion, rt1.reti_descripcion, r1.repo_consecutivo, r1.repo_fecharecepcion, r1.repo_fechasolucion, 
+                      (select o1.ortr_consecutivo from siap.ordentrabajo_reporte or2 inner join siap.ordentrabajo o1 on o1.ortr_id = or2.ortr_id where or2.repo_id = r1.repo_id and or2.tireuc_id = 1
+                      order by o1.ortr_consecutivo limit 1) as ortr_consecutivo,
                       (SELECT COUNT(*) 
                         FROM siap.reporte_direccion rd1 
                         WHERE rd1.repo_id = r1.repo_id) AS operaciones
                 FROM siap.reporte r1
                 INNER JOIN siap.reporte_tipo rt1 ON rt1.reti_id = r1.reti_id
-                LEFT JOIN siap.ordentrabajo_reporte otr1 ON otr1.repo_id = r1.repo_id
-                LEFT JOIN siap.ordentrabajo ot1 ON ot1.ortr_id = otr1.ortr_id
                WHERE r1.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final}
-                     AND ot1.ortr_id IS null AND r1.empr_id = {empr_id}
-               ORDER BY ot1.ortr_consecutivo DESC, r1.reti_id, r1.repo_consecutivo"""
+                      AND r1.empr_id = {empr_id} and r1.rees_id < 8
+union all
+SELECT r1.repo_id, 'CONTROL' AS tipo_operacion, rt1.reti_descripcion, r1.repo_consecutivo, r1.repo_fecharecepcion, r1.repo_fechasolucion, 
+                      (select o1.ortr_consecutivo from siap.ordentrabajo_reporte or2 inner join siap.ordentrabajo o1 on o1.ortr_id = or2.ortr_id where or2.repo_id = r1.repo_id and or2.tireuc_id = 2
+                      order by o1.ortr_consecutivo limit 1) as ortr_consecutivo,
+                      (SELECT COUNT(*) 
+                        FROM siap.reporte_direccion rd1 
+                        WHERE rd1.repo_id = r1.repo_id) AS operaciones
+                FROM siap.control_reporte r1
+                INNER JOIN siap.reporte_tipo rt1 ON rt1.reti_id = r1.reti_id
+               WHERE r1.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final}
+                      AND r1.empr_id = {empr_id} and r1.rees_id < 8
+union all 
+SELECT r1.repo_id, 'TRANSFORMADOR' AS tipo_operacion, rt1.reti_descripcion, r1.repo_consecutivo, r1.repo_fecharecepcion, r1.repo_fechasolucion, 
+                      (select o1.ortr_consecutivo from siap.ordentrabajo_reporte or2 inner join siap.ordentrabajo o1 on o1.ortr_id = or2.ortr_id where or2.repo_id = r1.repo_id and or2.tireuc_id = 3
+                      order by o1.ortr_consecutivo limit 1) as ortr_consecutivo,
+                      (SELECT COUNT(*) 
+                        FROM siap.reporte_direccion rd1 
+                        WHERE rd1.repo_id = r1.repo_id) AS operaciones
+                FROM siap.transformador_reporte r1
+                INNER JOIN siap.reporte_tipo rt1 ON rt1.reti_id = r1.reti_id
+               WHERE r1.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final}
+                      AND r1.empr_id = {empr_id} and r1.rees_id < 8
+union all
+SELECT r1.repo_id, 'MEDIDOR' AS tipo_operacion, rt1.reti_descripcion, r1.repo_consecutivo, r1.repo_fecharecepcion, r1.repo_fechasolucion, 
+                      (select o1.ortr_consecutivo from siap.ordentrabajo_reporte or2 inner join siap.ordentrabajo o1 on o1.ortr_id = or2.ortr_id where or2.repo_id = r1.repo_id and or2.tireuc_id = 4
+                      order by o1.ortr_consecutivo limit 1) as ortr_consecutivo,
+                      (SELECT COUNT(*) 
+                        FROM siap.reporte_direccion rd1 
+                        WHERE rd1.repo_id = r1.repo_id) AS operaciones
+                FROM siap.medidor_reporte r1
+                INNER JOIN siap.reporte_tipo rt1 ON rt1.reti_id = r1.reti_id
+               WHERE r1.repo_fechasolucion BETWEEN {fecha_inicial} AND {fecha_final}
+                      AND r1.empr_id = {empr_id} and r1.rees_id < 8
+) as o
+where o.ortr_consecutivo is null
+order by o.repo_consecutivo"""
       ).on(
           'fecha_inicial -> new DateTime(fi.getTimeInMillis),
           'fecha_final -> new DateTime(ff.getTimeInMillis),

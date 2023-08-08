@@ -1580,7 +1580,8 @@ export default {
     srsf: 'Reportes Sin Registro Fotográfico',
     fotos: 'Fotos',
     processing: 'Procesando',
-    elem_unidad: 'Unidad'
+    elem_unidad: 'Unidad',
+    tipo_operacion: 'Tipo Operación'
   },
   grafica: {
     cantidad: 'Cantidad',
