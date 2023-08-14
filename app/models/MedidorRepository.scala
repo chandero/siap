@@ -15,7 +15,7 @@ import play.api.libs.functional.syntax._
 import play.api.db.DBApi
 
 import anorm._
-import anorm.SqlParser.{get, str}
+import anorm.SqlParser.{get, str, int}
 import anorm.JodaParameterMetaData._
 
 import scala.util.{Failure, Success}
@@ -65,9 +65,10 @@ case class Medidor(
     empr_id: Option[Long],
     usua_id: Option[Long],
     medi_direccion: Option[String],
-    barr_id: Option[Long],
     medi_estado: Option[Int],
     medi_acta: Option[String],
+    medi_comenergia: Option[String],
+    barr_id: Option[Long],
     datos: Option[List[Medidor_Dato]]
 )
 
@@ -184,6 +185,8 @@ object Medidor {
       "medi_direccion" -> m.medi_direccion,
       "medi_estado" -> m.medi_estado,
       "medi_acta" -> m.medi_acta,
+      "medi_comenergia" -> m.medi_comenergia,
+      "barr_id" -> m.barr_id,
       "datos" -> m.datos
     )
   }
@@ -197,9 +200,10 @@ object Medidor {
       (__ \ "empr_id").readNullable[Long] and
       (__ \ "usua_id").readNullable[Long] and
       (__ \ "medi_direccion").readNullable[String] and
-      (__ \ "barr_id").readNullable[Long] and
       (__ \ "medi_estado").readNullable[Int] and
       (__ \ "medi_acta").readNullable[String] and
+      (__ \ "medi_comenergia").readNullable[String] and
+      (__ \ "barr_id").readNullable[Long] and
       (__ \ "datos").readNullable[List[Medidor_Dato]]
   )(Medidor.apply _)
 
@@ -212,9 +216,10 @@ object Medidor {
       get[Option[Long]]("empr_id") ~
       get[Option[Long]]("usua_id") ~
       get[Option[String]]("medi_direccion") ~
-      get[Option[Long]]("barr_id") ~
       get[Option[Int]]("medi_estado") ~
-      get[Option[String]]("medi_acta") map {
+      get[Option[String]]("medi_acta") ~ 
+      get[Option[String]]("medi_comenergia") ~
+      get[Option[Long]]("barr_id")  map {
       case medi_id ~
             medi_numero ~
             amem_id ~
@@ -223,9 +228,10 @@ object Medidor {
             empr_id ~
             usua_id ~
             medi_direccion ~
-            barr_id ~
             medi_estado ~
-            medi_acta =>
+            medi_acta ~
+            medi_comenergia ~ 
+            barr_id =>
         Medidor(
           medi_id,
           medi_numero,
@@ -235,9 +241,10 @@ object Medidor {
           empr_id,
           usua_id,
           medi_direccion,
-          barr_id,
           medi_estado,
           medi_acta,
+          medi_comenergia,
+          barr_id,
           None
         )
     }
@@ -607,7 +614,7 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
       val hora: LocalDateTime =
         new LocalDateTime(Calendar.getInstance().getTimeInMillis())
       val result: Boolean = SQL(
-        "UPDATE siap.medidor SET medi_numero = {medi_numero}, amem_id = {amem_id}, amet_id = {amet_id}, aacu_id = {aacu_id}, usua_id = {usua_id}, medi_direccion = {medi_direccion}, medi_estado = {medi_estado}, medi_acta = {medi_acta} WHERE medi_id = {medi_id} and empr_id = {empr_id}"
+        "UPDATE siap.medidor SET medi_numero = {medi_numero}, amem_id = {amem_id}, amet_id = {amet_id}, aacu_id = {aacu_id}, usua_id = {usua_id}, medi_direccion = {medi_direccion}, medi_estado = {medi_estado}, medi_acta = {medi_acta}, barr_id = {barr_id} WHERE medi_id = {medi_id} and empr_id = {empr_id}"
       ).on(
           'medi_id -> medidor.medi_id,
           'medi_numero -> medidor.medi_numero,
@@ -618,7 +625,8 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
           'usua_id -> medidor.usua_id,
           'medi_direccion -> medidor.medi_direccion,
           'medi_estado -> medidor.medi_estado,
-          'medi_acta -> medidor.medi_acta
+          'medi_acta -> medidor.medi_acta,
+          'barr_id -> medidor.barr_id
         )
         .executeUpdate() > 0
 
@@ -810,6 +818,71 @@ class MedidorRepository @Inject()(dbapi: DBApi)(
       count > 0
     }
   }
+
+    def buscarSiguienteACrear(empr_id: scala.Long): Int = {
+        db.withConnection { implicit connection =>
+            val ultimo = SQL("""SELECT a.medi_id FROM siap.medidor a WHERE a.empr_id = {empr_id}
+                                ORDER BY a.medi_id DESC LIMIT 1""").
+                        on(
+                            'empr_id -> empr_id
+                        ).as(SqlParser.scalar[Int].singleOpt)
+            ultimo match {
+                case Some(u) => u + 1
+                case None => 1
+            }
+        }
+    }   
+
+    def buscarParaVerificar(aap_id: Long, empr_id: Long): Int = {
+      db.withConnection { implicit connection =>
+        var result = 0
+        val _aapParser = int("aap_id") ~ int("esta_id") map { case a ~ e => (a,e)}
+        val a = SQL("""SELECT a.medi_id as aap_id, a.medi_estado as esta_id FROM siap.medidor a
+               LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
+               LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
+               WHERE a.medi_id = {aap_id} and a.empr_id = {empr_id}""").
+        on(
+            'aap_id -> aap_id,
+            'empr_id -> empr_id
+        ).as(_aapParser.singleOpt)
+        a match {
+            case None => result = 404
+            case Some(a) => 
+                if (a._2 == 9) {
+                  result = 401
+                } else {
+                  result = 200
+                }
+        }
+        result
+      }
+    }   
+    
+    /**
+    * Recuperar un aap por su aap_id
+    */
+    def buscarParaEditar(aap_id: Long, empr_id: Long): Option[Medidor] = {
+      db.withConnection { implicit connection => 
+        SQL("""SELECT a.*, b.*, t.* FROM siap.medidor a
+               LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
+               LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
+               WHERE medi_id = {aap_id} and empr_id = {empr_id}""").
+        on('aap_id -> aap_id, 'empr_id-> empr_id).as(Medidor._set.singleOpt)
+      }
+    }
+
+    /**
+    * Recuperar un aap por su aap_id
+    */
+    def buscarParaEditarPorNumero(aap_numero: String, empr_id: Long): Option[Medidor] = {
+      db.withConnection { implicit connection => 
+        SQL("""SELECT a.*, b.*, t.* FROM siap.medidor a
+               LEFT JOIN siap.barrio b ON a.barr_id = b.barr_id
+               LEFT JOIN siap.tipobarrio t ON b.tiba_id = t.tiba_id
+               WHERE medi_numero = {aap_numero} and empr_id = {empr_id}""").
+        on('aap_numero -> aap_numero, 'empr_id-> empr_id).as(Medidor._set.singleOpt)
+      }
+    }    
 
   def informe_siap_medidor(empr_id: scala.Long): Future[Iterable[Informe]] =
     Future[Iterable[Informe]] {

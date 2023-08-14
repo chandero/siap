@@ -4939,7 +4939,7 @@ ORDER BY e.reti_id, e.elem_codigo        """)
           var _listColumn = new ListBuffer[com.norbitltd.spoiwo.model.Column]()
           var _listMerged = new ListBuffer[CellRange]()
           val resultSet = SQL(
-            """SELECT * FROM (select distinct 
+            """SELECT o.* FROM (select distinct 
                             r.repo_fecharecepcion::text, r.repo_fechasolucion::text, r.repo_consecutivo, v.aap_id, d.aap_potencia, case when b.tiba_id = 2 then 'X' else Null end as vereda,
                            (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion AND r.repo_fechasolucion) AS festivos
                            from siap.reporte r
@@ -4947,19 +4947,8 @@ ORDER BY e.reti_id, e.elem_codigo        """)
                            inner join siap.aap a on a.aap_id = v.aap_id
                            left join siap.aap_adicional d on d.aap_id = a.aap_id
                            left join siap.barrio b on b.barr_id = a.barr_id
-                           where r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.reti_id = 1 and r.rees_id = 3 and r.empr_id = {empr_id}
-                           and a.aap_id <> 9999999
-               UNION ALL
-               select distinct 
-                            r.repo_fecharecepcion::text, r.repo_fechasolucion::text, r.repo_consecutivo, v.aap_id, 0 as aap_potencia, case when b.tiba_id = 2 then 'X' else Null end as vereda,
-                           (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion AND r.repo_fechasolucion) AS festivos
-                           from siap.control_reporte r
-                           inner join siap.control_reporte_evento v on v.repo_id = r.repo_id
-                           inner join siap.control a on a.aap_id = v.aap_id
-                           left join siap.barrio b on b.barr_id = a.barr_id
-                           where r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.reti_id = 1 and r.rees_id = 3 and r.empr_id = {empr_id}
-                           and a.aap_id <> 9999999               
-                          ) r order by r.repo_fechasolucion::text asc"""
+                           where r.repo_fechasolucion between {fecha_inicial} and {fecha_final} and r.reti_id = 1 and r.rees_id = 3 and r.empr_id = {empr_id}) as o
+                           """
           ).on(
               'fecha_inicial -> fi,
               'fecha_final -> ff,

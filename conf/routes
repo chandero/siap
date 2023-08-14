@@ -346,6 +346,9 @@ POST /api/medi/save controllers.MedidorController.guardar
 POST /api/medi/upd controllers.MedidorController.actualizar
 GET /api/medi/ism/:e controllers.MedidorController.informe_siap_medidor(e: Long)
 POST /api/medi/upload controllers.MedidorController.upload
+GET /api/medi/vali/:id controllers.MedidorController.buscarParaVerificar(id: Long)
+GET /api/medi/edit/:id controllers.MedidorController.buscarParaEditar(id: Long)
+GET /api/medi/edit2/:numero controllers.MedidorController.buscarParaEditarPorNumero(numero: String)
 
 # Transformador
 
@@ -622,6 +625,29 @@ GET /api/trre/vadi/:t/:n controllers.TransformadorReporteController.validarRepor
 POST /api/trre/grw controllers.TransformadorReporteController.guardarReporteWeb
 GET /api/trre/gbtc/:c/:e/:t controllers.TransformadorReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
 GET /api/trre/conv/:id controllers.TransformadorReporteController.convertir(id: Long)
+
+# Medidor Reporte
+
+POST /api/mere/get controllers.MedidorReporteController.todos
+GET /api/mere/updh controllers.MedidorReporteController.actualizarHistoria()
+GET /api/mere/all controllers.MedidorReporteController.reportes
+GET /api/mere/:id controllers.MedidorReporteController.buscarPorId(id: Long)
+GET /api/mere/del/:id controllers.MedidorReporteController.borrarReporte(id: Long)
+POST /api/mere/save controllers.MedidorReporteController.guardarReporte
+POST /api/mere/upd controllers.MedidorReporteController.actualizarReporte
+GET /api/mere/st/get controllers.MedidorReporteController.estados
+GET /api/mere/tp/get controllers.MedidorReporteController.tipos
+GET /api/mere/prn/repo/:id/:em controllers.MedidorReporteController.imprimirReporte(id: Long, em: Long)
+GET /api/mere/prn/rela/:fi/:ff/:e/:u/:t controllers.MedidorReporteController.imprimirRelacion(fi: Long, ff:Long, e:Long, u:Long, t:String)
+GET /api/mere/prn/form/:i/:e controllers.MedidorReporteController.imprimirFormato(i:Long, e:Long)
+GET /api/mere/rang/:y/:m/:t controllers.MedidorReporteController.buscarPorRango(y: Int, m: Int, t: Int)
+GET /api/mere/gbtc/:t/:n controllers.MedidorReporteController.buscarPorConsecutivo(t: Long, n:Int)
+GET /api/mere/vali/:e/:c controllers.MedidorReporteController.validarCodigo(e: Long, c: String)
+GET /api/mere/venc/get controllers.MedidorReporteController.siap_reporte_vencido
+GET /api/mere/vadi/:t/:n controllers.MedidorReporteController.validarReporteDiligenciado(t: Long, n: Int)
+POST /api/mere/grw controllers.MedidorReporteController.guardarReporteWeb
+GET /api/mere/gbtc/:c/:e/:t controllers.MedidorReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
+GET /api/mere/conv/:id controllers.MedidorReporteController.convertir(id: Long)
 
 # Obra
 

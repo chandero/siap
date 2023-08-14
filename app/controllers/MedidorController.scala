@@ -15,11 +15,20 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import pdi.jwt.JwtSession
 
+import net.liftweb.json._
+import net.liftweb.json.Serialization.write
+import net.liftweb.json.Serialization.read
+import net.liftweb.json.parse
+
+
+import dto.MedidorAapDto
+
 import utilities._
 
 @Singleton
-class MedidorController @Inject()(mService: MedidorRepository, cc: ControllerComponents, authenticatedUserAction: AuthenticatedUserAction, config: Configuration)(implicit ec: ExecutionContext) extends AbstractController(cc) {
-
+class MedidorController @Inject()(mService: MedidorRepository, cc: ControllerComponents, authenticatedUserAction: AuthenticatedUserAction, config: Configuration)(implicit ec: ExecutionContext) extends AbstractController(cc) with ImplicitJsonFormats {
+  implicit val formats = Serialization.formats(NoTypeHints) ++ List(DateTimeSerializer) 
+   
     def buscarPorId(medi_id: Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
       val m = mService.buscarPorId(medi_id, empr_id.get)
@@ -59,7 +68,7 @@ class MedidorController @Inject()(mService: MedidorRepository, cc: ControllerCom
       var m = json.as[Medidor]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
-      val mnuevo = new Medidor(Some(0),m.medi_numero, m.amem_id, m.amet_id, m.aacu_id, empr_id, usua_id, m.medi_direccion, m.barr_id, m.medi_estado, m.medi_acta, m.datos)
+      val mnuevo = new Medidor(Some(0),m.medi_numero, m.amem_id, m.amet_id, m.aacu_id, empr_id, usua_id, m.medi_direccion, m.medi_estado, m.medi_acta, m.medi_comenergia, m.barr_id, m.datos)
       mService.crear(mnuevo).map { result =>
         if (result > 0){
           Created(Json.toJson("true"))
@@ -74,7 +83,7 @@ class MedidorController @Inject()(mService: MedidorRepository, cc: ControllerCom
       var m = json.as[Medidor]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)      
-      val mnuevo = new Medidor(m.medi_id,m.medi_numero, m.amem_id, m.amet_id, m.aacu_id, empr_id, usua_id, m.medi_direccion, m.barr_id, m.medi_estado, m.medi_acta, m.datos)
+      val mnuevo = new Medidor(m.medi_id,m.medi_numero, m.amem_id, m.amet_id, m.aacu_id, empr_id, usua_id, m.medi_direccion, m.medi_estado, m.medi_acta, m.medi_comenergia, m.barr_id, m.datos)
       if (mService.actualizar(mnuevo, empr_id.get)) {
         Future.successful(Ok(Json.toJson("true")))
       } else {
@@ -90,6 +99,52 @@ class MedidorController @Inject()(mService: MedidorRepository, cc: ControllerCom
             Future.successful(ServiceUnavailable(Json.toJson("false")))
         }
     }
+
+  def buscarParaVerificar(aap_id:Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+    val empr_id = Utility.extraerEmpresa(request)
+    val result = mService.buscarParaVerificar(aap_id, empr_id.get)
+    Future.successful(Ok(Json.toJson(result)))
+  }
+  
+  def buscarParaEditar(id: Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+    val empr_id = Utility.extraerEmpresa(request)
+    val activo = mService.buscarParaEditar(id, empr_id.get)
+    val aap = activo match {
+      case Some(activo) => new MedidorAapDto(activo.medi_id, activo.medi_comenergia, activo.medi_numero, activo.amem_id, activo.amet_id, activo.aacu_id, activo.empr_id, activo.usua_id, activo.medi_direccion, activo.barr_id, activo.medi_estado, activo.medi_acta)
+      case None => None
+    }
+    activo match {
+      case None => {
+        Future.successful(NotFound(Json.toJson("false")))
+      }
+      case Some(activo) => {
+        Future.successful(Ok(write(aap)))
+      }
+    }
+  }
+
+  def buscarParaEditarPorNumero(aap_numero: String) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+    val empr_id = Utility.extraerEmpresa(request)
+    val activo = mService.buscarParaEditarPorNumero(aap_numero, empr_id.get)
+    val aap = activo match {
+      case Some(activo) => new MedidorAapDto(activo.medi_id, activo.medi_comenergia, activo.medi_numero, activo.amem_id, activo.amet_id, activo.aacu_id, activo.empr_id, activo.usua_id, activo.medi_direccion, activo.barr_id, activo.medi_estado, activo.medi_acta)
+      case None => None
+    }
+    activo match {
+      case None => {
+        Future.successful(NotFound(Json.toJson("false")))
+      }
+      case Some(activo) => {
+        Future.successful(Ok(write(aap)))
+      }
+    }
+  }  
+
+  def buscarSiguienteACrear() = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
+    val empr_id = Utility.extraerEmpresa(request)
+    val siguiente = mService.buscarSiguienteACrear(empr_id.get)
+    Future.successful(Ok(Json.toJson(siguiente)))
+  } 
 
     def informe_siap_medidor(empr_id: scala.Long) = authenticatedUserAction.async { implicit request: Request[AnyContent] =>
       mService.informe_siap_medidor(empr_id).map { lista => 

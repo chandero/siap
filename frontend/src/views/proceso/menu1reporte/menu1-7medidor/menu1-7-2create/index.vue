@@ -1,7 +1,7 @@
 <template>
   <el-container>
       <el-header>
-          <span>{{ $t('route.transformadorreportecreate') }}</span>
+          <span>{{ $t('route.medidorreportecreate') }}</span>
       </el-header>
       <el-main>
           <el-form :disabled="inactivo" ref="reporte" :model="reporte" :rules="rules" :label-position="labelPosition">
@@ -97,7 +97,7 @@
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
-                            <el-form-item prop="repo_codigo" :label="$t('transformador.reporte.code')">
+                            <el-form-item prop="repo_codigo" :label="$t('medidor.reporte.code')">
                                 <el-input ref="code" type="number" v-model="reporte.adicional.repo_codigo" @input="reporte.adicional.repo_codigo = $event.toUpperCase()" @blur="buscarAap()"></el-input>
                             </el-form-item>
                         </el-col>
@@ -116,7 +116,7 @@
                             </el-form-item>
                         </el-col>
                         <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
-                            <el-form-item prop="repo_direccion" :label="$t('transformador.reporte.address')">
+                            <el-form-item prop="repo_direccion" :label="$t('medidor.reporte.address')">
                              <el-input ref="direccion" v-model="reporte.repo_direccion" @input="reporte.repo_direccion = $event.toUpperCase()" @keyup.enter.native="changeFocus('barrio')">
                              </el-input>
                             </el-form-item>
@@ -208,12 +208,13 @@ import { mapGetters } from 'vuex'
 import { getOrigenes } from '@/api/origen'
 import { getBarriosEmpresa } from '@/api/barrio'
 import { getTiposBarrio } from '@/api/tipobarrio'
-import { saveReporte, printReporte, getTipos } from '@/api/transformadorreporte'
+import { saveReporte, printReporte, getTipos } from '@/api/medidorreporte'
 import { getActividades, saveActividad } from '@/api/actividad'
+import { getAap, getAapApoyo } from '@/api/medidor'
 import { getUrbanizadoraTodas } from '@/api/urbanizadora'
 import { getAapConexiones } from '@/api/aap_conexion'
 import { getMedidors } from '@/api/medidor'
-import { getAap, getAapApoyo, getTransformadors } from '@/api/transformador'
+import { getTransformadors } from '@/api/transformador'
 import { getNovedades } from '@/api/novedad'
 
 export default {
@@ -227,7 +228,7 @@ export default {
       confirmacionGuardar: false,
       nuevoReporte: false,
       inactivo: false,
-      tireuc_id: 3,
+      tireuc_id: 4,
       rules: {
         repo_fecharecepcion: [
           { required: true, message: 'Debe diligencia la Fecha de Recepción del Reporte', trigger: 'change' }
@@ -485,11 +486,12 @@ export default {
     nuevo () {
       this.nuevoReporte = false
       this.reporte = {
-        repo_id: null,
-        tireuc_id: this.tireuc_id,
         reti_id: 1,
+        tireuc_id: this.tireuc_id,
+        repo_id: null,
         repo_consecutivo: null,
         tiba_id: null,
+        repo_numero: null,
         repo_fecharecepcion: new Date(),
         repo_direccion: null,
         repo_nombre: null,
@@ -521,12 +523,11 @@ export default {
           repo_apoyo: null,
           urba_id: null,
           muot_id: null,
-          medi_id: null,
-          tran_id: null,
-          medi_acta: null,
           aaco_id_anterior: null,
           aaco_id_nuevo: null,
-          orto_id: null
+          medi_id: null,
+          tran_id: null,
+          medi_acta: null
         },
         meams: [],
         eventos: [],

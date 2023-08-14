@@ -28,13 +28,14 @@ export function siap_reporte_vencido () {
   })
 }
 
-export function getReportesRango (anho, mes) {
+export function getReportesRango (anho, mes, tireuc_id) {
   const data = {
     anho,
-    mes
+    mes,
+    tireuc_id
   }
   return request({
-    url: '/mere/rang/' + data.anho + '/' + data.mes,
+    url: '/mere/rang/' + data.anho + '/' + data.mes + '/' + data.tireuc_id,
     method: 'get'
   })
 }

@@ -162,7 +162,6 @@ export default {
       'Reporte Transformador / Modificar Información Reporte',
     transformadorreportereparar:
       'Reporte Transformador / Reparar Datos Según Reportes',
-    /*
     medidor: 'Inventario Medidor',
     medidorgestion: 'Medidor Activos',
     medidorgestioncreate: 'Crear Nuevo Medidor',
@@ -176,7 +175,6 @@ export default {
     medidorreporteedit: 'Reporte Medidor/ Modificar Información Reporte',
     medidorreporteedittags: 'Reporte Medidor / Modificar Información Reporte',
     medidorreportereparar: 'Reporte Medidor / Reparar Datos Según Reportes',
-    */
     obra: 'Obra',
     obracreate: 'Obra / Nueva Obra',
     obraedit: 'Obra / Modificar Información Obra',
@@ -336,7 +334,7 @@ export default {
     cargarreporte: 'Cargar Reporte',
     abrirreporte: 'Abrir Reporte',
     consultarautorizacion: 'Consultar Códigos',
-    medidor: 'Medidor',
+    /* medidor: 'Medidor', */
     medidorcreate: 'Nuevo Medidor',
     medidoredit: 'Editar Medidor',
     transformador: 'Transformador',
@@ -411,6 +409,11 @@ export default {
     'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-2create': 'Crear',
     'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-3edit':
       'Actualizar',
+    'menu_proceso_menu1reporte_menu1-7medidor': 'Medidor',
+    'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-1list': 'Lista',
+    'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-2create': 'Crear',
+    'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-3edit':
+        'Actualizar',
     menu_proceso_menu2pendiente: 'Informe de Reportes',
     'menu_proceso_menu2pendiente_menu2-1pendiente': 'Pendientes',
     'menu_proceso_menu2pendiente_menu2-2ejecutado': 'Ejecutados',
@@ -614,6 +617,26 @@ export default {
     },
     historia: {
       title: 'Historia del Transformador'
+    }
+  },
+  medidor: {
+    gestion: {
+      tabletitle: 'Medidores Activos',
+      code: 'Código del Medidor',
+      neighborhood: 'Barrio',
+      neighborhoodtype: 'Sector',
+      address: 'Dirección del Medidor',
+      codes: 'Códigos'
+    },
+    eliminada: {
+      tabletitle: 'Medidor En Baja'
+    },
+    reporte: {
+      code: 'Código del Medidor',
+      address: 'Dirección del Medidor'
+    },
+    historia: {
+      title: 'Historia de Medidor'
     }
   },
   recovery: {
@@ -942,6 +965,7 @@ export default {
     postetitle: 'Reportes de Postes',
     redestitle: 'Reportes de Redes',
     transformadortitle: 'Reportes de Transformadores',
+    medidortitle: 'Reportes de Medidores',
     workordertitle: 'Orden de Trabajo',
     workordercobrotitle: 'Cobro Orden de Trabajo Municipio',
     obratitle: 'Obras',

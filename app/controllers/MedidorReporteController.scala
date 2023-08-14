@@ -31,13 +31,13 @@ import dto._
 
 @Singleton
 class MedidorReporteController @Inject()(
-    reporteService: TransformadorReporteRepository,
+    reporteService: MedidorReporteRepository,
     cc: ControllerComponents,
     config: Configuration,
     authenticatedUserAction: AuthenticatedUserAction)(
     implicit ec: ExecutionContext)
     extends AbstractController(cc) with ImplicitJsonFormats {
-  implicit val formats = Serialization.formats(NoTypeHints) ++ List(DateTimeSerializer)                          
+  implicit val formats = Serialization.formats(NoTypeHints) ++ List(DateTimeSerializer)           
   def todos(): Action[AnyContent] =
     authenticatedUserAction.async { implicit request: Request[AnyContent] => 
     val json = request.body.asJson.get
@@ -52,7 +52,7 @@ class MedidorReporteController @Inject()(
     val empr_id = Utility.extraerEmpresa(request)
     val total = reporteService.cuenta(empr_id.get)
     reporteService.todos(page_size, current_page, empr_id.get, orderby, filtro).map { reportes =>
-        Ok(write(new ReporteResult(reportes, total)))
+        Ok(write( new ReporteResult(reportes, total)))
       }
     }
 
@@ -106,10 +106,10 @@ class MedidorReporteController @Inject()(
       }
   }
 
-  def buscarPorRango(anho: Int, mes: Int) = authenticatedUserAction.async {
+  def buscarPorRango(anho: Int, mes: Int, tireuc_id: Int) = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val empr_id = Utility.extraerEmpresa(request)
-      reporteService.buscarPorRango(anho, mes, empr_id.get).map { reportes =>
+      reporteService.buscarPorRango(anho, mes, tireuc_id, empr_id.get).map { reportes =>
         Ok(write(reportes))
       }
   }
@@ -197,7 +197,7 @@ class MedidorReporteController @Inject()(
                                       None)
         val usua_id = 1
         val reportenuevo = new Reporte(null,
-                              Some(6),
+                              Some(2),
                               Some(1),
                               None,
                               Some(repo_fecharecepcion),

@@ -1,5 +1,52 @@
 import request from '@/utils/request'
 
+export function getAap (aap_id) {
+  const data = {
+    aap_id
+  }
+  return request({
+    url: '/medi/' + data.aap_id,
+    method: 'get'
+  })
+}
+
+export function getAapValidar (aap_id) {
+  const data = {
+    aap_id
+  }
+  return request({
+    url: '/medi/vali/' + data.aap_id,
+    method: 'get'
+  })
+}
+
+export function getAapEdit (aap_id) {
+  const data = {
+    aap_id
+  }
+  return request({
+    url: '/medi/edit/' + data.aap_id,
+    method: 'get'
+  })
+}
+
+export function getAapEditByNumber (aap_numero) {
+  const data = {
+    aap_numero
+  }
+  return request({
+    url: '/medi/edit2/' + data.aap_numero,
+    method: 'get'
+  })
+}
+
+export function buscarSiguiente () {
+  return request({
+    url: '/medi/next',
+    method: 'get'
+  })
+}
+
 export function getTodos (page_size, current_page) {
   const data = {
     page_size,

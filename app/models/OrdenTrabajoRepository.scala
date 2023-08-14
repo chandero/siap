@@ -470,6 +470,7 @@ class OrdenTrabajoRepository @Inject()(
     reporteService: ReporteRepository,
     controlReporteService: ControlReporteRepository,
     transformadorReporteService: TransformadorReporteRepository,
+    medidorReporteService: MedidorReporteRepository,
     obraService: ObraRepository
 )(implicit ec: DatabaseExecutionContext) {
   private val db = dbapi.database("default")
@@ -499,7 +500,11 @@ class OrdenTrabajoRepository @Inject()(
            UNION ALL
            SELECT e.even_id, e.even_estado, e.repo_id, r.reti_id, r.repo_consecutivo, r.repo_descripcion, e.tireuc_id FROM siap.ordentrabajo_reporte e 
                            INNER JOIN siap.transformador_reporte r ON r.tireuc_id = e.tireuc_id and r.repo_id = e.repo_id
-                           WHERE e.ortr_id = {ortr_id}                           
+                           WHERE e.ortr_id = {ortr_id}
+          UNION ALL
+           SELECT e.even_id, e.even_estado, e.repo_id, r.reti_id, r.repo_consecutivo, r.repo_descripcion, e.tireuc_id FROM siap.ordentrabajo_reporte e 
+                           INNER JOIN siap.medidor_reporte r ON r.tireuc_id = e.tireuc_id and r.repo_id = e.repo_id
+                           WHERE e.ortr_id = {ortr_id}
         """
       ).on(
           'ortr_id -> ortr_id
@@ -689,6 +694,8 @@ class OrdenTrabajoRepository @Inject()(
                 case Some(2) => controlReporteService.buscarPorId(r.repo_id.get)
                 case Some(3) =>
                   transformadorReporteService.buscarPorId(r.repo_id.get)
+                case Some(4) =>
+                  medidorReporteService.buscarPorId(r.repo_id.get)
                 case _ => None
               }
               reporte match {
@@ -732,6 +739,15 @@ class OrdenTrabajoRepository @Inject()(
                             'repo_id -> r.repo_id
                           )
                           .executeUpdate()
+                      case Some(4) =>
+                        SQL(
+                          """UPDATE siap.medidor_reporte SET repo_fechasolucion = {repo_fechasolucion} where tireuc_id = {tireuc_id} and repo_id = {repo_id}"""
+                        ).on(
+                            'repo_fechasolucion -> Option.empty[DateTime],
+                            'tireuc_id -> r.tireuc_id,
+                            'repo_id -> r.repo_id
+                          )
+                          .executeUpdate()                          
                       case _ => None
                     }
                   }
@@ -839,6 +855,8 @@ class OrdenTrabajoRepository @Inject()(
                 case Some(2) => controlReporteService.buscarPorId(r.repo_id.get)
                 case Some(3) =>
                   transformadorReporteService.buscarPorId(r.repo_id.get)
+                case Some(4) =>
+                  medidorReporteService.buscarPorId(r.repo_id.get)
                 case _ => None
               }
               println("")
@@ -1261,6 +1279,12 @@ class OrdenTrabajoRepository @Inject()(
                     inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
                     inner join siap.transformador_reporte r1 on r1.tireuc_id = or1.tireuc_id  and r1.repo_id = or1.repo_id 
                    where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8
+                   union all
+            select ot1.ortr_id, r1.tireuc_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
+                    inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
+                    inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
+                    inner join siap.medidor_reporte r1 on r1.tireuc_id = or1.tireuc_id  and r1.repo_id = or1.repo_id 
+                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8
                    union all 
             select ot1.ortr_id, 99 as tireuc_id, o1.obra_id as repo_id, 99 as reti_id, o1.obra_consecutivo as repo_consecutivo from siap.ordentrabajo ot1
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
@@ -1308,6 +1332,12 @@ class OrdenTrabajoRepository @Inject()(
                     inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
                     inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
                     inner join siap.transformador_reporte r1 on r1.repo_id = or1.repo_id and r1.tireuc_id = or1.tireuc_id
+                   where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND r1.rees_id in (1,2) AND (coalesce(r1.repo_reportetecnico, '') = '') IS NOT FALSE
+                   union all
+                   select ot1.ortr_id, 3 as tireuc_id, r1.repo_id, r1.reti_id, r1.repo_consecutivo from siap.ordentrabajo ot1
+                    inner join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id 
+                    inner join siap.ordentrabajo_reporte or1 on or1.ortr_id = ot1.ortr_id 
+                    inner join siap.medidor_reporte r1 on r1.repo_id = or1.repo_id and r1.tireuc_id = or1.tireuc_id
                    where c1.cuad_id = {cuad_id} and ortr_fecha = {fecha_corte} and ot1.otes_id < 8 AND r1.rees_id in (1,2) AND (coalesce(r1.repo_reportetecnico, '') = '') IS NOT FALSE
                    union all                   
                    select ot1.ortr_id, 99 as tireuc_id, o1.obra_id as repo_id, 99 as reti_id, o1.obra_consecutivo as repo_consecutivo from siap.ordentrabajo ot1
@@ -1389,6 +1419,15 @@ class OrdenTrabajoRepository @Inject()(
             case None => {}
           }
         }
+        case 4 => {
+          val _reporte = medidorReporteService.buscarPorId(_r._3)
+          _reporte match {
+            case Some(r) => {
+              _listResult += r
+            }
+            case None => {}
+          }
+        }        
         case _ => {
           val _reporte = reporteService.buscarPorId(_r._2)
           _reporte match {

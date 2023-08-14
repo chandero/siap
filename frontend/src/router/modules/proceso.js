@@ -376,6 +376,60 @@ const procesoRouter = {
               }
             }
           ]
+        },
+        {
+          path: 'menu1-7medidor',
+          component: () =>
+            import('@/views/proceso/menu1reporte/menu1-7medidor'),
+          name: 'menu_proceso_menu1reporte_menu1-7medidor',
+          meta: {
+            title: 'menu_proceso_menu1reporte_menu1-7medidor',
+            icon: 'el-icon-watermelon',
+            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+          },
+          redirect: '/proceso/menu1reporte/menu1-7medidor/menu1-7-1list',
+          children: [
+            {
+              path: 'menu1-7-1list',
+              component: () =>
+                import(
+                  '@/views/proceso/menu1reporte/menu1-7medidor/menu1-7-1list'
+                ),
+              name: 'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-1list',
+              hidden: true,
+              meta: {
+                title: 'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-1list',
+                roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+              }
+            },
+            {
+              path: 'menu1-7-2create/:tireuc_id',
+              component: () =>
+                import(
+                  '@/views/proceso/menu1reporte/menu1-7medidor/menu1-7-2create'
+                ),
+              name: 'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-2create',
+              hidden: true,
+              meta: {
+                title:
+                  'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-2create',
+                roles: ['super', 'auxiliar', 'supervisor']
+              }
+            },
+            {
+              path: 'menu1-7-3edit/:id',
+              component: () =>
+                import(
+                  '@/views/proceso/menu1reporte/menu1-7medidor/menu1-7-3edit'
+                ),
+              name: 'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-3create',
+              hidden: true,
+              meta: {
+                title: 'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-3edit',
+                roles: ['super', 'auxiliar', 'supervisor']
+              }
+            }
+          ]
         }
       ]
     },
