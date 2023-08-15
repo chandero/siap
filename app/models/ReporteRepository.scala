@@ -2365,6 +2365,14 @@ class ReporteRepository @Inject()(
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
                     WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
+            UNION ALL
+            SELECT * FROM siap.medidor_reporte r
+                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.medidor_reporte_adicional ra on r.repo_id = ra.repo_id
+                            LEFT JOIN siap.actividad a on a.acti_id = ra.acti_id
+                            LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.empr_id = {empr_id} and r.rees_id <> 9
         ) as reporte"""
       ).on(
           'reti_id -> reti_id,
@@ -2914,7 +2922,7 @@ class ReporteRepository @Inject()(
                   'reti_id -> reti_id,
                   'repo_consecutivo -> repo_consecutivo
                   //'empr_id -> empr_id
-                )
+              )
                 .as(Reporte._set.singleOpt)
 
               r match {
@@ -2931,13 +2939,8 @@ class ReporteRepository @Inject()(
                       'repo_id -> r.repo_id
                     )
                     .as(scalar[scala.Long].*)
-                  val novedades = List[ReporteNovedad]() /* SQL(
-                """SELECT * FROM siap.control_reporte_novedad rn WHERE rn.repo_id = {repo_id} and rn.tireuc_id = {tireuc_id}"""
-              ).on(
-                  'repo_id -> r.repo_id,
-                  'tireuc_id -> r.tireuc_id
-                )
-              .as(ReporteNovedad._set *) */
+                  val novedades = List[ReporteNovedad]()
+
                   val adicional = SQL(
                     """SELECT * FROM siap.transformador_reporte_adicional ra
                 LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
@@ -3077,8 +3080,181 @@ class ReporteRepository @Inject()(
                   )
                   Some(reporte)
 
-                case None => None
-              }
+                case None => 
+                  val r = SQL(
+                    """SELECT * FROM siap.medidor_reporte r
+                            INNER JOIN siap.reporte_tipo t on r.reti_id = t.reti_id
+                            LEFT JOIN siap.medidor_reporte_adicional ra on r.repo_id = ra.repo_id
+                            LEFT JOIN siap.actividad a on ra.acti_id = a.acti_id
+                            LEFT JOIN siap.origen o on r.orig_id = o.orig_id
+                            LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
+                            INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
+                    WHERE r.reti_id = {reti_id} and r.repo_consecutivo = {repo_consecutivo} and r.rees_id in (1,2) AND (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE"""
+                  ).on(
+                    'reti_id -> reti_id,
+                    'repo_consecutivo -> repo_consecutivo
+                    //'empr_id -> empr_id
+                  )
+                  .as(Reporte._set.singleOpt)
+
+                  r match {
+                    case Some(r) =>
+                      val eventos = SQL(
+                        """SELECT * FROM siap.medidor_reporte_evento WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
+                      ).on(
+                          'repo_id -> r.repo_id
+                        )
+                        .as(Evento.eventoSet *)
+                      val meams = SQL(
+                        """SELECT m.meam_id FROM siap.medidor_reporte_medioambiente m WHERE m.repo_id = {repo_id}"""
+                      ).on(
+                          'repo_id -> r.repo_id
+                        )
+                        .as(scalar[scala.Long].*)
+                      val novedades = List[ReporteNovedad]()
+                      val adicional = SQL(
+                        """SELECT * FROM siap.medidor_reporte_adicional ra
+                           LEFT JOIN siap.ordentrabajo_reporte otr ON otr.repo_id = ra.repo_id and otr.tireuc_id = {tireuc_id}
+                           LEFT JOIN siap.ordentrabajo ot ON ot.ortr_id = otr.ortr_id
+                           WHERE ra.repo_id = {repo_id}
+             			        ORDER BY ot.ortr_fecha DESC
+				                  LIMIT 1 """
+                      ).on(
+                        'repo_id -> r.repo_id,
+                        'tireuc_id -> r.tireuc_id
+                      )
+                      .as(ReporteAdicional.reporteAdicionalSet.singleOpt)
+                      val direcciones = SQL(
+                        """SELECT * FROM siap.transformador_reporte_direccion WHERE repo_id = {repo_id} and even_estado < 8 ORDER BY even_id ASC"""
+                      ).on(
+                        'repo_id -> r.repo_id
+                      )
+                      .as(ReporteDireccion.reporteDireccionSet *)
+                      var _listDireccion = new ListBuffer[ReporteDireccion]()
+                      direcciones.map { d =>
+                        var dat = SQL(
+                          """SELECT * FROM siap.transformador_reporte_direccion_dato WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+                        ).on(
+                            'repo_id -> d.repo_id,
+                            'aap_id -> d.aap_id,
+                            'even_id -> d.even_id
+                        )
+                        .as(
+                          ReporteDireccionDato.reporteDireccionDatoSet.singleOpt
+                        )
+                        dat match {
+                        case None =>
+                          dat = Some(
+                            new ReporteDireccionDato(
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None
+                            )
+                          )
+                          case Some(dat) => None
+                        }
+                      
+                        var adi = SQL(
+                          """SELECT * FROM siap.transformador_reporte_direccion_dato_adicional WHERE repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}"""
+                        ).on(
+                          'repo_id -> d.repo_id,
+                          'aap_id -> d.aap_id,
+                          'even_id -> d.even_id
+                        )
+                        .as(ReporteDireccionDatoAdicional._set.singleOpt)
+                        adi match {
+                        case None =>
+                          adi = Some(
+                            new ReporteDireccionDatoAdicional(
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None,
+                              None
+                            )
+                          )
+                        case Some(adi) => None
+                        }
+                        var fotos =
+                        SQL("""
+                          SELECT * FROM siap.transformador_reporte_direccion_foto WHERE repo_id = {repo_id} and aap_id = {aap_id} and tireuc_id = {tireuc_id}
+                          """).on(
+                            'repo_id -> r.repo_id,
+                            'aap_id -> d.aap_id,
+                            'tireuc_id -> r.tireuc_id
+                          )
+                          .as(ReporteDireccionFoto._set *)
+                        var _listFoto = new ListBuffer[ReporteDireccionFoto]()
+                        fotos.map { f =>
+                        _listFoto += f
+                        }
+                        val direccion = d.copy(
+                        dato = dat,
+                        dato_adicional = adi,
+                        fotos = Some(_listFoto.toList)
+                        )
+                        _listDireccion += direccion
+                      }
+                      val reporte = new Reporte(
+                        r.repo_id,
+                        Some(4),
+                        r.reti_id,
+                        r.repo_consecutivo,
+                        r.repo_fecharecepcion,
+                        r.repo_direccion,
+                        r.repo_nombre,
+                        r.repo_telefono,
+                        r.repo_fechasolucion,
+                        r.repo_horainicio,
+                        r.repo_horafin,
+                        r.repo_reportetecnico,
+                        r.repo_descripcion,
+                        r.repo_subrepoconsecutivo,
+                        r.rees_id,
+                        r.orig_id,
+                        r.barr_id,
+                        r.empr_id,
+                        r.tiba_id,
+                        r.usua_id,
+                        adicional,
+                        Some(meams),
+                        Some(eventos),
+                        Some(_listDireccion.toList),
+                        Some(novedades)
+                      )
+                      Some(reporte)
+                
+                    case None => None
+                  }
+              } 
           }
       }
     }
@@ -10882,6 +11058,22 @@ class ReporteRepository @Inject()(
                         left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = {fecha_final} and ot.otes_id < 8
                         left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
                         where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE and r.empr_id = {empr_id}
+				           union all
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
+                   case 
+						        when (coalesce(r.repo_reportetecnico, '') = '') IS NOT FALSE THEN 'X'
+						        else ''
+					         end as estado 
+                   from siap.medidor_reporte r 
+                        left join siap.medidor_reporte_adicional a on r.repo_id = a.repo_id
+                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
+                        left join siap.actividad t on a.acti_id = t.acti_id
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id and ot.ortr_fecha = {fecha_final} and ot.otes_id < 8
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE and r.empr_id = {empr_id}
                    union all
                    select DISTINCT ON (r.obra_consecutivo) r.obra_consecutivo, r.obra_fecharecepcion, r.obra_direccion, r.barr_id, r.obra_telefono, r.obra_nombre, 'OBRA' as tipo_inventario, o.orig_descripcion, 'OBRA' as reti_descripcion, r.obra_descripcion as acti_descripcion, b.barr_descripcion, ((r.obra_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.obra_fecharecepcion and (r.obra_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion,
                    case 
@@ -11207,6 +11399,18 @@ class ReporteRepository @Inject()(
                    select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'TRANSFORMADOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
                    from siap.transformador_reporte r 
                         left join siap.transformador_reporte_adicional a on r.repo_id = a.repo_id
+                        left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
+                        left join siap.actividad t on a.acti_id = t.acti_id
+                        left join siap.barrio b on r.barr_id = b.barr_id
+                        left join siap.origen o on r.orig_id = o.orig_id
+                        left join siap.ordentrabajo_reporte otr on otr.tireuc_id = r.tireuc_id and otr.repo_id = r.repo_id
+                        left join siap.ordentrabajo ot on ot.ortr_id = otr.ortr_id
+                        left join siap.cuadrilla c on c.cuad_id = ot.cuad_id
+                        where ot.ortr_fecha between {fecha_inicial} and {fecha_final} and r.rees_id in (1,2) /* and (coalesce(trim(r.repo_reportetecnico), '') = '') IS NOT FALSE */ and r.empr_id = {empr_id} and c.cuad_id = {cuad_id}
+				           union all
+                   select DISTINCT ON (r.repo_consecutivo) r.repo_consecutivo, r.repo_fecharecepcion, r.repo_direccion, r.barr_id, r.repo_telefono, r.repo_nombre, 'MEDIDOR' as tire_descripcion, o.orig_descripcion, rt.reti_descripcion, t.acti_descripcion, b.barr_descripcion, ((r.repo_fecharecepcion + interval '48h')::timestamp + (SELECT COUNT(*) FROM siap.festivo WHERE fest_dia BETWEEN r.repo_fecharecepcion and (r.repo_fecharecepcion + interval '48h')) * '1 day'::interval ) as fecha_limite,  c.cuad_descripcion 
+                   from siap.medidor_reporte r 
+                        left join siap.medidor_reporte_adicional a on r.repo_id = a.repo_id
                         left join siap.reporte_tipo rt on r.reti_id = rt.reti_id
                         left join siap.actividad t on a.acti_id = t.acti_id
                         left join siap.barrio b on r.barr_id = b.barr_id

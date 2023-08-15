@@ -87,7 +87,7 @@
                             </el-col>
                             <el-col :xs="16" :sm="16" :md="11" :lg="11" :xl="11">
                               <div style="display: flex;">
-                                <span style="width:120px;">({{ evento.tireuc_id === 1 ? "Luminaria": evento.tireuc_id === 2 ? "Control" : evento.tireuc_id === 3 ? "Transformador" : "Indefinido" }})</span>
+                                <span style="width:120px;">({{ evento.tireuc_id === 1 ? "Luminaria": evento.tireuc_id === 2 ? "Control" : evento.tireuc_id === 3 ? "Transformador" : evento.tireuc_id === 4 ? "Medidor" : "Indefinido" }})</span>
                                 <el-form-item>
                                     <el-input readonly :disabled="evento.even_estado > 7" class="sinpadding" v-model="evento.repo_descripcion"></el-input>
                                 </el-form-item>

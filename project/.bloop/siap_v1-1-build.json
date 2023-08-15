@@ -222,7 +222,7 @@
         "platform": {
             "name": "jvm",
             "config": {
-                "home": "/usr/lib/jvm/java-17-openjdk",
+                "home": "/usr/lib/jvm/java-11-openjdk",
                 "options": [
                     "-Duser.dir=/home/chandero/Documentos/Desarrollo/Repositorios/isag/siap/siap_v1.1/project"
                 ]

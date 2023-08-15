@@ -2558,11 +2558,11 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     inner join siap.reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
-                    left join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
-                    LEFT JOIN siap.reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+                    left join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 8
+                    LEFT JOIN siap.reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id and re1.even_estado < 8
                     left JOIN siap.elemento e1 on e1.elem_id = re1.elem_id
                     left join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
-                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 9 and re1.even_estado <> 9 and r1.empr_id = {empr_id}
+                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 8 and re1.even_estado < 8 and r1.empr_id = {empr_id}
                     UNION ALL
                     SELECT distinct ot1.ortr_fecha, c1.cuad_descripcion, e1.elem_codigo, e1.elem_descripcion,rt1.reti_descripcion, 
                           r1.repo_consecutivo, 
@@ -2574,11 +2574,11 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     inner join siap.control_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.control_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
-                    left join siap.control_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
-                    LEFT JOIN siap.control_reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+                    left join siap.control_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 8
+                    LEFT JOIN siap.control_reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id and re1.even_estado < 8
                     left JOIN siap.elemento e1 on e1.elem_id = re1.elem_id
                     left join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
-                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 9 and re1.even_estado <> 9 and r1.empr_id = {empr_id}
+                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 8 and re1.even_estado < 8 and r1.empr_id = {empr_id}
                    UNION ALL
                     SELECT distinct ot1.ortr_fecha, c1.cuad_descripcion, e1.elem_codigo, e1.elem_descripcion,rt1.reti_descripcion, 
                           r1.repo_consecutivo, 
@@ -2590,11 +2590,28 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     inner join siap.transformador_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
                     LEFT JOIN siap.transformador_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
                     LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
-                    left join siap.transformador_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 9
-                    LEFT JOIN siap.transformador_reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id
+                    left join siap.transformador_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 8
+                    LEFT JOIN siap.transformador_reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id and re1.even_estado < 8
                     left JOIN siap.elemento e1 on e1.elem_id = re1.elem_id
                     left join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
-                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 9 and re1.even_estado <> 9 and r1.empr_id = {empr_id}
+                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 8 and re1.even_estado < 8 and r1.empr_id = {empr_id}
+                   UNION ALL
+                    SELECT distinct ot1.ortr_fecha, c1.cuad_descripcion, e1.elem_codigo, e1.elem_descripcion,rt1.reti_descripcion, 
+                          r1.repo_consecutivo, 
+                          r1.repo_fechasolucion, 
+                          re1.even_codigo_retirado, re1.even_cantidad_retirado, 
+                          re1.even_codigo_instalado, re1.even_cantidad_instalado 
+                    FROM siap.ordentrabajo ot1
+				            inner join siap.ordentrabajo_reporte otr1 on otr1.ortr_id = ot1.ortr_id AND otr1.even_estado < 8
+                    inner join siap.medidor_reporte r1 on r1.tireuc_id = otr1.tireuc_id and r1.repo_id = otr1.repo_id and r1.repo_fechasolucion = ot1.ortr_fecha
+                    LEFT JOIN siap.medidor_reporte_adicional ra1 on ra1.repo_id = r1.repo_id
+                    LEFT JOIN siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
+                    left join siap.medidor_reporte_direccion rd1 on rd1.repo_id = r1.repo_id and rd1.even_estado < 8
+                    LEFT JOIN siap.medidor_reporte_evento re1 on re1.repo_id = rd1.repo_id and re1.aap_id = rd1.aap_id and re1.even_estado < 8
+                    left JOIN siap.elemento e1 on e1.elem_id = re1.elem_id
+                    left join siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
+                    WHERE ot1.ortr_fecha BETWEEN {fecha_inicial} and {fecha_final} and r1.rees_id < 8 and re1.even_estado < 8 and r1.empr_id = {empr_id}
+
                     UNION ALL                    
                     SELECT distinct ot.ortr_fecha, c.cuad_descripcion, e.elem_codigo, e.elem_descripcion,  TRIM(CONCAT('OBRA', ' ', r.obra_nombre)) as reti_descripcion, 
                           r.obra_consecutivo as repo_consecutivo, 
@@ -2865,7 +2882,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     FROM siap.reporte r
                     LEFT JOIN siap.reporte_adicional a on a.repo_id = r.repo_id
                     LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
-                    LEFT JOIN siap.reporte_evento t on t.repo_id = r.repo_id
+                    LEFT JOIN siap.reporte_evento t on t.repo_id = r.repo_id and t.even_estado < 8
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
                     WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = {empr_id}
 UNION ALL 
@@ -2875,7 +2892,7 @@ SELECT e.elem_codigo, p.reti_id, e.elem_descripcion, p.reti_descripcion,
                     FROM siap.control_reporte r
                     LEFT JOIN siap.control_reporte_adicional a on a.repo_id = r.repo_id
                     LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
-                    LEFT JOIN siap.control_reporte_evento t on t.repo_id = r.repo_id
+                    LEFT JOIN siap.control_reporte_evento t on t.repo_id = r.repo_id and t.even_estado < 8
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
                     WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = {empr_id}
 UNION ALL
@@ -2885,7 +2902,17 @@ SELECT e.elem_codigo, p.reti_id, e.elem_descripcion, p.reti_descripcion,
                     FROM siap.transformador_reporte r
                     LEFT JOIN siap.transformador_reporte_adicional a on a.repo_id = r.repo_id
                     LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
-                    LEFT JOIN siap.transformador_reporte_evento t on t.repo_id = r.repo_id
+                    LEFT JOIN siap.transformador_reporte_evento t on t.repo_id = r.repo_id  and t.even_estado < 8
+                    INNER JOIN siap.elemento e on e.elem_id = t.elem_id
+                    WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = {empr_id}
+UNION ALL
+SELECT e.elem_codigo, p.reti_id, e.elem_descripcion, p.reti_descripcion,
+                           t.even_cantidad_retirado as even_cantidad_retirado, 
+                           t.even_cantidad_instalado as even_cantidad_instalado
+                    FROM siap.medidor_reporte r
+                    LEFT JOIN siap.medidor_reporte_adicional a on a.repo_id = r.repo_id
+                    LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
+                    LEFT JOIN siap.medidor_reporte_evento t on t.repo_id = r.repo_id  and t.even_estado < 8
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
                     WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = {empr_id}
 UNION ALL
