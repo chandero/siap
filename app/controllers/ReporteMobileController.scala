@@ -66,12 +66,31 @@ class ReporteMobileController @Inject()(
         }
       }
     }
+    
+  def consultarReporteMovil(uuid: String) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      val reporte = reporteService.consultarReporteMovil(uuid)
+      reporte match {
+        case None => {
+          Future.successful(NoContent)
+        }
+        case Some(rep) => {
+          case class dato (
+            id: Option[Int],
+            consec: Option[Int]
+          )
+          val obj = new dato(rep._1, rep._2)
+          Future.successful(Ok(Json.obj("id" -> rep._1, "consec" -> rep._2)))
+        }
+      }
+  }
 
   def guardarReporteMovil()  = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
       val json = request.body.asJson.get
       println("json: " + json)
-      var reporte = net.liftweb.json.parse(json.toString).extract[Reporte]
+      var reporte = net.liftweb.json.parse(json.toString).extract[ReporteDesdeMovil]
       val usua_id = Utility.extraerUsuario(request)
       val empr_id = Utility.extraerEmpresa(request)
       val reportenuevo = new Reporte(
@@ -101,7 +120,9 @@ class ReporteMobileController @Inject()(
         reporte.direcciones,
         reporte.novedades
       )
-      reporteService.crearFromMovil(reportenuevo).map {
+      val uuid = reporte.uuid.getOrElse("")
+      val ip_address = request.remoteAddress
+      reporteService.crearFromMovil(reportenuevo, uuid, ip_address).map {
         case (id, consec) =>
           if (id > 0) {
             Created(Json.obj("id" -> id, "consec" -> consec))

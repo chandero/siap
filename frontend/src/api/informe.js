@@ -519,17 +519,14 @@ export function informe_siap_resumen_aforo_xls (fecha_final, empr_id) {
   window.open(url, '_self', 'location=no, menubar=no')
 }
 
-export function siap_reporte_foto(fecha_inicial, fecha_final, reti_id) {
+export function siap_reporte_foto(fecha_inicial, fecha_final, tireuc_id, reti_id) {
   const data = {
     fecha_inicial,
     fecha_final,
+    tireuc_id,
     reti_id
   }
-  return request({
-    url: '/info/srf/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.reti_id,
-    method: 'get',
-    responseType: 'blob'
-  })
+  window.open(window.location.protocol + '//' + window.location.host.split('/')[0] + '/api' + '/info/srf/' + data.fecha_inicial + '/' + data.fecha_final + '/' + data.tireuc_id + '/' + data.reti_id, '_self', 'location=no, menubar=no')
 }
 
 export function informe_siap_reporte_sin_foto(fecha_inicial, fecha_final) {

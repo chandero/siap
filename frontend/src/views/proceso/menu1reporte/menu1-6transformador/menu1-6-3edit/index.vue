@@ -941,6 +941,34 @@ export default {
         repo_telefono: [
           { required: true, message: 'Debe Digitar el Teléfono de quién reporta el daño o actividad', trigger: 'blur' }
         ],
+        repo_fechasolucion: [
+          {
+            required: true,
+            message: 'Debe Seleccionar la Fecha de Solución',
+            trigger: 'change'
+          }
+        ],
+        repo_horainicio: [
+          {
+            required: true,
+            message: 'Debe Seleccionar la Hora Inicial',
+            trigger: 'change'
+          }
+        ],
+        repo_horafin: [
+          {
+            required: true,
+            message: 'Debe Seleccionar la Hora Final',
+            trigger: 'change'
+          }
+        ],
+        repo_reportetecnico: [
+          {
+            required: true,
+            message: 'Debe Diligenciar el Reporte Técnico',
+            trigger: 'change'
+          }
+        ],
         barr_id: [
           { required: true, message: 'Debe Seleccionar el Barrio del Daño o Actividad', trigger: 'change' }
         ],

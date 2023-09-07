@@ -2111,6 +2111,34 @@ export default {
             trigger: 'change'
           }
         ],
+        repo_fechasolucion: [
+          {
+            required: true,
+            message: 'Debe Seleccionar la Fecha de Solución',
+            trigger: 'change'
+          }
+        ],
+        repo_horainicio: [
+          {
+            required: true,
+            message: 'Debe Seleccionar la Hora Inicial',
+            trigger: 'change'
+          }
+        ],
+        repo_horafin: [
+          {
+            required: true,
+            message: 'Debe Seleccionar la Hora Final',
+            trigger: 'change'
+          }
+        ],
+        repo_reportetecnico: [
+          {
+            required: true,
+            message: 'Debe Diligenciar el Reporte Técnico',
+            trigger: 'change'
+          }
+        ],
         tiba_id: [
           {
             required: true,

@@ -3311,6 +3311,34 @@ export default {
             trigger: 'change'
           }
         ],
+        repo_fechasolucion: [
+          {
+            required: true,
+            message: 'Debe Seleccionar la Fecha de Solución',
+            trigger: 'change'
+          }
+        ],
+        repo_horainicio: [
+          {
+            required: true,
+            message: 'Debe Seleccionar la Hora Inicial',
+            trigger: 'change'
+          }
+        ],
+        repo_horafin: [
+          {
+            required: true,
+            message: 'Debe Seleccionar la Hora Final',
+            trigger: 'change'
+          }
+        ],
+        repo_reportetecnico: [
+          {
+            required: true,
+            message: 'Debe Diligenciar el Reporte Técnico',
+            trigger: 'change'
+          }
+        ],
         tiba_id: [
           {
             required: true,
@@ -3924,9 +3952,9 @@ export default {
     validate () {
       var valido = true
       if (
-        this.reporte.repo_fechasolucion &&
-        this.reporte.repo_horainicio &&
-        this.reporte.repo_horafin &&
+        (this.reporte.repo_fechasolucion !== null || this.reporte.repo_fechasolucion !== '') &&
+        (this.reporte.repo_horainicio !== null || this.repo_horainicio !== '') &&
+        (this.reporte.repo_horafin !== null || this.reporte.repo_horafin !== '') &&
         (this.reporte.rees_id === 1 || this.reporte.rees_id === 2)
       ) {
         valido = true

@@ -812,10 +812,10 @@ class InformeController @Inject()(
     }    
   }
 
-  def siap_reporte_foto(fecha_inicial: Long, fecha_final: Long, reti_id: Long) = authenticatedUserAction.async {
+  def siap_reporte_foto(fecha_inicial: scala.Long, fecha_final: scala.Long, tireuc_id: scala.Long, reti_id: scala.Long) = Action.async {
     implicit request: Request[AnyContent] =>
       var empr_id = Utility.extraerEmpresa(request)
-      val result = informeService.siap_reporte_foto(fecha_inicial: Long, fecha_final: Long, reti_id: Long, empr_id.get)
+      val result = informeService.siap_reporte_foto(fecha_inicial, fecha_final, tireuc_id, reti_id, empr_id.get)
       val fmt = DateTimeFormat.forPattern("yyyyMMdd")
       val filename = "Reporte_Foto_" + result._1.replace(" ", "_") + "_" + fmt.print(fecha_inicial) + "_a_" + fmt
         .print(fecha_final) + ".pdf"

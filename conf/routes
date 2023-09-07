@@ -479,6 +479,8 @@ POST /api/repo/savem controllers.ReporteMobileController.guardarReporteMovil
 POST /api/repo/updm controllers.ReporteMobileController.actualizarReporteMovil
 +nocsrf
 POST /api/repo/uplfm controllers.ReporteMobileController.uploadFotoMovil
++nocsrf
+GET /api/repo/reqm/:u controllers.ReporteMobileController.consultarReporteMovil(u: String)
 GET /api/repo/gfd/:p controllers.ReporteController.getFotoData(p: String)
 POST /api/repo/upde controllers.ReporteController.actualizarElemento
 POST /api/repo/pupd controllers.ReporteController.actualizarReporteParcial
@@ -739,7 +741,7 @@ GET /api/info/sigex/:fi/:ff/:ft/:e/:t controllers.InformeController.siap_informe
 GET /api/info/sirax/:ff/:e/:t controllers.InformeController.siap_informe_resumen_aforo_xls(ff: Long, e: Long, t: String)
 GET /api/info/sicax/:ff/:e/:t controllers.InformeController.siap_informe_carga_aforo_xls(ff: Long, e: Long, t: String)
 GET /api/info/sccmxlx/:fi/:ff/:c controllers.InformeController.siap_cuadrilla_consolidado_material_xlsx(fi: Long, ff: Long, c: Long)
-GET /api/info/srf/:fi/:ff/:rt   controllers.InformeController.siap_reporte_foto(fi: Long, ff: Long, rt: Long)
+GET /api/info/srf/:fi/:ff/:tu/:rt   controllers.InformeController.siap_reporte_foto(fi: Long, ff: Long, tu: Long, rt: Long)
 GET /api/info/strmxlsx/:fi/:ff controllers.InformeController.siap_consolidado_material_por_bodega_xlsx(fi: Long, ff: Long)
 GET /api/info/srsf/:fi/:ff  controllers.InformeController.siap_reporte_sin_foto(fi: Long, ff: Long)
 # Graficas
