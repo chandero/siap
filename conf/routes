@@ -481,6 +481,7 @@ POST /api/repo/updm controllers.ReporteMobileController.actualizarReporteMovil
 POST /api/repo/uplfm controllers.ReporteMobileController.uploadFotoMovil
 +nocsrf
 GET /api/repo/reqm/:u controllers.ReporteMobileController.consultarReporteMovil(u: String)
+
 GET /api/repo/gfd/:p controllers.ReporteController.getFotoData(p: String)
 POST /api/repo/upde controllers.ReporteController.actualizarElemento
 POST /api/repo/pupd controllers.ReporteController.actualizarReporteParcial
@@ -535,6 +536,8 @@ GET /api/core/vadi/:t/:n controllers.ControlReporteController.validarReporteDili
 POST /api/core/grw controllers.ControlReporteController.guardarReporteWeb
 GET /api/core/gbtc/:c/:e/:t controllers.ControlReporteController.buscarPorConsecutivoWeb(c: Int, e:Long, t:String)
 GET /api/core/conv/:id controllers.ControlReporteController.convertir(id: Long)
+POST /api/core/upde controllers.ControlReporteController.actualizarMaterial
+POST /api/core/pupd controllers.ControlReporteController.actualizarReporteParcial
 
 # CanalizacionReporte
 

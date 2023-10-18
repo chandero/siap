@@ -34,6 +34,7 @@ import utilities._
 
 import dto._
 import java.text.SimpleDateFormat
+import com.typesafe.config.ConfigFactory
 
 @Singleton
 class ReporteMobileController @Inject()(
@@ -188,22 +189,29 @@ class ReporteMobileController @Inject()(
   }
 
   def uploadFotoMovil() = authenticatedUserAction(parse.multipartFormData) { request =>
-    println("Guardando Foto:" + request.toString)
+    println("Guardando Foto:" + request.body)
+    val tireuc_id = request.body.dataParts.get("tireuc_id").get(0)
+    val repo_id = request.body.dataParts.get("repo_id").get(0)
+    val aap_id = request.body.dataParts.get("aap_id").get(0)
+    val refo_id = request.body.dataParts.get("refo_id").get(0)
       request.body
         .file("file")
         .map { f =>
           // only get the last part of the filename
           // otherwise someone can send a path like ../../home/foo/bar.txt to write to other files on the system
+          println("F:"+f)
           val filename = Paths.get(f.filename).getFileName // Paths.get(f.filename).getFileName
           val fileSize = f.fileSize
           val contentType = f.contentType
-          val path = "/opt/siap/fotos/" //System.getProperty("java.io.tmpdir")
+          val conf = Configuration(ConfigFactory.load("application.conf"))
+          val path = new java.lang.String(conf.get[String]("fotos.ubicacion"))  //System.getProperty("java.io.tmpdir")
           println("tmp path:" + path)
           val newTempDir = new File(path)
           if (!newTempDir.exists()) {
             newTempDir.mkdirs()
           }
-          val file = newTempDir + "/" + filename
+          val newName = "reporte_"+tireuc_id+"_"+repo_id+"_"+aap_id+"_image_"+refo_id+".jpg"
+          val file = newTempDir + "/" + newName
           println("path file: " + file)
           f.ref.copyTo(Paths.get(s"$file"), replace = true)
 /*           val txtFile = new File(filename)

@@ -1270,7 +1270,7 @@ export default {
     },
     validate () {
       var valido = true
-      if (this.reporte.repo_fechasolucion && this.reporte.repo_horainicio && this.reporte.repo_horafin && (this.reporte.rees_id === 1 || this.reporte.rees_id === 2)) {
+      if (this.reporte.repo_fechasolucion && this.reporte.repo_horainicio && this.reporte.repo_horafin && (this.reporte.rees_id === 1 || this.reporte.rees_id === 2 || this.reporte.rees_id === 4)) {
         valido = true
         return valido
       } else {

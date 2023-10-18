@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'SIAP v1.1.0',
+  title: 'SIAP v1.5.1',
 
   /**
      * @type {boolean} true | false

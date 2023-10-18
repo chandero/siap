@@ -1374,6 +1374,7 @@ class ReporteRepository @Inject()(
     transformadorService: TransformadorRepository,
     controlReporteService: ControlReporteRepository,
     transformadorReporteService: TransformadorReporteRepository,
+    medidorReporteService: MedidorReporteRepository,
     cuadrillaService: CuadrillaRepository,
     aapService: AapRepository
 )(implicit ec: DatabaseExecutionContext) {
@@ -7021,7 +7022,7 @@ class ReporteRepository @Inject()(
               controlReporteService.actualizarMovilControl(reporte)
             case Some(3) =>
               transformadorReporteService.actualizarMovilTransformador(reporte)
-            case Some(4) => actualizarMovilMedidor(reporte)
+            case Some(4) => medidorReporteService.actualizarMovilMedidor(reporte)
             case _       => false
           }
           insertarSincronizacionMovil(reporte, ip_address)

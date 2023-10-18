@@ -45,7 +45,8 @@ def upload_medidor_lectura(anho: Int, mes: Int, empr_id: Long) = Action(parse.mu
       val filename    = "file_medidor_lectura_" + anho + "_" + mes + "_" + empr_id + ".xlsx" // Paths.get(f.filename).getFileName
       val fileSize    = f.fileSize
       val contentType = f.contentType
-      val path = "/opt/tmp/" // System.getProperty("java.io.tmpdir")
+      // val path = "/opt/tmp/" // System.getProperty("java.io.tmpdir")
+      val path = System.getProperty("java.io.tmpdir")
       println("tmp path:" + path)
       val newTempDir = new File(path, "cargasiap")
       if (!newTempDir.exists()) {

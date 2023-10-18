@@ -9,6 +9,8 @@ packageSummary in Windows := "SIAP v1.5"
 packageDescription in Windows := "Inventario de Luminarias SIAP"
 maintainer := "aldacm2001@gmail.com"
 
+javacOptions ++= Seq("-source", "11", "-target", "11")
+
 scalaVersion := "2.12.11"
 
 scalacOptions += "-feature"
@@ -40,9 +42,9 @@ libraryDependencies ++= Seq(
   "org.olap4j" % "olap4j" % "1.2.0",
   "com.lowagie" % "itext" % "2.1.7.js7",
   "org.springframework" % "spring-beans" % "5.1.0.RELEASE",
-  "net.sf.jasperreports" % "jasperreports" % "6.13.0",
-  "net.sf.jasperreports" % "jasperreports-functions" % "6.13.0",
-  "net.sf.jasperreports" % "jasperreports-chart-themes" % "6.13.0",
+  "net.sf.jasperreports" % "jasperreports" % "6.16.0",
+  "net.sf.jasperreports" % "jasperreports-functions" % "6.16.0",
+  "net.sf.jasperreports" % "jasperreports-chart-themes" % "6.16.0",
   "com.norbitltd" %% "spoiwo" % "1.7.0",
   "org.mozilla" % "rhino" % "1.7R3",
   // JSON

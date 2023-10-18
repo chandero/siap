@@ -1458,6 +1458,242 @@ class ControlReporteRepository @Inject()(
   }
 
   /**
+    * Actualizar Parcial Reporte
+    */
+  def actualizarParcial(reporte: Reporte): Future[Boolean] =
+    Future {
+
+      val fecha: LocalDate =
+        new LocalDate(Calendar.getInstance().getTimeInMillis())
+      val hora: LocalDateTime =
+        new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+      var upd_repo = db.withConnection { implicit connection =>
+        var upd1 = SQL("""UPDATE siap.control_reporte SET  
+              repo_direccion = {repo_direccion}, 
+              repo_nombre = {repo_nombre}, 
+              repo_telefono = {repo_telefono},
+              repo_descripcion = {repo_descripcion}, 
+              rees_id = {rees_id}, 
+              orig_id = {orig_id}, 
+              barr_id = {barr_id}, 
+              empr_id = {empr_id},
+              usua_id = {usua_id} 
+              WHERE repo_id = {repo_id}""")
+          .on(
+            'repo_direccion -> reporte.repo_direccion,
+            'repo_nombre -> reporte.repo_nombre,
+            'repo_telefono -> reporte.repo_telefono,
+            'orig_id -> reporte.orig_id,
+            'barr_id -> reporte.barr_id,
+            'usua_id -> reporte.usua_id,
+            'empr_id -> reporte.empr_id,
+            'rees_id -> reporte.rees_id,
+            'repo_descripcion -> reporte.repo_descripcion,
+            'repo_id -> reporte.repo_id
+          )
+          .executeUpdate() > 0
+        var upd2 = reporte.adicional match {
+          case Some(adicional) =>
+            SQL("""UPDATE siap.control_reporte_adicional SET
+                    repo_tipo_expansion = {repo_tipo_expansion}, 
+                    repo_luminaria = {repo_luminaria},
+                    repo_redes = {repo_redes},
+                    repo_poste = {repo_poste},
+                    repo_email = {repo_email},
+                    acti_id = {acti_id},
+                    repo_codigo = {repo_codigo},
+                    repo_apoyo = {repo_apoyo},
+                    urba_id = {urba_id},
+                    muot_id = {muot_id},
+                    medi_id = {medi_id},
+                    tran_id = {tran_id},
+                    medi_acta = {medi_acta},
+                    aaco_id_anterior = {aaco_id_anterior},
+                    aaco_id_nuevo = {aaco_id_nuevo}
+                  WHERE repo_id = {repo_id}""")
+              .on(
+                'repo_tipo_expansion -> adicional.repo_tipo_expansion,
+                'repo_luminaria -> adicional.repo_luminaria,
+                'repo_redes -> adicional.repo_redes,
+                'repo_poste -> adicional.repo_poste,
+                'repo_email -> adicional.repo_email,
+                'acti_id -> adicional.acti_id,
+                'repo_codigo -> adicional.repo_codigo,
+                'repo_apoyo -> adicional.repo_apoyo,
+                'urba_id -> adicional.urba_id,
+                'muot_id -> adicional.muot_id,
+                'medi_id -> adicional.medi_id,
+                'tran_id -> adicional.tran_id,
+                'medi_acta -> adicional.medi_acta,
+                'aaco_id_anterior -> adicional.aaco_id_anterior,
+                'aaco_id_nuevo -> adicional.aaco_id_nuevo,
+                'repo_id -> adicional.repo_id
+              )
+              .executeUpdate() > 0
+
+          case None => true
+        }
+        var ins = SQL(
+          "INSERT INTO siap.auditoria(audi_fecha, audi_hora, usua_id, audi_tabla, audi_uid, audi_campo, audi_valorantiguo, audi_valornuevo, audi_evento) VALUES ({audi_fecha}, {audi_hora}, {usua_id}, {audi_tabla}, {audi_uid}, {audi_campo}, {audi_valorantiguo}, {audi_valornuevo}, {audi_evento})"
+        ).on(
+            'audi_fecha -> fecha,
+            'audi_hora -> hora,
+            'usua_id -> reporte.usua_id,
+            'audi_tabla -> "control_reporte",
+            'audi_uid -> reporte.repo_id,
+            'audi_campo -> "repo_id",
+            'audi_valorantiguo -> "",
+            'audi_valornuevo -> reporte.repo_id,
+            'audi_evento -> "A"
+          )
+          .executeInsert()
+
+        upd1 && upd2
+      }
+      upd_repo
+
+    }
+
+  /**
+    * Actualizar Reporte
+    * @param reporte: Reporte
+    */
+  def actualizarMaterial(
+      reporte: Reporte
+  ): Boolean = {
+    val reporte_ant: Option[Reporte] = buscarPorId(reporte.repo_id.get)
+
+    db.withConnection { implicit connection =>
+      val fecha: LocalDate =
+        new LocalDate(Calendar.getInstance().getTimeInMillis())
+      val hora: LocalDateTime =
+        new LocalDateTime(Calendar.getInstance().getTimeInMillis())
+      var historia =
+        scala.collection.mutable.Map[scala.Long, ElementoHistoria]()
+
+      SQL("""DELETE FROM siap.control_reporte_evento WHERE repo_id = {repo_id}""")
+        .on('repo_id -> reporte.repo_id)
+        .executeUpdate()
+
+      reporte.eventos.map { eventos =>
+        for (e <- eventos) {
+          if (e.aap_id != None) {
+            var elemento: Elemento = null
+            var bombillo_retirado = None: Option[String]
+            var bombillo_instalado = None: Option[String]
+            var balasto_retirado = None: Option[String]
+            var balasto_instalado = None: Option[String]
+            var arrancador_retirado = None: Option[String]
+            var arrancador_instalado = None: Option[String]
+            var condensador_retirado = None: Option[String]
+            var condensador_instalado = None: Option[String]
+            var fotocelda_retirado = None: Option[String]
+            var fotocelda_instalado = None: Option[String]
+
+            e.elem_id match {
+              case None => None
+              case Some(elem_id) =>
+                elemento = elementoService.buscarPorId(elem_id).get
+            }
+            // Actualizar Evento si ya Existe
+            var estado = 0
+            e.even_estado match {
+              case Some(1) => estado = 2
+              case Some(2) => estado = 2
+              case Some(8) => estado = 9
+              case Some(9) => estado = 9
+              case _       => estado = 2
+            }
+            var eventoActualizado: Boolean = false
+            var eventoInsertado: Boolean = false
+            /*println("empr_id: " + reporte.empr_id)
+            println("repo_id: " + reporte.repo_id)
+            println("aap_id: " + e.aap_id)
+            println("even_id: " + e.even_id)*/
+            eventoActualizado = SQL(
+              """UPDATE siap.control_reporte_evento SET 
+                                                                even_fecha = {even_fecha}, 
+                                                                elem_id = {elem_id},
+                                                                even_estado = {even_estado},
+                                                                even_codigo_retirado = {even_codigo_retirado},                                                                 
+                                                                even_cantidad_retirado = {even_cantidad_retirado}, 
+                                                                even_codigo_instalado = {even_codigo_instalado}, 
+                                                                even_cantidad_instalado = {even_cantidad_instalado},
+                                                                usua_id = {usua_id},
+                                                                unit_id = {unit_id}
+                                                            WHERE empr_id = {empr_id} and repo_id = {repo_id} and aap_id = {aap_id} and even_id = {even_id}
+                                                        """
+            ).on(
+                'even_fecha -> hora,
+                'elem_id -> e.elem_id,
+                'even_codigo_retirado -> e.even_codigo_retirado,
+                'even_cantidad_retirado -> e.even_cantidad_retirado,
+                'even_codigo_instalado -> e.even_codigo_instalado,
+                'even_cantidad_instalado -> e.even_cantidad_instalado,
+                'usua_id -> reporte.usua_id,
+                'even_estado -> estado,
+                'empr_id -> reporte.empr_id,
+                'repo_id -> reporte.repo_id,
+                'aap_id -> e.aap_id,
+                'even_id -> e.even_id,
+                'unit_id -> e.unit_id
+              )
+              .executeUpdate() > 0
+            if (!eventoActualizado) {
+              eventoInsertado = SQL(
+                """INSERT INTO siap.control_reporte_evento (even_fecha, 
+                                    even_codigo_instalado,
+                                    even_cantidad_instalado,
+                                    even_codigo_retirado,
+                                    even_cantidad_retirado, 
+                                    even_estado, 
+                                    aap_id, 
+                                    repo_id, 
+                                    elem_id, 
+                                    usua_id, 
+                                    empr_id,
+                                    even_id,
+                                    unit_id) VALUES (
+                                    {even_fecha}, 
+                                    {even_codigo_instalado},
+                                    {even_cantidad_instalado},
+                                    {even_codigo_retirado},
+                                    {even_cantidad_retirado},
+                                    {even_estado},
+                                    {aap_id}, 
+                                    {repo_id}, 
+                                    {elem_id}, 
+                                    {usua_id}, 
+                                    {empr_id},
+                                    {even_id},
+                                    {unit_id})"""
+              ).on(
+                  "even_fecha" -> hora,
+                  "even_codigo_instalado" -> e.even_codigo_instalado,
+                  "even_cantidad_instalado" -> e.even_cantidad_instalado,
+                  "even_codigo_retirado" -> e.even_codigo_retirado,
+                  "even_cantidad_retirado" -> e.even_cantidad_retirado,
+                  "even_estado" -> estado,
+                  "aap_id" -> e.aap_id,
+                  "repo_id" -> reporte.repo_id,
+                  "elem_id" -> e.elem_id,
+                  "usua_id" -> e.usua_id,
+                  "empr_id" -> reporte.empr_id,
+                  "even_id" -> e.even_id,
+                  "unit_id" -> e.unit_id
+                )
+                .executeUpdate() > 0
+            }
+          }
+        }
+      }
+
+      true
+    }
+  }
+
+
+  /**
     * Actualizar Reporte
     * @param reporte: Reporte
     */

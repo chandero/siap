@@ -16328,52 +16328,64 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
       ).as(SqlParser.scalar[String].single)
       val _parser = int("tireuc_id") ~ str("reti_descripcion") ~ int("repo_consecutivo") ~
                     int("repo_tipo_expansion") ~ int("aap_id") ~ str("barr_descripcion") ~
-                    int("refo_id") ~ str("refo_data") ~ date("repo_fechasolucion") map {
+                    int("refo_id") ~ str("refo_data") ~ date("repo_fechasolucion") ~ str("tireuc_descripcion") map {
                       case tireuc_id ~ reti_descripcion ~ repo_consecutivo ~ repo_tipo_expansion ~
-                           aap_id ~ barr_descripcion ~ refo_id ~ refo_data ~ repo_fechasolucion =>
+                           aap_id ~ barr_descripcion ~ refo_id ~ refo_data ~ repo_fechasolucion ~ tireuc_descripcion =>
                         (tireuc_id, reti_descripcion, repo_consecutivo, repo_tipo_expansion, aap_id,
-                         barr_descripcion, refo_id, refo_data, repo_fechasolucion)
+                         barr_descripcion, refo_id, refo_data, repo_fechasolucion, tireuc_descripcion)
                     }
       val query = tireuc_id match {
         case 1L => """
-      SELECT r1.tireuc_id, rt1.reti_descripcion, r1.repo_consecutivo, ra1.repo_tipo_expansion, rd1.aap_id, b1.barr_descripcion, rdf1.refo_id, rdf1.refo_data, r1.repo_fechasolucion from siap.reporte r1
+      SELECT r1.tireuc_id, rt1.reti_descripcion, r1.repo_consecutivo, ra1.repo_tipo_expansion, rd1.aap_id, b1.barr_descripcion, rdf1.refo_id, 
+        concat('reporte_',rdf1.tireuc_id,'_',rdf1.repo_id,'_aap_',rdf1.aap_id,'_image_',rdf1.refo_id,'.jpg') as refo_data, 
+        r1.repo_fechasolucion, tu.tireuc_descripcion from siap.reporte r1
         inner join siap.reporte_adicional ra1 on ra1.repo_id = r1.repo_id 
         inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
         inner join siap.reporte_direccion rd1 ON rd1.tire_id = r1.tireuc_id and rd1.repo_id = r1.repo_id and rd1.even_estado < 9
         inner join siap.reporte_direccion_foto rdf1 on rdf1.tireuc_id = rd1.tire_id and rdf1.repo_id = rd1.repo_id and rdf1.aap_id = rd1.aap_id
+        left join siap.tipo_reporte_ucap tu on tu.tireuc_id = r1.tireuc_id
         left join siap.barrio b1 on b1.barr_id = rd1.barr_id
       where r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} AND r1.reti_id = {reti_id} AND r1.empr_id = {empr_id} AND r1.rees_id < 8
       order by 1,2,3,4,5
       """
       case 2L => """
-      SELECT r1.tireuc_id, rt1.reti_descripcion, r1.repo_consecutivo, ra1.repo_tipo_expansion, rd1.aap_id, b1.barr_descripcion, rdf1.refo_id, rdf1.refo_data, r1.repo_fechasolucion 
+      SELECT r1.tireuc_id, rt1.reti_descripcion, r1.repo_consecutivo, ra1.repo_tipo_expansion, rd1.aap_id, b1.barr_descripcion, rdf1.refo_id, 
+      concat('reporte_',rdf1.tireuc_id,'_',rdf1.repo_id,'_aap_',rdf1.aap_id,'_image_',rdf1.refo_id,'.jpg') as refo_data, 
+      r1.repo_fechasolucion, tu.tireuc_descripcion 
       from siap.control_reporte r1
         inner join siap.control_reporte_adicional ra1 on ra1.repo_id = r1.repo_id 
         inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
         inner join siap.control_reporte_direccion rd1 ON rd1.tire_id = r1.tireuc_id and rd1.repo_id = r1.repo_id and rd1.even_estado < 9
         inner join siap.control_reporte_direccion_foto rdf1 on rdf1.tireuc_id = rd1.tire_id and rdf1.repo_id = rd1.repo_id and rdf1.aap_id = rd1.aap_id
+        left join siap.tireuc_descripcion tu on tu.tireuc_id = r1.tireuc_id
         left join siap.barrio b1 on b1.barr_id = rd1.barr_id
       where r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} AND r1.reti_id = {reti_id} AND r1.empr_id = {empr_id} AND r1.rees_id < 8
       order by 1,2,3,4,5
       """
       case 3L => """
-      SELECT r1.tireuc_id, rt1.reti_descripcion, r1.repo_consecutivo, ra1.repo_tipo_expansion, rd1.aap_id, b1.barr_descripcion, rdf1.refo_id, rdf1.refo_data, r1.repo_fechasolucion 
+      SELECT r1.tireuc_id, rt1.reti_descripcion, r1.repo_consecutivo, ra1.repo_tipo_expansion, rd1.aap_id, b1.barr_descripcion, rdf1.refo_id, 
+      concat('reporte_',rdf1.tireuc_id,'_',rdf1.repo_id,'_aap_',rdf1.aap_id,'_image_',rdf1.refo_id,'.jpg') as refo_data, 
+      r1.repo_fechasolucion, tu.tireuc_descripcion 
       from siap.transformador_reporte r1
         inner join siap.transformador_reporte_adicional ra1 on ra1.repo_id = r1.repo_id 
         inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
         inner join siap.transformador_reporte_direccion rd1 ON rd1.tire_id = r1.tireuc_id and rd1.repo_id = r1.repo_id and rd1.even_estado < 9
         inner join siap.transformador_reporte_direccion_foto rdf1 on rdf1.tireuc_id = rd1.tire_id and rdf1.repo_id = rd1.repo_id and rdf1.aap_id = rd1.aap_id
+        left join siap.tireuc_descripcion tu on tu.tireuc_id = r1.tireuc_id
         left join siap.barrio b1 on b1.barr_id = rd1.barr_id
       where r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} AND r1.reti_id = {reti_id} AND r1.empr_id = {empr_id} AND r1.rees_id < 8
       order by 1,2,3,4,5
       """
       case 4L => """
-      SELECT r1.tireuc_id, rt1.reti_descripcion, r1.repo_consecutivo, ra1.repo_tipo_expansion, rd1.aap_id, b1.barr_descripcion, rdf1.refo_id, rdf1.refo_data, r1.repo_fechasolucion 
+      SELECT r1.tireuc_id, rt1.reti_descripcion, r1.repo_consecutivo, ra1.repo_tipo_expansion, rd1.aap_id, b1.barr_descripcion, rdf1.refo_id, 
+      concat('reporte_',rdf1.tireuc_id,'_',rdf1.repo_id,'_aap_',rdf1.aap_id,'_image_',rdf1.refo_id,'.jpg') as refo_data, 
+      r1.repo_fechasolucion, tu.tireuc_descripcion 
       from siap.medidor_reporte r1
         inner join siap.medidor_reporte_adicional ra1 on ra1.repo_id = r1.repo_id 
         inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
         inner join siap.medidor_reporte_direccion rd1 ON rd1.tire_id = r1.tireuc_id and rd1.repo_id = r1.repo_id and rd1.even_estado < 9
         inner join siap.medidor_reporte_direccion_foto rdf1 on rdf1.tireuc_id = rd1.tire_id and rdf1.repo_id = rd1.repo_id and rdf1.aap_id = rd1.aap_id
+        left join siap.tireuc_descripcion tu on tu.tireuc_id = r1.tireuc_id
         left join siap.barrio b1 on b1.barr_id = rd1.barr_id
       where r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} AND r1.reti_id = {reti_id} AND r1.empr_id = {empr_id} AND r1.rees_id < 8
       order by 1,2,3,4,5

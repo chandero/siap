@@ -9,9 +9,13 @@ import org.joda.time.DateTime
 import java.text.SimpleDateFormat
 import java.util.{ HashMap, Map }
 import java.util.Date
+import com.typesafe.config.ConfigFactory
+import play.api.Configuration
 
 
-class ReporteFotoDS(listData: List[(Int, String, Int, Int, Int, String, Int, String, Date)]) extends JRDataSource {
+class ReporteFotoDS(listData: List[(Int, String, Int, Int, Int, String, Int, String, Date, String)]) extends JRDataSource {
+    
+    val conf = Configuration(ConfigFactory.load("application.conf"))
 
     var i = -1
     val dateFormat = new SimpleDateFormat("yyyy-MM-dd")
@@ -39,16 +43,17 @@ class ReporteFotoDS(listData: List[(Int, String, Int, Int, Int, String, Int, Str
           case "barr_descripcion" => new java.lang.String(listData(i)._6)
           case "refo_id" => new java.lang.Integer(listData(i)._7)
           case "refo_data" => listData(i)._8.trim() match {
-            case v if (v.isBlank || v.isEmpty()) => new java.lang.String("/opt/siap/fotos/empty.jpg")
+            case v if (v.isBlank || v.isEmpty()) => new java.lang.String(conf.get[String]("fotos.ubicacion") + "empty.jpg")
             case v => println("validando v: " + v)
                       if (v.isBlank() || v.isEmpty()) {
-                        new java.lang.String("/opt/siap/fotos/empty.jpg")  
+                        new java.lang.String(conf.get[String]("fotos.ubicacion") + "empty.jpg")
                       } else {
-                        new java.lang.String("/opt/siap/fotos/" + v)
+                        new java.lang.String(conf.get[String]("fotos.ubicacion") + v)
                       }
             
           }
           case "repo_fechasolucion" => dateFormat.format(listData(i)._9)
+          case "tiop_descripcion" => listData(i)._10          
           case _ => None
         }
         println("Retornando: " + retorno)
