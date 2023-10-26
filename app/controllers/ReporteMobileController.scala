@@ -210,7 +210,7 @@ class ReporteMobileController @Inject()(
           if (!newTempDir.exists()) {
             newTempDir.mkdirs()
           }
-          val newName = "reporte_"+tireuc_id+"_"+repo_id+"_"+aap_id+"_image_"+refo_id+".jpg"
+          val newName = "reporte_"+tireuc_id+"_"+repo_id+"_aap_"+aap_id+"_image_"+refo_id+".jpg"
           val file = newTempDir + "/" + newName
           println("path file: " + file)
           f.ref.copyTo(Paths.get(s"$file"), replace = true)

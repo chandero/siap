@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_reporte_foto" columnCount="2" printOrder="Horizontal" pageWidth="612" pageHeight="792" columnWidth="292" columnSpacing="2" leftMargin="6" rightMargin="20" topMargin="6" bottomMargin="10" uuid="90b504c3-4eed-4611-a455-9968a4e16b11">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SiapDataAdapter"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
@@ -117,7 +117,7 @@
 	</pageHeader>
 	<detail>
 		<band height="320" splitType="Stretch">
-			<image scaleImage="FillFrame" rotation="Right" hAlign="Center" vAlign="Middle">
+			<image scaleImage="FillFrame" rotation="None" hAlign="Center" vAlign="Middle" onErrorType="Blank">
 				<reportElement x="30" y="1" width="220" height="319" uuid="53742448-81b1-45a5-ab0a-8e04f3468a2c"/>
 				<imageExpression><![CDATA[$F{refo_data}]]></imageExpression>
 			</image>

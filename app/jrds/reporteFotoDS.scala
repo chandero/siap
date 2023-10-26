@@ -6,6 +6,8 @@ import net.sf.jasperreports.engine.JRField
 
 import org.joda.time.DateTime 
 
+import java.nio.file.{Paths, Files}
+
 import java.text.SimpleDateFormat
 import java.util.{ HashMap, Map }
 import java.util.Date
@@ -27,6 +29,7 @@ class ReporteFotoDS(listData: List[(Int, String, Int, Int, Int, String, Int, Str
 
     override def getFieldValue(jrField: JRField): AnyRef = {
         print("Procesando campo: " + jrField.getName + ", ")
+        val emptyImg = System.getProperty("user.dir") + "/public/img/empty.jpg"
         val retorno = jrField.getName match {
           case "tireuc_id" => new java.lang.Integer(listData(i)._1)
           case "reti_descripcion" => new java.lang.String(listData(i)._2)
@@ -43,12 +46,20 @@ class ReporteFotoDS(listData: List[(Int, String, Int, Int, Int, String, Int, Str
           case "barr_descripcion" => new java.lang.String(listData(i)._6)
           case "refo_id" => new java.lang.Integer(listData(i)._7)
           case "refo_data" => listData(i)._8.trim() match {
-            case v if (v.isBlank || v.isEmpty()) => new java.lang.String(conf.get[String]("fotos.ubicacion") + "empty.jpg")
+            case v if (v.isBlank || v.isEmpty()) => new java.lang.String(emptyImg)
             case v => println("validando v: " + v)
                       if (v.isBlank() || v.isEmpty()) {
-                        new java.lang.String(conf.get[String]("fotos.ubicacion") + "empty.jpg")
+                        new java.lang.String(emptyImg)
                       } else {
-                        new java.lang.String(conf.get[String]("fotos.ubicacion") + v)
+                        val ruta1 = conf.get[String]("fotos.ubicacion") + v
+                        val ruta2 = ruta1.replace("aap_","")
+                        if (Files.exists(Paths.get(ruta1))) {
+                          new java.lang.String(ruta1)
+                        } else if (Files.exists(Paths.get(ruta2))){
+                          new java.lang.String(ruta2)
+                        } else {
+                          new java.lang.String(emptyImg)
+                        }
                       }
             
           }
