@@ -3,7 +3,7 @@ mappings in Universal ++= directory(baseDirectory.value / "public")
 
 name := "siap"
 
-version := "1.5.2"
+version := "1.5.3"
 
 packageSummary in Windows := "SIAP v1.5"
 packageDescription in Windows := "Inventario de Luminarias SIAP"
@@ -79,7 +79,8 @@ libraryDependencies ++= Seq(
   // "org.slf4j" % "slf4j-api" % "2.0.7",
   // "org.slf4j" % "slf4j-simple" % "1.7.36",
   // "ch.qos.logback" % "logback-classic" % "1.4.4",
-  "com.enragedginger" %% "akka-quartz-scheduler" % "1.9.3-akka-2.6.x"
+  "com.enragedginger" %% "akka-quartz-scheduler" % "1.9.3-akka-2.6.x",
+  "com.lihaoyi" %% "requests" % "0.7.0"
 )
 
 // Play framework hooks for development

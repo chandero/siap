@@ -16357,7 +16357,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
         inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
         inner join siap.control_reporte_direccion rd1 ON rd1.tire_id = r1.tireuc_id and rd1.repo_id = r1.repo_id and rd1.even_estado < 9
         inner join siap.control_reporte_direccion_foto rdf1 on rdf1.tireuc_id = rd1.tire_id and rdf1.repo_id = rd1.repo_id and rdf1.aap_id = rd1.aap_id
-        left join siap.tireuc_descripcion tu on tu.tireuc_id = r1.tireuc_id
+        left join siap.tipo_reporte_ucap tu on tu.tireuc_id = r1.tireuc_id
         left join siap.barrio b1 on b1.barr_id = rd1.barr_id
       where r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} AND r1.reti_id = {reti_id} AND r1.empr_id = {empr_id} AND r1.rees_id < 8
       order by 1,2,3,4,5
@@ -16371,7 +16371,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
         inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
         inner join siap.transformador_reporte_direccion rd1 ON rd1.tire_id = r1.tireuc_id and rd1.repo_id = r1.repo_id and rd1.even_estado < 9
         inner join siap.transformador_reporte_direccion_foto rdf1 on rdf1.tireuc_id = rd1.tire_id and rdf1.repo_id = rd1.repo_id and rdf1.aap_id = rd1.aap_id
-        left join siap.tireuc_descripcion tu on tu.tireuc_id = r1.tireuc_id
+        left join siap.tipo_reporte_ucap tu on tu.tireuc_id = r1.tireuc_id
         left join siap.barrio b1 on b1.barr_id = rd1.barr_id
       where r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} AND r1.reti_id = {reti_id} AND r1.empr_id = {empr_id} AND r1.rees_id < 8
       order by 1,2,3,4,5
@@ -16385,7 +16385,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
         inner join siap.reporte_tipo rt1 on rt1.reti_id = r1.reti_id
         inner join siap.medidor_reporte_direccion rd1 ON rd1.tire_id = r1.tireuc_id and rd1.repo_id = r1.repo_id and rd1.even_estado < 9
         inner join siap.medidor_reporte_direccion_foto rdf1 on rdf1.tireuc_id = rd1.tire_id and rdf1.repo_id = rd1.repo_id and rdf1.aap_id = rd1.aap_id
-        left join siap.tireuc_descripcion tu on tu.tireuc_id = r1.tireuc_id
+        left join siap.tipo_reporte_ucap tu on tu.tireuc_id = r1.tireuc_id
         left join siap.barrio b1 on b1.barr_id = rd1.barr_id
       where r1.repo_fechasolucion between {fecha_inicial} and {fecha_final} AND r1.reti_id = {reti_id} AND r1.empr_id = {empr_id} AND r1.rees_id < 8
       order by 1,2,3,4,5

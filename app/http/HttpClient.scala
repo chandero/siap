@@ -25,17 +25,19 @@ class HttpClient @Inject()(
     conf: Configuration
 )(implicit ec: ExecutionContext) {
 
-  def sendSMS(message: String, destination: String) = {
+  def sendSMS(destination: String, message: String): Future[Boolean] = {
     val url = conf.get[String]("sms.url")
     val correo = conf.get[String]("sms.correo")
     val password = conf.get[String]("sms.password")
     val data = Json.obj(
       "mensaje" -> message,
-      "contactos" -> destination.as[List[String]]
+      "contactos" -> destination.split(",").toList
     )
 
     val authHeader = "Basic " + java.util.Base64.getEncoder
       .encodeToString(s"$correo:$password".getBytes)
+
+    println("Enviando Mensaje A Proveedor SMS")
 
     ws.url(url)
       .addHttpHeaders(
@@ -44,14 +46,16 @@ class HttpClient @Inject()(
       )
       .post(data)
       .map { response =>
+        println("Enviando provider response:" + response)
         if (response.status == 200) {
-          if (response.enviados == 1) {
-            Ok(true)
+          val json: JsValue = Json.parse(response.body)
+          if ( (json \ "enviados").as[Int] == 1) {
+            true
           } else {
-            Ok(false)
+            false
           }
         } else {
-          Ok(false)
+          false
         }
       }
   }
