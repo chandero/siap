@@ -7487,6 +7487,9 @@ class ReporteRepository @Inject()(
               // Procesando Fotos
               d.fotos.map { fotos =>
                 for (f <- fotos) {
+                  var refoData = if (!f.refo_data.isEmpty) {
+                    "reporte_" + reporte.tireuc_id.getOrElse(1).toString + "_" + reporte.repo_id.get.toString + "_aap_" + d.aap_id.get.toString + "_image_" + f.refo_id.get.toString + ".jpg"
+                  } else { "" }
                   val fotoInsertada = SQL(
                     """
                     INSERT INTO siap.sincronizacion_reporte_direccion_foto (
@@ -7513,7 +7516,7 @@ class ReporteRepository @Inject()(
                       'aap_id -> d.aap_id,
                       'refo_id -> f.refo_id,
                       'refo_tipo -> f.refo_tipo,
-                      'refo_data -> f.refo_data,
+                      'refo_data -> refoData,
                       'repo_idx -> _uuid
                     )
                     .executeUpdate() > 0
@@ -8737,6 +8740,9 @@ class ReporteRepository @Inject()(
               // Procesando Fotos
               d.fotos.map { fotos =>
                 for (f <- fotos) {
+                  var refoData = if (!f.refo_data.isEmpty) {
+                    "reporte_" + reporte.tireuc_id.getOrElse(1).toString + "_" + reporte.repo_id.get.toString + "_aap_" + d.aap_id.get.toString + "_image_" + f.refo_id.get.toString + ".jpg"
+                  } else { "" }
                   val fotoActualizada = SQL(
                     """UPDATE siap.reporte_direccion_foto SET 
                                     refo_data = {refo_data}
@@ -8753,7 +8759,7 @@ class ReporteRepository @Inject()(
                       'aap_id -> d.aap_id,
                       'refo_id -> f.refo_id,
                       'refo_tipo -> f.refo_tipo,
-                      'refo_data -> f.refo_data
+                      'refo_data ->  refoData
                     )
                     .executeUpdate() > 0
                   if (!fotoActualizada) {
@@ -8781,7 +8787,7 @@ class ReporteRepository @Inject()(
                         'aap_id -> d.aap_id,
                         'refo_id -> f.refo_id,
                         'refo_tipo -> f.refo_tipo,
-                        'refo_data -> f.refo_data
+                        'refo_data -> refoData
                       )
                       .executeUpdate() > 0
                   }

@@ -25,6 +25,8 @@ import org.joda.time.LocalDateTime
 import utilities.Convert
 import java.time.format.DateTimeFormatter
 
+import java.sql.Connection
+
 case class AapAdicional(
     aap_id: Option[scala.Long],
     tipo_id: Option[scala.Long],
@@ -2396,6 +2398,65 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
         .executeInsert()
 
       count > 0
+    }
+  }
+
+  def buscarFechaExpansion(aap_id: Long)(implicit connection: Connection): Option[String] = {
+    /// Primero buscamos si existe el reporte de expansion para la luminaria
+    var _query = """select repo_fechasolucion from siap.reporte r1
+                    inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+                    where r1.reti_id = 2 and rd1.aap_id = {aap_id} and rd1.even_estado < 8 limit 1"""
+    var _result = SQL(_query).on(
+      'aap_id -> aap_id
+    ).as(SqlParser.scalar[LocalDate].singleOpt)
+    val fecha: Option[LocalDate] = _result match {
+      case Some(fecha) =>
+        Some(fecha)
+      case None => /* _query = """select aap_fechatoma from siap.aap where aap_id = {aap_id}"""
+        _result = SQL(_query).on(
+          'aap_id -> aap_id
+        ).as(SqlParser.scalar[LocalDate].singleOpt)
+        _result match {
+          case Some(fecha) =>
+            Some(fecha)
+          case None => None
+        } */
+        None
+      }
+    fecha match {
+      case Some(fecha) =>
+        Some(fecha.toString())
+      case None => Option.empty[String]
+    }
+  }
+
+  def buscarFechaModernizacion(aap_id: Long)(implicit connection: Connection): Option[String] = {
+    /// Primero buscamos si existe el reporte de modernizacion para la luminaria
+    var _query = """select repo_fechasolucion from siap.reporte r1
+                    inner join siap.reporte_direccion rd1 on rd1.repo_id = r1.repo_id 
+                    where r1.reti_id = 6 and rd1.aap_id = {aap_id} and rd1.even_estado < 8 limit 1"""
+    var _result = SQL(_query).on(
+      'aap_id -> aap_id
+    ).as(SqlParser.scalar[LocalDate].singleOpt)
+    val fecha: Option[LocalDate] = _result match {
+      case Some(fecha) =>
+        Some(fecha)
+      case None => _query = """select ad1.aap_modernizada_anho from siap.aap a1
+                               inner join siap.aap_adicional ad1 on ad1.aap_id = a1.aap_id 
+                               where a1.aap_id = {aap_id}"""
+        val _result2 = SQL(_query).on(
+          'aap_id -> aap_id
+        ).as(SqlParser.scalar[Int].singleOpt)
+        _result2 match {
+          case Some(anho) =>
+            Some(LocalDate.parse(anho.toString + "-01-01"))
+          case None => None
+        }
+      }
+    fecha match {
+      case Some(fecha) =>
+        Some(fecha.toString())
+      case None => Option.empty[String]
     }
   }
 }

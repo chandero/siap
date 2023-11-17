@@ -2026,7 +2026,8 @@ class InformeRepository @Inject()(
     empresaService: EmpresaRepository,
     municipioService: MunicipioRepository,
     cuadrillaService: CuadrillaRepository,
-    generalService: GeneralRepository
+    generalService: GeneralRepository,
+    aapService: AapRepository
 )(implicit ec: DatabaseExecutionContext) {
 
   private val db = dbapi.database("default")
@@ -3465,7 +3466,9 @@ ORDER BY e.reti_id, e.elem_codigo        """)
               "Medidor Comercializadora",
               "Cuenta Alumbrado",
               "Transformador Código",
-              "Transformador Número"
+              "Transformador Número",
+              "Fecha Expansión",
+              "Fecha Modernización"
             )
           val resultSet =
             SQL("""SELECT
@@ -3662,6 +3665,16 @@ ORDER BY e.reti_id, e.elem_codigo        """)
                     case None        => ""
                   },
                   i.aap_numero match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  // Buscar fecha de expansión
+                  aapService.buscarFechaExpansion(i.aap_id.get) match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  // Buscar fecha de modernización
+                  aapService.buscarFechaModernizacion(i.aap_id.get) match {
                     case Some(value) => value
                     case None        => ""
                   }
@@ -16450,7 +16463,7 @@ select r.* from (select r.*, a.*, o.*, rt.*, t.*, b.*, ((r.repo_fecharecepcion +
   }
 
   def findFilenamesWithId(ID: String, dir: File): List[File] = {
-      findFilenamesMatchingRegex("^reporte_[0-9]{1,2}_" + ID + "_aap_[0-9]{1,6}_image_[0-9]\\.jpg$", dir);
+      findFilenamesMatchingRegex("^reporte_[0-9]{1,2}_" + ID + "_(aap_){0,}[0-9]{1,6}_image_[0-9]\\.jpg$", dir)
   }
 
   def findFilenamesMatchingRegex(regex: String, dir:File) = {

@@ -1,5 +1,7 @@
-module.exports = {
-  title: 'SIAP v1.5.1',
+import config from '../package.json'
+const title = 'SIAP v' + config.version
+const settings = {
+  title: title,
 
   /**
      * @type {boolean} true | false
@@ -33,3 +35,5 @@ module.exports = {
      */
   errorLog: 'production'
 }
+
+export default settings

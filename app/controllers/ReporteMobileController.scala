@@ -220,9 +220,11 @@ class ReporteMobileController @Inject()(
             bw.write(line)
           }
           bw.close() */
+          println("Archivo: Cargado: " + "reporte_"+tireuc_id+"_"+repo_id+"_aap_"+aap_id+"_image_"+refo_id+".jpg")
           Ok("Archivo Cargado")
         }
         .getOrElse {
+          println("Archivo: No Cargado: " + "reporte_"+tireuc_id+"_"+repo_id+"_aap_"+aap_id+"_image_"+refo_id+".jpg")
           NotFound("Archivo No Cargado")
         }
     }

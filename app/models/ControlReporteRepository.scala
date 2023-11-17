@@ -4382,6 +4382,7 @@ class ControlReporteRepository @Inject()(
                     )
                     .executeUpdate() > 0
                 }
+                
 
                 // Fin Direccion Dato Adicional
                 // Actualizar Información de Luminaria
