@@ -551,6 +551,32 @@ class OrdenTrabajoRepository @Inject()(
     }
   }
 
+  /**
+    * Recuperar un OrdenTrabajo por su ortr_consecutivo
+    * @param tireuc_id: Int
+    * @param repo_id: scala.Long
+    * @param empr_id: scala.Long
+    */
+  def buscarPorReporte(
+      tireuc_id: Int,
+      repo_id: scala.Long,
+      empr_id: scala.Long
+  ): Option[OrdenTrabajo] = {
+    db.withConnection { implicit connection =>
+      SQL(
+        """SELECT * FROM siap.ordentrabajo ot
+                   LEFT JOIN siap.ordentrabajo_reporte otr ON otr.ortr_id = ot.ortr_id
+                   WHERE otr.tireuc_id = {tireuc_id} and otr.repo_id = {repo_id} and ot.empr_id = {empr_id} 
+                   ORDER BY ot.ortr_id DESC LIMIT 1 OFFSET 0"""
+      ).on(
+          'tireuc_id -> tireuc_id,
+          'repo_id -> repo_id,
+          'empr_id -> empr_id
+        )
+        .as(OrdenTrabajo.simple.singleOpt)
+    }
+  }  
+
   def buscarPorCuadrillaFecha(
       cuad_id: Long,
       fecha: Long

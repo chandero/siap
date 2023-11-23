@@ -2439,8 +2439,8 @@ class AapRepository @Inject()(eventoService: EventoRepository, dbapi: DBApi)(
       'aap_id -> aap_id
     ).as(SqlParser.scalar[LocalDate].singleOpt)
     val fecha: Option[LocalDate] = _result match {
-      case Some(fecha) =>
-        Some(fecha)
+      case Some(a) =>
+        Some(a)
       case None => _query = """select ad1.aap_modernizada_anho from siap.aap a1
                                inner join siap.aap_adicional ad1 on ad1.aap_id = a1.aap_id 
                                where a1.aap_id = {aap_id}"""

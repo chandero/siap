@@ -5274,9 +5274,19 @@ export default {
       this.acti_id = this.reporte.acti_id
       this.tiba_id = this.reporte.tiba_id
       this.barr_id = this.reporte.barr_id
-      if (this.reporte.adicional.ortr_id === null) {
+      // Buscar la orden de trabajo correspondiente
+      getOrdenByReporte(this.reporte.tireuc_id, this.reporte.repo_id).then((response) => {
+        if (response.data) {
+          this.reporte.adicional.ortr_id = response.data.ortr_id
+          this.ortr_id_state = false
+        } else {
+          this.reporte.adicional.ortr_id = null
+          this.ortr_id_state = true
+        }
+      }).catch((error) => {
+        this.reporte.adicional.ortr_id = null
         this.ortr_id_state = true
-      }
+      })
     },
     validarConsecutivo () {
       // var consecutivo = 1

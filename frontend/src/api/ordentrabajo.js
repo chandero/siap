@@ -31,6 +31,13 @@ export function getOrden (ortr_id) {
   })
 }
 
+export function getOrdenByReporte(tireuc_id, repo_id) {
+  return request({
+    url: `/ortr/:tu/:rid/${tireuc_id}/${repo_id}`,
+    method: 'get'
+  })
+}
+
 export function getOrdenByCuadrillaFecha(cuad_id, fecha) {
   return request({
     url: `/ortr/gbycf/${cuad_id}/${fecha}`,

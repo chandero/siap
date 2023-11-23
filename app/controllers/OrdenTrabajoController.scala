@@ -80,6 +80,21 @@ class OrdenTrabajoController @Inject()(
 
   }
 
+  def buscarPorReporte(tireuc_id: Int, repo_id: Long) = authenticatedUserAction.async {
+    implicit request: Request[AnyContent] =>
+      val empr_id = Utility.extraerEmpresa(request)
+      val orden = ordenService.buscarPorReporte(tireuc_id, repo_id, empr_id.get)
+      orden match {
+        case None => {
+          Future.successful(NotFound(Json.toJson("false")))
+        }
+        case Some(orden) => {
+          Future.successful(Ok(Json.toJson(orden)))
+        }
+      }
+
+  }
+
   def buscarPorCuadrillaFecha(
     cuad_id: Long,
     fecha: Long
