@@ -2918,7 +2918,7 @@ import { getTiposRetiro } from '@/api/tiporetiro'
 import { getUrbanizadoraTodas } from '@/api/urbanizadora'
 import { getMedidors } from '@/api/medidor'
 import { getTransformadors } from '@/api/transformador'
-import { getOrdenes, addReporteAOrden } from '@/api/ordentrabajo'
+import { getOrdenes, addReporteAOrden, getOrdenByReporte } from '@/api/ordentrabajo'
 import { getNovedades } from '@/api/novedad'
 import { getUnitariosTodas } from '@/api/unitario'
 // component
@@ -5904,6 +5904,7 @@ export default {
                                                                                                                         this.obtenerReporte()
                                                                                                                         getOrdenes().then(response => {
                                                                                                                           this.ordenestrabajo = response.data
+                                                                                                                          this.$forceUpdate()
                                                                                                                         })
                                                                                                                       })
                                                                                                                     }

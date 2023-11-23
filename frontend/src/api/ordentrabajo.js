@@ -33,7 +33,7 @@ export function getOrden (ortr_id) {
 
 export function getOrdenByReporte(tireuc_id, repo_id) {
   return request({
-    url: `/ortr/:tu/:rid/${tireuc_id}/${repo_id}`,
+    url: `/ortr/${tireuc_id}/${repo_id}`,
     method: 'get'
   })
 }

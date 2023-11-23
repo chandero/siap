@@ -566,6 +566,7 @@ class OrdenTrabajoRepository @Inject()(
       SQL(
         """SELECT * FROM siap.ordentrabajo ot
                    LEFT JOIN siap.ordentrabajo_reporte otr ON otr.ortr_id = ot.ortr_id
+                   LEFT JOIN siap.cuadrilla c1 ON c1.cuad_id = ot.cuad_id
                    WHERE otr.tireuc_id = {tireuc_id} and otr.repo_id = {repo_id} and ot.empr_id = {empr_id} 
                    ORDER BY ot.ortr_id DESC LIMIT 1 OFFSET 0"""
       ).on(
