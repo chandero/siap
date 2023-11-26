@@ -1,8 +1,8 @@
-import Layout from '@/views/layout/Layout'
+import Modulo from '@/views/grupo/role/modulo'
 
 const auditorRouter = {
   path: '/auditor',
-  component: Layout,
+  component: Modulo,
   redirect: 'noredirect',
   single: false,
   name: 'menu_auditor',

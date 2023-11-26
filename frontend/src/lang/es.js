@@ -85,6 +85,19 @@ export default {
     anexo_redimensionamiento: 'Generar Anexo de Redimensionamiento'
   },
   route: {
+    role: {
+      pqrs: 'PQRS',
+      supervisor: 'SUPERVISOR',
+      inventario: 'INVENTARIO',
+      facturacion: 'FACTURACION',
+      gerencia: 'GERENCIA',
+      interventoria: 'INTERVENTORIA',
+      auditoria: 'AUDITORIA'
+    },
+    group: {
+      operador: 'Operador Delegado',
+      administrador: 'Administración'
+    },
     dashboard: 'Tablero',
     procesos: 'Procesos',
     reporte: 'Reporte Luminaria',
@@ -502,7 +515,12 @@ export default {
     menu_solicitud_menu3detallado: 'Informe Detallado',
     menu_solicitud_menu4porvencer: 'Informe por Vencer',
     menu_auditor: 'Auditoria',
-    menu_auditor_menu1codigoautorizacion: 'Código Autorización'
+    menu_auditor_menu1codigoautorizacion: 'Código Autorización',
+    menu_acta_obra: 'Acta de Obra',
+    menu_acta_obra_menu1list: 'Lista',
+    menu_acta_obra_menu2create: 'Crear',
+    menu_acta_obra_menu3edit: 'Modificar',
+    menu_acta_obra_menu4item: 'Item Acta'
   },
   navbar: {
     logOut: 'Cerrar Sesión',

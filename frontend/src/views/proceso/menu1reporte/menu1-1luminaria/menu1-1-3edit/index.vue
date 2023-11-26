@@ -5283,7 +5283,7 @@ export default {
           this.reporte.adicional.ortr_id = null
           this.ortr_id_state = true
         }
-      }).catch((error) => {
+      }).catch(() => {
         this.reporte.adicional.ortr_id = null
         this.ortr_id_state = true
       })

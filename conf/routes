@@ -862,6 +862,10 @@ POST /api/acre                          controllers.ActaRedimensionamientoContro
 GET /api/audi/coau/l/:fi/:ff            controllers.CodigoautorizacionController.informeUsoCodigoAutorizacion(fi: Long, ff: Long)
 GET /api/audi/coau/lxlsx/:fi/:ff            controllers.CodigoautorizacionController.informeUsoCodigoAutorizacionXlsx(fi: Long, ff: Long)
 
+# Georeferencia
+
+GET /api/geo/:t controllers.GeoreferenciacionController.getGeoreferencia(t: Int)
+
 # SSE - Server Send Event
 
 GET /api/progressStatuses/:uuid controllers.ProcessingProgressController.getProgressStatuses(uuid: String)

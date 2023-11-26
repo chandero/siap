@@ -1,6 +1,6 @@
 <template>
   <div class="empresa-container">
-      <el-form class="empresa-form" autoComplete="on" :rules="empresaRules" ref="empresaForm" label-position="left">
+<!--       <el-form class="empresa-form" autoComplete="on" :rules="empresaRules" ref="empresaForm" label-position="left">
         <div class="title-container">
             <h3  class="title">{{$t('empresa.title')}}</h3>
         </div>
@@ -14,7 +14,7 @@
             </el-select>
         </el-form-item>
         <el-button :disabled="selected" type="primary" style="width:100%;margin-bottom:30px;" :loading="loading" @click.native.prevent="handleSelect">{{$t('empresa.submit')}}</el-button>
-      </el-form>
+      </el-form> -->
   </div>
 </template>
 <script>
@@ -26,7 +26,7 @@ export default {
   data () {
     return {
       empresa: {
-        empr_id: '',
+        empr_id: 1,
         empr_descripcion: '',
         empr_sigla: ''
       },
@@ -43,6 +43,7 @@ export default {
     getEmpresas().then(response => {
       this.empresas = response.data
       this.empresa.empr_id = this.empresas[0].empr_id
+      this.handleSelect()
     }).catch(() => {
     })
   },
@@ -72,7 +73,8 @@ $light_gray:#eee;
   position: fixed;
   height: 100%;
   width: 100%;
-  background-color: $bg;
+  background-size: cover;
+  background-image: url('~@/assets/img/background_login.jpg');
   .empresa-form {
     position: absolute;
     left: 0;

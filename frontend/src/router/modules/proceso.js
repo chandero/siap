@@ -1,17 +1,17 @@
 /** When your routing table is too long, you can split it into small modules**/
 
-import Layout from '@/views/layout/Layout'
+import Modulo from '@/views/grupo/role/modulo'
 
 const procesoRouter = {
   path: '/proceso',
-  component: Layout,
+  component: Modulo,
   redirect: 'noredirect',
   single: false,
   name: 'menu_proceso',
   meta: {
     title: 'menu_proceso',
     icon: 'el-icon-tickets',
-    roles: ['super', 'admin', 'auxiliar', 'gerencia', 'ingeniero', 'supervisor']
+    roles: ['super', 'admin', 'pqrs']
   },
   children: [
     {
@@ -21,7 +21,7 @@ const procesoRouter = {
       meta: {
         title: 'menu_proceso_menu1reporte',
         icon: 'el-icon-s-order',
-        roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+        roles: ['super', 'admin', 'pqrs']
       },
       redirect: '/proceso/menu1reporte/menu1-1luminaria/menu1-1-1list',
       children: [
@@ -33,7 +33,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu1reporte_menu1-1luminaria',
             icon: 'el-icon-grape',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs']
           },
           redirect: '/proceso/menu1reporte/menu1-1luminaria/menu1-1-1list',
           children: [
@@ -48,7 +48,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu1reporte_menu1-1luminaria_menu1-1-1list',
-                roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+                roles: ['super', 'admin', 'pqrs']
               }
             },
             {
@@ -63,7 +63,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu1reporte_menu1-1luminaria_menu1-1-2create',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'admin', 'pqrs']
               }
             },
             {
@@ -77,7 +77,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu1reporte_menu1-1luminaria_menu1-1-3edit',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'admin', 'pqrs']
               }
             },
             {
@@ -92,7 +92,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu1reporte_menu1-1luminaria_menu1-1-4elemento',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'admin', 'pqrs']
               }
             }
           ]
@@ -105,7 +105,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu1reporte_menu1-2control',
             icon: 'el-icon-watermelon',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
           },
           redirect: '/proceso/menu1reporte/menu1-2control/menu1-2-1list',
           children: [
@@ -119,7 +119,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu1reporte_menu1-2control_menu1-2-1list',
-                roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
               }
             },
             {
@@ -133,7 +133,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu1reporte_menu1-2control_menu1-2-2create',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'pqrs', 'supervisor']
               }
             },
             {
@@ -146,7 +146,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu1reporte_menu1-2control_menu1-2-3edit',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'pqrs', 'supervisor']
               }
             }
           ]
@@ -160,7 +160,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu1reporte_menu1-3canalizacion',
             icon: 'el-icon-cherry',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
           },
           redirect: '/proceso/menu1reporte/menu1-3canalizacion/menu1-3-1list',
           children: [
@@ -176,7 +176,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu1reporte_menu1-3canalizacion_menu1-3-1list',
-                roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
               }
             },
             {
@@ -191,7 +191,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu1reporte_menu1-3canalizacion_menu1-3-2create',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'pqrs', 'supervisor']
               }
             },
             {
@@ -206,7 +206,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu1reporte_menu1-3canalizacion_menu1-3-3edit',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'pqrs', 'supervisor']
               }
             }
           ]
@@ -219,7 +219,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu1reporte_menu1-4poste',
             icon: 'el-icon-wind-power',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
           },
           redirect: '/proceso/menu1reporte/menu1-4poste/menu1-4-1list',
           children: [
@@ -233,7 +233,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu1reporte_menu1-4poste_menu1-4-1list',
-                roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
               }
             },
             {
@@ -247,7 +247,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu1reporte_menu1-4poste_menu1-4-2create',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'pqrs', 'supervisor']
               }
             },
             {
@@ -260,7 +260,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu1reporte_menu1-4poste_menu1-4-3edit',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'pqrs', 'supervisor']
               }
             }
           ]
@@ -273,7 +273,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu1reporte_menu1-5redes',
             icon: 'el-icon-phone-outline',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
           },
           redirect: '/proceso/menu1reporte/menu1-5redes/menu1-5-1list',
           children: [
@@ -287,7 +287,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu1reporte_menu1-5redes_menu1-5-1list',
-                roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
               }
             },
             {
@@ -300,7 +300,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu1reporte_menu1-5redes_menu1-5-2create',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'pqrs', 'supervisor']
               }
             },
             {
@@ -313,7 +313,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu1reporte_menu1-5redes_menu1-5-3edit',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'pqrs', 'supervisor']
               }
             }
           ]
@@ -326,7 +326,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu1reporte_menu1-6transformador',
             icon: 'el-icon-phone-outline',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
           },
           redirect: '/proceso/menu1reporte/menu1-6transformador/menu1-6-1list',
           children: [
@@ -342,7 +342,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-1list',
-                roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
               }
             },
             {
@@ -357,7 +357,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-2create',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'pqrs', 'supervisor']
               }
             },
             {
@@ -372,61 +372,64 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu1reporte_menu1-6transformador_menu1-6-3edit',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'pqrs', 'supervisor']
               }
             }
           ]
         },
         {
-          path: 'menu1-7medidor',
+          path: 'menu1-99migracion',
           component: () =>
-            import('@/views/proceso/menu1reporte/menu1-7medidor'),
-          name: 'menu_proceso_menu1reporte_menu1-7medidor',
+            import('@/views/proceso/menu1reporte/menu1-99migracion'),
+          name: 'menu_proceso_menu1reporte_menu1-99migracion',
           meta: {
-            title: 'menu_proceso_menu1reporte_menu1-7medidor',
-            icon: 'el-icon-watermelon',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            title: 'menu_proceso_menu1reporte_menu1-99migracion',
+            icon: 'el-icon-top-right',
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
           },
-          redirect: '/proceso/menu1reporte/menu1-7medidor/menu1-7-1list',
+          redirect: '/proceso/menu1reporte/menu1-99migracion/menu1-99-1list',
           children: [
             {
-              path: 'menu1-7-1list',
+              path: 'menu1-99-1list',
               component: () =>
                 import(
-                  '@/views/proceso/menu1reporte/menu1-7medidor/menu1-7-1list'
+                  '@/views/proceso/menu1reporte/menu1-99migracion/menu1-99-1list'
                 ),
-              name: 'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-1list',
-              hidden: true,
-              meta: {
-                title: 'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-1list',
-                roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
-              }
-            },
-            {
-              path: 'menu1-7-2create/:tireuc_id',
-              component: () =>
-                import(
-                  '@/views/proceso/menu1reporte/menu1-7medidor/menu1-7-2create'
-                ),
-              name: 'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-2create',
+              name: 'menu_proceso_menu1reporte_menu1-99migracion_menu1-99-1list',
               hidden: true,
               meta: {
                 title:
-                  'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-2create',
-                roles: ['super', 'auxiliar', 'supervisor']
+                  'menu_proceso_menu1reporte_menu1-99migracion_menu1-99-1list',
+                roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
               }
             },
             {
-              path: 'menu1-7-3edit/:id',
+              path: 'menu1-99-2create/:tireuc_id',
               component: () =>
                 import(
-                  '@/views/proceso/menu1reporte/menu1-7medidor/menu1-7-3edit'
+                  '@/views/proceso/menu1reporte/menu1-99migracion/menu1-99-2create'
                 ),
-              name: 'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-3create',
+              name:
+                'menu_proceso_menu1reporte_menu1-99migracion_menu1-99-2create',
               hidden: true,
               meta: {
-                title: 'menu_proceso_menu1reporte_menu1-7medidor_menu1-7-3edit',
-                roles: ['super', 'auxiliar', 'supervisor']
+                title:
+                  'menu_proceso_menu1reporte_menu1-99migracion_menu1-99-2create',
+                roles: ['super', 'pqrs', 'supervisor']
+              }
+            },
+            {
+              path: 'menu1-99-3edit/:tireuc_id/:id?',
+              component: () =>
+                import(
+                  '@/views/proceso/menu1reporte/menu1-99migracion/menu1-99-3edit'
+                ),
+              name: 'menu_proceso_menu1reporte_menu1-99migracion_menu1-99-3edit',
+              hidden: true,
+              meta: {
+                title:
+                  'menu_proceso_menu1reporte_menu1-99migracion_menu1-99-3edit',
+                roles: ['super', 'pqrs', 'supervisor']
               }
             }
           ]
@@ -443,7 +446,7 @@ const procesoRouter = {
         roles: [
           'super',
           'admin',
-          'auxiliar',
+          'pqrs',
           'gerencia',
           'ingeniero',
           'supervisor'
@@ -458,7 +461,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu2pendiente_menu2-1pendiente',
             icon: 'el-icon-edit-outline',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
           }
         },
         {
@@ -469,7 +472,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu2pendiente_menu2-2ejecutado',
             icon: 'el-icon-document-checked',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
           }
         },
         {
@@ -482,7 +485,7 @@ const procesoRouter = {
             roles: [
               'super',
               'admin',
-              'auxiliar',
+              'pqrs',
               'supervisor'
             ]
           }
@@ -499,7 +502,7 @@ const procesoRouter = {
         roles: [
           'super',
           'admin',
-          'auxiliar',
+          'pqrs',
           'supervisor'
         ]
       },
@@ -512,7 +515,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu9cierre_menu9-1directo',
             icon: 'el-icon-edit-outline',
-            roles: ['super', 'admin', 'auxiliar', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'supervisor']
           }
         }
       ]
@@ -527,7 +530,7 @@ const procesoRouter = {
         roles: [
           'super',
           'admin',
-          'auxiliar',
+          'pqrs',
           'supervisor'
         ]
       }
@@ -539,7 +542,7 @@ const procesoRouter = {
       meta: {
         title: 'menu_proceso_menu5formato',
         icon: 'el-icon-edit-outline',
-        roles: ['super', 'admin', 'auxiliar', 'supervisor']
+        roles: ['super', 'admin', 'pqrs', 'supervisor']
       }
     },
     {
@@ -549,7 +552,7 @@ const procesoRouter = {
       meta: {
         title: 'menu_proceso_menu3obra',
         icon: 'el-icon-picture-outline-round',
-        roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+        roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
       },
       children: [
         {
@@ -559,7 +562,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu3obra_menu3-1list',
             icon: 'el-icon-s-order',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
           }
         },
         {
@@ -569,7 +572,7 @@ const procesoRouter = {
           hidden: true,
           meta: {
             title: 'menu_proceso_menu3obra_menu3-2create',
-            roles: ['super', 'auxiliar', 'supervisor']
+            roles: ['super', 'pqrs', 'supervisor']
           }
         },
         {
@@ -579,7 +582,7 @@ const procesoRouter = {
           hidden: true,
           meta: {
             title: 'menu_proceso_menu3obra_menu3-3edit',
-            roles: ['super', 'auxiliar', 'supervisor']
+            roles: ['super', 'pqrs', 'supervisor']
           }
         },
         {
@@ -589,7 +592,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu3obra_menu3-4pendiente',
             icon: 'el-icon-s-unfold',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
           }
         }
       ]
@@ -601,7 +604,7 @@ const procesoRouter = {
       meta: {
         title: 'menu_proceso_menu4orden',
         icon: 'el-icon-document-add',
-        roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+        roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
       },
       redirect: '/proceso/menu4orden/menu4-1interna/menu4-1-1list',
       children: [
@@ -612,7 +615,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu4orden_menu4-1interna',
             icon: 'el-icon-truck',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
           },
           redirect: '/proceso/menu4orden/menu4-1interna/menu4-1-1list',
           children: [
@@ -626,7 +629,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu4orden_menu4-1interna_menu4-1-1list',
-                roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
               }
             },
             {
@@ -639,7 +642,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu4orden_menu4-1interna_menu4-1-2create',
-                roles: ['super', 'admin', 'auxiliar', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'supervisor']
               }
             },
             {
@@ -652,7 +655,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu4orden_menu4-1interna_menu4-1-3edit',
-                roles: ['super', 'admin', 'auxiliar', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'supervisor']
               }
             }
           ]
@@ -665,7 +668,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu4orden_menu4-2externa',
             icon: 'el-icon-receiving',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
           },
           redirect: '/proceso/menu4orden/menu4-2externa/menu4-2-1list',
           children: [
@@ -679,7 +682,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu4orden_menu4-2externa_menu4-2-1list',
-                roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
               }
             },
             {
@@ -692,7 +695,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu4orden_menu4-2externa_menu4-2-2create',
-                roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
               }
             },
             {
@@ -705,7 +708,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu4orden_menu4-2externa_menu4-2-3edit',
-                roles: ['super', 'auxiliar', 'supervisor']
+                roles: ['super', 'pqrs', 'supervisor']
               }
             },
             {
@@ -718,7 +721,7 @@ const procesoRouter = {
               hidden: true,
               meta: {
                 title: 'menu_proceso_menu4orden_menu4-2externa_menu4-2-4info',
-                roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
               }
             }
           ]
@@ -730,7 +733,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu4orden_menu4-3cobro',
             icon: 'el-icon-receiving',
-            roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor', 'facturacion']
           },
           redirect: '/proceso/menu4orden/menu4-3cobro/menu4-3-1list',
           children: [
@@ -741,7 +744,7 @@ const procesoRouter = {
               name: 'menu_proceso_menu4orden_menu4-3cobro_menu4-3-1list',
               meta: {
                 title: 'menu_proceso_menu4orden_menu4-3cobro_menu4-3-1list',
-                roles: ['super', 'admin', 'auxiliar', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'supervisor', 'facturacion']
               }
             },
             {
@@ -754,7 +757,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu4orden_menu4-3cobro_menu4-3-2factura',
-                roles: ['super', 'admin', 'auxiliar', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'supervisor', 'facturacion']
               }
             },
             {
@@ -767,7 +770,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu4orden_menu4-3cobro_menu4-3-3acta',
-                roles: ['super', 'admin', 'auxiliar', 'supervisor']
+                roles: ['super', 'admin', 'pqrs', 'supervisor', 'facturacion']
               }
             }
           ]
@@ -781,7 +784,7 @@ const procesoRouter = {
       meta: {
         title: 'menu_proceso_menu6recuperar',
         icon: 'el-icon-refresh-right',
-        roles: ['super', 'auxiliar']
+        roles: ['super', 'pqrs']
       }
     },
     {
@@ -791,7 +794,7 @@ const procesoRouter = {
       meta: {
         title: 'menu_proceso_menu7actadesmonte',
         icon: 'el-icon-refresh-right',
-        roles: ['super', 'auxiliar', 'supervisor', 'admin']
+        roles: ['super', 'pqrs', 'supervisor', 'admin']
       }
     }
   ]

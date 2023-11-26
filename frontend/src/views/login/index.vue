@@ -21,10 +21,13 @@
         </el-col>
         <el-col :xs="22" :sm="8" :md="8" :lg="8" :xl="8">
           <el-form-item prop="username">
-            <span class="svg-container svg-container_login">
-              <i class="el-icon-user" />
-            </span>
-            <el-input name="username" type="text" v-model="loginForm.username" autoComplete="on" :placeholder="$t('login.username')" />
+            <el-input name="username" type="text" v-model="loginForm.username" autoComplete="on" :placeholder="$t('login.username')">
+              <template slot="prepend">
+                <span>
+                  <i class="el-icon-user" />
+                </span>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :xs="1" :sm="8" :md="8" :lg="8" :xl="8">
@@ -37,13 +40,18 @@
         </el-col>
         <el-col :xs="22" :sm="8" :md="8" :lg="8" :xl="8">
           <el-form-item prop="password">
-            <span class="svg-container">
-              <i class="el-icon-lock" />
-            </span>
-            <el-input name="password" :type="passwordType" @keyup.enter.native="handleLogin" v-model="loginForm.password" autoComplete="on" :placeholder="$t('login.password')" />
-            <span class="show-pwd" @click="showPwd">
-              <i class="el-icon-view" />
-            </span>
+            <el-input name="password" :type="passwordType" @keyup.enter.native="handleLogin" v-model="loginForm.password" autoComplete="on" :placeholder="$t('login.password')">
+              <template slot="prepend">
+                <span>
+                  <i class="el-icon-lock" />
+                </span>
+              </template>
+            <template slot="append">
+              <span class="show-pwd" @click="showPwd">
+                <i class="el-icon-view" />
+              </span>
+            </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :xs="1" :sm="8" :md="8" :lg="8" :xl="8">
@@ -194,40 +202,6 @@ export default {
 }
 </script>
 
-<style rel="stylesheet/scss" lang="scss">
-$bg:#2d3a4b;
-$light_gray:#eee;
-
-/* reset element-ui css */
-.login-container {
-  .el-input {
-    display: inline-block;
-    height: 47px;
-    width: 82%;
-    input {
-      background: transparent;
-      border: 0px;
-      -webkit-appearance: none;
-      border-radius: 0px;
-      padding: 12px 5px 12px 15px;
-      color: $light_gray;
-      height: 47px;
-      &:-webkit-autofill {
-        box-shadow: 0 0 0px 1000px $bg inset !important;
-        -webkit-box-shadow: 0 0 0px 1000px $bg inset !important;
-        -webkit-text-fill-color: #fff !important;
-      }
-    }
-  }
-  .el-form-item {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    color: #454545;
-  }
-}
-</style>
-
 <style rel="stylesheet/scss" lang="scss" scoped>
 $bg:#2d3a4b;
 $dark_gray:#889aa4;
@@ -237,15 +211,18 @@ $light_gray:#eee;
   position: fixed;
   height: 100%;
   width: 100%;
-  background-color: $bg;
-  /*.login-form {
+  // background-color: $bg;
+  background-size: cover;
+  background-image: url('~@/assets/img/background_login.jpg');
+  .login-form {
+    background: transparent;
     position: absolute;
     left: 0;
     right: 0;
     width: 100%;
     padding: 35px 35px 15px 35px;
     margin: 0px auto;
-  }*/
+  }
   .tips {
     font-size: 14px;
     color: #fff;
@@ -258,7 +235,7 @@ $light_gray:#eee;
   }
   .svg-container {
     padding: 6px 5px 6px 7px;
-    color: $dark_gray;
+    color: $light_gray;
     vertical-align: middle;
     width: 30px;
     display: inline-block;
@@ -288,7 +265,7 @@ $light_gray:#eee;
     right: 10px;
     top: 7px;
     font-size: 16px;
-    color: $dark_gray;
+    color: $light_gray;
     cursor: pointer;
     user-select: none;
   }
@@ -298,7 +275,7 @@ $light_gray:#eee;
     bottom: 28px;
   }
   .password-forgot {
-    color: #bd5c57 !important;
+    color: #e27b1a !important;
   }
 }
 </style>

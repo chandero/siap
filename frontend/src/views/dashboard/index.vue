@@ -24,25 +24,12 @@ export default {
     ])
   },
   created () {
-    switch (this.roles) {
-      case 'super':
-        this.currentRole = 'adminDashboard'
-        break
-      case 'admin':
-        this.currentRole = 'adminDashboard'
-        break
-      case 'operativo':
-        this.currentRole = 'operativoDashboard'
-        break
-      case 'ingeniero':
-        this.currentRole = 'ingenieroDashboard'
-        break
-      default:
-        this.currentRole = 'operativoDashboard'
-        break
-    }
-    // if (!this.roles.includes('admin')) {
-    //   this.currentRole = 'operativoDashboard'
+    console.log('roles', this.roles)
+    if (this.roles.includes('pqrs')) {
+      this.currentRole = 'operativoDashboard'
+    } else {
+      this.currentRole = 'adminDashboard'
+    } //   this.currentRole = 'operativoDashboard'
     // }
   }
 }

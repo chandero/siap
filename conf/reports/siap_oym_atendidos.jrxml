@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.13.0  -->
-<!-- 2021-06-22T08:22:40 -->
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="siap_oym_recibidas" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="63639537-9742-435b-a7c6-dc73cfd2e140">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="siap"/>
@@ -17,10 +16,18 @@
 	SELECT DISTINCT o.orig_estado, r.repo_id  FROM siap.reporte r
     LEFT JOIN siap.origen o ON o.orig_id = r.orig_id
     WHERE r.repo_fecharecepcion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.reti_id = 1 and r.rees_id <> 9 and r.empr_id = $P{EMPR_ID} 
-	UNION
+	UNION ALL
 	SELECT DISTINCT o.orig_estado, r.repo_id  FROM siap.control_reporte r
     LEFT JOIN siap.origen o ON o.orig_id = r.orig_id
     WHERE r.repo_fecharecepcion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.reti_id = 1 and r.rees_id <> 9 and r.empr_id = $P{EMPR_ID} 	    
+    UNION ALL
+	SELECT DISTINCT o.orig_estado, r.repo_id  FROM siap.transformador_reporte r
+    LEFT JOIN siap.origen o ON o.orig_id = r.orig_id
+    WHERE r.repo_fecharecepcion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.reti_id = 1 and r.rees_id <> 9 and r.empr_id = $P{EMPR_ID}     
+    UNION ALL
+	SELECT DISTINCT o.orig_estado, r.repo_id  FROM siap.medidor_reporte r
+    LEFT JOIN siap.origen o ON o.orig_id = r.orig_id
+    WHERE r.repo_fecharecepcion BETWEEN $P{FECHA_INICIAL} and $P{FECHA_FINAL} and r.reti_id = 1 and r.rees_id <> 9 and r.empr_id = $P{EMPR_ID}     
 ) o
 GROUP BY o.orig_estado
 ORDER BY o.orig_estado]]>

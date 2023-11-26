@@ -50,6 +50,18 @@ export function getReportesRango(anho, mes, tireuc_id) {
   })
 }
 
+export function getReportesMigracionRango(anho, mes, tireuc_id) {
+  const data = {
+    anho,
+    mes,
+    tireuc_id
+  }
+  return request({
+    url: '/repo/rangm/' + data.anho + '/' + data.mes + '/' + data.tireuc_id,
+    method: 'get'
+  })
+}
+
 export function getReporte(repo_id) {
   const data = {
     repo_id
@@ -90,6 +102,17 @@ export function buscarReportePorVarios(filtro, tireuc_id) {
   }
   return request({
     url: '/repo/vari/' + data.filtro + '/' + data.tireuc_id,
+    method: 'get'
+  })
+}
+
+export function buscarReporteMigracionPorVarios(filtro, tireuc_id) {
+  const data = {
+    filtro,
+    tireuc_id
+  }
+  return request({
+    url: '/repo/varim/' + data.filtro + '/' + data.tireuc_id,
     method: 'get'
   })
 }
@@ -208,6 +231,13 @@ export function getEstados() {
 export function getTipos() {
   return request({
     url: '/repo/tp/get',
+    method: 'get'
+  })
+}
+
+export function getTiposMigracion() {
+  return request({
+    url: '/repo/tpm/get',
     method: 'get'
   })
 }
