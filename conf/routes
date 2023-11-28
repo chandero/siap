@@ -686,7 +686,7 @@ GET /api/ortr/st/get controllers.OrdenTrabajoController.getEstados
 GET /api/ortr/prn/ortr/:id/:em controllers.OrdenTrabajoController.imprimirOrden(id: Long, em: Long)
 GET /api/ortr/obc/:id controllers.OrdenTrabajoController.obtenerReporteObraPorCuadrilla(id: Long)
 +nocsrf
-GET /api/ortr/obcm/:id controllers.OrdenTrabajoController.obtenerReporteObraPorCuadrillaMobile(id: Long)
+GET /api/ortrm/obcm/:id controllers.OrdenTrabajoController.obtenerReporteObraPorCuadrillaMobile(id: Long)
 GET /api/ortr/incb/:fi/:ff controllers.OrdenTrabajoController.siap_informe_cambios_en_reporte(fi: Long, ff: Long)
 GET /api/ortr/gbycf/:c/:f controllers.OrdenTrabajoController.buscarPorCuadrillaFecha(c: Long, f: Long)
 # Medioambiente
