@@ -794,7 +794,7 @@ const procesoRouter = {
       meta: {
         title: 'menu_proceso_menu7actadesmonte',
         icon: 'el-icon-refresh-right',
-        roles: ['super', 'pqrs', 'supervisor', 'admin']
+        roles: ['super', 'supervisor', 'admin']
       }
     }
   ]

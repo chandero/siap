@@ -24,7 +24,7 @@ import supervisorRole from './roles/supervisor' */
 import administradorGroup from './group/administracion'
 import operadorGroup from './group/operador'
 
-const _import = require('./_import_' + process.env.NODE_ENV)
+const _import = require('./_import_' + process.env.NODE_ENV) // Define una función _import que se utiliza para importar componentes de manera dinámica.
 
 Vue.use(Router)
 
@@ -70,13 +70,14 @@ export const constantRouterMap = [
   }
 ]
 
+// Define un conjunto de rutas estáticas y constantes que estarán presentes en la aplicación independientemente de la autenticación o roles del usuario
 export default new Router({
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRouterMap
 })
 
 export const asyncRouterMap = [
-  operadorGroup,
   administradorGroup,
+  operadorGroup,
   { path: '*', redirect: '/404', hidden: true }
 ]

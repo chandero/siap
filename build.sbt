@@ -15,6 +15,8 @@ scalaVersion := "2.12.11"
 
 scalacOptions += "-feature"
 scalacOptions += "-language:postfixOps"
+javaOptions in run ++= Seq(
+    "-Xms4G", "-Xmx8G", "-XX:MaxPermSize=1024M", "-XX:+UseConcMarkSweepGC")
 
 crossScalaVersions := Seq("2.12.7", "2.12.11")
 
