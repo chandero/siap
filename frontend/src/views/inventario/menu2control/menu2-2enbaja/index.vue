@@ -271,7 +271,7 @@ export default {
       this.getAaps()
     },
     nuevo () {
-      this.$router.push({ path: '/inventario/gestion/crear' })
+      this.$router.push({ path: '/inven/gestion/crear' })
     },
     actualizar () {
       this.getAaps()

@@ -144,7 +144,7 @@ export default {
   },
   methods: {
     handleEdit (index, row) {
-      this.$router.push({ path: '/inventario/menu6transformador/menu6-1activa/gestion/edit/' + row.aap_id })
+      this.$router.push({ path: '/inven/menu6transformador/menu6-1activa/gestion/edit/' + row.aap_id })
       console.log(index, row)
     },
     handleDelete (index, row) {
@@ -185,7 +185,7 @@ export default {
       this.getTransformadores()
     },
     nuevo () {
-      this.$router.push({ path: '/inventario/menu6transformador/menu6-1activa/gestion/create' })
+      this.$router.push({ path: '/inven/menu6transformador/menu6-1activa/gestion/create' })
     },
     barrio (id) {
       if (id === null) {

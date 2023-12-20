@@ -225,7 +225,7 @@ export default {
       }
     },
     handleEdit (index, row) {
-      this.$router.push({ path: '/inventario/menu2control/menu2-1activa/gestion/editar/' + row.aap_id })
+      this.$router.push({ path: '/inven/menu2control/menu2-1activa/gestion/editar/' + row.aap_id })
       console.log(index, row)
     },
     handleDelete (index, row) {
@@ -263,7 +263,7 @@ export default {
       this.getAaps()
     },
     nuevo () {
-      this.$router.push({ path: '/inventario/menu2control/menu2-1activa/gestion/crear' })
+      this.$router.push({ path: '/inven/menu2control/menu2-1activa/gestion/crear' })
     },
     actualizar () {
       this.getAaps()
