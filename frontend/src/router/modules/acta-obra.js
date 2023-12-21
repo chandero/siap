@@ -9,7 +9,7 @@ const actaObraRouter = {
   meta: {
     title: 'menu_acta_obra',
     icon: 'el-icon-truck',
-    roles: ['super', 'admin', 'auxiliar', 'ingeniero', 'supervisor']
+    roles: ['super', 'auxiliar', 'ingeniero']
   },
   children: [
     {
