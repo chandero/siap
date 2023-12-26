@@ -18,7 +18,7 @@ const informeRouter = {
       path: 'menu1consolidado',
       component: () => import('@/views/informe/menu1consolidado/index'), // Parent router-view
       name: 'menu_informe_menu1consolidado',
-      meta: { title: 'menu_informe_menu1consolidado', icon: 'el-icon-document-remove', roles: ['super', 'admin', 'pqrs', 'gerencia', 'ingeniero', 'supervisor', 'interventoria'] },
+      meta: { title: 'menu_informe_menu1consolidado', icon: 'el-icon-document-remove', roles: ['super', 'pqrs', 'gerencia', 'ingeniero', 'supervisor', 'interventoria'] },
       redirect: '/informe/menu1consolidado/menu1-1material',
       children: [
         {
@@ -87,7 +87,7 @@ const informeRouter = {
       path: 'menu2detallado',
       component: () => import('@/views/informe/menu2detallado/index'), // Parent router-view
       name: 'menu_informe_menu2detallado',
-      meta: { title: 'menu_informe_menu2detallado', icon: 'el-icon-document', roles: ['super', 'admin', 'pqrs', 'gerencia', 'ingeniero', 'ingeniero', 'supervisor', 'interventoria'] },
+      meta: { title: 'menu_informe_menu2detallado', icon: 'el-icon-document', roles: ['super', 'pqrs', 'gerencia', 'ingeniero', 'ingeniero', 'supervisor', 'interventoria'] },
       redirect: '/informe/menu2detallado/menu2-1material',
       children: [
         {
@@ -282,7 +282,7 @@ const informeRouter = {
       path: 'menu5grafica',
       component: () => import('@/views/informe/menu5grafica/index'), // Parent router-view
       name: 'menu_informe_menu5grafica',
-      meta: { title: 'menu_informe_menu5grafica', icon: 'el-icon-pie-chart', roles: ['super', 'gerencia', 'ingeniero', 'supervisor', 'interventoria'] },
+      meta: { title: 'menu_informe_menu5grafica', icon: 'el-icon-pie-chart', roles: ['super', 'gerencia', 'ingeniero', 'supervisor', 'interventoria', 'pqrs'] },
       redirect: '/informe/menu5grafica/menu5-1operativa',
       children: [
         {
@@ -297,7 +297,7 @@ const informeRouter = {
       path: 'menu6foto',
       component: () => import('@/views/informe/menu6foto/index'), // Parent router-view
       name: 'menu_informe_menu6foto',
-      meta: { title: 'menu_informe_menu6foto', icon: 'el-icon-camera', roles: ['super', 'admin', 'pqrs', 'gerencia', 'ingeniero', 'supervisor', 'interventoria'] }
+      meta: { title: 'menu_informe_menu6foto', icon: 'el-icon-camera', roles: ['super', 'pqrs', 'gerencia', 'ingeniero', 'supervisor', 'interventoria'] }
     }
   ]
 }

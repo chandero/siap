@@ -13,7 +13,9 @@ import actaObraRouter from '../modules/acta-obra'
 import informeRouter from '../modules/informe'
 import solicitudRouter from '../modules/solicitud'
 import auditorRouter from '../modules/auditor'
-
+import cobranzarouter from '../modules/cobranza'
+import autorizacionrouter from '../modules/autorizacion'
+import calculorouter from '../modules/calculo'
 export const facturacionRole = {
   path: '/facturacion',
   component: Role,
@@ -23,10 +25,13 @@ export const facturacionRole = {
   meta: {
     title: 'role.facturacion',
     icon: 'invoices',
-    roles: ['super', 'admin', 'facturacion']
+    roles: ['super', 'admin', 'fact']
   },
   children: [
-    procesoRouter
+    procesoRouter,
+    cobranzarouter,
+    autorizacionrouter,
+    calculorouter
   ]
 }
 
