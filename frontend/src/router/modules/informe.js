@@ -243,7 +243,7 @@ const informeRouter = {
       path: 'menu4calculo',
       component: () => import('@/views/informe/menu4calculo/index'), // Parent router-view
       name: 'menu_informe_menu4calculo',
-      meta: { title: 'menu_informe_menu4calculo', icon: 'el-icon-data-analysis', roles: ['super', 'gerencia', 'ingeniero', 'supervisor', 'interventoria'] },
+      meta: { title: 'menu_informe_menu4calculo', icon: 'el-icon-data-analysis', roles: ['super', 'gerencia', 'ingeniero', 'interventoria'] },
       redirect: '/informe/menu4calculo/menu4-1disponibilidad',
       children: [
         {
@@ -282,7 +282,7 @@ const informeRouter = {
       path: 'menu5grafica',
       component: () => import('@/views/informe/menu5grafica/index'), // Parent router-view
       name: 'menu_informe_menu5grafica',
-      meta: { title: 'menu_informe_menu5grafica', icon: 'el-icon-pie-chart', roles: ['super', 'gerencia', 'ingeniero', 'supervisor', 'interventoria', 'pqrs'] },
+      meta: { title: 'menu_informe_menu5grafica', icon: 'el-icon-pie-chart', roles: ['super', 'gerencia', 'ingeniero', 'interventoria', 'pqrs'] },
       redirect: '/informe/menu5grafica/menu5-1operativa',
       children: [
         {
@@ -297,7 +297,7 @@ const informeRouter = {
       path: 'menu6foto',
       component: () => import('@/views/informe/menu6foto/index'), // Parent router-view
       name: 'menu_informe_menu6foto',
-      meta: { title: 'menu_informe_menu6foto', icon: 'el-icon-camera', roles: ['super', 'pqrs', 'gerencia', 'ingeniero', 'supervisor', 'interventoria'] }
+      meta: { title: 'menu_informe_menu6foto', icon: 'el-icon-camera', roles: ['super', 'pqrs', 'gerencia', 'ingeniero', 'interventoria'] }
     }
   ]
 }

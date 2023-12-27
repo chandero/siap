@@ -11,7 +11,7 @@ const procesoRouter = {
   meta: {
     title: 'menu_proceso',
     icon: 'el-icon-tickets',
-    roles: ['super', 'admin', 'pqrs']
+    roles: ['super', 'admin', 'pqrs', 'supervisor']
   },
   children: [
     {
@@ -502,8 +502,7 @@ const procesoRouter = {
         roles: [
           'super',
           '',
-          'pqrs',
-          'supervisor'
+          'pqrs'
         ]
       },
       children: [
@@ -542,7 +541,7 @@ const procesoRouter = {
       meta: {
         title: 'menu_proceso_menu5formato',
         icon: 'el-icon-edit-outline',
-        roles: ['super', 'pqrs', 'supervisor']
+        roles: ['super', 'pqrs']
       }
     },
     {
@@ -562,7 +561,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu3obra_menu3-1list',
             icon: 'el-icon-s-order',
-            roles: ['super', 'admin', 'pqrs', 'ingeniero', 'supervisor']
+            roles: ['super', 'admin', 'pqrs', 'ingeniero']
           }
         },
         {
@@ -572,7 +571,7 @@ const procesoRouter = {
           hidden: true,
           meta: {
             title: 'menu_proceso_menu3obra_menu3-2create',
-            roles: ['super', 'pqrs', 'supervisor']
+            roles: ['super', 'pqrs']
           }
         },
         {
@@ -582,7 +581,7 @@ const procesoRouter = {
           hidden: true,
           meta: {
             title: 'menu_proceso_menu3obra_menu3-3edit',
-            roles: ['super', 'pqrs', 'supervisor']
+            roles: ['super', 'pqrs', 'supeor']
           }
         },
         {
@@ -733,7 +732,7 @@ const procesoRouter = {
           meta: {
             title: 'menu_proceso_menu4orden_menu4-3cobro',
             icon: 'el-icon-receiving',
-            roles: ['super', 'pqrs', 'ingeniero', 'supervisor', 'facturacion']
+            roles: ['super', 'pqrs', 'ingeniero', 'facturacion']
           },
           redirect: '/proceso/menu4orden/menu4-3cobro/menu4-3-1list',
           children: [
@@ -744,7 +743,7 @@ const procesoRouter = {
               name: 'menu_proceso_menu4orden_menu4-3cobro_menu4-3-1list',
               meta: {
                 title: 'menu_proceso_menu4orden_menu4-3cobro_menu4-3-1list',
-                roles: ['super', 'admin', 'pqrs', 'supervisor', 'facturacion']
+                roles: ['super', 'admin', 'pqrs', 'facturacion']
               }
             },
             {
@@ -757,7 +756,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu4orden_menu4-3cobro_menu4-3-2factura',
-                roles: ['super', 'admin', 'pqrs', 'supervisor', 'facturacion']
+                roles: ['super', 'admin', 'pqrs', 'facturacion']
               }
             },
             {
@@ -770,7 +769,7 @@ const procesoRouter = {
               meta: {
                 title:
                   'menu_proceso_menu4orden_menu4-3cobro_menu4-3-3acta',
-                roles: ['super', 'admin', 'pqrs', 'supervisor', 'facturacion']
+                roles: ['super', 'admin', 'pqrs', 'facturacion']
               }
             }
           ]
@@ -794,7 +793,7 @@ const procesoRouter = {
       meta: {
         title: 'menu_proceso_menu7actadesmonte',
         icon: 'el-icon-refresh-right',
-        roles: ['super', 'supervisor']
+        roles: ['super']
       }
     }
   ]

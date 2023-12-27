@@ -26,7 +26,7 @@ export default {
   created () {
     console.log('roles', this.roles)
     if (this.roles.includes('pqrs')) {
-      this.currentRole = 'operativoDashboard'
+      this.currentRole = 'adminDashboard'
     } else {
       this.currentRole = 'adminDashboard'
     } //   this.currentRole = 'operativoDashboard'

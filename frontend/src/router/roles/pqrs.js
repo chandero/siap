@@ -25,7 +25,7 @@ export const pqrsRole = {
   meta: {
     title: 'role.pqrs',
     icon: 'callcenter01',
-    roles: ['super', 'admin', 'pqrs', 'supervisor']
+    roles: ['super', 'pqrs']
   },
   children: [
     procesoRouter,
