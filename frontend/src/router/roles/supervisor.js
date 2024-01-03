@@ -16,6 +16,7 @@ import auditorRouter from '../modules/auditor'
 import supervisorRouter from '../modules/supervisor'
 import gerenciaRouter from '../modules/gerencia'
 import administracionRouter from '../modules/administracion'
+import autorizacionrouter from '../modules/autorizacion'
 
 export const supervisorRole = {
   path: '/supervisor',
@@ -33,7 +34,8 @@ export const supervisorRole = {
     procesoRouter,
     solicitudRouter,
     informeRouter,
-    inventarioRouter
+    inventarioRouter,
+    autorizacionrouter
   ]
 }
 
