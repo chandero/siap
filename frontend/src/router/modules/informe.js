@@ -87,7 +87,7 @@ const informeRouter = {
       path: 'menu2detallado',
       component: () => import('@/views/informe/menu2detallado/index'), // Parent router-view
       name: 'menu_informe_menu2detallado',
-      meta: { title: 'menu_informe_menu2detallado', icon: 'el-icon-document', roles: ['super', 'pqrs', 'gerencia', 'ingeniero', 'ingeniero', 'supervisor', 'interventoria'] },
+      meta: { title: 'menu_informe_menu2detallado', icon: 'el-icon-document', roles: ['super', 'pqrs', 'gerencia', 'ingeniero', 'supervisor', 'interventoria'] },
       redirect: '/informe/menu2detallado/menu2-1material',
       children: [
         {
