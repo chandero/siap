@@ -22,7 +22,7 @@ export const operadorGroup = {
   meta: {
     title: 'group.operador',
     icon: 'audit',
-    roles: ['super', 'admin', 'administradorsap', 'operadorsap', 'fact', 'facturacion']
+    roles: ['super', 'admin', 'administradorsap', 'operadorsap', 'fact', 'facturacion', 'pqrs']
   },
   children: [
     pqrsRole,

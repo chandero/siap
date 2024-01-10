@@ -243,7 +243,7 @@ const informeRouter = {
       path: 'menu4calculo',
       component: () => import('@/views/informe/menu4calculo/index'), // Parent router-view
       name: 'menu_informe_menu4calculo',
-      meta: { title: 'menu_informe_menu4calculo', icon: 'el-icon-data-analysis', roles: ['super', 'gerencia', 'ingeniero', 'interventoria'] },
+      meta: { title: 'menu_informe_menu4calculo', icon: 'el-icon-data-analysis', roles: ['super', 'gerencia', 'ingeniero', 'interventoria', 'pqrs'] },
       redirect: '/informe/menu4calculo/menu4-1disponibilidad',
       children: [
         {
@@ -262,7 +262,7 @@ const informeRouter = {
           path: 'menu4-2carga',
           component: () => import('@/views/informe/menu4calculo/menu4-2carga'),
           name: 'menu_informe_menu4calculo_menu4-2carga',
-          meta: { title: 'menu_informe_menu4calculo_menu4-2carga', icon: 'el-icon-info', roles: ['super', 'admin', 'pqrs', 'gerencia', 'ingeniero', 'supervisor', 'interventoria'] }
+          meta: { title: 'menu_informe_menu4calculo_menu4-2carga', icon: 'el-icon-info', roles: ['super', 'admin', 'gerencia', 'ingeniero', 'supervisor', 'interventoria'] }
         },
         {
           path: 'menu4-3eficiencia',
@@ -274,7 +274,7 @@ const informeRouter = {
           path: 'menu4-4ucap',
           component: () => import('@/views/informe/menu4calculo/menu4-4ucap'),
           name: 'menu_informe_menu4calculo_menu4-4ucap',
-          meta: { title: 'menu_informe_menu4calculo_menu4-4ucap', icon: 'el-icon-info', roles: ['super', 'admin', 'pqrs', 'gerencia', 'ingeniero', 'supervisor'] }
+          meta: { title: 'menu_informe_menu4calculo_menu4-4ucap', icon: 'el-icon-info', roles: ['super', 'admin', 'gerencia', 'ingeniero', 'supervisor'] }
         }
       ]
     },

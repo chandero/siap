@@ -188,7 +188,9 @@ case class Inventario(
     aap_medidor_comercializadora: Option[String],
     aacu_descripcion: Option[String],
     aap_codigo: Option[String],
-    aap_numero: Option[String]
+    aap_numero: Option[String],
+    aap_lat: Option[String],
+    aap_lng: Option[String]
 )
 
 case class Siap_inventario(a: Siap_inventario_a, b: Siap_inventario_b)
@@ -436,7 +438,9 @@ object Inventario {
       "marca" -> i.aama_descripcion,
       "modelo" -> i.aamo_descripcion,
       "potencia" -> i.aap_potencia,
-      "tecnologia" -> i.aap_tecnologia
+      "tecnologia" -> i.aap_tecnologia,
+      "Latitud" -> i.aap_lat,
+      "Longitud" -> i.aap_lng
     )
   }
 }
@@ -482,7 +486,9 @@ object Siap_inventario {
       get[Option[String]]("aap_medidor_comercializadora") ~
       get[Option[String]]("aacu_descripcion") ~
       get[Option[String]]("aap_codigo") ~
-      get[Option[String]]("aap_numero") map {
+      get[Option[String]]("aap_numero") ~
+      get[Option[String]]("aap_lat") ~
+      get[Option[String]]("aap_lng") map {
       case aap_id ~
             aap_apoyo ~
             esta_descripcion ~
@@ -515,7 +521,9 @@ object Siap_inventario {
             aap_medidor_comercializadora ~
             aacu_descripcion ~
             aap_codigo ~
-            aap_numero =>
+            aap_numero ~
+            aap_lat ~
+            aap_lng =>
         new Inventario(
           aap_id,
           aap_apoyo,
@@ -549,7 +557,9 @@ object Siap_inventario {
           aap_medidor_comercializadora,
           aacu_descripcion,
           aap_codigo,
-          aap_numero
+          aap_numero,
+          aap_lat,
+          aap_lng
         )
     }
   }
@@ -3350,7 +3360,9 @@ ORDER BY e.reti_id, e.elem_codigo        """)
                           d.aap_medidor_comercializadora,
                           (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
                           to_char(t.aap_id, '0000') as aap_codigo,
-                          t.aap_numero
+                          t.aap_numero,
+                          a.aap_lat,
+                          a.aap_lng
                     FROM siap.aap a
                     LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
                     LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
@@ -3468,7 +3480,9 @@ ORDER BY e.reti_id, e.elem_codigo        """)
               "Transformador Código",
               "Transformador Número",
               "Fecha Expansión",
-              "Fecha Modernización"
+              "Fecha Modernización",
+              "Latitud",
+              "Longitud"
             )
           val resultSet =
             SQL("""SELECT
@@ -3504,7 +3518,9 @@ ORDER BY e.reti_id, e.elem_codigo        """)
                           d.aap_medidor_comercializadora,
                           (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
                           to_char(t.aap_id, '0000') as aap_codigo,
-                          t.aap_numero
+                          t.aap_numero,
+                          a.aap_lat,
+                          a.aap_lng
                     FROM siap.aap a
                     LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
                     LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
@@ -3675,6 +3691,14 @@ ORDER BY e.reti_id, e.elem_codigo        """)
                   },
                   // Buscar fecha de modernización
                   aapService.buscarFechaModernizacion(i.aap_id.get) match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.aap_lat match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.aap_lng match {
                     case Some(value) => value
                     case None        => ""
                   }
@@ -3864,7 +3888,9 @@ ORDER BY e.reti_id, e.elem_codigo        """)
               "Medidor Comercializadora",
               "Cuenta Alumbrado",
               "Transformador Código",
-              "Transformador Número"
+              "Transformador Número",
+              "Latitud",
+              "Longitud"
             )
           var query =
             """SELECT
@@ -3901,7 +3927,9 @@ ORDER BY e.reti_id, e.elem_codigo        """)
                           d.aap_medidor_comercializadora,
                           (CASE WHEN a.aaco_id = 1 THEN cu.aacu_descripcion WHEN a.aaco_id = 2 THEN mcu.aacu_descripcion ELSE '' END) AS aacu_descripcion,
                           to_char(t.aap_id, '0000') as aap_codigo,
-                          t.aap_numero
+                          t.aap_numero,
+                          a.aap_lat,
+                          a.aap_lng
                         FROM siap.aap a
                         LEFT JOIN siap.estado s ON s.esta_id = a.esta_id
                         LEFT JOIN siap.aap_adicional d on d.aap_id = a.aap_id AND d.empr_id = a.empr_id
@@ -4072,6 +4100,14 @@ ORDER BY e.reti_id, e.elem_codigo        """)
                     case None        => ""
                   },
                   i.aap_numero match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.aap_lat match {
+                    case Some(value) => value
+                    case None        => ""
+                  },
+                  i.aap_lng match {
                     case Some(value) => value
                     case None        => ""
                   }
