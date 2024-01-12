@@ -134,7 +134,7 @@ export default {
       this.showDialog = false
       const ucapIpp = {
         ucap_ipp_id: this.ucap_ipp_id,
-        ucap_ipp_anho: this.anho,
+        ucap_ipp_anho: parseInt(this.anho),
         ucap_ipp_valor: parseFloat(this.ipp),
         ucap_ipc_valor: parseFloat(this.ipc)
       }

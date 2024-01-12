@@ -1364,7 +1364,7 @@ class ElementoRepository @Inject()(dbapi: DBApi, gService: GeneralRepository)(
       SQL(
         query
       ).on(
-          'gene_id -> 10
+          'gene_id -> 12
         )
         .as(_parser.singleOpt)
         .getOrElse(1) > 0
