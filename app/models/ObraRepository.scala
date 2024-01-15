@@ -486,7 +486,8 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
                             LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
                             left join siap.ordentrabajo_obra oto1 on oto1.obra_id = r.obra_id 
                             INNER JOIN siap.reporte_estado e on r.rees_id = e.rees_id
-                    WHERE r.obra_id = {obra_id}""").
+                    WHERE r.obra_id = {obra_id} ORDER BY oto1.ortr_id DESC
+                    LIMIT 1;""").
             on(
                 'obra_id -> obra_id
             ).as(simple.singleOpt)
@@ -649,10 +650,8 @@ class ObraRepository @Inject()(dbapi: DBApi, eventoService: EventoRepository, el
     def buscarPorRango(anho: Int, mes: Int, empr_id: scala.Long) : Future[Iterable[Obra]] = Future[Iterable[Obra]] {
         db.withConnection { implicit connection => 
         var _list:ListBuffer[Obra] = new ListBuffer[Obra]()
-        var query: String = """SELECT r.*, oto1.ortr_id
-                                          FROM siap.obra r 
-                                          LEFT JOIN siap.barrio b on r.barr_id = b.barr_id
-                                          left join siap.ordentrabajo_obra oto1 on oto1.obra_id = r.obra_id 
+        var query: String = """SELECT r.*, -1 as ortr_id
+                                          FROM siap.obra r
                                           WHERE r.empr_id = {empr_id} and r.obra_fecharecepcion between {fecha_inicial} and {fecha_final}
                                           and r.rees_id <> 9 ORDER BY r.rees_id, r.obra_fecharecepcion DESC """
                     /*
