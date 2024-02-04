@@ -1,6 +1,6 @@
 <template>
   <el-menu class="navbar" mode="horizontal">
-    <hamburger class="hamburger-container" :toggleClick="toggleSideBar" :isActive="sidebar.opened"></hamburger>
+    <!--<hamburger class="hamburger-container" :toggleClick="toggleSideBar" :isActive="sidebar.opened"></hamburger> -->
     <div class="userinfo-container">
       <div style="display: inline;"><userinfo/><span style="padding: 10px; font-size: 12px;">Estado Actual del Sistema: {{ isIdle? "Inactivo": "Activo" }}</span></div>
     </div>
@@ -47,6 +47,7 @@ import Hamburger from '@/components/Hamburger'
 import ErrorLog from '@/components/ErrorLog'
 import ReporteAlert from '@/components/ReporteVencidoAlert'
 import SolicitudAlert from '@/components/SolicitudAlert'
+import Logo from './Logo'
 
 export default {
   components: {
@@ -55,7 +56,8 @@ export default {
     Hamburger,
     ErrorLog,
     ReporteAlert,
-    SolicitudAlert
+    SolicitudAlert,
+    Logo
   },
   computed: {
     ...mapGetters([

@@ -1,0 +1,144 @@
+#app {
+
+    // 主体区域 Main container
+    .main-container {
+      min-height: 100%;
+      transition: margin-left .28s;
+      margin-left: 0px;
+      position: relative;
+    }
+  
+    // 侧边栏 Menubar container
+    .menubar-container {
+      transition: width 0.28s;
+      width: $menuBarWidth !important;
+      height: $menuBarHeight;
+      position: relative;
+      font-size: 0px;
+      top: 50px;
+      bottom: 0;
+      left: 0;
+      z-index: 1001;
+      overflow: hidden;
+  
+      //reset element-ui css
+      /*.horizontal-collapse-transition {
+        transition: 0s width ease-in-out, 0s padding-left ease-in-out, 0s padding-right ease-in-out;
+      }
+  
+      .scrollbar-wrapper {
+        overflow-x: hidden !important;
+  
+        .el-scrollbar__view {
+          height: 95vh;
+        }
+      }
+  
+      .el-scrollbar__bar.is-vertical {
+        right: 0px;
+      }
+      */
+      a {
+        display: inline-block;
+        width: 100%;
+        overflow: hidden;
+      }
+  
+      .svg-icon {
+        margin-right: 16px;
+      }
+  
+      .el-menu {
+        border: none;
+        height: 60px;
+        width: 100% !important;
+      }
+  
+      // menu hover
+      .submenu-title-noDropdown,
+      .el-submenu__title {
+        &:hover {
+          background-color: $menuHover !important;
+        }
+      }
+  
+      .is-active>.el-submenu__title {
+        color: $subMenuActiveText !important;
+      }
+  
+      & .nest-menu .el-submenu>.el-submenu__title,
+      & .el-submenu .el-menu-item {
+        min-width: $menuBarWidth !important;
+        background-color: $subMenuBg !important;
+  
+        &:hover {
+          background-color: $subMenuHover !important;
+        }
+      }
+    }
+    
+    // 适配移动端, Mobile responsive
+    .mobile {
+      .main-container {
+        margin-left: 0px;
+      }
+  
+      .menubar-container {
+        transition: transform .28s;
+        width: 100% !important;
+      }
+  
+      &.hideMenubar {
+        .menubar-container {
+          pointer-events: none;
+          transition-duration: 0.3s;
+          transform: translate3d(-$menuBarWidth, 0, 0);
+        }
+      }
+    }
+  
+    .withoutAnimation {
+  
+      .main-container,
+      .menubar-container {
+        transition: none;
+      }
+    }
+  }
+  
+  // when menu collapsed
+  .el-menu--vertical {
+    &>.el-menu {
+      .svg-icon {
+        margin-right: 16px;
+      }
+    }
+  
+    .nest-menu .el-submenu>.el-submenu__title,
+    .el-menu-item {
+      &:hover {
+        // you can use $subMenuHover
+        background-color: $menuHover !important;
+      }
+    }
+  
+    // the scroll bar appears when the subMenu is too long
+    >.el-menu--popup {
+      max-height: 100vh;
+      overflow-y: auto;
+  
+      &::-webkit-scrollbar-track-piece {
+        background: #d3dce6;
+      }
+  
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+  
+      &::-webkit-scrollbar-thumb {
+        background: #99a9bf;
+        border-radius: 20px;
+      }
+    }
+  }
+  

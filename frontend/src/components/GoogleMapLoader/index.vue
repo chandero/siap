@@ -1,9 +1,14 @@
 <template>
   <el-container>
-    <el-main id="googleMap" ref="googleMap"></el-main>
-    <template v-if="Boolean(this.loader) && Boolean(this.map)">
-      <slot :loader="loader" :map="map"></slot>
-    </template>
+    <el-main id="googleMap" ref="googleMap">
+      <el-row>
+        <el-col>
+          <template v-if="Boolean(this.loader) && Boolean(this.map)">
+            <slot :loader="loader" :map="map"></slot>
+          </template>
+        </el-col>
+      </el-row>
+    </el-main>
   </el-container>
 </template>
 <script>
@@ -33,27 +38,31 @@ export default {
       mapId: 'cybersiap_map_1'
     })
 
-    this.loader.importLibrary('maps').then(({ Map }) => {
-      console.log('Map loaded')
-      const mapContainer = document.getElementById('googleMap')
-      // const mapContainer = this.$refs.googleMap
-      this.map = new Map(
-        mapContainer, this.mapConfig
-      )
-    }).catch(error => {
-      console.log('Map load error:', error)
-    })
-
-    this.loader.importLibrary('marker').then(({ Marker }) => {
-      console.log('Marker loaded')
-      const marker = new Marker({
-        position: { lat: 4.570868, lng: -74.297333 },
-        map: this.map,
-        title: 'Luminaria 10000'
+    this.loader
+      .importLibrary('maps')
+      .then(({ Map }) => {
+        console.log('Map loaded')
+        const mapContainer = document.getElementById('googleMap')
+        // const mapContainer = this.$refs.googleMap
+        this.map = new Map(mapContainer, this.mapConfig)
       })
-    }).catch(error => {
-      console.log('Marker load error:', error)
-    })
+      .catch(error => {
+        console.log('Map load error:', error)
+      })
+
+    this.loader
+      .importLibrary('marker')
+      .then(({ Marker }) => {
+        console.log('Marker loaded')
+        const marker = new Marker({
+          position: { lat: 4.570868, lng: -74.297333 },
+          map: this.map,
+          title: 'Luminaria 10000'
+        })
+      })
+      .catch(error => {
+        console.log('Marker load error:', error)
+      })
   },
 
   methods: {
@@ -61,9 +70,7 @@ export default {
       console.log('initializeMap')
       // const mapContainer = this.$refs.googleMap
       const mapContainer = document.getElementById('googleMap')
-      this.map = new Map(
-        mapContainer, this.mapConfig
-      )
+      this.map = new Map(mapContainer, this.mapConfig)
     }
   }
 }

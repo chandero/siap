@@ -30,7 +30,7 @@ export default {
   },
   data () {
     return {
-      apiKey: 'AIzaSyA7pz-4r8OtJyMBTCgpSQPGiU-TciYb5bM',
+      apiKey: 'AIzaSyBVdkH5xHLft7Mv-TRhxwsGiyiAncOyWt0',
       markers: null,
       dataLoaded: false,
       center: null
