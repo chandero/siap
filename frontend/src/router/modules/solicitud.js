@@ -9,7 +9,7 @@ const solicitudRouter = {
   meta: {
     title: 'menu_solicitud',
     icon: 'el-icon-postcard',
-    roles: ['super', 'admin', 'pqrs', 'gerencia', 'supervisor']
+    roles: ['super', 'admin', 'pqrs', 'gerencia', 'supervisor', 'interventoria']
   },
   children: [
     {
@@ -59,7 +59,7 @@ const solicitudRouter = {
       path: 'menu3detallado',
       component: () => import('@/views/solicitud/menu3detallado'),
       name: 'menu_solicitud_menu3detallado',
-      meta: { title: 'menu_solicitud_menu3detallado', icon: 'el-icon-tickets', roles: ['super', 'admin', 'gerencia', 'pqrs', 'supervisor'] }
+      meta: { title: 'menu_solicitud_menu3detallado', icon: 'el-icon-tickets', roles: ['super', 'admin', 'gerencia', 'pqrs', 'supervisor', 'interventoria'] }
     },
     {
       path: 'menu4porvencer',

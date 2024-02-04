@@ -27,7 +27,8 @@ export const interventoriaRole = {
   children: [
     procesoRouter,
     informeRouter,
-    inventarioRouter
+    inventarioRouter,
+    solicitudRouter
   ]
 }
 
