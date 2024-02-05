@@ -6,8 +6,12 @@
 		>
 		<el-main>
       <el-row>
-        <logo class="sidebar-logo-container"></logo>
-			  <navbar></navbar>
+        <el-col :xs="24" :sm="24" :md="3" :lg="3" :xl="3">
+          <logo class="sidebar-logo-container"></logo>
+        </el-col>
+        <el-col :xs="24" :sm="24" :md="21" :lg="21" :xl="21">
+			    <navbar></navbar>
+        </el-col>
       </el-row>
       <el-row>
         <menubar></menubar>
