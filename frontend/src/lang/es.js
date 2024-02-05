@@ -441,7 +441,7 @@ export default {
     'menu_proceso_menu4orden_menu4-1interna_menu4-1-1list': 'Lista',
     'menu_proceso_menu4orden_menu4-1interna_menu4-1-2create': 'Crear',
     'menu_proceso_menu4orden_menu4-1interna_menu4-1-3edit': 'Actualizar',
-    'menu_proceso_menu4orden_menu4-2externa': 'Municipio',
+    'menu_proceso_menu4orden_menu4-2externa': 'Historica',
     'menu_proceso_menu4orden_menu4-2externa_menu4-2-1list': 'Lista',
     'menu_proceso_menu4orden_menu4-2externa_menu4-2-2create': 'Crear',
     'menu_proceso_menu4orden_menu4-2externa_menu4-2-3edit': 'Actualizar',
@@ -1706,5 +1706,14 @@ export default {
   },
   element: {
     select: 'Seleccionar'
+  },
+  orhi: {
+    tabletitle: 'Orden de Trabajo Historica',
+    orhi_consecutivo: 'Consecutivo',
+    orhi_fechasolucion: 'Fecha Orden',
+    orhi_objeto: 'Objeto de la Orden',
+    orhi_direccion: 'Dirección de la Orden',
+    orhi_barrio: 'Barrio de la Orden',
+    orhi_edit: 'Actualizar Orden'
   }
 }

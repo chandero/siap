@@ -48,17 +48,52 @@ class GeoreferenciacionRepository @Inject()(
 
   private val db = dbapi.database("default")
 
-  def getGeoreferencia() = Future {
+  def getGeoreferencia(barr_id: Int, aap_tecnologia: String, aap_potencia: Int, aap_id: Int) = Future {
     db.withConnection{ implicit connection =>
-        val _query = """SELECT a1.aap_id::varchar, a1.aap_direccion, b1.barr_descripcion, ad1.aap_tecnologia, ad1.aap_potencia, a1.aap_lat, a1.aap_lng
+        val _consultaInicial = """SELECT a1.aap_id::varchar, a1.aap_direccion, b1.barr_descripcion, ad1.aap_tecnologia, ad1.aap_potencia, a1.aap_lat, a1.aap_lng
                         FROM siap.aap a1
                         LEFT JOIN siap.aap_adicional ad1 ON ad1.aap_id = a1.aap_id
                         LEFT JOIN siap.barrio b1 ON b1.barr_id = a1.barr_id
-                        WHERE a1.aap_lat IS NOT NULL AND a1.aap_lat <> '' AND a1.aap_lng IS NOT NULL AND a1.aap_lng <> '' and a1.esta_id = 1
-                    """
-        val _resultSet = SQL(_query).as(GeoreferenciaLuminaria._set *)
+                        WHERE a1.aap_lat IS NOT NULL AND a1.aap_lat <> '' AND a1.aap_lng IS NOT NULL AND a1.aap_lng <> '' AND a1.esta_id = 1"""
+        val _whereBarrio = """ AND b1.barr_id = {barr_id} """
+        val _WhereTecnologia = """ AND ad1.aap_tecnologia = {aap_tecnologia}"""
+        val _wherePotencia = """ AND ad1.aap_potencia = {aap_potencia}"""
+        val _whereLuminaria = """ AND a1.aap_id = {aap_id}"""
+        var _queryFinal = barr_id match {
+            case -1 => _consultaInicial 
+            case _ => _consultaInicial + _whereBarrio
+        }
+         _queryFinal = aap_tecnologia match {
+            case "-1" => _queryFinal
+            case _ => _queryFinal + _WhereTecnologia
+        }
+          _queryFinal = aap_potencia match {
+            case -1 => _queryFinal
+            case _ => _queryFinal + _wherePotencia
+        }
+        _queryFinal = aap_id match {
+            case -1 => _queryFinal
+            case _ => _queryFinal + _whereLuminaria
+        }
+        var _query = SQL(_queryFinal).on()
+        barr_id match {
+            case -1 =>None
+            case _ => _query=_query.on("barr_id" -> barr_id)
+        }
+        aap_tecnologia match {
+            case "-1" =>None
+            case _ => _query=_query.on("aap_tecnologia" -> aap_tecnologia)
+        }
+        aap_potencia match {
+            case -1 =>None
+            case _ => _query=_query.on("aap_potencia" -> aap_potencia)
+        }
+        aap_id match {
+            case -1 =>None
+            case _ => _query=_query.on("aap_id" -> aap_id)
+        }
+        val _resultSet = _query.as(GeoreferenciaLuminaria._set *)
         _resultSet
     }
   }
-
 }

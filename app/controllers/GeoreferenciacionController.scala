@@ -33,9 +33,9 @@ class GeoreferenciacionController @Inject()(
     DateTimeSerializer
   )
 
-  def getGeoreferencia(t: Integer) = authenticatedUserAction.async {
+  def getGeoreferencia(t: Integer, barr_id: Int,aap_tecnologia: String ,aap_potencia: Int, aap_id:Int) = authenticatedUserAction.async {
     implicit request: Request[AnyContent] =>
-      gService.getGeoreferencia().map { georeferencia =>
+      gService.getGeoreferencia(barr_id,aap_tecnologia,aap_potencia,aap_id).map { georeferencia =>
         Ok(write(georeferencia))
       }
   }
