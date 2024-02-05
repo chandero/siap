@@ -55,7 +55,7 @@ export default {
       tecnologias: [],
       potencias: [],
       aap_potencia: -1,
-      aap_id: '-1'
+      aap_id: -1
     }
   },
   beforeMount() {
@@ -65,20 +65,20 @@ export default {
         console.log('apiKey:', this.apiKey)
         getBarriosEmpresa().then(response => {
           this.options = response.data
-          this.options.push({ barr_id: -1, barr_descripcion: 'Filtrar Por Barrios' })
+          this.options.unshift({ barr_id: -1, barr_descripcion: 'Filtrar Por Barrios' })
           this.getMarkers()
         })
         getCaracteristica(7)
           .then(response => {
             const data = response.data.cara_valores.split(',')
             data.forEach(t => { this.tecnologias.push({ tecn_id: t, tecn_descripcion: t }) })
-            this.tecnologias.push({ tecn_id: '-1', tecn_descripcion: 'Filtrar por tecnologia' })
+            this.tecnologias.unshift({ tecn_id: '-1', tecn_descripcion: 'Filtrar por tecnologia' })
           })
         getCaracteristica(5)
           .then(response => {
             const data = response.data.cara_valores.split(',')
             data.forEach(p => { this.potencias.push({ pot_id: p, pot_descripcion: p }) })
-            this.potencias.push({ pot_id: -1, pot_descripcion: 'Filtrar por Potencias' })
+            this.potencias.unshift({ pot_id: -1, pot_descripcion: 'Filtrar por Potencias' })
           })
           .catch(error => {
             console.log(error)
@@ -88,8 +88,9 @@ export default {
         console.log(error)
       })
   },
-  methods: {
-    getMarkers() {
+  methods: { 
+    getMarkers() { 
+      if (!this.aap_id) { this.aap_id = '-1' }
       const loading = this.$loading({
         lock: true,
         text: 'Examinado Datos...',
@@ -113,18 +114,22 @@ export default {
     handleChangeBarrio() {
       console.log('Revisar:', this.barr_id)
       if (!this.barr_id) { this.barr_id = -1 }
+      this.dataLoaded = false
       this.getMarkers()
     },
     handleChangeTecnologia() {
       if (!this.aap_tecnologia) { this.aap_tecnologia = '-1' }
+      this.dataLoaded = false
       this.getMarkers()
     },
     handleChangePotencia() {
       if (!this.aap_potencia) { this.aap_potencia = -1 }
+      this.dataLoaded = false
       this.getMarkers()
     },
     handleChangeluminaria() {
       if (!this.aap_id) { this.aap_id = '-1' }
+      this.dataLoaded = false
       this.getMarkers()
     }
   },
