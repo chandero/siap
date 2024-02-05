@@ -6,6 +6,7 @@
 		>
 		<el-main>
       <el-row>
+        <logo class="sidebar-logo-container"></logo>
 			  <navbar></navbar>
       </el-row>
       <el-row>
@@ -23,7 +24,7 @@
 </template>
 <script>
 import { isReachable } from '@/api/isreachable'
-import { Navbar, Menubar, AppMain, TagsView } from './components'
+import { Navbar, Menubar, AppMain, TagsView, Logo } from './components'
 import ModalIdle from '@/components/ModalIdle'
 
 export default {
@@ -33,7 +34,8 @@ export default {
     Navbar,
     Menubar,
     AppMain,
-    TagsView
+    TagsView,
+    Logo
   },
   timers: {
     checkServer: { name: 'checkServer', time: 5000, autostart: true, repeat: true }

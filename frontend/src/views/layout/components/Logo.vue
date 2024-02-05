@@ -17,13 +17,6 @@
 import settings from '@/settings'
 
 export default {
-  name: 'SidebarLogo',
-  props: {
-    collapse: {
-      type: Boolean,
-      required: true
-    }
-  },
   data () {
     return {
       title: settings.title,
@@ -51,7 +44,7 @@ export default {
   text-align: center;
   overflow: hidden;
   & .sidebar-logo-link {
-    height: 50px;
+    height: 50px !important;
     width: 50px;
     & .sidebar-logo {
       // width: 32px;

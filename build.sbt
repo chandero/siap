@@ -3,7 +3,7 @@ mappings in Universal ++= directory(baseDirectory.value / "public")
 
 name := "siap"
 
-version := "2.1.10"
+version := "2.2.1"
 
 packageSummary in Windows := "SIAP v2.0"
 packageDescription in Windows := "Inventario de Luminarias SIAP"
