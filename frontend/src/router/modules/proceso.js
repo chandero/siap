@@ -663,7 +663,7 @@ const procesoRouter = {
           path: 'menu4-2externa',
           component: () => import('@/views/proceso/menu4orden/menu4-2externa'),
           name: 'menu_proceso_menu4orden_menu4-2externa',
-          hidden: true,
+          hidden: false,
           meta: {
             title: 'menu_proceso_menu4orden_menu4-2externa',
             icon: 'el-icon-receiving',
@@ -698,7 +698,7 @@ const procesoRouter = {
               }
             },
             {
-              path: 'menu4-2-3edit/:id',
+              path: 'menu4-2-3edit/:id?',
               component: () =>
                 import(
                   '@/views/proceso/menu4orden/menu4-2externa/menu4-2-3edit'
