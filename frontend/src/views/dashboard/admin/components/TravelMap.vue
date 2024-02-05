@@ -88,9 +88,8 @@ export default {
         console.log(error)
       })
   },
-  methods: { 
-    getMarkers() { 
-      if (!this.aap_id) { this.aap_id = '-1' }
+  methods: {
+    getMarkers() {
       const loading = this.$loading({
         lock: true,
         text: 'Examinado Datos...',
