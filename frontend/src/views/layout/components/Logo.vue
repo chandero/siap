@@ -1,5 +1,5 @@
 <template>
-  <div :class="{'collapse':collapse}">
+  <div>
     <transition name="sidebarLogoFade">
       <router-link v-if="collapse" key="collapse" class="sidebar-logo-link" to="/">
         <img v-if="logo" :src="minilogo" class="sidebar-logo">
