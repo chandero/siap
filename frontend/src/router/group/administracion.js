@@ -8,6 +8,10 @@ import Layout from '../../views/layout/Layout'
 
 import admininventarioRole from '../roles/admininventario'
 import interventoriaRole from '../roles/interventoria'
+import alcaldeRole from '../roles/alcalde'
+import supervisorcontratodeRole from '../roles/supervisorcontrato'
+import contraloriarole from '../roles/contraloria'
+import haciendarole from '../roles/hacienda'
 
 export const administradorGroup = {
   path: '/administrador',
@@ -16,13 +20,17 @@ export const administradorGroup = {
   name: 'grupo_administrador',
   single: false,
   meta: {
-    title: 'group.administrador',
+    title: 'AD MUNICIPAL',
     icon: 'audit',
     roles: ['super', 'admin', 'administradorsap', 'operadorsap']
   },
   children: [
     admininventarioRole,
-    interventoriaRole
+    interventoriaRole,
+    alcaldeRole,
+    supervisorcontratodeRole,
+    contraloriarole,
+    haciendarole
   ]
 }
 
