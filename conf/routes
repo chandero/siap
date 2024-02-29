@@ -880,3 +880,9 @@ GET /assets/*file   controllers.Assets.at(path="/public", file)
 # google reoutes
 GET /api/google/controller/key  controllers.GoogleController.getKey()
 
+# Actas
+
+GET /api/actas/exp controllers.acta91Expansion (fecha_inicial: Long, fecha_final: Long) 
+
+
+
