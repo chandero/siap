@@ -1714,6 +1714,16 @@ export default {
     orhi_objeto: 'Objeto de la Orden',
     orhi_direccion: 'Dirección de la Orden',
     orhi_barrio: 'Barrio de la Orden',
-    orhi_edit: 'Actualizar Orden'
+    orhi_edit: 'Actualizar Orden',
+    general: 'Datos Generales',
+    orhi_fecharecepcion: 'Fecha de la Orden',
+    orhi_reti_id: 'Tipo de Obra',
+    tipo_expansion: {
+      title: 'Tipo de Expansión'
+    },
+    consecutivo: 'Número de Acta de Orden',
+    barr_id: 'Barrio',
+    orhi_descripcion: 'Descripción del Acta de Orden',
+    orhi_material: 'Material Utilizado'
   }
 }

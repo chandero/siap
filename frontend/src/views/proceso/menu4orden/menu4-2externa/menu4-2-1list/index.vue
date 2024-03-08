@@ -5,7 +5,6 @@
       <el-container>
         <el-header>
           <el-button size="mini" type="primary" icon="el-icon-circle-plus" circle @click="nuevo"></el-button>
-          <el-button size="mini" type="warning" icon="el-icon-search" circle disabled></el-button>
           <el-button size="mini" type="success" icon="el-icon-refresh" circle @click="actualizar"></el-button>
         </el-header>
         <el-main>
@@ -17,9 +16,9 @@
                 <span style="margin-left: 10px">{{ scope.row.orhi_consecutivo }}</span>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('orhi.orhi_fechasolucion')" width="100" prop="orhi_fechasolucion">
+            <el-table-column :label="$t('orhi.orhi_fecharecepcion')" width="100" prop="orhi_fecharecepcion">
               <template slot-scope="scope">
-                <span style="margin-left: 10px">{{ scope.row.orhi_fechasolucion }}</span>
+                <span style="margin-left: 10px">{{ scope.row.orhi_fecharecepcion | moment("YYYY-MM-DD") }}</span>
               </template>
             </el-table-column>
             <el-table-column :label="$t('orhi.orhi_objeto')" width="350" prop="orhi_objeto">
@@ -45,8 +44,6 @@
               <template slot-scope="scope">
                 <el-button size="mini" title="Editar" @click="handleEdit(scope.$index, scope.row)"><i
                     class="el-icon-edit"></i></el-button>
-                <el-button size="mini" type="success" title="Informe" @click="handleInforme(scope.$index, scope.row)"><i
-                    class="el-icon-date"></i></el-button>
                 <el-button size="mini" type="danger" title="Eliminar" @click="handleDelete(scope.$index, scope.row)"><i
                     class="el-icon-delete"></i></el-button>
               </template>
@@ -59,7 +56,7 @@
 </template>
 
 <script>
-import { getOrders, deleteOrder } from '@/api/ordentrabajohistoria'
+import { getOrders, deleteOrder } from '@/api/ordentrabajo_historico'
 import { getBarriosEmpresa } from '@/api/barrio'
 
 export default {

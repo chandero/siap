@@ -859,8 +859,12 @@ GET /api/acin/gen/:a/:p/:t          controllers.ActaIndisponibilidadController.c
 POST /api/acre                          controllers.ActaRedimensionamientoController.getActasRedimensionamiento
 
 # OrdenTrabajoHistoria
+GET  /api/orhi/get/:id                   controllers.OrdenTrabajoHistoriaController.getOrden(id: Long)
 GET  /api/orhi/all                   controllers.OrdenTrabajoHistoriaController.getOrders()
 POST /api/orhi/save                  controllers.OrdenTrabajoHistoriaController.saveOrder()
+GET  /api/orhi/elementos             controllers.OrdenTrabajoHistoriaController.getElementos()
+GET  /api/orhi/elemento/desc/:d             controllers.OrdenTrabajoHistoriaController.getElementoByDescripcion(d: String)
+GET  /api/orhi/elemento/code/:d             controllers.OrdenTrabajoHistoriaController.getElementoByCodigo(d: String)
 # Auditoria
 GET /api/audi/coau/l/:fi/:ff            controllers.CodigoautorizacionController.informeUsoCodigoAutorizacion(fi: Long, ff: Long)
 GET /api/audi/coau/lxlsx/:fi/:ff            controllers.CodigoautorizacionController.informeUsoCodigoAutorizacionXlsx(fi: Long, ff: Long)
@@ -877,7 +881,7 @@ GET /api/progressStatuses/:uuid controllers.ProcessingProgressController.getProg
 
 GET /assets/*file   controllers.Assets.at(path="/public", file)
 
-# google reoutes
+# google routes
 GET /api/google/controller/key  controllers.GoogleController.getKey()
 
 # Actas

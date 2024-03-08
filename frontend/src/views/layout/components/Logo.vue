@@ -19,6 +19,7 @@ import settings from '@/settings'
 export default {
   data () {
     return {
+      collapse: false,
       title: settings.title,
       logo: 'logoisag.png',
       minilogo: 'farolisag.png'

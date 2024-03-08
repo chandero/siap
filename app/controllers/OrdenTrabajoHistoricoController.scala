@@ -29,6 +29,12 @@ class OrdenTrabajoHistoriaController @Inject()(
   )
 
 
+    def getOrden(id: Long)   = authenticatedUserAction.async {
+        ordenService.getOrden(id).map { result =>
+            Ok(write(result))
+        }
+    }
+
     def getOrders() = authenticatedUserAction.async {
         ordenService.getOrders().map { result =>
             Ok(write(result))
@@ -42,8 +48,32 @@ class OrdenTrabajoHistoriaController @Inject()(
         val empr_id = Utility.extraerEmpresa(request)
         val usua_id = Utility.extraerUsuario(request)
 
-        ordenService.saveOrder(ordenTrabajoHistorico, empr_id.get, usua_id.get).map { result =>
+        ordenService.save(ordenTrabajoHistorico, empr_id.get, usua_id.get).map { result =>
             Ok(write(result))
         }
     }
+
+    def getElementos = authenticatedUserAction.async { implicit request =>
+        val empr_id = Utility.extraerEmpresa(request)
+        val usua_id = Utility.extraerUsuario(request)
+        ordenService.elementos(empr_id.get).map { result =>
+            Ok(write(result))
+        }
+    }
+
+    def getElementoByDescripcion(elhi_descripcion: String) = authenticatedUserAction.async { implicit request =>
+        val empr_id = Utility.extraerEmpresa(request)
+        val usua_id = Utility.extraerUsuario(request)
+        ordenService.getElementoByDescripcion(elhi_descripcion, empr_id.get).map { result =>
+            Ok(write(result))
+        }
+    }
+
+    def getElementoByCodigo(elhi_codigo: String) = authenticatedUserAction.async { implicit request =>
+        val empr_id = Utility.extraerEmpresa(request)
+        val usua_id = Utility.extraerUsuario(request)
+        ordenService.getElementoByCodigo(elhi_codigo, empr_id.get).map { result =>
+            Ok(write(result))
+        }
+    }    
 }
