@@ -340,7 +340,7 @@
         type="primary"
         icon="el-icon-check"
         @click="confirmacionGuardar = !confirmacionGuardar"
-        >Guardar Obra</el-button
+        >Guardar Acta Orden</el-button
       >
       <el-button
         v-if="canPrint"
@@ -354,7 +354,7 @@
     </el-footer>
     <el-dialog title="Confirmación" :visible.sync="confirmacionGuardar">
       <span style="font-size:20px;"
-        >Seguro de Guardar las Modificaciones a la Orden?</span
+        >Seguro de Guardar las Modificaciones a la Acta Orden?</span
       >
       <span slot="footer" class="dialog-footer">
         <el-button @click="confirmacionGuardar = false">No</el-button>

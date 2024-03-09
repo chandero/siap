@@ -1709,7 +1709,7 @@ export default {
   },
   orhi: {
     tabletitle: 'Orden de Trabajo Historica',
-    orhi_consecutivo: 'Consecutivo',
+    orhi_consecutivo: 'Acta Orden No.',
     orhi_fechasolucion: 'Fecha Orden',
     orhi_objeto: 'Objeto de la Orden',
     orhi_direccion: 'Dirección de la Orden',
@@ -1721,9 +1721,11 @@ export default {
     tipo_expansion: {
       title: 'Tipo de Expansión'
     },
-    consecutivo: 'Número de Acta de Orden',
+    consecutivo: 'Acta Orden No.',
     barr_id: 'Barrio',
     orhi_descripcion: 'Descripción del Acta de Orden',
-    orhi_material: 'Material Utilizado'
+    orhi_material: 'Material Utilizado',
+    barr_descripcion: 'Barrio',
+    reti_id: 'TIpo de Obra'
   }
 }
