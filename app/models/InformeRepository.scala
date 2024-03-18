@@ -4865,7 +4865,7 @@ ORDER BY e.reti_id, e.elem_codigo        """)
                                             left join siap.aap_conexion co on co.aaco_id = ed.aaco_id
                                             left join siap.aap_uso au on au.aaus_id = eda.aaus_id
                                             LEFT JOIN siap.aap_cuentaap ac on ac.aacu_id = eda.aacu_id
-                                            where r.reti_id IN (3,7) and r.rees_id = 3 and r.empr_id = {empr_id} and a.aap_id = {aap_id} and e.even_estado <> 9
+                                            where r.reti_id IN (3, 7) and r.rees_id = 3 and r.empr_id = {empr_id} and a.aap_id = {aap_id} and e.even_estado <> 9
                                             ORDER BY r.repo_fechasolucion desc LIMIT 1"""
           ).on(
               'fecha_inicial -> fi.getTime(),
@@ -4909,7 +4909,7 @@ ORDER BY e.reti_id, e.elem_codigo        """)
                                             left join siap.aap_conexion co on co.aaco_id = ed.aaco_id
                                             left join siap.aap_uso au on au.aaus_id = eda.aaus_id
                                             LEFT JOIN siap.aap_cuentaap ac on ac.aacu_id = eda.aacu_id
-                                            where r.reti_id IN (3,7) and r.rees_id = 3 and r.repo_fechasolucion between {fecha_inicial} AND {fecha_final} and r.empr_id = {empr_id} and e.even_estado <> 9"""
+                                            where r.reti_id IN (3, 7) and r.rees_id = 3 and r.repo_fechasolucion between {fecha_inicial} AND {fecha_final} and r.empr_id = {empr_id} and e.even_estado <> 9"""
         ).on(
             'fecha_inicial -> fi.getTime(),
             'fecha_final -> ff.getTime(),
