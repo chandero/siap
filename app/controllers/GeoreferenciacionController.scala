@@ -39,4 +39,9 @@ class GeoreferenciacionController @Inject()(
         Ok(write(georeferencia))
       }
   }
+
+  def getKey() = authenticatedUserAction  {
+    val apiKey: String = config.get[String]("google.apiKey")
+    Ok(apiKey)
+  }  
 }

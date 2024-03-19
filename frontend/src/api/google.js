@@ -2,7 +2,7 @@
 import request from '@/utils/request'
 export function apiKey() {
   return request({
-    url: '/google/controller/key',
+    url: '/geo/key',
     method: 'get'
   })
 }

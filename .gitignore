@@ -21,3 +21,5 @@ front/package-lock.json
 *.backup
 /.metals
 .metals/*
+.bloop
+project/.bloop

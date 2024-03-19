@@ -2145,7 +2145,7 @@ class InformeRepository @Inject()(
         SQL("""SELECT b.barr_descripcion, count(r) as visitas FROM
                 siap.reporte r 
                 LEFT JOIN siap.barrio b ON b.barr_id = r.barr_id
-                WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and r.empr_id = {empr_id} and r.reti_id = 1
+                WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id = 3 and r.empr_id = {empr_id} and r.reti_id = 1
                 GROUP BY b.barr_descripcion
                 ORDER BY b.barr_descripcion
             """)
