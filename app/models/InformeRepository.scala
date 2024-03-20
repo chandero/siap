@@ -2363,7 +2363,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
                     LEFT JOIN siap.reporte_direccion rd1 ON rd1.repo_id = r.repo_id and rd1.even_estado < 9
                     LEFT JOIN siap.reporte_evento t on t.repo_id = rd1.repo_id and t.aap_id = rd1.aap_id
-                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id
+                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id and otr1.ortr_id = (select max(ortr_id) from siap.ordentrabajo_reporte where repo_id = r.repo_id and tireuc_id = r.tireuc_id) 
                     LEFT JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
                     LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
@@ -2382,7 +2382,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
                     LEFT JOIN siap.control_reporte_direccion rd1 ON rd1.repo_id = r.repo_id and rd1.even_estado < 9
                     LEFT JOIN siap.control_reporte_evento t on t.repo_id = rd1.repo_id and t.aap_id = rd1.aap_id
-                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id
+                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id and otr1.ortr_id = (select max(ortr_id) from siap.ordentrabajo_reporte where repo_id = r.repo_id and tireuc_id = r.tireuc_id)
                     LEFT JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
                     LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
@@ -2401,11 +2401,30 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
                     LEFT JOIN siap.transformador_reporte_direccion rd1 ON rd1.repo_id = r.repo_id and rd1.even_estado < 9 
                     LEFT JOIN siap.transformador_reporte_evento t on t.repo_id = rd1.repo_id and t.aap_id = rd1.aap_id
-                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id
+                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id and otr1.ortr_id = (select max(ortr_id) from siap.ordentrabajo_reporte where repo_id = r.repo_id and tireuc_id = r.tireuc_id)
                     LEFT JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
                     LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
                     WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado <> 9 and r.empr_id = {empr_id}
+                    UNION ALL
+                    SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
+                          r.repo_consecutivo, 
+                          r.repo_fechasolucion,
+                          'Medidor' as tipo, 
+                          t.aap_id,
+                          t.even_codigo_retirado, t.even_cantidad_retirado, 
+                          t.even_codigo_instalado, t.even_cantidad_instalado,
+                          c1.cuad_descripcion 
+                    FROM siap.medidor_reporte r
+                    LEFT JOIN siap.medidor_reporte_adicional a on a.repo_id = r.repo_id
+                    LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
+                    LEFT JOIN siap.medidor_reporte_direccion rd1 ON rd1.repo_id = r.repo_id and rd1.even_estado < 9 
+                    LEFT JOIN siap.medidor_reporte_evento t on t.repo_id = rd1.repo_id and t.aap_id = rd1.aap_id
+                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id and otr1.ortr_id = (select max(ortr_id) from siap.ordentrabajo_reporte where repo_id = r.repo_id and tireuc_id = r.tireuc_id)
+                    LEFT JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
+                    LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
+                    INNER JOIN siap.elemento e on e.elem_id = t.elem_id
+                    WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado <> 9 and r.empr_id = {empr_id}                    
                     UNION ALL                    
                     SELECT e.elem_codigo, e.elem_descripcion,  CONCAT('OBRA', ' ', r.obra_nombre) as reti_descripcion, 
                           r.obra_consecutivo as repo_consecutivo, 
@@ -2417,11 +2436,11 @@ ORDER BY e.reti_id, e.elem_codigo""")
                           c1.cuad_descripcion 
                     FROM siap.obra r
                     LEFT JOIN siap.obra_evento t on t.obra_id = r.obra_id
-                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.obra_id
+                    LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.obra_id and otr1.ortr_id = (select max(ortr_id) from siap.ordentrabajo_reporte where repo_id = r.obra_id and tireuc_id = 99)
                     LEFT JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.obra_fechasolucion
                     LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
-                    WHERE r.obra_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = {empr_id}
+                    WHERE r.obra_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado <> 9 and r.empr_id = {empr_id}
                     ORDER BY reti_descripcion, elem_codigo""")
           .on(
             'fecha_inicial -> fi.getTime(),
