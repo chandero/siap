@@ -2485,7 +2485,7 @@ export default {
       const data = {
         reporte: this.reporte
       }
-      updateReporteParcial(data)
+      /* updateReporteParcial(data)
         .then((response) => {
           this.repo_fecharecepcion = this.reporte.repo_fecharecepcion
           this.repo_direccion = this.reporte.repo_direccion
@@ -2505,7 +2505,7 @@ export default {
             message: 'Reporte NO se actualizó, error:' + error,
             type: 'warning'
           })
-        })
+        }) */
     },
     ordenes (id) {
       if (id === undefined || id === null) {
@@ -3385,7 +3385,7 @@ export default {
             }
           )
             .then(({ value }) => {
-              validar(1, value)
+              /* validar(1, value)
                 .then((response) => {
                   if (response.data === true) {
                     this.invalid = false
@@ -3416,7 +3416,7 @@ export default {
                     duration: 5000
                   })
                   this.invalid = true
-                })
+                }) */
             })
             .catch(() => {
               direccion.aap_id = null
@@ -3978,7 +3978,7 @@ export default {
           cancelButtonText: 'Cancelar'
         }
       ).then(({ value }) => {
-        validar(3, value)
+        /* validar(3, value)
           .then((response) => {
             if (response.data === true) {
               this.autorizacion = value
@@ -4007,7 +4007,7 @@ export default {
               message: 'Se presentó error al válidar el código (' + error + ')',
               duration: 5000
             })
-          })
+          }) */
       })
     },
     obtenerReporte () {
@@ -4048,7 +4048,7 @@ export default {
                   }
                 )
                   .then(({ value }) => {
-                    validar(2, value)
+                    /* validar(2, value)
                       .then((response) => {
                         if (response.data === true) {
                           this.invalid = false
@@ -4081,7 +4081,7 @@ export default {
                           duration: 5000
                         })
                         this.invalid = true
-                      })
+                      }) */
                   })
                   .catch(() => {
                     this.$message({

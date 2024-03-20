@@ -2249,7 +2249,7 @@ export default {
       const data = {
         reporte: this.reporte
       }
-      updateReporteParcial(data)
+      /* updateReporteParcial(data)
         .then((response) => {
           this.repo_fecharecepcion = this.reporte.repo_fecharecepcion
           this.repo_direccion = this.reporte.repo_direccion
@@ -2269,7 +2269,7 @@ export default {
             message: 'Reporte NO se actualizó, error:' + error,
             type: 'warning'
           })
-        })
+        }) */
     },
     ordenes(id) {
       if (id === undefined || id === null) {
@@ -3263,7 +3263,7 @@ export default {
           coau_codigo: this.autorizacion
         }
         if (this.reporte.repo_id !== null) {
-          updateReporteMigracion(data)
+          /* updateReporteMigracion(data)
             .then((response) => {
               if (response.status === 200) {
                 localStorage.removeItem('currEditRepMigFechaIni')
@@ -3279,9 +3279,9 @@ export default {
             .catch((error) => {
               this.reporte.rees_id = 2
               this.error(error)
-            })
+            }) */
         } else {
-          saveReporteMigracion(this.reporte).then(response => {
+          /* saveReporteMigracion(this.reporte).then(response => {
             if (response.status === 201) {
               this.reporte.repo_id = response.data.id
               this.guardando = false
@@ -3315,7 +3315,7 @@ export default {
           }).catch(error => {
             this.reporte.rees_id = 2
             this.error(error)
-          })
+          }) */
         }
       }
       start()

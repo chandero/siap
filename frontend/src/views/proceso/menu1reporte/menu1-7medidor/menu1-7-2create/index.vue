@@ -613,7 +613,7 @@ export default {
       if (this.reporte.repo_apoyo === null || this.reporte.repo_apoyo === '' || this.aap !== null) {
 
       } else {
-        getAapApoyo(this.reporte.repo_apoyo).then(response => {
+        /* getAapApoyo(this.reporte.repo_apoyo).then(response => {
           if (response.status === 200) {
             var aap = response.data
             this.reporte.repo_codigo = aap.aap_id
@@ -627,7 +627,7 @@ export default {
           }
         }).catch(error => {
           console.log('getAap: ' + error)
-        })
+        }) */
       }
     },
     tiporeporte (reti_id) {

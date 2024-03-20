@@ -91,6 +91,7 @@ case class Siap_detallado_material(
     reti_descripcion: Option[String],
     repo_numero: Option[scala.Long],
     repo_fechasolucion: Option[DateTime],
+    tipo: Option[String],
     aap_id: Option[scala.Long],
     even_codigo_retirado: Option[String],
     even_cantidad_retirado: Option[Double],
@@ -609,6 +610,7 @@ object Siap_detallado_material {
       "reti_descripcion" -> srm.reti_descripcion,
       "repo_numero" -> srm.repo_numero,
       "repo_fechasolucion" -> srm.repo_fechasolucion,
+      "tipo" -> srm.tipo,
       "aap_id" -> srm.aap_id,
       "even_codigo_retirado" -> srm.even_codigo_retirado,
       "even_cantidad_retirado" -> srm.even_cantidad_retirado,
@@ -885,6 +887,7 @@ case class Siap_retiro_reubicacion(
 )
 
 case class Siap_consolidado(
+    tipo: Option[String],
     repo_consecutivo: Option[Int],
     repo_fecharecepcion: Option[DateTime],
     repo_nombre: Option[String],
@@ -1004,6 +1007,7 @@ object Siap_consolidado {
 
   implicit val scWrites = new Writes[Siap_consolidado] {
     def writes(sc: Siap_consolidado) = Json.obj(
+      "tipo" -> sc.tipo,
       "repo_consecutivo" -> sc.repo_consecutivo,
       "repo_fecharecepcion" -> sc.repo_fecharecepcion,
       "repo_nombre" -> sc.repo_nombre,
@@ -1019,6 +1023,7 @@ object Siap_consolidado {
   }
 
   val set = {
+    get[Option[String]]("tipo") ~
     get[Option[Int]]("repo_consecutivo") ~
       get[Option[DateTime]]("repo_fecharecepcion") ~
       get[Option[String]]("repo_nombre") ~
@@ -1030,7 +1035,8 @@ object Siap_consolidado {
       get[Option[String]]("repo_descripcion") ~
       get[Option[DateTime]]("repo_fechasolucion") ~
       get[Option[String]]("repo_reportetecnico") map {
-      case repo_consecutivo ~
+      case tipo ~
+            repo_consecutivo ~
             repo_fecharecepcion ~
             repo_nombre ~
             repo_telefono ~
@@ -1042,6 +1048,7 @@ object Siap_consolidado {
             repo_fechasolucion ~
             repo_reportetecnico =>
         new Siap_consolidado(
+          tipo,
           repo_consecutivo,
           repo_fecharecepcion,
           repo_nombre,
@@ -2088,6 +2095,7 @@ class InformeRepository @Inject()(
       get[Option[String]]("reti_descripcion") ~
       get[Option[scala.Long]]("repo_consecutivo") ~
       get[Option[DateTime]]("repo_fechasolucion") ~
+      get[Option[String]]("tipo") ~
       get[Option[scala.Long]]("aap_id") ~
       get[Option[String]]("even_codigo_retirado") ~
       get[Option[Double]]("even_cantidad_retirado") ~
@@ -2099,6 +2107,7 @@ class InformeRepository @Inject()(
             reti_descripcion ~
             repo_consecutivo ~
             repo_fechasolucion ~
+            tipo ~
             aap_id ~
             even_codigo_retirado ~
             even_cantidad_retirado ~
@@ -2111,6 +2120,7 @@ class InformeRepository @Inject()(
           reti_descripcion,
           repo_consecutivo,
           repo_fechasolucion,
+          tipo,
           aap_id,
           even_codigo_retirado,
           even_cantidad_retirado,
@@ -2338,27 +2348,31 @@ ORDER BY e.reti_id, e.elem_codigo""")
         ff.set(Calendar.SECOND, 59)
         ff.set(Calendar.MINUTE, 59)
         ff.set(Calendar.HOUR, 23)
-        SQL("""SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
-                          r.repo_consecutivo, 
-                          r.repo_fechasolucion,
-                          t.aap_id,
-                          t.even_codigo_retirado, t.even_cantidad_retirado, 
-                          t.even_codigo_instalado, t.even_cantidad_instalado,
-                          c1.cuad_descripcion 
+        SQL("""SELECT e.elem_codigo, 
+                      e.elem_descripcion, 
+                      p.reti_descripcion, 
+                      r.repo_consecutivo, 
+                      r.repo_fechasolucion,
+                      'Luminaria' as tipo,
+                      t.aap_id,
+                      t.even_codigo_retirado, t.even_cantidad_retirado, 
+                      t.even_codigo_instalado, t.even_cantidad_instalado,
+                      c1.cuad_descripcion 
                     FROM siap.reporte r
                     LEFT JOIN siap.reporte_adicional a on a.repo_id = r.repo_id
                     LEFT JOIN siap.reporte_tipo p on p.reti_id = r.reti_id
                     LEFT JOIN siap.reporte_direccion rd1 ON rd1.repo_id = r.repo_id and rd1.even_estado < 9
                     LEFT JOIN siap.reporte_evento t on t.repo_id = rd1.repo_id and t.aap_id = rd1.aap_id
                     LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id
-                    INNER JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
+                    LEFT JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
                     LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
                     WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado <> 9 and r.empr_id = {empr_id}
                     UNION ALL
                     SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
                           r.repo_consecutivo, 
-                          r.repo_fechasolucion, 
+                          r.repo_fechasolucion,
+                          'Control' as tipo, 
                           t.aap_id,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
                           t.even_codigo_instalado, t.even_cantidad_instalado,
@@ -2369,14 +2383,15 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     LEFT JOIN siap.control_reporte_direccion rd1 ON rd1.repo_id = r.repo_id and rd1.even_estado < 9
                     LEFT JOIN siap.control_reporte_evento t on t.repo_id = rd1.repo_id and t.aap_id = rd1.aap_id
                     LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id
-                    INNER JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
+                    LEFT JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
                     LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
                     WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado <> 9 and r.empr_id = {empr_id}
                     UNION ALL
                     SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
                           r.repo_consecutivo, 
-                          r.repo_fechasolucion, 
+                          r.repo_fechasolucion,
+                          'Transformador' as tipo, 
                           t.aap_id,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
                           t.even_codigo_instalado, t.even_cantidad_instalado,
@@ -2387,7 +2402,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     LEFT JOIN siap.transformador_reporte_direccion rd1 ON rd1.repo_id = r.repo_id and rd1.even_estado < 9 
                     LEFT JOIN siap.transformador_reporte_evento t on t.repo_id = rd1.repo_id and t.aap_id = rd1.aap_id
                     LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.repo_id and otr1.tireuc_id = r.tireuc_id
-                    INNER JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
+                    LEFT JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.repo_fechasolucion
                     LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
                     WHERE r.repo_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado <> 9 and r.empr_id = {empr_id}
@@ -2395,6 +2410,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     SELECT e.elem_codigo, e.elem_descripcion,  CONCAT('OBRA', ' ', r.obra_nombre) as reti_descripcion, 
                           r.obra_consecutivo as repo_consecutivo, 
                           r.obra_fechasolucion,
+                          'Obra' as tipo,
                           0 as aap_id,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
                           t.even_codigo_instalado, t.even_cantidad_instalado,
@@ -2402,7 +2418,7 @@ ORDER BY e.reti_id, e.elem_codigo""")
                     FROM siap.obra r
                     LEFT JOIN siap.obra_evento t on t.obra_id = r.obra_id
                     LEFT JOIN siap.ordentrabajo_reporte otr1 on otr1.repo_id = r.obra_id
-                    INNER JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.obra_fechasolucion
+                    LEFT JOIN siap.ordentrabajo ot1 on ot1.ortr_id = otr1.ortr_id and ot1.ortr_fecha = r.obra_fechasolucion
                     LEFT JOIN siap.cuadrilla c1 on c1.cuad_id = ot1.cuad_id
                     INNER JOIN siap.elemento e on e.elem_id = t.elem_id
                     WHERE r.obra_fechasolucion BETWEEN {fecha_inicial} and {fecha_final} and r.rees_id < 9 and t.even_estado < 9 and r.empr_id = {empr_id}
@@ -3035,7 +3051,8 @@ ORDER BY e.reti_id, e.elem_codigo        """)
          */
         SQL("""SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
                           r.repo_consecutivo, 
-                          r.repo_fechasolucion, 
+                          r.repo_fechasolucion,
+                          'Luminaria' as tipo,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
                           t.even_codigo_instalado, t.even_cantidad_instalado 
                     FROM siap.reporte r
@@ -3047,7 +3064,8 @@ ORDER BY e.reti_id, e.elem_codigo        """)
                     UNION ALL
                     SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
                           r.repo_consecutivo, 
-                          r.repo_fechasolucion, 
+                          r.repo_fechasolucion,
+                          'Control' as tipo,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
                           t.even_codigo_instalado, t.even_cantidad_instalado 
                     FROM siap.control_reporte r
@@ -3059,7 +3077,8 @@ ORDER BY e.reti_id, e.elem_codigo        """)
                     UNION ALL
                     SELECT e.elem_codigo, e.elem_descripcion, p.reti_descripcion, 
                           r.repo_consecutivo, 
-                          r.repo_fechasolucion, 
+                          r.repo_fechasolucion,
+                          'Transformador' as tipo, 
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
                           t.even_codigo_instalado, t.even_cantidad_instalado 
                     FROM siap.transformador_reporte r
@@ -3071,7 +3090,8 @@ ORDER BY e.reti_id, e.elem_codigo        """)
                     UNION ALL                    
                     SELECT e.elem_codigo, e.elem_descripcion,  CONCAT('OBRA', ' ', r.obra_nombre) as reti_descripcion, 
                           r.obra_consecutivo as repo_consecutivo, 
-                          r.obra_fechasolucion, 
+                          r.obra_fechasolucion,
+                          'Obra' as tipo,
                           t.even_codigo_retirado, t.even_cantidad_retirado, 
                           t.even_codigo_instalado, t.even_cantidad_instalado 
                     FROM siap.obra r
@@ -5686,26 +5706,93 @@ ORDER BY e.reti_id, e.elem_codigo        """)
       ff.set(Calendar.SECOND, 59)
       ff.set(Calendar.MINUTE, 59)
       ff.set(Calendar.HOUR, 23)
-      SQL("""select distinct 
-                    r.repo_consecutivo,
-                    r.repo_fecharecepcion,
-                    r.repo_nombre,
-                    r.repo_telefono,
-                    r.repo_direccion,
-                    b.barr_descripcion,
-                    case when b.tiba_id = 2 then 'X' else '' end as vereda,
-                    o.orig_descripcion,
-                    a.acti_descripcion,
-                    r.repo_descripcion,
-                    r.repo_fechasolucion,
-                    r.repo_reportetecnico
-                   from siap.reporte r 
-                    left join siap.reporte_adicional ra on ra.repo_id = r.repo_id
-                    left join siap.barrio b on b.barr_id = r.barr_id
-                    left join siap.origen o on o.orig_id = r.orig_id
-                    left join siap.actividad a on a.acti_id = ra.acti_id
-                    where r.reti_id = 1 and r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.empr_id = {empr_id} and r.rees_id = 3
-                    order by r.repo_fecharecepcion, r.repo_consecutivo""")
+      SQL("""
+      select r.* from (
+    select distinct 
+    	'Luminaria' as tipo,
+    	r.repo_consecutivo,
+        r.repo_fecharecepcion,
+        r.repo_nombre,
+        r.repo_telefono,
+        r.repo_direccion,
+        b.barr_descripcion,
+        case when b.tiba_id = 2 then 'X' else '' end as vereda,
+        o.orig_descripcion,
+    	a.acti_descripcion,
+    	r.repo_descripcion,
+    	r.repo_fechasolucion,
+    	r.repo_reportetecnico
+    	from siap.reporte r 
+    	left join siap.reporte_adicional ra on ra.repo_id = r.repo_id
+    	left join siap.barrio b on b.barr_id = r.barr_id
+    	left join siap.origen o on o.orig_id = r.orig_id
+    	left join siap.actividad a on a.acti_id = ra.acti_id
+    	where r.reti_id = 1 and r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.empr_id = {empr_id} and r.rees_id = 3        
+    UNION ALL
+    select distinct 
+    	'Control' as tipo,
+    	r.repo_consecutivo,
+        r.repo_fecharecepcion,
+        r.repo_nombre,
+        r.repo_telefono,
+        r.repo_direccion,
+        b.barr_descripcion,
+        case when b.tiba_id = 2 then 'X' else '' end as vereda,
+        o.orig_descripcion,
+    	a.acti_descripcion,
+    	r.repo_descripcion,
+    	r.repo_fechasolucion,
+    	r.repo_reportetecnico
+    	from siap.control_reporte r 
+    	left join siap.control_reporte_adicional ra on ra.repo_id = r.repo_id
+    	left join siap.barrio b on b.barr_id = r.barr_id
+    	left join siap.origen o on o.orig_id = r.orig_id
+    	left join siap.actividad a on a.acti_id = ra.acti_id
+    	where r.reti_id = 1 and r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.empr_id = {empr_id} and r.rees_id = 3
+    UNION ALL
+    select distinct 
+    	'Medidor' as tipo,
+    	r.repo_consecutivo,
+        r.repo_fecharecepcion,
+        r.repo_nombre,
+        r.repo_telefono,
+        r.repo_direccion,
+        b.barr_descripcion,
+        case when b.tiba_id = 2 then 'X' else '' end as vereda,
+        o.orig_descripcion,
+    	a.acti_descripcion,
+    	r.repo_descripcion,
+    	r.repo_fechasolucion,
+    	r.repo_reportetecnico
+    	from siap.medidor_reporte r 
+    	left join siap.medidor_reporte_adicional ra on ra.repo_id = r.repo_id
+    	left join siap.barrio b on b.barr_id = r.barr_id
+    	left join siap.origen o on o.orig_id = r.orig_id
+    	left join siap.actividad a on a.acti_id = ra.acti_id
+    	where r.reti_id = 1 and r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.empr_id = {empr_id} and r.rees_id = 3
+    UNION ALL
+    select distinct 
+    	'Transformador' as tipo,
+    	r.repo_consecutivo,
+        r.repo_fecharecepcion,
+        r.repo_nombre,
+        r.repo_telefono,
+        r.repo_direccion,
+        b.barr_descripcion,
+        case when b.tiba_id = 2 then 'X' else '' end as vereda,
+        o.orig_descripcion,
+    	a.acti_descripcion,
+    	r.repo_descripcion,
+    	r.repo_fechasolucion,
+    	r.repo_reportetecnico
+    	from siap.transformador_reporte r 
+    	left join siap.transformador_reporte_adicional ra on ra.repo_id = r.repo_id
+    	left join siap.barrio b on b.barr_id = r.barr_id
+    	left join siap.origen o on o.orig_id = r.orig_id
+    	left join siap.actividad a on a.acti_id = ra.acti_id
+    	where r.reti_id = 1 and r.repo_fecharecepcion between {fecha_inicial} and {fecha_final} and r.empr_id = {empr_id} and r.rees_id = 3) as r
+    	order by r.repo_fecharecepcion, r.repo_consecutivo
+          """)
         .on(
           'fecha_inicial -> fi.getTime(),
           'fecha_final -> ff.getTime(),

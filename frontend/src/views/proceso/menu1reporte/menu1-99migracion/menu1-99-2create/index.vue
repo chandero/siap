@@ -638,7 +638,7 @@ export default {
         console.log('tireuc_id: ' + this.reporte.tireuc_id)
         this.$refs.reporte.validate(valid => {
           if (valid) {
-            saveReporteMigracion(this.reporte)
+            /* saveReporteMigracion(this.reporte)
               .then(response => {
                 if (response.status === 201) {
                   this.reporte.repo_id = response.data.id
@@ -650,7 +650,7 @@ export default {
               .catch(error => {
                 this.error(error)
                 this.guardando = false
-              })
+              }) */
           } else {
             this.guardando = false
           }

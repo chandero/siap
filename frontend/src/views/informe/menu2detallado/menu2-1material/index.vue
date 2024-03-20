@@ -146,8 +146,8 @@ export default {
     exportarXls () {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['Código Material', 'Nombre Material', 'Tipo de Reporte', 'Número Reporte', 'Fecha Solución', 'Luminaria', 'Código Retirado', 'Cantidad Retirado', 'Código Instalado', 'Cantidad Instalado', 'Cuadirlla']
-        const filterVal = ['elem_codigo', 'elem_descripcion', 'reti_descripcion', 'repo_numero', 'repo_fechasolucion', 'aap_id', 'even_codigo_retirado', 'even_cantidad_retirado', 'even_codigo_instalado', 'even_cantidad_instalado', 'cuad_descripcion']
+        const tHeader = ['Código Material', 'Nombre Material', 'Tipo de Reporte', 'Número Reporte', 'Fecha Solución', 'Tipo', 'Código Ucap', 'Código Retirado', 'Cantidad Retirado', 'Código Instalado', 'Cantidad Instalado', 'Cuadirlla']
+        const filterVal = ['elem_codigo', 'elem_descripcion', 'reti_descripcion', 'repo_numero', 'repo_fechasolucion', 'tipo', 'aap_id', 'even_codigo_retirado', 'even_cantidad_retirado', 'even_codigo_instalado', 'even_cantidad_instalado', 'cuad_descripcion']
         const list = this.tableData
         const data = this.formatJson(filterVal, list)
         excel.export_json_to_excel(tHeader, data, 'detallado_materiales_' + this.$moment(this.fecha_final).format('YYYYMMDD'))

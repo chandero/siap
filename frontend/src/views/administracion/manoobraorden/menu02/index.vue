@@ -303,7 +303,7 @@ export default {
           type: 'success'
         })
         this.showCotizadoPeriodoDialog = false
-        cargarPrecioFijo(this.anho).then(response => {
+        /* cargarPrecioFijo(this.anho).then(response => {
           if (response.data._1 === true) {
             this.$message({
               message: 'Precios cargados',
@@ -324,7 +324,7 @@ export default {
             message: 'Error al cargar precios: ' + error,
             type: 'warning'
           })
-        })
+        }) */
       }
     },
     uploadError(err, file) {
@@ -454,7 +454,7 @@ export default {
       const loading = this.$loading({
         lock: true
       })
-      newPriceElemento(parseInt(this.precioAnho), this.usarParaIncremento).then(resp => {
+      /* newPriceElemento(parseInt(this.precioAnho), this.usarParaIncremento).then(resp => {
         loading.close()
         this.getElementos()
         if (resp.data === 'true') {
@@ -471,7 +471,7 @@ export default {
         loading.close()
         this.getElementos()
         this.$message.error('Al procesar nuevos precios, Error al conectar con el servidor:' + err)
-      })
+      }) */
     },
     handleSizeChange(val) {
       this.page_size = val
