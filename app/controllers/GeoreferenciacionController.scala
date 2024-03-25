@@ -3,6 +3,7 @@ package controllers
 import play.api.mvc.Request
 import play.api.mvc.AnyContent
 import play.api.Configuration
+import play.api.libs.json.Json
 
 import com.google.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
@@ -59,7 +60,7 @@ class GeoreferenciacionController @Inject()(
       aap_potencia: Int,
       aap_id: Int,
       token: String
-  ) = { implicit request: Request[AnyContent] =>
+  ) = Action.async { implicit request: Request[AnyContent] =>
     val secret = config.get[String]("play.http.secret.key")
     if (secret == token) {
       gService
@@ -68,17 +69,17 @@ class GeoreferenciacionController @Inject()(
           Ok(write(georeferencia))
         }
     } else {
-      Ok(write("Token invalido"))
+      Future.successful(NotFound)
     }
   }
 
-  def getKeyWeb(token: String) = {
+  def getKeyWeb(token: String) = Action {
     val secret = config.get[String]("play.http.secret.key")
     if (secret == token) {
       val apiKey: String = config.get[String]("google.apiKey")
       Ok(apiKey)
     } else {
-      Ok(write("Token invalido"))
+      Ok(Json.toJson("Token inválido"))
     }
   }
 }

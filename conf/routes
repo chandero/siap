@@ -872,7 +872,7 @@ GET /api/audi/coau/lxlsx/:fi/:ff            controllers.CodigoautorizacionContro
 # Georeferencia
 GET /api/geo/:t/:barr_id/:aap_tecnologia/:aap_potencia/:aap_id controllers.GeoreferenciacionController.getGeoreferencia(t: Int, barr_id:Int, aap_tecnologia: String, aap_potencia:Int, aap_id: Int)
 +nocsrf
-GET /api/geo/web/:t/:b/:aap_tec/:aap_pot/:aap_id/:token  controllers.GeoreferenciacionController.getGeoreferenciaWeb(t: Int, b: Int, aap_tec: String, aap_pot: Int, aap_id: Int, token: String)
+GET /api/geo/web/:t/:b/:aap_tec/:aap_pot/:aap_id/:token   controllers.GeoreferenciacionController.getGeoreferenciaWeb(t: Int, b: Int, aap_tec: String, aap_pot: Int, aap_id: Int, token: String)
 
 # google routes
 GET /api/geo/key  controllers.GeoreferenciacionController.getKey()
