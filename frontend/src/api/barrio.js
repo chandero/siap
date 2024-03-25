@@ -24,7 +24,7 @@ export function getBarrios (muni_id, page_size, current_page) {
 
 export function getBarriosEmpresa () {
   return request({
-    url: '/barr/get/empr',
+    url: '/barr/web/get/empr',
     method: 'get'
   })
 }

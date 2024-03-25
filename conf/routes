@@ -53,6 +53,8 @@ GET /api/muni/get/:id controllers.MunicipioController.buscarpordepartamento(id: 
 GET /api/barr/get/:id/:p/:c controllers.BarrioController.buscarpormunicipio(id: Long, p:Long, c:Long)
 GET /api/barr/get/empr controllers.BarrioController.buscarporempresa
 +nocsrf
+GET /api/barr/web/get/empr/:token controllers.BarrioController.buscarporempresaweb(token: String)
++nocsrf
 GET /api/barr/m/get/empr controllers.BarrioController.buscarporempresa
 GET /api/barr/byid/:id controllers.BarrioController.buscarporid(id: Long)
 GET /api/barr/del/:id controllers.BarrioController.borrarBarrio(id: Long)
