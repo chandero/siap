@@ -39,11 +39,11 @@ class BarrioController @Inject()(barrioService: BarrioRepository, tipobarrioServ
           }
         }
     }
-    def buscarporempresaweb(token: String) = Action.async { implicit request: Request[AnyContent] =>
+    def buscarporempresaweb(empr_id: Int, token: String) = Action.async { implicit request: Request[AnyContent] =>
         val secret = config.get[String]("play.http.secret.key")
         if (secret == token) {
-            val empr_id = Utility.extraerEmpresa(request)
-            val empresa = empresaService.buscarPorId(empr_id.get)
+            //val empr_id = Utility.extraerEmpresa(request)
+            val empresa = empresaService.buscarPorId(empr_id)
             empresa match {
               case None => {
                 Future.successful(NotFound(Json.toJson("false")))
